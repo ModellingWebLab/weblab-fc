@@ -28,10 +28,17 @@ import protocol
 def apply_protocol(doc):
     """
     A very simple protocol, that doesn't make any changes, and is only
-    interested in membrane_voltage as an output.
+    really interested in membrane_voltage as an output.
+    
+    However, for test coverage purposes, we also include each type of
+    variable in the outputs.
     """
     p = protocol.Protocol(doc.model, multi_stage=True)
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
-    p.outputs = [V]
+    t = doc.model.get_variable_by_name('environment', 'time')
+    derived = doc.model.get_variable_by_cmeta_id('FonRT')
+    mapped = doc.model.get_variable_by_name('fast_sodium_current', 'V')
+    param = doc.model.get_variable_by_cmeta_id('fast_sodium_current_conductance')
+    p.outputs = [V, t, mapped, param, derived]
     p.inputs = []
     p.modify_model()
