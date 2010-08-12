@@ -1,2 +1,3 @@
 TestMultiArray.hpp
 TestSimpleProtocol.hpp
+TestProtocolOutputs.hpp
