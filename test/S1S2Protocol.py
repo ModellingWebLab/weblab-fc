@@ -28,10 +28,7 @@ import protocol
 def apply_protocol(doc):
     """
     A very simple protocol, that doesn't make any changes, and is only
-    really interested in membrane_voltage as an output.
-    
-    However, for test coverage purposes, we also include each type of
-    variable in the outputs.
+    really interested in membrane_voltage and time as an output.
     """
     p = protocol.Protocol(doc.model, multi_stage=True)
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
