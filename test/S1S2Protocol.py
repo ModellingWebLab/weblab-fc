@@ -32,7 +32,7 @@ def apply_protocol(doc):
     """
     p = protocol.Protocol(doc.model, multi_stage=True)
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
-    t = doc.model.get_variable_by_name('environment', 'time')
+    t = doc.model.get_variable_by_oxmeta_name('time')
     p.outputs = [V, t]
     p.inputs = []
     p.modify_model()
