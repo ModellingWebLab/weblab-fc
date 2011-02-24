@@ -33,6 +33,22 @@ def apply_protocol(doc):
     LCC = doc.model.get_variable_by_oxmeta_name('membrane_L_type_calcium_current')
     t = doc.model.get_variable_by_oxmeta_name('time')
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
-    p.outputs = [LCC, t]
-    p.inputs = [V]
+    
+    # Change V to be a constant set from a new parameter
+    value_name = u'membrane_voltage_value'
+    V_value = protocol.cellml_variable.create_new(doc, value_name, V.units, id=value_name,
+                                                  initial_value=V.initial_value)
+    V_const_defn = protocol.mathml_apply.create_new(doc, u'eq', [V.component.name + u',' + V.name,
+                                                                 u'protocol,' + value_name])
+
+    # Now a hack to stop translation complaining about missing currents
+    i_stim = protocol.cellml_variable.create_new(doc, u'i_stim', LCC.units, id=u'membrane_stimulus_current')
+    i_stim_defn = protocol.mathml_apply.create_new(doc, u'eq', [u'protocol,i_stim',
+                                                                (u'0', LCC.units)])
+    doc._cml_config.options.use_i_ionic_regexp = True
+    doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
+    
+    p.outputs = [V, LCC, t]
+    p.inputs = [V_value, V_const_defn, i_stim, i_stim_defn]
     p.modify_model()
+    i_stim.set_oxmeta_name(u'membrane_stimulus_current')
