@@ -324,7 +324,13 @@ http://www.CellML.org/
    <component name="external_ion_concentrations">
       <variable name="Nao" units="millimolar" initial_value="140" public_interface="out"/>
       <variable name="Cao" units="millimolar" initial_value="1.8" public_interface="out"/>
-      <variable name="Ko" units="millimolar" initial_value="5.4" public_interface="out"/>
+	  <variable name="Ko" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
    </component>
    <component name="internal_ion_concentrations">
 	  <variable name="Nai" units="millimolar" initial_value="4.925761439682025" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
@@ -4933,7 +4939,13 @@ http://www.CellML.org/
       <variable name="Km_CaSR" units="millimolar" initial_value="0.08"/>
       <variable name="Km_CaCyto" units="millimolar" initial_value="0.0008"/>
       <variable name="Km_ATP" units="millimolar" initial_value="0.1"/>
-      <variable name="i_max" units="picoA" initial_value="162500"/>
+	  <variable name="i_max" units="picoA" initial_value="162500" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="ATPi" units="millimolar" public_interface="in"/>
       <variable name="Cai" units="millimolar" public_interface="in"/>
       <variable name="Caup" units="millimolar" public_interface="in"/>
@@ -5124,7 +5136,20 @@ http://www.CellML.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>		  
-      <variable name="P_RyR" units="picoA_per_millimolar" initial_value="62000"/>
+	  <variable name="P_RyR" units="picoA_per_millimolar" initial_value="62000" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	
+	  <variable name="K_m_Ca_cyt" units="millimolar" initial_value="1" cmeta:id="SR_release_kmcacyt">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_kmcacyt">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_kmcacyt"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="k1" units="per_millisecond"/>
       <variable name="k2" units="per_millisecond"/>
       <variable name="k3" units="per_millisecond"/>
@@ -5223,7 +5248,7 @@ http://www.CellML.org/
                      <apply>
                         <divide/>
                         <ci>Cai</ci>
-                        <cn cellml:units="millimolar">1</cn>
+                        <ci>K_m_Ca_cyt</ci>
                      </apply>
                      <cn cellml:units="dimensionless">2</cn>
                   </apply>
@@ -5295,7 +5320,13 @@ http://www.CellML.org/
    </component>
    <component name="SR_L_current">
       <variable name="i_SR_L" units="picoA" public_interface="out"/>
-      <variable name="P_SR_L" units="picoA_per_millimolar" initial_value="459"/>
+	  <variable name="P_SR_L" initial_value="459" units="picoA_per_millimolar" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="Cai" units="millimolar" public_interface="in"/>
       <variable name="Caup" units="millimolar" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
@@ -5317,7 +5348,13 @@ http://www.CellML.org/
    </component>
    <component name="Ca_concentrations_in_SR">
       <variable name="Ca_Total" units="millimolar" initial_value="9.455741736977666"/>
-      <variable name="Carel" units="millimolar" public_interface="out"/>
+	  <variable name="Carel" units="millimolar" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="Caup" units="millimolar" initial_value="2.611712901567567" public_interface="out"/>
       <variable name="V_rel" units="micrometre3" initial_value="160"/>
       <variable name="V_up" units="micrometre3" initial_value="400"/>

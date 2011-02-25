@@ -3175,7 +3175,13 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
          </rdf:RDF>
       </variable>	  
       <variable units="dimensionless" private_interface="out" name="Fn"/>
-      <variable units="per_millisecond" name="K_rel" initial_value="30"/>
+	  <variable name="K_rel" units="per_millisecond" initial_value="30" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable units="micrometre_3" public_interface="in" name="V_rel"/>
       <variable units="millisecond" public_interface="in" private_interface="out" name="time"/>
       <variable units="millivolt" public_interface="in" private_interface="out" name="V"/>
@@ -3591,7 +3597,13 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
       </math>
    </component>
    <component name="Ca_uptake_current_by_the_NSR">
-      <variable units="millimolar_per_millisecond" public_interface="out" name="I_up_max" initial_value="0.005"/>
+	  <variable name="I_up_max" units="millimolar_per_millisecond" initial_value="0.005" public_interface="out" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="millimolar_per_millisecond" public_interface="out" name="i_up"/>
       <variable units="millimolar" name="K_up" initial_value="0.00092"/>
       <variable units="millisecond" public_interface="in" name="time"/>
@@ -3618,6 +3630,13 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
    </component>
    <component name="Ca_leak_current_by_the_NSR">
       <variable units="millimolar_per_millisecond" public_interface="out" name="i_up_leak"/>
+	  <variable name="leak_factor" initial_value="1" units="dimensionless" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="millimolar" name="Ca_up_max" initial_value="15"/>
       <variable units="millisecond" public_interface="in" name="time"/>
       <variable units="millimolar" public_interface="in" name="Ca_up"/>
@@ -3630,6 +3649,7 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
                <divide/>
                <apply>
                   <times/>
+				  <ci>leak_factor</ci>
                   <ci>I_up_max</ci>
                   <ci>Ca_up</ci>
                </apply>
@@ -3734,7 +3754,13 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
             </rdf:Description>
          </rdf:RDF>
       </variable>	 	  
-      <variable units="millimolar" public_interface="out" name="Ca_rel" initial_value="1.488"/>
+	  <variable name="Ca_rel" units="millimolar" initial_value="1.488" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="millimolar" public_interface="out" name="Ca_up" initial_value="1.488"/>
       <variable units="micrometre_3" name="V_cell" initial_value="20100"/>
       <variable units="micrometre_3" name="V_i"/>
@@ -4063,7 +4089,13 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
    <component name="standard_ionic_concentrations">
       <variable units="millimolar" public_interface="out" name="Na_o" initial_value="140"/>
       <variable units="millimolar" public_interface="out" name="Ca_o" initial_value="1.8"/>
-      <variable units="millimolar" public_interface="out" name="K_o" initial_value="5.4"/>
+	  <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
    </component>
    <group>
       <relationship_ref relationship="containment"/>

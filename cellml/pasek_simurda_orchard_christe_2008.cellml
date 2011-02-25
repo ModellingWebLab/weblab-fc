@@ -7345,6 +7345,13 @@ The complete original paper reference is cited below:
    </component>
    <component name="JCaSRup">
       <variable units="millimolar_per_second" public_interface="out" name="JCaSRup"/>
+	  <variable name="uptake_factor" units="dimensionless" initial_value="1.0" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>			  
       <variable units="millimolar" public_interface="in" name="Ca_i"/>
       <variable units="cm3" public_interface="in" name="Vmyo"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -7355,6 +7362,7 @@ The complete original paper reference is cited below:
                <divide/>
                <apply>
                   <times/>
+				  <ci>uptake_factor</ci>
                   <cn cellml:units="millimolar_micromolar">1</cn>
                   <cn cellml:units="per_cm3_second">1000</cn>
                   <ci>Vmyo</ci>
@@ -7384,6 +7392,13 @@ The complete original paper reference is cited below:
    </component>
    <component name="JCaSRleak">
       <variable units="millimolar_per_second" public_interface="out" name="JCaSRleak"/>
+	  <variable name="SR_leak_max" initial_value="1250" units="per_cm3_second" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="millimolar" public_interface="in" name="Ca_i"/>
       <variable units="millimolar" public_interface="in" name="CaSRup"/>
       <variable units="cm3" public_interface="in" name="Vmyo"/>
@@ -7393,7 +7408,7 @@ The complete original paper reference is cited below:
             <ci>JCaSRleak</ci>
             <apply>
                <times/>
-               <cn cellml:units="per_cm3_second">1250</cn>
+               <ci>SR_leak_max</ci>
                <ci>Vmyo</ci>
                <cn cellml:units="dimensionless">0.000058</cn>
                <apply>
@@ -7443,6 +7458,13 @@ The complete original paper reference is cited below:
             </rdf:Description>
          </rdf:RDF>
       </variable>
+	  <variable name="K_m_rel" units="per_cm3_second" initial_value="1800" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable units="per_millimolar4_per_second" name="kap"/>
       <variable units="per_second" name="kam" initial_value="576"/>
       <variable units="per_millimolar3_per_second" name="kbp"/>
@@ -7463,7 +7485,7 @@ The complete original paper reference is cited below:
             <ci>JCaSRrel</ci>
             <apply>
                <times/>
-               <cn cellml:units="per_cm3_second">1800</cn>
+               <ci>K_m_rel</ci>
                <ci>VSRrel</ci>
                <apply>
                   <plus/>
@@ -7654,7 +7676,13 @@ The complete original paper reference is cited below:
       </math>
    </component>
    <component name="CaSRrel">
-      <variable units="millimolar" public_interface="out" name="CaSRrel" initial_value="1.0326252e0"/>
+	  <variable name="CaSRrel" units="millimolar" initial_value="1.0326252e0" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="millimolar_per_second" public_interface="in" name="Jtr"/>
       <variable units="millimolar_per_second" public_interface="in" name="JCaSRrel"/>
       <variable units="cm3" public_interface="in" name="VSRrel"/>
@@ -7747,7 +7775,13 @@ The complete original paper reference is cited below:
       </math>
    </component>
    <component name="ion_concentrations">
-      <variable units="millimolar" public_interface="out" name="K_t" initial_value="5.4140321e0"/>
+	  <variable name="K_t" units="millimolar" initial_value="5.4140321e0" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="millimolar" public_interface="out" name="Na_t" initial_value="1.3993239e2"/>
       <variable units="millimolar" public_interface="out" name="Ca_t" initial_value="1.8476402e0"/>
 	  <variable name="K_i" units="millimolar" initial_value="1.3678926e2" public_interface="out" cmeta:id="cytosolic_potassium_concentration">

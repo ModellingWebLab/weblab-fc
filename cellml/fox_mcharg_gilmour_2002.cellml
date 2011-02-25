@@ -2556,13 +2556,37 @@ The complete original paper reference is cited below:
       <variable units="microA_per_microF" public_interface="in" name="i_Ca_b"/>
       <variable units="microA_per_microF" public_interface="in" name="i_p_Ca"/>
       <variable units="microA_per_microF" public_interface="in" name="i_NaCa"/>
-      <variable units="micromolar" name="Ca_SR" initial_value="320"/>
-      <variable units="per_millisecond" name="P_rel" initial_value="6"/>
-      <variable units="per_millisecond" name="P_leak" initial_value="0.000001"/>
+	  <variable name="Ca_SR" units="micromolar" initial_value="320" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	 	  
+	  <variable name="P_rel" units="per_millisecond" initial_value="6" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
+	  <variable name="P_leak" initial_value="0.000001" units="per_millisecond" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="micromolar" name="K_mCSQN" initial_value="600"/>
       <variable units="micromolar" name="CSQN_tot" initial_value="10000"/>
       <variable units="microlitre" name="V_SR" initial_value="0.000002"/>
-      <variable units="micromolar_per_millisecond" name="V_up" initial_value="0.1"/>
+	  <variable name="V_up" units="micromolar_per_millisecond" initial_value="0.1" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="micromolar" name="K_mup" initial_value="0.32"/>
       <variable units="dimensionless" name="gamma"/>
       <variable units="dimensionless" public_interface="in" name="f_Ca"/>
@@ -2828,7 +2852,13 @@ The complete original paper reference is cited below:
             </rdf:Description>
          </rdf:RDF>
       </variable>  
-      <variable units="millimolar" public_interface="out" name="K_o" initial_value="4"/>
+	  <variable name="K_o" units="millimolar" initial_value="4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
    </component>
    <group>
       <relationship_ref relationship="containment"/>

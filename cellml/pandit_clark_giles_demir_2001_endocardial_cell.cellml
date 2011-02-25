@@ -2702,7 +2702,13 @@ A Mathematical Model of Action Potential Heterogeneity in Adult Rat Left Ventric
             </rdf:Description>
          </rdf:RDF>
       </variable>	
-      <variable name="v1" units="per_second" initial_value="1.8e3"/>
+	  <variable name="v1" units="per_second" initial_value="1.8e3" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="k_a_plus" units="millimolar4_per_second" initial_value="12.15e12"/>
       <variable name="k_a_minus" units="per_second" initial_value="576"/>
       <variable name="k_b_plus" units="millimolar3_per_second" initial_value="4.05e9"/>
@@ -2888,7 +2894,13 @@ A Mathematical Model of Action Potential Heterogeneity in Adult Rat Left Ventric
       <variable name="rb" units="dimensionless"/>
       <variable name="Vmaxf" units="millimolar_per_second" initial_value="0.04"/>
       <variable name="Vmaxr" units="millimolar_per_second" initial_value="0.9"/>
-      <variable name="K_SR" units="dimensionless" initial_value="1"/>
+	  <variable name="K_SR" units="dimensionless" initial_value="1" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="N_fb" units="dimensionless" initial_value="1.2"/>
       <variable name="N_rb" units="dimensionless" initial_value="1"/>
       <variable name="time" units="second" public_interface="in"/>
@@ -3148,7 +3160,13 @@ A Mathematical Model of Action Potential Heterogeneity in Adult Rat Left Ventric
             </rdf:Description>
          </rdf:RDF>
       </variable>	 	  
-      <variable name="Ca_JSR" units="millimolar" initial_value="0.06607948" public_interface="out"/>
+	  <variable name="Ca_JSR" units="millimolar" initial_value="0.06607948" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="Ca_NSR" units="millimolar" initial_value="0.06600742" public_interface="out"/>
       <variable name="V_myo" units="micro_litre" initial_value="0.00000936"/>
       <variable name="V_JSR" units="micro_litre" initial_value="0.000000056"/>
@@ -3518,7 +3536,13 @@ A Mathematical Model of Action Potential Heterogeneity in Adult Rat Left Ventric
    <component name="standard_ionic_concentrations">
       <variable name="Na_o" units="millimolar" initial_value="140" public_interface="out"/>
       <variable name="Ca_o" units="millimolar" initial_value="1.2" public_interface="out"/>
-      <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out"/>
+	  <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
    </component>
 
    <group>

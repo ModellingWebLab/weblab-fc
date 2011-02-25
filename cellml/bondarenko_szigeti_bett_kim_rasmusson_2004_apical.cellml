@@ -169,7 +169,13 @@ The original paper reference is cited below:
       <variable units="microlitre" public_interface="out" name="VNSR" initial_value="2.098e-6"/>
       <variable units="microlitre" public_interface="out" name="Vss" initial_value="1.485e-9"/>
       <variable units="cm2" public_interface="out" name="Acap" initial_value="1.534e-4"/>
-      <variable units="micromolar" public_interface="out" name="Ko" initial_value="5400"/>
+	  <variable name="Ko" units="micromolar" initial_value="5400" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="micromolar" public_interface="out" name="Nao" initial_value="140000"/>
       <variable units="micromolar" public_interface="out" name="Cao" initial_value="1800"/>
       <variable units="joule_per_mole_kelvin" public_interface="out" name="R" initial_value="8.314"/>
@@ -330,7 +336,13 @@ The original paper reference is cited below:
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable units="micromolar" public_interface="out" name="CaJSR" initial_value="1299.5"/>
+	  <variable name="CaJSR" units="micromolar" initial_value="1299.5" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable units="micromolar" public_interface="out" name="CaNSR" initial_value="1299.5"/>
       <variable units="dimensionless" name="Bi"/>
       <variable units="dimensionless" name="Bss"/>
@@ -636,11 +648,29 @@ The original paper reference is cited below:
       <variable units="per_micromolar_millisecond" public_interface="out" name="k_plus_ltrpn" initial_value="0.0327"/>
       <variable units="per_millisecond" public_interface="out" name="k_minus_ltrpn" initial_value="0.0196"/>
       <variable units="dimensionless" name="P_RyR" initial_value="0"/>
-      <variable units="per_millisecond" name="v1" initial_value="4.5"/>
+	  <variable name="v1" units="per_millisecond" initial_value="4.5" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable units="millisecond" name="tau_tr" initial_value="20"/>
-      <variable units="per_millisecond" name="v2" initial_value="1.74e-5"/>
+	  <variable name="v2" initial_value="1.74e-5" units="per_millisecond" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	 	  
       <variable units="millisecond" name="tau_xfer" initial_value="8"/>
-      <variable units="micromolar_per_millisecond" name="v3" initial_value="0.45"/>
+	  <variable name="v3" units="micromolar_per_millisecond" initial_value="0.45" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	 	  
       <variable units="micromolar" name="Km_up" initial_value="0.5"/>
       <variable units="micromolar" public_interface="in" name="LTRPN_tot"/>
       <variable units="micromolar" public_interface="in" name="HTRPN_tot"/>

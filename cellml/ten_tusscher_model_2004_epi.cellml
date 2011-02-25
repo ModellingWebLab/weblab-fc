@@ -2827,7 +2827,13 @@ http://www.cellml.org/
          </rdf:RDF>
       </variable>
       <variable name="Ca_o" units="millimolar" initial_value="2" public_interface="out"/>
-      <variable name="Ca_SR" units="millimolar" initial_value="0.2"/>
+	  <variable name="Ca_SR" units="millimolar" initial_value="0.2" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
 	  <variable name="i_rel" units="millimolar_per_millisecond" cmeta:id="SR_release_current">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#SR_release_current">
@@ -2840,12 +2846,30 @@ http://www.cellml.org/
       <variable name="g" units="dimensionless" initial_value="1"/>
       <variable name="tau_g" units="millisecond" initial_value="2"/>
       <variable name="g_inf" units="dimensionless"/>
-      <variable name="a_rel" units="millimolar_per_millisecond" initial_value="0.016464"/>
+	  <variable name="a_rel" units="millimolar_per_millisecond" initial_value="0.016464" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="b_rel" units="millimolar" initial_value="0.25"/>
       <variable name="c_rel" units="millimolar_per_millisecond" initial_value="0.008232"/>
       <variable name="K_up" units="millimolar" initial_value="0.00025"/>
-      <variable name="V_leak" units="per_millisecond" initial_value="8e-5"/>
-      <variable name="Vmax_up" units="millimolar_per_millisecond" initial_value="0.000425"/>
+	  <variable name="V_leak" initial_value="8e-5" units="per_millisecond" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	
+	  <variable name="Vmax_up" units="millimolar_per_millisecond" initial_value="0.000425" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Ca_i_bufc" units="dimensionless"/>
       <variable name="Ca_sr_bufsr" units="dimensionless"/>
       <variable name="Buf_c" units="millimolar" initial_value="0.15"/>
@@ -3268,7 +3292,13 @@ http://www.cellml.org/
          </rdf:RDF>
       </variable>
 	  <variable name="conc_clamp" units="dimensionless" public_interface="in"/>	  
-      <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out"/>
+	  <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="F" units="coulomb_per_millimole" public_interface="in"/>
       <variable name="Cm" units="microF" public_interface="in"/>

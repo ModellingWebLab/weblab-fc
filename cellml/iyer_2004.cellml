@@ -214,7 +214,13 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="CaJSR" units="mM" initial_value="0.2852239446" public_interface="out"/>
+	  <variable name="CaJSR" units="mM" initial_value="0.2852239446" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="CaNSR" units="mM" initial_value="0.2855294915" public_interface="out"/>
 	  <variable name="V" units="mV" initial_value="-0.9065755929e2" public_interface="out" cmeta:id="membrane_voltage">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
@@ -249,7 +255,13 @@ http://www.cellml.org/
       <variable name="beta_JSR" units="dimensionless" public_interface="in"/>
       <variable name="beta_i" units="dimensionless" public_interface="in"/>
       <variable name="i_tot" units="uA_per_uF"/>
-      <variable name="Ko" units="mM" initial_value="4" public_interface="out"/>
+	  <variable name="Ko" units="mM" initial_value="4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="Nao" units="mM" initial_value="138" public_interface="out"/>
       <variable name="Cao" units="mM" initial_value="2" public_interface="out"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -652,7 +664,13 @@ http://www.cellml.org/
       <variable name="Krb" units="mM" initial_value="3.29"/>
       <variable name="Nrb" units="dimensionless" initial_value="1"/>
       <variable name="Jup" units="mM_per_ms" public_interface="out"/>
-      <variable name="KSR" units="mM" initial_value="1.2"/>
+	  <variable name="KSR" units="mM" initial_value="1.2" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="vmaxf" units="per_ms" initial_value="0.0748e-3"/>
       <variable name="vmaxr" units="per_ms" initial_value="0.318e-3"/>
 	  <variable name="Jrel" units="mM_per_ms" public_interface="out" cmeta:id="SR_release_current">
@@ -662,7 +680,13 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>	  
-      <variable name="v1" units="per_ms" initial_value="1.8"/>
+	  <variable name="v1" units="per_ms" initial_value="1.8" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="O1_RyR" units="dimensionless" public_interface="in"/>
       <variable name="O2_RyR" units="dimensionless" public_interface="in"/>
       <variable name="CaJSR" units="mM" public_interface="in"/>

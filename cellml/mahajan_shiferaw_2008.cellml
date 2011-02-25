@@ -92,7 +92,13 @@ http://www.CellML.org/
       <variable name="R" units="J_per_moleK" initial_value="8.314472"/>
       <variable name="T" units="kelvin" initial_value="308"/>
       <variable name="F" units="coulomb_per_mmole" initial_value="96.4853415" public_interface="out"/>
-      <variable name="K_o" units="mM" initial_value="5.4" public_interface="out"/>
+	  <variable name="K_o" units="mM" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="Ca_o" units="mM" initial_value="1.8" public_interface="out"/>
       <variable name="Na_o" units="mM" initial_value="136" public_interface="out"/>
       <variable name="FonRT" units="per_mV" public_interface="out"/>
@@ -3204,7 +3210,13 @@ http://www.CellML.org/
       <variable name="po" units="dimensionless" public_interface="in"/>
       <variable name="rxa" units="mA_per_cm2" public_interface="in"/>
       <variable name="cstar" units="uM" initial_value="90"/>
-      <variable name="Ca_JSR" units="uM" initial_value="97.505463697266"/>
+	  <variable name="Ca_JSR" units="uM" initial_value="97.505463697266" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="gryr" units="per_ms" initial_value="2.58079"/>
       <variable name="gbarsr" units="dimensionless" initial_value="26841.8"/>
       <variable name="gdyad" units="mmole_per_coulomb_cm" initial_value="9000"/>
@@ -3514,8 +3526,20 @@ http://www.CellML.org/
       <variable name="jleak" units="uM_per_ms" public_interface="out"/>
       <variable name="cup" units="uM" initial_value="0.5"/>
       <variable name="kj" units="uM" initial_value="50"/>
-      <variable name="vup" units="uM_per_ms" initial_value="0.4"/>
-      <variable name="gleak" units="per_ms" initial_value="0.00002069"/>
+	  <variable name="vup" units="uM_per_ms" initial_value="0.4" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
+	  <variable name="gleak" initial_value="0.00002069" units="per_ms" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>

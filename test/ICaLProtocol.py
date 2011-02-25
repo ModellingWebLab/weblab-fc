@@ -33,6 +33,7 @@ def apply_protocol(doc):
     LCC = doc.model.get_variable_by_oxmeta_name('membrane_L_type_calcium_current')
     t = doc.model.get_variable_by_oxmeta_name('time')
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
+    Ko = doc.model.get_variable_by_oxmeta_name('extracellular_potassium_concentration')
     
     # Change V to be a constant set from a new parameter
     value_name = u'membrane_voltage_value'
@@ -48,7 +49,7 @@ def apply_protocol(doc):
     doc._cml_config.options.use_i_ionic_regexp = True
     doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
     
-    p.outputs = [V, LCC, t]
+    p.outputs = [V, LCC, t, Ko]
     p.inputs = [V_value, V_const_defn, i_stim, i_stim_defn]
     p.modify_model()
     i_stim.set_oxmeta_name(u'membrane_stimulus_current')

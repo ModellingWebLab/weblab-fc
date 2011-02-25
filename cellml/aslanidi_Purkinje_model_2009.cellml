@@ -4864,7 +4864,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
       </math>
    </component>
    <component name="Ca_JSR">
-      <variable initial_value="1.1433050636518596" name="Ca_JSR" public_interface="out" units="millimolar"/>
+	  <variable name="Ca_JSR" units="millimolar" initial_value="1.1433050636518596" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable initial_value="10" name="CSQN_max" units="millimolar"/>
       <variable initial_value="0.8" name="km_CSQN" units="millimolar"/>
       <variable name="Vol_jsr" public_interface="in" units="microlitre"/>
@@ -5072,6 +5078,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
          </rdf:RDF>
       </variable>
       <variable name="g_rel" units="per_millisecond"/>
+	  <variable name="g_rel_max" units="per_millisecond" initial_value="3000" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="vg" units="dimensionless"/>
       <variable name="time" private_interface="out" public_interface="in" units="millisecond"/>
       <variable name="Ca_MK_act" private_interface="out" public_interface="in" units="dimensionless"/>
@@ -5104,7 +5117,7 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
             <ci>g_rel</ci>
             <apply>
                <times/>
-               <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="per_millisecond">3000</cn>
+               <ci>g_rel_max</ci>
                <ci>vg</ci>
             </apply>
          </apply>
@@ -5386,7 +5399,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
    </component>
    <component name="q_leak">
       <variable name="q_leak" public_interface="out" units="millimolar_per_millisecond"/>
-      <variable initial_value="0.004375" name="q_leak_max" units="millimolar_per_millisecond"/>
+	  <variable name="q_leak_max" initial_value="0.004375" units="millimolar_per_millisecond" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable initial_value="15" name="NSR_max" units="millimolar"/>
       <variable name="Ca_NSR" public_interface="in" units="millimolar"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -5408,7 +5427,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
    <component name="q_up">
       <variable name="q_up" public_interface="out" units="millimolar_per_millisecond"/>
       <variable initial_value="0.5" name="X_q_up" units="dimensionless"/>
-      <variable initial_value="0.004375" name="q_up_max" units="millimolar_per_millisecond"/>
+	  <variable name="q_up_max" initial_value="0.004375" units="millimolar_per_millisecond" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	 	  
       <variable name="dq_up_Ca_MK" units="dimensionless"/>
       <variable initial_value="0.75" name="dq_up_Ca_MK_max" units="dimensionless"/>
       <variable name="dkm_plb" units="millimolar"/>
@@ -5515,7 +5540,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
    <component name="model_parameters">
       <variable initial_value="140" name="Na_o" public_interface="out" units="millimolar"/>
       <variable initial_value="1.8" name="Ca_o" public_interface="out" units="millimolar"/>
-      <variable initial_value="5.4" name="K_o" public_interface="out" units="millimolar"/>
+	  <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable initial_value="100" name="Cl_o" public_interface="out" units="millimolar"/>
       <variable initial_value="8314" name="R" public_interface="out" units="joule_per_kilomole_kelvin"/>
       <variable initial_value="310" name="T" public_interface="out" units="kelvin"/>

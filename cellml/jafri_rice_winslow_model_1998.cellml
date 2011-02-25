@@ -3205,9 +3205,27 @@ http://www.cellml.org/
       <variable name="P_O2" units="dimensionless" initial_value="6.30613e-9"/>
       <variable name="P_C1" units="dimensionless" initial_value="0.762527"/>
       <variable name="P_C2" units="dimensionless" initial_value="0.236283"/>
-      <variable name="v1" units="per_ms" initial_value="1.8"/>
-      <variable name="v2" units="per_ms" initial_value="0.58e-4"/>
-      <variable name="v3" units="mM_per_ms" initial_value="1.8e-3"/>
+	  <variable name="v1" units="per_ms" initial_value="1.8" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
+	  <variable name="v2" initial_value="0.58e-4" units="per_ms" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
+	  <variable name="v3" units="mM_per_ms" initial_value="1.8e-3" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="nCa" units="dimensionless" initial_value="4"/>
       <variable name="mCa" units="dimensionless" initial_value="3"/>
       <variable name="k_a_plus" units="per_mM4_per_ms" initial_value="1.215e10"/>
@@ -3221,7 +3239,13 @@ http://www.cellml.org/
       <variable name="k_ltrpn_plus" units="per_mM_per_ms" initial_value="40"/>
       <variable name="k_ltrpn_minus" units="per_ms" initial_value="0.04"/>
       <variable name="tau_tr" units="ms" initial_value="34.48"/>
-      <variable name="Ca_JSR" units="mM" initial_value="1.17504"/>
+	  <variable name="Ca_JSR" units="mM" initial_value="1.17504" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	 	  
       <variable name="Ca_NSR" units="mM" initial_value="1.243891"/>
       <variable name="V_JSR" units="dimensionless"/>
       <variable name="V_NSR" units="dimensionless"/>
@@ -3866,7 +3890,13 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>		  
-      <variable name="Ko" units="mM" initial_value="5.4" public_interface="out"/>
+	  <variable name="Ko" units="mM" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>			  
       <variable name="Cao" units="mM" initial_value="1.8" public_interface="out"/>
       <variable name="time" units="ms" public_interface="in"/>
       <variable name="F" units="faradays_constant_units" public_interface="in"/>
