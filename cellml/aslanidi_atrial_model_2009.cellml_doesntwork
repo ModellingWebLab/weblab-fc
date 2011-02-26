@@ -3331,7 +3331,13 @@ Mechanisms of transition from normal to reentrant electrical activity in a model
    </component>
    <component name="cleft_space_ion_concentrations">
       <variable initial_value="140" name="Na_c" public_interface="out" units="millimolar"/>
-      <variable initial_value="2.5" name="Ca_c" public_interface="out" units="millimolar"/>
+      <variable initial_value="2.5" name="Ca_c" public_interface="out" units="millimolar" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable initial_value="5" name="K_c" public_interface="out" units="millimolar"/>
       <variable initial_value="0.0000025" name="Vol_c" public_interface="out" units="nanolitre"/>
       <variable name="time" public_interface="in" units="second"/>

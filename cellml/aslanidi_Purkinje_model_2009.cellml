@@ -5539,7 +5539,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
    </component>
    <component name="model_parameters">
       <variable initial_value="140" name="Na_o" public_interface="out" units="millimolar"/>
-      <variable initial_value="1.8" name="Ca_o" public_interface="out" units="millimolar"/>
+      <variable initial_value="1.8" name="Ca_o" public_interface="out" units="millimolar" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
 	  <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_potassium_concentration">

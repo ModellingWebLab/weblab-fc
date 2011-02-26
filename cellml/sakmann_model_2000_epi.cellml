@@ -1239,7 +1239,13 @@ http://www.CellML.org/
       <variable name="i_Ca_L_Ca_ds" units="nanoA" public_interface="out"/>
       <variable name="i_Ca_L_K_ds" units="nanoA" public_interface="out"/>
       <variable name="i_Ca_L_Na_ds" units="nanoA" public_interface="out"/>
-      <variable name="i_Ca_L" units="nanoA" public_interface="out"/>
+      <variable name="i_Ca_L" units="nanoA" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="P_Ca_L" units="nanoA_per_millimolar" initial_value="0.11"/>
       <variable name="P_CaK" units="dimensionless" initial_value="0.002"/>
       <variable name="P_CaNa" units="dimensionless" initial_value="0.01"/>
@@ -3201,7 +3207,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="extracellular_calcium_concentration">
-      <variable name="Ca_o" units="millimolar" initial_value="2" public_interface="out"/>
+      <variable name="Ca_o" units="millimolar" initial_value="2" public_interface="out" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
    </component>
    <component name="extracellular_potassium_concentration">
       <variable name="K_o" units="millimolar" initial_value="4" public_interface="out"/>

@@ -157,7 +157,13 @@ The original paper reference is cited below:
       <variable initial_value="1.5410e-5" name="Acap" public_interface="out" units="cm2"/>
       <variable initial_value="5400" name="Ko" public_interface="out" units="micromolar"/>
       <variable initial_value="140000" name="Nao" public_interface="out" units="micromolar"/>
-      <variable initial_value="1000" name="Cao" public_interface="out" units="micromolar"/>
+      <variable initial_value="1000" name="Cao" public_interface="out" units="micromolar" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
 	  <variable initial_value="132000" name="Clo" public_interface="out" units="micromolar"/>
       <variable initial_value="30000" name="Cli" public_interface="out" units="micromolar"/>
       <variable initial_value="8.314" name="R" public_interface="out" units="joule_per_mole_kelvin"/>

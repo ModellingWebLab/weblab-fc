@@ -131,7 +131,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     </variable>
     <variable initial_value="96485" name="F" public_interface="out" units="C_per_mole"/>
     <variable initial_value="5.4" name="K_o" public_interface="out" units="mM"/>
-    <variable initial_value="1.8" name="Ca_o" public_interface="out" units="mM"/>
+    <variable initial_value="1.8" name="Ca_o" public_interface="out" units="mM" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
     <variable initial_value="140" name="Na_o" public_interface="out" units="mM"/>
     <variable initial_value="100" name="Cl_o" public_interface="out" units="mM"/>
     <variable initial_value="0.0374358835078" name="FonRT" public_interface="out" units="per_mV"/>

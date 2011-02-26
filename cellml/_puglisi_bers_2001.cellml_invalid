@@ -3306,7 +3306,13 @@ LabHEART: an interactive computer model of rabbit ventricular myocyte ion channe
     <variable units="millimolar" public_interface="out" name="Nai" initial_value="10.0"/>
     <variable units="millimolar" public_interface="out" name="Nao" initial_value="140.0"/>
     <variable units="micromolar" public_interface="out" name="Cai" initial_value="0.12"/>
-    <variable units="millimolar" public_interface="out" name="Cao" initial_value="1.8"/>
+    <variable units="millimolar" public_interface="out" name="Cao" initial_value="1.8" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
     <variable units="millimolar" public_interface="out" name="Ki" initial_value="145.0"/>
     <variable units="millimolar" public_interface="out" name="Ko" initial_value="5.4"/>
     <variable units="millimolar" public_interface="out" name="Ca_JSR"/>

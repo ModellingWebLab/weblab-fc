@@ -223,7 +223,13 @@ http://www.cellml.org/
       <variable name="i_tot" units="uA_per_uF"/>
       <variable name="Ko" units="mM" initial_value="4" public_interface="out"/>
       <variable name="Nao" units="mM" initial_value="138" public_interface="out"/>
-      <variable name="Cao" units="mM" initial_value="2" public_interface="out"/>
+      <variable name="Cao" units="mM" initial_value="2" public_interface="out" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -4851,7 +4857,13 @@ http://www.cellml.org/
       <variable name="a2_Ca" units="dimensionless"/>
       <variable name="a1_K" units="mM"/>
       <variable name="a2_K" units="dimensionless"/>
-      <variable name="ICa" units="uA_per_uF" public_interface="out"/>
+      <variable name="ICa" units="uA_per_uF" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="ICaK" units="uA_per_uF" public_interface="out"/>
       <variable name="ICamax" units="uA_per_uF"/>
       <variable name="Icabar" units="uA_per_uF"/>

@@ -776,7 +776,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="L_type_Ca_channel">
-      <variable name="i_Ca_L" units="microA_per_microF" public_interface="out"/>
+      <variable name="i_Ca_L" units="microA_per_microF" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="i_CaCa" units="microA_per_microF" public_interface="out"/>
       <variable name="i_CaK" units="microA_per_microF" public_interface="out"/>
       <variable name="i_CaNa" units="microA_per_microF" public_interface="out"/>
@@ -3445,7 +3451,13 @@ http://www.CellML.org/
       <variable name="time" units="second" public_interface="in"/>
       <variable name="F" units="coulomb_per_mole" public_interface="in"/>
       <variable name="Cai" units="millimolar" initial_value="0.00035237" public_interface="out"/>
-      <variable name="Cao" units="millimolar" initial_value="1.8" public_interface="out"/>
+      <variable name="Cao" units="millimolar" initial_value="1.8" public_interface="out" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Ca_JSR" units="millimolar" initial_value="0.817895" public_interface="out"/>
       <variable name="Ca_NSR" units="millimolar" initial_value="2.797668" public_interface="out"/>
       <variable name="V_myo" units="micro_litre" public_interface="in"/>

@@ -274,7 +274,13 @@ A novel computational model of the human ventricular action potential and Ca tra
          </rdf:RDF>
       </variable>		  
       <variable name="Nao" units="mM" public_interface="out"/>
-      <variable name="Cao" units="mM" public_interface="out"/>
+      <variable name="Cao" units="mM" initial_value="1.8" public_interface="out" cmeta:id="extracellular_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Mgi" units="mM" public_interface="out"/>
       <variable name="ena_junc" units="mV" public_interface="out"/>
       <variable name="ena_sl" units="mV" public_interface="out"/>
@@ -643,11 +649,6 @@ A novel computational model of the human ventricular action potential and Ca tra
             <eq/>
             <ci>Nao</ci>
             <cn cellml:units="mM">140</cn>
-         </apply>
-         <apply>
-            <eq/>
-            <ci>Cao</ci>
-            <cn cellml:units="mM">1.8</cn>
          </apply>
          <apply>
             <eq/>
