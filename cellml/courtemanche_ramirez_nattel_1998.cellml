@@ -147,7 +147,13 @@ Ionic mechanisms underlying human atrial action potential properties: insights f
       <variable units="joule_per_mole_kelvin" public_interface="out" name="R" initial_value="8.3143"/>
       <variable units="kelvin" public_interface="out" name="T" initial_value="310"/>
       <variable units="coulomb_per_millimole" public_interface="out" name="F" initial_value="96.4867"/>
-      <variable units="picoF" public_interface="out" name="Cm" initial_value="100"/>
+      <variable units="picoF" public_interface="out" name="Cm" initial_value="100" cmeta:id="membrane_capacitance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_capacitance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="i_st" units="picoA" cmeta:id="membrane_stimulus_current">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_stimulus_current">

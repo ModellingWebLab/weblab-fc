@@ -33,8 +33,40 @@ def apply_protocol(doc):
     LCC = doc.model.get_variable_by_oxmeta_name('membrane_L_type_calcium_current')
     t = doc.model.get_variable_by_oxmeta_name('time')
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
-    # cap = doc.model.get_variable_by_oxmeta_name('membrane_capacitance')
     Cao = doc.model.get_variable_by_oxmeta_name('extracellular_calcium_concentration')
+    try:
+        Cm = doc.model.get_variable_by_oxmeta_name('membrane_capacitance')
+    except:
+        Cm = None
+
+    # Units
+    current_units = protocol.cellml_units.create_new(
+        doc.model, 'proto_uA_per_cm2',
+        [{'units': 'ampere', 'prefix': 'micro'},
+         {'units': 'metre', 'prefix': 'centi', 'exponent': '-2'}])
+    uF_per_cm2 = protocol.cellml_units.create_new(
+        doc.model, 'proto_uF_per_cm2',
+        [{'units': 'farad', 'prefix': 'micro'},
+         {'units': 'metre', 'prefix': 'centi', 'exponent': '-2'}])
+    chaste_cm = protocol.cellml_variable.create_new(doc.model, u'chaste_membrane_capacitance',
+                                                    uF_per_cm2.name, initial_value=u'1')
+    conc_units = protocol.cellml_units.create_new(
+        doc.model, 'proto_mM',
+        [{'units': 'mole', 'prefix': 'milli'},
+         {'units': 'litre', 'exponent': '-1'}])
+    
+    # Another hack: ensure Cm appears in protocol component for conversions if needed
+    if Cm:
+        Cm_proto = protocol.cellml_variable.create_new(doc, Cm.name+u'_proto', Cm.units)
+        Cm_proto_defn = protocol.mathml_apply.create_new(doc, u'eq', [u'protocol,' + Cm.name+u'_proto',
+                                                                      Cm.component.name + u',' + Cm.name])
+        doc._cml_config.Cm_variable = Cm_proto
+
+    # LCC in desired units for comparison
+    LCC_output = protocol.cellml_variable.create_new(doc, LCC.name + '_compare', current_units.name,
+                                                     id=LCC.oxmeta_name + '_compare')
+    LCC_output_defn = protocol.mathml_apply.create_new(doc, u'eq', [u'protocol,' + LCC.name + '_compare',
+                                                                    LCC.component.name + u',' + LCC.name])
     
     # Change V to be a constant set from a new parameter
     value_name = u'membrane_voltage_value'
@@ -46,18 +78,21 @@ def apply_protocol(doc):
     # Change Ko to be a constant set from a new parameter
     Cao_value_name = u'extracellular_calcium_concentration_value'
     Cao_value = protocol.cellml_variable.create_new(doc, Cao_value_name, Cao.units, id=Cao_value_name,
-                                                  initial_value=Cao.initial_value)
+                                                    initial_value=Cao.initial_value) # TODO: units-convert initial value?
     Cao_const_defn = protocol.mathml_apply.create_new(doc, u'eq', [Cao.component.name + u',' + Cao.name,
-                                                                 u'protocol,' + Cao_value_name])
+                                                                   u'protocol,' + Cao_value_name])
 
     # Now a hack to stop translation complaining about missing currents
-    i_stim = protocol.cellml_variable.create_new(doc, u'i_stim', LCC.units, id=u'membrane_stimulus_current')
-    i_stim_defn = protocol.mathml_apply.create_new(doc, u'eq', [u'protocol,i_stim',
+    i_stim = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current')
+    i_stim_defn = protocol.mathml_apply.create_new(doc, u'eq', [i_stim.component.name + u',' + i_stim.name,
                                                                 (u'0', LCC.units)])
     doc._cml_config.options.use_i_ionic_regexp = True
     doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
     
-    p.outputs = [V, LCC, t, Cao]
-    p.inputs = [Cao_value, Cao_const_defn, V_value, V_const_defn, i_stim, i_stim_defn]
+    p.outputs = [V, LCC_output, t, Cao, LCC, i_stim]
+    p.inputs = [Cao_value, Cao_const_defn, V_value, V_const_defn, i_stim_defn,
+                LCC_output, LCC_output_defn, conc_units, current_units, chaste_cm, uF_per_cm2]
+    if Cm:
+        p.outputs.extend([Cm, Cm_proto])
+        p.inputs.extend([Cm_proto_defn, Cm_proto])
     p.modify_model()
-    i_stim.set_oxmeta_name(u'membrane_stimulus_current')
