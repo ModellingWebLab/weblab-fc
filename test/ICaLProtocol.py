@@ -65,6 +65,6 @@ def apply_protocol(doc):
     doc._cml_config.options.use_i_ionic_regexp = True
     doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
     
-    p.outputs.update([LCC, i_stim])
+    p.outputs.update([V, t, Cao, LCC, i_stim])
     p.inputs.update([i_stim_defn])
     p.modify_model()
