@@ -34,23 +34,39 @@ def apply_protocol(doc):
     t = doc.model.get_variable_by_oxmeta_name('time')
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
     Cao = doc.model.get_variable_by_oxmeta_name('extracellular_calcium_concentration')
+    try:
+        Cm = doc.model.get_variable_by_oxmeta_name('membrane_capacitance')
+    except:
+        Cm = None
 
     # Units
-    current_units = protocol.cellml_units.create_new(
-        doc.model, 'proto_uA_per_cm2',
-        [{'units': 'ampere', 'prefix': 'micro'},
-         {'units': 'metre', 'prefix': 'centi', 'exponent': '-2'}])
-#    uF_per_cm2 = protocol.cellml_units.create_new(
-#        doc.model, 'proto_uF_per_cm2',
-#        [{'units': 'farad', 'prefix': 'micro'},
-#         {'units': 'metre', 'prefix': 'centi', 'exponent': '-2'}])
-#    chaste_cm = protocol.cellml_variable.create_new(doc.model, u'chaste_membrane_capacitance',
-#                                                    uF_per_cm2.name, initial_value=u'1')
-#    conc_units = protocol.cellml_units.create_new(
-#        doc.model, 'proto_mM',
-#        [{'units': 'mole', 'prefix': 'milli'},
-#         {'units': 'litre', 'exponent': '-1'}])
-
+    new_units = protocol.cellml_units.create_new
+    current_units = new_units(doc.model, 'proto_uA_per_cm2',
+                              [{'units': 'ampere', 'prefix': 'micro'},
+                               {'units': 'metre', 'prefix': 'centi', 'exponent': '-2'}])
+    uF_per_cm2 = new_units(doc.model, 'proto_uF_per_cm2',
+                           [{'units': 'farad', 'prefix': 'micro'},
+                            {'units': 'metre', 'prefix': 'centi', 'exponent': '-2'}])
+    microamps = new_units(doc.model, u'microamps',
+                          [{'units':'ampere', 'prefix':'micro'}])
+    A_per_F = new_units(doc.model, 'A_per_F',
+                        [{'units': 'ampere'},
+                         {'units': 'farad', 'exponent': '-1'}])
+    
+    # Define special units conversion for LCC
+    chaste_cm = protocol.cellml_variable.create_new(doc.model, u'chaste_membrane_capacitance',
+                                                    uF_per_cm2.name, initial_value=u'1')
+    converter = p.get_units_converter()
+    converter.add_special_conversion(A_per_F, current_units,
+                                     lambda expr: converter.times_rhs_by(expr, chaste_cm))
+    converter.add_special_conversion(current_units, A_per_F,
+                                     lambda expr: converter.divide_rhs_by(expr, chaste_cm))
+    if Cm:
+        converter.add_special_conversion(microamps, current_units,
+                lambda expr: converter.times_rhs_by(converter.divide_rhs_by(expr, Cm), chaste_cm))
+        converter.add_special_conversion(current_units, microamps,
+                lambda expr: converter.divide_rhs_by(converter.times_rhs_by(expr, Cm), chaste_cm))
+    
     # LCC in desired units for comparison
     p.specify_as_output(LCC, current_units)
     
@@ -66,5 +82,5 @@ def apply_protocol(doc):
     doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
     
     p.outputs.update([V, t, Cao, LCC, i_stim])
-    p.inputs.update([i_stim_defn])
+    p.inputs.update([i_stim_defn, chaste_cm, uF_per_cm2])
     p.modify_model()
