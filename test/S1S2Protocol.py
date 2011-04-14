@@ -30,6 +30,8 @@ def apply_protocol(doc):
     A very simple protocol, that doesn't make any changes, and is only
     really interested in membrane_voltage and time as an output.
     """
+    doc._cml_config.options.use_chaste_stimulus = True
+    doc._cml_config.options.convert_interfaces = True
     p = protocol.Protocol(doc.model, multi_stage=True)
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
     t = doc.model.get_variable_by_oxmeta_name('time')

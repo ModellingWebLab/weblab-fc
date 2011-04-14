@@ -33,6 +33,8 @@ def apply_protocol(doc):
     However, for test coverage purposes, we also include each type of
     variable in the outputs.
     """
+    doc._cml_config.options.use_chaste_stimulus = True
+    doc._cml_config.options.convert_interfaces = True
     p = protocol.Protocol(doc.model, multi_stage=True)
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
     t = doc.model.get_variable_by_name('environment', 'time')
