@@ -1,5 +1,6 @@
 TestDealingWithVoltageClamps.hpp
 TestMultiArray.hpp
+TestNdArray.hpp
 TestS1S2Protocol.hpp
 TestSimpleProtocol.hpp
 TestSteppers.hpp
