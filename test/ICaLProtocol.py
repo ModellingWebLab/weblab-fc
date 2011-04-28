@@ -68,11 +68,11 @@ def apply_protocol(doc):
                 lambda expr: converter.divide_rhs_by(converter.times_rhs_by(expr, Cm), chaste_cm))
     
     # LCC in desired units for comparison
-    p.specify_as_output(LCC, current_units)
+    LCC = p.specify_as_output(LCC, current_units)
     
     # V and Cao should become modifiable parameters
-    p.specify_as_input(V, V.get_units())
-    p.specify_as_input(Cao, Cao.get_units())
+    V = p.specify_as_input(V, V.get_units())
+    Cao = p.specify_as_input(Cao, Cao.get_units())
 
     # Now a hack to stop translation complaining about missing currents
     i_stim = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current')
@@ -80,6 +80,9 @@ def apply_protocol(doc):
                                                                 (u'0', LCC.units)])
     doc._cml_config.options.use_i_ionic_regexp = True
     doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
+    
+    # Quick fix to get t units-converted
+    doc._cml_config.options.convert_interfaces = True
     
     p.outputs.update([V, t, Cao, LCC, i_stim])
     p.inputs.update([i_stim_defn, chaste_cm, uF_per_cm2])
