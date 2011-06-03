@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <!-- sum = lambda a, dim=default: fold(mathml.plus, a, 0, dim) -->
+            <apply><eq/>
+                <ci>sum</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">plus</csymbol>
+                        <ci>a</ci>
+                        <cn>0</cn>
+                        <ci>dim</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            <!-- max = lambda a, dim: fold(mathml.max, a, default, dim) -->
+            <apply><eq/>
+                <ci>max</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">max</csymbol>
+                        <ci>a</ci>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        <ci>dim</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            <!-- input = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } -->
+            <apply><eq/>
+                <ci>input</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <cn>1</cn>
+                    <cn>2</cn>
+                    <cn>3</cn>
+                    <cn>4</cn>
+                    <cn>5</cn>
+                    <cn>6</cn>
+                    <cn>7</cn>
+                    <cn>8</cn>
+                    <cn>9</cn>
+                    <cn>10</cn>
+                </apply>
+            </apply>
+            <!-- input_sum = sum(input) -->
+            <apply><eq/>
+                <ci>input_sum</ci>
+                <apply>
+                    <ci>sum</ci>
+                    <ci>input</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            <!-- input2d = { { 1, 3, 5 }, { 6, 4, 2 } } -->
+            <apply><eq/>
+                <ci>input2d</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <cn>1</cn>
+                        <cn>3</cn>
+                        <cn>5</cn>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <cn>6</cn>
+                        <cn>4</cn>
+                        <cn>2</cn>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- input2d_max = max(input2d, 0) -->
+            <apply><eq/>
+                <ci>input2d_max</ci>
+                <apply>
+                    <ci>max</ci>
+                    <ci>input2d</ci>
+                    <cn>0</cn>
+                </apply>
+            </apply>
+            <!-- input2d_slice = input2d[<1>1:2] -->
+            <apply><eq/>
+                <ci>input2d_slice</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                    <ci>input2d</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>1</cn> <!-- dim -->
+                        <cn>1</cn> <!-- start -->
+                        <cn>1</cn> <!-- stride -->
+                        <cn>2</cn> <!-- end -->
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/> <!-- dim -->
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/> <!-- start -->
+                        <cn>1</cn> <!-- stride -->
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/> <!-- end -->
+                    </apply>
+                </apply>
+            </apply>
+            <!-- input2 = { 1, 2, 3 } -->
+            <apply><eq/>
+                <ci>input2</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <cn>1</cn>
+                    <cn>2</cn>
+                    <cn>3</cn>
+                </apply>
+            </apply>
+            <!-- map_result = map(mathml.plus, input2d_max[0][:], input2) -->
+            <apply><eq/>
+                <ci>map_result</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">plus</csymbol>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>input2d_max</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>0</cn> <!-- stride -->
+                            <cn>0</cn> <!-- end -->
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>1</cn> <!-- dim -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/> <!-- start -->
+                            <cn>1</cn> <!-- stride -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/> <!-- end -->
+                        </apply>
+                    </apply>
+                    <ci>input2</ci>
+                </apply>
+            </apply>
+            <!-- adder = lambda input: map(mathml.plus, input, input2) -->
+            <apply><eq/>
+                <ci>adder</ci>
+                <lambda>
+                    <bvar><ci>input</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">plus</csymbol>
+                        <ci>input</ci>
+                        <ci>input2</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            <!-- double_input2 = adder(input2) -->
+            <apply><eq/>
+                <ci>double_input2</ci>
+                <apply>
+                    <ci>adder</ci>
+                    <ci>input2</ci>
+                </apply>
+            </apply>
+        </apply>
+    </post-processing>
+</protocol>
