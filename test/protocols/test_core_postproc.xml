@@ -438,6 +438,59 @@
                     <cn>2</cn>
                 </apply>
             </apply>
+            
+            <!-- Test function returning multiple values -->
+            <!-- swap = lambda a, b: return b, a -->
+            <apply><eq/>
+                <ci>swap</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <bvar><ci>b</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <ci>b</ci>
+                            <ci>a</ci>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            <!-- one, two = swap(2, 1) -->
+            <apply><eq/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                    <ci>one</ci>
+                    <ci>two</ci>
+                </apply>
+                <apply>
+                    <ci>swap</ci>
+                    <cn>2</cn>
+                    <cn>1</cn>
+                </apply>
+            </apply>
+            <!-- Check results -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_FUNCTION</csymbol>
+                    <ci>swap</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <ci>one</ci>
+                    <cn>1</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <ci>two</ci>
+                    <cn>2</cn>
+                </apply>
+            </apply>
         </apply>
     </post-processing>
 </protocol>
