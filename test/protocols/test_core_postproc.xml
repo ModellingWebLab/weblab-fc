@@ -211,6 +211,233 @@
                     <cn>3</cn>
                 </apply>                
             </apply>
+            
+            <!-- Testing array comprehensions (and more accessors) -->
+            <!-- counting1d = { i for #0#i=0:10 } -->
+            <apply><eq/>
+                <ci>counting1d</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <domainofapplication>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>1</cn> <!-- stride -->
+                            <cn>10</cn> <!-- end -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol> <!-- var name -->
+                        </apply>                        
+                    </domainofapplication>
+                    <ci>i</ci>
+                </apply>
+            </apply>
+            <!-- Check array shape -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>counting1d</ci>
+                    </apply>
+                    <cn>1</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_ELEMENTS</csymbol>
+                        <ci>counting1d</ci>
+                    </apply>
+                    <cn>10</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>counting1d</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>0</cn> <!-- stride -->
+                            <cn>0</cn> <!-- end -->
+                        </apply>
+                    </apply>
+                    <cn>10</cn>
+                </apply>
+            </apply>
+            
+            <!-- counting2d = { i * 3 + j for #0#i=1:3, #1#j=0:3 } -->
+            <apply><eq/>
+                <ci>counting2d</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <domainofapplication>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>1</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>1</cn> <!-- stride -->
+                            <cn>3</cn> <!-- end -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">j</csymbol> <!-- var name -->
+                        </apply>                        
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>1</cn> <!-- start -->
+                            <cn>1</cn> <!-- stride -->
+                            <cn>3</cn> <!-- end -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol> <!-- var name -->
+                        </apply>                        
+                    </domainofapplication>
+                    <apply><plus/>
+                        <apply><times/>
+                            <ci>i</ci>
+                            <cn>3</cn>
+                        </apply>
+                        <ci>j</ci>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- Check array shape -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>counting2d</ci>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_ELEMENTS</csymbol>
+                        <ci>counting2d</ci>
+                    </apply>
+                    <cn>6</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>counting2d</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>0</cn> <!-- stride -->
+                            <cn>0</cn> <!-- end -->
+                        </apply>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+
+            <!-- blocks = { {{-10+j,j},{10+j,20+j}} for #1#j=0:2 } -->
+            <apply><eq/>
+                <ci>blocks</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <domainofapplication>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>1</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>1</cn> <!-- stride -->
+                            <cn>2</cn> <!-- end -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">j</csymbol> <!-- var name -->
+                        </apply>
+                    </domainofapplication>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <apply><plus/><cn>-10</cn><ci>j</ci></apply>
+                            <ci>j</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <apply><plus/><cn>10</cn><ci>j</ci></apply>
+                            <apply><plus/><cn>20</cn><ci>j</ci></apply>
+                        </apply>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- Check array shape -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>blocks</ci>
+                    </apply>
+                    <cn>3</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_ELEMENTS</csymbol>
+                        <ci>blocks</ci>
+                    </apply>
+                    <cn>8</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>blocks</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>0</cn> <!-- start -->
+                            <cn>0</cn> <!-- stride -->
+                            <cn>0</cn> <!-- end -->
+                        </apply>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>blocks</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn> <!-- dim -->
+                            <cn>1</cn> <!-- start -->
+                            <cn>0</cn> <!-- stride -->
+                            <cn>1</cn> <!-- end -->
+                        </apply>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
         </apply>
     </post-processing>
 </protocol>
