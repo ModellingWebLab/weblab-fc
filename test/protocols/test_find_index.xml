@@ -78,7 +78,7 @@
             </apply>
             
             <!-- Function to check array equality elementwise -->
-            <!-- How do we make this dimension-independent? -->
+            <!-- How do we make this dimension-independent? Allow multi-dimensional fold? -->
             <apply><eq/>
                 <ci>array_eq</ci>
                 <lambda>
