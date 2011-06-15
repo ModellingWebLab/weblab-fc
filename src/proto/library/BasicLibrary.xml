@@ -3,6 +3,48 @@
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             
+            <!-- max = lambda a, dim=default: fold(mathml.max, a, default, dim) -->
+            <apply><eq/>
+                <ci>max</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">max</csymbol>
+                        <ci>a</ci>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        <ci>dim</ci>
+                    </apply>
+                </lambda>
+            </apply>
+
+            <!-- min = lambda a, dim=default: fold(mathml.min, a, default, dim) -->
+            <apply><eq/>
+                <ci>min</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">min</csymbol>
+                        <ci>a</ci>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        <ci>dim</ci>
+                    </apply>
+                </lambda>
+            </apply>
+                        
             <!--
                 def diff(array, dim=array.num_dims-1):
                     map(-, array[<dim>1:], array[<dim>:-1])
@@ -113,6 +155,35 @@
                                     </apply>
                                 </apply>
                             </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- grad x y [dim] = map (/) (diff y dim) (diff x dim) -->
+            <apply><eq/>
+                <ci>grad</ci>
+                <lambda>
+                    <bvar><ci>x</ci></bvar>
+                    <bvar><ci>y</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">divide</csymbol>
+                        <apply>
+                            <ci>diff</ci>
+                            <ci>y</ci>
+                            <ci>dim</ci>
+                        </apply>
+                        <apply>
+                            <ci>diff</ci>
+                            <ci>x</ci>
+                            <ci>dim</ci>
                         </apply>
                     </apply>
                 </lambda>
