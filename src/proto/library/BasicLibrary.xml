@@ -44,21 +44,13 @@
                     </apply>
                 </lambda>
             </apply>
-                        
-            <!--
-                def diff(array, dim=array.num_dims-1):
-                    map(-, array[<dim>1:], array[<dim>:-1])
-            -->
+            
+            <!-- default_dim(array, dim'): if dim'=default then array.num_dims-1 else dim' -->
             <apply><eq/>
-                <ci>diff</ci>
+                <ci>default_dim</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
-                    <semantics>
-                        <bvar><ci>dim'</ci></bvar>
-                        <annotation-xml>
-                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                        </annotation-xml>
-                    </semantics>
+                    <bvar><ci>dim'</ci></bvar>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
                         <!-- test arguments -->
@@ -69,6 +61,7 @@
                                 <ci>array</ci>
                             </apply>
                         </apply>
+                        <!-- calculate result -->
                         <apply><eq/>
                             <ci>default_dim</ci>
                             <apply><minus/>
@@ -111,7 +104,40 @@
                                 </apply>
                             </apply>
                         </apply>
+                        <!-- return result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <ci>dim</ci>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
                         
+            <!--
+                def diff(array, dim=array.num_dims-1):
+                    map(-, array[<dim>1:], array[<dim>:-1])
+            -->
+            <apply><eq/>
+                <ci>diff</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- test arguments using default_dim -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply>
+                                <ci>default_dim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
                         <!-- calculate result -->
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
@@ -188,6 +214,400 @@
                     </apply>
                 </lambda>
             </apply>
+            
+            <!-- join(a1, a2, dim=default): catenate two arrays along the given dimension -->
+            <apply><eq/>
+                <ci>join</ci>
+                <lambda>
+                    <bvar><ci>a1</ci></bvar>
+                    <bvar><ci>a2</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- test some arguments using default_dim -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply>
+                                <ci>default_dim</ci>
+                                <ci>a1</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <!-- the array comprehension will check that a1.num_dims == a2.num_dims, and that the shapes match up -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                <domainofapplication>
+                                    <!-- #dim#i=-a1.shape[dim]:a2.shape[dim] -->
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci>
+                                        <apply><minus/>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                <apply>
+                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                                    <ci>a1</ci>
+                                                </apply>
+                                                <apply>
+                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                    <cn>0</cn>
+                                                    <ci>dim</ci>
+                                                    <cn>0</cn>
+                                                    <ci>dim</ci>
+                                                </apply>
+                                            </apply>
+                                        </apply>
+                                        <cn>1</cn>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                                <ci>a2</ci>
+                                            </apply>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <cn>0</cn>
+                                                <ci>dim</ci>
+                                                <cn>0</cn>
+                                                <ci>dim</ci>
+                                            </apply>
+                                        </apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol>
+                                    </apply>
+                                </domainofapplication>
+                                <!-- If the index along dim is less than zero, use a slice of a1, else a slice of a2 -->
+                                <piecewise>
+                                    <piece>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <ci>a1</ci>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <ci>dim</ci>
+                                                <ci>i</ci>
+                                                <cn>0</cn>
+                                                <ci>i</ci>
+                                            </apply>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                <cn>1</cn>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                            </apply>
+                                        </apply>
+                                        <apply><lt/><ci>i</ci><cn>0</cn></apply>
+                                    </piece>
+                                    <otherwise>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <ci>a2</ci>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <ci>dim</ci>
+                                                <ci>i</ci>
+                                                <cn>0</cn>
+                                                <ci>i</ci>
+                                            </apply>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                <cn>1</cn>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                            </apply>
+                                        </apply>
+                                    </otherwise>
+                                </piecewise>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- stretch(array, length, dim=default): stretch dimension dim (of length 1) to the given length -->
+            <apply><eq/>
+                <ci>stretch</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>length</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- some testing of arguments using default_dim -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply>
+                                <ci>default_dim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <!-- Also check that the array.shape[dim] == 1 -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                        <ci>array</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn>
+                                        <ci>dim</ci>
+                                        <cn>0</cn>
+                                        <ci>dim</ci>
+                                    </apply>
+                                </apply>
+                                <cn>1</cn>
+                            </apply>
+                        </apply>
+                        <!-- calculate result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                <domainofapplication>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci>
+                                        <cn>0</cn>
+                                        <cn>1</cn>
+                                        <ci>length</ci>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol>
+                                    </apply>
+                                </domainofapplication>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <ci>array</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci>
+                                        <cn>0</cn>
+                                        <cn>0</cn>
+                                        <cn>0</cn>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <cn>1</cn>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    </apply>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- shift(array, distance, dim=default) -->
+            <apply><eq/>
+                <ci>shift</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>distance</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- test arguments using default_dim -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply>
+                                <ci>default_dim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <!-- calculate result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <piecewise>
+                                <piece>
+                                    <!-- no-op if distance == 0 -->
+                                    <ci>array</ci>
+                                    <apply><eq/><ci>distance</ci><cn>0</cn></apply>
+                                </piece>
+                                <otherwise>
+                                    <piecewise>
+                                        <piece>
+                                            <!-- shift right if distance > 0:
+                                                join stretch(array[<dim>0:1], distance, dim)
+                                                   & array[<dim>0:-distance] along dim -->
+                                            <apply>
+                                                <ci>join</ci>
+                                                <apply>
+                                                    <ci>stretch</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                        <ci>array</ci>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                            <ci>dim</ci>
+                                                            <cn>0</cn>
+                                                            <cn>1</cn>
+                                                            <cn>1</cn>
+                                                        </apply>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                            <cn>1</cn>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        </apply>
+                                                    </apply>
+                                                    <ci>distance</ci>
+                                                    <ci>dim</ci>
+                                                </apply>
+                                                <apply>
+                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                    <ci>array</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                        <ci>dim</ci>
+                                                        <cn>0</cn>
+                                                        <cn>1</cn>
+                                                        <apply><minus/><ci>distance</ci></apply>
+                                                    </apply>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        <cn>1</cn>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                    </apply>
+                                                </apply>
+                                                <ci>dim</ci>
+                                            </apply>
+                                            <apply><gt/><ci>distance</ci><cn>0</cn></apply>
+                                        </piece>
+                                        <otherwise>
+                                            <!-- shift left if distance < 0:
+                                                join array[<dim>-distance:]
+                                                   & stretch(array[<dim>-1:], -distance, dim) along dim -->
+                                            <apply>
+                                                <ci>join</ci>
+                                                <apply>
+                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                    <ci>array</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                        <ci>dim</ci>
+                                                        <apply><minus/><ci>distance</ci></apply>
+                                                        <cn>1</cn>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                    </apply>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        <cn>1</cn>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                    </apply>
+                                                </apply>
+                                                <apply>
+                                                    <ci>stretch</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                        <ci>array</ci>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                            <ci>dim</ci>
+                                                            <cn>-1</cn>
+                                                            <cn>1</cn>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        </apply>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                            <cn>1</cn>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        </apply>
+                                                    </apply>
+                                                    <apply><minus/><ci>distance</ci></apply>
+                                                    <ci>dim</ci>
+                                                </apply>
+                                                <ci>dim</ci>
+                                            </apply>
+                                        </otherwise>
+                                    </piecewise>
+                                </otherwise>
+                            </piecewise>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- window(array, size, dim=default) -->
+            <apply><eq/>
+                <ci>window</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>size</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- test arguments -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                <ci>array</ci>
+                            </apply>
+                        </apply>
+                        
+                        <!-- calculate result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                <domainofapplication>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn> <!-- dim -->
+                                        <apply><minus/><ci>size</ci></apply> <!-- start -->
+                                        <cn>1</cn> <!-- stride -->
+                                        <apply><plus/><ci>size</ci><cn>1</cn></apply> <!-- end -->
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol> <!-- var name -->
+                                    </apply>
+                                </domainofapplication>
+                                <apply>
+                                    <ci>shift</ci>
+                                    <ci>array</ci>
+                                    <ci>i</ci>
+                                    <ci>dim</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
         </apply>
     </post-processing>
 </protocol>

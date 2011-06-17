@@ -77,8 +77,19 @@
                 </apply>
             </apply>
             
+            <!-- Recursive function to fold along every dimension in turn, starting from zero -->
+            <!--<apply><eq/>
+                <ci>multi_fold</ci>
+                <lambda>
+                    <bvar><ci>op</ci></bvar>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>init</ci></bvar>
+                    <piecewise></piecewise>
+                </lambda>
+            </apply>-->
+            
             <!-- Function to check array equality elementwise -->
-            <!-- How do we make this dimension-independent? Allow multi-dimensional fold? -->
+            <!-- TODO: implement as multi_fold(and, map(eq, a1, a2), true) -->
             <apply><eq/>
                 <ci>array_eq</ci>
                 <lambda>
