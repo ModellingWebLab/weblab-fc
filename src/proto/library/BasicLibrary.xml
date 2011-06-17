@@ -608,6 +608,83 @@
                 </lambda>
             </apply>
             
+            <!-- Recursive function to fold along every dimension in turn, starting from zero -->
+            <apply><eq/>
+                <ci>multi_fold</ci>
+                <lambda>
+                    <bvar><ci>op</ci></bvar>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>init</ci></bvar>
+                    <piecewise>
+                        <piece>
+                            <!-- Base case: 0d input - return the single value -->
+                            <ci>array</ci>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                    <ci>array</ci>
+                                </apply>
+                                <cn>0</cn>
+                            </apply>
+                        </piece>
+                        <otherwise>
+                            <!-- Recursive case: fold zeroth dimension -->
+                            <apply>
+                                <ci>multi_fold</ci>
+                                <ci>op</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                                        <ci>op</ci>
+                                        <ci>array</ci>
+                                        <ci>init</ci>
+                                        <cn>0</cn>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn> <!-- dim -->
+                                        <cn>0</cn> <!-- start -->
+                                        <cn>0</cn> <!-- stride -->
+                                        <cn>0</cn> <!-- end -->
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <cn>1</cn>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    </apply>
+                                </apply>
+                                <ci>init</ci>
+                            </apply>                            
+                        </otherwise>
+                    </piecewise>
+                </lambda>
+            </apply>
+
+            <!-- Function to check array equality elementwise.
+                Works with arrays of any dimension.
+                Implemented as multi_fold(and, map(eq, a1, a2), true) -->
+            <apply><eq/>
+                <ci>array_eq</ci>
+                <lambda>
+                    <bvar><ci>a1</ci></bvar>
+                    <bvar><ci>a2</ci></bvar>
+                    <apply>
+                        <ci>multi_fold</ci>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">and</csymbol>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">eq</csymbol>
+                            <ci>a1</ci>
+                            <ci>a2</ci>
+                        </apply>
+                        <cn>1</cn>
+                    </apply>
+                </lambda>
+            </apply>
+            
         </apply>
     </post-processing>
 </protocol>
