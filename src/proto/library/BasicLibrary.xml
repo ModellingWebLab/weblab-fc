@@ -332,12 +332,16 @@
                 </lambda>
             </apply>
             
-            <!-- stretch(array, length, dim=default): stretch dimension dim (of length 1) to the given length -->
+            <!--
+                stretch(array, length_spec, dim=default): stretch dimension dim (of length 1) to the given length.
+                The length_spec can either be a number giving the length, or a shape array the relevant entry of
+                which will be read.  We do not (yet) check that the other dimensions match the input array shape!
+            -->
             <apply><eq/>
                 <ci>stretch</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
-                    <bvar><ci>length</ci></bvar>
+                    <bvar><ci>length_spec</ci></bvar>
                     <semantics>
                         <bvar><ci>dim'</ci></bvar>
                         <annotation-xml>
@@ -354,6 +358,78 @@
                                 <ci>array</ci>
                                 <ci>dim'</ci>
                             </apply>
+                        </apply>
+                        <!-- Figure out the desired length -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><or/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
+                                    <ci>length_spec</ci>
+                                </apply>
+                                <apply><and/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                        <ci>length_spec</ci>
+                                    </apply>
+                                    <apply><eq/>
+                                        <!-- length_spec.num_dims == 1 -->
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                            <ci>length_spec</ci>
+                                        </apply>
+                                        <cn>1</cn>
+                                    </apply>
+                                    <apply><eq/>
+                                        <!-- Check that length_spec.shape[0] == array.num_dims -->
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                                <ci>length_spec</ci>
+                                            </apply>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <cn>0</cn>
+                                                <cn>0</cn>
+                                                <cn>0</cn>
+                                                <cn>0</cn>
+                                            </apply>
+                                        </apply>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                            <ci>array</ci>
+                                        </apply>
+                                    </apply>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>length</ci>
+                            <piecewise>
+                                <piece>
+                                    <!-- length_spec is just a number so use it -->
+                                    <ci>length_spec</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
+                                        <ci>length_spec</ci>
+                                    </apply>
+                                </piece>
+                                <otherwise>
+                                    <!-- length_spec is a shape array so index it -->
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                        <ci>length_spec</ci>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                            <cn>0</cn>
+                                            <ci>dim</ci>
+                                            <cn>0</cn>
+                                            <ci>dim</ci>
+                                        </apply>
+                                    </apply>
+                                </otherwise>
+                            </piecewise>
                         </apply>
                         <!-- Also check that the array.shape[dim] == 1 -->
                         <apply>
@@ -681,6 +757,373 @@
                             <ci>a2</ci>
                         </apply>
                         <cn>1</cn>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- interp(xs, ys, targets, starts, afterStarts=1, dim=default): linear interpolation
+              It uses the following algorithm:
+                interp xs ys y
+                  = let pred = if ys[0] < y  # ys increasing
+                               then (>=y)  # lambda v: v >= y
+                               else (<=y)  # lambda v: v <= y
+                    in let i = (find (pred ys))[0]  # Error if pred never satisfied
+                       in if i == 0
+                          then xs[i]
+                          else xs[i-1] + (xs[i]-xs[i-1])*(y-ys[i-1])/(ys[i]-ys[i-1])
+            -->
+            <apply><eq/>
+                <ci>interp</ci>
+                <lambda>
+                    <bvar><ci>xs</ci></bvar>
+                    <bvar><ci>ys</ci></bvar>
+                    <bvar><ci>targets</ci></bvar>
+                    <bvar><ci>starts</ci></bvar>
+                    <semantics>
+                        <bvar><ci>afterStarts</ci></bvar>
+                        <annotation-xml>
+                            <cn>1</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- check arguments -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply><ci>default_dim</ci>
+                                <ci>xs</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>input_shape</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                <ci>xs</ci>
+                            </apply>                            
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><ci>array_eq</ci>
+                                <ci>input_shape</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>ys</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>result_shape</ci>
+                            <!-- 1 for the desired dimension, input shape otherwise -->
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                <domainofapplication>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn><cn>0</cn><cn>1</cn>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                            <ci>xs</ci>
+                                        </apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol>
+                                    </apply>
+                                </domainofapplication>
+                                <piecewise>
+                                    <piece>
+                                        <cn>1</cn>
+                                        <apply><eq/><ci>i</ci><ci>dim</ci></apply>
+                                    </piece>
+                                    <otherwise>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <ci>input_shape</ci>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <cn>0</cn><ci>i</ci><cn>0</cn><ci>i</ci>
+                                            </apply>
+                                        </apply>
+                                    </otherwise>
+                                </piecewise>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><ci>array_eq</ci>
+                                <ci>result_shape</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>starts</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><ci>array_eq</ci>
+                                <ci>result_shape</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>targets</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                        
+                        <!-- Result calculation -->
+                        <apply><eq/>
+                            <ci>stretched_starts</ci>
+                            <apply><ci>stretch</ci>
+                                <ci>starts</ci>
+                                <ci>input_shape</ci>
+                                <ci>dim</ci>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>stretched_targets</ci>
+                            <apply><ci>stretch</ci>
+                                <ci>targets</ci>
+                                <ci>input_shape</ci>
+                                <ci>dim</ci>
+                            </apply>
+                        </apply>
+                        <!--
+                            We want to find indexes i into rYs such that rXs[i] >= p_stretched_starts[i], and
+                            if rYs[start] > rTargets, rYs[i] <= p_stretched_targets[i]
+                            if rYs[start] < rTargets, rYs[i] >= p_stretched_targets[i]
+                        -->
+                        <!-- First, find the values of y where x=start -->
+                        <apply><eq/>
+                            <ci>y_starts</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                <ci>ys</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">eq</csymbol>
+                                        <ci>xs</ci>
+                                        <ci>stretched_starts</ci>
+                                    </apply>
+                                </apply>
+                                <ci>dim</ci>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                            </apply>
+                        </apply>
+                        <!-- Next, create an array saying whether Y is increasing or decreasing in the region of interest -->
+                        <apply><eq/>
+                            <ci>increasing</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">lt</csymbol>
+                                <ci>y_starts</ci>
+                                <ci>targets</ci>
+                            </apply>
+                        </apply>
+                        <!-- Now, test for Y matching the predicate -->
+                        <apply><eq/>
+                            <ci>y_matches</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <lambda>
+                                    <bvar><ci>inc</ci></bvar>
+                                    <bvar><ci>y</ci></bvar>
+                                    <bvar><ci>t</ci></bvar>
+                                    <piecewise>
+                                        <piece>
+                                            <apply><geq/><ci>y</ci><ci>t</ci></apply>
+                                            <ci>inc</ci>
+                                        </piece>
+                                        <otherwise>
+                                            <apply><leq/><ci>y</ci><ci>t</ci></apply>
+                                        </otherwise>
+                                    </piecewise>
+                                </lambda>
+                                <apply><ci>stretch</ci>
+                                    <ci>increasing</ci>
+                                    <ci>input_shape</ci>
+                                    <ci>dim</ci>
+                                </apply>
+                                <ci>ys</ci>
+                                <ci>stretched_targets</ci>
+                            </apply>
+                        </apply>
+                        <!-- Finally, filter so we only get matches before/after the start point -->
+                        <apply><eq/>
+                            <ci>idxs</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                    <piecewise>
+                                        <piece>
+                                            <lambda>
+                                                <bvar><ci>match</ci></bvar>
+                                                <bvar><ci>x</ci></bvar>
+                                                <bvar><ci>start</ci></bvar>
+                                                <apply><and/>
+                                                    <ci>match</ci>
+                                                    <apply><geq/>
+                                                        <ci>x</ci>
+                                                        <ci>start</ci>
+                                                    </apply>
+                                                </apply>
+                                            </lambda>
+                                            <ci>afterStarts</ci>
+                                        </piece>
+                                        <otherwise>
+                                            <lambda>
+                                                <bvar><ci>match</ci></bvar>
+                                                <bvar><ci>x</ci></bvar>
+                                                <bvar><ci>start</ci></bvar>
+                                                <apply><and/>
+                                                    <ci>match</ci>
+                                                    <apply><leq/>
+                                                        <ci>x</ci>
+                                                        <ci>start</ci>
+                                                    </apply>
+                                                </apply>
+                                            </lambda>
+                                        </otherwise>
+                                    </piecewise>
+                                    <ci>y_matches</ci>
+                                    <ci>xs</ci>
+                                    <ci>stretched_starts</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <!-- Compute "(xs[i]-xs[i-1]) / (ys[i]-ys[i-1])" (but don't index it yet) -->
+                        <apply><eq/>
+                            <ci>gradient</ci>
+                            <apply>
+                                <ci>grad</ci>
+                                <ci>ys</ci>
+                                <ci>xs</ci>
+                                <ci>dim</ci>
+                            </apply>
+                        </apply>
+                        <!-- Add a zero on the front to make it match xs etc. in size, and handle the i==0 case -->
+                        <apply><eq/>
+                            <ci>zero_array</ci><!-- Zero array of shape result_shape -->
+                            <!-- TODO: better approach? -->
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <lambda>
+                                    <bvar><ci>_</ci></bvar>
+                                    <cn>0</cn>
+                                </lambda>
+                                <ci>targets</ci>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>gradient_extended</ci>
+                            <apply><ci>join</ci>
+                                <piecewise>
+                                    <piece><ci>zero_array</ci><ci>afterStarts</ci></piece>
+                                    <otherwise><ci>gradient</ci></otherwise>
+                                </piecewise>
+                                <piecewise>
+                                    <piece><ci>gradient</ci><ci>afterStarts</ci></piece>
+                                    <otherwise><ci>zero_array</ci></otherwise>
+                                </piecewise>
+                                <ci>dim</ci>
+                            </apply>
+                        </apply>
+                        <!-- Compute "(y - ys[i-1])" or "(y - ys[i])" -->
+                        <apply><eq/>
+                            <ci>shift_dir</ci>
+                            <piecewise>
+                                <piece><cn>1</cn><ci>afterStarts</ci></piece>
+                                <otherwise><cn>0</cn></otherwise>
+                            </piecewise>
+                        </apply>
+                        <apply><eq/>
+                            <ci>target_minus_ys</ci>
+                            <apply><ci>shift</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
+                                    <ci>stretched_targets</ci>
+                                    <ci>ys</ci>
+                                </apply>
+                                <ci>shift_dir</ci>
+                                <ci>dim</ci>
+                            </apply>
+                        </apply>
+                        <!-- Shift xs to get xs[i-1] or xs -->
+                        <apply><eq/>
+                            <ci>shifted_xs</ci>
+                            <apply><ci>shift</ci>
+                                <ci>xs</ci><ci>shift_dir</ci><ci>dim</ci>
+                            </apply>
+                        </apply>
+                        <!-- Compute the 'total' result -->
+                        <apply><eq/>
+                            <ci>result</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                    <lambda>
+                                        <bvar><ci>shifted_x</ci></bvar>
+                                        <bvar><ci>t_minus_y</ci></bvar>
+                                        <bvar><ci>x_over_y</ci></bvar>
+                                        <apply><plus/>
+                                            <ci>shifted_x</ci>
+                                            <apply><times/>
+                                                <ci>t_minus_y</ci><ci>x_over_y</ci>
+                                            </apply>
+                                        </apply>
+                                    </lambda>
+                                    <ci>shifted_xs</ci>
+                                    <ci>target_minus_ys</ci>
+                                    <ci>gradient_extended</ci>
+                                </apply>
+                                <ci>idxs</ci>
+                                <ci>dim</ci>
+                                <piecewise>
+                                    <!-- shrink excess off the correct end -->
+                                    <piece><cn>1</cn><ci>afterStarts</ci></piece>
+                                    <otherwise><cn>-1</cn></otherwise>
+                                </piecewise>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                            </apply>
+                        </apply>
+                        <!-- Finally, take the first/last match... -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <ci>result</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <ci>dim</ci>
+                                    <piecewise>
+                                        <piece><cn>0</cn><ci>afterStarts</ci></piece>
+                                        <otherwise><cn>-1</cn></otherwise>
+                                    </piecewise>
+                                    <cn>1</cn>
+                                    <piecewise>
+                                        <piece><cn>1</cn><ci>afterStarts</ci></piece>
+                                        <otherwise><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/></otherwise>
+                                    </piecewise>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    <cn>1</cn>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                </apply>
+                            </apply>
+                        </apply>
                     </apply>
                 </lambda>
             </apply>
