@@ -491,6 +491,42 @@
                     <cn>2</cn>
                 </apply>
             </apply>
+            
+            <!-- Test nested functions and scoping -->
+            <apply><eq/>
+                <ci>nested_scopes</ci>
+                <lambda>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Nested function -->
+                        <apply><eq/>
+                            <ci>nested_fn</ci>
+                            <lambda>
+                                <bvar><ci>input</ci></bvar>
+                                <apply><plus/>
+                                    <ci>input</ci>
+                                    <ci>outer_var</ci>
+                                </apply>
+                            </lambda>
+                        </apply>
+                        <!-- Variable that should be accessible -->
+                        <apply><eq/>
+                            <ci>outer_var</ci>
+                            <cn>1</cn>
+                        </apply>
+                        <!-- Call nested function & check result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply><ci>nested_fn</ci>
+                                    <cn>1</cn>
+                                </apply>
+                                <cn>2</cn>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
         </apply>
     </post-processing>
 </protocol>

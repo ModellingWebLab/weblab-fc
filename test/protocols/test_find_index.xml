@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
     <post-processing>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
