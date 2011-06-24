@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
     <post-processing>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
@@ -757,6 +758,47 @@
                             <ci>a2</ci>
                         </apply>
                         <cn>1</cn>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- Check whether two arrays have the same shape -->
+            <apply><eq/>
+                <ci>shape_eq</ci>
+                <lambda>
+                    <bvar><ci>a1</ci></bvar>
+                    <bvar><ci>a2</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- test arguments -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                <ci>a1</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                <ci>a2</ci>
+                            </apply>
+                        </apply>                        
+                        <!-- return result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply><ci>array_eq</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>a1</ci>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>a2</ci>
+                                </apply>
+                            </apply>
+                        </apply>
                     </apply>
                 </lambda>
             </apply>
