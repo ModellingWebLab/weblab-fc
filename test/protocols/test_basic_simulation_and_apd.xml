@@ -2,6 +2,39 @@
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
     <simulations>
         <nestedSimulation>
+            <vectorStepper name="run_outer" units="dimensionless">
+                <value>0</value>
+                <value>1</value>
+                <value>2</value>
+            </vectorStepper>
+            <modifiers>
+                <!-- TODO: save the start AT_START_ONLY here -->
+            </modifiers>
+            <nestedSimulation>
+                <uniformStepper name="run_inner" units="dimensionless">
+                    <start>0</start>
+                    <stop>2</stop>
+                    <step>1</step>
+                </uniformStepper>
+                <modifiers/>
+                <timecourseSimulation>
+                    <uniformStepper name="time" units="ms">
+                        <start>0</start>
+                        <stop>1200</stop>
+                        <step>1</step>
+                    </uniformStepper>
+                    <modifiers>
+                        <resetModifier>
+                            <when>AT_START_ONLY</when>
+                            <!-- TODO: refer to saved state above -->
+                        </resetModifier>
+                        <!-- TODO: test saving final state here -->
+                    </modifiers>
+                </timecourseSimulation>
+            </nestedSimulation>
+        </nestedSimulation>
+        
+        <nestedSimulation>
             <uniformStepper name="run" units="dimensionless">
                 <start>0</start>
                 <stop>4</stop>
@@ -19,7 +52,6 @@
                     <step>1</step>
                 </uniformStepper>
                 <modifiers/>
-                <model ref="LR91"/>
             </timecourseSimulation>
         </nestedSimulation>
     </simulations>
