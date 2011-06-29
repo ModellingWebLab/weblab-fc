@@ -8,7 +8,10 @@
                 <value>2</value>
             </vectorStepper>
             <modifiers>
-                <!-- TODO: save the start AT_START_ONLY here -->
+                <saveState>
+                    <when>AT_START_ONLY</when>
+                    <name>initial_state</name>
+                </saveState>
             </modifiers>
             <nestedSimulation>
                 <uniformStepper name="run_inner" units="dimensionless">
@@ -26,9 +29,12 @@
                     <modifiers>
                         <resetModifier>
                             <when>AT_START_ONLY</when>
-                            <!-- TODO: refer to saved state above -->
+                            <state>initial_state</state>
                         </resetModifier>
-                        <!-- TODO: test saving final state here -->
+                        <saveState>
+                            <when>AT_END</when>
+                            <name>final_state</name>
+                        </saveState>
                     </modifiers>
                 </timecourseSimulation>
             </nestedSimulation>
