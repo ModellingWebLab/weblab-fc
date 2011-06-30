@@ -12,6 +12,42 @@
                     <when>AT_START_ONLY</when>
                     <name>initial_state</name>
                 </saveState>
+                <!-- Set stimulus: we need 2 APs to be able to calculate a DI -->                    
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_amplitude</name><!-- uA/cm^2 -->
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">-25.5</cn>
+                    </value>
+                </setVariable>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_duration</name><!-- ms -->
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">2.0</cn>
+                    </value>
+                </setVariable>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_offset</name><!-- ms -->
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">50.0</cn>
+                    </value>
+                </setVariable>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_period</name><!-- ms -->
+                    <value>
+                        <!-- Let's prove we can access the stepper -->
+                        <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
+                            <cn>600.0</cn>
+                            <apply><times/>
+                                <ci>run_outer</ci>
+                                <cn>0</cn>
+                            </apply>
+                        </apply>
+                    </value>
+                </setVariable>
             </modifiers>
             <nestedSimulation>
                 <uniformStepper name="run_inner" units="dimensionless">
@@ -19,7 +55,22 @@
                     <stop>2</stop>
                     <step>1</step>
                 </uniformStepper>
-                <modifiers/>
+                <modifiers>
+                    <!-- Let's prove we can access the outer stepper -->
+                    <setVariable>
+                        <when>AT_START_ONLY</when>
+                        <name>membrane_stimulus_current_period</name><!-- ms -->
+                        <value>
+                            <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
+                                <cn>600.0</cn>
+                                <apply><times/>
+                                    <ci>run_outer</ci>
+                                    <cn>0</cn>
+                                </apply>
+                            </apply>
+                        </value>
+                    </setVariable>
+                </modifiers>
                 <timecourseSimulation>
                     <uniformStepper name="time" units="ms">
                         <start>0</start>
