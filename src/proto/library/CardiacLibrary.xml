@@ -3,9 +3,79 @@
     Library of routines useful for post-processing cardiac simulations.
 -->
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
-    <post-processing>
+    <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            
+            <!--
+                Return that portion of an input array that occurs strictly after a specified time
+                (although the comparison array does not necessarily have to be time).
+            -->
+            <apply><eq/>
+                <ci>after</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>index</ci></bvar>
+                    <bvar><ci>test_value</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Test arguments -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply><ci>default_dim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                <ci>index</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
+                                <ci>test_value</ci>
+                            </apply>
+                        </apply>
+                        <!-- Compute result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                <ci>array</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                        <lambda>
+                                            <bvar><ci>idx_value</ci></bvar>
+                                            <apply><gt/>
+                                                <ci>idx_value</ci>
+                                                <ci>test_value</ci>
+                                            </apply>
+                                        </lambda>
+                                        <ci>index</ci>
+                                    </apply>
+                                </apply>
+                                <ci>dim</ci>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
             
             <!-- Remove the given dimension from an array, taking a slice at the 0th entry -->
             <apply><eq/>
@@ -640,5 +710,5 @@
                 </lambda>
             </apply>
         </apply>
-    </post-processing>
+    </library>
 </protocol>

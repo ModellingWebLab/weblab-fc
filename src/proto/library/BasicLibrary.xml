@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
-    <post-processing>
+    <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             
@@ -1171,5 +1171,5 @@
             </apply>
             
         </apply>
-    </post-processing>
+    </library>
 </protocol>
