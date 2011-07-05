@@ -1,0 +1,220 @@
+<?xml version="1.0"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <library>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <!-- TODO: We want this to be a protocol input, with default value. -->
+            <apply><eq/>
+                <ci>s1_interval</ci>
+                <cn>1000</cn>
+            </apply>
+        </apply>    
+    </library>
+    
+    <simulations>
+        <!-- Do a pre-run to get the model to steady-state with the desired S1 stimulus -->
+        <timecourseSimulation>
+            <vectorStepper name="time" units="ms">
+                <value>0</value>
+                <value>10000</value>  <!-- TODO: Allow expressions here -->
+            </vectorStepper>
+            <modifiers>
+                <!-- Set stimulus period to S1 interval, offset 1ms -->                    
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_period</name><!-- ms -->
+                    <value>
+                        <ci xmlns="http://www.w3.org/1998/Math/MathML">s1_interval</ci>
+                    </value>
+                </setVariable>                 
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_offset</name><!-- ms -->
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">1</cn>
+                    </value>
+                </setVariable>
+                <saveState>
+                    <when>AT_END</when>
+                    <name>initial_state</name>
+                </saveState>
+            </modifiers>
+        </timecourseSimulation>
+        
+        <!-- Now do the S1-S2 part, i.e. two stimuli -->
+        <nestedSimulation>
+            <vectorStepper name="s2_interval" units="dimensionless">
+                <value>1000</value>
+                <value>900</value>
+                <value>800</value>
+                <value>700</value>
+                <value>600</value>
+                <value>500</value>
+            </vectorStepper>
+            <modifiers>
+                <resetModifier>
+                    <when>EVERY_LOOP</when>
+                    <state>initial_state</state>
+                </resetModifier>
+                <!-- Set the gap between stimuli to the S2 interval -->
+                <setVariable>
+                    <when>EVERY_LOOP</when>
+                    <name>membrane_stimulus_current_period</name>
+                    <value>
+                        <ci xmlns="http://www.w3.org/1998/Math/MathML">s2_interval</ci>
+                    </value>
+                </setVariable>
+                <!-- And only do one S2 stimulus -->
+                <setVariable>
+                    <when>EVERY_LOOP</when>
+                    <name>membrane_stimulus_current_end</name>
+                    <value>
+                        <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                            <ci>s2_interval</ci>
+                            <cn>1.5</cn>
+                        </apply>
+                    </value>
+                </setVariable>
+            </modifiers>
+            <timecourseSimulation>
+                <uniformStepper name="time" units="ms">
+                    <start>0</start>
+                    <stop>2000</stop>
+                    <step>1</step>
+                </uniformStepper>
+                <modifiers/>
+            </timecourseSimulation>
+        </nestedSimulation>
+    </simulations>
+    
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            
+            <!-- Test that expected model outputs exist -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>time</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>membrane_voltage</ci>
+                </apply>
+            </apply>
+            
+            <!-- Compute APD90 -->
+            <apply><eq/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                    <ci>raw_APD90</ci>
+                    <ci>raw_DI</ci>
+                </apply>
+                <apply><ci>apd</ci>
+                    <ci>membrane_voltage</ci>
+                    <ci>time</ci>
+                    <cn>90</cn>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            
+            <!-- Just consider the first DI and the second AP to be of interest -->
+            <apply><eq/>
+                <ci>first_raw_DI</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                    <ci>raw_DI</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>1</cn><cn>0</cn><cn>0</cn><cn>0</cn>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>
+                </apply>
+            </apply>
+            <apply><eq/>
+                <ci>second_raw_APD</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                    <ci>raw_APD90</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>1</cn><cn>1</cn><cn>0</cn><cn>1</cn>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>
+                </apply>
+            </apply>
+            
+            <!--
+                Remove entries for negative DIs from both the DI and APD arrays.
+                This removes entries where the S2 stimulus was applied before repolarisation from the last S1 pulse.
+                Also ignore entries with DI <= 19ms (which tend to skew the graph scales).
+            -->
+            <apply><eq/>
+                <ci>min_DI</ci>
+                <cn>19</cn>
+            </apply>
+            <apply><eq/>
+                <ci>DI</ci>
+                <apply><ci>after</ci>
+                    <ci>first_raw_DI</ci>
+                    <ci>first_raw_DI</ci>
+                    <ci>min_DI</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            <apply><eq/>
+                <ci>APD90</ci>
+                <apply><ci>after</ci>
+                    <ci>second_raw_APD</ci>
+                    <ci>first_raw_DI</ci>
+                    <ci>min_DI</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+
+            <!-- Calculate slope information -->
+            <apply><eq/>
+                <ci>S1S2_slope</ci>
+                <apply><ci>grad</ci>
+                    <ci>DI</ci>
+                    <ci>APD90</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            <apply><eq/>
+                <ci>max_S1S2_slope</ci>
+                <apply><ci>max</ci>
+                    <ci>S1S2_slope</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+        </apply>
+    </post-processing>
+    
+    <outputVariables>
+        <name>raw_APD90</name>
+        <name>raw_DI</name>
+        <name>APD90</name>
+        <name>DI</name>
+        <name>S1S2_slope</name>
+        <name>max_S1S2_slope</name>
+    </outputVariables>
+</protocol>
