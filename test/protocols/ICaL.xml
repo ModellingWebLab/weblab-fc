@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <library>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <!-- TODO: We want some of these to be protocol inputs, with default values. -->
+            <apply><eq/>
+                <ci>holding_potential</ci>
+                <cn>-50.0</cn>
+            </apply>
+            <apply><eq/>
+                <ci>default_Cao</ci>
+                <ci>extracellular_calcium_concentration</ci>
+            </apply>
+        </apply>    
+    </library>
+    
+    <simulations>
+        <!-- Do a pre-run to get the model to steady-state for the holding potential -->
+        <timecourseSimulation>
+            <vectorStepper name="time" units="ms">
+                <value>0</value>
+                <value>10000</value>
+            </vectorStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_voltage</name>
+                    <value>
+                        <ci xmlns="http://www.w3.org/1998/Math/MathML">holding_potential</ci>
+                    </value>
+                </setVariable>
+                <saveState>
+                    <when>AT_END</when>
+                    <name>holding_state</name>
+                </saveState>
+            </modifiers>
+        </timecourseSimulation>
+        
+        <!-- Now do the IV curve generation for each Cao -->
+        <nestedSimulation>
+            <vectorStepper name="step_calcium_ratio" units="dimensionless">
+                <value>0.5</value>
+                <value>1.0</value>
+                <value>1.5</value>
+            </vectorStepper>
+            <modifiers>
+                <!-- Set the external calcium concentration -->
+                <setVariable>
+                    <when>EVERY_LOOP</when>
+                    <name>extracellular_calcium_concentration</name>
+                    <value>
+                        <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                            <ci>step_calcium_ratio</ci>
+                            <ci>default_Cao</ci>
+                        </apply>
+                    </value>
+                </setVariable>
+            </modifiers>
+            <nestedSimulation>
+                <vectorStepper name="step_voltage" units="mV">
+                    <value>-45.01</value>
+                    <value>-40.01</value>
+                    <value>-35.01</value>
+                    <value>-30.01</value>
+                    <value>-25.01</value>
+                    <value>-20.01</value>
+                    <value>-15.01</value>
+                    <value>-10.01</value>
+                    <value>-5.01</value>
+                    <value>-0.01</value>
+                    <value>5.01</value>
+                    <value>10.01</value>
+                    <value>15.01</value>
+                    <value>20.01</value>
+                    <value>25.01</value>
+                    <value>30.01</value>
+                    <value>35.01</value>
+                    <value>40.01</value>
+                    <value>45.01</value>
+                    <value>50.01</value>
+                    <value>55.01</value>
+                    <value>60.01</value>
+                    <value>65.01</value>
+                    <value>70.01</value>
+                    <value>75.01</value>
+                    <value>79.99</value>
+                </vectorStepper>
+                <modifiers>
+                    <!-- Reset the model to holding potential -->
+                    <resetModifier>
+                        <when>EVERY_LOOP</when>
+                        <state>holding_state</state>
+                    </resetModifier>                    
+                    <setVariable>
+                        <when>EVERY_LOOP</when>
+                        <name>membrane_voltage</name>
+                        <value>
+                            <ci xmlns="http://www.w3.org/1998/Math/MathML">holding_potential</ci>
+                        </value>
+                    </setVariable>
+                </modifiers>
+                <timecourseSimulation>
+                    <uniformStepper name="time" units="ms">
+                        <start>-10.0</start>
+                        <stop>500.0</stop>
+                        <step>0.05</step>
+                    </uniformStepper>
+                    <modifiers>
+                        <setVariable>
+                            <when>EVERY_LOOP</when>
+                            <name>membrane_voltage</name>
+                            <value>
+                                <piecewise xmlns="http://www.w3.org/1998/Math/MathML">
+                                    <piece>
+                                        <ci>step_voltage</ci>
+                                        <apply><lt/>
+                                            <apply><abs/>
+                                                <apply><minus/>
+                                                    <ci>time</ci>
+                                                    <cn>0</cn>
+                                                </apply>
+                                            </apply>
+                                            <cn>1e-6</cn>
+                                        </apply>
+                                    </piece>
+                                    <otherwise>
+                                        <ci>membrane_voltage</ci>
+                                    </otherwise>
+                                </piecewise>
+                            </value>
+                        </setVariable>
+                    </modifiers>
+                </timecourseSimulation>
+            </nestedSimulation>
+        </nestedSimulation>
+    </simulations>
+    
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            
+            <!-- Test that expected model outputs exist -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>time</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>membrane_voltage</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>membrane_L_type_calcium_current</ci>
+                </apply>
+            </apply>
+            
+            <!-- Only examine the "tail currents" after t=0 -->
+            <apply><eq/>
+                <ci>membrane_L_type_calcium_tail_current</ci>
+                <apply><ci>after</ci>
+                    <ci>membrane_L_type_calcium_current</ci>
+                    <ci>time</ci>
+                    <cn>0</cn>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            
+            <!-- Get the minimum tail current (this has the largest magnitude) as a 2d array -->
+            <apply><eq/>
+                <ci>min_LCC</ci>
+                <apply><ci>remove_dim</ci>
+                    <apply><ci>min</ci>
+                        <ci>membrane_L_type_calcium_tail_current</ci>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+            <!-- We'll plot against the final V, which is equal to the step voltage -->
+            <apply><eq/>
+                <ci>final_membrane_voltage</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                    <ci>membrane_voltage</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>2</cn><cn>-1</cn><cn>0</cn><cn>-1</cn>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>                    
+                </apply>
+            </apply>
+        </apply>
+    </post-processing>
+    
+    <outputVariables>
+        <name>membrane_L_type_calcium_tail_current</name>
+        <name>min_LCC</name>
+        <name>final_membrane_voltage</name>
+    </outputVariables>
+</protocol>
