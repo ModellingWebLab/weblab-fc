@@ -3,10 +3,14 @@
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-            <!-- TODO: We want this to be a protocol input, with default value. -->
+            <!-- TODO: We want these to be protocol inputs, with default values. -->
             <apply><eq/>
                 <ci>s1_interval</ci>
                 <cn>1000</cn>
+            </apply>
+            <apply><eq/>
+                <ci>steady_state_beats</ci>
+                <cn>10</cn>
             </apply>
         </apply>    
     </library>
@@ -16,7 +20,10 @@
         <timecourseSimulation>
             <vectorStepper name="time" units="ms">
                 <value>0</value>
-                <value>10000</value>  <!-- TODO: Allow expressions here -->
+                <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                    <ci>s1_interval</ci>
+                    <ci>steady_state_beats</ci>
+                </apply>
             </vectorStepper>
             <modifiers>
                 <!-- Set stimulus period to S1 interval, offset 1ms -->                    
