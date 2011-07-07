@@ -1,5 +1,14 @@
 <?xml version="1.0"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <library>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <apply><eq/>
+                <ci>bcl</ci>
+                <cn>600.0</cn>
+            </apply>
+        </apply>
+    </library>
     <simulations>
         <nestedSimulation>
             <vectorStepper name="run_outer" units="dimensionless">
@@ -40,7 +49,7 @@
                     <value>
                         <!-- Let's prove we can access the stepper -->
                         <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
-                            <cn>600.0</cn>
+                            <ci>bcl</ci>
                             <apply><times/>
                                 <ci>run_outer</ci>
                                 <cn>0</cn>
@@ -62,7 +71,7 @@
                         <name>membrane_stimulus_current_period</name><!-- ms -->
                         <value>
                             <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
-                                <cn>600.0</cn>
+                                <ci>bcl</ci>
                                 <apply><times/>
                                     <ci>run_outer</ci>
                                     <cn>0</cn>
@@ -74,7 +83,12 @@
                 <timecourseSimulation>
                     <uniformStepper name="time" units="ms">
                         <start>0</start>
-                        <stop>1200</stop>
+                        <stop>
+                            <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                                <ci>bcl</ci>
+                                <cn>2</cn>
+                            </apply>
+                        </stop>
                         <step>1</step>
                     </uniformStepper>
                     <modifiers>
