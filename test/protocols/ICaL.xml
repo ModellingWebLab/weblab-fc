@@ -1,13 +1,24 @@
 <?xml version="1.0"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
-    <library>
+    <!-- Declare protocol inputs with default values -->
+    <inputs>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-            <!-- TODO: We want some of these to be protocol inputs, with default values. -->
             <apply><eq/>
                 <ci>holding_potential</ci>
                 <cn>-50.0</cn>
             </apply>
+            <!-- How long to simulate for to get to steady state at the holding potential -->
+            <apply><eq/>
+                <ci>steady_state_time</ci>
+                <cn>10000</cn>
+            </apply>
+        </apply>
+    </inputs>
+    
+    <library>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             <apply><eq/>
                 <ci>default_Cao</ci>
                 <ci>extracellular_calcium_concentration</ci>
@@ -20,7 +31,7 @@
         <timecourseSimulation>
             <vectorStepper name="time" units="ms">
                 <value>0</value>
-                <value>10000</value>
+                <ci xmlns="http://www.w3.org/1998/Math/MathML">steady_state_time</ci>
             </vectorStepper>
             <modifiers>
                 <setVariable>

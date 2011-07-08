@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
-    <library>
+    <!-- Declare protocol inputs with default values -->
+    <inputs>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-            <!-- TODO: We want these to be protocol inputs, with default values. -->
             <apply><eq/>
                 <ci>s1_interval</ci>
                 <cn>1000</cn>
             </apply>
             <apply><eq/>
                 <ci>steady_state_beats</ci>
-                <cn>10</cn>
+                <cn>1000</cn>
             </apply>
         </apply>    
-    </library>
+    </inputs>
     
     <simulations>
         <!-- Do a pre-run to get the model to steady-state with the desired S1 stimulus -->
