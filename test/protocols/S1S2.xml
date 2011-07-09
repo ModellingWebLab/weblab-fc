@@ -12,6 +12,22 @@
                 <ci>steady_state_beats</ci>
                 <cn>1000</cn>
             </apply>
+            <apply><eq/>
+                <ci>timecourse_duration</ci>
+                <cn>2000</cn>
+            </apply>
+            <apply><eq/>
+                <ci>s2_intervals</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <cn>1000</cn>
+                    <cn>900</cn>
+                    <cn>800</cn>
+                    <cn>700</cn>
+                    <cn>600</cn>
+                    <cn>500</cn>
+                </apply>
+            </apply>
         </apply>    
     </inputs>
     
@@ -51,12 +67,7 @@
         <!-- Now do the S1-S2 part, i.e. two stimuli -->
         <nestedSimulation>
             <vectorStepper name="s2_interval" units="dimensionless">
-                <value>1000</value>
-                <value>900</value>
-                <value>800</value>
-                <value>700</value>
-                <value>600</value>
-                <value>500</value>
+                <ci xmlns="http://www.w3.org/1998/Math/MathML">s2_intervals</ci>
             </vectorStepper>
             <modifiers>
                 <resetModifier>
@@ -86,7 +97,7 @@
             <timecourseSimulation>
                 <uniformStepper name="time" units="ms">
                     <start>0</start>
-                    <stop>2000</stop>
+                    <stop><ci xmlns="http://www.w3.org/1998/Math/MathML">timecourse_duration</ci></stop>
                     <step>1</step>
                 </uniformStepper>
                 <modifiers/>
