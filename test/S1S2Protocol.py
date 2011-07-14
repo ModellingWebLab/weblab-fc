@@ -36,6 +36,8 @@ def apply_protocol(doc):
     V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
     t = doc.model.get_variable_by_oxmeta_name('time')
     
+    pending = []
+    
     def maybe_new_var(name, units, init):
         try:
             v = doc.model.get_variable_by_oxmeta_name(name)
@@ -46,37 +48,48 @@ def apply_protocol(doc):
             v.initial_value = init
         else:
             v = protocol.cellml_variable.create_new(doc.model, name, units.name, initial_value=init, id=name)
+            pending.append((v, name))
             p.inputs.add(v)
         return v
     new_var = lambda name, units, init: protocol.cellml_variable.create_new(doc.model, name, units, initial_value=init, id=name)
     new_apply = lambda op, args: protocol.mathml_apply.create_new(doc, op, args)
-    var = lambda v: v.component.name + u',' + v.name
-    pvar = lambda v: u'protocol,' + v.name
+    def vn(v):
+        if getattr(v, 'xml_parent', None):
+            return v.component.name + u',' + v.name
+        else:
+            return u'protocol,' + v.name
 
     ms = protocol.cellml_units.create_new(doc.model, u'ms', [{'units':'second', 'prefix':'milli'}])
+    p.inputs.add(ms)
     i_stim = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current')
     i_stim_amp = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current_amplitude')
     i_stim_duration = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current_duration')
     stim_end = maybe_new_var(u'membrane_stimulus_current_end', ms, u'100000000000')
     stim_offset = maybe_new_var(u'membrane_stimulus_current_offset', ms, u'10')
     stim_period = maybe_new_var(u'membrane_stimulus_current_period', ms, u'1000')
-    start = new_apply('geq', [var(t), pvar(stim_offset)])
-    stop = new_apply('leq', [var(t), pvar(stim_end)])
+    start = new_apply('geq', [vn(t), vn(stim_offset)])
+    stop = new_apply('leq', [vn(t), vn(stim_end)])
     during = new_apply('leq',
                        [new_apply('minus',
-                                  [new_apply('minus', [var(t), pvar(stim_offset)]),
+                                  [new_apply('minus', [vn(t), vn(stim_offset)]),
                                    new_apply('times',
                                              [new_apply('floor',
                                                         [new_apply('divide',
-                                                                   [new_apply('minus', [var(t), pvar(stim_offset)]),
-                                                                    pvar(stim_period)])]),
-                                              pvar(stim_period)])]),
-                        var(i_stim_duration)])
+                                                                   [new_apply('minus', [vn(t), vn(stim_offset)]),
+                                                                    vn(stim_period)])]),
+                                              vn(stim_period)])]),
+                        vn(i_stim_duration)])
     cond = new_apply(u'and', [start, stop, during])
-    case = var(i_stim_amp)
+    if i_stim_amp.get_value() < 0:
+        case = protocol.mathml_ci.create_new(doc, vn(i_stim_amp))
+    else:
+        case = new_apply('minus', [vn(i_stim_amp)])
     otherwise = protocol.mathml_cn.create_new(doc, u'0', i_stim_amp.units)
-    i_stim_defn = protocol.mathml_piecewise.create_new(doc, [(case, cond)], otherwise)
+    i_stim_defn = new_apply(u'eq', [vn(i_stim), protocol.mathml_piecewise.create_new(doc, [(case, cond)], otherwise)])
 
     p.outputs = [V, t]
     p.inputs.add(i_stim_defn)
     p.modify_model()
+
+    for v, name in pending:
+        v.set_oxmeta_name(name)

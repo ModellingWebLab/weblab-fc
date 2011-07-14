@@ -14,7 +14,7 @@
             </apply>
             <apply><eq/>
                 <ci>timecourse_duration</ci>
-                <cn>2000</cn>
+                <cn>3000</cn>
             </apply>
             <apply><eq/>
                 <ci>s2_intervals</ci>
