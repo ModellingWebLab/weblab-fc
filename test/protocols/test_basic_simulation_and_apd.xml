@@ -254,7 +254,8 @@
     </post-processing>
 
     <outputVariables>
-        <name>apd90</name>
-        <name>di</name>
+        <model name="membrane_voltage"/>
+        <postprocessed name="apd90" units="ms"/>
+        <postprocessed name="di" units="ms" description="Diastolic interval"/>
     </outputVariables>
 </protocol>

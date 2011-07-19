@@ -219,8 +219,12 @@
     </post-processing>
     
     <outputVariables>
-        <name>membrane_L_type_calcium_tail_current</name>
-        <name>min_LCC</name>
-        <name>final_membrane_voltage</name>
+        <model name="extracellular_calcium_concentration" description="Extracellular calcium concentration"/>
+        <model name="membrane_L_type_calcium_current" description="L-type calcium current"/>
+        <model name="membrane_voltage" description="Transmembrane potential"/>
+        <postprocessed name="membrane_L_type_calcium_tail_current" units="uA/cm^2"
+            description="I_Ca_L after test potential applied"/>
+        <postprocessed name="min_LCC" description="Minimum current" units="uA/cm^2"/>
+        <postprocessed name="final_membrane_voltage" units="mV" description="Test potential"/>
     </outputVariables>
 </protocol>

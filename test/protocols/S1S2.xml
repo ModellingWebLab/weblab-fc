@@ -234,11 +234,12 @@
     </post-processing>
     
     <outputVariables>
-        <name>raw_APD90</name>
-        <name>raw_DI</name>
-        <name>APD90</name>
-        <name>DI</name>
-        <name>S1S2_slope</name>
-        <name>max_S1S2_slope</name>
+        <model name="membrane_voltage" description="Transmembrane potential"/>
+        <postprocessed name="raw_APD90" units="ms"/>
+        <postprocessed name="raw_DI" units="ms"/>
+        <postprocessed name="APD90" units="ms" description="Action Potential Duration (at 90%)"/>
+        <postprocessed name="DI" units="ms" description="Diastolic Interval"/>
+        <postprocessed name="S1S2_slope" units="dimensionless" description="S1-S2 curve gradient"/>
+        <postprocessed name="max_S1S2_slope" units="dimensionless" description="Maximum gradient of S1-S2 curve"/>
     </outputVariables>
 </protocol>
