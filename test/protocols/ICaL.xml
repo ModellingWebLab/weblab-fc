@@ -227,4 +227,12 @@
         <postprocessed name="min_LCC" description="Minimum current" units="uA/cm^2"/>
         <postprocessed name="final_membrane_voltage" units="mV" description="Test potential"/>
     </outputVariables>
+    
+    <plots>
+        <plot>
+            <title>Current-voltage relationship</title>
+            <x>final_membrane_voltage</x>
+            <y>min_LCC</y>
+        </plot>
+    </plots>
 </protocol>

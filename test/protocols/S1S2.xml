@@ -242,4 +242,16 @@
         <postprocessed name="S1S2_slope" units="dimensionless" description="S1-S2 curve gradient"/>
         <postprocessed name="max_S1S2_slope" units="dimensionless" description="Maximum gradient of S1-S2 curve"/>
     </outputVariables>
+    
+    <plots>
+        <plot>
+            <title>S1-S2 curve</title>
+            <x>DI</x>
+            <y>APD90</y>
+        </plot>
+        <plot>
+            <title>Transmembrane potential traces</title>
+            <data>membrane_voltage</data>
+        </plot>
+    </plots>
 </protocol>

@@ -258,4 +258,16 @@
         <postprocessed name="apd90" units="ms"/>
         <postprocessed name="di" units="ms" description="Diastolic interval"/>
     </outputVariables>
+    
+    <plots>
+        <plot>
+            <title>Pretend S1-S2 curve</title>
+            <x>di</x>
+            <y>apd90</y>
+        </plot>
+        <plot>
+            <title>Transmembrane potential traces</title>
+            <data>membrane_voltage</data>
+        </plot>
+    </plots>
 </protocol>
