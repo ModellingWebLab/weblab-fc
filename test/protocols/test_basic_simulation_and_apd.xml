@@ -198,10 +198,6 @@
                 <apply><ci>apd</ci>
                     <ci>fast_sodium_current__V</ci>
                     <ci>time</ci>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
             <apply>
