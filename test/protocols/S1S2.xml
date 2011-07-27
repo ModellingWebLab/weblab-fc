@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
     <!-- Declare protocol inputs with default values -->
     <inputs>
@@ -141,10 +142,10 @@ for v, name in pending:
                 <ci xmlns="http://www.w3.org/1998/Math/MathML">s2_intervals</ci>
             </vectorStepper>
             <modifiers>
-                <resetModifier>
+                <resetState>
                     <when>EVERY_LOOP</when>
                     <state>initial_state</state>
-                </resetModifier>
+                </resetState>
                 <!-- Set the gap between stimuli to the S2 interval -->
                 <setVariable>
                     <when>EVERY_LOOP</when>

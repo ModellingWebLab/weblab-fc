@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-model href="../parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
 <!--
     Library of routines useful for post-processing cardiac simulations.
 -->

@@ -1,0 +1,213 @@
+# Basic RELAX NG schema for the draft protocol XML format
+
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace mathml = "http://www.w3.org/1998/Math/MathML"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+
+start = proto.protocol
+
+ident = text
+
+proto.protocol = element proto:protocol {
+    proto.inputs?,
+    proto.modelModification?,
+    proto.library?,
+    proto.simulations?,
+    proto.post-processing?,
+    proto.outputVariables?,
+    proto.plots?
+    }
+
+proto.inputs = element proto:inputs { StatementList }
+
+proto.modelModification = element proto:modelModification { text }
+
+proto.library = element proto:library { StatementList }
+
+proto.simulations = element proto:simulations { Simulation+ }
+Simulation = ( proto.timecourseSimulation | proto.nestedSimulation )
+
+proto.post-processing = element proto:post-processing { StatementList }
+
+proto.outputVariables = element proto:outputVariables {
+    ( proto.model | proto.postprocessed )+
+    }
+
+proto.model = element proto:model { OutputVariableDefinition }
+proto.postprocessed = element proto:postprocessed {
+    OutputVariableDefinition,
+    attribute units { text }
+    }
+OutputVariableDefinition =
+    attribute description { text }?,
+    attribute name { ident }
+
+proto.plots = element proto:plots { proto.plot+ }
+proto.plot = element proto:plot {
+    element proto:title { text },
+    ( element proto:data { ident }
+    | ( element proto:x { ident },
+        element proto:y { ident }
+       )
+    )
+    }
+
+proto.timecourseSimulation = element proto:timecourseSimulation { BasicSimulation }
+
+proto.nestedSimulation = element proto:nestedSimulation {
+    BasicSimulation,
+    Simulation
+    }
+
+BasicSimulation =
+    Stepper,
+    proto.modifiers
+
+Stepper = proto.vectorStepper | proto.uniformStepper
+
+proto.vectorStepper = element proto:vectorStepper {
+    StepperAttributes,
+    ( Expression | proto.value )+
+    }
+
+proto.uniformStepper = element proto:uniformStepper {
+    StepperAttributes,
+    element proto:start { NumberOrExpression },
+    element proto:stop { NumberOrExpression },
+    element proto:step { NumberOrExpression }
+    }
+
+StepperAttributes =
+    attribute name { ident },
+    attribute units { text }
+
+NumberOrExpression = Expression | xsd:double
+
+proto.modifiers = element proto:modifiers { Modifier* }
+
+Modifier = proto.resetState | proto.setVariable | proto.saveState
+
+proto.resetState = element proto:resetState {
+    proto.when,
+    element proto:state { ident }?
+    }
+
+proto.saveState = element proto:saveState {
+    proto.when,
+    proto.name
+    }
+
+proto.setVariable = element proto:setVariable {
+    proto.when,
+    proto.name,
+    proto.value
+    }
+
+proto.when = element proto:when { "AT_START_ONLY" | "EVERY_LOOP" | "AT_END" }
+proto.name = element proto:name { ident }
+proto.value = element proto:value { NumberOrExpression }
+
+Expression = mathml.piecewise | mathml.apply | mathml.lambda | ctoken
+
+StatementList = element mathml:apply { attlist-mathml.apply, StatementListCsymbol, Content+ }
+StatementListCsymbol = element mathml:csymbol {
+    attribute definitionURL {
+        "https://chaste.cs.ox.ac.uk/nss/protocol/statementList"
+    } }
+
+CsymbolNames =
+      "https://chaste.cs.ox.ac.uk/nss/protocol/statementList"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/assert"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/return"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/newArray"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/view"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/index"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/find"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/map"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/fold"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/tuple"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/string"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"
+    | "https://chaste.cs.ox.ac.uk/nss/protocol/null"
+
+AccessorCsymbolContent =
+    attribute definitionURL { "https://chaste.cs.ox.ac.uk/nss/protocol/accessor" },
+    ( "IS_SIMPLE_VALUE" | "IS_ARRAY" | "IS_STRING" | "IS_FUNCTION" | "IS_TUPLE" | "IS_NULL" | "IS_DEFAULT"
+    | "NUM_DIMS" | "NUM_ELEMENTS" | "SHAPE" )
+
+WrapCsymbolContent =
+    attribute definitionURL { xsd:anyURI { pattern = "https://chaste.cs.ox.ac.uk/nss/protocol/wrap/\d+" } },
+    ident
+
+StringCsymbolContent =
+    attribute definitionURL { "https://chaste.cs.ox.ac.uk/nss/protocol/string" },
+    text
+
+include "../../../../../python/pycml/mathml2.rnc" {
+    # We can be more specific about the definitionURL on our csymbols
+    attlist-mathml.csymbol = MATHML.Common.attrib, att-encoding, att-type,
+        attribute definitionURL { CsymbolNames }
+    mathml.csymbol = element mathml:csymbol {
+        attlist-mathml.csymbol | AccessorCsymbolContent | WrapCsymbolContent | StringCsymbolContent
+        }
+
+    # Restrict the attribute list for math elements, since they're not top-level.
+    attlist-mathml.math = MATHML.Common.attrib
+
+    # Presentation markup is NOT allowed except within annotation-xml.
+    # However, that element may contain any XML, so we can just define
+    # the presentation elements to not exist :)
+    PresInCont = empty
+    
+    # We don't want to allow empty expressions
+    ContentExpression = Content+
+
+    # Restrict what is allowable "any XML" so ID attrs don't conflict
+    any =
+        ( element mathml:* {
+             attribute * - ( id | xref ) { text }*,
+             any
+          }
+        | text)*
+
+    # Check numbers of operands using co-occurrence constraints
+    mathml.apply =
+        element mathml:apply { attlist-mathml.apply, ApplyContentExpression }
+
+    # I think some operators are wrongly classified in the MathML schema
+    # Lets be more specific about the 'misc' operators
+    copmisc = empty
+}
+    # Extra unary operators that were misc.
+    cop1ary |= mathml.root
+            | mathml.log
+            | mathml.minus
+            | cseqop
+            | cstatopmoment
+            | clogicopquant
+    # Be more specific for calculus operators
+    ccalcop1ary |= mathml.int
+                | mathml.diff
+                | mathml.partialdiff
+                | mathml.divergence
+                | mathml.grad
+                | mathml.curl
+                | mathml.laplacian
+    ccalcop2ary = mathml.partialdiff
+  
+    # Extra binary operators that were misc.
+    cop2ary |= ccalcop2ary | mathml.minus
+
+    # Restrict number of operands depending on the operator
+    c_operand = ctoken | c0ary | cconstructor | cspecial | cother
+    c_not_oper = cquantifier | csemantics
+
+    ApplyContentExpression = (
+        (cop1ary, c_operand) & c_not_oper*
+      ) | (
+        ((crel2ary | cop2ary), c_operand, c_operand) & c_not_oper*
+      ) | (
+        ((crelnary | copnary | mathml.csymbol), c_operand+) & c_not_oper*
+      ) | (
+        ((mathml.lambda | mathml.ci), c_operand*) & c_not_oper*
+      )

@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
@@ -92,10 +93,10 @@
                         <step>1</step>
                     </uniformStepper>
                     <modifiers>
-                        <resetModifier>
+                        <resetState>
                             <when>AT_START_ONLY</when>
                             <state>initial_state</state>
-                        </resetModifier>
+                        </resetState>
                         <saveState>
                             <when>AT_END</when>
                             <name>final_state</name>
@@ -112,9 +113,9 @@
                 <step>1</step>
             </uniformStepper>
             <modifiers>
-                <resetModifier>
+                <resetState>
                     <when>EVERY_LOOP</when>
-                </resetModifier>
+                </resetState>
             </modifiers>
             <timecourseSimulation>
                 <uniformStepper name="time" units="ms">
