@@ -6,8 +6,10 @@ namespace cellml = "http://www.cellml.org/cellml/1.0#"
 
 start = proto.protocol
 
+# Variable names within protocols - we don't restrict these yet
 ident = text
 
+# The root element
 proto.protocol = element proto:protocol {
     proto.inputs?,
     proto.modelModification?,
@@ -18,58 +20,87 @@ proto.protocol = element proto:protocol {
     proto.plots?
     }
 
+# Specifies inputs to the protocol.  Once protocols can import others
+# there will be an override feature for these; for now they can only
+# be set from the C++ code.
 proto.inputs = element proto:inputs { StatementList }
 
+# Specifies model changes and outputs.  Currently contains embedded Python code!
 proto.modelModification = element proto:modelModification { text }
 
+# A library of routines and definitions for use in the rest of the protocol.
 proto.library = element proto:library { StatementList }
 
+# The simulations to run on the model.  You can have a sequence of simulations,
+# but only the outputs from the last are currently available.
 proto.simulations = element proto:simulations { Simulation+ }
+
+# A simulations may be a simple timecourse, or nest another simulation.
 Simulation = ( proto.timecourseSimulation | proto.nestedSimulation )
 
+# Post-processing consists of a list of statements in the augmented MathML language.
 proto.post-processing = element proto:post-processing { StatementList }
 
+# This element specifies the variables (either from the model or post-processing)
+# which should be considered as the protocol output, and will be saved to file.
 proto.outputVariables = element proto:outputVariables {
     ( proto.model | proto.postprocessed )+
     }
 
+# Specifies a model output as a protocol output.
 proto.model = element proto:model { OutputVariableDefinition }
+# Specifies a post-processing variable as a protocol output.
+# In this case the units must also be given explicitly.
 proto.postprocessed = element proto:postprocessed {
     OutputVariableDefinition,
     attribute units { text }
     }
+# Output variable specifications contain the variable name, and optionally a
+# more friendly human-readable description (suitable for use on graph axes etc.).
 OutputVariableDefinition =
     attribute description { text }?,
     attribute name { ident }
 
+# Specify what to plot by default for this protocol.
+# The first plot listed should be considered as the primary output of interest.
 proto.plots = element proto:plots { proto.plot+ }
+# Each plot must have a title, and can either plot two 1d variables against each
+# other, or plot a single variable against the relevant stepper values.  In the
+# latter case if the variable has more than one dimension, then you get multiple
+# traces.
 proto.plot = element proto:plot {
     element proto:title { text },
-    ( element proto:data { ident }
-    | ( element proto:x { ident },
+    ( ( element proto:x { ident },
         element proto:y { ident }
-       )
+      )
+    | element proto:data { ident }
     )
     }
 
+# A timecourse simulation just needs the stepper to loop over, and any modifiers to apply.
 proto.timecourseSimulation = element proto:timecourseSimulation { BasicSimulation }
+BasicSimulation =
+    Stepper,
+    proto.modifiers
 
+# A nested simulation also needs to specify the simulation to run at each iteration round
+# its loop.
 proto.nestedSimulation = element proto:nestedSimulation {
     BasicSimulation,
     Simulation
     }
 
-BasicSimulation =
-    Stepper,
-    proto.modifiers
-
+# Two kinds of stepper are defined.
 Stepper = proto.vectorStepper | proto.uniformStepper
 
+# A vector stepper just gives a list of specific values to use.
+# It can reference expressions to provide these, either as single values, or as 1d arrays.
 proto.vectorStepper = element proto:vectorStepper {
     StepperAttributes,
     ( Expression | proto.value )+
     }
 
+# A uniform stepper gives a range of values to loop over with a fixed step size.
 proto.uniformStepper = element proto:uniformStepper {
     StepperAttributes,
     element proto:start { NumberOrExpression },
@@ -77,74 +108,105 @@ proto.uniformStepper = element proto:uniformStepper {
     element proto:step { NumberOrExpression }
     }
 
+# Common attributes to all kinds of stepper.
 StepperAttributes =
     attribute name { ident },
     attribute units { text }
 
+# Uniform stepper parameters can either be given as just numbers, or computed.
 NumberOrExpression = Expression | xsd:double
 
+# Each simulation may have zero or more modifiers...
 proto.modifiers = element proto:modifiers { Modifier* }
-
+# ...of which there are 3 kinds.
 Modifier = proto.resetState | proto.setVariable | proto.saveState
 
-proto.resetState = element proto:resetState {
-    proto.when,
-    element proto:state { ident }?
-    }
-
+# This 'modifier' saves the current model state for later reference with resetState.
 proto.saveState = element proto:saveState {
     proto.when,
     proto.name
     }
 
+# This modifier resets the model's state; either to a state saved using saveState,
+# or to the model's initial conditions if no state name is given.
+proto.resetState = element proto:resetState {
+    proto.when,
+    element proto:state { ident }?
+    }
+
+# This modifier sets the value of a variable in the model.
 proto.setVariable = element proto:setVariable {
     proto.when,
     proto.name,
     proto.value
     }
 
+# Modifiers can be applied either at the start of a stepper's loop, at each iteration,
+# or after all steps have been taken.
 proto.when = element proto:when { "AT_START_ONLY" | "EVERY_LOOP" | "AT_END" }
+
+# This either gives state name to use (in saveState) or references a model variable
+# using an ontology term (in setVariable).
 proto.name = element proto:name { ident }
+
+# A variable's value can be given either as just a number or as the result of an expression.
 proto.value = element proto:value { NumberOrExpression }
 
+# We restrict slightly what MathML is considered an 'expression'; the C++ code will do more
+# tests than given here on the internal structure.
 Expression = mathml.piecewise | mathml.apply | mathml.lambda | ctoken
 
-StatementList = element mathml:apply { attlist-mathml.apply, StatementListCsymbol, Content+ }
+# A 'statement list' is an apply of one of our cymbols that extend core MathML.  Each operand
+# is a 'statement' which must be an apply of either the assert or return csymbols, or of the
+# 'eq' MathML operator (representing assignment).  A return is only allowed within the context
+# of a function body.
+StatementList = element mathml:apply { attlist-mathml.apply, StatementListCsymbol, mathml.apply+ }
 StatementListCsymbol = element mathml:csymbol {
     attribute definitionURL {
         "https://chaste.cs.ox.ac.uk/nss/protocol/statementList"
     } }
 
+# These are most of the special csymbols defined in our language.  There are 3 others
+# defined below, which have special content within the element.  All of these should
+# appear on an empty csymbol element.
 CsymbolNames =
+    # Statements
       "https://chaste.cs.ox.ac.uk/nss/protocol/statementList"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/assert"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/return"
+    # Expressions
     | "https://chaste.cs.ox.ac.uk/nss/protocol/newArray"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/view"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/index"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/find"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/map"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/fold"
+    # Values / expressions wrapping values
     | "https://chaste.cs.ox.ac.uk/nss/protocol/tuple"
-    | "https://chaste.cs.ox.ac.uk/nss/protocol/string"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"
     | "https://chaste.cs.ox.ac.uk/nss/protocol/null"
 
+# The accessor csymbol encodes tests of certain properties of variables.
 AccessorCsymbolContent =
     attribute definitionURL { "https://chaste.cs.ox.ac.uk/nss/protocol/accessor" },
     ( "IS_SIMPLE_VALUE" | "IS_ARRAY" | "IS_STRING" | "IS_FUNCTION" | "IS_TUPLE" | "IS_NULL" | "IS_DEFAULT"
     | "NUM_DIMS" | "NUM_ELEMENTS" | "SHAPE" )
 
+# The wrap csymbols are syntactic sugar to turn a MathML operator into a lambda expression.
+# The number in the URL gives the number of operands, and the text content gives the operator name.
 WrapCsymbolContent =
     attribute definitionURL { xsd:anyURI { pattern = "https://chaste.cs.ox.ac.uk/nss/protocol/wrap/\d+" } },
     ident
 
+# This allows construction of string variables for use in array comprehensions.  The text
+# content gives the string value.
 StringCsymbolContent =
     attribute definitionURL { "https://chaste.cs.ox.ac.uk/nss/protocol/string" },
     text
 
+# We override or extent various aspects of the normal MathML schema. 
 include "../../../../../python/pycml/mathml2.rnc" {
-    # We can be more specific about the definitionURL on our csymbols
+    # We can be more specific about the definitionURL on our csymbols.
     attlist-mathml.csymbol = MATHML.Common.attrib, att-encoding, att-type,
         attribute definitionURL { CsymbolNames }
     mathml.csymbol = element mathml:csymbol {
@@ -159,10 +221,10 @@ include "../../../../../python/pycml/mathml2.rnc" {
     # the presentation elements to not exist :)
     PresInCont = empty
     
-    # We don't want to allow empty expressions
+    # We don't want to allow empty expressions.
     ContentExpression = Content+
 
-    # Restrict what is allowable "any XML" so ID attrs don't conflict
+    # Restrict what is allowable "any XML" so ID attrs don't conflict.
     any =
         ( element mathml:* {
              attribute * - ( id | xref ) { text }*,
@@ -170,12 +232,12 @@ include "../../../../../python/pycml/mathml2.rnc" {
           }
         | text)*
 
-    # Check numbers of operands using co-occurrence constraints
+    # Check numbers of operands using co-occurrence constraints.
     mathml.apply =
         element mathml:apply { attlist-mathml.apply, ApplyContentExpression }
 
     # I think some operators are wrongly classified in the MathML schema
-    # Lets be more specific about the 'misc' operators
+    # Lets be more specific about the 'misc' operators.
     copmisc = empty
 }
     # Extra unary operators that were misc.
@@ -185,7 +247,7 @@ include "../../../../../python/pycml/mathml2.rnc" {
             | cseqop
             | cstatopmoment
             | clogicopquant
-    # Be more specific for calculus operators
+    # Be more specific for calculus operators.
     ccalcop1ary |= mathml.int
                 | mathml.diff
                 | mathml.partialdiff
@@ -198,7 +260,7 @@ include "../../../../../python/pycml/mathml2.rnc" {
     # Extra binary operators that were misc.
     cop2ary |= ccalcop2ary | mathml.minus
 
-    # Restrict number of operands depending on the operator
+    # Restrict number of operands depending on the operator.
     c_operand = ctoken | c0ary | cconstructor | cspecial | cother
     c_not_oper = cquantifier | csemantics
 
