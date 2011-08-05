@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <!-- Declare protocol inputs with default values -->
+    <inputs>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <apply><eq/>
+                <ci>pacing_period</ci>
+                <cn>1000</cn>
+            </apply>
+            <apply><eq/>
+                <ci>steady_state_beats</ci>
+                <cn>1000</cn>
+            </apply>            
+        </apply>    
+    </inputs>
+    
+    <modelModification><![CDATA[
+doc._cml_config.options.convert_interfaces = True
+p = protocol.Protocol(doc.model, multi_stage=True)
+V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
+t = doc.model.get_variable_by_oxmeta_name('time')
+
+pending = []
+
+def maybe_new_var(name, units, init):
+    try:
+        v = doc.model.get_variable_by_oxmeta_name(name)
+    except:
+        v = None
+    if v:
+        v = p.specify_as_input(v, units)
+        v.initial_value = init
+    else:
+        v = protocol.cellml_variable.create_new(doc.model, name, units.name, initial_value=init, id=name)
+        pending.append((v, name))
+        p.inputs.add(v)
+    return v
+new_var = lambda name, units, init: protocol.cellml_variable.create_new(doc.model, name, units, initial_value=init, id=name)
+new_apply = lambda op, args: protocol.mathml_apply.create_new(doc, op, args)
+def vn(v):
+    if getattr(v, 'xml_parent', None):
+        return v.component.name + u',' + v.name
+    else:
+        return u'protocol,' + v.name
+
+ms = protocol.cellml_units.create_new(doc.model, u'ms', [{'units':'second', 'prefix':'milli'}])
+p.inputs.add(ms)
+i_stim = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current')
+i_stim_amp = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current_amplitude')
+i_stim_duration = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current_duration')
+stim_end = maybe_new_var(u'membrane_stimulus_current_end', ms, u'100000000000')
+stim_offset = maybe_new_var(u'membrane_stimulus_current_offset', ms, u'10')
+stim_period = maybe_new_var(u'membrane_stimulus_current_period', ms, u'1000')
+start = new_apply('geq', [vn(t), vn(stim_offset)])
+stop = new_apply('leq', [vn(t), vn(stim_end)])
+during = new_apply('leq',
+                   [new_apply('minus',
+                              [new_apply('minus', [vn(t), vn(stim_offset)]),
+                               new_apply('times',
+                                         [new_apply('floor',
+                                                    [new_apply('divide',
+                                                               [new_apply('minus', [vn(t), vn(stim_offset)]),
+                                                                vn(stim_period)])]),
+                                          vn(stim_period)])]),
+                    vn(i_stim_duration)])
+cond = new_apply(u'and', [start, stop, during])
+if i_stim_amp.get_value() < 0:
+    case = protocol.mathml_ci.create_new(doc, vn(i_stim_amp))
+else:
+    case = new_apply('minus', [vn(i_stim_amp)])
+otherwise = protocol.mathml_cn.create_new(doc, u'0', i_stim_amp.units)
+i_stim_defn = new_apply(u'eq', [vn(i_stim), protocol.mathml_piecewise.create_new(doc, [(case, cond)], otherwise)])
+
+p.outputs = [V, t]
+p.inputs.add(i_stim_defn)
+p.modify_model()
+
+for v, name in pending:
+    v.set_oxmeta_name(name)
+]]></modelModification>
+    
+    <simulations>
+        <!-- Do a pre-run to get the model to steady-state with the desired S1 stimulus -->
+        <timecourseSimulation>
+            <vectorStepper name="time" units="ms">
+                <value>0</value>
+                <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                    <ci>pacing_period</ci>
+                    <ci>steady_state_beats</ci>
+                </apply>
+            </vectorStepper>
+            <modifiers>
+                <!-- Set stimulus period to S1 interval, offset 10ms -->                    
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_period</name><!-- ms -->
+                    <value>
+                        <ci xmlns="http://www.w3.org/1998/Math/MathML">pacing_period</ci>
+                    </value>
+                </setVariable>                 
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>membrane_stimulus_current_offset</name><!-- ms -->
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">10</cn>
+                    </value>
+                </setVariable>
+                <saveState>
+                    <when>AT_END</when>
+                    <name>initial_state</name>
+                </saveState>
+            </modifiers>
+        </timecourseSimulation>
+        
+        <!-- Now do the part when we will examine the last two action potentials, i.e. two stimului -->
+        <timecourseSimulation>
+            <uniformStepper name="time" units="ms">
+                <start>0</start>
+                <stop>
+                <!-- As a workaround we run the model for two action potentials -->
+                <!-- \todo #1858 make this do a single action potential -->
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                        <ci>pacing_period</ci>
+                        <cn>2.0</cn>
+                    </apply>
+                </stop>                
+                <step>0.1</step> <!-- Get a good amount of detail for the APD calculation -->
+            </uniformStepper>
+	        <modifiers>
+	            <resetState> <!-- At the beginning of the final AP simulation load up the state variables from the long run to steady state -->
+	                <when>AT_START_ONLY</when>
+	                <name>initial_state</name>
+	            </resetState>
+			</modifiers>
+        </timecourseSimulation>
+    </simulations>
+    
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            
+            <!-- Test that expected model outputs exist -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>time</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>membrane_voltage</ci>
+                </apply>
+            </apply>
+            
+            <!-- Compute APD90 
+            <apply><eq/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                    <ci>raw_APD90</ci>
+                    <ci>raw_DI</ci>
+                </apply>
+                <apply><ci>apd</ci>
+                    <ci>membrane_voltage</ci>
+                    <ci>time</ci>
+                    <cn>90</cn>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            -->
+            
+           
+            <!-- Get the peak voltage 
+            <apply><eq/>
+                <ci>peak_voltage</ci>
+                <apply><ci>max</ci>
+                    <ci>membrane_voltage</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
+            -->
+            
+            <!-- Take the second action potential as the steady state APD
+            <apply><eq/>
+                <ci>apd90</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                    <ci>raw_APD90</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>1</cn><cn>1</cn><cn>0</cn><cn>1</cn>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>
+                </apply>
+            </apply>
+            -->
+            
+        </apply>
+    </post-processing>
+    
+    <outputVariables>
+        <model name="membrane_voltage" description="Transmembrane potential in milliVolts"/>
+        <model name="time" description="Time in milliseconds"/>       
+        
+        <!--
+        <postprocessed name="peak_voltage" units="mV"/>
+        <postprocessed name="raw_APD90" units="ms"/>
+        <postprocessed name="raw_DI" units="ms"/>
+        <postprocessed name="apd90" units="ms"/>
+        -->
+    </outputVariables>
+    
+    <plots>
+        <plot>
+            <title>Steady State Action Potential</title>
+            <x>time</x>
+            <y>membrane_voltage</y>
+        </plot>
+    </plots>
+</protocol>
