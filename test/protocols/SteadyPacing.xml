@@ -157,7 +157,7 @@ for v, name in pending:
                 </apply>
             </apply>
             
-            <!-- Compute APD90 
+            <!-- Compute APD90 -->
             <apply><eq/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
@@ -173,10 +173,8 @@ for v, name in pending:
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
-            -->
-            
            
-            <!-- Get the peak voltage 
+            <!-- Get the peak voltage -->
             <apply><eq/>
                 <ci>peak_voltage</ci>
                 <apply><ci>max</ci>
@@ -184,9 +182,8 @@ for v, name in pending:
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
-            -->
             
-            <!-- Take the second action potential as the steady state APD
+            <!-- Take the second action potential as the steady state APD -->
             <apply><eq/>
                 <ci>apd90</ci>
                 <apply>
@@ -205,7 +202,6 @@ for v, name in pending:
                     </apply>
                 </apply>
             </apply>
-            -->
             
         </apply>
     </post-processing>
@@ -214,12 +210,10 @@ for v, name in pending:
         <model name="membrane_voltage" description="Transmembrane potential in milliVolts"/>
         <model name="time" description="Time in milliseconds"/>       
         
-        <!--
         <postprocessed name="peak_voltage" units="mV"/>
         <postprocessed name="raw_APD90" units="ms"/>
         <postprocessed name="raw_DI" units="ms"/>
         <postprocessed name="apd90" units="ms"/>
-        -->
     </outputVariables>
     
     <plots>
