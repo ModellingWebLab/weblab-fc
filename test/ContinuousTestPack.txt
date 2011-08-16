@@ -6,5 +6,5 @@ TestNdArray.hpp
 TestProtocolParser.hpp
 TestS1S2Protocol.hpp
 TestSimpleProtocol.hpp
-TestSteadyStatePacingProtocol.hpp
+TestSteadyPacingProtocol.hpp
 TestSteppers.hpp
