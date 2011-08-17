@@ -55,6 +55,7 @@ def maybe_new_var(name, units, init):
         v = p.specify_as_input(v, units)
         v.initial_value = init
     else:
+        units = p.add_units(units)
         v = protocol.cellml_variable.create_new(doc.model, name, units.name, initial_value=init, id=name)
         pending.append((v, name))
         p.inputs.add(v)
