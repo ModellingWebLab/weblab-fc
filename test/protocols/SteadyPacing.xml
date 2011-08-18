@@ -168,9 +168,6 @@ for v, name in pending:
                     <ci>membrane_voltage</ci>
                     <ci>time</ci>
                     <cn>90</cn>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
            
@@ -179,7 +176,6 @@ for v, name in pending:
                 <ci>peak_voltage</ci>
                 <apply><ci>max</ci>
                     <ci>membrane_voltage</ci>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
             
@@ -191,14 +187,7 @@ for v, name in pending:
                     <ci>raw_APD90</ci>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                        <cn>1</cn><cn>1</cn><cn>0</cn><cn>1</cn>
-                    </apply>
-                    <apply>
-                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
-                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
-                        <cn>1</cn>
-                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>0</cn><cn>1</cn><cn>0</cn><cn>1</cn>
                     </apply>
                 </apply>
             </apply>
