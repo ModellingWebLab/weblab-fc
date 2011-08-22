@@ -39,28 +39,16 @@
     </inputs>
     
     <modelModification><![CDATA[
-doc._cml_config.options.convert_interfaces = True
 p = protocol.Protocol(doc.model, multi_stage=True)
-V = doc.model.get_variable_by_oxmeta_name('membrane_voltage')
-t = doc.model.get_variable_by_oxmeta_name('time')
 
-pending = []
+mV = protocol.cellml_units.create_new(doc.model, u'mV', [{'units':'volt', 'prefix':'milli'}])
+ms = protocol.cellml_units.create_new(doc.model, u'ms', [{'units':'second', 'prefix':'milli'}])
+
+p.specify_output_variable('membrane_voltage', mV)
+t = p.specify_output_variable('time', ms)
 
 def maybe_new_var(name, units, init):
-    try:
-        v = doc.model.get_variable_by_oxmeta_name(name)
-    except:
-        v = None
-    if v:
-        v = p.specify_as_input(v, units)
-        v.initial_value = init
-    else:
-        units = p.add_units(units)
-        v = protocol.cellml_variable.create_new(doc.model, name, units.name, initial_value=init, id=name)
-        pending.append((v, name))
-        p.inputs.add(v)
-    return v
-new_var = lambda name, units, init: protocol.cellml_variable.create_new(doc.model, name, units, initial_value=init, id=name)
+    return p.specify_input_variable(name, units, init)
 new_apply = lambda op, args: protocol.mathml_apply.create_new(doc, op, args)
 def vn(v):
     if getattr(v, 'xml_parent', None):
@@ -68,8 +56,6 @@ def vn(v):
     else:
         return u'protocol,' + v.name
 
-ms = protocol.cellml_units.create_new(doc.model, u'ms', [{'units':'second', 'prefix':'milli'}])
-p.inputs.add(ms)
 i_stim = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current')
 i_stim_amp = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current_amplitude')
 i_stim_duration = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current_duration')
@@ -96,12 +82,8 @@ else:
 otherwise = protocol.mathml_cn.create_new(doc, u'0', i_stim_amp.units)
 i_stim_defn = new_apply(u'eq', [vn(i_stim), protocol.mathml_piecewise.create_new(doc, [(case, cond)], otherwise)])
 
-p.outputs = [V, t]
 p.inputs.add(i_stim_defn)
 p.modify_model()
-
-for v, name in pending:
-    v.set_oxmeta_name(name)
 ]]></modelModification>
     
     <simulations>
