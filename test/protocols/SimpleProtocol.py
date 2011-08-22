@@ -42,3 +42,6 @@ def apply_protocol(doc):
     p.outputs = [V, t, mapped, param, derived]
     p.inputs = []
     p.modify_model()
+    # For the present, we don't want to avoid using Chaste's stimulus!
+    doc._cml_config.finalize_config()
+    doc._cml_config.find_current_vars()

@@ -63,18 +63,11 @@ LCC = p.specify_as_output(LCC, current_units)
 V = p.specify_as_input(V, V.get_units())
 Cao = p.specify_as_input(Cao, Cao.get_units())
 
-# Now a hack to stop translation complaining about missing currents
-i_stim = doc.model.get_variable_by_oxmeta_name('membrane_stimulus_current')
-i_stim_defn = protocol.mathml_apply.create_new(doc, u'eq', [i_stim.component.name + u',' + i_stim.name,
-                                                            (u'0', LCC.units)])
-doc._cml_config.options.use_i_ionic_regexp = True
-doc._cml_config.i_ionic_definitions = [doc._cml_config._create_var_def(LCC.component.name + u',' + LCC.name, u'name')]
-
 # Quick fix to get t units-converted
 doc._cml_config.options.convert_interfaces = True
 
-p.outputs.update([V, t, Cao, LCC, i_stim])
-p.inputs.update([i_stim_defn, chaste_cm, uF_per_cm2])
+p.outputs.update([V, t, Cao, LCC])
+p.inputs.update([chaste_cm, uF_per_cm2])
 p.modify_model()
 ]]></modelModification>
     
