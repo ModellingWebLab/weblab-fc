@@ -18,9 +18,10 @@
     </inputs>
     
     <modelModification><![CDATA[
-p = protocol.Protocol(doc.model, multi_stage=True)
+p = protocol.Protocol(doc.model, multi_stage=True,
+                      namespaces={'oxmeta': protocol.NSS['oxmeta']})
 
-# Units
+# Define units used by the protocol
 new_units = protocol.cellml_units.create_new
 mV = new_units(doc.model, 'mV', [{'units': 'volt', 'prefix': 'milli'}])
 ms = new_units(doc.model, 'ms', [{'units': 'second', 'prefix': 'milli'}])
@@ -45,23 +46,20 @@ p.specify_output_variable('extracellular_calcium_concentration')
 p.specify_output_variable('time', ms)
 
 # Define special units conversion for LCC
-chaste_cm = protocol.cellml_variable.create_new(doc.model, u'chaste_membrane_capacitance',
-                                                uF_per_cm2.name, initial_value=u'1')
-converter = p.get_units_converter()
-converter.add_special_conversion(A_per_F, current_units,
-                                 lambda expr: converter.times_rhs_by(expr, chaste_cm))
-converter.add_special_conversion(current_units, A_per_F,
-                                 lambda expr: converter.divide_rhs_by(expr, chaste_cm))
-try:
-    Cm = doc.model.get_variable_by_oxmeta_name('membrane_capacitance')
-    converter.add_special_conversion(microamps, current_units,
-            lambda expr: converter.times_rhs_by(converter.divide_rhs_by(expr, Cm), chaste_cm))
-    converter.add_special_conversion(current_units, microamps,
-            lambda expr: converter.divide_rhs_by(converter.times_rhs_by(expr, Cm), chaste_cm))
-except:
-    pass
+chaste_cm = 'chaste_membrane_capacitance'
+model_cm = 'oxmeta:membrane_capacitance'
+p.declare_new_variable(chaste_cm, uF_per_cm2, 1)
+def rule(op_args):
+    bvar = u'rhs'
+    body = protocol.mathml_ci.create_new(doc, bvar)
+    for op, arg in op_args:
+        body = protocol.mathml_apply.create_new(doc, op, [body, arg])
+    return protocol.mathml_lambda.create_new(doc, [bvar], body)
+p.add_units_conversion_rule(A_per_F, current_units, rule([('times', chaste_cm)]))
+p.add_units_conversion_rule(current_units, A_per_F, rule([('divide', chaste_cm)]))
+p.add_units_conversion_rule(microamps, current_units, rule([('divide', model_cm), ('times', chaste_cm)]))
+p.add_units_conversion_rule(current_units, microamps, rule([('times', model_cm), ('divide', chaste_cm)]))
 
-p.inputs.update([chaste_cm, uF_per_cm2])
 p.modify_model()
 ]]></modelModification>
     
