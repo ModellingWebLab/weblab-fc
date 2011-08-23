@@ -38,12 +38,12 @@ A_per_F = new_units(doc.model, 'A_per_F',
                      {'units': 'farad', 'exponent': '-1'}])
 
 # Inputs & outputs
-p.specify_input_variable('membrane_voltage')
-p.specify_input_variable('extracellular_calcium_concentration')
-p.specify_output_variable('membrane_L_type_calcium_current', current_units)
-p.specify_output_variable('membrane_voltage')
-p.specify_output_variable('extracellular_calcium_concentration')
-p.specify_output_variable('time', ms)
+p.specify_input_variable('oxmeta:membrane_voltage')
+p.specify_input_variable('oxmeta:extracellular_calcium_concentration')
+p.specify_output_variable('oxmeta:membrane_L_type_calcium_current', current_units)
+p.specify_output_variable('oxmeta:membrane_voltage')
+p.specify_output_variable('oxmeta:extracellular_calcium_concentration')
+p.specify_output_variable('oxmeta:time', ms)
 
 # Define special units conversion for LCC
 chaste_cm = 'chaste_membrane_capacitance'
