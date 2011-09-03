@@ -12,8 +12,9 @@ ident = text
 # The root element
 proto.protocol = element proto:protocol {
     proto.inputs?,
-    proto.modelModification?,
     proto.library?,
+    proto.units?,
+    proto.modelInterface?,
     proto.simulations?,
     proto.post-processing?,
     proto.outputVariables?,
@@ -25,12 +26,39 @@ proto.protocol = element proto:protocol {
 # be set from the C++ code.
 proto.inputs = element proto:inputs { StatementList }
 
-# Specifies model changes and outputs.  Currently contains embedded Python code!
-proto.modelModification = element proto:modelModification { text }
-
 # A library of routines and definitions for use in the rest of the protocol.
 proto.library = element proto:library { StatementList }
 
+# Units declarations; unspecified, but uses CellML at present
+any-non-math = element * - mathml:* { any-non-math* } | attribute * { text } | text
+proto.units = element proto:units { any-non-math* }
+
+# Better XML definition of model interfacing
+proto.modelInterface = element proto:modelInterface {
+    proto.setIndependentVariableUnits?,
+    proto.specifyInputVariable*,
+    proto.specifyOutputVariable*,
+    proto.declareNewVariable*,
+    proto.addOrReplaceEquation*,
+    proto.unitsConversionRule*
+    }
+
+proto.setIndependentVariableUnits = element proto:setIndependentVariableUnits { unitsRef }
+proto.specifyInputVariable = element proto:specifyInputVariable { nameRef, unitsRef?, initialValue? }
+proto.specifyOutputVariable = element proto:specifyOutputVariable { nameRef, unitsRef? }
+proto.declareNewVariable = element proto:declareNewVariable { nameAttr, unitsRef, initialValue? }
+proto.addOrReplaceEquation = element proto:addOrReplaceEquation { mathml.apply }
+proto.unitsConversionRule = element proto:unitsConversionRule {
+    attribute desiredDimensions { ident },
+    attribute actualDimensions { ident },
+    mathml.lambda
+    }
+
+unitsRef = attribute units { ident }
+nameRef = attribute name { ident }
+initialValue = attribute initial_value { xsd:double }
+nameAttr = attribute name { ident }
+        
 # The simulations to run on the model.  You can have a sequence of simulations,
 # but only the outputs from the last are currently available.
 proto.simulations = element proto:simulations { Simulation+ }
@@ -53,13 +81,13 @@ proto.model = element proto:model { OutputVariableDefinition }
 # In this case the units must also be given explicitly.
 proto.postprocessed = element proto:postprocessed {
     OutputVariableDefinition,
-    attribute units { text }
+    unitsRef
     }
 # Output variable specifications contain the variable name, and optionally a
 # more friendly human-readable description (suitable for use on graph axes etc.).
 OutputVariableDefinition =
     attribute description { text }?,
-    attribute name { ident }
+    nameRef
 
 # Specify what to plot by default for this protocol.
 # The first plot listed should be considered as the primary output of interest.
@@ -110,8 +138,7 @@ proto.uniformStepper = element proto:uniformStepper {
 
 # Common attributes to all kinds of stepper.
 StepperAttributes =
-    attribute name { ident },
-    attribute units { text }
+    nameRef, unitsRef
 
 # Uniform stepper parameters can either be given as just numbers, or computed.
 NumberOrExpression = Expression | xsd:double
@@ -273,3 +300,6 @@ include "../../../../../python/pycml/mathml2.rnc" {
       ) | (
         ((mathml.lambda | mathml.ci), c_operand*) & c_not_oper*
       )
+
+    # Raw numbers often need units; we use CellML for now
+    attlist-mathml.cn &= attribute cellml:units { ident }?

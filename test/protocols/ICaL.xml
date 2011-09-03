@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<?oxygen RNGSchema="../../src/proto/parsing/protocol.rnc" type="compact"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
@@ -54,10 +55,10 @@
     </units>
     
     <modelInterface>
-        <specifyInputVariable name="oxmeta:membrane_voltage"/>
+        <specifyInputVariable name="oxmeta:membrane_voltage" units="mV"/>
         <specifyInputVariable name="oxmeta:extracellular_calcium_concentration"/>
         <specifyOutputVariable name="oxmeta:membrane_L_type_calcium_current" units="uA_per_cm2"/>
-        <specifyOutputVariable name="oxmeta:membrane_voltage"/>
+        <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
         <specifyOutputVariable name="oxmeta:extracellular_calcium_concentration"/>
         <specifyOutputVariable name="oxmeta:time" units="ms"/>
         <declareNewVariable name="chaste_membrane_capacitance" units="uF_per_cm2" initial_value="1"/>
@@ -158,7 +159,7 @@
                     <value>-15.01</value>
                     <value>-10.01</value>
                     <value>-5.01</value>
-                    <value>-0.01</value>
+                    <value>0.01</value>
                     <value>5.01</value>
                     <value>10.01</value>
                     <value>15.01</value>
