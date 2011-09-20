@@ -61,11 +61,7 @@
                 <ci>oxmeta:membrane_stimulus_current</ci>
                 <piecewise>
                     <piece>
-                        <apply><minus/>
-                            <apply><abs/>
-                                <ci>oxmeta:membrane_stimulus_current_amplitude</ci>
-                            </apply>
-                        </apply>
+                        <ci>oxmeta:membrane_stimulus_current_amplitude</ci>
                         <apply><and/>
                             <apply><geq/>
                                 <ci>oxmeta:time</ci>
