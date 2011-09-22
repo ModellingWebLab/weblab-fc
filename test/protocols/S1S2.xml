@@ -119,14 +119,14 @@
                 <!-- Set stimulus period to S1 interval, offset 10ms -->                    
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_period</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_period</name><!-- ms -->
                     <value>
                         <ci xmlns="http://www.w3.org/1998/Math/MathML">s1_interval</ci>
                     </value>
                 </setVariable>                 
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_offset</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_offset</name><!-- ms -->
                     <value>
                         <cn xmlns="http://www.w3.org/1998/Math/MathML">10</cn>
                     </value>
@@ -151,7 +151,7 @@
                 <!-- Set the gap between stimuli to the S2 interval -->
                 <setVariable>
                     <when>EVERY_LOOP</when>
-                    <name>membrane_stimulus_current_period</name>
+                    <name>oxmeta:membrane_stimulus_current_period</name>
                     <value>
                         <ci xmlns="http://www.w3.org/1998/Math/MathML">s2_interval</ci>
                     </value>
@@ -159,7 +159,7 @@
                 <!-- And only do one S2 stimulus -->
                 <setVariable>
                     <when>EVERY_LOOP</when>
-                    <name>membrane_stimulus_current_end</name>
+                    <name>oxmeta:membrane_stimulus_current_end</name>
                     <value>
                         <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
                             <ci>s2_interval</ci>

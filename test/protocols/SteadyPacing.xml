@@ -39,11 +39,7 @@
                 <ci>oxmeta:membrane_stimulus_current</ci>
                 <piecewise>
                     <piece>
-                        <apply><minus/>
-                            <apply><abs/>
-                                <ci>oxmeta:membrane_stimulus_current_amplitude</ci>
-                            </apply>
-                        </apply>
+                        <ci>oxmeta:membrane_stimulus_current_amplitude</ci>
                         <apply><and/>
                             <apply><geq/>
                                 <ci>oxmeta:time</ci>
@@ -101,14 +97,14 @@
                 <!-- Set stimulus period to S1 interval, offset 10ms -->                    
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_period</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_period</name><!-- ms -->
                     <value>
                         <ci xmlns="http://www.w3.org/1998/Math/MathML">pacing_period</ci>
                     </value>
                 </setVariable>                 
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_offset</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_offset</name><!-- ms -->
                     <value>
                         <cn xmlns="http://www.w3.org/1998/Math/MathML">10</cn>
                     </value>
@@ -137,7 +133,7 @@
 	        <modifiers>
 	            <resetState> <!-- At the beginning of the final AP simulation load up the state variables from the long run to steady state -->
 	                <when>AT_START_ONLY</when>
-	                <name>initial_state</name>
+	                <state>initial_state</state>
 	            </resetState>
 			</modifiers>
         </timecourseSimulation>

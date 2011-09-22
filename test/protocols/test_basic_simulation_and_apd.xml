@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
-<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
@@ -25,28 +26,28 @@
                 <!-- Set stimulus: we need 2 APs to be able to calculate a DI -->                    
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_amplitude</name><!-- uA/cm^2 -->
+                    <name>oxmeta:membrane_stimulus_current_amplitude</name><!-- uA/cm^2 -->
                     <value>
                         <cn xmlns="http://www.w3.org/1998/Math/MathML">-25.5</cn>
                     </value>
                 </setVariable>
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_duration</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_duration</name><!-- ms -->
                     <value>
                         <cn xmlns="http://www.w3.org/1998/Math/MathML">2.0</cn>
                     </value>
                 </setVariable>
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_offset</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_offset</name><!-- ms -->
                     <value>
                         <cn xmlns="http://www.w3.org/1998/Math/MathML">50.0</cn>
                     </value>
                 </setVariable>
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_stimulus_current_period</name><!-- ms -->
+                    <name>oxmeta:membrane_stimulus_current_period</name><!-- ms -->
                     <value>
                         <!-- Let's prove we can access the stepper -->
                         <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
@@ -69,7 +70,7 @@
                     <!-- Let's prove we can access the outer stepper -->
                     <setVariable>
                         <when>AT_START_ONLY</when>
-                        <name>membrane_stimulus_current_period</name><!-- ms -->
+                        <name>oxmeta:membrane_stimulus_current_period</name><!-- ms -->
                         <value>
                             <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
                                 <ci>bcl</ci>

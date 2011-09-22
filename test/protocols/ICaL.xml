@@ -25,7 +25,7 @@
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             <apply><eq/>
                 <ci>default_Cao</ci>
-                <ci>extracellular_calcium_concentration</ci>
+                <ci>oxmeta:extracellular_calcium_concentration</ci>
             </apply>
         </apply>    
     </library>
@@ -116,7 +116,7 @@
             <modifiers>
                 <setVariable>
                     <when>AT_START_ONLY</when>
-                    <name>membrane_voltage</name>
+                    <name>oxmeta:membrane_voltage</name>
                     <value>
                         <ci xmlns="http://www.w3.org/1998/Math/MathML">holding_potential</ci>
                     </value>
@@ -139,7 +139,7 @@
                 <!-- Set the external calcium concentration -->
                 <setVariable>
                     <when>EVERY_LOOP</when>
-                    <name>extracellular_calcium_concentration</name>
+                    <name>oxmeta:extracellular_calcium_concentration</name>
                     <value>
                         <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
                             <ci>step_calcium_ratio</ci>
@@ -185,7 +185,7 @@
                     </resetState>                    
                     <setVariable>
                         <when>EVERY_LOOP</when>
-                        <name>membrane_voltage</name>
+                        <name>oxmeta:membrane_voltage</name>
                         <value>
                             <ci xmlns="http://www.w3.org/1998/Math/MathML">holding_potential</ci>
                         </value>
@@ -200,7 +200,7 @@
                     <modifiers>
                         <setVariable>
                             <when>EVERY_LOOP</when>
-                            <name>membrane_voltage</name>
+                            <name>oxmeta:membrane_voltage</name>
                             <value>
                                 <piecewise xmlns="http://www.w3.org/1998/Math/MathML">
                                     <piece>
@@ -216,7 +216,7 @@
                                         </apply>
                                     </piece>
                                     <otherwise>
-                                        <ci>membrane_voltage</ci>
+                                        <ci>oxmeta:membrane_voltage</ci>
                                     </otherwise>
                                 </piecewise>
                             </value>
