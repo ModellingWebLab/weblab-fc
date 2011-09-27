@@ -12,7 +12,7 @@
         </apply>
     </library>
     <simulations>
-        <nestedSimulation>
+        <nestedSimulation prefix="sim1">
             <vectorStepper name="run_outer" units="dimensionless">
                 <value>0</value>
                 <value>1</value>
@@ -107,7 +107,7 @@
             </nestedSimulation>
         </nestedSimulation>
         
-        <nestedSimulation>
+        <nestedSimulation prefix="sim2">
             <uniformStepper name="run" units="dimensionless">
                 <start>0</start>
                 <stop>4</stop>
@@ -138,35 +138,64 @@
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>FonRT</ci>
+                    <ci>sim2:FonRT</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>time</ci>
+                    <ci>sim2:time</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>fast_sodium_current__V</ci>
+                    <ci>sim2:fast_sodium_current__V</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>membrane_fast_sodium_current_conductance</ci>
+                    <ci>sim2:membrane_fast_sodium_current_conductance</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>membrane_voltage</ci>
+                    <ci>sim2:membrane_voltage</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>sim2:membrane_voltage</ci>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+            
+            <!-- And check we can access results from multiple simulations -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>sim1:membrane_voltage</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>sim1:membrane_voltage</ci>
+                    </apply>
+                    <cn>3</cn>
                 </apply>
             </apply>
 
@@ -174,7 +203,7 @@
             <apply><eq/>
                 <ci>min_time</ci>
                 <apply><ci>min</ci>
-                    <ci>time</ci>
+                    <ci>sim2:time</ci>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
@@ -198,8 +227,8 @@
                     <ci>di</ci>
                 </apply>
                 <apply><ci>apd</ci>
-                    <ci>fast_sodium_current__V</ci>
-                    <ci>time</ci>
+                    <ci>sim2:fast_sodium_current__V</ci>
+                    <ci>sim2:time</ci>
                 </apply>
             </apply>
             <apply>
@@ -252,7 +281,7 @@
     </post-processing>
 
     <outputVariables>
-        <model name="membrane_voltage"/>
+        <raw ref="sim2:membrane_voltage" name="membrane_voltage"/>
         <postprocessed name="apd90" units="ms"/>
         <postprocessed name="di" units="ms" description="Diastolic interval"/>
     </outputVariables>

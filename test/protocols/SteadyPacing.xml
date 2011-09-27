@@ -117,7 +117,7 @@
         </timecourseSimulation>
         
         <!-- Now do the part when we will examine the last two action potentials, i.e. two stimului -->
-        <timecourseSimulation>
+        <timecourseSimulation prefix="sim">
             <uniformStepper name="time" units="ms">
                 <start>0</start>
                 <stop>
@@ -148,14 +148,14 @@
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>time</ci>
+                    <ci>sim:time</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>membrane_voltage</ci>
+                    <ci>sim:membrane_voltage</ci>
                 </apply>
             </apply>
             
@@ -167,8 +167,8 @@
                     <ci>raw_DI</ci>
                 </apply>
                 <apply><ci>apd</ci>
-                    <ci>membrane_voltage</ci>
-                    <ci>time</ci>
+                    <ci>sim:membrane_voltage</ci>
+                    <ci>sim:time</ci>
                     <cn>90</cn>
                 </apply>
             </apply>
@@ -177,7 +177,7 @@
             <apply><eq/>
                 <ci>peak_voltage</ci>
                 <apply><ci>max</ci>
-                    <ci>membrane_voltage</ci>
+                    <ci>sim:membrane_voltage</ci>
                 </apply>
             </apply>
             
@@ -198,8 +198,8 @@
     </post-processing>
     
     <outputVariables>
-        <model name="membrane_voltage" description="Transmembrane potential in milliVolts"/>
-        <model name="time" description="Time in milliseconds"/>       
+        <raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential in milliVolts"/>
+        <raw ref="sim:time" name="time" description="Time in milliseconds"/>       
         
         <postprocessed name="peak_voltage" units="mV"/>
         <postprocessed name="raw_APD90" units="ms"/>

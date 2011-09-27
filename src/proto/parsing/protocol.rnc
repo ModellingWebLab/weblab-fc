@@ -6,8 +6,9 @@ namespace cellml = "http://www.cellml.org/cellml/1.0#"
 
 start = proto.protocol
 
-# Variable names within protocols - we don't restrict these yet
-ident = text
+# Variable names within protocols - fairly standard
+nc_ident = xsd:token { pattern = "[_a-zA-Z][_0-9a-zA-Z]*" }
+ident = xsd:token { pattern = "[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*" }
 
 # The root element
 proto.protocol = element proto:protocol {
@@ -57,7 +58,7 @@ proto.unitsConversionRule = element proto:unitsConversionRule {
 unitsRef = attribute units { ident }
 nameRef = attribute name { ident }
 initialValue = attribute initial_value { xsd:double }
-nameAttr = attribute name { ident }
+nameAttr = attribute name { nc_ident }
         
 # The simulations to run on the model.  You can have a sequence of simulations,
 # but only the outputs from the last are currently available.
@@ -72,11 +73,11 @@ proto.post-processing = element proto:post-processing { StatementList }
 # This element specifies the variables (either from the model or post-processing)
 # which should be considered as the protocol output, and will be saved to file.
 proto.outputVariables = element proto:outputVariables {
-    ( proto.model | proto.postprocessed )+
+    ( proto.raw | proto.postprocessed )+
     }
 
 # Specifies a model output as a protocol output.
-proto.model = element proto:model { OutputVariableDefinition }
+proto.raw = element proto:raw { OutputVariableDefinition }
 # Specifies a post-processing variable as a protocol output.
 # In this case the units must also be given explicitly.
 proto.postprocessed = element proto:postprocessed {
@@ -87,7 +88,8 @@ proto.postprocessed = element proto:postprocessed {
 # more friendly human-readable description (suitable for use on graph axes etc.).
 OutputVariableDefinition =
     attribute description { text }?,
-    nameRef
+    nameAttr,
+    attribute ref { ident }?
 
 # Specify what to plot by default for this protocol.
 # The first plot listed should be considered as the primary output of interest.
@@ -108,6 +110,7 @@ proto.plot = element proto:plot {
 # A timecourse simulation just needs the stepper to loop over, and any modifiers to apply.
 proto.timecourseSimulation = element proto:timecourseSimulation { BasicSimulation }
 BasicSimulation =
+    attribute prefix { nc_ident } ?,
     Stepper,
     proto.modifiers
 
@@ -151,7 +154,7 @@ Modifier = proto.resetState | proto.setVariable | proto.saveState
 # This 'modifier' saves the current model state for later reference with resetState.
 proto.saveState = element proto:saveState {
     proto.when,
-    proto.name
+    proto.nc_name
     }
 
 # This modifier resets the model's state; either to a state saved using saveState,
@@ -164,7 +167,7 @@ proto.resetState = element proto:resetState {
 # This modifier sets the value of a variable in the model.
 proto.setVariable = element proto:setVariable {
     proto.when,
-    proto.name,
+    proto.nc_name,
     proto.value
     }
 
@@ -172,8 +175,10 @@ proto.setVariable = element proto:setVariable {
 # or after all steps have been taken.
 proto.when = element proto:when { "AT_START_ONLY" | "EVERY_LOOP" | "AT_END" }
 
-# This either gives state name to use (in saveState) or references a model variable
-# using an ontology term (in setVariable).
+# This gives state name to use (in save/resetState)
+proto.nc_name = element proto:name { nc_ident }
+
+# This references a model variable using an ontology term (in setVariable).
 proto.name = element proto:name { ident }
 
 # A variable's value can be given either as just a number or as the result of an expression.

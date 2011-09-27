@@ -139,7 +139,7 @@
         </timecourseSimulation>
         
         <!-- Now do the S1-S2 part, i.e. two stimuli -->
-        <nestedSimulation>
+        <nestedSimulation prefix="sim">
             <vectorStepper name="s2_interval" units="dimensionless">
                 <ci xmlns="http://www.w3.org/1998/Math/MathML">s2_intervals</ci>
             </vectorStepper>
@@ -188,14 +188,14 @@
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>time</ci>
+                    <ci>sim:time</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>membrane_voltage</ci>
+                    <ci>sim:membrane_voltage</ci>
                 </apply>
             </apply>
             
@@ -207,8 +207,8 @@
                     <ci>raw_DI</ci>
                 </apply>
                 <apply><ci>apd</ci>
-                    <ci>membrane_voltage</ci>
-                    <ci>time</ci>
+                    <ci>sim:membrane_voltage</ci>
+                    <ci>sim:time</ci>
                     <cn>90</cn>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
@@ -302,7 +302,7 @@
     </post-processing>
     
     <outputVariables>
-        <model name="membrane_voltage" description="Transmembrane potential"/>
+        <raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential"/>
         <postprocessed name="raw_APD90" units="ms"/>
         <postprocessed name="raw_DI" units="ms"/>
         <postprocessed name="APD90" units="ms" description="Action Potential Duration (at 90%)"/>

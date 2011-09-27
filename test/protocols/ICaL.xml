@@ -129,7 +129,7 @@
         </timecourseSimulation>
         
         <!-- Now do the IV curve generation for each Cao -->
-        <nestedSimulation>
+        <nestedSimulation prefix="sim">
             <vectorStepper name="step_calcium_ratio" units="dimensionless">
                 <value>0.5</value>
                 <value>1.0</value>
@@ -236,21 +236,21 @@
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>time</ci>
+                    <ci>sim:time</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>membrane_voltage</ci>
+                    <ci>sim:membrane_voltage</ci>
                 </apply>
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>membrane_L_type_calcium_current</ci>
+                    <ci>sim:membrane_L_type_calcium_current</ci>
                 </apply>
             </apply>
             
@@ -258,8 +258,8 @@
             <apply><eq/>
                 <ci>membrane_L_type_calcium_tail_current</ci>
                 <apply><ci>after</ci>
-                    <ci>membrane_L_type_calcium_current</ci>
-                    <ci>time</ci>
+                    <ci>sim:membrane_L_type_calcium_current</ci>
+                    <ci>sim:time</ci>
                     <cn>0</cn>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
@@ -281,7 +281,7 @@
                 <ci>final_membrane_voltage</ci>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                    <ci>membrane_voltage</ci>
+                    <ci>sim:membrane_voltage</ci>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
                         <cn>2</cn><cn>-1</cn><cn>0</cn><cn>-1</cn>
@@ -299,9 +299,12 @@
     </post-processing>
     
     <outputVariables>
-        <model name="extracellular_calcium_concentration" description="Extracellular calcium concentration"/>
-        <model name="membrane_L_type_calcium_current" description="L-type calcium current"/>
-        <model name="membrane_voltage" description="Transmembrane potential"/>
+        <raw ref="sim:extracellular_calcium_concentration" name="extracellular_calcium_concentration"
+            description="Extracellular calcium concentration"/>
+        <raw ref="sim:membrane_L_type_calcium_current" name="membrane_L_type_calcium_current"
+            description="L-type calcium current"/>
+        <raw ref="sim:membrane_voltage" name="membrane_voltage"
+            description="Transmembrane potential"/>
         <postprocessed name="membrane_L_type_calcium_tail_current" units="uA/cm^2"
             description="I_Ca_L after test potential applied"/>
         <postprocessed name="min_LCC" description="Minimum current" units="uA/cm^2"/>
