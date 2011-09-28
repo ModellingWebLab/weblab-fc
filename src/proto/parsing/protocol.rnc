@@ -167,7 +167,7 @@ proto.resetState = element proto:resetState {
 # This modifier sets the value of a variable in the model.
 proto.setVariable = element proto:setVariable {
     proto.when,
-    proto.nc_name,
+    proto.name,
     proto.value
     }
 
