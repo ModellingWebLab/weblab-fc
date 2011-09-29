@@ -1,1 +1,1 @@
-TestCellModelTests.hpp
+TestFunctionalCurationPaper.hpp
