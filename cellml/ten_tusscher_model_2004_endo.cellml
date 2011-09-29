@@ -149,7 +149,7 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>
-	  <variable name="stim_amplitude" units="picoA_per_picoF" initial_value="52" cmeta:id="membrane_stimulus_current_amplitude">
+	  <variable name="stim_amplitude" units="picoA_per_picoF" initial_value="-52" cmeta:id="membrane_stimulus_current_amplitude">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_stimulus_current_amplitude">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/>
@@ -162,10 +162,7 @@ http://www.cellml.org/
             <ci>i_Stim</ci>
             <piecewise>
                <piece>
-                  <apply>
-                     <minus/>
-                     <ci>stim_amplitude</ci>
-                  </apply>
+                  <ci>stim_amplitude</ci>
                   <apply>
                      <and/>
                      <apply>

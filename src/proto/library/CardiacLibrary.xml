@@ -283,6 +283,27 @@
                                 <ci>dim</ci>
                             </apply>
                         </apply>
+                        <!-- Ensure dV/dt crosses the threshold, so we have a chance of having an AP -->
+                        <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><and/>
+                                <apply><lt/>
+                                    <apply><ci>multi_fold</ci>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">min</csymbol>
+                                        <ci>dVdt</ci>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                    </apply>
+                                    <ci>dvdtThreshold</ci>
+                                </apply>
+                                <apply><gt/>
+                                    <apply><ci>multi_fold</ci>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">max</csymbol>
+                                        <ci>dVdt</ci>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                    </apply>
+                                    <ci>dvdtThreshold</ci>
+                                </apply>
+                            </apply>
+                        </apply>
                         <apply><eq/>
                             <ci>max_upstroke_idxs</ci>
                             <apply>
