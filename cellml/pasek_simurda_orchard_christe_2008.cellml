@@ -438,28 +438,10 @@ The complete original paper reference is cited below:
       <variable name="g_Na_s" units="milliS" public_interface="out"/>
       <variable units="milliS" public_interface="out" name="g_Naps_s"/>
       <variable name="q_Kr_s" units="milliS" public_interface="out"/>
-      <variable name="q_Ks_s" units="milliS" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
-         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
-            </rdf:Description>
-         </rdf:RDF>
-      </variable>		  
+      <variable name="q_Ks_s" units="milliS" public_interface="out"/>	  
       <variable units="milliS" public_interface="out" name="g_Kp_s"/>
-      <variable name="g_Kto_s" units="milliS" public_interface="out" cmeta:id="membrane_transient_outward_current_conductance">
-         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#membrane_transient_outward_current_conductance">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/>
-            </rdf:Description>
-         </rdf:RDF>
-      </variable>	  
-      <variable name="g_K1_s" units="milliS" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
-         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
-            </rdf:Description>
-         </rdf:RDF>
-      </variable>
+      <variable name="g_Kto_s" units="milliS" public_interface="out"/>	  
+      <variable name="g_K1_s" units="milliS" public_interface="out"/>
       <variable units="milliS" public_interface="out" name="g_KNa_s"/>
       <variable units="milliS" public_interface="out" name="g_KATP_s"/>
       <variable units="milliS" public_interface="out" name="g_Nab_s"/>
@@ -507,13 +489,31 @@ The complete original paper reference is cited below:
          </rdf:RDF>
       </variable>	  
       <variable units="dimensionless" name="fKrt" initial_value="0.526"/>
-      <variable units="milliS_per_cm2" name="q_Ks" initial_value="0.1975"/>
+      <variable name="q_Ks" units="milliS_per_cm2" initial_value="0.1975" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable units="dimensionless" name="fKst" initial_value="0.526"/>
       <variable units="milliS_per_cm2" name="g_Kp" initial_value="0.006"/>
       <variable units="dimensionless" name="fKpt" initial_value="0.526"/>
-      <variable units="milliS_per_cm2" name="g_Kto" initial_value="0"/>
+      <variable name="g_Kto" units="milliS_per_cm2" initial_value="0" cmeta:id="membrane_transient_outward_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_transient_outward_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
       <variable units="dimensionless" name="fKtot" initial_value="0.526"/>
-      <variable units="milliS_per_cm2" name="g_K1" initial_value="0.75"/>
+      <variable name="g_K1" units="milliS_per_cm2" initial_value="0.75" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable units="dimensionless" name="fK1t" initial_value="0.8"/>
       <variable units="milliS_per_cm2" name="g_KNa" initial_value="0.12848"/>
       <variable units="dimensionless" name="fKNat" initial_value="0.526"/>

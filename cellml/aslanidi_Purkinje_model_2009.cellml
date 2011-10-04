@@ -3365,13 +3365,14 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="g_K1" units="milliS_per_microF" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+      <variable name="g_K1" units="milliS_per_microF"/>
+      <variable name="g_K1_max" units="milliS_per_microF" initial_value="0.25" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>	   
+      </variable>
       <variable name="time" public_interface="in" units="millisecond"/>
       <variable name="V" private_interface="out" public_interface="in" units="millivolt"/>
       <variable name="E_K" private_interface="out" public_interface="in" units="millivolt"/>
@@ -3404,7 +3405,7 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
             <ci>g_K1</ci>
             <apply>
                <times/>
-               <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="milliS_per_microF">0.25</cn>
+               <ci>g_K1_max</ci>
                <apply>
                   <root/>
                   <apply>

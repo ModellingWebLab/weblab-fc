@@ -2125,13 +2125,14 @@ http://www.CellML.org/
       <variable name="V" units="mV" public_interface="in"/>
       <variable name="Ca_i" units="mM" public_interface="in"/>
       <variable name="time" units="ms" public_interface="in"/>
-      <variable name="gks" units="mS_per_uF" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+      <variable name="gks" units="mS_per_uF"/>
+      <variable name="gks_max" units="mS_per_uF" initial_value="0.0248975" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>	 		  
+      </variable>
       <variable name="EKs" units="mV" public_interface="in"/>
       <variable name="xss" units="dimensionless"/>
       <variable name="tauxs" units="ms"/>
@@ -2150,7 +2151,7 @@ http://www.CellML.org/
             <ci>gks</ci>
             <apply>
                <times/>
-               <cn cellml:units="mS_per_uF">0.0248975</cn>
+               <ci>gks_max</ci>
                <apply>
                   <plus/>
                   <cn cellml:units="dimensionless">1</cn>

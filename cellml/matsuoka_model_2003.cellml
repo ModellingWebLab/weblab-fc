@@ -2577,14 +2577,14 @@ http://www.CellML.org/
          </rdf:RDF>
       </variable>	 	  
       <variable name="E_K" units="millivolt" public_interface="out" private_interface="out"/>
-      <variable name="g_K1" units="nanoS" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+      <variable name="g_K1" units="nanoS"/>
+      <variable name="P_K1_0" units="nanoS_per_picoF" initial_value="1.146" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
       </variable>	 	
-      <variable name="P_K1_0" units="nanoS_per_picoF" initial_value="1.146"/>
       <variable name="fO" units="dimensionless" private_interface="out"/>
       <variable name="fO2" units="dimensionless"/>
       <variable name="fO3" units="dimensionless"/>

@@ -1834,14 +1834,15 @@ http://www.cellml.org/
       </variable>	  	  
       <variable name="i_Ks_jct" units="microA_per_microF"/>
       <variable name="i_Ks_SL" units="microA_per_microF"/>
-      <variable name="G_Ks_SL" units="milliS_per_microF" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+      <variable name="G_Ks_SL" units="milliS_per_microF"/>
+      <variable name="G_Ks_jct" units="milliS_per_microF"/>
+      <variable name="G_Ks_max" units="milliS_per_microF" initial_value = "0.07" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>	
-      <variable name="G_Ks_jct" units="milliS_per_microF"/>
+      </variable>		  
       <variable name="Fx_Ks_jct" units="dimensionless" initial_value="0.11"/>
       <variable name="Fx_Ks_SL" units="dimensionless" initial_value="0.89"/>
       <variable name="E_Ks_jct" units="millivolt"/>
@@ -1908,7 +1909,7 @@ http://www.cellml.org/
             <ci>G_Ks_jct</ci>
             <apply>
                <times/>
-               <cn cellml:units="milliS_per_microF">0.07</cn>
+               <ci>G_Ks_max</ci>
                <apply>
                   <plus/>
                   <cn cellml:units="dimensionless">0.057</cn>
@@ -1943,7 +1944,7 @@ http://www.cellml.org/
             <ci>G_Ks_SL</ci>
             <apply>
                <times/>
-               <cn cellml:units="milliS_per_microF">0.07</cn>
+               <ci>G_Ks_max</ci>
                <apply>
                   <plus/>
                   <cn cellml:units="dimensionless">0.057</cn>
@@ -2765,13 +2766,14 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>	  
-      <variable name="G_K1" units="milliS_per_microF" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+      <variable name="G_K1" units="milliS_per_microF"/>
+      <variable name="G_K1_max" units="milliS_per_microF" initial_value="0.9" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>	 	
+      </variable>	 		  
       <variable name="V" units="millivolt" public_interface="in" private_interface="out"/>
       <variable name="E_K" units="millivolt" public_interface="in" private_interface="out"/>
       <variable name="Ko" units="millimolar" public_interface="in"/>
@@ -2782,7 +2784,7 @@ http://www.cellml.org/
             <ci>G_K1</ci>
             <apply>
                <times/>
-               <cn cellml:units="milliS_per_microF">0.9</cn>
+               <ci>G_K1_max</ci>
                <apply>
                   <root/>
                   <apply>
