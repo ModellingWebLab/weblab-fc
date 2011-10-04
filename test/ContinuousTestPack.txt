@@ -1,5 +1,6 @@
 TestCoreProtocolLanguage.hpp
 TestDealingWithVoltageClamps.hpp
+private/TestHypokalaemiaProtocol.hpp
 TestIcalProtocol.hpp
 TestModelStateCollection.hpp
 TestNdArray.hpp
