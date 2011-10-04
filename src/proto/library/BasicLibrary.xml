@@ -5,9 +5,9 @@
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             
-            <!-- max = lambda a, dim=default: fold(mathml.max, a, default, dim) -->
+            <!-- Max = lambda a, dim=default: fold(mathml.max, a, default, dim) -->
             <apply><eq/>
-                <ci>max</ci>
+                <ci>Max</ci>
                 <lambda>
                     <bvar><ci>a</ci></bvar>
                     <semantics>
@@ -26,9 +26,9 @@
                 </lambda>
             </apply>
 
-            <!-- min = lambda a, dim=default: fold(mathml.min, a, default, dim) -->
+            <!-- Min = lambda a, dim=default: fold(mathml.min, a, default, dim) -->
             <apply><eq/>
-                <ci>min</ci>
+                <ci>Min</ci>
                 <lambda>
                     <bvar><ci>a</ci></bvar>
                     <semantics>
@@ -47,9 +47,9 @@
                 </lambda>
             </apply>
             
-            <!-- default_dim(array, dim'): if dim'=default then array.num_dims-1 else dim' -->
+            <!-- DefaultDim(array, dim'): if dim'=default then array.num_dims-1 else dim' -->
             <apply><eq/>
-                <ci>default_dim</ci>
+                <ci>DefaultDim</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <bvar><ci>dim'</ci></bvar>
@@ -116,11 +116,11 @@
             </apply>
                         
             <!--
-                def diff(array, dim=array.num_dims-1):
+                def Diff(array, dim=default):
                     map(-, array[<dim>1:], array[<dim>:-1])
             -->
             <apply><eq/>
-                <ci>diff</ci>
+                <ci>Diff</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <semantics>
@@ -131,11 +131,11 @@
                     </semantics>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-                        <!-- test arguments using default_dim -->
+                        <!-- test arguments using DefaultDim -->
                         <apply><eq/>
                             <ci>dim</ci>
                             <apply>
-                                <ci>default_dim</ci>
+                                <ci>DefaultDim</ci>
                                 <ci>array</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -188,9 +188,9 @@
                 </lambda>
             </apply>
             
-            <!-- grad x y [dim] = map (/) (diff y dim) (diff x dim) -->
+            <!-- Grad x y [dim] = map (/) (Diff y dim) (Diff x dim) -->
             <apply><eq/>
-                <ci>grad</ci>
+                <ci>Grad</ci>
                 <lambda>
                     <bvar><ci>x</ci></bvar>
                     <bvar><ci>y</ci></bvar>
@@ -204,12 +204,12 @@
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">divide</csymbol>
                         <apply>
-                            <ci>diff</ci>
+                            <ci>Diff</ci>
                             <ci>y</ci>
                             <ci>dim</ci>
                         </apply>
                         <apply>
-                            <ci>diff</ci>
+                            <ci>Diff</ci>
                             <ci>x</ci>
                             <ci>dim</ci>
                         </apply>
@@ -217,9 +217,9 @@
                 </lambda>
             </apply>
             
-            <!-- join(a1, a2, dim=default): catenate two arrays along the given dimension -->
+            <!-- Join(a1, a2, dim=default): catenate two arrays along the given dimension -->
             <apply><eq/>
-                <ci>join</ci>
+                <ci>Join</ci>
                 <lambda>
                     <bvar><ci>a1</ci></bvar>
                     <bvar><ci>a2</ci></bvar>
@@ -231,11 +231,11 @@
                     </semantics>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-                        <!-- test some arguments using default_dim -->
+                        <!-- test some arguments using DefaultDim -->
                         <apply><eq/>
                             <ci>dim</ci>
                             <apply>
-                                <ci>default_dim</ci>
+                                <ci>DefaultDim</ci>
                                 <ci>a1</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -335,15 +335,15 @@
             </apply>
             
             <!--
-                stretch(array, length_spec, dim=default): stretch dimension dim (of length 1) to the given length.
-                The length_spec can either be a number giving the length, or a shape array the relevant entry of
+                Stretch(array, lengthSpec, dim=default): stretch dimension dim (of length 1) to the given length.
+                The lengthSpec can either be a number giving the length, or a shape array the relevant entry of
                 which will be read.  We do not (yet) check that the other dimensions match the input array shape!
             -->
             <apply><eq/>
-                <ci>stretch</ci>
+                <ci>Stretch</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
-                    <bvar><ci>length_spec</ci></bvar>
+                    <bvar><ci>lengthSpec</ci></bvar>
                     <semantics>
                         <bvar><ci>dim'</ci></bvar>
                         <annotation-xml>
@@ -352,11 +352,11 @@
                     </semantics>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-                        <!-- some testing of arguments using default_dim -->
+                        <!-- some testing of arguments using DefaultDim -->
                         <apply><eq/>
                             <ci>dim</ci>
                             <apply>
-                                <ci>default_dim</ci>
+                                <ci>DefaultDim</ci>
                                 <ci>array</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -367,28 +367,28 @@
                             <apply><or/>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
-                                    <ci>length_spec</ci>
+                                    <ci>lengthSpec</ci>
                                 </apply>
                                 <apply><and/>
                                     <apply>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                                        <ci>length_spec</ci>
+                                        <ci>lengthSpec</ci>
                                     </apply>
                                     <apply><eq/>
-                                        <!-- length_spec.num_dims == 1 -->
+                                        <!-- lengthSpec.num_dims == 1 -->
                                         <apply>
                                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
-                                            <ci>length_spec</ci>
+                                            <ci>lengthSpec</ci>
                                         </apply>
                                         <cn>1</cn>
                                     </apply>
                                     <apply><eq/>
-                                        <!-- Check that length_spec.shape[0] == array.num_dims -->
+                                        <!-- Check that lengthSpec.shape[0] == array.num_dims -->
                                         <apply>
                                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
                                             <apply>
                                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
-                                                <ci>length_spec</ci>
+                                                <ci>lengthSpec</ci>
                                             </apply>
                                             <apply>
                                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
@@ -410,18 +410,18 @@
                             <ci>length</ci>
                             <piecewise>
                                 <piece>
-                                    <!-- length_spec is just a number so use it -->
-                                    <ci>length_spec</ci>
+                                    <!-- lengthSpec is just a number so use it -->
+                                    <ci>lengthSpec</ci>
                                     <apply>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
-                                        <ci>length_spec</ci>
+                                        <ci>lengthSpec</ci>
                                     </apply>
                                 </piece>
                                 <otherwise>
-                                    <!-- length_spec is a shape array so index it -->
+                                    <!-- lengthSpec is a shape array so index it -->
                                     <apply>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                                        <ci>length_spec</ci>
+                                        <ci>lengthSpec</ci>
                                         <apply>
                                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
                                             <cn>0</cn>
@@ -493,9 +493,9 @@
                 </lambda>
             </apply>
             
-            <!-- shift(array, distance, dim=default) -->
+            <!-- Shift(array, distance, dim=default) -->
             <apply><eq/>
-                <ci>shift</ci>
+                <ci>Shift</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <bvar><ci>distance</ci></bvar>
@@ -507,11 +507,11 @@
                     </semantics>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
-                        <!-- test arguments using default_dim -->
+                        <!-- test arguments using DefaultDim -->
                         <apply><eq/>
                             <ci>dim</ci>
                             <apply>
-                                <ci>default_dim</ci>
+                                <ci>DefaultDim</ci>
                                 <ci>array</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -529,12 +529,12 @@
                                     <piecewise>
                                         <piece>
                                             <!-- shift right if distance > 0:
-                                                join stretch(array[<dim>0:1], distance, dim)
+                                                join Stretch(array[<dim>0:1], distance, dim)
                                                    & array[<dim>0:-distance] along dim -->
                                             <apply>
-                                                <ci>join</ci>
+                                                <ci>Join</ci>
                                                 <apply>
-                                                    <ci>stretch</ci>
+                                                    <ci>Stretch</ci>
                                                     <apply>
                                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
                                                         <ci>array</ci>
@@ -581,9 +581,9 @@
                                         <otherwise>
                                             <!-- shift left if distance < 0:
                                                 join array[<dim>-distance:]
-                                                   & stretch(array[<dim>-1:], -distance, dim) along dim -->
+                                                   & Stretch(array[<dim>-1:], -distance, dim) along dim -->
                                             <apply>
-                                                <ci>join</ci>
+                                                <ci>Join</ci>
                                                 <apply>
                                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
                                                     <ci>array</ci>
@@ -603,7 +603,7 @@
                                                     </apply>
                                                 </apply>
                                                 <apply>
-                                                    <ci>stretch</ci>
+                                                    <ci>Stretch</ci>
                                                     <apply>
                                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
                                                         <ci>array</ci>
@@ -636,9 +636,9 @@
                 </lambda>
             </apply>
             
-            <!-- window(array, size, dim=default) -->
+            <!-- Window(array, size, dim=default) -->
             <apply><eq/>
-                <ci>window</ci>
+                <ci>Window</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <bvar><ci>size</ci></bvar>
@@ -675,7 +675,7 @@
                                     </apply>
                                 </domainofapplication>
                                 <apply>
-                                    <ci>shift</ci>
+                                    <ci>Shift</ci>
                                     <ci>array</ci>
                                     <ci>i</ci>
                                     <ci>dim</ci>
@@ -688,7 +688,7 @@
             
             <!-- Recursive function to fold along every dimension in turn, starting from zero -->
             <apply><eq/>
-                <ci>multi_fold</ci>
+                <ci>MultiFold</ci>
                 <lambda>
                     <bvar><ci>op</ci></bvar>
                     <bvar><ci>array</ci></bvar>
@@ -708,7 +708,7 @@
                         <otherwise>
                             <!-- Recursive case: fold zeroth dimension -->
                             <apply>
-                                <ci>multi_fold</ci>
+                                <ci>MultiFold</ci>
                                 <ci>op</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
@@ -743,14 +743,14 @@
 
             <!-- Function to check array equality elementwise.
                 Works with arrays of any dimension.
-                Implemented as multi_fold(and, map(eq, a1, a2), true) -->
+                Implemented as MultiFold(and, map(eq, a1, a2), true) -->
             <apply><eq/>
-                <ci>array_eq</ci>
+                <ci>ArrayEq</ci>
                 <lambda>
                     <bvar><ci>a1</ci></bvar>
                     <bvar><ci>a2</ci></bvar>
                     <apply>
-                        <ci>multi_fold</ci>
+                        <ci>MultiFold</ci>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">and</csymbol>
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
@@ -765,7 +765,7 @@
             
             <!-- Check whether two arrays have the same shape -->
             <apply><eq/>
-                <ci>shape_eq</ci>
+                <ci>ShapeEq</ci>
                 <lambda>
                     <bvar><ci>a1</ci></bvar>
                     <bvar><ci>a2</ci></bvar>
@@ -789,7 +789,7 @@
                         <!-- return result -->
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
-                            <apply><ci>array_eq</ci>
+                            <apply><ci>ArrayEq</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
                                     <ci>a1</ci>
@@ -804,7 +804,7 @@
                 </lambda>
             </apply>
             
-            <!-- interp(xs, ys, targets, starts, afterStarts=1, dim=default): linear interpolation
+            <!-- Interp(xs, ys, targets, starts, afterStarts=1, dim=default): linear interpolation
               It uses the following algorithm:
                 interp xs ys y
                   = let pred = if ys[0] < y  # ys increasing
@@ -816,7 +816,7 @@
                           else xs[i-1] + (xs[i]-xs[i-1])*(y-ys[i-1])/(ys[i]-ys[i-1])
             -->
             <apply><eq/>
-                <ci>interp</ci>
+                <ci>Interp</ci>
                 <lambda>
                     <bvar><ci>xs</ci></bvar>
                     <bvar><ci>ys</ci></bvar>
@@ -839,7 +839,7 @@
                         <!-- check arguments -->
                         <apply><eq/>
                             <ci>dim</ci>
-                            <apply><ci>default_dim</ci>
+                            <apply><ci>DefaultDim</ci>
                                 <ci>xs</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -853,7 +853,7 @@
                         </apply>
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
-                            <apply><ci>array_eq</ci>
+                            <apply><ci>ArrayEq</ci>
                                 <ci>input_shape</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
@@ -897,7 +897,7 @@
                         </apply>
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
-                            <apply><ci>array_eq</ci>
+                            <apply><ci>ArrayEq</ci>
                                 <ci>result_shape</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
@@ -907,7 +907,7 @@
                         </apply>
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
-                            <apply><ci>array_eq</ci>
+                            <apply><ci>ArrayEq</ci>
                                 <ci>result_shape</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
@@ -919,7 +919,7 @@
                         <!-- Result calculation -->
                         <apply><eq/>
                             <ci>stretched_starts</ci>
-                            <apply><ci>stretch</ci>
+                            <apply><ci>Stretch</ci>
                                 <ci>starts</ci>
                                 <ci>input_shape</ci>
                                 <ci>dim</ci>
@@ -927,7 +927,7 @@
                         </apply>
                         <apply><eq/>
                             <ci>stretched_targets</ci>
-                            <apply><ci>stretch</ci>
+                            <apply><ci>Stretch</ci>
                                 <ci>targets</ci>
                                 <ci>input_shape</ci>
                                 <ci>dim</ci>
@@ -988,7 +988,7 @@
                                         </otherwise>
                                     </piecewise>
                                 </lambda>
-                                <apply><ci>stretch</ci>
+                                <apply><ci>Stretch</ci>
                                     <ci>increasing</ci>
                                     <ci>input_shape</ci>
                                     <ci>dim</ci>
@@ -1045,7 +1045,7 @@
                         <apply><eq/>
                             <ci>gradient</ci>
                             <apply>
-                                <ci>grad</ci>
+                                <ci>Grad</ci>
                                 <ci>ys</ci>
                                 <ci>xs</ci>
                                 <ci>dim</ci>
@@ -1066,7 +1066,7 @@
                         </apply>
                         <apply><eq/>
                             <ci>gradient_extended</ci>
-                            <apply><ci>join</ci>
+                            <apply><ci>Join</ci>
                                 <piecewise>
                                     <piece><ci>zero_array</ci><ci>afterStarts</ci></piece>
                                     <otherwise><ci>gradient</ci></otherwise>
@@ -1088,7 +1088,7 @@
                         </apply>
                         <apply><eq/>
                             <ci>target_minus_ys</ci>
-                            <apply><ci>shift</ci>
+                            <apply><ci>Shift</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
@@ -1102,7 +1102,7 @@
                         <!-- Shift xs to get xs[i-1] or xs -->
                         <apply><eq/>
                             <ci>shifted_xs</ci>
-                            <apply><ci>shift</ci>
+                            <apply><ci>Shift</ci>
                                 <ci>xs</ci><ci>shift_dir</ci><ci>dim</ci>
                             </apply>
                         </apply>

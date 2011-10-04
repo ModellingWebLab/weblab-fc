@@ -13,11 +13,11 @@
                 (although the comparison array does not necessarily have to be time).
             -->
             <apply><eq/>
-                <ci>after</ci>
+                <ci>After</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <bvar><ci>index</ci></bvar>
-                    <bvar><ci>test_value</ci></bvar>
+                    <bvar><ci>testValue</ci></bvar>
                     <semantics>
                         <bvar><ci>dim'</ci></bvar>
                         <annotation-xml>
@@ -29,7 +29,7 @@
                         <!-- Test arguments -->
                         <apply><eq/>
                             <ci>dim</ci>
-                            <apply><ci>default_dim</ci>
+                            <apply><ci>DefaultDim</ci>
                                 <ci>array</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -45,7 +45,7 @@
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                             <apply>
                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
-                                <ci>test_value</ci>
+                                <ci>testValue</ci>
                             </apply>
                         </apply>
                         <!-- Compute result -->
@@ -62,7 +62,7 @@
                                             <bvar><ci>idx_value</ci></bvar>
                                             <apply><gt/>
                                                 <ci>idx_value</ci>
-                                                <ci>test_value</ci>
+                                                <ci>testValue</ci>
                                             </apply>
                                         </lambda>
                                         <ci>index</ci>
@@ -80,7 +80,7 @@
             
             <!-- Remove the given dimension from an array, taking a slice at the 0th entry -->
             <apply><eq/>
-                <ci>remove_dim</ci>
+                <ci>RemoveDim</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <bvar><ci>dim</ci></bvar>
@@ -104,7 +104,7 @@
             
             <!-- Add a new dimension to an array, of extent 1 -->
             <apply><eq/>
-                <ci>add_dim</ci>
+                <ci>AddDim</ci>
                 <lambda>
                     <bvar><ci>array</ci></bvar>
                     <bvar><ci>dim</ci></bvar>
@@ -122,13 +122,13 @@
                 </lambda>
             </apply>
 
-            <!-- localise(fn, array, windowSize, dim=default):
+            <!-- Localise(fn, array, windowSize, dim=default):
                 Perform a function locally within a given window size, for example to compute the local
                 maxima of an array centered at each entry.
                 The function must take two arguments: an array, and dimension.
             -->
             <apply><eq/>
-                <ci>localise</ci>
+                <ci>Localise</ci>
                 <lambda>
                     <bvar><ci>fn</ci></bvar>
                     <bvar><ci>array</ci></bvar>
@@ -144,7 +144,7 @@
                         <!-- Test arguments -->
                         <apply><eq/>
                             <ci>dim</ci>
-                            <apply><ci>default_dim</ci>
+                            <apply><ci>DefaultDim</ci>
                                 <ci>array</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -152,9 +152,9 @@
                         <!-- Compute result -->
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
-                            <apply><ci>remove_dim</ci>
+                            <apply><ci>RemoveDim</ci>
                                 <apply><ci>fn</ci>
-                                    <apply><ci>window</ci>
+                                    <apply><ci>Window</ci>
                                         <ci>array</ci>
                                         <ci>windowSize</ci>
                                         <ci>dim</ci>
@@ -168,14 +168,14 @@
                 </lambda>
             </apply>
             
-            <!-- apd(V, t, percent=90.0, dim=default, dvdtThreshold=10.0, windowSize=50)
+            <!-- Apd(V, t, percent=90.0, dim=default, dvdtThreshold=10.0, windowSize=50)
                 Compute action potential durations and diastolic intervals along timeseries.
                 Returns a tuple (apd, di).
                 
                 TODO: check whether we handle a non-default dim properly!
             -->
             <apply><eq/>
-                <ci>apd</ci>
+                <ci>Apd</ci>
                 <lambda>
                     <bvar><ci>V</ci></bvar>
                     <bvar><ci>t</ci></bvar>
@@ -208,7 +208,7 @@
                         <!-- Test arguments -->
                         <apply><eq/>
                             <ci>dim</ci>
-                            <apply><ci>default_dim</ci>
+                            <apply><ci>DefaultDim</ci>
                                 <ci>V</ci>
                                 <ci>dim'</ci>
                             </apply>
@@ -216,7 +216,7 @@
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                             <apply>
-                                <ci>shape_eq</ci>
+                                <ci>ShapeEq</ci>
                                 <ci>V</ci>
                                 <ci>t</ci>
                             </apply>
@@ -277,7 +277,7 @@
                         <!-- Find the maximum upstroke velocity location -->
                         <apply><eq/>
                             <ci>dVdt</ci>
-                            <apply><ci>grad</ci>
+                            <apply><ci>Grad</ci>
                                 <ci>t</ci>
                                 <ci>V</ci>
                                 <ci>dim</ci>
@@ -287,7 +287,7 @@
                         <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                             <apply><and/>
                                 <apply><lt/>
-                                    <apply><ci>multi_fold</ci>
+                                    <apply><ci>MultiFold</ci>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">min</csymbol>
                                         <ci>dVdt</ci>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
@@ -295,7 +295,7 @@
                                     <ci>dvdtThreshold</ci>
                                 </apply>
                                 <apply><gt/>
-                                    <apply><ci>multi_fold</ci>
+                                    <apply><ci>MultiFold</ci>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">max</csymbol>
                                         <ci>dVdt</ci>
                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
@@ -323,8 +323,8 @@
                                         </apply>
                                     </lambda>
                                     <ci>dVdt</ci>
-                                    <apply><ci>localise</ci>
-                                        <ci>max</ci>
+                                    <apply><ci>Localise</ci>
+                                        <ci>Max</ci>
                                         <ci>dVdt</ci>
                                         <ci>windowSize</ci>
                                         <ci>dim</ci>
@@ -456,8 +456,8 @@
                                         </apply>
                                         <apply><eq/>
                                             <ci>max_upstroke_times</ci>
-                                            <apply><ci>stretch</ci>
-                                                <apply><ci>add_dim</ci>
+                                            <apply><ci>Stretch</ci>
+                                                <apply><ci>AddDim</ci>
                                                     <ci>times_nonextended</ci>
                                                     <ci>num_dims</ci>
                                                 </apply>
@@ -481,10 +481,10 @@
                         <!-- Find the peaks of these APs: V == local_Vmax && t > t_up -->
                         <apply><eq/>
                             <ci>local_Vmax</ci>
-                            <apply><ci>stretch</ci>
-                                <apply><ci>add_dim</ci>
-                                    <apply><ci>localise</ci>
-                                        <ci>max</ci>
+                            <apply><ci>Stretch</ci>
+                                <apply><ci>AddDim</ci>
+                                    <apply><ci>Localise</ci>
+                                        <ci>Max</ci>
                                         <ci>V</ci>
                                         <cn>1</cn>
                                         <ci>dim</ci>
@@ -497,8 +497,8 @@
                         </apply>
                         <apply><eq/>
                             <ci>extended_V</ci>
-                            <apply><ci>stretch</ci>
-                                <apply><ci>add_dim</ci>
+                            <apply><ci>Stretch</ci>
+                                <apply><ci>AddDim</ci>
                                     <ci>V</ci>
                                     <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
                                 </apply>
@@ -508,8 +508,8 @@
                         </apply>
                         <apply><eq/>
                             <ci>extended_time</ci>
-                            <apply><ci>stretch</ci>
-                                <apply><ci>add_dim</ci>
+                            <apply><ci>Stretch</ci>
+                                <apply><ci>AddDim</ci>
                                     <ci>t</ci>
                                     <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
                                 </apply>
@@ -597,7 +597,7 @@
                         <!-- Assume resting potential is global minimum, and calculate relaxation potential -->
                         <apply><eq/>
                             <ci>V_rest</ci>
-                            <apply><ci>min</ci>
+                            <apply><ci>Min</ci>
                                 <ci>extended_V</ci>
                                 <ci>num_dims</ci>
                             </apply>
@@ -631,8 +631,8 @@
                         <!-- Find (with interpolation) the first time before each peak where the relaxation potential is crossed -->
                         <apply><eq/>
                             <ci>t_ap_starts</ci>
-                            <apply><ci>remove_dim</ci>
-                                <apply><ci>interp</ci>
+                            <apply><ci>RemoveDim</ci>
+                                <apply><ci>Interp</ci>
                                     <ci>extended_time</ci>
                                     <ci>extended_V</ci>
                                     <ci>V_relax</ci>
@@ -667,8 +667,8 @@
                         <!-- Similarly, find the first time after each peak, and compute the difference -->
                         <apply><eq/>
                             <ci>t_ap_ends</ci>
-                            <apply><ci>remove_dim</ci>
-                                <apply><ci>interp</ci>
+                            <apply><ci>RemoveDim</ci>
+                                <apply><ci>Interp</ci>
                                     <ci>extended_time</ci>
                                     <ci>extended_V</ci>
                                     <ci>V_relax</ci>
@@ -695,7 +695,7 @@
                             <apply>
                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
-                                <apply><ci>diff</ci>
+                                <apply><ci>Diff</ci>
                                     <ci>t_ap_starts</ci>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                                 </apply>

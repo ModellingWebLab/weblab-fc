@@ -166,7 +166,7 @@
                     <ci>raw_APD90</ci>
                     <ci>raw_DI</ci>
                 </apply>
-                <apply><ci>apd</ci>
+                <apply><ci>Apd</ci>
                     <ci>sim:membrane_voltage</ci>
                     <ci>sim:time</ci>
                     <cn>90</cn>
@@ -176,7 +176,7 @@
             <!-- Get the peak voltage -->
             <apply><eq/>
                 <ci>peak_voltage</ci>
-                <apply><ci>max</ci>
+                <apply><ci>Max</ci>
                     <ci>sim:membrane_voltage</ci>
                 </apply>
             </apply>

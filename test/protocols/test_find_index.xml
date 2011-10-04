@@ -81,7 +81,7 @@
             
             <!-- Recursive function to fold along every dimension in turn, starting from zero -->
             <apply><eq/>
-                <ci>multi_fold</ci>
+                <ci>MultiFold</ci>
                 <lambda>
                     <bvar><ci>op</ci></bvar>
                     <bvar><ci>array</ci></bvar>
@@ -101,7 +101,7 @@
                         <otherwise>
                             <!-- Recursive case: fold zeroth dimension -->
                             <apply>
-                                <ci>multi_fold</ci>
+                                <ci>MultiFold</ci>
                                 <ci>op</ci>
                                 <apply>
                                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
@@ -136,12 +136,12 @@
             
             <!-- Function to check array equality elementwise: multi_fold(and, map(eq, a1, a2), true) -->
             <apply><eq/>
-                <ci>array_eq</ci>
+                <ci>ArrayEq</ci>
                 <lambda>
                     <bvar><ci>a1</ci></bvar>
                     <bvar><ci>a2</ci></bvar>
                     <apply>
-                        <ci>multi_fold</ci>
+                        <ci>MultiFold</ci>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">and</csymbol>
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
@@ -198,7 +198,7 @@
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
-                    <ci>array_eq</ci>
+                    <ci>ArrayEq</ci>
                     <ci>input</ci>
                     <ci>all_entries_indexed</ci>
                 </apply>

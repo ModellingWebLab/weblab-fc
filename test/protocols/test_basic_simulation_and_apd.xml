@@ -202,7 +202,7 @@
             <!-- min(time) should all be zero -->
             <apply><eq/>
                 <ci>min_time</ci>
-                <apply><ci>min</ci>
+                <apply><ci>Min</ci>
                     <ci>sim2:time</ci>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
@@ -211,7 +211,7 @@
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply><eq/>
                     <cn>0</cn>
-                    <apply><ci>multi_fold</ci>
+                    <apply><ci>MultiFold</ci>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">max</csymbol>
                         <ci>min_time</ci>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
@@ -226,7 +226,7 @@
                     <ci>apd90</ci>
                     <ci>di</ci>
                 </apply>
-                <apply><ci>apd</ci>
+                <apply><ci>Apd</ci>
                     <ci>sim2:fast_sodium_current__V</ci>
                     <ci>sim2:time</ci>
                 </apply>
@@ -247,7 +247,7 @@
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
-                <apply><ci>array_eq</ci>
+                <apply><ci>ArrayEq</ci>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
                         <ci>apd90</ci>
@@ -261,7 +261,7 @@
             </apply>
             <apply>
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
-                <apply><ci>array_eq</ci>
+                <apply><ci>ArrayEq</ci>
                     <apply>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
                         <ci>di</ci>

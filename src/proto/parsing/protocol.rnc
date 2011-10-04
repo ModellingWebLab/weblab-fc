@@ -82,7 +82,7 @@ proto.raw = element proto:raw { OutputVariableDefinition }
 # In this case the units must also be given explicitly.
 proto.postprocessed = element proto:postprocessed {
     OutputVariableDefinition,
-    unitsRef
+    attribute units { text }
     }
 # Output variable specifications contain the variable name, and optionally a
 # more friendly human-readable description (suitable for use on graph axes etc.).

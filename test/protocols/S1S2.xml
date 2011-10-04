@@ -206,7 +206,7 @@
                     <ci>raw_APD90</ci>
                     <ci>raw_DI</ci>
                 </apply>
-                <apply><ci>apd</ci>
+                <apply><ci>Apd</ci>
                     <ci>sim:membrane_voltage</ci>
                     <ci>sim:time</ci>
                     <cn>90</cn>
@@ -265,7 +265,7 @@
             </apply>
             <apply><eq/>
                 <ci>DI</ci>
-                <apply><ci>after</ci>
+                <apply><ci>After</ci>
                     <ci>first_raw_DI</ci>
                     <ci>first_raw_DI</ci>
                     <ci>min_DI</ci>
@@ -274,7 +274,7 @@
             </apply>
             <apply><eq/>
                 <ci>APD90</ci>
-                <apply><ci>after</ci>
+                <apply><ci>After</ci>
                     <ci>second_raw_APD</ci>
                     <ci>first_raw_DI</ci>
                     <ci>min_DI</ci>
@@ -285,7 +285,7 @@
             <!-- Calculate slope information -->
             <apply><eq/>
                 <ci>S1S2_slope</ci>
-                <apply><ci>grad</ci>
+                <apply><ci>Grad</ci>
                     <ci>DI</ci>
                     <ci>APD90</ci>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
@@ -293,7 +293,7 @@
             </apply>
             <apply><eq/>
                 <ci>max_S1S2_slope</ci>
-                <apply><ci>max</ci>
+                <apply><ci>Max</ci>
                     <ci>S1S2_slope</ci>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>

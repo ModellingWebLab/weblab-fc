@@ -257,7 +257,7 @@
             <!-- Only examine the "tail currents" after t=0 -->
             <apply><eq/>
                 <ci>membrane_L_type_calcium_tail_current</ci>
-                <apply><ci>after</ci>
+                <apply><ci>After</ci>
                     <ci>sim:membrane_L_type_calcium_current</ci>
                     <ci>sim:time</ci>
                     <cn>0</cn>
@@ -268,8 +268,8 @@
             <!-- Get the minimum tail current (this has the largest magnitude) as a 2d array -->
             <apply><eq/>
                 <ci>min_LCC</ci>
-                <apply><ci>remove_dim</ci>
-                    <apply><ci>min</ci>
+                <apply><ci>RemoveDim</ci>
+                    <apply><ci>Min</ci>
                         <ci>membrane_L_type_calcium_tail_current</ci>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                     </apply>
