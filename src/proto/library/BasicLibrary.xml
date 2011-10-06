@@ -1171,6 +1171,166 @@
                 </lambda>
             </apply>
             
+            <!--
+                Return that portion of an input array that occurs strictly after a specified time
+                (although the comparison array does not necessarily have to be time).
+            -->
+            <apply><eq/>
+                <ci>After</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>index</ci></bvar>
+                    <bvar><ci>testValue</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Test arguments -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply><ci>DefaultDim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                <ci>index</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_SIMPLE_VALUE</csymbol>
+                                <ci>testValue</ci>
+                            </apply>
+                        </apply>
+                        <!-- Compute result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                <ci>array</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                        <lambda>
+                                            <bvar><ci>idx_value</ci></bvar>
+                                            <apply><gt/>
+                                                <ci>idx_value</ci>
+                                                <ci>testValue</ci>
+                                            </apply>
+                                        </lambda>
+                                        <ci>index</ci>
+                                    </apply>
+                                </apply>
+                                <ci>dim</ci>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- Remove the given dimension from an array, taking a slice at the 0th entry -->
+            <apply><eq/>
+                <ci>RemoveDim</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>dim</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>array</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <ci>dim</ci><cn>0</cn><cn>0</cn><cn>0</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- Add a new dimension to an array, of extent 1 -->
+            <apply><eq/>
+                <ci>AddDim</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>dim</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <domainofapplication>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <ci>dim</ci><cn>0</cn><cn>1</cn><cn>1</cn>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">_</csymbol>
+                            </apply>
+                        </domainofapplication>
+                        <ci>array</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- Localise(fn, array, windowSize, dim=default):
+                Perform a function locally within a given window size, for example to compute the local
+                maxima of an array centered at each entry.
+                The function must take two arguments: an array, and dimension.
+            -->
+            <apply><eq/>
+                <ci>Localise</ci>
+                <lambda>
+                    <bvar><ci>fn</ci></bvar>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>windowSize</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Test arguments -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply><ci>DefaultDim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <!-- Compute result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply><ci>RemoveDim</ci>
+                                <apply><ci>fn</ci>
+                                    <apply><ci>Window</ci>
+                                        <ci>array</ci>
+                                        <ci>windowSize</ci>
+                                        <ci>dim</ci>
+                                    </apply>
+                                    <cn>0</cn>
+                                </apply>
+                                <cn>0</cn>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+                        
         </apply>
     </library>
 </protocol>
