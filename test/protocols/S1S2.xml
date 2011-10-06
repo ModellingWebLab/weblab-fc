@@ -206,7 +206,7 @@
                     <ci>raw_APD90</ci>
                     <ci>raw_DI</ci>
                 </apply>
-                <apply><ci>Apd</ci>
+                <apply><ci>ApdAndDi</ci>
                     <ci>sim:membrane_voltage</ci>
                     <ci>sim:time</ci>
                     <cn>90</cn>

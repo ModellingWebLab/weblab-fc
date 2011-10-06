@@ -9,13 +9,209 @@
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             
             <!-- Apd(V, t, percent=90.0, dim=default, dvdtThreshold=10.0, windowSize=50)
+                Compute action potential durations along timeseries.
+                Returns an array of APD values, whose extent along the last dimension
+                is the minimum number of APs.
+            -->
+            <apply><eq/>
+                <ci>Apd</ci>
+                <lambda>
+                    <bvar><ci>V</ci></bvar>
+                    <bvar><ci>t</ci></bvar>
+                    <semantics>
+                        <bvar><ci>percent</ci></bvar>
+                        <annotation-xml>
+                            <cn>90.0</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>dvdtThreshold</ci></bvar>
+                        <annotation-xml>
+                            <cn>10.0</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>windowSize</ci></bvar>
+                        <annotation-xml>
+                            <cn>50</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <apply><eq/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <ci>t_ap_starts</ci>
+                                <ci>t_ap_ends</ci>
+                            </apply>
+                            <apply><ci>ApStartAndEnd</ci>
+                                <ci>V</ci>
+                                <ci>t</ci>
+                                <ci>percent</ci>
+                                <ci>dim'</ci>
+                                <ci>dvdtThreshold</ci>
+                                <ci>windowSize</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
+                                <ci>t_ap_ends</ci>
+                                <ci>t_ap_starts</ci>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- ApdAndDi(V, t, percent=90.0, dim=default, dvdtThreshold=10.0, windowSize=50)
                 Compute action potential durations and diastolic intervals along timeseries.
                 Returns a tuple (apd, di).
+            -->
+            <apply><eq/>
+                <ci>ApdAndDi</ci>
+                <lambda>
+                    <bvar><ci>V</ci></bvar>
+                    <bvar><ci>t</ci></bvar>
+                    <semantics>
+                        <bvar><ci>percent</ci></bvar>
+                        <annotation-xml>
+                            <cn>90.0</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>dvdtThreshold</ci></bvar>
+                        <annotation-xml>
+                            <cn>10.0</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>windowSize</ci></bvar>
+                        <annotation-xml>
+                            <cn>50</cn>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Find where each AP starts and ends -->
+                        <apply><eq/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <ci>t_ap_starts</ci>
+                                <ci>t_ap_ends</ci>
+                            </apply>
+                            <apply><ci>ApStartAndEnd</ci>
+                                <ci>V</ci>
+                                <ci>t</ci>
+                                <ci>percent</ci>
+                                <ci>dim'</ci>
+                                <ci>dvdtThreshold</ci>
+                                <ci>windowSize</ci>
+                            </apply>
+                        </apply>
+                        <!-- Check we have at least 2 APs -->
+                        <apply><eq/>
+                            <ci>num_dims</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                <ci>V</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><geq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                        <ci>t_ap_starts</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn>
+                                        <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
+                                        <cn>0</cn>
+                                        <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
+                                    </apply>
+                                </apply>
+                                <cn>2</cn>
+                            </apply>
+                        </apply>
+                        <!-- Find the differences between start & end -->
+                        <apply><eq/>
+                            <ci>apds</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
+                                <ci>t_ap_ends</ci>
+                                <ci>t_ap_starts</ci>
+                            </apply>
+                        </apply>                    
+                        <!-- DI = diff(t_ap_starts) - apds[:-1] -->
+                        <apply><eq/>
+                            <ci>dis</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
+                                <apply><ci>Diff</ci>
+                                    <ci>t_ap_starts</ci>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <ci>apds</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
+                                        <cn>0</cn>
+                                        <cn>1</cn>
+                                        <cn>-1</cn>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <cn>1</cn>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    </apply>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <!-- Return results -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <ci>apds</ci>
+                                <ci>dis</ci>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!--
+                Utility function doing the bulk of the calculation for Apd and ApdAndDi.  Determines
+                the start and end times for each action potential.
                 
                 TODO: check whether we handle a non-default dim properly!
             -->
             <apply><eq/>
-                <ci>Apd</ci>
+                <ci>ApStartAndEnd</ci>
                 <lambda>
                     <bvar><ci>V</ci></bvar>
                     <bvar><ci>t</ci></bvar>
@@ -483,28 +679,7 @@
                                 <ci>num_dims</ci>
                             </apply>
                         </apply>
-                        <!-- Check we have at least 2 -->
-                        <apply>
-                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
-                            <apply><geq/>
-                                <apply>
-                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                                    <apply>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
-                                        <ci>t_ap_starts</ci>
-                                    </apply>
-                                    <apply>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                        <cn>0</cn>
-                                        <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
-                                        <cn>0</cn>
-                                        <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
-                                    </apply>
-                                </apply>
-                                <cn>2</cn>
-                            </apply>
-                        </apply>
-                        <!-- Similarly, find the first time after each peak, and compute the difference -->
+                        <!-- Similarly, find the first time after each peak -->
                         <apply><eq/>
                             <ci>t_ap_ends</ci>
                             <apply><ci>RemoveDim</ci>
@@ -519,53 +694,14 @@
                                 <ci>num_dims</ci>
                             </apply>
                         </apply>
-                        <apply><eq/>
-                            <ci>apds</ci>
-                            <apply>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
-                                <ci>t_ap_ends</ci>
-                                <ci>t_ap_starts</ci>
-                            </apply>
-                        </apply>
-                    
-                        <!-- DI = diff(t_ap_starts) - apds[:-1] -->
-                        <apply><eq/>
-                            <ci>dis</ci>
-                            <apply>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">minus</csymbol>
-                                <apply><ci>Diff</ci>
-                                    <ci>t_ap_starts</ci>
-                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
-                                </apply>
-                                <apply>
-                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                                    <ci>apds</ci>
-                                    <apply>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                        <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
-                                        <cn>0</cn>
-                                        <cn>1</cn>
-                                        <cn>-1</cn>
-                                    </apply>
-                                    <apply>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
-                                        <cn>1</cn>
-                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
-                                    </apply>
-                                </apply>
-                            </apply>
-                        </apply>
+                        
                         <!-- Return results -->
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
                             <apply>
                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                <ci>apds</ci>
-                                <ci>dis</ci>
+                                <ci>t_ap_starts</ci>
+                                <ci>t_ap_ends</ci>
                             </apply>
                         </apply>
                     </apply>

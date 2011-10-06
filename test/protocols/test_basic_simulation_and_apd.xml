@@ -226,7 +226,7 @@
                     <ci>apd90</ci>
                     <ci>di</ci>
                 </apply>
-                <apply><ci>Apd</ci>
+                <apply><ci>ApdAndDi</ci>
                     <ci>sim2:fast_sodium_current__V</ci>
                     <ci>sim2:time</ci>
                 </apply>
