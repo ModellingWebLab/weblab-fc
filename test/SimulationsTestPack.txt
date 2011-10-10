@@ -1,1 +1,2 @@
 TestFunctionalCurationPaper.hpp
+private/TestHypokalaemiaProtocol.hpp
