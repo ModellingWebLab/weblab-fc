@@ -39,8 +39,8 @@ def apply_protocol(doc):
     derived = doc.model.get_variable_by_cmeta_id('FonRT')
     mapped = doc.model.get_variable_by_name('fast_sodium_current', 'V')
     param = doc.model.get_variable_by_cmeta_id('fast_sodium_current_conductance')
-    p.outputs = [V, t, mapped, param, derived]
-    p.inputs = []
+    p.outputs = set([V, t, mapped, param, derived])
+    p.inputs = set()
     p.modify_model()
     # For the present, we don't want to avoid using Chaste's stimulus!
     doc._cml_config.finalize_config()
