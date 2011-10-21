@@ -1330,6 +1330,99 @@
                     </apply>
                 </lambda>
             </apply>
+            
+            <!-- Transpose a 2d array -->
+            <apply><eq/>
+                <ci>Transpose</ci>
+                <lambda>
+                    <bvar><ci>matrix</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Check it's 2d -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                    <ci>matrix</ci>
+                                </apply>
+                                <cn>2</cn>
+                            </apply>
+                        </apply>
+                        <!-- Compute transpose by swapping dimensions -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                <domainofapplication>
+                                    <!-- Our dimension 0 ranges over matrix's dimension 1 -->
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn>
+                                        <cn>0</cn>
+                                        <cn>1</cn>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                                <ci>matrix</ci>
+                                            </apply>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <cn>0</cn>
+                                                <cn>1</cn>
+                                                <cn>0</cn>
+                                                <cn>1</cn>
+                                            </apply>
+                                        </apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">dim0</csymbol>
+                                    </apply>
+                                    <!-- Our dimension 1 ranges over matrix's dimension 0 -->
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>1</cn>
+                                        <cn>0</cn>
+                                        <cn>1</cn>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                                <ci>matrix</ci>
+                                            </apply>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <cn>0</cn>
+                                                <cn>0</cn>
+                                                <cn>0</cn>
+                                                <cn>0</cn>
+                                            </apply>
+                                        </apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">dim1</csymbol>
+                                    </apply>
+                                </domainofapplication>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <ci>matrix</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn>
+                                        <ci>dim1</ci>
+                                        <cn>0</cn>
+                                        <ci>dim1</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>1</cn>
+                                        <ci>dim0</ci>
+                                        <cn>0</cn>
+                                        <ci>dim0</ci>
+                                    </apply>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
                         
         </apply>
     </library>
