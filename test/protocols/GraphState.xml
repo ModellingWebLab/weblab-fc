@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:cellml="http://www.cellml.org/cellml/1.0#"
+    xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    <units>
+        <cellml:units name="ms">
+            <cellml:unit units="second" prefix="milli"/>
+        </cellml:units>
+    </units>
+    <modelInterface>
+        <setIndependentVariableUnits units="ms"/>
+        <specifyOutputVariable name="oxmeta:state_variable"/>
+    </modelInterface>
+    <simulations>
+        <timecourseSimulation prefix="sim">
+            <uniformStepper units="ms" name="time">
+                <start>0</start>
+                <stop>1000</stop>
+                <step>1</step>
+            </uniformStepper>
+            <modifiers/>
+        </timecourseSimulation>
+    </simulations>
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <apply><eq/>
+                <ci>state_trans</ci>
+                <apply><ci>Transpose</ci>
+                    <ci>sim:state_variable</ci>
+                </apply>
+            </apply>
+            <!-- Check the Transpose function -->
+            <!-- sim:state_variable.num_dims == state_trans.num_dims -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>sim:state_variable</ci>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>state_trans</ci>
+                    </apply>
+                </apply>
+            </apply>            
+            <!-- sim:state_variable.shape[0] == state_trans.shape[1] -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>sim:state_variable</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn>
+                            <cn>0</cn>
+                            <cn>0</cn>
+                            <cn>0</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>state_trans</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn>
+                            <cn>1</cn>
+                            <cn>0</cn>
+                            <cn>1</cn>
+                        </apply>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- sim:state_variable.shape[1] == state_trans.shape[0] -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>sim:state_variable</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn>
+                            <cn>1</cn>
+                            <cn>0</cn>
+                            <cn>1</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>state_trans</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn>
+                            <cn>0</cn>
+                            <cn>0</cn>
+                            <cn>0</cn>
+                        </apply>
+                    </apply>
+                </apply>
+            </apply>
+        </apply>
+    </post-processing>
+    <outputVariables>
+        <raw name="raw_state" description="State variables (raw)" ref="sim:state_variable"/>
+        <postprocessed units="various" name="state" description="State variables (for plotting)"
+            ref="state_trans"/>
+    </outputVariables>
+    <plots>
+        <plot>
+            <title>State variables</title>
+            <data>state</data>
+        </plot>
+    </plots>
+</protocol>

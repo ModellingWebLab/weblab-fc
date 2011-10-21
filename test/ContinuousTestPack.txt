@@ -1,5 +1,7 @@
+TestAccessingStateVector.hpp
 TestCoreProtocolLanguage.hpp
 TestDealingWithVoltageClamps.hpp
+TestEnvironment.hpp
 TestIcalProtocol.hpp
 TestModelStateCollection.hpp
 TestNdArray.hpp

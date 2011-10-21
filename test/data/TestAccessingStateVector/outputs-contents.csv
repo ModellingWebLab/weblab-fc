@@ -1,0 +1,3 @@
+Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
+"raw_state","State variables (raw)","unspecified",2,outputs_raw_state.csv,Raw,1001,8
+"state","State variables (for plotting)","various",2,outputs_state.csv,Post-processed,8,1001
