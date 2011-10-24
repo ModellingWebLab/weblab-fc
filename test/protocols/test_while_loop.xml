@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:cellml="http://www.cellml.org/cellml/1.0#"
+    xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    <inputs>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <apply><eq/>
+                <ci>num_iters</ci>
+                <cn cellml:units="ms">5</cn>
+            </apply>
+        </apply>
+    </inputs>
+    <units>
+        <cellml:units name="ms">
+            <cellml:unit units="second" prefix="milli"/>
+        </cellml:units>
+        <cellml:units name="mV">
+            <cellml:unit units="volt" prefix="milli"/>
+        </cellml:units>
+        <cellml:units name="mV_per_ms">
+            <cellml:unit units="volt" prefix="milli"/>
+            <cellml:unit units="second" prefix="milli" exponent="-1"/>
+        </cellml:units>
+    </units>
+    <modelInterface>
+        <setIndependentVariableUnits units="ms"/>
+        <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
+        <addOrReplaceEquation>
+            <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
+                <apply><diff/>
+                    <bvar><ci>oxmeta:time</ci></bvar>
+                    <ci>oxmeta:membrane_voltage</ci>
+                </apply>
+                <cn cellml:units="mV_per_ms">1</cn>
+            </apply>
+        </addOrReplaceEquation>
+    </modelInterface>
+    <simulations>
+        <!-- For comparison, use a uniformStepper -->
+        <timecourseSimulation prefix="sim0">
+            <uniformStepper units="ms" name="t">
+                <start>0</start>
+                <stop>9</stop>
+                <step>1</step>
+            </uniformStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>oxmeta:membrane_voltage</name>
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                    </value>
+                </setVariable>
+            </modifiers>
+        </timecourseSimulation>
+        <!-- While loop with fixed end point -->
+        <timecourseSimulation prefix="sim1">
+            <whileStepper name="t" units="ms">
+                <condition>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><lt/>
+                        <ci>t</ci>
+                        <cn cellml:units="ms">10</cn>
+                    </apply>
+                </condition>
+            </whileStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>oxmeta:membrane_voltage</name>
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                    </value>
+                </setVariable>
+            </modifiers>
+        </timecourseSimulation>
+        <!-- While loop with end point taken from protocol input-->
+        <timecourseSimulation prefix="sim2">
+            <whileStepper name="t" units="ms">
+                <condition>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><lt/>
+                        <ci>t</ci>
+                        <ci>num_iters</ci>
+                    </apply>
+                </condition>
+            </whileStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>oxmeta:membrane_voltage</name>
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                    </value>
+                </setVariable>
+            </modifiers>
+        </timecourseSimulation>
+        <!-- A long simulation to check that arrays get extended -->
+        <timecourseSimulation prefix="sim_long">
+            <whileStepper name="t" units="ms">
+                <condition>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><lt/>
+                        <ci>t</ci>
+                        <cn cellml:units="ms">3001</cn>
+                    </apply>
+                </condition>
+            </whileStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>oxmeta:membrane_voltage</name>
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                    </value>
+                </setVariable>
+            </modifiers>
+        </timecourseSimulation>
+    </simulations>
+    <outputVariables>
+        <raw name="V0" ref="sim0:membrane_voltage"/>
+        <raw name="V1" ref="sim1:membrane_voltage"/>
+        <raw name="V2" ref="sim2:membrane_voltage"/>
+        <raw name="V_3001" ref="sim_long:membrane_voltage"/>
+    </outputVariables>
+</protocol>

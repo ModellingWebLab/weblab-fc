@@ -10,3 +10,4 @@ TestS1S2Protocol.hpp
 TestSimpleProtocol.hpp
 TestSteadyPacingProtocol.hpp
 TestSteppers.hpp
+TestWhileLoops.hpp

@@ -121,8 +121,8 @@ proto.nestedSimulation = element proto:nestedSimulation {
     Simulation
     }
 
-# Two kinds of stepper are defined.
-Stepper = proto.vectorStepper | proto.uniformStepper
+# Three kinds of stepper are defined.
+Stepper = proto.vectorStepper | proto.uniformStepper | proto.whileStepper
 
 # A vector stepper just gives a list of specific values to use.
 # It can reference expressions to provide these, either as single values, or as 1d arrays.
@@ -137,6 +137,13 @@ proto.uniformStepper = element proto:uniformStepper {
     element proto:start { NumberOrExpression },
     element proto:stop { NumberOrExpression },
     element proto:step { NumberOrExpression }
+    }
+
+# A while stepper encodes an outer while loop, which continues until the condition
+# evaluates to false.
+proto.whileStepper = element proto:whileStepper {
+    StepperAttributes,
+    element proto:condition { Expression }
     }
 
 # Common attributes to all kinds of stepper.
