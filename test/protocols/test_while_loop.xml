@@ -131,6 +131,52 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        <!-- While loop with condition using previous simulation -->
+        <timecourseSimulation prefix="sim4">
+            <whileStepper name="t" units="ms">
+                <condition>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><or/>
+                        <apply><eq/>
+                            <ci>t</ci>
+                            <cn>0</cn>
+                        </apply>
+                        <apply><lt/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <ci>sim4:membrane_voltage</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <cn>0</cn>
+                                    <cn>-1</cn>
+                                    <cn>0</cn>
+                                    <cn>-1</cn>
+                                </apply>
+                            </apply>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <ci>sim3:membrane_voltage</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <cn>0</cn>
+                                    <cn>-1</cn>
+                                    <cn>0</cn>
+                                    <cn>-1</cn>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                </condition>
+            </whileStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>oxmeta:membrane_voltage</name>
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                    </value>
+                </setVariable>
+            </modifiers>
+        </timecourseSimulation>
         <!-- A long simulation to check that arrays get extended -->
         <timecourseSimulation prefix="sim_long">
             <whileStepper name="t" units="ms">
@@ -157,6 +203,7 @@
         <raw name="V1" ref="sim1:membrane_voltage"/>
         <raw name="V2" ref="sim2:membrane_voltage"/>
         <raw name="V3" ref="sim3:membrane_voltage"/>
+        <raw name="V4" ref="sim4:membrane_voltage"/>
         <raw name="V_3001" ref="sim_long:membrane_voltage"/>
     </outputVariables>
 </protocol>
