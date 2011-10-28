@@ -195,7 +195,7 @@
                     <uniformStepper name="time" units="ms">
                         <start>-10.0</start>
                         <stop>500.0</stop>
-                        <step>0.05</step>
+                        <step>0.01</step>
                     </uniformStepper>
                     <modifiers>
                         <setVariable>
