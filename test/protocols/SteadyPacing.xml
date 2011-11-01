@@ -17,6 +17,9 @@
             </apply>            
         </apply>    
     </inputs>
+    
+    <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
+    <import source="../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="true"/>
      
     <units>
         <cellml:units name="mV">

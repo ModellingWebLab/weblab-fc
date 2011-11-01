@@ -2,6 +2,8 @@
 <?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
+    <import source="../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="true"/>
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>

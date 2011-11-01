@@ -20,6 +20,9 @@
         </apply>
     </inputs>
     
+    <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
+    <import source="../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="true"/>
+    
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>

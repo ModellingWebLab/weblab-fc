@@ -13,6 +13,7 @@ ident = xsd:token { pattern = "[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*"
 # The root element
 proto.protocol = element proto:protocol {
     proto.inputs?,
+    proto.imports?,
     proto.library?,
     proto.units?,
     proto.modelInterface?,
@@ -27,15 +28,36 @@ proto.protocol = element proto:protocol {
 # be set from the C++ code.
 proto.inputs = element proto:inputs { StatementList }
 
+# Imports of other protocols, either for using them as libraries of functionality,
+# or using a complete protocol but changing some inputs.
+proto.imports = element proto:import {
+    attribute source { xsd:anyURI },
+    ( ( attribute prefix { nc_ident }, attribute mergeDefinitions { "false" | "0" }? )
+      | attribute mergeDefinitions { "true" | "1" } ),
+    proto.setInput*
+    } +
+
+# Accessing imported protocol components by prefix
+proto.useImports = element proto:useImports {
+    attribute prefix { nc_ident }
+    }
+
+# Inputs of imported protocols can be set by expressions computed from our inputs.
+proto.setInput = element proto:setInput {
+    attribute name { nc_ident },
+    NumberOrExpression
+    }
+
 # A library of routines and definitions for use in the rest of the protocol.
 proto.library = element proto:library { StatementList }
 
 # Units declarations; unspecified, but uses CellML at present
-any-non-math = element * - mathml:* { any-non-math* } | attribute * { text } | text
-proto.units = element proto:units { any-non-math* }
+any-non-local = element * - (mathml:* | proto:*) { any-non-local* } | attribute * { text } | text
+proto.units = element proto:units { any-non-local* & proto.useImports* }
 
 # Better XML definition of model interfacing
 proto.modelInterface = element proto:modelInterface {
+    proto.useImports?,
     proto.setIndependentVariableUnits?,
     proto.specifyInputVariable*,
     proto.specifyOutputVariable*,
@@ -65,15 +87,15 @@ nameAttr = attribute name { nc_ident }
 proto.simulations = element proto:simulations { Simulation+ }
 
 # A simulations may be a simple timecourse, or nest another simulation.
-Simulation = ( proto.timecourseSimulation | proto.nestedSimulation )
+Simulation = ( proto.timecourseSimulation | proto.nestedSimulation | proto.useImports )
 
 # Post-processing consists of a list of statements in the augmented MathML language.
-proto.post-processing = element proto:post-processing { StatementList }
+proto.post-processing = element proto:post-processing { ( StatementList | proto.useImports )+ }
 
 # This element specifies the variables (either from the model or post-processing)
 # which should be considered as the protocol output, and will be saved to file.
 proto.outputVariables = element proto:outputVariables {
-    ( proto.raw | proto.postprocessed )+
+    ( proto.raw | proto.postprocessed | proto.useImports )+
     }
 
 # Specifies a model output as a protocol output.
@@ -93,7 +115,7 @@ OutputVariableDefinition =
 
 # Specify what to plot by default for this protocol.
 # The first plot listed should be considered as the primary output of interest.
-proto.plots = element proto:plots { proto.plot+ }
+proto.plots = element proto:plots { ( proto.plot | proto.useImports )+ }
 # Each plot must have a title, and can either plot two 1d variables against each
 # other, or plot a single variable against the relevant stepper values.  In the
 # latter case if the variable has more than one dimension, then you get multiple
@@ -235,7 +257,7 @@ AccessorCsymbolContent =
 # The number in the URL gives the number of operands, and the text content gives the operator name.
 WrapCsymbolContent =
     attribute definitionURL { xsd:anyURI { pattern = "https://chaste.cs.ox.ac.uk/nss/protocol/wrap/\d+" } },
-    ident
+    nc_ident
 
 # This allows construction of string variables for use in array comprehensions.  The text
 # content gives the string value.
