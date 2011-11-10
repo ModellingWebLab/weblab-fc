@@ -23,9 +23,7 @@ proto.protocol = element proto:protocol {
     proto.plots?
     }
 
-# Specifies inputs to the protocol.  Once protocols can import others
-# there will be an override feature for these; for now they can only
-# be set from the C++ code.
+# Specifies inputs to the protocol.
 proto.inputs = element proto:inputs { StatementList }
 
 # Imports of other protocols, either for using them as libraries of functionality,

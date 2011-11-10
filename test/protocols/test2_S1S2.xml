@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<?oxygen RNGSchema="../../src/proto/parsing/protocol.rnc" type="compact"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <!-- Identical to the main S1S2, but exercising import functionality -->
+    <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="1"/>
+    <import source="../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="1"/>
+    <import source="S1S2.xml" prefix="s1s2"/>
+    <modelInterface>
+        <useImports prefix="s1s2"/>
+    </modelInterface>
+    <simulations>
+        <useImports prefix="s1s2"/>
+    </simulations>
+    <post-processing>
+        <useImports prefix="s1s2"/>
+    </post-processing>
+    <outputVariables>
+        <useImports prefix="s1s2"/>
+    </outputVariables>
+    <plots>
+        <useImports prefix="s1s2"/>
+    </plots>
+</protocol>
+

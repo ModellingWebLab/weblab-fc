@@ -20,8 +20,7 @@
         </apply>
     </inputs>
     
-    <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
-    <import source="../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="true"/>
+    <import source="../../src/proto/library/BasicLibrary.xml" prefix="std"/>
     
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
@@ -260,7 +259,7 @@
             <!-- Only examine the "tail currents" after t=0 -->
             <apply><eq/>
                 <ci>membrane_L_type_calcium_tail_current</ci>
-                <apply><ci>After</ci>
+                <apply><ci>std:After</ci>
                     <ci>sim:membrane_L_type_calcium_current</ci>
                     <ci>sim:time</ci>
                     <cn>0</cn>
@@ -271,8 +270,8 @@
             <!-- Get the minimum tail current (this has the largest magnitude) as a 2d array -->
             <apply><eq/>
                 <ci>min_LCC</ci>
-                <apply><ci>RemoveDim</ci>
-                    <apply><ci>Min</ci>
+                <apply><ci>std:RemoveDim</ci>
+                    <apply><ci>std:Min</ci>
                         <ci>membrane_L_type_calcium_tail_current</ci>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                     </apply>
