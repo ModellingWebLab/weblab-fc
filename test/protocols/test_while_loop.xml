@@ -99,25 +99,19 @@
         <timecourseSimulation prefix="sim3">
             <whileStepper name="t" units="ms">
                 <condition>
-                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><or/>
-                        <apply><eq/>
-                            <ci>t</ci>
-                            <cn>0</cn>
-                        </apply>
-                        <apply><lt/>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><lt/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                            <ci>sim3:membrane_voltage</ci>
                             <apply>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                                <ci>sim3:membrane_voltage</ci>
-                                <apply>
-                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                    <cn>0</cn>
-                                    <apply><minus/><ci>t</ci><cn>1</cn></apply>
-                                    <cn>0</cn>
-                                    <cn>-1</cn> <!-- Should work out the same as index t-1 -->
-                                </apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <cn>0</cn>
+                                <apply><minus/><ci>t</ci><cn>1</cn></apply>
+                                <cn>0</cn>
+                                <cn>-1</cn> <!-- Should work out the same as index t-1 -->
                             </apply>
-                            <apply><minus/><ci>num_iters</ci><cn>1</cn></apply>
                         </apply>
+                        <apply><minus/><ci>num_iters</ci><cn>1</cn></apply>
                     </apply>
                 </condition>
             </whileStepper>
@@ -135,33 +129,27 @@
         <timecourseSimulation prefix="sim4">
             <whileStepper name="t" units="ms">
                 <condition>
-                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><or/>
-                        <apply><eq/>
-                            <ci>t</ci>
-                            <cn>0</cn>
-                        </apply>
-                        <apply><lt/>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><lt/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                            <ci>sim4:membrane_voltage</ci>
                             <apply>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                                <ci>sim4:membrane_voltage</ci>
-                                <apply>
-                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                    <cn>0</cn>
-                                    <cn>-1</cn>
-                                    <cn>0</cn>
-                                    <cn>-1</cn>
-                                </apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <cn>0</cn>
+                                <cn>-1</cn>
+                                <cn>0</cn>
+                                <cn>-1</cn>
                             </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                            <ci>sim3:membrane_voltage</ci>
                             <apply>
-                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
-                                <ci>sim3:membrane_voltage</ci>
-                                <apply>
-                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                                    <cn>0</cn>
-                                    <cn>-1</cn>
-                                    <cn>0</cn>
-                                    <cn>-1</cn>
-                                </apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                <cn>0</cn>
+                                <cn>-1</cn>
+                                <cn>0</cn>
+                                <cn>-1</cn>
                             </apply>
                         </apply>
                     </apply>
@@ -197,6 +185,26 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        <!-- Prove that it's impossible to have an empty loop -->
+        <timecourseSimulation prefix="not_empty">
+            <whileStepper name="t" units="ms">
+                <condition>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><lt/>
+                        <ci>t</ci>
+                        <cn>0</cn>
+                    </apply>
+                </condition>
+            </whileStepper>
+            <modifiers>
+                <setVariable>
+                    <when>AT_START_ONLY</when>
+                    <name>oxmeta:membrane_voltage</name>
+                    <value>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                    </value>
+                </setVariable>
+            </modifiers>
+        </timecourseSimulation>
     </simulations>
     <outputVariables>
         <raw name="V0" ref="sim0:membrane_voltage"/>
@@ -205,5 +213,6 @@
         <raw name="V3" ref="sim3:membrane_voltage"/>
         <raw name="V4" ref="sim4:membrane_voltage"/>
         <raw name="V_3001" ref="sim_long:membrane_voltage"/>
+        <raw name="V_empty" ref="not_empty:membrane_voltage"/>
     </outputVariables>
 </protocol>
