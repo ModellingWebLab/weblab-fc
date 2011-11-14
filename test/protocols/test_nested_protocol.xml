@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:cellml="http://www.cellml.org/cellml/1.0#"
+    xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    
+    <simulations>
+        <nestedSimulation prefix="sim">
+            <vectorStepper name="iter" units="dimensionless">
+                <value>0</value>
+                <value>1</value>
+            </vectorStepper>
+            <modifiers/>
+            <nestedProtocol source="SteadyPacing.xml">
+                <setInput name="steady_state_beats">
+                    <cn xmlns="http://www.w3.org/1998/Math/MathML">5</cn>
+                </setInput>
+                <setInput name="pacing_period">
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><plus/>
+                        <apply><times/><ci>iter</ci><cn>100</cn></apply>
+                        <cn>900</cn>
+                    </apply>
+                </setInput>
+                <selectOutput name="peak_voltage"/>
+                <selectOutput name="apd90"/>
+            </nestedProtocol>
+        </nestedSimulation>
+    </simulations>
+    
+    <outputVariables>
+        <raw ref="sim:peak_voltage" name="peak_voltage"/>
+        <raw ref="sim:apd90" name="apd90"/>
+    </outputVariables>
+</protocol>

@@ -4,6 +4,7 @@ TestDealingWithVoltageClamps.hpp
 TestEnvironment.hpp
 TestIcalProtocol.hpp
 TestModelStateCollection.hpp
+TestNestedProtocols.hpp
 TestNdArray.hpp
 TestProtocolParser.hpp
 TestS1S2Protocol.hpp

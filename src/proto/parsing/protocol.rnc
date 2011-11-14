@@ -138,7 +138,15 @@ BasicSimulation =
 # its loop.
 proto.nestedSimulation = element proto:nestedSimulation {
     BasicSimulation,
-    Simulation
+    ( Simulation | proto.nestedProtocol )
+    }
+
+# Initial support for nested protocols.  Eventually these will be represented as another
+# kind of model.
+proto.nestedProtocol = element proto:nestedProtocol {
+    attribute source { xsd:anyURI },
+    proto.setInput*,
+    element proto:selectOutput { nameAttr }*
     }
 
 # Three kinds of stepper are defined.
