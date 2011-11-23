@@ -6,7 +6,7 @@ namespace cellml = "http://www.cellml.org/cellml/1.0#"
 
 start = proto.protocol
 
-# Variable names within protocols - fairly standard
+# Variable names etc. within protocols - fairly standard
 nc_ident = xsd:token { pattern = "[_a-zA-Z][_0-9a-zA-Z]*" }
 ident = xsd:token { pattern = "[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*" }
 
