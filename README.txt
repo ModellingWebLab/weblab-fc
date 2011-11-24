@@ -37,7 +37,7 @@ are in `cellml`.  Some additional interesting locations are:
  * `src/proto/parsing/protocol.rnc`  is a schema for the protocol XML language
 
 You can run the simulations from the paper using:
-  scons cl=1 b=GccOptNative ts=projects/FunctionalCuration/test/TestFunctionalCurationPaper.hpp
+  scons b=GccOptNative ts=projects/FunctionalCuration/test/TestFunctionalCurationPaper.hpp
 
 Output will appear in /tmp/$USER/testoutput/FunctionalCuration by default (unless the
 environment variable CHASTE_TEST_OUTPUT is set to point elsewhere; it defaults to
@@ -58,11 +58,11 @@ completion.  These were not included in the paper.
 
 There are also tests covering the lower-level functionality available for use by
 protocols.  Run all the default tests with:
-  scons cl=1 b=GccOptNative projects/FunctionalCuration
+  scons b=GccOptNative projects/FunctionalCuration
 
 
 To build an executable that can run a single protocol on a single model, do:
-  scons cl=1 exe=1 projects/FunctionalCuration/apps
+  scons exe=1 projects/FunctionalCuration/apps
 
 The executable will appear at projects/FunctionalCuration/apps/src/FunctionalCuration.
 You'll need the environment variable LD_LIBRARY_PATH set up as described in the Chaste
@@ -77,7 +77,10 @@ http://www.cs.ox.ac.uk/chaste/theteam.html
 
 == Footnotes ==
 
-* With the exception of one case where subsequent investigation has revealed the
-results in the paper to be slightly incorrect, and 3 cases where changes to numerical
-parameters have resulted in differences slightly larger than 0.5%; for these
-model/protocol combinations the results for comparison have been altered.
+* The reference data included in this project do not all exactly match those used in the paper.
+  For one model subsequent investigation has revealed the results in the paper to be slightly
+  incorrect.  Tightening of tolerances and refinement of sampling intervals have also
+  improved the quality of the results for several models, especially under the ICaL protocol,
+  beyond the default comparison tolerance of 0.5%.  Another model shows extremely high
+  sensitivity to code generation settings in the peak transmembrane potential, which in turn
+  affects the APD90 calculation in the S1-S2 protocol.
