@@ -266,9 +266,15 @@ A novel computational model of the human ventricular action potential and Ca tra
       <variable name="Fsl_CaL" units="dimensionless" public_interface="out"/>
       <variable name="Cli" units="mM" public_interface="out"/>
       <variable name="Clo" units="mM" public_interface="out"/>
-      <variable name="Ko" units="mM" public_interface="out"/>
+	  <variable name="Ko" units="mM" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="Nao" units="mM" public_interface="out"/>
-      <variable name="Cao" units="mM" public_interface="out" initial_value="1.8" cmeta:id="extracellular_calcium_concentration">
+      <variable name="Cao" units="mM" initial_value="1.8" public_interface="out" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
@@ -331,11 +337,23 @@ A novel computational model of the human ventricular action potential and Ca tra
       <variable name="GCaB" units="mS_per_uF" public_interface="out"/>
       <variable name="Q10SLCaP" units="dimensionless" public_interface="out"/>
       <variable name="Q10SRCaP" units="dimensionless" public_interface="out"/>
-      <variable name="Vmax_SRCaP" units="mM_per_msec" public_interface="out"/>
+	  <variable name="Vmax_SRCaP" units="mM_per_msec" initial_value="0.0053114" public_interface="out" cmeta:id="SR_uptake_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_uptake_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	 
       <variable name="Kmf" units="mM" public_interface="out"/>
       <variable name="Kmr" units="mM" public_interface="out"/>
       <variable name="hillSRCaP" units="dimensionless" public_interface="out"/>
-      <variable name="ks" units="per_msec" public_interface="out"/>
+	  <variable name="ks" units="per_msec" initial_value="25" public_interface="out" cmeta:id="SR_release_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_release_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="koCa" units="per_mM2_per_msec" public_interface="out"/>
       <variable name="kom" units="per_msec" public_interface="out"/>
       <variable name="kiCa" units="per_mM_per_msec" public_interface="out"/>
@@ -626,11 +644,6 @@ A novel computational model of the human ventricular action potential and Ca tra
             <eq/>
             <ci>Clo</ci>
             <cn cellml:units="mM">150</cn>
-         </apply>
-         <apply>
-            <eq/>
-            <ci>Ko</ci>
-            <cn cellml:units="mM">5.4</cn>
          </apply>
          <apply>
             <eq/>
@@ -950,12 +963,6 @@ A novel computational model of the human ventricular action potential and Ca tra
          </apply>
          <apply>
             <eq/>
-            <ci>Vmax_SRCaP</ci>
-            <cn type="e-notation" cellml:units="mM_per_msec">5.3114   <sep/>
-            -3</cn>
-         </apply>
-         <apply>
-            <eq/>
             <ci>Kmf</ci>
             <cn type="e-notation" cellml:units="mM">0.246   <sep/>
             -3</cn>
@@ -969,11 +976,6 @@ A novel computational model of the human ventricular action potential and Ca tra
             <eq/>
             <ci>hillSRCaP</ci>
             <cn cellml:units="dimensionless">1.787</cn>
-         </apply>
-         <apply>
-            <eq/>
-            <ci>ks</ci>
-            <cn cellml:units="per_msec">25</cn>
          </apply>
          <apply>
             <eq/>
@@ -2469,7 +2471,7 @@ A novel computational model of the human ventricular action potential and Ca tra
    <component name="I_Ks">
       <variable name="eks" units="mV" public_interface="out"/>
       <variable name="gks_junc" units="mS_per_uF" public_interface="out"/>
-      <variable name="gks_sl" units="mS_per_uF" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+      <variable name="gks_sl" units="mS_per_uF" initial_value="0.0035" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
@@ -2538,11 +2540,6 @@ A novel computational model of the human ventricular action potential and Ca tra
          <apply>
             <eq/>
             <ci>gks_junc</ci>
-            <cn cellml:units="mS_per_uF">0.0035</cn>
-         </apply>
-         <apply>
-            <eq/>
-            <ci>gks_sl</ci>
             <cn cellml:units="mS_per_uF">0.0035</cn>
          </apply>
          <apply>
@@ -2669,13 +2666,14 @@ A novel computational model of the human ventricular action potential and Ca tra
    </component>
    <component name="I_to">
       <variable name="GtoSlow" units="mS_per_uF" public_interface="out"/>
-      <variable name="GtoFast" units="mS_per_uF" public_interface="out" cmeta:id="membrane_transient_outward_current_conductance">
+      <variable name="GtoFast" units="mS_per_uF" public_interface="out"/> 
+      <variable name="GtoFast_factor" units="dimensionless" initial_value="1" cmeta:id="membrane_transient_outward_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_transient_outward_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>		  
+      </variable>	  
       <variable name="xtoss" units="dimensionless" public_interface="out"/>
       <variable name="ytoss" units="dimensionless" public_interface="out"/>
       <variable name="tauxtos" units="msec" public_interface="out"/>
@@ -2734,6 +2732,7 @@ A novel computational model of the human ventricular action potential and Ca tra
                <piece>
                   <apply>
                      <times/>
+					 <ci>GtoFast_factor</ci>
                      <cn cellml:units="mS_per_uF">1</cn>
                      <cn cellml:units="dimensionless">0.13</cn>
                      <cn cellml:units="dimensionless">0.88</cn>
@@ -2747,6 +2746,7 @@ A novel computational model of the human ventricular action potential and Ca tra
                <otherwise>
                   <apply>
                      <times/>
+					 <ci>GtoFast_factor</ci>
                      <cn cellml:units="mS_per_uF">0.13</cn>
                      <cn cellml:units="dimensionless">0.3</cn>
                      <cn cellml:units="dimensionless">0.036</cn>
@@ -4656,7 +4656,14 @@ A novel computational model of the human ventricular action potential and Ca tra
          </rdf:RDF>
       </variable>	
       <variable name="J_serca" units="mM_per_msec" public_interface="out"/>
-      <variable name="J_SRleak" units="mM_per_msec" public_interface="out"/>
+      <variable name="J_SRleak" units="mM_per_msec" public_interface="out"/> 
+	  <variable name="SR_leak_max" initial_value="5.348e-6" units="per_msec" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="time" units="msec" public_interface="in"/>
       <variable name="ec50SR" units="mM" public_interface="in"/>
       <variable name="koCa" units="per_mM2_per_msec" public_interface="in"/>
@@ -4968,8 +4975,7 @@ A novel computational model of the human ventricular action potential and Ca tra
             <ci>J_SRleak</ci>
             <apply>
                <times/>
-               <cn type="e-notation" cellml:units="per_msec">5.348   <sep/>
-               -6</cn>
+               <ci>SR_leak_max</ci>
                <apply>
                   <minus/>
                   <ci>Ca_sr</ci>
@@ -5691,7 +5697,13 @@ A novel computational model of the human ventricular action potential and Ca tra
    </component>
    <component name="SR_Ca_Concentrations">
       <variable name="Csqn_b" units="mM" initial_value="1.19772047585784" public_interface="out"/>
-      <variable name="Ca_sr" units="mM" initial_value="0.555180633859957" public_interface="out"/>
+	  <variable name="Ca_sr" units="mM" initial_value="0.555180633859957" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="time" units="msec" public_interface="in"/>
       <variable name="Bmax_Csqn" units="mM" public_interface="in"/>
       <variable name="kon_csqn" units="per_mM_per_msec" public_interface="in"/>

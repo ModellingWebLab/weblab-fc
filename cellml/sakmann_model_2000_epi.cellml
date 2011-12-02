@@ -3221,7 +3221,13 @@ http://www.CellML.org/
       </variable>
    </component>
    <component name="extracellular_potassium_concentration">
-      <variable name="K_o" units="millimolar" initial_value="4" public_interface="out"/>
+      <variable name="K_o" units="millimolar" initial_value="4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>         
    </component>
    <component name="intracellular_potassium_concentration">
       <variable name="K_i" units="millimolar" initial_value="138.7963753" public_interface="out"/>

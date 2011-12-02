@@ -3364,7 +3364,13 @@ http://www.CellML.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="Ko" units="mM" initial_value="4" public_interface="out"/>
+      <variable name="Ko" units="mM" initial_value="4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>        
       <variable name="Ca_JSR" units="mM" initial_value="2.5" public_interface="out"/>
       <variable name="Ca_NSR" units="mM" initial_value="2.5" public_interface="out"/>
 	  <variable name="conc_clamp" units="dimensionless" initial_value="1" cmeta:id="concentration_clamp_onoff">
