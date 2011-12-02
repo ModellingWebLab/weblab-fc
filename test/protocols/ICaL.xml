@@ -17,6 +17,21 @@
                 <ci>steady_state_time</ci>
                 <cn>10000</cn>
             </apply>
+            <!-- The values to step the transmembrane potential to -->
+            <apply><eq/>
+                <ci>test_potentials</ci>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                    <cn>-45.01</cn> <cn>-40.01</cn> <cn>-35.01</cn> <cn>-30.01</cn>
+                    <cn>-25.01</cn> <cn>-20.01</cn> <cn>-15.01</cn> <cn>-10.01</cn>
+                    <cn>-5.01</cn>
+                    <cn> 0.01</cn> <cn> 5.01</cn> <cn>10.01</cn> <cn>15.01</cn>
+                    <cn>20.01</cn> <cn>25.01</cn> <cn>30.01</cn> <cn>35.01</cn>
+                    <cn>40.01</cn> <cn>45.01</cn> <cn>50.01</cn> <cn>55.01</cn>
+                    <cn>60.01</cn> <cn>65.01</cn> <cn>70.01</cn> <cn>75.01</cn>
+                    <cn>79.99</cn>
+                </apply>
+            </apply>
         </apply>
     </inputs>
     
@@ -152,32 +167,7 @@
             </modifiers>
             <nestedSimulation>
                 <vectorStepper name="step_voltage" units="mV">
-                    <value>-45.01</value>
-                    <value>-40.01</value>
-                    <value>-35.01</value>
-                    <value>-30.01</value>
-                    <value>-25.01</value>
-                    <value>-20.01</value>
-                    <value>-15.01</value>
-                    <value>-10.01</value>
-                    <value>-5.01</value>
-                    <value>0.01</value>
-                    <value>5.01</value>
-                    <value>10.01</value>
-                    <value>15.01</value>
-                    <value>20.01</value>
-                    <value>25.01</value>
-                    <value>30.01</value>
-                    <value>35.01</value>
-                    <value>40.01</value>
-                    <value>45.01</value>
-                    <value>50.01</value>
-                    <value>55.01</value>
-                    <value>60.01</value>
-                    <value>65.01</value>
-                    <value>70.01</value>
-                    <value>75.01</value>
-                    <value>79.99</value>
+                    <ci xmlns="http://www.w3.org/1998/Math/MathML">test_potentials</ci>
                 </vectorStepper>
                 <modifiers>
                     <!-- Reset the model to holding potential -->
