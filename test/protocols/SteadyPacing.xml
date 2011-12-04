@@ -12,8 +12,8 @@
                 <cn>1000</cn>
             </apply>
             <apply><eq/>
-                <ci>max_steady_state_beats</ci>
-                <cn>100000</cn>
+                <ci>steady_state_beats</ci>
+                <cn>1000</cn>
             </apply>            
         </apply>    
     </inputs>
@@ -119,7 +119,7 @@
             </modifiers>
         </timecourseSimulation>
         
-        <!-- Now we will examine the last action potential for its properties -->
+        <!-- Now do the part when we will examine the last two action potentials, i.e. two stimului -->
         <timecourseSimulation prefix="sim">
             <uniformStepper name="time" units="ms">
                 <start>0</start>
