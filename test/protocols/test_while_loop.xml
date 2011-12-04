@@ -3,6 +3,7 @@
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    
     <inputs>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
@@ -12,6 +13,7 @@
             </apply>
         </apply>
     </inputs>
+    
     <units>
         <cellml:units name="ms">
             <cellml:unit units="second" prefix="milli"/>
@@ -24,6 +26,7 @@
             <cellml:unit units="second" prefix="milli" exponent="-1"/>
         </cellml:units>
     </units>
+    
     <modelInterface>
         <setIndependentVariableUnits units="ms"/>
         <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
@@ -37,6 +40,7 @@
             </apply>
         </addOrReplaceEquation>
     </modelInterface>
+    
     <simulations>
         <!-- For comparison, use a uniformStepper -->
         <timecourseSimulation prefix="sim0">
@@ -55,6 +59,7 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        
         <!-- While loop with fixed end point -->
         <timecourseSimulation prefix="sim1">
             <whileStepper name="t" units="ms">
@@ -75,6 +80,7 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        
         <!-- While loop with end point taken from protocol input-->
         <timecourseSimulation prefix="sim2">
             <whileStepper name="t" units="ms">
@@ -95,6 +101,7 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        
         <!-- While loop with condition using outputs -->
         <timecourseSimulation prefix="sim3">
             <whileStepper name="t" units="ms">
@@ -125,6 +132,7 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        
         <!-- While loop with condition using previous simulation -->
         <timecourseSimulation prefix="sim4">
             <whileStepper name="t" units="ms">
@@ -154,7 +162,7 @@
                         </apply>
                     </apply>
                 </condition>
-            </whileStepper>
+            </whileStepper>            
             <modifiers>
                 <setVariable>
                     <when>AT_START_ONLY</when>
@@ -163,8 +171,9 @@
                         <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
                     </value>
                 </setVariable>
-            </modifiers>
+            </modifiers>            
         </timecourseSimulation>
+        
         <!-- A long simulation to check that arrays get extended -->
         <timecourseSimulation prefix="sim_long">
             <whileStepper name="t" units="ms">
@@ -185,6 +194,7 @@
                 </setVariable>
             </modifiers>
         </timecourseSimulation>
+        
         <!-- Prove that it's impossible to have an empty loop -->
         <timecourseSimulation prefix="not_empty">
             <whileStepper name="t" units="ms">
@@ -206,6 +216,7 @@
             </modifiers>
         </timecourseSimulation>
     </simulations>
+    
     <outputVariables>
         <raw name="V0" ref="sim0:membrane_voltage"/>
         <raw name="V1" ref="sim1:membrane_voltage"/>
@@ -215,4 +226,5 @@
         <raw name="V_3001" ref="sim_long:membrane_voltage"/>
         <raw name="V_empty" ref="not_empty:membrane_voltage"/>
     </outputVariables>
+    
 </protocol>

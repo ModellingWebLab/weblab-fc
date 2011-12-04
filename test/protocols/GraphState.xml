@@ -4,15 +4,18 @@
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
     <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
+    
     <units>
         <cellml:units name="ms">
             <cellml:unit units="second" prefix="milli"/>
         </cellml:units>
     </units>
+    
     <modelInterface>
         <setIndependentVariableUnits units="ms"/>
         <specifyOutputVariable name="oxmeta:state_variable"/>
     </modelInterface>
+    
     <simulations>
         <timecourseSimulation prefix="sim">
             <uniformStepper units="ms" name="time">
@@ -23,6 +26,7 @@
             <modifiers/>
         </timecourseSimulation>
     </simulations>
+    
     <post-processing>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
@@ -117,15 +121,18 @@
             </apply>
         </apply>
     </post-processing>
+    
     <outputVariables>
         <raw name="raw_state" description="State variables (raw)" ref="sim:state_variable"/>
         <postprocessed units="various" name="state" description="State variables (for plotting)"
             ref="state_trans"/>
     </outputVariables>
+    
     <plots>
         <plot>
             <title>State variables</title>
             <data>state</data>
         </plot>
     </plots>
+    
 </protocol>

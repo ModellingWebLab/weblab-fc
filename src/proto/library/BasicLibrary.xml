@@ -47,6 +47,27 @@
                 </lambda>
             </apply>
             
+            <!-- Sum = lambda a, dim=default: fold(mathml.plus, a, 0, dim) -->
+            <apply><eq/>
+                <ci>Sum</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">plus</csymbol>
+                        <ci>a</ci>
+                        <cn>0</cn>
+                        <ci>dim</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            
             <!-- DefaultDim(array, dim'): if dim'=default then array.num_dims-1 else dim' -->
             <apply><eq/>
                 <ci>DefaultDim</ci>
