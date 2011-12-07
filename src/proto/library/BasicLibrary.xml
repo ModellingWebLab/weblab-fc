@@ -1444,6 +1444,42 @@
                     </apply>
                 </lambda>
             </apply>
+            
+            <!-- Last(array, dim=array.num_dims-1): return the last sub-array/value along a particular dimension -->
+            <apply><eq/>
+                <ci>Last</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>array</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <apply><ci>DefaultDim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                            <cn>-1</cn>
+                            <cn>0</cn>
+                            <cn>-1</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
                         
         </apply>
     </library>

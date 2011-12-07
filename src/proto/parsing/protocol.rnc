@@ -272,7 +272,7 @@ StringCsymbolContent =
     text
 
 # We override or extent various aspects of the normal MathML schema. 
-include "../../../../../python/pycml/mathml2.rnc" {
+include "mathml2.rnc" {
     # We can be more specific about the definitionURL on our csymbols.
     attlist-mathml.csymbol = MATHML.Common.attrib, att-encoding, att-type,
         attribute definitionURL { CsymbolNames }
