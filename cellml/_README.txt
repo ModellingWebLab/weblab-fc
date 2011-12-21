@@ -1,7 +1,9 @@
-These cellML files have been downloaded from Alan/Penny/Gary's repository of
-annotated cellML files as of r72 of that repository.
+These cellML files have been downloaded from Alan Garny/Penny Noble/Gary Mirams's 
+repository of annotated cellML files as of r72 of that repository.
 
-They are mostly the excitable models that are packaged with COR.
+They are mostly the excitable models that are packaged with COR, 
+with additional models from the CellML Electophysiology models repository
+as of around January 2011.
 
 All the *.cellml files directly in this folder are used by the main
 long-running protocol tests, and results compared with historic data, to
