@@ -2093,10 +2093,10 @@ http://www.CellML.org/
       <variable name="Na_o" units="millimolar" initial_value="140" public_interface="out"/>
    </component>
    <component name="intracellular_sodium_concentration">
-	  <variable name="Na_i" units="millimolar" initial_value="6.48" public_interface="out" cmeta:id="cytoplasmic_sodium_concentration">
+	  <variable name="Na_i" units="millimolar" initial_value="6.48" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#cytoplasmic_sodium_concentration">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytoplasmic_sodium_concentration"/>
+            <rdf:Description rdf:about="#cytosolic_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
             </rdf:Description>
          </rdf:RDF>
       </variable>
@@ -2183,10 +2183,10 @@ http://www.CellML.org/
       </variable>		  
    </component>
    <component name="intracellular_potassium_concentration">
-	  <variable name="K_i" units="millimolar" initial_value="140" public_interface="out" cmeta:id="cytoplasmic_potassium_concentration">
+	  <variable name="K_i" units="millimolar" initial_value="140" public_interface="out" cmeta:id="cytosolic_potassium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#cytoplasmic_potassium_concentration">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytoplasmic_potassium_concentration"/>
+            <rdf:Description rdf:about="#cytosolic_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
             </rdf:Description>
          </rdf:RDF>
       </variable>
@@ -2248,10 +2248,10 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="intracellular_calcium_concentration">
-	  <variable name="Ca_i" units="millimolar" initial_value="1e-5" public_interface="out" cmeta:id="calcium_concentration_intracellular">
+	  <variable name="Ca_i" units="millimolar" initial_value="1e-5" public_interface="out" cmeta:id="cytosolic_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#calcium_concentration_intracellular">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#calcium_concentration_intracellular"/>
+            <rdf:Description rdf:about="#cytosolic_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
             </rdf:Description>
          </rdf:RDF>
       </variable>

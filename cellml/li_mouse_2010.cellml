@@ -1998,9 +1998,21 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="fast_sodium_current">
-      <variable name="i_Na" units="picoA_per_picoF" public_interface="out"/>
+      <variable name="i_Na" units="picoA_per_picoF" public_interface="out" cmeta:id="membrane_fast_sodium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="E_Na" units="millivolt" public_interface="out"/>
-      <variable name="g_Na" units="milliS_per_microF" initial_value="16"/>
+      <variable name="g_Na" units="milliS_per_microF" initial_value="16" cmeta:id="membrane_fast_sodium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="O_Na" units="dimensionless" initial_value="1.46826771436314e-6"/>
       <variable name="C_Na1" units="dimensionless" initial_value="0.000420472760277688"/>
       <variable name="C_Na2" units="dimensionless" initial_value="0.0240114508843199"/>

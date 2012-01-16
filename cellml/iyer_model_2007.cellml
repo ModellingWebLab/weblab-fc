@@ -177,7 +177,13 @@ http://www.cellml.org/
       <variable name="Rgas" units="joule_per_mole_kelvin" initial_value="8.315" public_interface="out"/>
       <variable name="RT_over_F" units="mV" public_interface="out"/>
       <variable name="Acap" units="cm2" initial_value="0.0001534"/>
-      <variable name="C" units="mF"/>
+      <variable name="C" units="mF" cmeta:id="membrane_capacitance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_capacitance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Vmyo" units="uL" initial_value="2.584e-5"/>
       <variable name="VJSR" units="uL" initial_value="1.6e-7"/>
       <variable name="VNSR" units="uL" initial_value="2.1e-6"/>
@@ -4213,7 +4219,13 @@ http://www.cellml.org/
       <variable name="GKr" units="mS_per_uF" initial_value="0.0186"/>
       <variable name="GKs" units="mS_per_uF" initial_value="0.0035"/>
       <variable name="GK1" units="mS_per_uF" initial_value="0.125305126118808"/>
-      <variable name="GNa" units="mS_per_uF" initial_value="56.32"/>
+      <variable name="GNa" units="mS_per_uF" initial_value="56.32" cmeta:id="membrane_fast_sodium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="GNab" units="mS_per_uF" initial_value="0.001"/>
       <variable name="KvScale" units="dimensionless" initial_value="0.872"/>
       <variable name="Kv43Frac" units="dimensionless" initial_value="0.889"/>
@@ -4251,7 +4263,13 @@ http://www.cellml.org/
       <variable name="Ito1" units="uA_per_uF" public_interface="out"/>
       <variable name="IK1" units="uA_per_uF" public_interface="out"/>
       <variable name="INab" units="uA_per_uF" public_interface="out"/>
-      <variable name="INa" units="uA_per_uF" public_interface="out"/>
+      <variable name="INa" units="uA_per_uF" public_interface="out" cmeta:id="membrane_fast_sodium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
