@@ -110,20 +110,34 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="sodium_current">
-      <variable name="i_Na" units="uA_per_mm2" public_interface="out" cmeta:id="membrane_fast_sodium_current">
+	  <variable name="i_Na" units="uA_per_mm2" public_interface="out" cmeta:id="membrane_fast_sodium_current">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_fast_sodium_current">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>
+      </variable>		  
       <variable name="g_Na" units="mS_per_mm2" initial_value="4e-2" cmeta:id="membrane_fast_sodium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_fast_sodium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
+      </variable>	
+	  <variable name="shift_INa_inact" units="mV" initial_value="0" private_interface="out" cmeta:id="membrane_fast_sodium_current_shift_inactivation">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_shift_inactivation">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_shift_inactivation"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
+	  <variable name="perc_reduced_inact_for_IpNa" units="dimensionless" initial_value="0" private_interface="out" cmeta:id="membrane_fast_sodium_current_reduced_inactivation">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_reduced_inactivation">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_reduced_inactivation"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  
       <variable name="E_Na" units="mV" initial_value="50"/>
       <variable name="g_Nac" units="mS_per_mm2" initial_value="3e-5"/>
       <variable name="time" units="ms" public_interface="in" private_interface="out"/>
@@ -162,7 +176,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="sodium_current_m_gate">
-      <variable name="m" units="dimensionless" initial_value="0.011" public_interface="out"/>
+	  <variable name="m" units="dimensionless" initial_value="0.011" public_interface="out" cmeta:id="membrane_fast_sodium_current_m_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_m_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_m_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
       <variable name="alpha_m" units="per_ms"/>
       <variable name="beta_m" units="per_ms"/>
       <variable name="V" units="mV" public_interface="in"/>
@@ -259,9 +279,25 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="sodium_current_h_gate">
-      <variable name="h" units="dimensionless" initial_value="0.988" public_interface="out"/>
+	  <variable name="h" units="dimensionless" initial_value="0.988" public_interface="out" cmeta:id="membrane_fast_sodium_current_h_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_h_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
       <variable name="alpha_h" units="per_ms"/>
       <variable name="beta_h" units="per_ms"/>
+      <variable name="h_inf" units="dimensionless"/>
+	  <variable name="tau_h" units="ms" cmeta:id="membrane_fast_sodium_current_h_gate_tau">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_h_gate_tau">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate_tau"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
+      <variable name="shift_INa_inact" units="mV" public_interface="in"/>
+	  <variable name="perc_reduced_inact_for_IpNa" units="dimensionless" public_interface="in"/>		  
       <variable name="V" units="mV" public_interface="in"/>
       <variable name="time" units="ms" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -280,9 +316,13 @@ http://www.CellML.org/
                         <cn cellml:units="per_mV">0.25</cn>
                      </apply>
                      <apply>
-                        <plus/>
-                        <ci>V</ci>
-                        <cn cellml:units="mV">77</cn>
+                        <minus/>
+                        <apply>
+                           <plus/>
+                           <ci>V</ci>
+                           <cn cellml:units="mV">77</cn>
+                        </apply>
+                        <ci>shift_INa_inact</ci>
                      </apply>
                   </apply>
                </apply>
@@ -305,13 +345,63 @@ http://www.CellML.org/
                            <cn cellml:units="per_mV">0.082</cn>
                         </apply>
                         <apply>
-                           <plus/>
-                           <ci>V</ci>
-                           <cn cellml:units="mV">22.5</cn>
+                           <minus/>
+                           <apply>
+                              <plus/>
+                              <ci>V</ci>
+                              <cn cellml:units="mV">22.5</cn>
+                           </apply>
+                           <ci>shift_INa_inact</ci>
                         </apply>
                      </apply>
                   </apply>
                   <cn cellml:units="dimensionless">1</cn>
+               </apply>
+            </apply>
+         </apply>
+         <apply>
+            <eq/>
+            <ci>h_inf</ci>
+            <apply>
+               <plus/>
+               <apply>
+                  <divide/>
+                  <apply>
+                     <times/>
+                     <ci>alpha_h</ci>
+                     <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
+                        <apply>
+                           <divide/>
+                           <ci>perc_reduced_inact_for_IpNa</ci>
+                           <cn cellml:units="dimensionless">100</cn>
+                        </apply>
+                     </apply>
+                  </apply>
+                  <apply>
+                     <plus/>
+                     <ci>alpha_h</ci>
+                     <ci>beta_h</ci>
+                  </apply>
+               </apply>
+               <apply>
+                  <divide/>
+                  <ci>perc_reduced_inact_for_IpNa</ci>
+                  <cn cellml:units="dimensionless">100</cn>
+               </apply>
+            </apply>
+         </apply>
+         <apply>
+            <eq/>
+            <ci>tau_h</ci>
+            <apply>
+               <divide/>
+               <cn cellml:units="dimensionless">1</cn>
+               <apply>
+                  <plus/>
+                  <ci>alpha_h</ci>
+                  <ci>beta_h</ci>
                </apply>
             </apply>
          </apply>
@@ -325,29 +415,37 @@ http://www.CellML.org/
                <ci>h</ci>
             </apply>
             <apply>
-               <minus/>
+               <divide/>
                <apply>
-                  <times/>
-                  <ci>alpha_h</ci>
-                  <apply>
-                     <minus/>
-                     <cn cellml:units="dimensionless">1</cn>
-                     <ci>h</ci>
-                  </apply>
-               </apply>
-               <apply>
-                  <times/>
-                  <ci>beta_h</ci>
+                  <minus/>
+                  <ci>h_inf</ci>
                   <ci>h</ci>
                </apply>
+               <ci>tau_h</ci>
             </apply>
          </apply>
       </math>
    </component>
    <component name="sodium_current_j_gate">
-      <variable name="j" units="dimensionless" initial_value="0.975" public_interface="out"/>
+	  <variable name="j" units="dimensionless" initial_value="0.975" public_interface="out" cmeta:id="membrane_fast_sodium_current_j_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_j_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
       <variable name="alpha_j" units="per_ms"/>
       <variable name="beta_j" units="per_ms"/>
+      <variable name="j_inf" units="dimensionless"/>
+	  <variable name="tau_j" units="ms" cmeta:id="membrane_fast_sodium_current_j_gate_tau">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_j_gate_tau">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate_tau"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
+      <variable name="shift_INa_inact" units="mV" public_interface="in"/>
+	  <variable name="perc_reduced_inact_for_IpNa" units="dimensionless" public_interface="in"/>		  	  
       <variable name="V" units="mV" public_interface="in"/>
       <variable name="time" units="ms" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -368,9 +466,13 @@ http://www.CellML.org/
                            <cn cellml:units="per_mV">0.25</cn>
                         </apply>
                         <apply>
-                           <plus/>
-                           <ci>V</ci>
-                           <cn cellml:units="mV">78</cn>
+                           <minus/>
+                           <apply>
+                              <plus/>
+                              <ci>V</ci>
+                              <cn cellml:units="mV">78</cn>
+                           </apply>
+                           <ci>shift_INa_inact</ci>
                         </apply>
                      </apply>
                   </apply>
@@ -386,9 +488,13 @@ http://www.CellML.org/
                            <cn cellml:units="per_mV">0.2</cn>
                         </apply>
                         <apply>
-                           <plus/>
-                           <ci>V</ci>
-                           <cn cellml:units="mV">78</cn>
+                           <minus/>
+                           <apply>
+                              <plus/>
+                              <ci>V</ci>
+                              <cn cellml:units="mV">78</cn>
+                           </apply>
+                           <ci>shift_INa_inact</ci>
                         </apply>
                      </apply>
                   </apply>
@@ -413,13 +519,63 @@ http://www.CellML.org/
                            <cn cellml:units="per_mV">0.1</cn>
                         </apply>
                         <apply>
-                           <plus/>
-                           <ci>V</ci>
-                           <cn cellml:units="mV">32</cn>
+                           <minus/>
+                           <apply>
+                              <plus/>
+                              <ci>V</ci>
+                              <cn cellml:units="mV">32</cn>
+                           </apply>
+                           <ci>shift_INa_inact</ci>
                         </apply>
                      </apply>
                   </apply>
                   <cn cellml:units="dimensionless">1</cn>
+               </apply>
+            </apply>
+         </apply>
+         <apply>
+            <eq/>
+            <ci>j_inf</ci>
+            <apply>
+               <plus/>
+               <apply>
+                  <divide/>
+                  <apply>
+                     <times/>
+                     <ci>alpha_j</ci>
+                     <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
+                        <apply>
+                           <divide/>
+                           <ci>perc_reduced_inact_for_IpNa</ci>
+                           <cn cellml:units="dimensionless">100</cn>
+                        </apply>
+                     </apply>
+                  </apply>
+                  <apply>
+                     <plus/>
+                     <ci>alpha_j</ci>
+                     <ci>beta_j</ci>
+                  </apply>
+               </apply>
+               <apply>
+                  <divide/>
+                  <ci>perc_reduced_inact_for_IpNa</ci>
+                  <cn cellml:units="dimensionless">100</cn>
+               </apply>
+            </apply>
+         </apply>
+         <apply>
+            <eq/>
+            <ci>tau_j</ci>
+            <apply>
+               <divide/>
+               <cn cellml:units="dimensionless">1</cn>
+               <apply>
+                  <plus/>
+                  <ci>alpha_j</ci>
+                  <ci>beta_j</ci>
                </apply>
             </apply>
          </apply>
@@ -433,28 +589,32 @@ http://www.CellML.org/
                <ci>j</ci>
             </apply>
             <apply>
-               <minus/>
+               <divide/>
                <apply>
-                  <times/>
-                  <ci>alpha_j</ci>
-                  <apply>
-                     <minus/>
-                     <cn cellml:units="dimensionless">1</cn>
-                     <ci>j</ci>
-                  </apply>
-               </apply>
-               <apply>
-                  <times/>
-                  <ci>beta_j</ci>
+                  <minus/>
+                  <ci>j_inf</ci>
                   <ci>j</ci>
                </apply>
+               <ci>tau_j</ci>
             </apply>
          </apply>
       </math>
    </component>
    <component name="slow_inward_current">
-      <variable name="i_s" units="uA_per_mm2" public_interface="out"/>
-      <variable name="g_s" units="mS_per_mm2" initial_value="9e-4"/>
+	  <variable name="i_s" units="uA_per_mm2" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
+      <variable name="g_s" units="mS_per_mm2" initial_value="9e-4" cmeta:id="membrane_L_type_calcium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="E_s" units="mV"/>
       <variable name="Cai" units="concentration_units" initial_value="1e-4" public_interface="out" cmeta:id="cytosolic_calcium_concentration">
         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
@@ -543,7 +703,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="slow_inward_current_d_gate">
-      <variable name="d" units="dimensionless" initial_value="0.003" public_interface="out"/>
+	  <variable name="d" units="dimensionless" initial_value="0.003" public_interface="out" cmeta:id="membrane_L_type_calcium_current_d_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_d_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_d_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>		  
       <variable name="alpha_d" units="per_ms"/>
       <variable name="beta_d" units="per_ms"/>
       <variable name="V" units="mV" public_interface="in"/>
@@ -666,7 +832,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="slow_inward_current_f_gate">
-      <variable name="f" units="dimensionless" initial_value="0.994" public_interface="out"/>
+	  <variable name="f" units="dimensionless" initial_value="0.994" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_f_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  	  
       <variable name="alpha_f" units="per_ms"/>
       <variable name="beta_f" units="per_ms"/>
       <variable name="V" units="mV" public_interface="in"/>
@@ -789,7 +961,20 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="time_dependent_outward_current">
-      <variable name="i_x1" units="uA_per_mm2" public_interface="out"/>
+	  <variable name="i_x1" units="uA_per_mm2" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>  	  
+      <variable name="G_Kr" units="uA_per_mm2" initial_value="0.008" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	  		  
       <variable name="time" units="ms" public_interface="in" private_interface="out"/>
       <variable name="V" units="mV" public_interface="in" private_interface="out"/>
       <variable name="x1" units="dimensionless" private_interface="in"/>
@@ -802,7 +987,7 @@ http://www.CellML.org/
                <apply>
                   <times/>
                   <ci>x1</ci>
-                  <cn type="e-notation" cellml:units="uA_per_mm2">8<sep/>-3</cn>
+                  <ci>G_Kr</ci>
                   <apply>
                      <minus/>
                      <apply>
@@ -957,7 +1142,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="time_independent_outward_current">
-      <variable name="i_K1" units="uA_per_mm2" public_interface="out"/>
+	  <variable name="i_K1" units="uA_per_mm2" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>	   	  	  
       <variable name="time" units="ms" public_interface="in"/>
       <variable name="V" units="mV" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1233,12 +1424,16 @@ http://www.CellML.org/
       <map_variables variable_1="h" variable_2="h"/>
       <map_variables variable_1="time" variable_2="time"/>
       <map_variables variable_1="V" variable_2="V"/>
+      <map_variables variable_1="shift_INa_inact" variable_2="shift_INa_inact"/>
+      <map_variables variable_1="perc_reduced_inact_for_IpNa" variable_2="perc_reduced_inact_for_IpNa"/>	  
    </connection>
    <connection>
       <map_components component_1="sodium_current" component_2="sodium_current_j_gate"/>
       <map_variables variable_1="j" variable_2="j"/>
       <map_variables variable_1="time" variable_2="time"/>
       <map_variables variable_1="V" variable_2="V"/>
+      <map_variables variable_1="shift_INa_inact" variable_2="shift_INa_inact"/>
+      <map_variables variable_1="perc_reduced_inact_for_IpNa" variable_2="perc_reduced_inact_for_IpNa"/>	  
    </connection>
    <connection>
       <map_components component_1="time_dependent_outward_current" component_2="time_dependent_outward_current_x1_gate"/>

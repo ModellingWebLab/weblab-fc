@@ -3540,7 +3540,13 @@ A Mathematical Model of Action Potential Heterogeneity in Adult Rat Left Ventric
       </math>
    </component>
    <component name="standard_ionic_concentrations">
-      <variable name="Na_o" units="millimolar" initial_value="140" public_interface="out"/>
+      <variable name="Na_o" units="millimolar" initial_value="140" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Ca_o" units="millimolar" initial_value="1.2" public_interface="out" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">

@@ -7782,7 +7782,13 @@ The complete original paper reference is cited below:
             </rdf:Description>
          </rdf:RDF>
       </variable>		  
-      <variable units="millimolar" public_interface="out" name="Na_t" initial_value="1.3993239e2"/>
+      <variable units="millimolar" public_interface="out" name="Na_t" initial_value="1.3993239e2" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable units="millimolar" public_interface="out" name="Ca_t" initial_value="1.8476402e0" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">

@@ -273,7 +273,13 @@ A novel computational model of the human ventricular action potential and Ca tra
             </rdf:Description>
          </rdf:RDF>
       </variable>		  
-      <variable name="Nao" units="mM" public_interface="out"/>
+      <variable name="Nao" units="mM" initial_value="140" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Cao" units="mM" initial_value="1.8" public_interface="out" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">
@@ -644,11 +650,6 @@ A novel computational model of the human ventricular action potential and Ca tra
             <eq/>
             <ci>Clo</ci>
             <cn cellml:units="mM">150</cn>
-         </apply>
-         <apply>
-            <eq/>
-            <ci>Nao</ci>
-            <cn cellml:units="mM">140</cn>
          </apply>
          <apply>
             <eq/>

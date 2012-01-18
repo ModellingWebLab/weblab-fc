@@ -3880,7 +3880,13 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="Nao" units="mM" initial_value="140" public_interface="out"/>
+      <variable name="Nao" units="mM" initial_value="140" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
 	  <variable name="Ki" units="mM" initial_value="143.727" public_interface="out" cmeta:id="cytosolic_potassium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#cytosolic_potassium_concentration">

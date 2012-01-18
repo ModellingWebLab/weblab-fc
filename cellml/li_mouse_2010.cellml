@@ -118,7 +118,13 @@ http://www.CellML.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>		
-      <variable name="Nao" units="micromolar" initial_value="134000" public_interface="out"/>
+      <variable name="Nao" units="micromolar" initial_value="134000" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Cao" units="micromolar" initial_value="1400" public_interface="out" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">
@@ -280,9 +286,27 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="calcium_concentration">
-      <variable name="Cai" units="micromolar" initial_value="0.0949915068139801" public_interface="out"/>
-      <variable name="Cass" units="micromolar" initial_value="0.0954184301907784" public_interface="out"/>
-      <variable name="CaJSR" units="micromolar" initial_value="171.167969039613" public_interface="out"/>
+      <variable name="Cai" units="micromolar" initial_value="0.0949915068139801" public_interface="out" cmeta:id="cytosolic_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#cytosolic_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+      <variable name="Cass" units="micromolar" initial_value="0.0954184301907784" public_interface="out" cmeta:id="diadicspace_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#diadicspace_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#diadicspace_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+      <variable name="CaJSR" units="micromolar" initial_value="171.167969039613" public_interface="out" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>     
       <variable name="CaNSR" units="micromolar" initial_value="404.825013216286" public_interface="out"/>
       <variable name="Bi" units="dimensionless"/>
       <variable name="Bss" units="dimensionless"/>
@@ -1943,7 +1967,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="sodium_concentration">
-      <variable name="Nai" units="micromolar" initial_value="12364.7482121793" public_interface="out"/>
+      <variable name="Nai" units="micromolar" initial_value="12364.7482121793" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#cytosolic_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="F" units="coulomb_per_millimole" public_interface="in"/>
       <variable name="Vmyo" units="microlitre" public_interface="in"/>
@@ -2834,7 +2864,13 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="potassium_concentration">
-      <variable name="Ki" units="micromolar" initial_value="115599.50642567" public_interface="out"/>
+      <variable name="Ki" units="micromolar" initial_value="115599.50642567" public_interface="out" cmeta:id="cytosolic_potassium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#cytosolic_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="F" units="coulomb_per_millimole" public_interface="in"/>
       <variable name="Vmyo" units="microlitre" public_interface="in"/>

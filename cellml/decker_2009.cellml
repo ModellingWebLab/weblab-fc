@@ -275,7 +275,13 @@ Properties and ionic mechanisms of action potential adaptation, restitution, and
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="Na_o" units="mM" initial_value="140" public_interface="out"/>
+      <variable name="Na_o" units="mM" initial_value="140" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="Cl_o" units="mM" initial_value="100" public_interface="out"/>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="cell_geometry">

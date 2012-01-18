@@ -3043,7 +3043,8 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="g_Ks" units="milliS_per_microF" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+      <variable name="g_Ks" units="milliS_per_microF"/>
+      <variable name="g_Ks_max" units="milliS_per_microF" initial_value="0.052581329" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
@@ -3077,7 +3078,7 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
             <ci>g_Ks</ci>
             <apply>
                <times/>
-               <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="milliS_per_microF">0.052581329</cn>
+               <ci>g_Ks_max</ci>
                <apply>
                   <plus/>
                   <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="dimensionless">1</cn>
@@ -5539,7 +5540,13 @@ Optimal velocity and safety of discontinuous conduction through the heterogeneou
       </math>
    </component>
    <component name="model_parameters">
-      <variable initial_value="140" name="Na_o" public_interface="out" units="millimolar"/>
+      <variable initial_value="140" name="Na_o" public_interface="out" units="millimolar" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable initial_value="1.8" name="Ca_o" public_interface="out" units="millimolar" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">

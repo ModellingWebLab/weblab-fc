@@ -2862,7 +2862,7 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>		  
-      <variable name="g_to" units="milliS_per_microF" cmeta:id="membrane_transient_outward_current_conductance">
+      <variable name="g_to" units="milliS_per_microF" initial_value="0.5" cmeta:id="membrane_transient_outward_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_transient_outward_current_conductance">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/>
@@ -2876,15 +2876,6 @@ http://www.cellml.org/
       <variable name="zdv" units="dimensionless" private_interface="in"/>
       <variable name="ydv" units="dimensionless" private_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
-         <apply>
-            <eq/>
-            <ci>g_to</ci>
-            <apply>
-               <times/>
-               <cn cellml:units="dimensionless">0</cn>
-               <cn cellml:units="milliS_per_microF">0.5</cn>
-            </apply>
-         </apply>
          <apply>
             <eq/>
             <ci>rvdv</ci>
@@ -3852,34 +3843,41 @@ http://www.cellml.org/
       <variable name="i_tr" units="millimolar_per_ms" public_interface="out"/>
       <variable name="G_rel" units="per_ms"/>
       <variable name="G_rel_Viswanathan" units="per_ms"/>
-      <variable name="G_rel_max" units="per_ms" initial_value="60" cmeta:id="SR_release_current_max">
+	  <variable name="G_rel_max" units="per_ms" initial_value="60" cmeta:id="SR_release_current_max">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#SR_release_current_max">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>     
+      </variable>	  
       <variable name="G_rel_overload" units="per_ms" initial_value="4"/>
       <variable name="tau_tr" units="ms" initial_value="180"/>
-      <variable name="K_mrel" units="millimolar" initial_value="0.0008" cmeta:id="SR_release_kmcacyt">
+	  <variable name="K_mrel" units="millimolar" initial_value="0.0008" cmeta:id="SR_release_kmcacyt">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#SR_release_kmcacyt">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_kmcacyt"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>         
+      </variable>		  
       <variable name="delta_Ca_ith" units="millimolar" initial_value="0.00018"/>
       <variable name="CSQN_max" units="millimolar" initial_value="10"/>
       <variable name="K_mCSQN" units="millimolar" initial_value="0.8"/>
       <variable name="K_mup" units="millimolar" initial_value="0.00092"/>
       <variable name="K_leak" units="per_ms"/>
-      <variable name="I_up" units="millimolar_per_ms" initial_value="0.00875" cmeta:id="SR_uptake_current_max">
+	  <variable name="leak_factor" initial_value="1" units="dimensionless" cmeta:id="SR_leak_current_max">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#SR_leak_current_max">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+	  <variable name="I_up" units="millimolar_per_ms" initial_value="0.00875" cmeta:id="SR_uptake_current_max">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#SR_uptake_current_max">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>         
+      </variable>		  
       <variable name="Ca_NSR_max" units="millimolar" initial_value="15"/>
       <variable name="time" units="ms" public_interface="in"/>
       <variable name="F" units="coulomb_per_mole" public_interface="in"/>
@@ -3897,13 +3895,13 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="Ca_JSR" units="millimolar" initial_value="1.12791401197882" public_interface="out" cmeta:id="JSR_calcium_concentration">
+	  <variable name="Ca_JSR" units="millimolar" initial_value="1.12791401197882" public_interface="out" cmeta:id="JSR_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#JSR_calcium_concentration">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>         
+      </variable>		  
       <variable name="Ca_NSR" units="millimolar" initial_value="1.76731003671612" public_interface="out"/>
       <variable name="V_myo" units="micro_litre" public_interface="in"/>
       <variable name="A_cap" units="cm2" public_interface="in"/>
@@ -4498,7 +4496,11 @@ http://www.cellml.org/
             <ci>K_leak</ci>
             <apply>
                <divide/>
-               <ci>I_up</ci>
+               <apply>
+                  <times/>
+                  <ci>leak_factor</ci>
+                  <ci>I_up</ci>
+               </apply>
                <ci>Ca_NSR_max</ci>
             </apply>
          </apply>
@@ -4722,7 +4724,13 @@ http://www.cellml.org/
             </rdf:Description>
          </rdf:RDF>
       </variable>
-      <variable name="Nao" units="millimolar" initial_value="140" public_interface="out"/>
+      <variable name="Nao" units="millimolar" initial_value="140" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
 	  <variable name="Ki" units="millimolar" initial_value="141.056872392446" public_interface="out" cmeta:id="cytosolic_potassium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#cytosolic_potassium_concentration">
@@ -4736,14 +4744,14 @@ http://www.cellml.org/
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#concentration_clamp_onoff"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>             
-      <variable name="Ko" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+      </variable>			  
+	  <variable name="Ko" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_potassium_concentration">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>         
+      </variable>		  
       <variable name="A_cap" units="cm2" public_interface="in"/>
       <variable name="V_myo" units="micro_litre" public_interface="in"/>
       <variable name="time" units="ms" public_interface="in"/>

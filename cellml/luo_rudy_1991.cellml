@@ -1876,7 +1876,13 @@ The breakdown of the model into components and the definition of encapsulation a
       </math>
    </component>
    <component name="ionic_concentrations">
-      <variable units="millimolar" public_interface="out" name="Nao" initial_value="140"/>
+      <variable units="millimolar" public_interface="out" name="Nao" initial_value="140" cmeta:id="extracellular_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
 	  <variable name="Nai" units="millimolar" initial_value="18" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#cytosolic_sodium_concentration">
