@@ -10,6 +10,7 @@
             </apply>
         </apply>
     </inputs>
+    <import source="../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
     <post-processing>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
@@ -445,6 +446,28 @@
                         </apply>
                     </apply>
                     <cn>2</cn>
+                </apply>
+            </apply>
+            
+            <!-- Test reversing an array -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <ci>ArrayEq</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>input</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>-1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <apply>
+                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                         <cn>10</cn><cn>9</cn><cn>8</cn><cn>7</cn><cn>6</cn><cn>5</cn><cn>4</cn><cn>3</cn><cn>2</cn><cn>1</cn>
+                    </apply>
                 </apply>
             </apply>
             
