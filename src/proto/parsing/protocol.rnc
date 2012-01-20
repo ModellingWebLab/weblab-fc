@@ -223,6 +223,9 @@ proto.value = element proto:value { NumberOrExpression }
 # tests than given here on the internal structure.
 Expression = mathml.piecewise | mathml.apply | mathml.lambda | ctoken
 
+# Whether to trace evaluation of this expression/statement/whatever.
+trace_attr = attribute proto:trace { xsd:boolean }
+
 # A 'statement list' is an apply of one of our cymbols that extend core MathML.  Each operand
 # is a 'statement' which must be an apply of either the assert or return csymbols, or of the
 # 'eq' MathML operator (representing assignment).  A return is only allowed within the context
@@ -343,3 +346,6 @@ include "mathml2.rnc" {
 
     # Raw numbers often need units; we use CellML for now
     attlist-mathml.cn &= attribute cellml:units { ident }?
+    
+    # Many things are traceable
+    MATHML.Common.attrib &= trace_attr?
