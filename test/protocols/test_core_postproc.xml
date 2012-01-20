@@ -559,6 +559,158 @@
                     </apply>
                 </lambda>
             </apply>
+            
+            <!-- Test Count function. -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply><ci>Count</ci>
+                        <ci>input</ci>
+                        <lambda>
+                            <bvar><ci>elt</ci></bvar>
+                            <apply><lt/><ci>elt</ci><cn>5</cn></apply>
+                        </lambda>
+                    </apply>
+                    <cn>4</cn>
+                </apply>
+            </apply>
+            
+            <!-- Simple test of Filter function. -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>Filter</ci>
+                        <ci>input</ci>
+                        <lambda>
+                            <bvar><ci>elt</ci></bvar>
+                            <apply><lt/><ci>elt</ci><cn>5</cn></apply>
+                        </lambda>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <cn>1</cn><cn>2</cn><cn>3</cn><cn>4</cn>
+                    </apply>
+                </apply>
+            </apply>
+            
+            <!-- Test Permute function. -->
+            <!-- Check input[:-1:] == Permute(input, {9,...,0}) -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>Permute</ci>
+                        <ci>input</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>9</cn><cn>8</cn><cn>7</cn><cn>6</cn><cn>5</cn><cn>4</cn><cn>3</cn><cn>2</cn><cn>1</cn><cn>0</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>input</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>-1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- Check Permute(input2d, {1,2,0}) == {{3,5,1}, {4,2,6}} -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>Permute</ci>
+                        <ci>input2d</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>1</cn><cn>2</cn><cn>0</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>3</cn><cn>5</cn><cn>1</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>4</cn><cn>2</cn><cn>6</cn>
+                        </apply>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- Check Sort({3,7,5,2,9}) == {2,3,5,7,9} -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>Sort</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>3</cn><cn>7</cn><cn>5</cn><cn>2</cn><cn>9</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <cn>2</cn><cn>3</cn><cn>5</cn><cn>7</cn><cn>9</cn>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- Check Sort({3,7,11,2,9}) == {2,3,7,9,11} -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>Sort</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>3</cn><cn>7</cn><cn>11</cn><cn>2</cn><cn>9</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <cn>2</cn><cn>3</cn><cn>7</cn><cn>9</cn><cn>11</cn>
+                    </apply>
+                </apply>
+            </apply>
+            <!-- Check Sort(input) == input -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>Sort</ci>
+                        <ci>input</ci>
+                    </apply>
+                    <ci>input</ci>
+                </apply>
+            </apply>
+            <!-- Check SortBy(input2d, {3,1,2}) == { { 3, 5, 1 }, { 4, 2, 6 } } -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>ArrayEq</ci>
+                    <apply><ci>SortBy</ci>
+                        <ci>input2d</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>3</cn><cn>1</cn><cn>2</cn>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>3</cn>
+                            <cn>5</cn>
+                            <cn>1</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>4</cn>
+                            <cn>2</cn>
+                            <cn>6</cn>
+                        </apply>
+                    </apply>
+                </apply>
+            </apply>
         </apply>
     </post-processing>
 </protocol>

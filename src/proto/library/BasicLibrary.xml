@@ -1445,6 +1445,33 @@
                 </lambda>
             </apply>
             
+            <!-- Count(array, predicate): count the number of elements within array that satisfy the predicate -->
+            <apply><eq/>
+                <ci>Count</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>predicate</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"></csymbol>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                    <ci>predicate</ci>
+                                    <ci>array</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>0</cn><cn>0</cn>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
             <!-- Last(array, dim=array.num_dims-1): return the last sub-array/value along a particular dimension -->
             <apply><eq/>
                 <ci>Last</ci>
@@ -1480,7 +1507,530 @@
                     </apply>
                 </lambda>
             </apply>
-                        
+
+            <!-- Permute(array, permutation, dim=array.num_dims-1): re-order elements in the array according to the permutation vector.
+                The i-th entry in the vector gives the index within array dimension dim of the i-th entry of the result array.
+                -->
+            <apply><eq/>
+                <ci>Permute</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>permutation</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Test arguments -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply><ci>DefaultDim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <!-- permutation.num_dims == 1 -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                    <ci>permutation</ci>
+                                </apply>
+                                <cn>1</cn>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>len</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>permutation</ci>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <cn>0</cn><cn>0</cn><cn>0</cn>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <!-- array.shape[dim] == permutation.shape[0] -->
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                        <ci>array</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci><cn>0</cn><ci>dim</ci>
+                                    </apply>
+                                </apply>
+                                <ci>len</ci>
+                            </apply>
+                        </apply>
+                        <apply><eq/><ci>tmp</ci><apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                        <ci>array</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci><cn>0</cn><ci>dim</ci>
+                                    </apply>
+                                </apply></apply>
+                        <!-- Calculate result: [ array[permutation[i]] for i=0:permutation.shape[0] ] -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                <domainofapplication>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci>
+                                        <cn>0</cn>
+                                        <cn>1</cn>
+                                        <ci>len</ci>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol>
+                                    </apply>
+                                </domainofapplication>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <ci>array</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <ci>dim</ci>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <ci>permutation</ci>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <ci>i</ci><cn>0</cn><ci>i</ci>
+                                            </apply>                                                
+                                        </apply>
+                                        <cn>0</cn>
+                                        <apply>
+                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                            <ci>permutation</ci>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <ci>i</ci><cn>0</cn><ci>i</ci>
+                                            </apply>                                                
+                                        </apply>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                        <cn>1</cn>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    </apply>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- Filter(array, predicate, dim=default, shrink=default, pad=default, padValue=default):
+                return only those elements of the array matching the predicate.
+                The optional arguments are passed to index, and specify how to deal with an irregular result.
+            -->
+            <apply><eq/>
+                <ci>Filter</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>predicate</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/></annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>shrink</ci></bvar>
+                        <annotation-xml><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/></annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>pad</ci></bvar>
+                        <annotation-xml><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/></annotation-xml>
+                    </semantics>
+                    <semantics>
+                        <bvar><ci>padValue</ci></bvar>
+                        <annotation-xml><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/></annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                        <ci>array</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <ci>predicate</ci>
+                                <ci>array</ci>
+                            </apply>
+                        </apply>
+                        <ci>dim</ci><ci>shrink</ci><ci>pad</ci><ci>padValue</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- GetSortPermutation(vector, orig_indices=[0,...,vector.len-1]): get the permutation vector
+                (see Permute) required to sort the given vector into ascending order.
+                Uses the quicksort algorithm.
+            -->
+            <apply><eq/>
+                <ci>GetSortPermutation</ci>
+                <lambda>
+                    <bvar><ci>vector</ci></bvar>
+                    <semantics>
+                        <bvar><ci>orig_indices'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Check it's a vector -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                    <ci>vector</ci>
+                                </apply>
+                                <cn>1</cn>
+                            </apply>
+                        </apply>
+                        <!-- Find the length -->
+                        <apply><eq/>
+                            <ci>len</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>vector</ci>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <cn>0</cn><cn>0</cn><cn>0</cn>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <!-- Create a default indices vector if not supplied -->
+                        <apply><eq/>
+                            <ci>orig_indices</ci>
+                            <piecewise>
+                                <piece>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                        <domainofapplication>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                <cn>0</cn><cn>0</cn><cn>1</cn><ci>len</ci>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol>
+                                            </apply>
+                                        </domainofapplication>
+                                        <ci>i</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_DEFAULT</csymbol>
+                                        <ci>orig_indices'</ci>
+                                    </apply>
+                                </piece>
+                                <otherwise><ci>orig_indices'</ci></otherwise>
+                            </piecewise>
+                        </apply>
+                        <!-- Put the return here, since we need to do the base case if len == 1 -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <piecewise>
+                                <piece>
+                                    <!-- Base case: identity permutation -->
+                                    <ci>orig_indices</ci>
+                                    <apply><eq/><ci>len</ci><cn>1</cn></apply>
+                                </piece>
+                                <otherwise>
+                                    <!-- Nested scope so we can sequence statements for the recursive case -->
+                                    <apply>
+                                        <lambda>
+                                            <apply>
+                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                                                <!-- Pick a pivot in the middle -->
+                                                <apply><eq/>
+                                                    <ci>curr_pivot_idx</ci>
+                                                    <apply><floor/>
+                                                        <apply><divide/><ci>len</ci><cn>2</cn></apply>
+                                                    </apply>
+                                                </apply>
+                                                <apply><eq/>
+                                                    <ci>pivot</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                        <ci>vector</ci>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                            <ci>curr_pivot_idx</ci><cn>0</cn><ci>curr_pivot_idx</ci>
+                                                        </apply>
+                                                    </apply>
+                                                </apply>
+                                                <apply><eq/>
+                                                    <ci>orig_pivot_idx</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                                        <ci>orig_indices</ci>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                                            <ci>curr_pivot_idx</ci>
+                                                            <cn>0</cn>
+                                                            <ci>curr_pivot_idx</ci>
+                                                        </apply>
+                                                    </apply>
+                                                </apply>
+                                                <!-- Count how many elements fall each side -->
+                                                <apply><eq/>
+                                                    <ci>num_below</ci>
+                                                    <apply><minus/>
+                                                        <apply><ci>Count</ci>
+                                                            <ci>vector</ci>
+                                                            <lambda>
+                                                                <bvar><ci>elt</ci></bvar>
+                                                                <apply><leq/><ci>elt</ci><ci>pivot</ci></apply>
+                                                            </lambda>
+                                                        </apply>
+                                                        <cn>1</cn>
+                                                    </apply>
+                                                </apply>
+                                                <apply><eq/>
+                                                    <ci>num_above</ci>
+                                                    <apply><minus/>
+                                                        <ci>len</ci>
+                                                        <apply><plus/><ci>num_below</ci><cn>1</cn></apply>
+                                                    </apply>
+                                                </apply>
+                                                <!-- Recursively sort each non-empty sub-vector -->
+                                                <apply><eq/>
+                                                    <ci>all_idxs_below</ci> <!-- includes pivot -->
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                                            <lambda>
+                                                                <bvar><ci>elt</ci></bvar>
+                                                                <apply><leq/><ci>elt</ci><ci>pivot</ci></apply>                                                                    
+                                                            </lambda>
+                                                            <ci>vector</ci>
+                                                        </apply>
+                                                    </apply>                                                
+                                                </apply>
+                                                <!-- Remove pivot index -->
+                                                <apply><eq/>
+                                                    <ci>idxs_below</ci>
+                                                    <piecewise>
+                                                        <piece>
+                                                            <apply><ci>Filter</ci>
+                                                                <ci>all_idxs_below</ci>
+                                                                <lambda>
+                                                                    <bvar><ci>idx</ci></bvar>
+                                                                    <apply><neq/><ci>idx</ci><ci>curr_pivot_idx</ci></apply>
+                                                                </lambda>
+                                                                <cn>0</cn><cn>1</cn>
+                                                            </apply>
+                                                            <apply><gt/><ci>num_below</ci><cn>0</cn></apply>
+                                                        </piece>                                                        
+                                                        <otherwise>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        </otherwise>
+                                                    </piecewise>
+                                                </apply>
+                                                <apply><eq/>
+                                                    <ci>idxs_above</ci>
+                                                    <apply>
+                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                                                        <apply>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                                            <lambda>
+                                                                <bvar><ci>elt</ci></bvar>
+                                                                <apply><gt/><ci>elt</ci><ci>pivot</ci></apply>                                                                    
+                                                            </lambda>
+                                                            <ci>vector</ci>
+                                                        </apply>
+                                                    </apply>                                                
+                                                </apply>
+                                                <apply><eq/>
+                                                    <ci>result_below</ci>
+                                                    <piecewise>
+                                                        <piece>
+                                                            <apply><ci>GetSortPermutation</ci>
+                                                                <apply>
+                                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                                                    <ci>vector</ci>
+                                                                    <ci>idxs_below</ci>
+                                                                </apply>
+                                                                <apply>
+                                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                                                    <ci>orig_indices</ci>
+                                                                    <ci>idxs_below</ci>
+                                                                </apply>
+                                                            </apply>
+                                                            <apply><gt/><ci>num_below</ci><cn>0</cn></apply>
+                                                        </piece>
+                                                        <otherwise>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        </otherwise>
+                                                    </piecewise>
+                                                </apply>
+                                                <apply><eq/>
+                                                    <ci>result_above</ci>
+                                                    <piecewise>
+                                                        <piece>
+                                                            <apply><ci>GetSortPermutation</ci>
+                                                                <apply>
+                                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                                                    <ci>vector</ci>
+                                                                    <ci>idxs_above</ci>
+                                                                </apply>
+                                                                <apply>
+                                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index"/>
+                                                                    <ci>orig_indices</ci>
+                                                                    <ci>idxs_above</ci>
+                                                                </apply>
+                                                            </apply>
+                                                            <apply><gt/><ci>num_above</ci><cn>0</cn></apply>
+                                                        </piece>
+                                                        <otherwise>
+                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                                        </otherwise>
+                                                    </piecewise>
+                                                </apply>
+                                                <!-- Merge the sub-permutations -->
+                                                <apply>
+                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                                                    <piecewise>
+                                                        <piece>
+                                                            <!-- No elements below pivot -->
+                                                            <apply><ci>Join</ci>
+                                                                <apply>
+                                                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                                                    <ci>orig_pivot_idx</ci>
+                                                                </apply>
+                                                                <ci>result_above</ci>
+                                                            </apply>
+                                                            <apply>
+                                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_NULL</csymbol>
+                                                                <ci>result_below</ci>
+                                                            </apply>
+                                                        </piece>
+                                                        <otherwise>
+                                                            <piecewise>
+                                                                <piece>
+                                                                    <!-- No elements above pivot -->
+                                                                    <apply><ci>Join</ci>
+                                                                        <ci>result_below</ci>
+                                                                        <apply>
+                                                                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                                                            <ci>orig_pivot_idx</ci>
+                                                                        </apply>
+                                                                    </apply>
+                                                                    <apply>
+                                                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_NULL</csymbol>
+                                                                        <ci>result_above</ci>
+                                                                    </apply>
+                                                                </piece>
+                                                                <otherwise>
+                                                                    <!-- Elements above and below pivot -->
+                                                                    <apply><ci>Join</ci>
+                                                                        <ci>result_below</ci>
+                                                                        <apply><ci>Join</ci>
+                                                                            <apply>
+                                                                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                                                                                <ci>orig_pivot_idx</ci>
+                                                                            </apply>
+                                                                            <ci>result_above</ci>
+                                                                        </apply>
+                                                                    </apply>
+                                                                </otherwise>
+                                                            </piecewise>
+                                                        </otherwise>
+                                                    </piecewise>
+                                                </apply>
+                                            </apply>
+                                        </lambda>
+                                    </apply>
+                                </otherwise>
+                            </piecewise>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+
+            <!-- Sort(vector): sort a vector into ascending order (using quicksort). -->
+            <apply><eq/>
+                <ci>Sort</ci>
+                <lambda>
+                    <bvar><ci>vector</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Get the permutation -->
+                        <apply><eq/>
+                            <ci>permutation</ci>
+                            <apply><ci>GetSortPermutation</ci>
+                                <ci>vector</ci>
+                            </apply>
+                        </apply>
+                        <!-- Apply it -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply><ci>Permute</ci>
+                                <ci>vector</ci>
+                                <ci>permutation</ci>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- SortBy(array, key, dim=array.num_dims-1): sort an array using a "key" vector.  The result
+                array will be re-ordered along the given dimension in such a way that the same re-ordering
+                would put the key vector in ascending order.
+            -->
+            <apply><eq/>
+                <ci>SortBy</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <bvar><ci>key</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Get the permutation to use by sorting the key -->
+                        <apply><eq/>
+                            <ci>permutation</ci>
+                            <apply><ci>GetSortPermutation</ci>
+                                <ci>key</ci>
+                            </apply>
+                        </apply>
+                        <!-- Apply it to the array -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply><ci>Permute</ci>
+                                <ci>array</ci>
+                                <ci>permutation</ci>
+                                <ci>dim</ci>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
         </apply>
     </library>
 </protocol>
