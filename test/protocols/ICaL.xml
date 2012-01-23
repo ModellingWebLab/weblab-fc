@@ -302,8 +302,9 @@
             description="L-type calcium current"/>
         <raw ref="sim:membrane_voltage" name="membrane_voltage"
             description="Transmembrane potential"/>
+        
         <postprocessed name="membrane_L_type_calcium_tail_current" units="uA/cm^2"
-            description="I_Ca_L after test potential applied"/>
+            description="I_{CaL} after test potential applied"/>
         <postprocessed name="min_LCC" description="Minimum current" units="uA/cm^2"/>
         <postprocessed name="final_membrane_voltage" units="mV" description="Test potential"/>
     </outputVariables>
