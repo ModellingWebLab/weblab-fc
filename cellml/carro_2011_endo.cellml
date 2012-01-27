@@ -1181,9 +1181,21 @@ http://www.cellml.org/
       <variable name="x_Kr" units="dimensionless" initial_value="1.896559e-2" public_interface="out"/>
       <variable name="r_Kr" units="dimensionless" public_interface="out"/>
       <variable name="E_K" units="millivolt" public_interface="in"/>
-      <variable name="G_Kr" units="milliS_per_microF" initial_value="0.035" public_interface="out"/>
+      <variable name="G_Kr" units="milliS_per_microF" initial_value="0.035" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="tau_xr" units="millisecond" public_interface="out"/>
-      <variable name="I_Kr" units="picoA_per_picoF" public_interface="out"/>
+      <variable name="I_Kr" units="picoA_per_picoF" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="K_o" units="millimolar" public_interface="in"/>
       <variable name="t" units="millisecond" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -1847,9 +1859,21 @@ http://www.cellml.org/
       <variable name="a_K1" units="dimensionless" public_interface="out"/>
       <variable name="b_K1" units="dimensionless" public_interface="out"/>
       <variable name="K1_ss" units="dimensionless" public_interface="out"/>
-      <variable name="I_K1" units="picoA_per_picoF" public_interface="out"/>
+      <variable name="I_K1" units="picoA_per_picoF" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>   
       <variable name="K_o" units="millimolar" public_interface="in"/>
-      <variable name="G_K1" units="milliS_per_microF" initial_value="0.57153" public_interface="out"/>
+      <variable name="G_K1" units="milliS_per_microF" initial_value="0.57153" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>     
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>

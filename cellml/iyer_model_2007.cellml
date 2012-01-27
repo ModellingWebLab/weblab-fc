@@ -4246,9 +4246,27 @@ http://www.cellml.org/
       </math>
    </component>
    <component name="COMPUTE_INa_IKr_IKs_Ito1_IK1_INab_IKp">
-      <variable name="GKr" units="mS_per_uF" initial_value="0.0186"/>
-      <variable name="GKs" units="mS_per_uF" initial_value="0.0035"/>
-      <variable name="GK1" units="mS_per_uF" initial_value="0.125305126118808"/>
+      <variable name="GKr" units="mS_per_uF" initial_value="0.0186" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+      <variable name="GKs" units="mS_per_uF" initial_value="0.0035" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+      <variable name="GK1" units="mS_per_uF" initial_value="0.125305126118808" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>     
       <variable name="GNa" units="mS_per_uF" initial_value="56.32" cmeta:id="membrane_fast_sodium_current_conductance">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#membrane_fast_sodium_current_conductance">
@@ -4282,8 +4300,20 @@ http://www.cellml.org/
       <variable name="a2" units="dimensionless"/>
       <variable name="a1_Na" units="mM"/>
       <variable name="K1_inf" units="dimensionless"/>
-      <variable name="IKr" units="uA_per_uF" public_interface="out"/>
-      <variable name="IKs" units="uA_per_uF" public_interface="out"/>
+      <variable name="IKr" units="uA_per_uF" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+      <variable name="IKs" units="uA_per_uF" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="IKv43" units="uA_per_uF" public_interface="out"/>
       <variable name="IKv14_K" units="uA_per_uF" public_interface="out"/>
       <variable name="Nai" units="mM" public_interface="in"/>
@@ -4291,7 +4321,13 @@ http://www.cellml.org/
       <variable name="IKv14_Na" units="uA_per_uF" public_interface="out"/>
       <variable name="IKv14" units="uA_per_uF" public_interface="out"/>
       <variable name="Ito1" units="uA_per_uF" public_interface="out"/>
-      <variable name="IK1" units="uA_per_uF" public_interface="out"/>
+      <variable name="IK1" units="uA_per_uF" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>   
       <variable name="INab" units="uA_per_uF" public_interface="out"/>
       <variable name="INa" units="uA_per_uF" public_interface="out" cmeta:id="membrane_fast_sodium_current">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">

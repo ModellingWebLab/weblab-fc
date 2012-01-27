@@ -4364,7 +4364,13 @@ http://www.cellml.org/
    </component>
    <component name="IK1">
       <variable name="GK1" units="milliS_per_microF"/>
-      <variable name="GK1_b" units="milliS_per_microF" initial_value="0.1908"/>
+      <variable name="GK1_b" units="milliS_per_microF" initial_value="0.1908" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>     
       <variable name="xk1ss" units="dimensionless"/>
       <variable name="txk1" units="millisecond"/>
       <variable name="xk1" units="dimensionless" initial_value="1"/>
@@ -4374,7 +4380,13 @@ http://www.cellml.org/
       <variable name="celltype" units="dimensionless" public_interface="in"/>
       <variable name="EK" units="millivolt" public_interface="in"/>
       <variable name="ko" units="millimolar" public_interface="in"/>
-      <variable name="IK1" units="microA_per_microF" public_interface="out"/>
+      <variable name="IK1" units="microA_per_microF" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>   
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
