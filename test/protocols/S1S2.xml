@@ -59,6 +59,7 @@
         <specifyInputVariable name="oxmeta:membrane_stimulus_current_period" units="ms" initial_value="1000"/>
         <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
         <specifyOutputVariable name="oxmeta:time" units="ms"/>
+        
         <addOrReplaceEquation>
             <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
                 <ci>oxmeta:membrane_stimulus_current</ci>
@@ -202,6 +203,15 @@
                 </apply>
             </apply>
             
+            <!-- Get out a single 1D array for time (for plotting) -->
+            <apply><eq/>
+                <ci>time_1d</ci>
+                <apply><ci>RemoveDim</ci>
+                     <ci>sim:time</ci>     
+                     <cn>0</cn>
+                </apply>
+            </apply>
+            
             <!-- Compute APD90 -->
             <apply><eq/>
                 <apply>
@@ -312,9 +322,10 @@
     
     <outputVariables>
         <raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential"/>
+        <postprocessed name="time_1d" description="Time" units="ms"/>
         <postprocessed name="raw_APD90" units="ms"/>
         <postprocessed name="raw_DI" units="ms"/>
-        <postprocessed name="APD90" units="ms" description="Action Potential Duration (at 90%)"/>
+        <postprocessed name="APD90" units="ms" description="Action Potential Duration 90%"/>
         <postprocessed name="DI" units="ms" description="Diastolic Interval"/>
         <postprocessed name="S1S2_slope" units="dimensionless" description="S1-S2 curve gradient"/>
         <postprocessed name="max_S1S2_slope" units="dimensionless" description="Maximum gradient of S1-S2 curve"/>
@@ -327,8 +338,9 @@
             <y>APD90</y>
         </plot>
         <plot>
-            <title>Transmembrane potential traces</title>
-            <data>membrane_voltage</data>
+            <title>Action potential traces</title>
+            <x>time_1d</x>
+            <y>membrane_voltage</y>
         </plot>
     </plots>
 </protocol>

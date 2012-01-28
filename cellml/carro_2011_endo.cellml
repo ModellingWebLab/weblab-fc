@@ -2162,7 +2162,13 @@ http://www.cellml.org/
       <variable name="I_Ca_Na_sl" units="picoA_per_picoF" public_interface="out"/>
       <variable name="I_Ca_Na" units="picoA_per_picoF" public_interface="out"/>
       <variable name="I_Ca_K" units="picoA_per_picoF" public_interface="out"/>
-      <variable name="I_Ca_L" units="picoA_per_picoF" public_interface="out"/>
+      <variable name="I_Ca_L" units="picoA_per_picoF" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>

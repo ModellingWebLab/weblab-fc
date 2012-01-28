@@ -268,6 +268,7 @@
                     <cn>2</cn>
                 </apply>
             </apply>
+            
             <!-- We'll plot against the final V, which is equal to the step voltage -->
             <apply><eq/>
                 <ci>final_membrane_voltage</ci>
@@ -303,15 +304,15 @@
         <raw ref="sim:membrane_voltage" name="membrane_voltage"
             description="Transmembrane potential"/>
         
-        <postprocessed name="membrane_L_type_calcium_tail_current" units="uA/cm^2"
+        <postprocessed name="membrane_L_type_calcium_tail_current" units="{/Symbol m}A/cm^2"
             description="I_{CaL} after test potential applied"/>
-        <postprocessed name="min_LCC" description="Minimum current" units="uA/cm^2"/>
+        <postprocessed name="min_LCC" description="Minimum I_{CaL} current" units="{/Symbol m}A/cm^2"/>
         <postprocessed name="final_membrane_voltage" units="mV" description="Test potential"/>
     </outputVariables>
     
     <plots>
         <plot>
-            <title>Current-voltage relationship</title>
+            <title>IV curve</title>
             <x>final_membrane_voltage</x>
             <y>min_LCC</y>
         </plot>
