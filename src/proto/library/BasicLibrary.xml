@@ -68,6 +68,27 @@
                 </lambda>
             </apply>
             
+            <!-- Product = lambda a, dim=default: fold(mathml.times, a, 1, dim) -->
+            <apply><eq/>
+                <ci>Product</ci>
+                <lambda>
+                    <bvar><ci>a</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2">times</csymbol>
+                        <ci>a</ci>
+                        <cn>1</cn>
+                        <ci>dim</ci>
+                    </apply>
+                </lambda>
+            </apply>
+            
             <!-- DefaultDim(array, dim'): if dim'=default then array.num_dims-1 else dim' -->
             <apply><eq/>
                 <ci>DefaultDim</ci>
@@ -136,10 +157,7 @@
                 </lambda>
             </apply>
                         
-            <!--
-                def Diff(array, dim=default):
-                    map(-, array[<dim>1:], array[<dim>:-1])
-            -->
+            <!-- Diff(array, dim=default) = map(-, array[<dim>1:], array[<dim>:-1]) -->
             <apply><eq/>
                 <ci>Diff</ci>
                 <lambda>
@@ -707,7 +725,7 @@
                 </lambda>
             </apply>
             
-            <!-- Recursive function to fold along every dimension in turn, starting from zero -->
+            <!-- MultiFold: a recursive function to fold along every dimension in turn, starting from zero -->
             <apply><eq/>
                 <ci>MultiFold</ci>
                 <lambda>
@@ -762,7 +780,7 @@
                 </lambda>
             </apply>
 
-            <!-- Function to check array equality elementwise.
+            <!-- ArrayEq: check array equality elementwise.
                 Works with arrays of any dimension.
                 Implemented as MultiFold(and, map(eq, a1, a2), true) -->
             <apply><eq/>
@@ -784,7 +802,7 @@
                 </lambda>
             </apply>
             
-            <!-- Check whether two arrays have the same shape -->
+            <!-- ShapeEq: check whether two arrays have the same shape -->
             <apply><eq/>
                 <ci>ShapeEq</ci>
                 <lambda>
@@ -1193,7 +1211,7 @@
             </apply>
             
             <!--
-                Return that portion of an input array that occurs strictly after a specified time
+                After: return that portion of an input array that occurs strictly after a specified time
                 (although the comparison array does not necessarily have to be time).
             -->
             <apply><eq/>
@@ -1262,7 +1280,7 @@
                 </lambda>
             </apply>
             
-            <!-- Remove the given dimension from an array, taking a slice at the 0th entry -->
+            <!-- RemoveDim: remove the given dimension from an array, taking a slice at the 0th entry -->
             <apply><eq/>
                 <ci>RemoveDim</ci>
                 <lambda>
@@ -1286,7 +1304,7 @@
                 </lambda>
             </apply>
             
-            <!-- Add a new dimension to an array, of extent 1 -->
+            <!-- AddDim: add a new dimension to an array, of extent 1 -->
             <apply><eq/>
                 <ci>AddDim</ci>
                 <lambda>
@@ -1352,7 +1370,7 @@
                 </lambda>
             </apply>
             
-            <!-- Transpose a 2d array -->
+            <!-- Transpose: transpose a 2d array -->
             <apply><eq/>
                 <ci>Transpose</ci>
                 <lambda>
