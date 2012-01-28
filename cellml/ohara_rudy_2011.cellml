@@ -3773,7 +3773,13 @@ http://www.cellml.org/
       </math>
    </component>
    <component name="IKr">
-      <variable name="GKr_b" units="milliS_per_microF" initial_value="0.046"/>
+      <variable name="GKr_b" units="milliS_per_microF" initial_value="0.046" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="GKr" units="milliS_per_microF"/>
       <variable name="xrss" units="dimensionless"/>
       <variable name="txrf" units="millisecond"/>
@@ -3789,7 +3795,13 @@ http://www.cellml.org/
       <variable name="celltype" units="dimensionless" public_interface="in"/>
       <variable name="EK" units="millivolt" public_interface="in"/>
       <variable name="ko" units="millimolar" public_interface="in"/>
-      <variable name="IKr" units="microA_per_microF" public_interface="out"/>
+      <variable name="IKr" units="microA_per_microF" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -4114,7 +4126,13 @@ http://www.cellml.org/
       </math>
    </component>
    <component name="IKs">
-      <variable name="GKs_b" units="milliS_per_microF" initial_value="0.0034"/>
+      <variable name="GKs_b" units="milliS_per_microF" initial_value="0.0034" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>         
       <variable name="GKs" units="milliS_per_microF"/>
       <variable name="xs1ss" units="dimensionless"/>
       <variable name="xs2ss" units="dimensionless"/>
@@ -4126,7 +4144,13 @@ http://www.cellml.org/
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="celltype" units="dimensionless" public_interface="in"/>
       <variable name="EKs" units="millivolt" public_interface="in"/>
-      <variable name="IKs" units="microA_per_microF" public_interface="out"/>
+      <variable name="IKs" units="microA_per_microF" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>         
       <variable name="txs2" units="millisecond"/>
       <variable name="cai" units="millimolar" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
