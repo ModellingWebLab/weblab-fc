@@ -1378,11 +1378,22 @@ http://www.cellml.org/
       <variable name="E_Ks" units="millivolt" public_interface="in"/>
       <variable name="F_junc" units="dimensionless" public_interface="in"/>
       <variable name="F_sl" units="dimensionless" public_interface="in"/>
-      <variable name="G_Ks_junc" units="milliS_per_microF" initial_value="0.0035" public_interface="out"/>
-      <variable name="G_Ks_sl" units="milliS_per_microF" initial_value="0.0035" public_interface="out"/>
+      <variable name="G_Ks" units="milliS_per_microF" initial_value="0.0035" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>     
       <variable name="I_Ks_junc" units="picoA_per_picoF" public_interface="out"/>
       <variable name="I_Ks_sl" units="picoA_per_picoF" public_interface="out"/>
-      <variable name="I_Ks" units="picoA_per_picoF" public_interface="out"/>
+      <variable name="I_Ks" units="picoA_per_picoF" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -1463,7 +1474,7 @@ http://www.cellml.org/
             <apply>
                <times/>
                <ci>F_junc</ci>
-               <ci>G_Ks_junc</ci>
+               <ci>G_Ks</ci>
                <apply>
                   <power/>
                   <ci>x_Ks</ci>
@@ -1482,7 +1493,7 @@ http://www.cellml.org/
             <apply>
                <times/>
                <ci>F_sl</ci>
-               <ci>G_Ks_sl</ci>
+               <ci>G_Ks</ci>
                <apply>
                   <power/>
                   <ci>x_Ks</ci>
