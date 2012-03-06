@@ -3551,8 +3551,20 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="slow_delayed_rectifier_K_I">
-      <variable name="i_Ks" units="picoA_per_picoF" public_interface="out"/>
-      <variable name="g_Ks" units="milliS_per_microF" initial_value="0.00575"/>
+      <variable name="i_Ks" units="picoA_per_picoF" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
+      <variable name="g_Ks" units="milliS_per_microF" initial_value="0.00575" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="nKs" units="dimensionless" initial_value="0.00336735013094628"/>
       <variable name="alpha_n" units="per_millisecond"/>
       <variable name="beta_n" units="per_millisecond"/>

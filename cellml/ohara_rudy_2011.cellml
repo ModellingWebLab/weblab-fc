@@ -9,7 +9,7 @@ http://cor.physiol.ox.ac.uk/ - cor@physiol.ox.ac.uk
 CellML 1.0 was used to generate this model
 http://www.cellml.org/
 -->
-<model name="MyModel1" cmeta:id="MyModel1" xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
+<model name="ohara_rudy_2011" cmeta:id="ohara_rudy_2011" xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
    <units name="millisecond">
       <unit units="second" prefix="milli"/>
    </units>
@@ -2644,7 +2644,14 @@ http://www.cellml.org/
    <component name="ICaL">
       <variable name="Kmn" units="millimolar" initial_value="0.002"/>
       <variable name="k2n" units="per_millisecond" initial_value="1000"/>
-      <variable name="PCa_b" units="dimensionless" initial_value="0.0001"/>
+      <variable name="PCa_b" units="dimensionless" initial_value="0.0001" cmeta:id="membrane_L_type_calcium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_conductance"/>
+               <modifiable-parameter xmlns="https://chaste.comlab.ox.ac.uk/cellml/ns/pycml#">yes</modifiable-parameter>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="dss" units="dimensionless"/>
       <variable name="d" units="dimensionless" initial_value="0"/>
       <variable name="fss" units="dimensionless"/>
@@ -4132,7 +4139,7 @@ http://www.cellml.org/
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
             </rdf:Description>
          </rdf:RDF>
-      </variable>         
+      </variable>
       <variable name="GKs" units="milliS_per_microF"/>
       <variable name="xs1ss" units="dimensionless"/>
       <variable name="xs2ss" units="dimensionless"/>
