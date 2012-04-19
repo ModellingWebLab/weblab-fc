@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<?xml-model href="../../Chaste/python/pycml/cellml1.0.rnc" type="application/relax-ng-compact-syntax"?>
+<?xml-model href="../../Chaste/python/pycml/cellml1.0.rnc" type="application/relax-ng-compact-syntax"?>
 <model xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqs="http://www.cellml.org/bqs/1.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:ns7="http://www.cellml.org/metadata/simulation/1.0#" name="decker_2009" cmeta:id="decker_2009" xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
 	<documentation xmlns="http://cellml.org/tmp-documentation">
 		<article>

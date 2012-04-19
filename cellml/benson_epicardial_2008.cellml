@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-model href="../../Chaste/python/pycml/cellml1.0.rnc" type="application/relax-ng-compact-syntax"?>
 <model xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqs="http://www.cellml.org/bqs/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" cmeta:id="benson_epicardial_2008" name="benson_epicardial_2008">
 
   <documentation xmlns="http://cellml.org/tmp-documentation">
@@ -122,15 +123,21 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <unit units="per_ms"/>
   </units>
   <component name="Environment">
-    <variable cmeta:id="Environment_time" name="time" public_interface="out" units="ms" cmeta:id="time">
+    <variable cmeta:id="Environment_time" name="time" public_interface="out" units="ms">
        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-          <rdf:Description rdf:about="#time">
+         <rdf:Description rdf:about="#Environment_time">
              <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/>
           </rdf:Description>
        </rdf:RDF>
     </variable>
     <variable initial_value="96485" name="F" public_interface="out" units="C_per_mole"/>
-    <variable initial_value="5.4" name="K_o" public_interface="out" units="mM"/>
+    <variable initial_value="5.4" name="K_o" public_interface="out" units="mM" cmeta:id="extracellular_potassium_concentration">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#extracellular_potassium_concentration">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>   
     <variable initial_value="1.8" name="Ca_o" public_interface="out" units="mM" cmeta:id="extracellular_calcium_concentration">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
             <rdf:Description rdf:about="#extracellular_calcium_concentration">
@@ -138,7 +145,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
             </rdf:Description>
          </rdf:RDF>
       </variable>
-    <variable initial_value="140" name="Na_o" public_interface="out" units="mM"/>
+    <variable initial_value="140" name="Na_o" public_interface="out" units="mM" cmeta:id="extracellular_sodium_concentration">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#extracellular_sodium_concentration">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <variable initial_value="100" name="Cl_o" public_interface="out" units="mM"/>
     <variable initial_value="0.0374358835078" name="FonRT" public_interface="out" units="per_mV"/>
     <variable initial_value="0" name="tissue" public_interface="out" units="dimensionless"/>
@@ -495,7 +508,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <variable name="bh" units="per_ms"/>
     <variable name="aj" units="per_ms"/>
     <variable name="bj" units="per_ms"/>
-    <variable cmeta:id="INa_INa" name="INa" public_interface="out" units="uA_per_uF"/>
+    <variable cmeta:id="INa_INa" name="INa" public_interface="out" units="uA_per_uF">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#INa_INa">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <math xmlns="http://www.w3.org/1998/Math/MathML">
       <apply>
         <eq/>
@@ -994,7 +1013,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <variable name="fca2ss" units="dimensionless"/>
     <variable name="taufca" units="ms"/>
     <variable name="taufca2" units="ms"/>
-    <variable cmeta:id="ICaL_ICaL" name="ICaL" public_interface="out" units="uA_per_uF"/>
+    <variable cmeta:id="ICaL_ICaL" name="ICaL" public_interface="out" units="uA_per_uF">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#ICaL_ICaL">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <math xmlns="http://www.w3.org/1998/Math/MathML">
       <apply>
         <eq/>
@@ -1560,7 +1585,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <variable name="K_o" public_interface="in" units="mM"/>
     <variable name="ak1" units="per_ms"/>
     <variable name="bk1" units="per_ms"/>
-    <variable cmeta:id="IK1_IK1" name="IK1" public_interface="out" units="uA_per_uF"/>
+    <variable cmeta:id="IK1_IK1" name="IK1" public_interface="out" units="uA_per_uF">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#IK1_IK1">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>   
     <math xmlns="http://www.w3.org/1998/Math/MathML">
       <apply>
         <eq/>
@@ -1708,14 +1739,28 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <variable name="xrss" units="dimensionless"/>
     <variable name="tauxr" units="ms"/>
     <variable name="time" public_interface="in" units="ms"/>
-    <variable cmeta:id="IKr_IKr" name="IKr" public_interface="out" units="uA_per_uF"/>
+    <variable cmeta:id="IKr_IKr" name="IKr" public_interface="out" units="uA_per_uF">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#IKr_IKr">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
+    <variable name="gkr_max" public_interface="out" initial_value="0.0138542" units="mS_per_uF" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
+    
     <math xmlns="http://www.w3.org/1998/Math/MathML">
       <apply>
         <eq/>
         <ci>gkr</ci>
         <apply>
           <times/>
-          <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="mS_per_uF">0.0138542</cn>
+          <ci>gkr_max</ci>
           <apply>
             <root/>
             <apply>
@@ -1893,14 +1938,27 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <variable name="tauxs" units="ms"/>
     <variable initial_value="0.019883138161" name="xs1" units="dimensionless"/>
     <variable initial_value="0.019890650554" name="xs2" units="dimensionless"/>
-    <variable cmeta:id="IKs_IKs" name="IKs" public_interface="out" units="uA_per_uF"/>
+    <variable cmeta:id="IKs_IKs" name="IKs" public_interface="out" units="uA_per_uF">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#IKs_IKs">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
+    <variable name="gks_max" public_interface="out" initial_value="0.0248975" units="mS_per_uF" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <math xmlns="http://www.w3.org/1998/Math/MathML">
       <apply>
         <eq/>
         <ci>gks</ci>
         <apply>
           <times/>
-          <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="mS_per_uF">0.0248975</cn>
+          <ci>gks_max</ci>
           <apply>
             <plus/>
             <cn xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="dimensionless">1</cn>
@@ -2095,7 +2153,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
     <variable initial_value="0.013970786703" name="ydv" units="dimensionless"/>
     <variable initial_value="0.99996472752" name="ydv2" units="dimensionless"/>
     <variable initial_value="0.829206149767" name="zdv" units="dimensionless"/>
-    <variable cmeta:id="Ito_Ito" name="Ito" public_interface="out" units="uA_per_uF"/>
+    <variable cmeta:id="Ito_Ito" name="Ito" public_interface="out" units="uA_per_uF">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#Ito_Ito">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>   
     <math xmlns="http://www.w3.org/1998/Math/MathML">
       <apply>
         <eq/>
@@ -3772,7 +3836,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
   </component>
   <component name="Na">
     <variable name="time" public_interface="in" units="ms"/>
-    <variable initial_value="12.972433387269" name="Na_i" public_interface="out" units="mM"/>
+    <variable initial_value="12.972433387269" name="Na_i" public_interface="out" units="mM" cmeta:id="cytosolic_sodium_concentration">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#cytosolic_sodium_concentration">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <variable name="naiont" public_interface="in" units="uA_per_uF"/>
     <variable name="AF" public_interface="in" units="uF_mole_per_C"/>
     <variable name="vmyo" public_interface="in" units="uL"/>
@@ -3848,7 +3918,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
   </component>
   <component name="K">
     <variable name="time" public_interface="in" units="ms"/>
-    <variable initial_value="135.469546216758" name="K_i" public_interface="out" units="mM"/>
+    <variable initial_value="135.469546216758" name="K_i" public_interface="out" units="mM" cmeta:id="cytosolic_potassium_concentration">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#cytosolic_potassium_concentration">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <variable name="kiont" public_interface="in" units="uA_per_uF"/>
     <variable name="AF" public_interface="in" units="uF_mole_per_C"/>
     <variable name="vmyo" public_interface="in" units="uL"/>
@@ -3947,7 +4023,13 @@ The canine virtual ventricular wall: a platform for dissecting pharmacological e
   </component>
   <component name="Ca">
     <variable name="time" public_interface="in" units="ms"/>
-    <variable cmeta:id="Ca_Ca_i" initial_value="0.00012131666" name="Ca_i" public_interface="out" units="mM"/>
+    <variable cmeta:id="Ca_Ca_i" initial_value="0.00012131666" name="Ca_i" public_interface="out" units="mM">
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#Ca_Ca_i">
+          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
+        </rdf:Description>
+      </rdf:RDF>
+    </variable>
     <variable initial_value="1.737580994071" name="Ca_jsr" public_interface="out" units="mM"/>
     <variable initial_value="1.832822335168" name="Ca_nsr" public_interface="out" units="mM"/>
     <variable initial_value="0.00012271265" name="Ca_ss" public_interface="out" units="mM"/>

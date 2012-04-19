@@ -93,7 +93,11 @@
                 <value>0</value>
                 <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
                     <ci>pacing_period</ci>
-                    <ci>steady_state_beats</ci>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                        <ci>steady_state_beats</ci>
+                        <cn>1</cn> <!-- We just run up to the last pace in one go, 
+                                        then we examine that in more detail below. -->
+                    </apply>
                 </apply>
             </vectorStepper>
             <modifiers>
@@ -119,7 +123,7 @@
             </modifiers>
         </timecourseSimulation>
         
-        <!-- Now do the part when we will examine the last two action potentials, i.e. two stimului -->
+        <!-- Now do the part when we will examine the last action potential -->
         <timecourseSimulation prefix="sim">
             <uniformStepper name="time" units="ms">
                 <start>0</start>
