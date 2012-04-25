@@ -124,9 +124,9 @@ Mechanisms of transition from normal to reentrant electrical activity in a model
       <unit exponent="-1" units="mole"/>
    </units>
    <component name="environment">
-      <variable cmeta:id="environment_time" name="time" public_interface="out" units="second" cmeta:id="time">
+      <variable cmeta:id="environment_time" name="time" public_interface="out" units="second">
          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#time">
+            <rdf:Description rdf:about="#environment_time">
                <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/>
             </rdf:Description>
          </rdf:RDF>
