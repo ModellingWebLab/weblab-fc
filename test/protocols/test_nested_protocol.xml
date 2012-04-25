@@ -22,13 +22,13 @@
                     </apply>
                 </setInput>
                 <selectOutput name="peak_voltage"/>
-                <selectOutput name="apd90"/>
+                <selectOutput name="apd"/>
             </nestedProtocol>
         </nestedSimulation>
     </simulations>
     
     <outputVariables>
         <raw ref="sim:peak_voltage" name="peak_voltage"/>
-        <raw ref="sim:apd90" name="apd90"/>
+        <raw ref="sim:apd" name="apd90"/>
     </outputVariables>
 </protocol>

@@ -14,7 +14,11 @@
             <apply><eq/>
                 <ci>steady_state_beats</ci>
                 <cn>1000</cn>
-            </apply>            
+            </apply>
+            <apply><eq/>
+                <ci>apd_percent</ci>
+                <cn>90</cn>
+            </apply>
         </apply>    
     </inputs>
     
@@ -161,13 +165,13 @@
                 </apply>
             </apply>
             
-            <!-- Compute APD90 -->
+            <!-- Compute APD -->
             <apply><eq/>
-                <ci>apd90</ci>
+                <ci>apd</ci>
                 <apply><ci>Apd</ci>
                     <ci>sim:membrane_voltage</ci>
                     <ci>sim:time</ci>
-                    <cn>90</cn>
+                    <ci>apd_percent</ci>
                 </apply>
             </apply>
            
@@ -186,7 +190,7 @@
         <raw ref="sim:time" name="time" description="Time in milliseconds"/>       
         
         <postprocessed name="peak_voltage" units="mV"/>
-        <postprocessed name="apd90" units="ms"/>
+        <postprocessed name="apd" units="ms"/>
     </outputVariables>
     
     <plots>
