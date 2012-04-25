@@ -4144,6 +4144,7 @@ http://www.cellml.org/
       <variable name="xs1ss" units="dimensionless"/>
       <variable name="xs2ss" units="dimensionless"/>
       <variable name="txs1" units="millisecond"/>
+      <variable name="txs1_max" units="millisecond" initial_value="817.3"/>
       <variable name="xs1" units="dimensionless" initial_value="0"/>
       <variable name="xs2" units="dimensionless" initial_value="0"/>
       <variable name="KsCa" units="dimensionless"/>
@@ -4193,7 +4194,7 @@ http://www.cellml.org/
             <ci>txs1</ci>
             <apply>
                <plus/>
-               <cn cellml:units="millisecond">817.3</cn>
+               <ci>txs1_max</ci>
                <apply>
                   <divide/>
                   <cn cellml:units="millisecond">1</cn>
@@ -4201,8 +4202,7 @@ http://www.cellml.org/
                      <plus/>
                      <apply>
                         <times/>
-                        <cn type="e-notation" cellml:units="dimensionless">2.326   <sep/>
-                        -4</cn>
+                        <cn type="e-notation" cellml:units="dimensionless">2.326<sep/>-4</cn>
                         <apply>
                            <exp/>
                            <apply>
