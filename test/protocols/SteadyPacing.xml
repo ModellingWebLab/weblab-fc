@@ -168,18 +168,24 @@
             <!-- Compute APD -->
             <apply><eq/>
                 <ci>apd</ci>
-                <apply><ci>Apd</ci>
-                    <ci>sim:membrane_voltage</ci>
-                    <ci>sim:time</ci>
-                    <ci>apd_percent</ci>
+                <apply><ci>RemoveDim</ci>
+                    <apply><ci>Apd</ci>
+                        <ci>sim:membrane_voltage</ci>
+                        <ci>sim:time</ci>
+                        <ci>apd_percent</ci>
+                    </apply>
+                    <cn>0</cn>
                 </apply>
             </apply>
            
             <!-- Get the peak voltage -->
             <apply><eq/>
                 <ci>peak_voltage</ci>
-                <apply><ci>Max</ci>
-                    <ci>sim:membrane_voltage</ci>
+                <apply><ci>RemoveDim</ci>
+                    <apply><ci>Max</ci>
+                        <ci>sim:membrane_voltage</ci>
+                    </apply>
+                    <cn>0</cn>
                 </apply>
             </apply>
         </apply>
