@@ -146,7 +146,8 @@ proto.nestedSimulation = element proto:nestedSimulation {
 proto.nestedProtocol = element proto:nestedProtocol {
     attribute source { xsd:anyURI },
     proto.setInput*,
-    element proto:selectOutput { nameAttr }*
+    element proto:selectOutput { nameAttr }*,
+    trace_attr
     }
 
 # Three kinds of stepper are defined.

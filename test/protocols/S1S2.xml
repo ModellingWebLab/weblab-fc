@@ -2,6 +2,7 @@
 <?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
 <?oxygen RNGSchema="../../src/proto/parsing/protocol.rnc" type="compact"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
     <!-- Declare protocol inputs with default values -->
