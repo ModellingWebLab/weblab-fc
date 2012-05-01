@@ -1,2 +1,2 @@
-Plot title,First variable,Optional second variable
-"State variables","state"
+Plot title,File name,First variable,Optional second variable
+"State variables",State_variables.eps,"state"
