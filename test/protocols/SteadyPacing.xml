@@ -37,7 +37,7 @@
     <modelInterface>
         <!-- Here we've commented out the stimulus end time because we don't ever want it to finish, for other protocols you might want to re-include it. -->
         <!-- <specifyInputVariable name="oxmeta:membrane_stimulus_current_end" units="ms" initial_value="100000000000"/> -->
-        <specifyInputVariable name="oxmeta:membrane_stimulus_current_offset" units="ms" initial_value="10"/>
+        <specifyInputVariable name="oxmeta:membrane_stimulus_current_offset" units="ms" initial_value="1"/>
         <specifyInputVariable name="oxmeta:membrane_stimulus_current_period" units="ms" initial_value="1000"/>
         <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
         <specifyOutputVariable name="oxmeta:time" units="ms"/>
@@ -105,7 +105,7 @@
                 </apply>
             </vectorStepper>
             <modifiers>
-                <!-- Set stimulus period to S1 interval, offset 10ms -->                    
+                <!-- Set stimulus period to S1 interval, offset 1ms -->                    
                 <setVariable>
                     <when>AT_START_ONLY</when>
                     <name>oxmeta:membrane_stimulus_current_period</name><!-- ms -->
@@ -117,7 +117,7 @@
                     <when>AT_START_ONLY</when>
                     <name>oxmeta:membrane_stimulus_current_offset</name><!-- ms -->
                     <value>
-                        <cn xmlns="http://www.w3.org/1998/Math/MathML">10</cn>
+                        <cn xmlns="http://www.w3.org/1998/Math/MathML">1</cn>
                     </value>
                 </setVariable>
                 <saveState>
