@@ -147,7 +147,7 @@
                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
                 <apply>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
-                    <ci>sim2:time</ci>
+                    <ci>sim2:environment_time</ci>
                 </apply>
             </apply>
             <apply>
@@ -205,7 +205,7 @@
             <apply><eq/>
                 <ci>min_time</ci>
                 <apply><ci>Min</ci>
-                    <ci>sim2:time</ci>
+                    <ci>sim2:environment_time</ci>
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
@@ -230,7 +230,7 @@
                 </apply>
                 <apply><ci>ApdAndDi</ci>
                     <ci>sim2:fast_sodium_current__V</ci>
-                    <ci>sim2:time</ci>
+                    <ci>sim2:environment_time</ci>
                 </apply>
             </apply>
             <apply>
