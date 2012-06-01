@@ -14,6 +14,7 @@
     <modelInterface>
         <setIndependentVariableUnits units="ms"/>
         <specifyOutputVariable name="oxmeta:state_variable"/>
+        <specifyOutputVariable name="oxmeta:time"/>
     </modelInterface>
     
     <simulations>
@@ -124,14 +125,15 @@
     
     <outputVariables>
         <raw name="raw_state" description="State variables (raw)" ref="sim:state_variable"/>
-        <postprocessed units="various" name="state" description="State variables (for plotting)"
-            ref="state_trans"/>
+        <postprocessed units="various" name="state" description="State variables" ref="state_trans"/>
+        <raw name="time" ref="sim:time" description="Time"/>
     </outputVariables>
     
     <plots>
         <plot>
             <title>State variables</title>
-            <data>state</data>
+            <x>time</x>
+            <y>state</y>
         </plot>
     </plots>
     
