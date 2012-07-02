@@ -2,6 +2,7 @@ TestAccessingStateVector.hpp
 TestCoreProtocolLanguage.hpp
 TestDealingWithVoltageClamps.hpp
 TestEnvironment.hpp
+TestExceptionSet.hpp
 TestIcalProtocol.hpp
 TestModelStateCollection.hpp
 TestNestedProtocols.hpp
