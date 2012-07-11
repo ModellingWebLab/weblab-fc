@@ -42,7 +42,7 @@
             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
             <apply><eq/>
                 <ci>default_Cao</ci>
-                <ci>oxmeta:extracellular_calcium_concentration</ci>
+                <ci>sim:oxmeta:extracellular_calcium_concentration</ci>
             </apply>
         </apply>    
     </library>
