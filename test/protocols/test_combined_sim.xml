@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:cellml="http://www.cellml.org/cellml/1.0#"
+    xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    
+    <units>
+        <cellml:units name="ms">
+            <cellml:unit units="second" prefix="milli"/>
+        </cellml:units>
+        <cellml:units name="mV">
+            <cellml:unit units="volt" prefix="milli"/>
+        </cellml:units>
+        <cellml:units name="mV_per_ms">
+            <cellml:unit units="volt" prefix="milli"/>
+            <cellml:unit units="second" prefix="milli" exponent="-1"/>
+        </cellml:units>
+    </units>
+    
+    <!-- Turn the input model, whatever it is, into dV/dt=1 -->
+    <modelInterface>
+        <setIndependentVariableUnits units="ms"/>
+        <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
+        <addOrReplaceEquation>
+            <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
+                <apply><diff/>
+                    <bvar><ci>oxmeta:time</ci></bvar>
+                    <ci>oxmeta:membrane_voltage</ci>
+                </apply>
+                <cn cellml:units="mV_per_ms">1</cn>
+            </apply>
+        </addOrReplaceEquation>
+    </modelInterface>
+    
+    <simulations>
+        <!-- Ordered case -->
+        <combinedSimulation prefix="seq" scheduling="sequential">
+            <simulations>
+                <timecourseSimulation prefix="sim1">
+                    <uniformStepper name="t" units="ms">
+                        <start>0</start>
+                        <stop>10</stop>
+                        <step>1</step>
+                    </uniformStepper>
+                    <modifiers>
+                        <setVariable>
+                            <when>AT_START_ONLY</when>
+                            <name>oxmeta:membrane_voltage</name>
+                            <value>
+                                <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                            </value>
+                        </setVariable>
+                    </modifiers>
+                </timecourseSimulation>
+                <timecourseSimulation prefix="sim2">
+                    <uniformStepper name="t" units="ms">
+                        <start>10</start>
+                        <stop>20</stop>
+                        <step>1</step>
+                    </uniformStepper>
+                    <modifiers>
+                    </modifiers>
+                </timecourseSimulation>
+            </simulations>
+        </combinedSimulation>
+        
+        <!-- Order doesn't matter case -->
+        <combinedSimulation prefix="para" scheduling="parallel">
+            <simulations>
+                <timecourseSimulation prefix="sim1">
+                    <uniformStepper name="t" units="ms">
+                        <start>0</start>
+                        <stop>10</stop>
+                        <step>1</step>
+                    </uniformStepper>
+                    <modifiers>
+                        <setVariable>
+                            <when>AT_START_ONLY</when>
+                            <name>oxmeta:membrane_voltage</name>
+                            <value>
+                                <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                            </value>
+                        </setVariable>
+                    </modifiers>
+                </timecourseSimulation>
+                <timecourseSimulation prefix="sim2">
+                    <uniformStepper name="t" units="ms">
+                        <start>10</start>
+                        <stop>20</stop>
+                        <step>1</step>
+                    </uniformStepper>
+                    <modifiers>
+                        <setVariable>
+                            <when>AT_START_ONLY</when>
+                            <name>oxmeta:membrane_voltage</name>
+                            <value>
+                                <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                            </value>
+                        </setVariable>
+                    </modifiers>
+                </timecourseSimulation>
+            </simulations>
+        </combinedSimulation>
+        
+        <!-- TODO: Nested case -->
+    </simulations>
+    
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            
+            <!-- General result checking function -->
+            <apply><eq/>
+                <ci>CheckResult</ci>
+                <lambda>
+                    <bvar><ci>vector</ci></bvar>
+                    <bvar><ci>expectedLength</ci></bvar>
+                    <bvar><ci>expectedStart</ci></bvar>
+                    <bvar><ci>expectedEnd</ci></bvar>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- Check it's an array -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                                <ci>vector</ci>
+                            </apply>
+                        </apply>
+                        <!-- Check it's 1d -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                                    <ci>vector</ci>
+                                </apply>
+                                <cn>1</cn>
+                            </apply>
+                        </apply>
+                        <!-- Check the length -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                        <ci>vector</ci>
+                                    </apply>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn><cn>0</cn><cn>0</cn>
+                                    </apply>
+                                </apply>
+                                <ci>expectedLength</ci>
+                            </apply>
+                        </apply>
+                        <!-- Check the initial value -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <ci>vector</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>0</cn><cn>0</cn><cn>0</cn>
+                                    </apply>
+                                </apply>
+                                <ci>expectedStart</ci>
+                            </apply>
+                        </apply>
+                        <!-- Check the final value -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                            <apply><eq/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                    <ci>vector</ci>
+                                    <apply>
+                                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                        <cn>-1</cn><cn>0</cn><cn>-1</cn>
+                                    </apply>
+                                </apply>
+                                <ci>expectedEnd</ci>
+                            </apply>
+                        </apply>
+                        <!-- Return true if all assertions passed -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <cn>1</cn>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
+            
+            <!-- Check each result -->
+            <apply><eq/><ci>r1</ci>
+                <apply><ci>CheckResult</ci>
+                    <ci>seq:sim1:membrane_voltage</ci>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>r2</ci>
+                <apply><ci>CheckResult</ci>
+                    <ci>seq:sim2:membrane_voltage</ci>
+                    <cn>11</cn> <!-- length -->
+                    <cn>10</cn> <!-- start -->
+                    <cn>20</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>r3</ci>
+                <apply><ci>CheckResult</ci>
+                    <ci>para:sim1:membrane_voltage</ci>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>r4</ci>
+                <apply><ci>CheckResult</ci>
+                    <ci>para:sim2:membrane_voltage</ci>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+        </apply>
+    </post-processing>
+</protocol>

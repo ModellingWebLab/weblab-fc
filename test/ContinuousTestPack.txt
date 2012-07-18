@@ -1,4 +1,5 @@
 TestAccessingStateVector.hpp
+TestCombinedSimulation.hpp
 TestCoreProtocolLanguage.hpp
 TestDealingWithVoltageClamps.hpp
 TestEnvironment.hpp
