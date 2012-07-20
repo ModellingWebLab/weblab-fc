@@ -102,7 +102,69 @@
             </simulations>
         </combinedSimulation>
         
-        <!-- TODO: Nested case -->
+        <!-- Combined inside combined -->
+        <combinedSimulation prefix="c_in_c" scheduling="sequential">
+            <simulations>
+                <combinedSimulation prefix="seq" scheduling="sequential">
+                    <simulations>
+                        <timecourseSimulation prefix="sim1">
+                            <uniformStepper name="t" units="ms">
+                                <start>0</start>
+                                <stop>10</stop>
+                                <step>1</step>
+                            </uniformStepper>
+                            <modifiers>
+                                <setVariable>
+                                    <when>AT_START_ONLY</when>
+                                    <name>oxmeta:membrane_voltage</name>
+                                    <value>
+                                        <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                                    </value>
+                                </setVariable>
+                            </modifiers>
+                        </timecourseSimulation>
+                    </simulations>
+                </combinedSimulation>
+            </simulations>
+        </combinedSimulation>
+        
+        <!-- Nested case -->
+        <nestedSimulation prefix="nested">
+            <vectorStepper name="run" units="none">
+                <value>0</value><value>1</value><value>2</value>
+            </vectorStepper>
+            <modifiers></modifiers>
+            <combinedSimulation scheduling="sequential">
+                <simulations>
+                    <timecourseSimulation prefix="sim1">
+                        <uniformStepper name="t" units="ms">
+                            <start>0</start>
+                            <stop>10</stop>
+                            <step>1</step>
+                        </uniformStepper>
+                        <modifiers>
+                            <setVariable>
+                                <when>AT_START_ONLY</when>
+                                <name>oxmeta:membrane_voltage</name>
+                                <value>
+                                    <cn xmlns="http://www.w3.org/1998/Math/MathML">0</cn>
+                                </value>
+                            </setVariable>
+                        </modifiers>
+                    </timecourseSimulation>
+                    <timecourseSimulation prefix="sim2">
+                        <uniformStepper name="t" units="ms">
+                            <start>10</start>
+                            <stop>20</stop>
+                            <step>1</step>
+                        </uniformStepper>
+                        <modifiers>
+                        </modifiers>
+                    </timecourseSimulation>
+                </simulations>
+            </combinedSimulation>
+        </nestedSimulation>
+        
     </simulations>
     
     <post-processing>
@@ -228,6 +290,205 @@
                     <cn>10</cn> <!-- end -->
                 </apply>
             </apply>
+            <apply><eq/><ci>r5</ci>
+                <apply><ci>CheckResult</ci>
+                    <ci>c_in_c:seq:sim1:membrane_voltage</ci>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+            
+            <!-- Check the nested case -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>nested:sim1:membrane_voltage</ci>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">NUM_DIMS</csymbol>
+                        <ci>nested:sim2:membrane_voltage</ci>
+                    </apply>
+                    <cn>2</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>nested:sim1:membrane_voltage</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>0</cn><cn>0</cn>
+                        </apply>
+                    </apply>
+                    <cn>3</cn>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><eq/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                            <ci>nested:sim2:membrane_voltage</ci>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>0</cn><cn>0</cn>
+                        </apply>
+                    </apply>
+                    <cn>3</cn>
+                </apply>
+            </apply>
+
+            <apply><eq/><ci>rn1_0</ci>
+                <apply><ci>CheckResult</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>nested:sim1:membrane_voltage</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>0</cn><cn>0</cn><cn>0</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>rn1_1</ci>
+                <apply><ci>CheckResult</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>nested:sim1:membrane_voltage</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>1</cn><cn>0</cn><cn>1</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>rn1_2</ci>
+                <apply><ci>CheckResult</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>nested:sim1:membrane_voltage</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>2</cn><cn>0</cn><cn>2</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <cn>11</cn> <!-- length -->
+                    <cn>0</cn>  <!-- start -->
+                    <cn>10</cn> <!-- end -->
+                </apply>
+            </apply>
+
+            <apply><eq/><ci>rn2_0</ci>
+                <apply><ci>CheckResult</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>nested:sim2:membrane_voltage</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>0</cn><cn>0</cn><cn>0</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <cn>11</cn> <!-- length -->
+                    <cn>10</cn>  <!-- start -->
+                    <cn>20</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>rn2_1</ci>
+                <apply><ci>CheckResult</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>nested:sim2:membrane_voltage</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>1</cn><cn>0</cn><cn>1</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <cn>11</cn> <!-- length -->
+                    <cn>10</cn>  <!-- start -->
+                    <cn>20</cn> <!-- end -->
+                </apply>
+            </apply>
+            <apply><eq/><ci>rn2_2</ci>
+                <apply><ci>CheckResult</ci>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                        <ci>nested:sim2:membrane_voltage</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <cn>0</cn><cn>2</cn><cn>0</cn><cn>2</cn>
+                        </apply>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                            <cn>1</cn>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        </apply>
+                    </apply>
+                    <cn>11</cn> <!-- length -->
+                    <cn>10</cn>  <!-- start -->
+                    <cn>20</cn> <!-- end -->
+                </apply>
+            </apply>
+            
         </apply>
     </post-processing>
 </protocol>
