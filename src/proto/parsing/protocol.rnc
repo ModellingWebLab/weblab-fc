@@ -82,11 +82,11 @@ nameAttr = attribute name { nc_ident }
         
 # The simulations to run on the model.  You can have a sequence of simulations,
 # but only the outputs from the last are currently available.
-proto.simulations = element proto:simulations { Simulation+ }
+proto.simulations = element proto:simulations { (Simulation | proto.useImports)+ }
 
 # A simulations may be a simple timecourse, or nest another simulation.
 Simulation = ( proto.timecourseSimulation | proto.nestedSimulation | proto.combinedSimulation
-               | proto.useImports )
+               | proto.nestedProtocol | proto.oneStepSimulation )
 
 # Post-processing consists of a list of statements in the augmented MathML language.
 proto.post-processing = element proto:post-processing { ( StatementList | proto.useImports )+ }
@@ -139,15 +139,18 @@ BasicSimulation =
 # its loop.
 proto.nestedSimulation = element proto:nestedSimulation {
     BasicSimulation,
-    ( Simulation | proto.nestedProtocol )
+    Simulation
     }
 
 # A combined simulation collects multiple simulations together in a single unit
 proto.combinedSimulation = element proto:combinedSimulation {
     attribute prefix { nc_ident } ?,
     attribute scheduling { "sequential" | "parallel" },
-    element proto:simulations {
-        ( proto.timecourseSimulation | proto.nestedSimulation | proto.combinedSimulation )+ }
+    element proto:simulations { Simulation+ }
+    }
+
+proto.oneStepSimulation = element proto:oneStep {
+    attribute prefix { nc_ident } ?
     }
 
 # Initial support for nested protocols.  Eventually these will be represented as another
