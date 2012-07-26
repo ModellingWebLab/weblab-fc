@@ -156,6 +156,64 @@
                     </apply>
                 </lambda>
             </apply>
+            
+            <!-- Mean(array, dim=default) = Sum(array, dim) / array.SHAPE[dim] -->
+            <apply><eq/>
+                <ci>Mean</ci>
+                <lambda>
+                    <bvar><ci>array</ci></bvar>
+                    <semantics>
+                        <bvar><ci>dim'</ci></bvar>
+                        <annotation-xml>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                        </annotation-xml>
+                    </semantics>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+                        <!-- test arguments using DefaultDim -->
+                        <apply><eq/>
+                            <ci>dim</ci>
+                            <apply>
+                                <ci>DefaultDim</ci>
+                                <ci>array</ci>
+                                <ci>dim'</ci>
+                            </apply>
+                        </apply>
+                        <apply><eq/>
+                            <ci>dim_len</ci>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
+                                    <ci>array</ci>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <ci>dim</ci><cn>0</cn><ci>dim</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                        <!-- calculate result -->
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return"/>
+                            <apply>
+                                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                                <lambda>
+                                    <bvar><ci>sum</ci></bvar>
+                                    <apply><divide/>
+                                        <ci>sum</ci>
+                                        <ci>dim_len</ci>
+                                    </apply>
+                                </lambda>
+                                <apply><ci>Sum</ci>
+                                    <ci>array</ci>
+                                    <ci>dim</ci>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                </lambda>
+            </apply>
                         
             <!-- Diff(array, dim=default) = map(-, array[<dim>1:], array[<dim>:-1]) -->
             <apply><eq/>
