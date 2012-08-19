@@ -3,37 +3,17 @@
 
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="org.eclipse.cdt.core.default.config.1357074679">
-			<storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="org.eclipse.cdt.core.default.config.1357074679" moduleId="org.eclipse.cdt.core.settings" name="Configuration">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="RESOLVED" kind="includePath" name="D:/cygwin/usr/include"/>
-						<entry flags="RESOLVED" kind="includePath" name="D:/cygwin/lib/gcc/i686-pc-cygwin/4.5.3/include/c++"/>
-						<entry flags="RESOLVED" kind="includePath" name="D:/cygwin/home/jonc/src/xsd-3.3.0-i686-windows/libxsd"/>
-						<entry flags="RESOLVED" kind="includePath" name="D:/cygwin/lib/gcc/i686-pc-cygwin/4.5.3/include/c++/i686-pc-cygwin"/>
-						<entry flags="RESOLVED" kind="includePath" name="D:/cygwin/lib/gcc/i686-pc-cygwin/4.5.3/include"/>
-					</externalSetting>
-				</externalSettings>
+		<cconfiguration id="org.eclipse.cdt.core.default.config.1579163948">
+			<storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="org.eclipse.cdt.core.default.config.1579163948" moduleId="org.eclipse.cdt.core.settings" name="Configuration">
+				<externalSettings/>
 				<extensions/>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings">
-				<doc-comment-owner id="org.eclipse.cdt.ui.doxygen">
-					<path value=""/>
-				</doc-comment-owner>
-			</storageModule>
 		</cconfiguration>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration"/>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.core.pathentry">
 		<pathentry kind="src" path=""/>
 		<pathentry kind="out" path=""/>
 		<pathentry kind="prj" path="/Chaste"/>
-		<pathentry exported="true" include="D:/cygwin/usr/include" kind="inc" path="" system="true"/>
-		<pathentry exported="true" include="D:/cygwin/lib/gcc/i686-pc-cygwin/4.5.3/include/c++" kind="inc" path="" system="true"/>
-		<pathentry exported="true" include="D:/cygwin/home/jonc/src/xsd-3.3.0-i686-windows/libxsd" kind="inc" path="" system="true"/>
-		<pathentry exported="true" include="D:/cygwin/lib/gcc/i686-pc-cygwin/4.5.3/include/c++/i686-pc-cygwin" kind="inc" path="" system="true"/>
-		<pathentry exported="true" include="D:/cygwin/lib/gcc/i686-pc-cygwin/4.5.3/include" kind="inc" path="" system="true"/>
 	</storageModule>
 </cproject>
