@@ -8,6 +8,7 @@ TestIcalProtocol.hpp
 TestModelStateCollection.hpp
 TestNestedProtocols.hpp
 TestNdArray.hpp
+TestOneStepSimulation.hpp
 TestProtocolParser.hpp
 TestS1S2Protocol.hpp
 TestSimpleProtocol.hpp

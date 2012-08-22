@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    xmlns:cellml="http://www.cellml.org/cellml/1.0#"
+    xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    
+    <import source="../../src/proto/library/BasicLibrary.xml" prefix="std"/>
+    
+    <units>
+        <cellml:units name="ms">
+            <cellml:unit units="second" prefix="milli"/>
+        </cellml:units>
+        <cellml:units name="mV">
+            <cellml:unit units="volt" prefix="milli"/>
+        </cellml:units>
+        <cellml:units name="mV_per_ms">
+            <cellml:unit units="volt" prefix="milli"/>
+            <cellml:unit units="second" prefix="milli" exponent="-1"/>
+        </cellml:units>
+    </units>
+    
+    <!-- Turn the input model, whatever it is, into dV/dt=1 -->
+    <modelInterface>
+        <setIndependentVariableUnits units="ms"/>
+        <specifyInputVariable name="oxmeta:membrane_voltage" initial_value="0.0"/>
+        <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
+        <addOrReplaceEquation>
+            <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
+                <apply><diff/>
+                    <bvar><ci>oxmeta:time</ci></bvar>
+                    <ci>oxmeta:membrane_voltage</ci>
+                </apply>
+                <cn cellml:units="mV_per_ms">1</cn>
+            </apply>
+        </addOrReplaceEquation>
+    </modelInterface>
+    
+    <simulations>
+        <!-- Nesting a oneStep should look like a TimecourseSimulation.
+            However, with the nested version we don't record the initial conditions.
+        -->
+        <nestedSimulation prefix="nested">
+            <uniformStepper name="t" units="ms">
+                <start>0</start>
+                <stop>9</stop>
+                <step>1</step>
+            </uniformStepper>
+            <modifiers>
+                <setVariable>
+                    <when>EVERY_LOOP</when>
+                    <name>oxmeta:time</name>
+                    <value><ci xmlns="http://www.w3.org/1998/Math/MathML">t</ci></value>
+                </setVariable>
+            </modifiers>
+            <oneStep step="1.0"/>
+        </nestedSimulation>
+        
+        <timecourseSimulation prefix="timecourse">
+            <uniformStepper name="t" units="ms">
+                <start>0</start>
+                <stop>10</stop>
+                <step>1</step>
+            </uniformStepper>
+            <modifiers>
+                <resetState>
+                    <when>AT_START_ONLY</when>
+                </resetState>
+            </modifiers>
+        </timecourseSimulation>
+    </simulations>
+    
+    <post-processing>
+        <apply xmlns="http://www.w3.org/1998/Math/MathML">
+            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList"/>
+            <!-- Check results are arrays -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>nested:membrane_voltage</ci>
+                </apply>
+            </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>timecourse:membrane_voltage</ci>
+                </apply>
+            </apply>
+            
+            <!-- Check solutions match -->
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>std:ArrayEq</ci>
+                    <apply><ci>std:Join</ci>
+                        <apply>
+                            <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                            <cn>0</cn>
+                        </apply>
+                        <ci>nested:membrane_voltage</ci>
+                    </apply>
+                    <ci>timecourse:membrane_voltage</ci>
+                </apply>
+            </apply>
+        </apply>
+    </post-processing>
+    
+    <outputVariables>
+        <raw name="V_nested" ref="nested:membrane_voltage"/>
+        <raw name="V_timecourse" ref="timecourse:membrane_voltage"/>
+    </outputVariables>
+</protocol>
