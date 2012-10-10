@@ -66,6 +66,36 @@ class Optional(p.Optional):
                 tokens = []
         return loc, tokens
 
+def OptionalDelimitedList(expr, delim):
+    """Like delimitedList, but the list may be empty."""
+    return p.delimitedList(expr, delim) | p.Empty()
+
+def DelimitedMultiList(elements, delimiter):
+    """Like delimitedList, but allows for a sequence of constituent element expressions.
+    
+    elements should be a sequence of tuples (expr, unbounded), where expr is a ParserElement,
+    and unbounded is True iff zero or more occurrences are allowed; otherwise the expr is
+    considered to be optional (i.e. 0 or 1 occurrences).  The delimiter parameter must occur
+    in between each matched token, and is suppressed from the output.
+    """
+    if len(elements) == 0:
+        return p.Empty()
+    # If we have an optional expr, we need (expr + delimiter + rest) | expr | rest
+    # If we have an unbounded expr, we need (expr + delimiter + this) | expr | rest, i.e. allow expr to recur
+    expr, unbounded = elements[0]
+    if not isinstance(delimiter, p.Suppress):
+        delimiter = p.Suppress(delimiter)
+    rest = DelimitedMultiList(elements[1:], delimiter)
+    if unbounded:
+        result = p.Forward()
+        result << ((expr + delimiter + result) | expr | rest)
+    else:
+        if isinstance(rest, p.Empty):
+            result = expr | rest
+        else:
+            result = (expr + delimiter + rest) | expr | rest
+    return result
+
 class CompactSyntaxParser(object):
     """A parser that converts a compact textual syntax for protocols into XML."""
     # Single-line Python-style comments
@@ -118,7 +148,7 @@ class CompactSyntaxParser(object):
     
     # Simple assignment
     simpleAssign = p.Group(ncIdent + eq + expr)
-    simpleAssignList = p.ZeroOrMore(simpleAssign + nl)
+    simpleAssignList = OptionalDelimitedList(simpleAssign, nl)
 
     # Miscellaneous constructs making up protocols
     ##############################################
@@ -132,7 +162,7 @@ class CompactSyntaxParser(object):
 
     # Import statements
     importStmt = p.Group(MakeKw('import') + Optional(ncIdent + eq, default='') + quotedUri)
-    imports = p.ZeroOrMore(importStmt + nl)
+    imports = OptionalDelimitedList(importStmt, nl)
     
     # Model interface section
     #########################
@@ -152,12 +182,11 @@ class CompactSyntaxParser(object):
     modelEquation = p.Group(MakeKw('define') + ident + eq + expr)
     
     modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace +
-                             Optional(setTimeUnits + nl) +
-                             p.ZeroOrMore(inputVariable + nl) +
-                             p.ZeroOrMore(outputVariable + nl) +
-                             p.ZeroOrMore(newVariable + nl) +
-                             p.ZeroOrMore(modelEquation + nl) +
-                             cbrace)
+                             DelimitedMultiList([(setTimeUnits, False),
+                                                 (inputVariable, True),
+                                                 (outputVariable, True),
+                                                 (newVariable, True),
+                                                 (modelEquation, True)], nl) + cbrace)
     
     # Simulation definitions
     ########################
@@ -176,9 +205,22 @@ class CompactSyntaxParser(object):
     saveState = MakeKw('save') + MakeKw('as') + ncIdent
     resetState = MakeKw('reset') + Optional(MakeKw('to') + ncIdent)
     modifier = p.Group(modifierWhen + p.Group(setVariable | saveState | resetState))
-    modifiers = p.Group(MakeKw('modifiers') + obrace + p.ZeroOrMore(modifier + nl) + cbrace)
+    modifiers = p.Group(MakeKw('modifiers') + obrace + OptionalDelimitedList(modifier, nl) + cbrace)
+    
+    # The simulations themselves
+    basicSimContent = range + Optional(nl + modifiers)
+    timecourseSim = p.Group(MakeKw('timecourse') + obrace + basicSimContent + cbrace)
+    simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + timecourseSim
 
-def EnableDebug():
+
+def GetNamedGrammars():
+    """Get an iterator over all the named grammars in CompactSyntaxParser."""
+    for parser in dir(CompactSyntaxParser):
+        parser = getattr(CompactSyntaxParser, parser)
+        if isinstance(parser, p.ParserElement):
+            yield parser
+
+def EnableDebug(grammars=None):
     """Enable debugging of our (named) grammars."""
     def DisplayLoc(instring, loc):
         return " at loc " + str(loc) + "(%d,%d)" % ( p.lineno(loc,instring), p.col(loc,instring) )
@@ -189,7 +231,19 @@ def EnableDebug():
     def ExceptionDebugAction( instring, loc, expr, exc ):
         print ("Exception raised:" + str(exc) + DisplayLoc(instring, loc))
 
-    for parser in dir(CompactSyntaxParser):
-        parser = getattr(CompactSyntaxParser, parser)
-        if isinstance(parser, p.ParserElement):
-            parser.setDebugActions(None, SuccessDebugAction, ExceptionDebugAction)
+    for parser in grammars or GetNamedGrammars():
+        parser.setDebugActions(None, SuccessDebugAction, ExceptionDebugAction)
+
+def DisableDebug(grammars=None):
+    """Stop debugging our (named) grammars."""
+    for parser in grammars or GetNamedGrammars():
+        parser.setDebug(False)
+
+class Debug(object):
+    """A Python 2.6+ context manager that enables debugging just for the enclosed block."""
+    def __init__(self, grammars=None):
+        self._grammars or GetNamedGrammars()
+    def __enter__(self):
+        EnableDebug(self._grammars)
+    def __exit__(self, type, value, traceback):
+        DisableDebug(self._grammars)

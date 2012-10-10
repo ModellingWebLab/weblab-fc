@@ -150,12 +150,13 @@ inputs {
 """, [['label_duration', '300'], ['unlabel_time', '600000'], ['use_tapasin', '1']])
         self.assertParses(csp.inputs, 'inputs {}', [])
         self.assertParses(csp.inputs, '\ninputs\n{\n}\n', [])
+        self.assertParses(csp.inputs, 'inputs{X=1}', [['X', '1']])
     
     def TestParsingImports(self):
         self.assertParses(csp.importStmt, 'import std = "../../../src/proto/library/BasicLibrary.xml"',
                           [['std', '../../../src/proto/library/BasicLibrary.xml']])
         self.assertParses(csp.importStmt, "import 'TestS1S2.xml'", [['', 'TestS1S2.xml']])
-        self.assertParses(csp.imports, 'import l1="file1"\nimport "file2"#blah\n',
+        self.assertParses(csp.imports, 'import l1="file1"#blah\nimport "file2"',
                           [['l1', 'file1'], ['', 'file2']])
         self.assertParses(csp.imports, '', [])
     
@@ -198,6 +199,7 @@ model interface {  # Comments can go here
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']]]])
         self.assertParses(csp.modelInterface, 'model interface {}', [[]])
         self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time', '']]])
+        self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time', '']]])
 
     def TestParsingUniformRange(self):
         self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
@@ -235,10 +237,20 @@ model interface {  # Comments can go here
         
         # Blank lines OK too
         at end save as savedState
-} # Trailing comments are fine""", [[['start', []], ['each', ['model:input', 'loopVariable']], ['end', ['savedState']]]])
+} # Trailing comments are fine""",
+                          [[['start', []], ['each', ['model:input', 'loopVariable']], ['end', ['savedState']]]])
+        self.assertParses(csp.modifiers, 'modifiers {at start reset}', [[['start', []]]])
     
     def TestParsingTimecourseSimulations(self):
-        pass
+        self.assertParses(csp.simulation, 'simulation sim = timecourse { range time units ms uniform 1:10 }',
+                          ['sim', [['time', 'ms', ['1', '10']]]])
+        self.assertParses(csp.simulation, 'simulation timecourse #c\n#c\n{\n range time units ms uniform 1:10\n\n }#c',
+                          ['', [['time', 'ms', ['1', '10']]]])
+        self.assertParses(csp.simulation, """simulation sim = timecourse {
+range time units U while time < 100
+modifiers { at end save as prelim }
+}""",
+                          ['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]])
     
     def TestParsingNestedSimulations(self):
         pass
