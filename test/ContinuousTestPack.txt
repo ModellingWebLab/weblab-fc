@@ -1,5 +1,6 @@
 TestAccessingStateVector.hpp
 TestCombinedSimulation.hpp
+TestCompactSyntaxParser.py
 TestCoreProtocolLanguage.hpp
 TestDealingWithVoltageClamps.hpp
 TestEnvironment.hpp
