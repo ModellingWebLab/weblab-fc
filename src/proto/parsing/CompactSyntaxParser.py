@@ -38,9 +38,12 @@ __all__ = ['CompactSyntaxParser']
 # Necessary for reasonable speed when using operatorPrecedences
 p.ParserElement.enablePackrat()
 
-def MakeKw(keyword):
+def MakeKw(keyword, suppress=True):
     """Helper function to create a parser for the given keyword."""
-    return p.Keyword(keyword).suppress()
+    kw = p.Keyword(keyword)
+    if suppress:
+        kw = kw.suppress()
+    return kw
 
 class Optional(p.Optional):
     """An Optional pattern that doesn't consume whitespace if the contents don't match."""
@@ -69,10 +72,11 @@ class CompactSyntaxParser(object):
     comment = p.Regex(r'#.*').setWhitespaceChars(' \t').suppress().setName('Comment')
 
     # Punctuation etc.
-    eq = p.Literal('=').suppress()
-    nl = Optional(comment) + p.LineEnd().suppress() # Any line can end with a comment
-    obrace = p.Suppress('{')# + p.Empty().suppress()
-    cbrace = p.Suppress('}')# + p.Empty().suppress()
+    eq = p.Suppress('=')
+    colon = p.Suppress(':')
+    nl = p.OneOrMore(Optional(comment) + p.LineEnd().suppress()) # Any line can end with a comment
+    obrace = Optional(nl) + p.Suppress('{') + Optional(nl)
+    cbrace = Optional(nl) + p.Suppress('}') + Optional(nl)
     
     # Numbers can be given in scientific notation, with an optional leading minus sign.
     number = p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?').setName('Number')
@@ -82,6 +86,7 @@ class CompactSyntaxParser(object):
     ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('Ident')
     # This may become more specific in future
     quotedUri = (p.QuotedString('"') | p.QuotedString("'")).setName('QuotedUri')
+    quotedString = p.quotedString.setName('QuotedString').setParseAction(p.removeQuotes)
     
     # Basic expressions from the "post-processing" language
     #######################################################
@@ -89,8 +94,14 @@ class CompactSyntaxParser(object):
     # Expressions must be constructed recursively
     expr = p.Forward().setName('Expression')
     
+    # A vector written like 1:2:5 or 1:5
+    numericRange = p.Group(number + colon + number + Optional(colon + number))
+    
+    # If-then-else
+    ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr)
+    
     # The main expression grammar
-    atom = number | ident
+    atom = number | ifExpr | ident
     expr << p.operatorPrecedence(atom, [('^', 2, p.opAssoc.LEFT),
                                         ('-', 1, p.opAssoc.RIGHT),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT),
@@ -147,6 +158,25 @@ class CompactSyntaxParser(object):
                              p.ZeroOrMore(newVariable + nl) +
                              p.ZeroOrMore(modelEquation + nl) +
                              cbrace)
+    
+    # Simulation definitions
+    ########################
+    
+    # Ranges
+    uniformRange = MakeKw('uniform') + numericRange
+    vectorRange = MakeKw('vector') + expr
+    whileRange = MakeKw('while') + expr
+    range = p.Group(MakeKw('range') + ncIdent + unitsRef + (uniformRange | vectorRange | whileRange))
+    
+    # Modifiers
+    modifierWhen = MakeKw('at') + (MakeKw('start', False) |
+                                   (MakeKw('each', False) + MakeKw('loop')) |
+                                   MakeKw('end', False))
+    setVariable = MakeKw('set') + ident + eq + expr
+    saveState = MakeKw('save') + MakeKw('as') + ncIdent
+    resetState = MakeKw('reset') + Optional(MakeKw('to') + ncIdent)
+    modifier = p.Group(modifierWhen + p.Group(setVariable | saveState | resetState))
+    modifiers = p.Group(MakeKw('modifiers') + obrace + p.ZeroOrMore(modifier + nl) + cbrace)
 
 def EnableDebug():
     """Enable debugging of our (named) grammars."""

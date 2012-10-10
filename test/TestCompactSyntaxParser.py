@@ -109,6 +109,9 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, '1 < 2 && 4 > 3', [[['1', '<', '2'], '&&', ['4', '>', '3']]])
         self.assertParses(csp.expr, '0 || 1 && 1', [['0', '||', '1', '&&', '1']])
         self.assertParses(csp.expr, 'A + B || C * D', [[['A', '+', 'B'], '||', ['C', '*', 'D']]])
+        self.assertParses(csp.expr, 'if 1 then 2 else 3', [[['1'], ['2'], ['3']]])
+        self.assertParses(csp.expr, 'if 1 < 2 then 3 + 4 else 5 * 6',
+                          [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
     
     def TestParsingMultiLineExpressions(self):
         self.assertParses(csp.expr, '((1 + 2)\n  * 3)', [[['1', '+', '2'], '*', '3']])
@@ -181,15 +184,71 @@ inputs {
         #self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var')
 
         self.assertParses(csp.modelInterface, """
-model interface {
+model interface {  # Comments can go here
     independent var units t
+    
     input test:v1 = 0  # a comment
     input test:v2 units u
     output test:time
+    # comments are always ignored
     output test:v3 units u
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
 }""", [['t', ['test:v1', '', '0'], ['test:v2', 'u', ''], ['test:time', ''], ['test:v3', 'u'],
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']]]])
         self.assertParses(csp.modelInterface, 'model interface {}', [[]])
-        self.assertParses(csp.modelInterface, 'model interface\n{output test:time\n}', [[['test:time', '']]])
+        self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time', '']]])
+
+    def TestParsingUniformRange(self):
+        self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
+        self.assertParses(csp.range, 'range time units ms uniform 0:1000', [['time', 'ms', ['0', '1000']]])
+
+#    def TestParsingVectorRange(self):
+#        self.assertParses(csp.range, 'range run units dimensionless vector [1, 2, 3, 4]',
+#                          [['run', 'dimensionless', ['1', '2', '3', '4']]])
+
+    def TestParsingWhileRange(self):
+        self.assertParses(csp.range, 'range rpt units dimensionless while rpt < 5',
+                          [['rpt', 'dimensionless', ['rpt', '<', '5']]])
+
+    def TestParsingModifiers(self):
+        self.assertParses(csp.modifierWhen, 'at start', ['start'])
+        self.assertParses(csp.modifierWhen, 'at each loop', ['each'])
+        self.assertParses(csp.modifierWhen, 'at end', ['end'])
+        
+        self.assertParses(csp.setVariable, 'set model:V = 5.0', ['model:V', '5.0'])
+        self.assertParses(csp.setVariable, 'set model:t = time + 10.0', ['model:t', ['time', '+', '10.0']])
+        
+        self.assertParses(csp.saveState, 'save as state_name', ['state_name'])
+        self.failIfParses(csp.saveState, 'save as state:name')
+        
+        self.assertParses(csp.resetState, 'reset', [])
+        self.assertParses(csp.resetState, 'reset to state_name', ['state_name'])
+        self.failIfParses(csp.resetState, 'reset to state:name')
+        
+        self.assertParses(csp.modifiers, """modifiers {
+        # Multiple
+        # comment lines
+        # are OK
+        at start reset
+        at each loop set model:input = loopVariable
+        
+        # Blank lines OK too
+        at end save as savedState
+} # Trailing comments are fine""", [[['start', []], ['each', ['model:input', 'loopVariable']], ['end', ['savedState']]]])
+    
+    def TestParsingTimecourseSimulations(self):
+        pass
+    
+    def TestParsingNestedSimulations(self):
+        pass
+    
+    def TestParsingOutputSpecifications(self):
+        pass
+    
+    def TestParsingPlotSpecifications(self):
+        pass
+
+    def TestParsingLambdaExpressions(self):
+        pass
+    
