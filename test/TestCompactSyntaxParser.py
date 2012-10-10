@@ -251,9 +251,19 @@ range time units U while time < 100
 modifiers { at end save as prelim }
 }""",
                           ['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]])
+        self.failIfParses(csp.simulation, 'simulation sim = timecourse {}')
     
     def TestParsingNestedSimulations(self):
-        pass
+        self.assertParses(csp.simulation,
+                          'simulation rpt = nested { range run units U while not rpt:result\n nests sim }',
+                          ['rpt', [['run', 'U', ['not', 'rpt:result']], ['sim']]])
+        self.assertParses(csp.simulation, """simulation nested {
+range R units U uniform 3:5
+modifiers { at each loop reset to prelim }
+nests sim
+}""",
+                          ['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]])
+        self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
     def TestParsingOutputSpecifications(self):
         pass

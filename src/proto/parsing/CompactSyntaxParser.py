@@ -210,8 +210,15 @@ class CompactSyntaxParser(object):
     # The simulations themselves
     basicSimContent = range + Optional(nl + modifiers)
     timecourseSim = p.Group(MakeKw('timecourse') + obrace + basicSimContent + cbrace)
-    simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + timecourseSim
+    nestedSim = p.Group(MakeKw('nested') + obrace + basicSimContent +
+                        p.Group(MakeKw('nests') + ident) + cbrace)
+    simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
 
+
+
+################################################################################
+# Parser debugging support
+################################################################################
 
 def GetNamedGrammars():
     """Get an iterator over all the named grammars in CompactSyntaxParser."""
