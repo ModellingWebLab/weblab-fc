@@ -114,9 +114,10 @@ class CompactSyntaxParser(object):
     # Identifiers
     ncIdent = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*').setName('ncIdent')
     ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('Ident')
+    # Used for descriptive text
+    quotedString = (p.QuotedString('"', escChar="\\") | p.QuotedString("'", escChar="\\")).setName('QuotedString')
     # This may become more specific in future
-    quotedUri = (p.QuotedString('"') | p.QuotedString("'")).setName('QuotedUri')
-    quotedString = p.quotedString.setName('QuotedString').setParseAction(p.removeQuotes)
+    quotedUri = quotedString.copy().setName('QuotedUri')
     
     # Basic expressions from the "post-processing" language
     #######################################################
@@ -214,6 +215,13 @@ class CompactSyntaxParser(object):
                         p.Group(MakeKw('nests') + ident) + cbrace)
     simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
 
+    # Output specifications
+    #######################
+    
+    outputDesc = Optional(quotedString, default='')
+    outputSpec = p.Group(ncIdent + ((unitsRef + outputDesc) |
+                                    (eq + ident + Optional(unitsRef, default='') + outputDesc)))
+
 
 
 ################################################################################
@@ -249,7 +257,7 @@ def DisableDebug(grammars=None):
 class Debug(object):
     """A Python 2.6+ context manager that enables debugging just for the enclosed block."""
     def __init__(self, grammars=None):
-        self._grammars or GetNamedGrammars()
+        self._grammars = list(grammars or GetNamedGrammars())   
     def __enter__(self):
         EnableDebug(self._grammars)
     def __exit__(self, type, value, traceback):

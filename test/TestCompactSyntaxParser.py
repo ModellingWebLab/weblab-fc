@@ -266,7 +266,14 @@ nests sim
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
     def TestParsingOutputSpecifications(self):
-        pass
+        self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', '', 'Description']])
+        self.assertParses(csp.outputSpec, r'name = ref:var units U "Description \"quotes\""',
+                          [['name', 'ref:var', 'U', 'Description "quotes"']])
+        self.assertParses(csp.outputSpec, "name = ref:var units U 'Description \\'quotes\\' \"too\"'",
+                          [['name', 'ref:var', 'U', 'Description \'quotes\' "too"']])
+        self.assertParses(csp.outputSpec, 'varname units UU', [['varname', 'UU', '']])
+        self.assertParses(csp.outputSpec, 'varname units UU "desc"', [['varname', 'UU', 'desc']])
+        self.failIfParses(csp.outputSpec, 'varname_no_units')
     
     def TestParsingPlotSpecifications(self):
         pass
