@@ -300,5 +300,31 @@ nests sim
         self.assertParses(csp.plots, 'plots {}', [[]])
 
     def TestParsingLambdaExpressions(self):
+        self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
+        self.failIfParses(csp.lambdaExpr, 'lambda p:a: 5')
+        # TODO: Lambdas with a full statement list as body
+    
+    def TestParsingFunctionCalls(self):
+        pass
+    
+    def TestParsingMathmlOperators(self):
+        pass
+    
+    def TestParsingAssignStatements(self):
+        pass
+    
+    def TestParsingReturnStatements(self):
+        pass
+    
+    def TestParsingAssertStatements(self):
+        self.assertParses(csp.assertStmt, 'assert a + b', [['a', '+', 'b']])
+        self.assertParses(csp.assertStmt, 'assert 1', [['1']])
+    
+    def TestParsingFunctionDefinitions(self):
+        #self.assertParses(csp.functionDefn, 'def double(a):\n    return a * 2')
         pass
     

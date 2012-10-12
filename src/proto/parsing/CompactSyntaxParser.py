@@ -31,6 +31,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# TODO: We may be able to get rid of some of the p.Group wrapping when we add parse actions
+
 import pyparsing as p
 
 __all__ = ['CompactSyntaxParser']
@@ -119,8 +121,8 @@ class CompactSyntaxParser(object):
     # This may become more specific in future
     quotedUri = quotedString.copy().setName('QuotedUri')
     
-    # Basic expressions from the "post-processing" language
-    #######################################################
+    # Expressions from the "post-processing" language
+    #################################################
     
     # Expressions must be constructed recursively
     expr = p.Forward().setName('Expression')
@@ -130,6 +132,11 @@ class CompactSyntaxParser(object):
     
     # If-then-else
     ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr)
+    
+    # Lambda definitions
+    paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr
+    paramList = p.Group(p.delimitedList(paramDecl, ','))
+    lambdaExpr = p.Group(MakeKw('lambda') + paramList + colon + expr)
     
     # The main expression grammar
     atom = number | ifExpr | ident
@@ -147,9 +154,15 @@ class CompactSyntaxParser(object):
     # Embedded comments are also OK
     expr.ignore(comment)
     
+    # Statements from the "post-processing" language
+    ################################################
+    
     # Simple assignment
     simpleAssign = p.Group(ncIdent + eq + expr)
     simpleAssignList = OptionalDelimitedList(simpleAssign, nl)
+    
+    # Assertions
+    assertStmt = MakeKw('assert') + expr # TODO: May need to add a nl here?
 
     # Miscellaneous constructs making up protocols
     ##############################################
