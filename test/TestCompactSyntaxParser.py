@@ -274,9 +274,30 @@ nests sim
         self.assertParses(csp.outputSpec, 'varname units UU', [['varname', 'UU', '']])
         self.assertParses(csp.outputSpec, 'varname units UU "desc"', [['varname', 'UU', 'desc']])
         self.failIfParses(csp.outputSpec, 'varname_no_units')
+        
+        self.assertParses(csp.outputs, """outputs #cccc
+{ #cdc
+        n1 = n2 units u1
+        n3 = p:m 'd1'
+        n4 units u2 "d2"
+} #cpc
+""", [[['n1', 'n2', 'u1', ''], ['n3', 'p:m', '', 'd1'], ['n4', 'u2', 'd2']]])
+        self.assertParses(csp.outputs, "outputs {}", [[]])
     
     def TestParsingPlotSpecifications(self):
-        pass
+        self.assertParses(csp.plotCurve, 'y against x', [['y', 'x']])
+        self.assertParses(csp.plotCurve, 'y, y2 against x', [['y', 'y2', 'x']])
+        self.failIfParses(csp.plotCurve, 'm:y against x')
+        self.failIfParses(csp.plotCurve, 'y against m:x')
+        self.assertParses(csp.plotSpec, 'plot "A title\'s good" { y1, y2 against x1\n y3 against x2 }',
+                          [["A title's good", ['y1', 'y2', 'x1'], ['y3', 'x2']]])
+        self.failIfParses(csp.plotSpec, 'plot "only title" {}')
+        self.failIfParses(csp.plotSpec, 'plot "only title"')
+        
+        self.assertParses(csp.plots, """plots { plot "t1" { v1 against v2 }
+        plot "t1" { v3, v4 against v5 }
+}""", [[['t1', ['v1', 'v2']], ['t1', ['v3', 'v4', 'v5']]]])
+        self.assertParses(csp.plots, 'plots {}', [[]])
 
     def TestParsingLambdaExpressions(self):
         pass

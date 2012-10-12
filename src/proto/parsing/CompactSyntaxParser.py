@@ -221,7 +221,15 @@ class CompactSyntaxParser(object):
     outputDesc = Optional(quotedString, default='')
     outputSpec = p.Group(ncIdent + ((unitsRef + outputDesc) |
                                     (eq + ident + Optional(unitsRef, default='') + outputDesc)))
+    outputs = p.Group(MakeKw('outputs') + obrace + OptionalDelimitedList(outputSpec, nl) + cbrace)
 
+    # Plot specifications
+    #####################
+    
+    plotCurve = p.Group(p.delimitedList(ncIdent, ',') + MakeKw('against') + ncIdent)
+    plotSpec = p.Group(MakeKw('plot') + quotedString + obrace +
+                       plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace)
+    plots = p.Group(MakeKw('plots') + obrace + p.ZeroOrMore(plotSpec) + cbrace)
 
 
 ################################################################################
