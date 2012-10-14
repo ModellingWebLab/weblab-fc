@@ -361,8 +361,13 @@ return c
                        ['c']]])
 
     def TestParsingFunctionDefinitions(self):
-        #self.assertParses(csp.functionDefn, 'def double(a):\n    return a * 2')
-        pass
+        self.assertParses(csp.functionDefn, 'def double(a):\n    return a * 2',
+                          [['double', [['a']], [['a', '*', '2']]]])
+        self.assertParses(csp.functionDefn, 'def double(a): a * 2',
+                          [['double', [['a']], ['a', '*', '2']]])
+        # A function definition is just sugar for an assignment of a lambda expression
+        self.assertParses(csp.stmtList, 'def double(a):\n    return a * 2',
+                          [['double', [['a']], [['a', '*', '2']]]])
     
     def TestParsingTuples(self):
         pass

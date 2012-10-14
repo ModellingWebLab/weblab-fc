@@ -108,6 +108,8 @@ class CompactSyntaxParser(object):
     # Punctuation etc.
     eq = p.Suppress('=')
     colon = p.Suppress(':')
+    oparen = p.Suppress('(')
+    cparen = p.Suppress(')')
     nl = p.OneOrMore(Optional(comment) + p.LineEnd().suppress()) # Any line can end with a comment
     obrace = Optional(nl) + p.Suppress('{') + Optional(nl)
     cbrace = Optional(nl) + p.Suppress('}') + Optional(nl)
@@ -174,7 +176,11 @@ class CompactSyntaxParser(object):
     # Full assignment, to a tuple of names or single name
     assignStmt = p.Group(p.Group(p.delimitedList(ncIdent)) + eq + p.Group(p.delimitedList(expr)))
     
-    stmtList << p.delimitedList(assertStmt | returnStmt | assignStmt, nl)
+    # Function definition
+    functionDefn = p.Group(MakeKw('def') + ncIdent + oparen + paramList + cparen + colon +
+                           (nl + stmtList | expr))
+    
+    stmtList << p.delimitedList(assertStmt | returnStmt | assignStmt | functionDefn, nl)
 
     # Miscellaneous constructs making up protocols
     ##############################################
