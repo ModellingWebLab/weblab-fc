@@ -96,6 +96,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.comment, '# blah blah\n')
         
     def TestParsingSimpleExpressions(self):
+        self.assertParses(csp.expr, '1', [['1']])
+        self.assertParses(csp.expr, '(A)', [['A']])
         self.assertParses(csp.expr, '1 - 2 + 3 * 4 / 5 ^ 6', [['1', '-', '2', '+',
                                                                ['3', '*', '4', '/', ['5', '^', '6']]]])
         self.assertParses(csp.expr, '-(a + -3)', [['-', ['a', '+', ['-', '3']]]])
@@ -114,10 +116,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
     
     def TestParsingMultiLineExpressions(self):
-        self.assertParses(csp.expr, '((1 + 2)\n  * 3)', [[['1', '+', '2'], '*', '3']])
-        self.assertParses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '(1 + 2) * 3', [[['1', '+', '2'], '*', '3']])
+        self.assertParses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '(1 + 2)\\\n * 3', [[['1', '+', '2'], '*', '3']])
+        self.assertParses(csp.expr, '((1 + 2)\n  * 3)', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '((1 + 2)#embedded comment\n  * 3)', [[['1', '+', '2'], '*', '3']])
         # This one doesn't match Python behaviour, but it's hard to stop it parsing while allowing
         # the above to work.
@@ -128,28 +130,27 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.simpleAssign, 'var = pre:value', [['var', 'pre:value']])
         self.failIfParses(csp.simpleAssign, 'pre:var = value')
         self.assertParses(csp.simpleAssign, 'var = 1 + 2', [['var', ['1', '+', '2']]])
-        
-        self.assertParses(csp.simpleAssignList, 'v1 = 1\nv2=2\n', [['v1', '1'], ['v2', '2']])
-        self.assertParses(csp.simpleAssignList, '', [])
 
+        self.assertParses(csp.simpleAssignList, 'v1 = 1\nv2=2', [['v1', '1'], ['v2', '2']])
+        self.assertParses(csp.simpleAssignList, '', [])
+    
     def TestParsingNamespaces(self):
         self.assertParses(csp.nsDecl, 'namespace prefix = "urn:test"', [['prefix', 'urn:test']])
         self.assertParses(csp.nsDecl, "namespace prefix='urn:test'", [['prefix', 'urn:test']])
-        self.assertParses(csp.nsDecls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"\n',
+        self.assertParses(csp.nsDecls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
                           [['n1', 'urn:t1'], ['n2', 'urn:t2']])
         self.assertParses(csp.nsDecls, '', [])
     
     def TestParsingInputs(self):
         '''Test parsing protocol input declarations'''
-        self.assertParses(csp.inputs, """
-inputs {
+        self.assertParses(csp.inputs, """inputs {
     label_duration = 300  # How long to label for
     unlabel_time = 600000 # When to stop labelling
     use_tapasin = 1       # Whether to include Tapasin
 }
 """, [['label_duration', '300'], ['unlabel_time', '600000'], ['use_tapasin', '1']])
         self.assertParses(csp.inputs, 'inputs {}', [])
-        self.assertParses(csp.inputs, '\ninputs\n{\n}\n', [])
+        self.assertParses(csp.inputs, 'inputs\n{\n}\n', [])
         self.assertParses(csp.inputs, 'inputs{X=1}', [['X', '1']])
     
     def TestParsingImports(self):
@@ -184,8 +185,7 @@ inputs {
         
         #self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var')
 
-        self.assertParses(csp.modelInterface, """
-model interface {  # Comments can go here
+        self.assertParses(csp.modelInterface, """model interface {  # Comments can go here
     independent var units t
     
     input test:v1 = 0  # a comment
@@ -298,15 +298,6 @@ nests sim
         plot "t1" { v3, v4 against v5 }
 }""", [[['t1', ['v1', 'v2']], ['t1', ['v3', 'v4', 'v5']]]])
         self.assertParses(csp.plots, 'plots {}', [[]])
-
-    def TestParsingLambdaExpressions(self):
-        self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
-        self.failIfParses(csp.lambdaExpr, 'lambda p:a: 5')
-        # TODO: Lambdas with a full statement list as body
     
     def TestParsingFunctionCalls(self):
         pass
@@ -315,16 +306,72 @@ nests sim
         pass
     
     def TestParsingAssignStatements(self):
-        pass
+        self.assertParses(csp.assignStmt, 'var = value', [[['var'], ['value']]])
+        self.assertParses(csp.assignStmt, 'var = pre:value', [[['var'], ['pre:value']]])
+        self.failIfParses(csp.assignStmt, 'pre:var = value')
+        self.assertParses(csp.assignStmt, 'var = 1 + 2', [[['var'], [['1', '+', '2']]]])
+
+        self.assertParses(csp.assignStmt, 'a, b = tuple', [[['a', 'b'], ['tuple']]])
+        self.assertParses(csp.assignStmt, 'a, b = b, a', [[['a', 'b'], ['b', 'a']]])
+        #self.assertParses(csp.assignStmt, 'a, b = (b, a)', [[['a', 'b'], ['b', 'a']]])
+        self.failIfParses(csp.assignStmt, 'p:a, p:b = e')
+        self.failIfParses(csp.assignStmt, '')
     
     def TestParsingReturnStatements(self):
-        pass
+        self.assertParses(csp.returnStmt, 'return 2 * a', [[['2', '*', 'a']]])
+        self.assertParses(csp.returnStmt, 'return (3 - 4)', [[['3', '-', '4']]])
+        self.assertParses(csp.returnStmt, 'return a, b', [['a', 'b']])
+        self.assertParses(csp.returnStmt, 'return a + 1, b - 1', [[['a', '+', '1'], ['b', '-', '1']]])
+        #self.assertParses(csp.returnStmt, 'return (a, b)', [[['a', 'b']]])
     
     def TestParsingAssertStatements(self):
-        self.assertParses(csp.assertStmt, 'assert a + b', [['a', '+', 'b']])
-        self.assertParses(csp.assertStmt, 'assert 1', [['1']])
+        self.assertParses(csp.assertStmt, 'assert a + b', [[['a', '+', 'b']]])
+        self.assertParses(csp.assertStmt, 'assert (a + b)', [[['a', '+', 'b']]])
+        self.assertParses(csp.assertStmt, 'assert 1', [[['1']]])
     
+    def TestParsingStatementLists(self):
+        self.assertParses(csp.stmtList, "b=-a\nassert 1", [[['b'], [['-', 'a']]], ['1']])
+        self.assertParses(csp.stmtList, """assert a < 0 # comments are ok
+
+# as are blank lines
+b = -a
+assert b > 0
+c, d = a * 2, b + 1
+return c, d""", [[['a', '<', '0']],
+                 [['b'], [['-', 'a']]],
+                 [['b', '>', '0']],
+                 [['c', 'd'], [['a', '*', '2'], ['b', '+', '1']]],
+                 ['c', 'd']])
+        self.failIfParses(csp.stmtList, '')
+    
+    def TestParsingLambdaExpressions(self):
+        self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
+        self.failIfParses(csp.lambdaExpr, 'lambda p:a: 5')
+
+        self.assertParses(csp.lambdaExpr, """lambda a, b:
+assert a > b
+c = a - b
+return c
+""", [[[['a'], ['b']], [['a', '>', 'b']],
+                       [['c'], [['a', '-', 'b']]],
+                       ['c']]])
+
     def TestParsingFunctionDefinitions(self):
         #self.assertParses(csp.functionDefn, 'def double(a):\n    return a * 2')
         pass
     
+    def TestParsingTuples(self):
+        pass
+    
+    def TestParsingArrays(self):
+        pass
+
+    def TestParsingArrayComprehensions(self):
+        pass
+    
+    def TestParsingIndexing(self):
+        pass

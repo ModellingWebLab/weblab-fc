@@ -100,8 +100,10 @@ def DelimitedMultiList(elements, delimiter):
 
 class CompactSyntaxParser(object):
     """A parser that converts a compact textual syntax for protocols into XML."""
+    # Newlines are significant most of the time for us
+    p.ParserElement.setDefaultWhitespaceChars(' \t\r')
     # Single-line Python-style comments
-    comment = p.Regex(r'#.*').setWhitespaceChars(' \t').suppress().setName('Comment')
+    comment = p.Regex(r'#.*').suppress().setName('Comment')
 
     # Punctuation etc.
     eq = p.Suppress('=')
@@ -124,8 +126,9 @@ class CompactSyntaxParser(object):
     # Expressions from the "post-processing" language
     #################################################
     
-    # Expressions must be constructed recursively
+    # Expressions and statements must be constructed recursively
     expr = p.Forward().setName('Expression')
+    stmtList = p.Forward().setName('StatementList')
     
     # A vector written like 1:2:5 or 1:5
     numericRange = p.Group(number + colon + number + Optional(colon + number))
@@ -135,8 +138,8 @@ class CompactSyntaxParser(object):
     
     # Lambda definitions
     paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr
-    paramList = p.Group(p.delimitedList(paramDecl, ','))
-    lambdaExpr = p.Group(MakeKw('lambda') + paramList + colon + expr)
+    paramList = p.Group(p.delimitedList(paramDecl))
+    lambdaExpr = p.Group(MakeKw('lambda') + paramList + colon + (nl + stmtList + nl | expr))
     
     # The main expression grammar
     atom = number | ifExpr | ident
@@ -151,18 +154,27 @@ class CompactSyntaxParser(object):
 
     # Newlines in expressions may be escaped with a backslash
     expr.ignore('\\' + p.LineEnd())
+    # Bare newlines are OK provided we started with a bracket.
+    # However, it's quite hard to enforce that restriction.
+    expr.ignore(p.Literal('\n'))
     # Embedded comments are also OK
     expr.ignore(comment)
     
     # Statements from the "post-processing" language
     ################################################
     
-    # Simple assignment
+    # Simple assignment (i.e. not to a tuple)
     simpleAssign = p.Group(ncIdent + eq + expr)
     simpleAssignList = OptionalDelimitedList(simpleAssign, nl)
     
-    # Assertions
-    assertStmt = MakeKw('assert') + expr # TODO: May need to add a nl here?
+    # Assertions and function returns
+    assertStmt = p.Group(MakeKw('assert') + expr)
+    returnStmt = p.Group(MakeKw('return') + p.delimitedList(expr))
+    
+    # Full assignment, to a tuple of names or single name
+    assignStmt = p.Group(p.Group(p.delimitedList(ncIdent)) + eq + p.Group(p.delimitedList(expr)))
+    
+    stmtList << p.delimitedList(assertStmt | returnStmt | assignStmt, nl)
 
     # Miscellaneous constructs making up protocols
     ##############################################
@@ -222,9 +234,8 @@ class CompactSyntaxParser(object):
     modifiers = p.Group(MakeKw('modifiers') + obrace + OptionalDelimitedList(modifier, nl) + cbrace)
     
     # The simulations themselves
-    basicSimContent = range + Optional(nl + modifiers)
-    timecourseSim = p.Group(MakeKw('timecourse') + obrace + basicSimContent + cbrace)
-    nestedSim = p.Group(MakeKw('nested') + obrace + basicSimContent +
+    timecourseSim = p.Group(MakeKw('timecourse') + obrace + range + Optional(nl + modifiers) + cbrace)
+    nestedSim = p.Group(MakeKw('nested') + obrace + range + nl + Optional(modifiers) +
                         p.Group(MakeKw('nests') + ident) + cbrace)
     simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
 
@@ -249,12 +260,14 @@ class CompactSyntaxParser(object):
 # Parser debugging support
 ################################################################################
 
-def GetNamedGrammars():
-    """Get an iterator over all the named grammars in CompactSyntaxParser."""
-    for parser in dir(CompactSyntaxParser):
-        parser = getattr(CompactSyntaxParser, parser)
+def GetNamedGrammars(obj=CompactSyntaxParser):
+    """Get a list of all the named grammars in the given object."""
+    grammars = []
+    for parser in dir(obj):
+        parser = getattr(obj, parser)
         if isinstance(parser, p.ParserElement):
-            yield parser
+            grammars.append(parser)
+    return grammars
 
 def EnableDebug(grammars=None):
     """Enable debugging of our (named) grammars."""
