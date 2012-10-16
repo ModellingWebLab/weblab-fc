@@ -300,7 +300,11 @@ nests sim
         self.assertParses(csp.plots, 'plots {}', [[]])
     
     def TestParsingFunctionCalls(self):
-        pass
+        self.assertParses(csp.functionCall, 'swap(a, b)', [['swap', ['a', 'b']]])
+        self.assertParses(csp.functionCall, 'double(33)', [['double', ['33']]])
+        self.assertParses(csp.functionCall, 'double(a + b)', [['double', [['a', '+', 'b']]]])
+        self.failIfParses(csp.functionCall, 'spaced (param)')
+        self.assertParses(csp.expr, 'func(a,b, 3)', [['func', ['a', 'b', '3']]])
     
     def TestParsingMathmlOperators(self):
         pass
@@ -313,7 +317,7 @@ nests sim
 
         self.assertParses(csp.assignStmt, 'a, b = tuple', [[['a', 'b'], ['tuple']]])
         self.assertParses(csp.assignStmt, 'a, b = b, a', [[['a', 'b'], ['b', 'a']]])
-        #self.assertParses(csp.assignStmt, 'a, b = (b, a)', [[['a', 'b'], ['b', 'a']]])
+        self.assertParses(csp.assignStmt, 'a, b = (b, a)', [[['a', 'b'], [['b', 'a']]]]) # TODO: same nesting as previous case
         self.failIfParses(csp.assignStmt, 'p:a, p:b = e')
         self.failIfParses(csp.assignStmt, '')
     
@@ -322,7 +326,7 @@ nests sim
         self.assertParses(csp.returnStmt, 'return (3 - 4)', [[['3', '-', '4']]])
         self.assertParses(csp.returnStmt, 'return a, b', [['a', 'b']])
         self.assertParses(csp.returnStmt, 'return a + 1, b - 1', [[['a', '+', '1'], ['b', '-', '1']]])
-        #self.assertParses(csp.returnStmt, 'return (a, b)', [[['a', 'b']]])
+        self.assertParses(csp.returnStmt, 'return (a, b)', [[['a', 'b']]])
     
     def TestParsingAssertStatements(self):
         self.assertParses(csp.assertStmt, 'assert a + b', [[['a', '+', 'b']]])
@@ -370,7 +374,14 @@ return c
                           [['double', [['a']], [['a', '*', '2']]]])
     
     def TestParsingTuples(self):
-        pass
+        self.assertParses(csp.tuple, '(1,2)', [['1', '2']])
+        self.assertParses(csp.tuple, '(1+a,2*b)', [[['1', '+', 'a'], ['2', '*', 'b']]])
+        self.assertParses(csp.tuple, '(singleton,)', [['singleton']])
+        self.failIfParses(csp.tuple, '(1)') # You need a Python-style comma as above
+        self.assertParses(csp.expr, '(1,2)', [['1', '2']])
+        self.assertParses(csp.expr, '(1,a,3,c)', [['1', 'a', '3', 'c']])
+        self.assertParses(csp.assignStmt, 't = (1,2)', [[['t'], [['1', '2']]]])
+        self.assertParses(csp.assignStmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
     
     def TestParsingArrays(self):
         pass

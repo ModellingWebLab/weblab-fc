@@ -108,6 +108,7 @@ class CompactSyntaxParser(object):
     # Punctuation etc.
     eq = p.Suppress('=')
     colon = p.Suppress(':')
+    comma = p.Suppress(',')
     oparen = p.Suppress('(')
     cparen = p.Suppress(')')
     nl = p.OneOrMore(Optional(comment) + p.LineEnd().suppress()) # Any line can end with a comment
@@ -143,8 +144,17 @@ class CompactSyntaxParser(object):
     paramList = p.Group(p.delimitedList(paramDecl))
     lambdaExpr = p.Group(MakeKw('lambda') + paramList + colon + (nl + stmtList + nl | expr))
     
-    # The main expression grammar
-    atom = number | ifExpr | ident
+    # Function calls
+    adjParen = oparen.copy()
+    adjParen.setWhitespaceChars('')
+    argList = p.Group(p.delimitedList(expr))
+    functionCall = p.Group(ident + adjParen + argList + cparen)
+    
+    # Tuples
+    tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen)
+    
+    # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
+    atom = number | ifExpr | functionCall | ident | tuple
     expr << p.operatorPrecedence(atom, [('^', 2, p.opAssoc.LEFT),
                                         ('-', 1, p.opAssoc.RIGHT),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT),
