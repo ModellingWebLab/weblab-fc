@@ -399,10 +399,19 @@ return c
         self.assertParses(csp.assignStmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
     
     def TestParsingArrays(self):
-        pass
+        self.assertParses(csp.expr, '[1, 2, 3]', [['1', '2', '3']])
+        self.assertParses(csp.array, '[[a, b], [c, d]]', [[['a', 'b'], ['c', 'd']]])
+        self.assertParses(csp.array, '[ [ [1+2,a,b]],[[3/4,c,d] ]]', [[[[['1', '+', '2'],'a','b']],
+                                                                        [[['3', '/', '4'],'c','d']]]])
 
     def TestParsingArrayComprehensions(self):
-        pass
+        self.assertParses(csp.array, '[i for i in 0:N]', [['i', ['i', '0', 'N']]])
+        self.assertParses(csp.array, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', '0', '2', '4']]])
+        self.assertParses(csp.array, '[i+j*5 for i in 1:3 for j in 2:4]',
+                          [[['i', '+', ['j', '*', '5']], ['i', '1', '3'], ['j', '2', '4']]])
+        self.assertParses(csp.array, '[block for 1#i in 2:10]', [['block', ['1#i', '2', '10']]])
+        self.assertParses(csp.array, '[i^j for i in 1:3 for 2#j in 4:-1:2]',
+                          [[['i', '^', 'j'], ['i', '1', '3'], ['2#j', '4', ['-', '1'], '2']]])
     
     def TestParsingIndexing(self):
         pass

@@ -111,6 +111,8 @@ class CompactSyntaxParser(object):
     comma = p.Suppress(',')
     oparen = p.Suppress('(')
     cparen = p.Suppress(')')
+    osquare = p.Suppress('[')
+    csquare = p.Suppress(']')
     nl = p.OneOrMore(Optional(comment) + p.LineEnd().suppress()) # Any line can end with a comment
     obrace = Optional(nl) + p.Suppress('{') + Optional(nl)
     cbrace = Optional(nl) + p.Suppress('}') + Optional(nl)
@@ -135,6 +137,12 @@ class CompactSyntaxParser(object):
     
     # A vector written like 1:2:5 or 1:5
     numericRange = p.Group(number + colon + number + Optional(colon + number))
+
+    # Creating arrays
+    dimSpec = p.Combine(Optional(number + '#') + ncIdent)
+    comprehension = p.Group(MakeKw('for') + dimSpec + MakeKw('in') +
+                            expr + colon + expr + Optional(colon + expr))
+    array = p.Group(osquare + expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma + expr)) + csquare)
     
     # If-then-else
     ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr)
@@ -154,7 +162,7 @@ class CompactSyntaxParser(object):
     tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen)
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = number | ifExpr | functionCall | ident | tuple
+    atom = array | number | ifExpr | functionCall | ident | tuple
     expr << p.operatorPrecedence(atom, [('^', 2, p.opAssoc.LEFT),
                                         ('-', 1, p.opAssoc.RIGHT),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT),
