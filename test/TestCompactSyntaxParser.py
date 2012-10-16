@@ -183,7 +183,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.modelEquation, 'define model:var = 2.5 / local_var',
                           [['model:var', ['2.5', '/', 'local_var']]])
         
-        #self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var')
+        self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var',
+                          [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]])
 
         self.assertParses(csp.modelInterface, """model interface {  # Comments can go here
     independent var units t
@@ -195,8 +196,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
     output test:v3 units u
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
+    convert u1 to u2 by lambda u: u * test:v3
 }""", [['t', ['test:v1', '', '0'], ['test:v2', 'u', ''], ['test:time', ''], ['test:v3', 'u'],
-        ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']]]])
+        ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
+        ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]])
         self.assertParses(csp.modelInterface, 'model interface {}', [[]])
         self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time', '']]])
         self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time', '']]])
@@ -303,11 +306,23 @@ nests sim
         self.assertParses(csp.functionCall, 'swap(a, b)', [['swap', ['a', 'b']]])
         self.assertParses(csp.functionCall, 'double(33)', [['double', ['33']]])
         self.assertParses(csp.functionCall, 'double(a + b)', [['double', [['a', '+', 'b']]]])
+        self.assertParses(csp.functionCall, 'std:max(A)', [['std:max', ['A']]])
         self.failIfParses(csp.functionCall, 'spaced (param)')
         self.assertParses(csp.expr, 'func(a,b, 3)', [['func', ['a', 'b', '3']]])
     
     def TestParsingMathmlOperators(self):
-        pass
+        # MathML that doesn't have a special operator is represented as a normal function call,
+        # with the 'magic' MathML: prefix.
+        self.assertEqual(len(csp.mathmlOperators), 12 + 3*8)
+        for trigbase in ['sin', 'cos', 'tan', 'sec', 'csc', 'cot']:
+            self.assert_(trigbase in csp.mathmlOperators)
+            self.assert_(trigbase + 'h' in csp.mathmlOperators)
+            self.assert_('arc' + trigbase in csp.mathmlOperators)
+            self.assert_('arc' + trigbase + 'h' in csp.mathmlOperators)
+        for op in 'quotient rem max min root xor abs floor ceiling exp ln log'.split():
+            self.assert_(op in csp.mathmlOperators)
+        self.assertParses(csp.expr, 'MathML:exp(MathML:floor(MathML:exponentiale))',
+                          [['MathML:exp', [['MathML:floor', ['MathML:exponentiale']]]]])
     
     def TestParsingAssignStatements(self):
         self.assertParses(csp.assignStmt, 'var = value', [[['var'], ['value']]])
@@ -390,4 +405,7 @@ return c
         pass
     
     def TestParsingIndexing(self):
+        pass
+
+    def TestParsingUnitsDefinitions(self):
         pass

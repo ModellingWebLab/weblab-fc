@@ -172,6 +172,12 @@ class CompactSyntaxParser(object):
     # Embedded comments are also OK
     expr.ignore(comment)
     
+    # Recognised MathML operators
+    mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
+                             sin cos tan   sec csc cot   sinh cosh tanh   sech csch coth
+                             arcsin arccos arctan   arccosh arccot arccoth
+                             arccsc arccsch arcsec   arcsech arcsinh arctanh'''.split())
+    
     # Statements from the "post-processing" language
     ################################################
     
@@ -222,13 +228,17 @@ class CompactSyntaxParser(object):
     newVariable = p.Group(MakeKw('var') + ncIdent + unitsRef + Optional(eq + number, default=''))
     # Adding or replacing equations in the model
     modelEquation = p.Group(MakeKw('define') + ident + eq + expr)
+    # Units conversion rules
+    unitsConversion = p.Group(MakeKw('convert') + ncIdent + MakeKw('to') + ncIdent +
+                              MakeKw('by') + lambdaExpr)
     
     modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace +
                              DelimitedMultiList([(setTimeUnits, False),
                                                  (inputVariable, True),
                                                  (outputVariable, True),
                                                  (newVariable, True),
-                                                 (modelEquation, True)], nl) + cbrace)
+                                                 (modelEquation, True),
+                                                 (unitsConversion, True)], nl) + cbrace)
     
     # Simulation definitions
     ########################
