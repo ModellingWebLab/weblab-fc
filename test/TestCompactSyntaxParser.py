@@ -413,8 +413,36 @@ return c
         self.assertParses(csp.array, '[i^j for i in 1:3 for 2#j in 4:-1:2]',
                           [[['i', '^', 'j'], ['i', '1', '3'], ['2#j', '4', ['-', '1'], '2']]])
     
-    def TestParsingIndexing(self):
+    def TestParsingViews(self):
+        self.assertParses(csp.expr, 'A[1:3:7]', [['A', ['1', '3', '7']]])
+        self.assertParses(csp.expr, 'A[2#6:-2:4]', [['A', ['2#', '6', ['-', '2'], '4']]])
+        self.assertParses(csp.expr, 'sim:res[1#2]', [['sim:res', ['1#', '2']]])
+        self.assertParses(csp.expr, 'func(A)[5]', [[['func', ['A']], ['5']]])
+        self.assertParses(csp.expr, 'arr[:]', [['arr', ['', '']]])
+        self.assertParses(csp.expr, 'arr[2:]', [['arr', ['2', '']]])
+        self.assertParses(csp.expr, 'arr[:2:]', [['arr', ['', '2', '']]])
+        self.assertParses(csp.expr, 'arr[:-alpha]', [['arr', ['', ['-', 'alpha']]]])
+        self.assertParses(csp.expr, 'arr[-3:-1:]', [['arr', [['-', '3'], ['-', '1'], '']]])
+        self.assertParses(csp.expr, 'genericity[*#:]', [['genericity', ['*#', '', '']]])
+        self.assertParses(csp.expr, 'genericity[*#0]', [['genericity', ['*#', '0']]])
+        self.assertParses(csp.expr, 'genericity[*#0:5]', [['genericity', ['*#', '0', '5']]])
+        self.assertParses(csp.expr, 'genericity[*#0:5:50]', [['genericity', ['*#', '0', '5', '50']]])
+        self.assertParses(csp.expr, 'genericity[*#:5:]', [['genericity', ['*#', '', '5', '']]])
+        self.assertParses(csp.expr, 'genericity[*#0:]', [['genericity', ['*#', '0', '']]])
+        self.assertParses(csp.expr, 'multiples[3][4]', [['multiples', ['3'], ['4']]])
+        self.assertParses(csp.expr, 'multiples[1#3][0#:-step:0][*#0]',
+                          [['multiples', ['1#', '3'], ['0#', '', ['-', 'step'], '0'], ['*#', '0']]])
+        self.assertParses(csp.expr, 'okspace[ 0# (1+2) : a+b : 50 ]',
+                          [['okspace', ['0#', ['1', '+', '2'], ['a', '+', 'b'], '50']]])
+        self.failIfParses(csp.expr, 'arr [1]')    # No space allowed here!
+        self.failIfParses(csp.expr, 'arr[1] [3]') # No space allowed here!
+    
+    def TestParsingFindAndIndex(self):
+        # Possible syntax: ages_ext{in_box_pattern}, but index needs optional args dim, shrink, pad, pad value
         pass
 
     def TestParsingUnitsDefinitions(self):
+        pass
+    
+    def TestParsingAccessors(self):
         pass

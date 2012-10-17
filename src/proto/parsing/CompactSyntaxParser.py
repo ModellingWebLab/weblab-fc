@@ -47,6 +47,12 @@ def MakeKw(keyword, suppress=True):
         kw = kw.suppress()
     return kw
 
+def Adjacent(parser):
+    """Create a copy of the given parser that doesn't permit whitespace to occur before it."""
+    adj = parser.copy()
+    adj.setWhitespaceChars('')
+    return adj
+
 class Optional(p.Optional):
     """An Optional pattern that doesn't consume whitespace if the contents don't match."""
     def __init__(self, *args, **kwargs):
@@ -144,26 +150,31 @@ class CompactSyntaxParser(object):
                             expr + colon + expr + Optional(colon + expr))
     array = p.Group(osquare + expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma + expr)) + csquare)
     
+    # Array views
+    optExpr = Optional(expr, default='')
+    viewSpec = p.Group(Adjacent(osquare) + Optional(p.Combine((number | '*') + '#')) +
+                       optExpr + Optional(colon + optExpr + Optional(colon + optExpr)) + csquare)
+    arrayView = p.Group(expr + viewSpec) # For standalone testing
+    
     # If-then-else
     ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr)
     
     # Lambda definitions
-    paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr
+    paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
     paramList = p.Group(p.delimitedList(paramDecl))
     lambdaExpr = p.Group(MakeKw('lambda') + paramList + colon + (nl + stmtList + nl | expr))
     
     # Function calls
-    adjParen = oparen.copy()
-    adjParen.setWhitespaceChars('')
     argList = p.Group(p.delimitedList(expr))
-    functionCall = p.Group(ident + adjParen + argList + cparen)
+    functionCall = p.Group(ident + Adjacent(oparen) + argList + cparen)
     
     # Tuples
     tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen)
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
     atom = array | number | ifExpr | functionCall | ident | tuple
-    expr << p.operatorPrecedence(atom, [('^', 2, p.opAssoc.LEFT),
+    expr << p.operatorPrecedence(atom, [(viewSpec, 1, p.opAssoc.LEFT),
+                                        ('^', 2, p.opAssoc.LEFT),
                                         ('-', 1, p.opAssoc.RIGHT),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT),
                                         (p.oneOf('+ -'), 2, p.opAssoc.LEFT),
