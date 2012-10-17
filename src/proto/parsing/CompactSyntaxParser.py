@@ -104,6 +104,31 @@ def DelimitedMultiList(elements, delimiter):
             result = (expr + delimiter + rest) | expr | rest
     return result
 
+def UnIgnore(parser):
+    """Stop ignoring things in the given parser."""
+    for child in getattr(parser, 'exprs', []):
+        UnIgnore(child)
+    if hasattr(parser, 'expr'):
+        UnIgnore(parser.expr)
+    parser.ignoreExprs = []
+
+def MonkeyPatch():
+    """Monkey-patch some pyparsing methods to behave slightly differently."""
+    def ignore( self, other ):
+        """Improved ignore that avoids ignoring self by accident."""
+        if isinstance( other, p.Suppress ):
+            if other not in self.ignoreExprs and other != self:
+                self.ignoreExprs.append( other.copy() )
+        else:
+            self.ignoreExprs.append( p.Suppress( other.copy() ) )
+        return self
+
+    import new
+    setattr(p.ParserElement, 'ignore', new.instancemethod(locals()['ignore'], None, p.ParserElement))
+
+MonkeyPatch()
+
+
 class CompactSyntaxParser(object):
     """A parser that converts a compact textual syntax for protocols into XML."""
     # Newlines are significant most of the time for us
@@ -119,7 +144,7 @@ class CompactSyntaxParser(object):
     cparen = p.Suppress(')')
     osquare = p.Suppress('[')
     csquare = p.Suppress(']')
-    nl = p.OneOrMore(Optional(comment) + p.LineEnd().suppress()) # Any line can end with a comment
+    nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())) # Any line can end with a comment
     obrace = Optional(nl) + p.Suppress('{') + Optional(nl)
     cbrace = Optional(nl) + p.Suppress('}') + Optional(nl)
     
@@ -154,7 +179,6 @@ class CompactSyntaxParser(object):
     optExpr = Optional(expr, default='')
     viewSpec = p.Group(Adjacent(osquare) + Optional(p.Combine((number | '*') + '#')) +
                        optExpr + Optional(colon + optExpr + Optional(colon + optExpr)) + csquare)
-    arrayView = p.Group(expr + viewSpec) # For standalone testing
     
     # If-then-else
     ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr)
@@ -162,17 +186,17 @@ class CompactSyntaxParser(object):
     # Lambda definitions
     paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
     paramList = p.Group(p.delimitedList(paramDecl))
-    lambdaExpr = p.Group(MakeKw('lambda') + paramList + colon + (nl + stmtList + nl | expr))
+    lambdaExpr = p.Group(MakeKw('lambda') + paramList + ((colon + expr) | (obrace + stmtList + cbrace)))
     
     # Function calls
     argList = p.Group(p.delimitedList(expr))
-    functionCall = p.Group(ident + Adjacent(oparen) + argList + cparen)
+    functionCall = p.Group(ident + Adjacent(oparen) + argList + cparen) # TODO: allow lambdas, not just ident?
     
     # Tuples
     tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen)
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = array | number | ifExpr | functionCall | ident | tuple
+    atom = array | number | ifExpr | lambdaExpr | functionCall | ident | tuple
     expr << p.operatorPrecedence(atom, [(viewSpec, 1, p.opAssoc.LEFT),
                                         ('^', 2, p.opAssoc.LEFT),
                                         ('-', 1, p.opAssoc.RIGHT),
@@ -190,6 +214,8 @@ class CompactSyntaxParser(object):
     expr.ignore(p.Literal('\n'))
     # Embedded comments are also OK
     expr.ignore(comment)
+    # Avoid mayhem
+    UnIgnore(nl)
     
     # Recognised MathML operators
     mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
@@ -212,8 +238,8 @@ class CompactSyntaxParser(object):
     assignStmt = p.Group(p.Group(p.delimitedList(ncIdent)) + eq + p.Group(p.delimitedList(expr)))
     
     # Function definition
-    functionDefn = p.Group(MakeKw('def') + ncIdent + oparen + paramList + cparen + colon +
-                           (nl + stmtList | expr))
+    functionDefn = p.Group(MakeKw('def') + ncIdent + oparen + paramList + cparen +
+                           ((colon + expr) | (obrace + stmtList + cbrace)))
     
     stmtList << p.delimitedList(assertStmt | returnStmt | assignStmt | functionDefn, nl)
 

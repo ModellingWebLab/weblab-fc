@@ -367,26 +367,33 @@ return c, d""", [[['a', '<', '0']],
         self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
         self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
         self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
+        self.assertParses(csp.expr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
         self.assertParses(csp.lambdaExpr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
         self.failIfParses(csp.lambdaExpr, 'lambda p:a: 5')
 
-        self.assertParses(csp.lambdaExpr, """lambda a, b:
+        self.assertParses(csp.lambdaExpr, """lambda a, b {
 assert a > b
 c = a - b
 return c
+}
 """, [[[['a'], ['b']], [['a', '>', 'b']],
                        [['c'], [['a', '-', 'b']]],
                        ['c']]])
+        self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], ['a']]])
 
     def TestParsingFunctionDefinitions(self):
-        self.assertParses(csp.functionDefn, 'def double(a):\n    return a * 2',
+        self.assertParses(csp.functionDefn, 'def double(a)\n {\n return a * 2\n }',
                           [['double', [['a']], [['a', '*', '2']]]])
         self.assertParses(csp.functionDefn, 'def double(a): a * 2',
                           [['double', [['a']], ['a', '*', '2']]])
         # A function definition is just sugar for an assignment of a lambda expression
-        self.assertParses(csp.stmtList, 'def double(a):\n    return a * 2',
+        self.assertParses(csp.stmtList, 'def double(a) {\n    return a * 2}',
                           [['double', [['a']], [['a', '*', '2']]]])
+    
+    def TestParsingNestedFunctions(self):
+        # Currently we can't do this, as we don't delimit the contained statement list in any way!
+        # Need to choose between indentation level (Python) or brace-delimited
+        pass
     
     def TestParsingTuples(self):
         self.assertParses(csp.tuple, '(1,2)', [['1', '2']])
