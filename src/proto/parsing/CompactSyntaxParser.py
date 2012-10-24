@@ -144,6 +144,7 @@ class CompactSyntaxParser(object):
     cparen = p.Suppress(')')
     osquare = p.Suppress('[')
     csquare = p.Suppress(']')
+    dollar = p.Suppress('$')
     nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())) # Any line can end with a comment
     obrace = Optional(nl) + p.Suppress('{') + Optional(nl)
     cbrace = Optional(nl) + p.Suppress('}') + Optional(nl)
@@ -170,14 +171,14 @@ class CompactSyntaxParser(object):
     numericRange = p.Group(number + colon + number + Optional(colon + number))
 
     # Creating arrays
-    dimSpec = p.Combine(Optional(number + '#') + ncIdent)
+    dimSpec = Optional(expr + Adjacent(dollar)) + ncIdent
     comprehension = p.Group(MakeKw('for') + dimSpec + MakeKw('in') +
                             expr + colon + expr + Optional(colon + expr))
     array = p.Group(osquare + expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma + expr)) + csquare)
     
     # Array views
     optExpr = Optional(expr, default='')
-    viewSpec = p.Group(Adjacent(osquare) + Optional(p.Combine((number | '*') + '#')) +
+    viewSpec = p.Group(Adjacent(osquare) + Optional(('*' | expr) + Adjacent(dollar)) +
                        optExpr + Optional(colon + optExpr + Optional(colon + optExpr)) + csquare)
     
     # If-then-else
