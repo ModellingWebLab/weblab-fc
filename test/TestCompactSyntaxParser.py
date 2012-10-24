@@ -452,4 +452,22 @@ return c
         pass
     
     def TestParsingAccessors(self):
+        for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:
+            self.assertParses(csp.accessor, '.' + accessor, [accessor])
+            self.assertParses(csp.expr, 'var.' + accessor, [['var', accessor]])
+        for ptype in ['SIMPLE_VALUE', 'ARRAY', 'STRING', 'TUPLE', 'FUNCTION', 'NULL', 'DEFAULT']:
+            self.assertParses(csp.accessor, '.IS_' + ptype, ['IS_' + ptype])
+            self.assertParses(csp.expr, 'var.IS_' + ptype, [['var', 'IS_' + ptype]])
+        self.assertParses(csp.expr, 'arr.SHAPE[1]', [[['arr', 'SHAPE'], ['1']]])
+        self.assertParses(csp.expr, 'func(var).IS_ARRAY', [[['func', ['var']], 'IS_ARRAY']])
+        self.assertParses(csp.expr, 'A.SHAPE.IS_ARRAY', [['A', 'SHAPE', 'IS_ARRAY']])
+        self.failIfParses(csp.expr, 'arr .SHAPE')
+    
+    def TestParsingMap(self):
+        pass
+    
+    def TestParsingFold(self):
+        pass
+
+    def TestParsingWrappedMathmlOperators(self):
         pass
