@@ -473,10 +473,18 @@ return c
         self.failIfParses(csp.expr, 'arr .SHAPE')
     
     def TestParsingMap(self):
+        # map(func, a1, a2)
+        # map(lambda a, b: a+b, A, B)
+        # map(id, a)
+        # map(hof(arg), a, b, c, d, e)
+        # but not: map(f)  (unless implemented just as a function call with special name)
         pass
     
     def TestParsingFold(self):
+        # fold(func, array, init, dim)
         pass
 
     def TestParsingWrappedMathmlOperators(self):
+        # e.g. used in map(@2:/, a, b)
+        # func = @1:MathML.sin
         pass
