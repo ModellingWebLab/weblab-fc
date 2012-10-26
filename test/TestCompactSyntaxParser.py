@@ -455,10 +455,15 @@ return c
     def TestParsingFindAndIndex(self):
         # Possible syntax: ages_ext{in_box_pattern}, but index needs optional args dim, shrink, pad, pad value
         # Perhaps arr{pattern, shrink:dim, pad:dim=value} or similar
-        # What should a bare find look like?
+        # What should a bare find look like?  This is used, as is index without immediately nested find.
+        # So the curly braces could just represent index, and use something else to make the find explicit
+        # - perhaps a function call like map & fold.
         pass
 
     def TestParsingUnitsDefinitions(self):
+        # Possible syntax:  (mult, offset, expt are numbers; prefix is SI prefix name; base is ncIdent)
+        #  new_simple = [mult] [prefix] base [+|- offset]
+        #  new_complex = p.delimtedList( [mult] [prefix] base [^expt], '.')
         pass
     
     def TestParsingAccessors(self):
@@ -474,18 +479,40 @@ return c
         self.failIfParses(csp.expr, 'arr .SHAPE')
     
     def TestParsingMap(self):
-        # map(func, a1, a2)
-        # map(lambda a, b: a+b, A, B)
-        # map(id, a)
-        # map(hof(arg), a, b, c, d, e)
-        # but not: map(f)  (unless implemented just as a function call with special name)
-        pass
+        self.assertParses(csp.expr, 'map(func, a1, a2)', [['map', ['func', 'a1', 'a2']]])
+        self.assertParses(csp.expr, 'map(lambda a, b: a+b, A, B)',
+                          [['map', [[[['a'], ['b']], ['a', '+', 'b']], 'A', 'B']]])
+        self.assertParses(csp.expr, 'map(id, a)', [['map', ['id', 'a']]])
+        self.assertParses(csp.expr, 'map(hof(arg), a, b, c, d, e)',
+                          [['map', [['hof', ['arg']], 'a', 'b', 'c', 'd', 'e']]])
+        # self.failIfParses(csp.expr, 'map(f)') # At present implemented just as a function call with special name
     
     def TestParsingFold(self):
-        # fold(func, array, init, dim)
+        self.assertParses(csp.expr, 'fold(func, array, init, dim)', [['fold', ['func', 'array', 'init', 'dim']]])
+        self.assertParses(csp.expr, 'fold(lambda a, b: a - b, f(), 1, 2)',
+                          [['fold', [[[['a'], ['b']], ['a', '-', 'b']], ['f', []], '1', '2']]])
+        self.assertParses(csp.expr, 'fold(f, A)', [['fold', ['f', 'A']]])
+        self.assertParses(csp.expr, 'fold(f, A, 0)', [['fold', ['f', 'A', '0']]])
+        self.assertParses(csp.expr, 'fold(f, A, default, 1)', [['fold', ['f', 'A', [], '1']]])
+        #self.failIfParses(csp, expr, 'fold()')
         pass
 
     def TestParsingWrappedMathmlOperators(self):
         # e.g. used in map(@2:/, a, b)
         # func = @1:MathML.sin
+        pass
+
+    def TestParsingNullAndDefault(self):
+#        self.assertParses(csp.expr, 'null', [])
+#        self.assertParses(csp.expr, 'default', [])
+        pass
+
+    def TestParsingLibrary(self):
+        pass
+    
+    def TestParsingUseImports(self):
+        pass
+    
+    def TestParsingFullProtocols(self):
+        # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
         pass

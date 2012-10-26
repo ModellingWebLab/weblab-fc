@@ -199,9 +199,13 @@ class CompactSyntaxParser(object):
     # Accessors
     accessor = p.Combine(Adjacent(p.Suppress('.')) +
                          p.oneOf('IS_SIMPLE_VALUE IS_ARRAY IS_STRING IS_TUPLE IS_FUNCTION IS_NULL IS_DEFAULT NUM_DIMS NUM_ELEMENTS SHAPE'))
+   
+    # Special values
+    nullValue = p.Group(MakeKw('null'))
+    defaultValue = p.Group(MakeKw('default'))
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = array | number | ifExpr | lambdaExpr | functionCall | ident | tuple
+    atom = array | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT),
                                         (viewSpec, 1, p.opAssoc.LEFT),
                                         ('^', 2, p.opAssoc.LEFT),
