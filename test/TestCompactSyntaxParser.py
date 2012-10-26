@@ -303,6 +303,7 @@ nests sim
         self.assertParses(csp.plots, 'plots {}', [[]])
     
     def TestParsingFunctionCalls(self):
+        self.assertParses(csp.functionCall, 'noargs()', [['noargs', []]])
         self.assertParses(csp.functionCall, 'swap(a, b)', [['swap', ['a', 'b']]])
         self.assertParses(csp.functionCall, 'double(33)', [['double', ['33']]])
         self.assertParses(csp.functionCall, 'double(a + b)', [['double', [['a', '+', 'b']]]])

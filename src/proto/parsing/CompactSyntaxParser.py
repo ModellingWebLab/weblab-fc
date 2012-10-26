@@ -190,7 +190,7 @@ class CompactSyntaxParser(object):
     lambdaExpr = p.Group(MakeKw('lambda') + paramList + ((colon + expr) | (obrace + stmtList + cbrace)))
     
     # Function calls
-    argList = p.Group(p.delimitedList(expr))
+    argList = p.Group(OptionalDelimitedList(expr, comma))
     functionCall = p.Group(ident + Adjacent(oparen) + argList + cparen) # TODO: allow lambdas, not just ident?
     
     # Tuples
