@@ -461,10 +461,36 @@ return c
         pass
 
     def TestParsingUnitsDefinitions(self):
-        # Possible syntax:  (mult, offset, expt are numbers; prefix is SI prefix name; base is ncIdent)
+        # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
         #  new_simple = [mult] [prefix] base [+|- offset]
-        #  new_complex = p.delimtedList( [mult] [prefix] base [^expt], '.')
-        pass
+        #  new_complex = p.delimitedList( [mult] [prefix] base [^expt], '.')
+        self.assertParses(csp.unitsDef, 'ms = milli second', [['ms', ['1', 'milli', 'second', '1']]])
+        self.assertParses(csp.unitsDef, 'C = kelvin - 273.15', [['C', ['1', '', 'kelvin', '1', ['-', '273.15']]]])
+        self.assertParses(csp.unitsDef, 'C=kelvin-273.15', [['C', ['1', '', 'kelvin', '1', ['-', '273.15']]]])
+        self.assertParses(csp.unitsDef, 'litre = 1000 centi metre^3', [['litre', ['1000', 'centi', 'metre', '3']]])
+        self.assertParses(csp.unitsDef, 'accel_units = kilo metre . second^-2',
+                          [['accel_units', ['1', 'kilo', 'metre', '1'], ['1', '', 'second', '-2']]])
+        self.assertParses(csp.unitsDef, 'fahrenheit = (5/9) celsius + 32.0',
+                          [['fahrenheit', [['5', '/', '9'], '', 'celsius', '1', ['+', '32.0']]]])
+        self.assertParses(csp.unitsDef, 'fahrenheit = (5/9) kelvin + (32 - 273.15 * 9 / 5)',
+                          [['fahrenheit', [['5', '/', '9'], '', 'kelvin', '1', ['+', ['32', '-', ['273.15', '*', '9', '/', '5']]]]]])
+        
+        self.assertParses(csp.units, "units {}", [])
+        self.assertParses(csp.units, """units
+{
+# nM = nanomolar
+nM = nano mole . litre^-1
+hour = 3600 second
+flux = nM . hour ^ -1
+
+rate_const = hour^-1           # First order
+rate_const_2 = nM^-1 . hour^-1 # Second order
+}
+""", [['nM', ['1', 'nano', 'mole', '1'], ['1', '', 'litre', '-1']],
+      ['hour', ['3600', '', 'second', '1']],
+      ['flux', ['1', '', 'nM', '1'], ['1', '', 'hour', '-1']],
+      ['rate_const', ['1', '', 'hour', '-1']],
+      ['rate_const_2', ['1', '', 'nM', '-1'], ['1', '', 'hour', '-1']]])
     
     def TestParsingAccessors(self):
         for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:
@@ -495,7 +521,7 @@ return c
         self.assertParses(csp.expr, 'fold(f, A, 0)', [['fold', ['f', 'A', '0']]])
         self.assertParses(csp.expr, 'fold(f, A, default, 1)', [['fold', ['f', 'A', [], '1']]])
         #self.failIfParses(csp, expr, 'fold()')
-        pass
+        #self.failIfParses(csp, expr, 'fold(f, A, i, d, extra)')
 
     def TestParsingWrappedMathmlOperators(self):
         # e.g. used in map(@2:/, a, b)
@@ -503,9 +529,8 @@ return c
         pass
 
     def TestParsingNullAndDefault(self):
-#        self.assertParses(csp.expr, 'null', [])
-#        self.assertParses(csp.expr, 'default', [])
-        pass
+        self.assertParses(csp.expr, 'null', [[]])
+        self.assertParses(csp.expr, 'default', [[]])
 
     def TestParsingLibrary(self):
         pass

@@ -267,6 +267,15 @@ class CompactSyntaxParser(object):
     importStmt = p.Group(MakeKw('import') + Optional(ncIdent + eq, default='') + quotedUri)
     imports = OptionalDelimitedList(importStmt, nl)
     
+    # Units definitions
+    siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
+                       'deci centi milli micro nano pico femto atto zepto yocto')
+    _num_or_expr = number | (oparen + expr + cparen)
+    unitRef = p.Group(Optional(_num_or_expr, '1') + Optional(siPrefix, '') + ncIdent + Optional(p.Suppress('^') + number, '1')
+                      + Optional(p.Group(p.oneOf('- +') + _num_or_expr)))
+    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.'))
+    units = MakeKw('units') + obrace + OptionalDelimitedList(unitsDef, nl) + cbrace
+    
     # Model interface section
     #########################
     unitsRef = MakeKw('units') + ncIdent
