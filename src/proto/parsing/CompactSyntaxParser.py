@@ -199,7 +199,12 @@ class CompactSyntaxParser(object):
     # Accessors
     accessor = p.Combine(Adjacent(p.Suppress('.')) +
                          p.oneOf('IS_SIMPLE_VALUE IS_ARRAY IS_STRING IS_TUPLE IS_FUNCTION IS_NULL IS_DEFAULT NUM_DIMS NUM_ELEMENTS SHAPE'))
-   
+
+    # Indexing
+    pad = MakeKw('pad') + Adjacent(colon) + expr + eq + expr
+    shrink = MakeKw('shrink') + Adjacent(colon) + expr
+    index = p.Group(Adjacent(p.Suppress('{')) + expr + Optional(comma + (pad|shrink)) + p.Suppress('}'))
+
     # Special values
     nullValue = p.Group(MakeKw('null'))
     defaultValue = p.Group(MakeKw('default'))
@@ -208,6 +213,7 @@ class CompactSyntaxParser(object):
     atom = array | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT),
                                         (viewSpec, 1, p.opAssoc.LEFT),
+                                        (index, 1, p.opAssoc.LEFT),
                                         ('^', 2, p.opAssoc.LEFT),
                                         ('-', 1, p.opAssoc.RIGHT),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT),

@@ -453,12 +453,19 @@ return c
         self.failIfParses(csp.expr, 'arr[1 $ 2]')
     
     def TestParsingFindAndIndex(self):
-        # Possible syntax: ages_ext{in_box_pattern}, but index needs optional args dim, shrink, pad, pad value
-        # Perhaps arr{pattern, shrink:dim, pad:dim=value} or similar
-        # What should a bare find look like?  This is used, as is index without immediately nested find.
-        # So the curly braces could just represent index, and use something else to make the find explicit
-        # - perhaps a function call like map & fold.
-        pass
+        # Curly braces represent index, with optional pad or shrink argument.  Find is a function call.
+        self.assertParses(csp.expr, 'find(arr)', [['find', ['arr']]])
+        self.failIfParses(csp.expr, 'find (arr)')
+        #self.failIfParses(csp.expr, 'find(arr, extra)') # Needs special support e.g. from parse actions
+        
+        self.assertParses(csp.expr, 'arr{idxs}', [['arr', ['idxs']]])
+        self.failIfParses(csp.expr, 'arr {spaced}')
+        self.assertParses(csp.expr, 'arr{idxs, shrink:dim}', [['arr', ['idxs', 'dim']]])
+        self.assertParses(csp.expr, 'arr{idxs, pad:dim=value}', [['arr', ['idxs', 'dim', 'value']]])
+        self.failIfParses(csp.expr, 'arr{idxs, shrink:dim, pad:dim=value}')
+        
+        self.assertParses(csp.expr, 'f(1,2){find(blah), shrink:0}', [[['f', ['1', '2']], [['find', ['blah']], '0']]])
+        self.assertParses(csp.expr, 'A{find(A), pad:0=1+2}', [['A', [['find', ['A']], '0', ['1', '+', '2']]]])
 
     def TestParsingUnitsDefinitions(self):
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
