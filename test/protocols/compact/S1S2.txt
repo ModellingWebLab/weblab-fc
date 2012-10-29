@@ -1,0 +1,115 @@
+# Compact syntax version of the S1S2 protocol
+
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    s1_interval = 1000
+    steady_state_beats = 1000
+    timecourse_duration = 3000
+    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,
+                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, 
+                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, 
+                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, 
+                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, 
+                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, 
+                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, 
+                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 
+                    90,  80,  70,  60,  50,  40,  30,  20]
+}
+
+import "../../../src/proto/library/BasicLibrary.xml"
+import "../../../src/proto/library/CardiacLibrary.xml"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    input oxmeta:membrane_stimulus_current_end units ms = 100000000000
+    input oxmeta:membrane_stimulus_current_offset units ms = 10
+    input oxmeta:membrane_stimulus_current_period units ms = 1000
+    
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+    
+    define oxmeta:membrane_stimulus_current = \
+        if (oxmeta:time >= oxmeta:membrane_stimulus_current_offset && oxmeta:time <= oxmeta:membrane_stimulus_current_end &&
+            (oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)
+            - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /
+                            oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)
+            <= oxmeta:membrane_stimulus_current_duration)
+        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless
+}
+
+tasks {
+    # Do a pre-run to get the model to steady-state with the desired S1 stimulus
+    simulation timecourse {
+        range time units ms vector [0, s1_interval * steady_state_beats]
+        modifiers {
+            # Set stimulus period to S1 interval, offset 10ms
+            at start set oxmeta:membrane_stimulus_current_period = s1_interval # ms
+            at start set oxmeta:membrane_stimulus_current_offset = 10          # ms
+            at end save as initial_state
+        }
+    }
+    # Now do the S1-S2 part, i.e. two stimuli
+    simulation sim = nested {
+        range s2_interval units dimensionless vector s2_intervals
+        modifiers {
+            at each loop reset to initial_state
+            # Set the gap between stimuli to the S2 interval
+            at each loop set oxmeta:membrane_stimulus_current_period = s2_interval
+            # And only do one S2 stimulus
+            at each loop set oxmeta:membrane_stimulus_current_end = s2_interval * 1.5
+        }
+        nests simulation timecourse {
+            range time units ms uniform 0:1:timecourse_duration
+        }
+    }
+}
+
+post-processing {
+    # Test that expected model outputs exist
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    
+    # Get out a single 1D array for time (for plotting)
+    time_1d = RemoveDim(sim:time, 0)
+    
+    # Compute APD90
+    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)
+
+    # Just consider the first DI and the second AP to be of interest
+    first_raw_DI = raw_DI[1$0][*$:]
+    second_raw_APD = raw_APD90[1$1][*$:]
+    
+    # Remove entries for negative DIs from both the DI and APD arrays.
+    # This removes entries where the S2 stimulus was applied before repolarisation from the last S1 pulse.
+    # Also ignore entries with DI <= 19ms (which tend to skew the graph scales).
+    min_DI = 19
+    DI = After(first_raw_DI, first_raw_DI, min_DI, default)
+    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)
+    
+    # Calculate slope information
+    S1S2_slope = Grad(DI, APD90, default)
+    max_S1S2_slope = Max(S1S2_slope, default)
+}
+
+outputs {
+    membrane_voltage = sim:membrane_voltage "Transmembrane potential"
+    time_1d units ms "Time"
+    raw_APD90 units ms
+    raw_DI units ms
+    APD90 units ms "Action Potential Duration 90%"
+    DI units ms "Diastolic Interval"
+    S1S2_slope units dimensionless "S1-S2 curve gradient"
+    max_S1S2_slope units dimensionless "Maximum gradient of S1-S2 curve"
+}
+
+plots {
+    plot "S1-S2 curve" { APD90 against DI }
+    plot "Action potential traces" { membrane_voltage against time_1d }
+}

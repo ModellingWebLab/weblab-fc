@@ -32,6 +32,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 # TODO: We may be able to get rid of some of the p.Group wrapping when we add parse actions
+import sys
 
 import pyparsing as p
 
@@ -145,9 +146,9 @@ class CompactSyntaxParser(object):
     osquare = p.Suppress('[')
     csquare = p.Suppress(']')
     dollar = p.Suppress('$')
-    nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())) # Any line can end with a comment
-    obrace = Optional(nl) + p.Suppress('{') + Optional(nl)
-    cbrace = Optional(nl) + p.Suppress('}') + Optional(nl)
+    nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())).setName('Newline(s)') # Any line can end with a comment
+    obrace = (Optional(nl) + p.Suppress('{') + Optional(nl)).setName('{')
+    cbrace = (Optional(nl) + p.Suppress('}') + Optional(nl)).setName('}')
     
     # Numbers can be given in scientific notation, with an optional leading minus sign.
     number = p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?').setName('Number')
@@ -167,47 +168,47 @@ class CompactSyntaxParser(object):
     expr = p.Forward().setName('Expression')
     stmtList = p.Forward().setName('StatementList')
     
-    # A vector written like 1:2:5 or 1:5
-    numericRange = p.Group(number + colon + number + Optional(colon + number))
+    # A vector written like 1:2:5 or 1:5 or A:B:C
+    numericRange = expr + colon + expr + Optional(colon + expr)
 
     # Creating arrays
     dimSpec = Optional(expr + Adjacent(dollar)) + ncIdent
-    comprehension = p.Group(MakeKw('for') + dimSpec + MakeKw('in') +
-                            expr + colon + expr + Optional(colon + expr))
-    array = p.Group(osquare + expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma + expr)) + csquare)
+    comprehension = p.Group(MakeKw('for') + dimSpec + MakeKw('in') + numericRange)
+    array = p.Group(osquare + expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma + expr)) + csquare).setName('Array')
     
     # Array views
     optExpr = Optional(expr, default='')
     viewSpec = p.Group(Adjacent(osquare) + Optional(('*' | expr) + Adjacent(dollar)) +
-                       optExpr + Optional(colon + optExpr + Optional(colon + optExpr)) + csquare)
+                       optExpr + Optional(colon + optExpr + Optional(colon + optExpr)) + csquare).setName('ViewSpec')
     
     # If-then-else
-    ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr)
+    ifExpr = p.Group(MakeKw('if') + expr + MakeKw('then') + expr + MakeKw('else') + expr).setName('IfThenElse')
     
     # Lambda definitions
     paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
     paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
-    lambdaExpr = p.Group(MakeKw('lambda') + paramList + ((colon + expr) | (obrace + stmtList + cbrace)))
+    lambdaExpr = p.Group(MakeKw('lambda') + paramList + ((colon + expr) | (obrace + stmtList + cbrace))).setName('Lambda')
     
     # Function calls
     argList = p.Group(OptionalDelimitedList(expr, comma))
-    functionCall = p.Group(ident + Adjacent(oparen) + argList + cparen) # TODO: allow lambdas, not just ident?
+    functionCall = p.Group(ident + Adjacent(oparen) + argList + cparen).setName('FnCall') # TODO: allow lambdas, not just ident?
     
     # Tuples
-    tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen)
+    tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen).setName('Tuple')
     
     # Accessors
     accessor = p.Combine(Adjacent(p.Suppress('.')) +
-                         p.oneOf('IS_SIMPLE_VALUE IS_ARRAY IS_STRING IS_TUPLE IS_FUNCTION IS_NULL IS_DEFAULT NUM_DIMS NUM_ELEMENTS SHAPE'))
+                         p.oneOf('IS_SIMPLE_VALUE IS_ARRAY IS_STRING IS_TUPLE IS_FUNCTION IS_NULL IS_DEFAULT '
+                                 'NUM_DIMS NUM_ELEMENTS SHAPE')).setName('Accessor')
 
     # Indexing
     pad = MakeKw('pad') + Adjacent(colon) + expr + eq + expr
     shrink = MakeKw('shrink') + Adjacent(colon) + expr
-    index = p.Group(Adjacent(p.Suppress('{')) + expr + Optional(comma + (pad|shrink)) + p.Suppress('}'))
+    index = p.Group(Adjacent(p.Suppress('{')) + expr + Optional(comma + (pad|shrink)) + p.Suppress('}')).setName('Index')
 
     # Special values
-    nullValue = p.Group(MakeKw('null'))
-    defaultValue = p.Group(MakeKw('default'))
+    nullValue = p.Group(MakeKw('null')).setName('Null')
+    defaultValue = p.Group(MakeKw('default')).setName('Default')
     
     # Recognised MathML operators
     mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
@@ -217,11 +218,11 @@ class CompactSyntaxParser(object):
 
     # Wrapping MathML operators into lambdas
     mathmlOperator = (p.oneOf('^ * / + - not == != <= >= < > && ||') |
-                      p.Combine('MathML.' + p.oneOf(' '.join(mathmlOperators))))
-    wrap = p.Group(p.Suppress('@') + Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator)
+                      p.Combine('MathML:' + p.oneOf(' '.join(mathmlOperators))))
+    wrap = p.Group(p.Suppress('@') + Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator).setName('WrapMathML')
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = array | wrap | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple
+    atom = (array | wrap | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple).setName('Atom')
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT),
                                         (viewSpec, 1, p.opAssoc.LEFT),
                                         (index, 1, p.opAssoc.LEFT),
@@ -252,15 +253,15 @@ class CompactSyntaxParser(object):
     simpleAssignList = OptionalDelimitedList(simpleAssign, nl)
     
     # Assertions and function returns
-    assertStmt = p.Group(MakeKw('assert') + expr)
-    returnStmt = p.Group(MakeKw('return') + p.delimitedList(expr))
+    assertStmt = p.Group(MakeKw('assert') + expr).setName('AssertStmt')
+    returnStmt = p.Group(MakeKw('return') + p.delimitedList(expr)).setName('ReturnStmt')
     
     # Full assignment, to a tuple of names or single name
-    assignStmt = p.Group(p.Group(p.delimitedList(ncIdent)) + eq + p.Group(p.delimitedList(expr)))
+    assignStmt = p.Group(p.Group(p.delimitedList(ncIdent)) + eq + p.Group(p.delimitedList(expr))).setName('AssignStmt')
     
     # Function definition
     functionDefn = p.Group(MakeKw('def') + ncIdent + oparen + paramList + cparen +
-                           ((colon + expr) | (obrace + stmtList + Optional(nl) + p.Suppress('}'))))
+                           ((colon + expr) | (obrace + stmtList + Optional(nl) + p.Suppress('}')))).setName('FunctionDef')
     
     stmtList << p.delimitedList(assertStmt | returnStmt | functionDefn | assignStmt, nl)
 
@@ -268,24 +269,25 @@ class CompactSyntaxParser(object):
     ##############################################
     
     # Namespace declarations
-    nsDecl = p.Group(MakeKw('namespace') + ncIdent + eq + quotedUri)
-    nsDecls = p.ZeroOrMore(nsDecl + nl)
+    nsDecl = p.Group(MakeKw('namespace') + ncIdent + eq + quotedUri).setName('NamespaceDecl')
+    nsDecls = OptionalDelimitedList(nsDecl, nl)
     
     # Protocol input declarations, with default values
-    inputs = MakeKw('inputs') + obrace + simpleAssignList + cbrace
+    inputs = (MakeKw('inputs') + obrace + simpleAssignList + cbrace).setName('Inputs')
 
     # Import statements & use-imports
-    importStmt = p.Group(MakeKw('import') + Optional(ncIdent + eq, default='') + quotedUri)
-    imports = OptionalDelimitedList(importStmt, nl)
-    useImports = p.Group(MakeKw('use') + MakeKw('imports') + ncIdent)
+    importStmt = p.Group(MakeKw('import') + Optional(ncIdent + eq, default='') + quotedUri).setName('Import')
+    imports = OptionalDelimitedList(importStmt, nl).setName('Imports')
+    useImports = p.Group(MakeKw('use') + MakeKw('imports') + ncIdent).setName('UseImports')
     
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
-    library = MakeKw('library') + obrace + Optional(stmtList) + cbrace
+    library = (MakeKw('library') + obrace + Optional(stmtList) + cbrace).setName('Library')
     
     # Post-processing
-    postProcessing = MakeKw('post-processing') + obrace + \
-        OptionalDelimitedList(useImports | assertStmt | returnStmt | functionDefn | assignStmt, nl) + cbrace
+    postProcessing = (MakeKw('post-processing') + obrace + 
+                      OptionalDelimitedList(useImports | assertStmt | returnStmt | functionDefn | assignStmt, nl) +
+                      cbrace).setName('PostProc')
     
     # Units definitions
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
@@ -293,8 +295,8 @@ class CompactSyntaxParser(object):
     _num_or_expr = number | (oparen + expr + cparen)
     unitRef = p.Group(Optional(_num_or_expr, '1') + Optional(siPrefix, '') + ncIdent + Optional(p.Suppress('^') + number, '1')
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr)))
-    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.'))
-    units = MakeKw('units') + obrace + OptionalDelimitedList(useImports | unitsDef, nl) + cbrace
+    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.')).setName('UnitsDefinition')
+    units = (MakeKw('units') + obrace + OptionalDelimitedList(useImports | unitsDef, nl) + cbrace).setName('Units')
     
     # Model interface section
     #########################
@@ -305,16 +307,16 @@ class CompactSyntaxParser(object):
     # Input variables, with optional units and initial value
     inputVariable = p.Group(MakeKw('input') + ident
                             + Optional(unitsRef, default='')
-                            + Optional(eq + number, default=''))
+                            + Optional(eq + number, default='')).setName('InputVariable')
     # Model outputs of interest, with optional units
-    outputVariable = p.Group(MakeKw('output') + ident + Optional(unitsRef, default=''))
+    outputVariable = p.Group(MakeKw('output') + ident + Optional(unitsRef, default='')).setName('OutputVariable')
     # New variables added to the model, with optional initial value
-    newVariable = p.Group(MakeKw('var') + ncIdent + unitsRef + Optional(eq + number, default=''))
+    newVariable = p.Group(MakeKw('var') + ncIdent + unitsRef + Optional(eq + number, default='')).setName('NewVariable')
     # Adding or replacing equations in the model
-    modelEquation = p.Group(MakeKw('define') + ident + eq + expr)
+    modelEquation = p.Group(MakeKw('define') + ident + eq + expr).setName('AddOrReplaceEquation')
     # Units conversion rules
     unitsConversion = p.Group(MakeKw('convert') + ncIdent + MakeKw('to') + ncIdent +
-                              MakeKw('by') + lambdaExpr)
+                              MakeKw('by') + lambdaExpr).setName('UnitsConversion')
     
     modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace +
                              DelimitedMultiList([(useImports, True),
@@ -323,16 +325,16 @@ class CompactSyntaxParser(object):
                                                  (outputVariable, True),
                                                  (newVariable, True),
                                                  (modelEquation, True),
-                                                 (unitsConversion, True)], nl) + cbrace)
+                                                 (unitsConversion, True)], nl) + cbrace).setName('ModelInterface')
     
     # Simulation definitions
     ########################
     
     # Ranges
-    uniformRange = MakeKw('uniform') + numericRange
+    uniformRange = MakeKw('uniform') + p.Group(numericRange)
     vectorRange = MakeKw('vector') + expr
     whileRange = MakeKw('while') + expr
-    range = p.Group(MakeKw('range') + ncIdent + unitsRef + (uniformRange | vectorRange | whileRange))
+    range = p.Group(MakeKw('range') + ncIdent + unitsRef + (uniformRange | vectorRange | whileRange)).setName('Range')
     
     # Modifiers
     modifierWhen = MakeKw('at') + (MakeKw('start', False) |
@@ -341,34 +343,75 @@ class CompactSyntaxParser(object):
     setVariable = MakeKw('set') + ident + eq + expr
     saveState = MakeKw('save') + MakeKw('as') + ncIdent
     resetState = MakeKw('reset') + Optional(MakeKw('to') + ncIdent)
-    modifier = p.Group(modifierWhen + p.Group(setVariable | saveState | resetState))
-    modifiers = p.Group(MakeKw('modifiers') + obrace + OptionalDelimitedList(modifier, nl) + cbrace)
+    modifier = p.Group(modifierWhen + p.Group(setVariable | saveState | resetState)).setName('Modifier')
+    modifiers = p.Group(MakeKw('modifiers') + obrace + OptionalDelimitedList(modifier, nl) + cbrace).setName('Modifiers')
     
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
-    timecourseSim = p.Group(MakeKw('timecourse') + obrace + range + Optional(nl + modifiers) + cbrace)
+    timecourseSim = p.Group(MakeKw('timecourse') + obrace + range + Optional(nl + modifiers) + cbrace).setName('TimecourseSim')
     nestedSim = p.Group(MakeKw('nested') + obrace + range + nl + Optional(modifiers) +
-                        p.Group(MakeKw('nests') + (simulation | ident)) + cbrace)
+                        p.Group(MakeKw('nests') + (simulation | ident)) + cbrace).setName('NestedSim')
     simulation << MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
 
-    tasks = p.Group(MakeKw('tasks') + obrace + p.ZeroOrMore(p.Group(simulation)) + cbrace)
+    tasks = p.Group(MakeKw('tasks') + obrace + p.ZeroOrMore(p.Group(simulation)) + cbrace).setName('Tasks')
 
     # Output specifications
     #######################
     
     outputDesc = Optional(quotedString, default='')
     outputSpec = p.Group(ncIdent + ((unitsRef + outputDesc) |
-                                    (eq + ident + Optional(unitsRef, default='') + outputDesc)))
-    outputs = p.Group(MakeKw('outputs') + obrace + OptionalDelimitedList(useImports | outputSpec, nl) + cbrace)
+                                    (eq + ident + Optional(unitsRef, default='') + outputDesc))).setName('Output')
+    outputs = p.Group(MakeKw('outputs') + obrace + OptionalDelimitedList(useImports | outputSpec, nl) + cbrace).setName('Outputs')
 
     # Plot specifications
     #####################
     
-    plotCurve = p.Group(p.delimitedList(ncIdent, ',') + MakeKw('against') + ncIdent)
+    plotCurve = p.Group(p.delimitedList(ncIdent, ',') + MakeKw('against') + ncIdent).setName('Curve')
     plotSpec = p.Group(MakeKw('plot') + quotedString + obrace +
-                       plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace)
-    plots = p.Group(MakeKw('plots') + obrace + p.ZeroOrMore(useImports | plotSpec) + cbrace)
-
+                       plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot')
+    plots = p.Group(MakeKw('plots') + obrace + p.ZeroOrMore(useImports | plotSpec) + cbrace).setName('Plots')
+    
+    # Parsing a full protocol
+    #########################
+    
+    protocol = p.And(map(Optional, [nl, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
+                                    tasks, postProcessing, outputs, plots])).setName('Protocol')
+    
+    def __init__(self):
+        """Initialise the parser."""
+        # We just store the original stack limit here, so we can increase
+        # it for the lifetime of this object if needed for parsing, on the
+        # basis that if one expression needs to, several are likely to.
+        self._stack_depth_factor = 1
+        self._original_stack_limit = sys.getrecursionlimit()
+        
+    def __del__(self):
+        """Reset the stack limit if it changed."""
+        sys.setrecursionlimit(self._original_stack_limit)
+    
+    def _Try(self, callable, *args, **kwargs):
+        """Try calling the given parse command, increasing the stack depth limit if needed."""
+        r = None # Result
+        while self._stack_depth_factor < 3:
+            try:
+                r = callable(*args, **kwargs)
+            except RuntimeError, msg:
+                print >> sys.stderr, "Got RuntimeError:", msg
+                self._stack_depth_factor += 0.5
+                new_limit = int(self._stack_depth_factor * self._original_stack_limit)
+                print >> sys.stderr, "Increasing recursion limit to", new_limit
+                sys.setrecursionlimit(new_limit)
+            else:
+                break # Parsed OK
+        if not r:
+            raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
+                               % (int(self._stack_depth_factor * self._original_stack_limit),))
+        return r
+    
+    def ParseFile(self, fileOrFilename):
+        """Main entry point for parsing a complete protocol file."""
+        return self._Try(self.protocol.parseFile, fileOrFilename, parseAll=True)
+    
 
 ################################################################################
 # Parser debugging support

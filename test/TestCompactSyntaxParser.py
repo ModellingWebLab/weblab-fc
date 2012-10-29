@@ -31,6 +31,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import glob
 import os
 import unittest
 import sys
@@ -140,6 +141,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.nsDecls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
                           [['n1', 'urn:t1'], ['n2', 'urn:t2']])
         self.assertParses(csp.nsDecls, '', [])
+        self.failIfParses(csp.nsDecls, 'namespace n="uri"\n')
     
     def TestParsingInputs(self):
         '''Test parsing protocol input declarations'''
@@ -160,6 +162,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.imports, 'import l1="file1"#blah\nimport "file2"',
                           [['l1', 'file1'], ['', 'file2']])
         self.assertParses(csp.imports, '', [])
+        self.failIfParses(csp.imports, 'import "file"\n')
 
     def TestParsingUseImports(self):
         self.assertParses(csp.useImports, 'use imports import_prefix', [['import_prefix']])
@@ -211,6 +214,11 @@ class TestCompactSyntaxParser(unittest.TestCase):
     def TestParsingUniformRange(self):
         self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
         self.assertParses(csp.range, 'range time units ms uniform 0:1000', [['time', 'ms', ['0', '1000']]])
+        self.assertParses(csp.range, 'range t units s uniform 0:end', [['t', 's', ['0', 'end']]])
+        # Spaces or brackets are required in this case to avoid 'start:step:end' parsing as an ident
+        self.assertParses(csp.range, 'range t units s uniform start : step : end', [['t', 's', ['start', 'step', 'end']]])
+        self.assertParses(csp.range, 'range t units s uniform start:(step):end', [['t', 's', ['start', 'step', 'end']]])
+        self.failIfParses(csp.range, 'range t units s uniform start:step:end')
 
     def TestParsingVectorRange(self):
         self.assertParses(csp.range, 'range run units dimensionless vector [1, 2, 3, 4]',
@@ -562,7 +570,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
 
     def TestParsingWrappedMathmlOperators(self):
         self.assertParses(csp.expr, '@3:+', [['3', '+']])
-        self.assertParses(csp.expr, '@1:MathML.sin', [['1', 'MathML.sin']])
+        self.assertParses(csp.expr, '@1:MathML:sin', [['1', 'MathML:sin']])
         self.assertParses(csp.expr, 'map(@2:/, a, b)', [['map', [['2', '/'], 'a', 'b']]])
         #self.failIfParses(csp.expr, '@0:+') # Best done at parse action level?
         self.failIfParses(csp.expr, '@1:non_mathml')
@@ -602,4 +610,10 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
     
     def TestParsingFullProtocols(self):
         # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
-        pass
+        test_folder = 'projects/FunctionalCuration/test/protocols/compact'
+        for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
+            csp().ParseFile(proto_filename)
+
+    def TestZzzPackratWasUsed(self):
+        # Method name ensures this runs last!
+        self.assert_(len(CSP.p.ParserElement._exprArgCache) > 0)
