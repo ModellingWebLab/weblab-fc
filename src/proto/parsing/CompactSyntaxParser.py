@@ -186,7 +186,7 @@ class CompactSyntaxParser(object):
     
     # Lambda definitions
     paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
-    paramList = p.Group(p.delimitedList(paramDecl))
+    paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
     lambdaExpr = p.Group(MakeKw('lambda') + paramList + ((colon + expr) | (obrace + stmtList + cbrace)))
     
     # Function calls

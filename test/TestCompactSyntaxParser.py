@@ -391,6 +391,8 @@ return c
                        [['c'], [['a', '-', 'b']]],
                        ['c']]])
         self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], ['a']]])
+        self.assertParses(csp.expr, 'lambda { return 1 }', [[[], ['1']]])
+        self.assertParses(csp.expr, 'lambda: 1', [[[], ['1']]])
 
     def TestParsingFunctionDefinitions(self):
         self.assertParses(csp.functionDefn, 'def double(a)\n {\n return a * 2\n }',
@@ -400,11 +402,19 @@ return c
         # A function definition is just sugar for an assignment of a lambda expression
         self.assertParses(csp.stmtList, 'def double(a) {\n    return a * 2}',
                           [['double', [['a']], [['a', '*', '2']]]])
+        self.assertParses(csp.functionDefn, 'def noargs(): 1', [['noargs', [], '1']])
     
     def TestParsingNestedFunctions(self):
-        # Currently we can't do this, as we don't delimit the contained statement list in any way!
-        # Need to choose between indentation level (Python) or brace-delimited
-        pass
+        self.assertParses(csp.functionDefn, """def outer()
+{
+    def inner1(a): a/2
+    def inner2(b) {
+        return b*2
+    }
+    return inner1(1) + inner2(2)
+}""", [['outer', [], ['inner1', [['a']], ['a', '/', '2']],
+                     ['inner2', [['b']], [['b', '*', '2']]],
+                     [[['inner1', ['1']], '+', ['inner2', ['2']]]]]])
     
     def TestParsingTuples(self):
         self.assertParses(csp.tuple, '(1,2)', [['1', '2']])
