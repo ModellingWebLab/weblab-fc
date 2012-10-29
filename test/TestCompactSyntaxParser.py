@@ -546,7 +546,18 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         self.assertParses(csp.expr, 'default', [[]])
 
     def TestParsingLibrary(self):
-        pass
+        self.assertParses(csp.library, 'library {}', [])
+        self.assertParses(csp.library, """library
+{
+    def f(a) {
+        return a
+    }
+    f2 = lambda b: b/2
+    const = 13
+}
+""", [['f', [['a']], ['a']],
+      [['f2'], [[[['b']], ['b', '/', '2']]]],
+      [['const'], ['13']]])
     
     def TestParsingUseImports(self):
         pass

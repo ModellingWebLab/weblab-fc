@@ -260,9 +260,9 @@ class CompactSyntaxParser(object):
     
     # Function definition
     functionDefn = p.Group(MakeKw('def') + ncIdent + oparen + paramList + cparen +
-                           ((colon + expr) | (obrace + stmtList + cbrace)))
+                           ((colon + expr) | (obrace + stmtList + Optional(nl) + p.Suppress('}'))))
     
-    stmtList << p.delimitedList(assertStmt | returnStmt | assignStmt | functionDefn, nl)
+    stmtList << p.delimitedList(assertStmt | returnStmt | functionDefn | assignStmt, nl)
 
     # Miscellaneous constructs making up protocols
     ##############################################
@@ -277,6 +277,10 @@ class CompactSyntaxParser(object):
     # Import statements
     importStmt = p.Group(MakeKw('import') + Optional(ncIdent + eq, default='') + quotedUri)
     imports = OptionalDelimitedList(importStmt, nl)
+    
+    # Library, globals defined using post-processing language.
+    # Strictly speaking returns aren't allowed, but that gets picked up later.
+    library = MakeKw('library') + obrace + Optional(stmtList) + cbrace
     
     # Units definitions
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
