@@ -270,6 +270,9 @@ modifiers { at each loop reset to prelim }
 nests sim
 }""",
                           ['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]])
+        self.assertParses(csp.simulation, """simulation nested { range R units U uniform 1:2
+nests simulation timecourse { range t units u uniform 1:100 } }""",
+                          ['', [['R', 'U', ['1', '2']], ['', [['t', 'u', ['1', '100']]]]]])
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
     def TestParsingTasks(self):

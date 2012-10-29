@@ -345,10 +345,11 @@ class CompactSyntaxParser(object):
     modifiers = p.Group(MakeKw('modifiers') + obrace + OptionalDelimitedList(modifier, nl) + cbrace)
     
     # The simulations themselves
+    simulation = p.Forward().setName('Simulation')
     timecourseSim = p.Group(MakeKw('timecourse') + obrace + range + Optional(nl + modifiers) + cbrace)
     nestedSim = p.Group(MakeKw('nested') + obrace + range + nl + Optional(modifiers) +
-                        p.Group(MakeKw('nests') + ident) + cbrace)
-    simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
+                        p.Group(MakeKw('nests') + (simulation | ident)) + cbrace)
+    simulation << MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
 
     tasks = p.Group(MakeKw('tasks') + obrace + p.ZeroOrMore(p.Group(simulation)) + cbrace)
 
