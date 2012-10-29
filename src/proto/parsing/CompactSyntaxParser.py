@@ -274,9 +274,10 @@ class CompactSyntaxParser(object):
     # Protocol input declarations, with default values
     inputs = MakeKw('inputs') + obrace + simpleAssignList + cbrace
 
-    # Import statements
+    # Import statements & use-imports
     importStmt = p.Group(MakeKw('import') + Optional(ncIdent + eq, default='') + quotedUri)
     imports = OptionalDelimitedList(importStmt, nl)
+    useImports = p.Group(MakeKw('use') + MakeKw('imports') + ncIdent)
     
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
@@ -289,7 +290,7 @@ class CompactSyntaxParser(object):
     unitRef = p.Group(Optional(_num_or_expr, '1') + Optional(siPrefix, '') + ncIdent + Optional(p.Suppress('^') + number, '1')
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr)))
     unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.'))
-    units = MakeKw('units') + obrace + OptionalDelimitedList(unitsDef, nl) + cbrace
+    units = MakeKw('units') + obrace + OptionalDelimitedList(useImports | unitsDef, nl) + cbrace
     
     # Model interface section
     #########################
@@ -312,7 +313,8 @@ class CompactSyntaxParser(object):
                               MakeKw('by') + lambdaExpr)
     
     modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace +
-                             DelimitedMultiList([(setTimeUnits, False),
+                             DelimitedMultiList([(useImports, True),
+                                                 (setTimeUnits, False),
                                                  (inputVariable, True),
                                                  (outputVariable, True),
                                                  (newVariable, True),
@@ -350,7 +352,7 @@ class CompactSyntaxParser(object):
     outputDesc = Optional(quotedString, default='')
     outputSpec = p.Group(ncIdent + ((unitsRef + outputDesc) |
                                     (eq + ident + Optional(unitsRef, default='') + outputDesc)))
-    outputs = p.Group(MakeKw('outputs') + obrace + OptionalDelimitedList(outputSpec, nl) + cbrace)
+    outputs = p.Group(MakeKw('outputs') + obrace + OptionalDelimitedList(useImports | outputSpec, nl) + cbrace)
 
     # Plot specifications
     #####################
@@ -358,7 +360,7 @@ class CompactSyntaxParser(object):
     plotCurve = p.Group(p.delimitedList(ncIdent, ',') + MakeKw('against') + ncIdent)
     plotSpec = p.Group(MakeKw('plot') + quotedString + obrace +
                        plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace)
-    plots = p.Group(MakeKw('plots') + obrace + p.ZeroOrMore(plotSpec) + cbrace)
+    plots = p.Group(MakeKw('plots') + obrace + p.ZeroOrMore(useImports | plotSpec) + cbrace)
 
 
 ################################################################################

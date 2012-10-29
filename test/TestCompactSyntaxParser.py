@@ -160,7 +160,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.imports, 'import l1="file1"#blah\nimport "file2"',
                           [['l1', 'file1'], ['', 'file2']])
         self.assertParses(csp.imports, '', [])
-    
+
+    def TestParsingUseImports(self):
+        self.assertParses(csp.useImports, 'use imports import_prefix', [['import_prefix']])
+
     def TestParsingModelInterface(self):
         self.assertParses(csp.setTimeUnits, 'independent var units u', ['u'])
         
@@ -187,6 +190,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]])
 
         self.assertParses(csp.modelInterface, """model interface {  # Comments can go here
+    use imports ident
     independent var units t
     
     input test:v1 = 0  # a comment
@@ -197,7 +201,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
     convert u1 to u2 by lambda u: u * test:v3
-}""", [['t', ['test:v1', '', '0'], ['test:v2', 'u', ''], ['test:time', ''], ['test:v3', 'u'],
+}""", [[['ident'], 't', ['test:v1', '', '0'], ['test:v2', 'u', ''], ['test:time', ''], ['test:v3', 'u'],
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
         ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]])
         self.assertParses(csp.modelInterface, 'model interface {}', [[]])
@@ -268,6 +272,10 @@ nests sim
                           ['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]])
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
+    def TestParsingTasks(self):
+        # TODO: Need to include useImports
+        pass
+    
     def TestParsingOutputSpecifications(self):
         self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', '', 'Description']])
         self.assertParses(csp.outputSpec, r'name = ref:var units U "Description \"quotes\""',
@@ -280,11 +288,12 @@ nests sim
         
         self.assertParses(csp.outputs, """outputs #cccc
 { #cdc
+        use imports proto_prefix
         n1 = n2 units u1
         n3 = p:m 'd1'
         n4 units u2 "d2"
 } #cpc
-""", [[['n1', 'n2', 'u1', ''], ['n3', 'p:m', '', 'd1'], ['n4', 'u2', 'd2']]])
+""", [[['proto_prefix'], ['n1', 'n2', 'u1', ''], ['n3', 'p:m', '', 'd1'], ['n4', 'u2', 'd2']]])
         self.assertParses(csp.outputs, "outputs {}", [[]])
     
     def TestParsingPlotSpecifications(self):
@@ -299,7 +308,8 @@ nests sim
         
         self.assertParses(csp.plots, """plots { plot "t1" { v1 against v2 }
         plot "t1" { v3, v4 against v5 }
-}""", [[['t1', ['v1', 'v2']], ['t1', ['v3', 'v4', 'v5']]]])
+        use imports plots_lib
+}""", [[['t1', ['v1', 'v2']], ['t1', ['v3', 'v4', 'v5']], ['plots_lib']]])
         self.assertParses(csp.plots, 'plots {}', [[]])
     
     def TestParsingFunctionCalls(self):
@@ -485,6 +495,7 @@ return c
         self.assertParses(csp.units, "units {}", [])
         self.assertParses(csp.units, """units
 {
+use imports ulib
 # nM = nanomolar
 nM = nano mole . litre^-1
 hour = 3600 second
@@ -493,7 +504,8 @@ flux = nM . hour ^ -1
 rate_const = hour^-1           # First order
 rate_const_2 = nM^-1 . hour^-1 # Second order
 }
-""", [['nM', ['1', 'nano', 'mole', '1'], ['1', '', 'litre', '-1']],
+""", [['ulib'],
+      ['nM', ['1', 'nano', 'mole', '1'], ['1', '', 'litre', '-1']],
       ['hour', ['3600', '', 'second', '1']],
       ['flux', ['1', '', 'nM', '1'], ['1', '', 'hour', '-1']],
       ['rate_const', ['1', '', 'hour', '-1']],
@@ -559,7 +571,8 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
       [['f2'], [[[['b']], ['b', '/', '2']]]],
       [['const'], ['13']]])
     
-    def TestParsingUseImports(self):
+    def TestParsingPostProcessing(self):
+        # TODO: Include useImports
         pass
     
     def TestParsingFullProtocols(self):
