@@ -209,8 +209,19 @@ class CompactSyntaxParser(object):
     nullValue = p.Group(MakeKw('null'))
     defaultValue = p.Group(MakeKw('default'))
     
+    # Recognised MathML operators
+    mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
+                             sin cos tan   sec csc cot   sinh cosh tanh   sech csch coth
+                             arcsin arccos arctan   arccosh arccot arccoth
+                             arccsc arccsch arcsec   arcsech arcsinh arctanh'''.split())
+
+    # Wrapping MathML operators into lambdas
+    mathmlOperator = (p.oneOf('^ * / + - not == != <= >= < > && ||') |
+                      p.Combine('MathML.' + p.oneOf(' '.join(mathmlOperators))))
+    wrap = p.Group(p.Suppress('@') + Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator)
+    
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = array | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple
+    atom = array | wrap | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT),
                                         (viewSpec, 1, p.opAssoc.LEFT),
                                         (index, 1, p.opAssoc.LEFT),
@@ -232,12 +243,6 @@ class CompactSyntaxParser(object):
     expr.ignore(comment)
     # Avoid mayhem
     UnIgnore(nl)
-    
-    # Recognised MathML operators
-    mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
-                             sin cos tan   sec csc cot   sinh cosh tanh   sech csch coth
-                             arcsin arccos arctan   arccosh arccot arccoth
-                             arccsc arccsch arcsec   arcsech arcsinh arctanh'''.split())
     
     # Statements from the "post-processing" language
     ################################################

@@ -531,9 +531,15 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         #self.failIfParses(csp, expr, 'fold(f, A, i, d, extra)')
 
     def TestParsingWrappedMathmlOperators(self):
-        # e.g. used in map(@2:/, a, b)
-        # func = @1:MathML.sin
-        pass
+        self.assertParses(csp.expr, '@3:+', [['3', '+']])
+        self.assertParses(csp.expr, '@1:MathML.sin', [['1', 'MathML.sin']])
+        self.assertParses(csp.expr, 'map(@2:/, a, b)', [['map', [['2', '/'], 'a', 'b']]])
+        #self.failIfParses(csp.expr, '@0:+') # Best done at parse action level?
+        self.failIfParses(csp.expr, '@1:non_mathml')
+        self.failIfParses(csp.expr, '@ 2:*')
+        self.failIfParses(csp.expr, '@2 :-')
+        self.failIfParses(csp.expr, '@1:--')
+        self.failIfParses(csp.expr, '@N:+')
 
     def TestParsingNullAndDefault(self):
         self.assertParses(csp.expr, 'null', [[]])
