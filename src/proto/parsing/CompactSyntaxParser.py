@@ -283,6 +283,10 @@ class CompactSyntaxParser(object):
     # Strictly speaking returns aren't allowed, but that gets picked up later.
     library = MakeKw('library') + obrace + Optional(stmtList) + cbrace
     
+    # Post-processing
+    postProcessing = MakeKw('post-processing') + obrace + \
+        OptionalDelimitedList(useImports | assertStmt | returnStmt | functionDefn | assignStmt, nl) + cbrace
+    
     # Units definitions
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
                        'deci centi milli micro nano pico femto atto zepto yocto')

@@ -587,8 +587,15 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
       [['const'], ['13']]])
     
     def TestParsingPostProcessing(self):
-        # TODO: Include useImports
-        pass
+        self.assertParses(csp.postProcessing, """post-processing
+{
+    use imports ppp
+    a = check(sim:result)
+    assert a > 5
+}
+""", [['ppp'],
+      [['a'], [['check', ['sim:result']]]],
+      [['a', '>', '5']]])
     
     def TestParsingFullProtocols(self):
         # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
