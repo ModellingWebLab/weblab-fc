@@ -346,6 +346,8 @@ class CompactSyntaxParser(object):
                         p.Group(MakeKw('nests') + ident) + cbrace)
     simulation = MakeKw('simulation') + Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
 
+    tasks = p.Group(MakeKw('tasks') + obrace + p.ZeroOrMore(p.Group(simulation)) + cbrace)
+
     # Output specifications
     #######################
     

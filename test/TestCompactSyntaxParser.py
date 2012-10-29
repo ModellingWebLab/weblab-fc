@@ -212,9 +212,9 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
         self.assertParses(csp.range, 'range time units ms uniform 0:1000', [['time', 'ms', ['0', '1000']]])
 
-#    def TestParsingVectorRange(self):
-#        self.assertParses(csp.range, 'range run units dimensionless vector [1, 2, 3, 4]',
-#                          [['run', 'dimensionless', ['1', '2', '3', '4']]])
+    def TestParsingVectorRange(self):
+        self.assertParses(csp.range, 'range run units dimensionless vector [1, 2, 3, 4]',
+                          [['run', 'dimensionless', ['1', '2', '3', '4']]])
 
     def TestParsingWhileRange(self):
         self.assertParses(csp.range, 'range rpt units dimensionless while rpt < 5',
@@ -273,8 +273,13 @@ nests sim
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
     def TestParsingTasks(self):
-        # TODO: Need to include useImports
-        pass
+        self.assertParses(csp.tasks, """tasks {
+    simulation timecourse { range time units second uniform 1:1000 }
+    simulation main = nested { range n units dimensionless vector [i*2 for i in 1:4] 
+                               nests inner }
+}
+""", [[['', [['time', 'second', ['1', '1000']]]],
+       ['main', [['n', 'dimensionless', [['i', '*', '2'], ['i', '1', '4']]], ['inner']]]]])
     
     def TestParsingOutputSpecifications(self):
         self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', '', 'Description']])
