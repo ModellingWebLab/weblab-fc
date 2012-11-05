@@ -23,7 +23,7 @@ library {
 units {
     mV = milli volt
     ms = milli second
-    uA_per_cm2 = micro ampere . centi metre^-2 # Desired units of currents
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
     uF_per_cm2 = micro farad . centi metre^-2
     microamps = micro ampere
     A_per_F = ampere . farad^-1

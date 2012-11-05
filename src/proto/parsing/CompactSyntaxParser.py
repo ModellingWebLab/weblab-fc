@@ -300,7 +300,7 @@ class CompactSyntaxParser(object):
     _num_or_expr = number | (oparen + expr + cparen)
     unitRef = p.Group(Optional(_num_or_expr, '1') + Optional(siPrefix, '') + ncIdent + Optional(p.Suppress('^') + number, '1')
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr)))
-    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.')).setName('UnitsDefinition')
+    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)).setName('UnitsDefinition')
     units = (MakeKw('units') + obrace - OptionalDelimitedList(useImports | unitsDef, nl) + cbrace).setName('Units')
     
     # Model interface section

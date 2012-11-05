@@ -524,8 +524,8 @@ return c
         self.assertParses(csp.unitsDef, 'C = kelvin - 273.15', [['C', ['1', '', 'kelvin', '1', ['-', '273.15']]]])
         self.assertParses(csp.unitsDef, 'C=kelvin-273.15', [['C', ['1', '', 'kelvin', '1', ['-', '273.15']]]])
         self.assertParses(csp.unitsDef, 'litre = 1000 centi metre^3', [['litre', ['1000', 'centi', 'metre', '3']]])
-        self.assertParses(csp.unitsDef, 'accel_units = kilo metre . second^-2',
-                          [['accel_units', ['1', 'kilo', 'metre', '1'], ['1', '', 'second', '-2']]])
+        self.assertParses(csp.unitsDef, 'accel_units = kilo metre . second^-2 "km/s^2"',
+                          [['accel_units', ['1', 'kilo', 'metre', '1'], ['1', '', 'second', '-2'], 'km/s^2']])
         self.assertParses(csp.unitsDef, 'fahrenheit = (5/9) celsius + 32.0',
                           [['fahrenheit', [['5', '/', '9'], '', 'celsius', '1', ['+', '32.0']]]])
         self.assertParses(csp.unitsDef, 'fahrenheit = (5/9) kelvin + (32 - 273.15 * 9 / 5)',
