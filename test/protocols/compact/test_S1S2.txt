@@ -1,0 +1,8 @@
+# Compact version of the test_S1S2 protocol
+
+# An altered S1S2 which assumes models get to steady state quickly, for testing.
+
+import "S1S2.txt" {
+    steady_state_beats = 10
+    timecourse_duration = 2000
+}

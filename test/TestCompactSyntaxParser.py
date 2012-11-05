@@ -164,6 +164,14 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.imports, '', [])
         self.failIfParses(csp.imports, 'import "file"\n')
 
+    def TestParsingImportsWithSetInput(self):
+        self.assertParses(csp.importStmt, """import "S1S2.txt" {
+    steady_state_beats = 10
+    timecourse_duration = 2000
+}""", [['', 'S1S2.txt', ['steady_state_beats', '10'], ['timecourse_duration', '2000']]])
+        self.assertParses(csp.importStmt, 'import "file.txt" { }', [['', 'file.txt']])
+        self.failIfParses(csp.importStmt, 'import "file.txt" { } \n')
+
     def TestParsingUseImports(self):
         self.assertParses(csp.useImports, 'use imports import_prefix', [['import_prefix']])
 

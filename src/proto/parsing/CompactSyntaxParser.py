@@ -277,12 +277,13 @@ class CompactSyntaxParser(object):
     nsDecls = OptionalDelimitedList(nsDecl, nl)
     
     # Protocol input declarations, with default values
-    inputs = (MakeKw('inputs') - obrace + simpleAssignList + cbrace).setName('Inputs')
+    inputs = (MakeKw('inputs') + obrace - simpleAssignList + cbrace).setName('Inputs')
 
     # Import statements & use-imports
-    importStmt = p.Group(MakeKw('import') - Optional(ncIdent + eq, default='') + quotedUri).setName('Import')
+    importStmt = p.Group(MakeKw('import') - Optional(ncIdent + eq, default='') + quotedUri +
+                         Optional(obrace - simpleAssignList + embedded_cbrace)).setName('Import')
     imports = OptionalDelimitedList(importStmt, nl).setName('Imports')
-    useImports = p.Group(MakeKw('use') - MakeKw('imports') + ncIdent).setName('UseImports')
+    useImports = p.Group(MakeKw('use') + MakeKw('imports') - ncIdent).setName('UseImports')
     
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
