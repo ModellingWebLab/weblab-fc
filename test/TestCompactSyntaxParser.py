@@ -278,6 +278,12 @@ modifiers { at end save as prelim }
                           ['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]])
         self.failIfParses(csp.simulation, 'simulation sim = timecourse {}')
     
+    def TestParsingOneStepSimulations(self):
+        self.assertParses(csp.simulation, 'simulation oneStep', ['', []])
+        self.assertParses(csp.simulation, 'simulation sim = oneStep', ['sim', []])
+        self.assertParses(csp.simulation, 'simulation oneStep 1.0', ['', ['1.0']])
+        self.assertParses(csp.simulation, 'simulation sim = oneStep step', ['sim', ['step']])
+    
     def TestParsingNestedSimulations(self):
         self.assertParses(csp.simulation,
                           'simulation rpt = nested { range run units U while not rpt:result\n nests sim }',

@@ -1,0 +1,49 @@
+# Compact syntax version of the test_onestep_sim protocol
+
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import "../../../src/proto/library/BasicLibrary.xml"
+
+units {
+    ms = milli second
+    mV = milli volt
+    mV_per_ms = milli volt . milli second^-1
+}
+
+# Turn the input model, whatever it is, into dV/dt=1
+model interface {
+    independent var units ms
+    input oxmeta:membrane_voltage = 0.0
+    output oxmeta:membrane_voltage units mV
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1
+}
+
+tasks {
+    # Nesting a oneStep should look like a TimecourseSimulation.
+    # However, with the nested version we don't record the initial conditions.
+    simulation nested = nested {
+        range t units ms uniform 0:9
+        modifiers { at each loop set oxmeta:time = t }
+        nests simulation oneStep 1.0
+    }
+    
+    simulation timecourse = timecourse {
+        range t units ms uniform 0:10
+        modifiers { at start reset } # Since otherwise we'd start where nested stopped
+    }
+}
+
+post-processing {
+    # Check results are arrays
+    assert nested:membrane_voltage.IS_ARRAY
+    assert timecourse:membrane_voltage.IS_ARRAY
+    
+    # Check solutions match
+    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)
+}
+
+outputs {
+    V_nested = nested:membrane_voltage
+    V_timecourse = timecourse:membrane_voltage
+}

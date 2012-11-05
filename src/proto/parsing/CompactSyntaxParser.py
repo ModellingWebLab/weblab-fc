@@ -32,6 +32,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 # TODO: We may be able to get rid of some of the p.Group wrapping when we add parse actions
+# TODO: Units annotations on numbers in the model interface (and possibly everywhere)
 
 import sys
 
@@ -352,14 +353,15 @@ class CompactSyntaxParser(object):
     
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
-    _selectOutput = (MakeKw('select') - MakeKw('output') + ncIdent).setName('SelectOutput')
+    _selectOutput = (MakeKw('select') + MakeKw('output') - ncIdent).setName('SelectOutput')
     nestedProtocol = p.Group(MakeKw('protocol') - quotedUri + obrace +
                              simpleAssignList + Optional(nl) + OptionalDelimitedList(_selectOutput, nl) +
                              cbrace).setName('NestedProtocol')
-    timecourseSim = p.Group(MakeKw('timecourse') + obrace + range + Optional(nl + modifiers) + cbrace).setName('TimecourseSim')
-    nestedSim = p.Group(MakeKw('nested') + obrace + range + nl + Optional(modifiers) +
+    timecourseSim = p.Group(MakeKw('timecourse') + obrace - range + Optional(nl + modifiers) + cbrace).setName('TimecourseSim')
+    nestedSim = p.Group(MakeKw('nested') + obrace - range + nl + Optional(modifiers) +
                         p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident)) + cbrace).setName('NestedSim')
-    simulation << MakeKw('simulation') - Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim)
+    oneStepSim = p.Group(MakeKw('oneStep') - Optional(expr))
+    simulation << MakeKw('simulation') - Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim | oneStepSim)
 
     tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(p.Group(simulation)) + cbrace).setName('Tasks')
 
