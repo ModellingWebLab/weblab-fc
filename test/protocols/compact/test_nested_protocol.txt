@@ -1,0 +1,22 @@
+# Compact syntax version of the test_nested_protocol protocol
+
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+tasks {
+    simulation sim = nested {
+        range iter units dimensionless vector [0, 1]
+        nests protocol "../SteadyPacing.xml" {
+            steady_state_beats = 5
+            pacing_period = (iter * 100) + 900
+            select output peak_voltage
+            select output apd
+        }
+    }
+}
+
+outputs {
+    peak_voltage = sim:peak_voltage
+    apd90 = sim:apd
+}

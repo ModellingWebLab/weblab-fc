@@ -293,6 +293,24 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
                           ['', [['R', 'U', ['1', '2']], ['', [['t', 'u', ['1', '100']]]]]])
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
+    def TestParsingNestedProtocol(self):
+        self.assertParses(csp.simulation, 'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { } }',
+                          ['', [['iter', 'D', ['0', '1']], [['P']]]])
+        self.assertParses(csp.simulation, """simulation nested {
+    range iter units D vector [0, 1]
+    nests protocol "../proto.xml" {
+        input1 = 1
+        input2 = 2
+    }
+}""", ['', [['iter', 'D', ['0', '1']], [['../proto.xml', ['input1', '1'], ['input2', '2']]]]])
+        self.assertParses(csp.simulation, """simulation nested {
+    range iter units D vector [0, 1]
+    nests protocol "proto.txt" {
+        input = iter
+        select output oname
+    }
+}""", ['', [['iter', 'D', ['0', '1']], [['proto.txt', ['input', 'iter'], 'oname']]]])
+    
     def TestParsingTasks(self):
         self.assertParses(csp.tasks, """tasks {
     simulation timecourse { range time units second uniform 1:1000 }
