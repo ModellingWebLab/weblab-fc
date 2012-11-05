@@ -1,0 +1,36 @@
+# Compact syntax version of the GraphState protocol
+
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import "../../../src/proto/library/BasicLibrary.xml"
+
+units {
+    ms = milli second
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1000
+    }
+}
+
+post-processing {
+    state_trans = Transpose(sim:state_variable)
+    
+    # Check the transpose function
+    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS
+    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]
+    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]
+}
+
+outputs {
+    raw_state = sim:state_variable "State variables (raw)"
+    time = sim:time "Time"
+    state = state_trans units various "State variables"
+}
+
+plots {
+    plot "State variables" { state against time }
+}

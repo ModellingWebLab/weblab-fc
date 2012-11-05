@@ -1,0 +1,82 @@
+# Compact version of the test_core_postproc protocol
+
+inputs {
+    example_input = 0
+}
+
+import "../../../src/proto/library/BasicLibrary.xml"
+
+post-processing {
+    def sum(a, dim=default) {
+        return fold(@2:+, a, 0, dim)
+    }
+    max = lambda a, dim: fold(@2:MathML:max, a, default, dim)
+    
+    input = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+    input_sum = sum(input)
+    input2d = [ [1,3,5], [6,4,2] ]
+    input2d_max = max(input2d, 0)
+    input2d_slice = input2d[1$1:2] # [*$:] added implicitly
+    input2 = [ 1, 2, 3 ]
+    map_result = map(@2:+, input2d_max[0][:], input2)
+    
+    adder = lambda input: map(@2:+, input, input2)
+    double_input2 = adder(input2)
+    
+    # Testing if
+    assert (if 1 then 2 else 3) == 2
+    assert (if 0 then 2 else 3) == 3
+    
+    # Testing array comprehensions (and more accessors)
+    
+    counting1d = [ i for 0$i in 0:10 ]
+    assert counting1d.NUM_DIMS == 1
+    assert counting1d.SHAPE[0] == 10
+    
+    counting2d = [ i*3 + j for 0$i in 1:3 for 1$j in 0:3 ]
+    assert counting2d.NUM_DIMS == 2
+    assert counting2d.NUM_ELEMENTS == 6
+    assert counting2d.SHAPE[0] == 2
+    
+    blocks = [ [[-10+j,j],[10+j,20+j]] for 1$j in 0:2 ]
+    assert blocks.NUM_DIMS == 3
+    assert blocks.NUM_ELEMENTS == 8
+    assert blocks.SHAPE[0] == 2
+    assert blocks.SHAPE[1] == 2
+    
+    # Test reversing an array
+    assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])
+    
+    # Test function returning multiple values
+    swap = lambda a, b { return b, a }
+    one, two = swap(2, 1)
+    assert swap.IS_FUNCTION
+    assert one == 1
+    assert two == 2
+    
+    # Test nested functions and scoping
+    nested_scopes = lambda {
+        # Nested function
+        nested_fn = lambda input: input + outer_var
+        # Variable that should be accessible
+        outer_var = 1
+        # Call nested function & check result
+        assert nested_fn(1) == 2
+    }
+    
+    # Test Count function
+    assert Count(input, lambda elt: elt < 5) == 4
+    
+    # Simple test of Filter function
+    assert ArrayEq(Filter(input, lambda elt: elt < 5), [1,2,3,4])
+    
+    # Test Permute function
+    assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])
+    assert ArrayEq(Permute(input2d, [1,2,0]), [[3,5,1], [4,2,6]])
+    
+    assert ArrayEq(Sort([3,7,5,2,9]), [2,3,5,7,9])
+    assert ArrayEq(Sort([3,7,11,2,9]), [2,3,7,9,11])
+    assert ArrayEq(Sort(input), input)
+    
+    assert ArrayEq(SortBy(input2d, [3,1,2]), [ [3,5,1], [4,2,6] ])
+}

@@ -62,7 +62,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
     def failIfParses(self, grammar, input):
         """Utility method to test that a given grammar fails to parse an input."""
         strict_grammar = grammar + strict_string_end
-        self.assertRaises(CSP.p.ParseException, strict_grammar.parseString, input)
+        self.assertRaises(CSP.p.ParseBaseException, strict_grammar.parseString, input)
         
     def TestParsingIdentifiers(self):
         self.assertParses(csp.ncIdent, 'abc', ['abc'])
@@ -406,6 +406,7 @@ return c
 """, [[[['a'], ['b']], [['a', '>', 'b']],
                        [['c'], [['a', '-', 'b']]],
                        ['c']]])
+        self.assertParses(csp.expr, "lambda a, b { return b, a }", [[[['a'], ['b']], ['b', 'a']]])
         self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], ['a']]])
         self.assertParses(csp.expr, 'lambda { return 1 }', [[[], ['1']]])
         self.assertParses(csp.expr, 'lambda: 1', [[[], ['1']]])
@@ -424,13 +425,15 @@ return c
         self.assertParses(csp.functionDefn, """def outer()
 {
     def inner1(a): a/2
-    def inner2(b) {
+    inner2 = lambda { return 5 }
+    def inner3(b) {
         return b*2
     }
-    return inner1(1) + inner2(2)
+    return inner1(1) + inner2() + inner3(2)
 }""", [['outer', [], ['inner1', [['a']], ['a', '/', '2']],
-                     ['inner2', [['b']], [['b', '*', '2']]],
-                     [[['inner1', ['1']], '+', ['inner2', ['2']]]]]])
+                     [['inner2'], [[[], ['5']]]],
+                     ['inner3', [['b']], [['b', '*', '2']]],
+                     [[['inner1', ['1']], '+', ['inner2', []], '+', ['inner3', ['2']]]]]])
     
     def TestParsingTuples(self):
         self.assertParses(csp.tuple, '(1,2)', [['1', '2']])
@@ -612,6 +615,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
         test_folder = 'projects/FunctionalCuration/test/protocols/compact'
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
+            print os.path.basename(proto_filename), '...'
             csp().ParseFile(proto_filename)
 
     def TestZzzPackratWasUsed(self):
