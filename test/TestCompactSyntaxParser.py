@@ -196,6 +196,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           [['local_var', ['1', '+', 'model:var']]])
         self.assertParses(csp.modelEquation, 'define model:var = 2.5 / local_var',
                           [['model:var', ['2.5', '/', 'local_var']]])
+        self.assertParses(csp.modelEquation, 'define diff(oxmeta:membrane_voltage; oxmeta:time) = 1',
+                          [[['oxmeta:membrane_voltage', 'oxmeta:time'], '1']])
         
         self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var',
                           [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]])

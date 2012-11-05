@@ -318,7 +318,8 @@ class CompactSyntaxParser(object):
     # New variables added to the model, with optional initial value
     newVariable = p.Group(MakeKw('var') - ncIdent + unitsRef + Optional(eq + number, default='')).setName('NewVariable')
     # Adding or replacing equations in the model
-    modelEquation = p.Group(MakeKw('define') - ident + eq + expr).setName('AddOrReplaceEquation')
+    modelEquation = p.Group(MakeKw('define') - (p.Group(MakeKw('diff') + Adjacent(oparen) - ident + p.Suppress(';') + ident + cparen) |
+                                                ident) + eq + expr).setName('AddOrReplaceEquation')
     # Units conversion rules
     unitsConversion = p.Group(MakeKw('convert') - ncIdent + MakeKw('to') + ncIdent +
                               MakeKw('by') - lambdaExpr).setName('UnitsConversion')

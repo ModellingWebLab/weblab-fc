@@ -1,0 +1,86 @@
+# Compact version of the test_while_loop protocol
+
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    num_iters = 5
+}
+
+units {
+    ms = milli second
+    mV = milli volt
+    mV_per_ms = milli volt . milli second^-1
+}
+
+model interface {
+    independent var units ms
+    output oxmeta:membrane_voltage units mV
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1
+}
+
+tasks {
+    # For comparison, use a uniform timecourse.
+    # All these simulations run from t=0 to t=9 inclusive, generating 10 output points.
+    simulation sim0 = timecourse {
+        range t units ms uniform 0:9
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+    
+    # While loop with fixed end point
+    simulation sim1= timecourse {
+        range t units ms while t < 10
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+    
+    # While loop with end point taken from protocol input
+    simulation sim2 = timecourse {
+        range t units ms while t < num_iters
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+
+    # While loop with condition using outputs
+    simulation sim3 = timecourse {
+        range t units ms while sim3:membrane_voltage[t-1] < num_iters - 1
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+
+    # While loop with condition using previous simulation
+    simulation sim4 = timecourse {
+        range t units ms while sim4:membrane_voltage[-1] < sim3:membrane_voltage[-1]
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+
+    # While loop with condition using the model's free variable.
+    # The condition is tested each time Step is called, just after incrementing the loop counter, 
+    # but before solving the model up to the next time.  The model's free variable is updated in
+    # the solve.  Hence we need to continue until the free variable reaches its desired final value
+    # of 9, in contrast to the case where we test against the loop counter.
+    simulation sim5 = timecourse {
+        range t units ms while oxmeta:time < 9
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+    
+    # A long simulation to check that arrays get extended
+    simulation sim_long = timecourse {
+        range t units ms while t < 3001
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+    
+    # Prove that it's impossible to have an empty loop
+    simulation not_empty = timecourse {
+        range t units ms while 0 # Always fails
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
+}
+
+outputs {
+    V0 = sim0:membrane_voltage
+    V1 = sim1:membrane_voltage
+    V2 = sim2:membrane_voltage
+    V3 = sim3:membrane_voltage
+    V4 = sim4:membrane_voltage
+    V5 = sim5:membrane_voltage
+    V_3001 = sim_long:membrane_voltage
+    V_empty = not_empty:membrane_voltage
+}
