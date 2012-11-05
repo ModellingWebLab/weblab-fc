@@ -32,6 +32,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 # TODO: We may be able to get rid of some of the p.Group wrapping when we add parse actions
+# TODO: Allow units definitions to have a description, e.g. {/Symbol m}A/cm^2
+
 import sys
 
 import pyparsing as p

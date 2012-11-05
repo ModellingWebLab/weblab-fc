@@ -1,0 +1,113 @@
+# Compact syntax version of the ICaL protocol
+
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    holding_potential = -50
+    # How long to simulate for to get to steady state at the holding potential
+    steady_state_time = 10000
+    # The values to step the transmembrane potential to
+    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,
+                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,
+                        60.01, 65.01, 70.01, 75.01, 79.99 ]
+}
+
+import std = "../../../src/proto/library/BasicLibrary.xml"
+
+library {
+    default_Cao = sim:oxmeta:extracellular_calcium_concentration
+}
+
+units {
+    mV = milli volt
+    ms = milli second
+    uA_per_cm2 = micro ampere . centi metre^-2 # Desired units of currents
+    uF_per_cm2 = micro farad . centi metre^-2
+    microamps = micro ampere
+    A_per_F = ampere . farad^-1
+}
+
+model interface {
+    input oxmeta:membrane_voltage units mV
+    input oxmeta:extracellular_calcium_concentration
+    
+    output oxmeta:membrane_L_type_calcium_current units uA_per_cm2
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:extracellular_calcium_concentration
+    output oxmeta:time units ms
+    
+    var chaste_membrane_capacitance units uF_per_cm2 = 1
+    
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
+}
+
+tasks {
+    # Do a pre-run to get the model to steady-state for the holding potential
+    simulation timecourse {
+        range time units ms vector [0, steady_state_time]
+        modifiers {
+            at start set oxmeta:membrane_voltage = holding_potential
+            at end save as holding_state
+        }
+    }
+    
+    # Now do the IV curve generation for each Cao
+    simulation sim = nested {
+        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]
+        modifiers {
+            # Set the external calcium concentration
+            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao
+        }
+        nests simulation nested {
+            range step_voltage units mV vector test_potentials
+            modifiers {
+                # Reset the model to holding potential
+                at each loop reset to holding_state
+                at each loop set oxmeta:membrane_voltage = holding_potential
+            }
+            nests simulation timecourse {
+                range time units ms uniform -10:0.01:500
+                modifiers {
+                    at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-6 then step_voltage else oxmeta:membrane_voltage
+                }
+            }
+        }
+    }
+}
+
+post-processing {
+    # Test that expected model outputs exist
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    assert sim:membrane_L_type_calcium_current.IS_ARRAY
+    
+    # Only examine the "tail currents" after t=0
+    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)
+    
+    # Get the minimum tail current (this has the largest magnitude) as a 2d array
+    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)
+    
+    # We'll plot against the final V, which is equal to the step voltage
+    # We take the first concentration loop, since they all use the same test potentials
+    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]
+}
+
+outputs {
+    extracellular_calcium_concentration = sim:extracellular_calcium_concentration "Extracellular calcium concentration"
+    membrane_L_type_calcium_current = sim:membrane_L_type_calcium_current "L-type calcium current"
+    membrane_voltage = sim:membrane_voltage "Transmembrane potential"
+
+    membrane_L_type_calcium_tail_current units uA_per_cm2 "I_{CaL} after test potential applied"
+    min_LCC units uA_per_cm2 "Minimum I_{CaL} current"
+    final_membrane_voltage units mV "Test potential"
+}
+
+plots {
+    plot "IV curve" { min_LCC against final_membrane_voltage }
+}
