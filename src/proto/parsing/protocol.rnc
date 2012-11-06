@@ -80,11 +80,10 @@ nameRef = attribute name { ident }
 initialValue = attribute initial_value { xsd:double }
 nameAttr = attribute name { nc_ident }
         
-# The simulations to run on the model.  You can have a sequence of simulations,
-# but only the outputs from the last are currently available.
+# The simulations to run on the model.
 proto.simulations = element proto:simulations { (Simulation | proto.useImports)+ }
 
-# A simulations may be a simple timecourse, or nest another simulation.
+# Several kinds of simulation are now supported.
 Simulation = ( proto.timecourseSimulation | proto.nestedSimulation | proto.combinedSimulation
                | proto.nestedProtocol | proto.oneStepSimulation )
 
@@ -149,6 +148,7 @@ proto.combinedSimulation = element proto:combinedSimulation {
     element proto:simulations { Simulation+ }
     }
 
+# This simulation type supports the proposed SED-ML construct, and cell-based Chaste simulations.
 proto.oneStepSimulation = element proto:oneStep {
     attribute prefix { nc_ident } ?,
     attribute step { xsd:double } ?
@@ -288,7 +288,7 @@ StringCsymbolContent =
     attribute definitionURL { "https://chaste.cs.ox.ac.uk/nss/protocol/string" },
     text
 
-# We override or extent various aspects of the normal MathML schema. 
+# We override or extend various aspects of the normal MathML schema. 
 include "mathml2.rnc" {
     # We can be more specific about the definitionURL on our csymbols.
     attlist-mathml.csymbol = MATHML.Common.attrib, att-encoding, att-type,

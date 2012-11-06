@@ -176,13 +176,13 @@ class CompactSyntaxParser(object):
 
     # Creating arrays
     dimSpec = Optional(expr + Adjacent(dollar)) + ncIdent
-    comprehension = p.Group(MakeKw('for') - dimSpec + MakeKw('in') + numericRange)
-    array = p.Group(osquare + expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma + expr)) + csquare).setName('Array')
+    comprehension = p.Group(MakeKw('for') - dimSpec + MakeKw('in') - numericRange)
+    array = p.Group(osquare - expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma - expr)) + csquare).setName('Array')
     
     # Array views
     optExpr = Optional(expr, default='')
     viewSpec = p.Group(Adjacent(osquare) - Optional(('*' | expr) + Adjacent(dollar)) +
-                       optExpr + Optional(colon + optExpr + Optional(colon + optExpr)) + csquare).setName('ViewSpec')
+                       optExpr + Optional(colon - optExpr + Optional(colon - optExpr)) + csquare).setName('ViewSpec')
     
     # If-then-else
     ifExpr = p.Group(MakeKw('if') - expr + MakeKw('then') - expr + MakeKw('else') - expr).setName('IfThenElse')
@@ -190,14 +190,14 @@ class CompactSyntaxParser(object):
     # Lambda definitions
     paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
     paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
-    lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon + expr) | (obrace + stmtList + embedded_cbrace))).setName('Lambda')
+    lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon - expr) | (obrace - stmtList + embedded_cbrace))).setName('Lambda')
     
     # Function calls
     argList = p.Group(OptionalDelimitedList(expr, comma))
     functionCall = p.Group(ident + Adjacent(oparen) - argList + cparen).setName('FnCall') # TODO: allow lambdas, not just ident?
     
     # Tuples
-    tuple = p.Group(oparen + expr + comma + OptionalDelimitedList(expr, comma) + cparen).setName('Tuple')
+    tuple = p.Group(oparen + expr + comma - OptionalDelimitedList(expr, comma) + cparen).setName('Tuple')
     
     # Accessors
     accessor = p.Combine(Adjacent(p.Suppress('.')) -
