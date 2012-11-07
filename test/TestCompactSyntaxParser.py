@@ -45,19 +45,32 @@ csp = CSP.CompactSyntaxParser
 strict_string_end = CSP.p.StringEnd().leaveWhitespace()
 
 class TestCompactSyntaxParser(unittest.TestCase):
-    def checkResultsList(self, actual, expected):
-        """Compare parse results to expected strings."""
-        self.assertEqual(len(actual), len(expected), '%s != %s' % (actual, expected))
-        for i, result in enumerate(expected):
-            if type(result) == type([]):
-                self.checkResultsList(actual[i], result)
+    def checkParseResults(self, actual, expected):
+        """Compare parse results to expected strings.
+        
+        The expected results may be given as a (nested) list or a dictionary, depending
+        on whether you want to compare against matched tokens by order or results name.
+        """
+        def check_result(actual, expected):
+            if type(expected) == type(""):
+                self.assertEqual(actual, expected, '%s != %s' % (actual, expected))
             else:
-                self.assertEqual(actual[i], result, '%s != %s' % (actual[i], result))
+                self.checkParseResults(actual, expected)
+        if isinstance(expected, type([])):
+            self.assertEqual(len(actual), len(expected), '%s != %s' % (actual, expected))
+            for i, result in enumerate(expected):
+                check_result(actual[i], result)
+        elif isinstance(expected, type({})):
+            self.assertEqual(len(actual.keys()), len(expected), '%s != %s' % (actual, expected))
+            for key, value in expected.iteritems():
+                check_result(actual[key], value)
     
     def assertParses(self, grammar, input, results):
         """Utility method to test that a given grammar parses an input as expected."""
         actual_results = grammar.parseString(input, parseAll=True)
-        self.checkResultsList(actual_results, results)
+#        if len(actual_results) > 0 and hasattr(actual_results[0], 'xml') and callable(actual_results[0].xml):
+#            print CSP.ET.tostring(actual_results[0].xml(), pretty_print=False)
+        self.checkParseResults(actual_results, results)
     
     def failIfParses(self, grammar, input):
         """Utility method to test that a given grammar fails to parse an input."""
@@ -136,10 +149,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.simpleAssignList, '', [])
     
     def TestParsingNamespaces(self):
-        self.assertParses(csp.nsDecl, 'namespace prefix = "urn:test"', [['prefix', 'urn:test']])
-        self.assertParses(csp.nsDecl, "namespace prefix='urn:test'", [['prefix', 'urn:test']])
+        self.assertParses(csp.nsDecl, 'namespace prefix = "urn:test"', [{'prefix': 'prefix', 'uri': 'urn:test'}])
+        self.assertParses(csp.nsDecl, "namespace prefix='urn:test'", [{'prefix': 'prefix', 'uri': 'urn:test'}])
         self.assertParses(csp.nsDecls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
-                          [['n1', 'urn:t1'], ['n2', 'urn:t2']])
+                          {'namespace': [{'prefix': 'n1', 'uri': 'urn:t1'}, {'prefix': 'n2', 'uri': 'urn:t2'}]})
         self.assertParses(csp.nsDecls, '', [])
         self.failIfParses(csp.nsDecls, 'namespace n="uri"\n')
     

@@ -1,7 +1,5 @@
 # Compact syntax version of the S1S2 protocol
 
-namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
-namespace cellml = "http://www.cellml.org/cellml/1.0#"
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 inputs {

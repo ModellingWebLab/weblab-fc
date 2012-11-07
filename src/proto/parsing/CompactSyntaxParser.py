@@ -43,6 +43,120 @@ __all__ = ['CompactSyntaxParser']
 # Necessary for reasonable speed when using operatorPrecedences
 p.ParserElement.enablePackrat()
 
+################################################################################
+# Parse actions that can generate the XML syntax
+################################################################################
+import lxml.builder
+import lxml.etree as ET
+
+PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+P = lxml.builder.ElementMaker(namespace=PROTO_NS)
+M = lxml.builder.ElementMaker(namespace="http://www.w3.org/1998/Math/MathML")
+CELLML = lxml.builder.ElementMaker(namespace="http://www.cellml.org/cellml/1.0#",
+                                   nsmap={'cellml': "http://www.cellml.org/cellml/1.0#"})
+
+class Actions(object):
+    """Container for parse actions."""
+    source_file = "" # Should be filled in by main parse method
+        
+    class BaseAction(object):
+        """Base parse action.
+        
+        This contains the code for allowing parsed protocol elements to be compared to lists in the test code.
+        """
+        def __init__(self, s, loc, tokens):
+            self.tokens = tokens
+            self.source_location = "%s:%d:%d\t%s" % (Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
+        
+        def __eq__(self, other):
+            """Comparison of these parse results to another instance or a list."""
+            if type(other) == type(self):
+                return self.tokens == other.tokens
+            elif type(other) == type([]):
+                return self.tokens == other
+            elif type(other) == type(""):
+                return len(self.tokens) == 1 and str(self.tokens[0]) == other
+            else:
+                return False
+        
+        def __len__(self):
+            """Get the length of the encapsulated token list."""
+            return len(self.tokens)
+        
+        def __getitem__(self, i):
+            """Get the i'th encapsulated token."""
+            return self.tokens[i]
+        
+        def __str__(self):
+            return self.__class__.__name__ + str(self.tokens)
+        def __repr__(self):
+            return str(self)
+        
+        def xml(self):
+            """Main method to generate the XML syntax.
+            Will add an attribute containing source location information where appropriate.
+            """
+            result = self._xml()
+            if ET.iselement(result):
+                # Add source location attribute
+                result.set('{%s}loc' % PROTO_NS, self.source_location)
+            return result
+        
+        def _xml(self):
+            """Subclasses must implement this method to generate their specific XML."""
+            raise NotImplementedError
+    
+    class Number(BaseAction):
+        """Parse action for numbers."""
+        def _xml(self):
+            return M.cn(self.tokens[0])
+    
+    class Variable(BaseAction):
+        """Parse action for variable references (identifiers)."""
+        def _xml(self):
+            return M.ci(self.tokens[0])
+    
+    class Operator(BaseAction):
+        """Parse action for most MathML operators that are represented as operators in the syntax."""
+        # Map from operator symbols used to MathML element names
+        OP_MAP = {'+': 'plus', '-': 'minus', '*': 'times', '/': 'divide', '^': 'power',
+                  '==': 'eq', '!=': 'neq', '<': 'lt', '>': 'gt', '<=': 'leq', '>=': 'geq',
+                  'not': 'not', '&&': 'and', '||': 'or'}
+        def __init__(self, s, loc, tokens, rightAssoc=False):
+#            print tokens
+            Actions.BaseAction.__init__(self, s, loc, tokens[0]) # TODO: Should the base class do the [0]?
+            self.rightAssoc = rightAssoc
+        
+        def OperatorOperands(self):
+            """Generator over (operator, operand) pairs."""
+            it = iter(self.tokens[1:])
+            while 1:
+                try:
+                    operator = next(it)
+                    operand = next(it)
+                    yield (operator, operand)
+                except StopIteration:
+                    break
+        
+        def Operator(self, operator):
+            """Get the MathML element for the given operator."""
+            return getattr(M, self.OP_MAP[operator])
+        
+        def _xml(self):
+            if self.rightAssoc:
+                # The only right-associative operators are also unary
+                result = self.tokens[-1].xml()
+                for operator in self.tokens[-2:-1:]:
+                    result = M.apply(self.Operator(operator), result)
+            else:
+                result = self.tokens[0].xml()
+                for operator, operand in self.OperatorOperands():
+                    result = M.apply(self.Operator(operator), result, operand.xml())
+            return result
+
+################################################################################
+# Helper methods for defining parsers
+################################################################################
 def MakeKw(keyword, suppress=True):
     """Helper function to create a parser for the given keyword."""
     kw = p.Keyword(keyword)
@@ -108,7 +222,7 @@ def DelimitedMultiList(elements, delimiter):
     return result
 
 def UnIgnore(parser):
-    """Stop ignoring things in the given parser."""
+    """Stop ignoring things in the given parser (and its children)."""
     for child in getattr(parser, 'exprs', []):
         UnIgnore(child)
     if hasattr(parser, 'expr'):
@@ -225,17 +339,19 @@ class CompactSyntaxParser(object):
     wrap = p.Group(p.Suppress('@') - Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator).setName('WrapMathML')
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = (array | wrap | number | ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | ident | tuple).setName('Atom')
+    atom = (array | wrap | number.copy().setParseAction(Actions.Number) |
+            ifExpr | nullValue | defaultValue | lambdaExpr | functionCall |
+            ident.copy().setParseAction(Actions.Variable) | tuple).setName('Atom')
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT),
                                         (viewSpec, 1, p.opAssoc.LEFT),
                                         (index, 1, p.opAssoc.LEFT),
-                                        ('^', 2, p.opAssoc.LEFT),
-                                        ('-', 1, p.opAssoc.RIGHT),
-                                        (p.oneOf('* /'), 2, p.opAssoc.LEFT),
-                                        (p.oneOf('+ -'), 2, p.opAssoc.LEFT),
-                                        ('not', 1, p.opAssoc.RIGHT),
-                                        (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT),
-                                        (p.oneOf('&& ||'), 2, p.opAssoc.LEFT)
+                                        ('^', 2, p.opAssoc.LEFT, Actions.Operator),
+                                        ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                        (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                        ('not', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                        (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
 
     # Newlines in expressions may be escaped with a backslash
@@ -272,8 +388,8 @@ class CompactSyntaxParser(object):
     ##############################################
     
     # Namespace declarations
-    nsDecl = p.Group(MakeKw('namespace') - ncIdent + eq + quotedUri).setName('NamespaceDecl')
-    nsDecls = OptionalDelimitedList(nsDecl, nl)
+    nsDecl = p.Group(MakeKw('namespace') - ncIdent("prefix") + eq + quotedUri("uri")).setName('NamespaceDecl')
+    nsDecls = OptionalDelimitedList(nsDecl("namespace*"), nl)
     
     # Protocol input declarations, with default values
     inputs = (MakeKw('inputs') + obrace - simpleAssignList + cbrace).setName('Inputs')
@@ -418,9 +534,10 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
     
-    def ParseFile(self, fileOrFilename):
+    def ParseFile(self, filename):
         """Main entry point for parsing a complete protocol file."""
-        return self._Try(self.protocol.parseFile, fileOrFilename, parseAll=True)
+        Actions.source_file = filename
+        return self._Try(self.protocol.parseFile, filename, parseAll=True)
     
 
 ################################################################################
