@@ -35,6 +35,7 @@ import glob
 import os
 import unittest
 import sys
+import types
 
 # Import the module to test
 sys.path[0:0] = ['python/pycml', 'projects/FunctionalCuration/src/proto/parsing']
@@ -65,11 +66,29 @@ class TestCompactSyntaxParser(unittest.TestCase):
             for key, value in expected.iteritems():
                 check_result(actual[key], value)
     
-    def assertParses(self, grammar, input, results):
+    def assertHasLocalName(self, xmlElement, localName):
+        self.assert_(xmlElement.tag.endswith('}' + localName))
+    
+    def checkXml(self, actualXml, expectedXml):
+        if type(expectedXml) == types.StringType:
+            self.assertEqual(len(actualXml), 0)
+            self.assertHasLocalName(actualXml, expectedXml)
+        elif type(expectedXml) == types.TupleType:
+            self.assertHasLocalName(actualXml, expectedXml[0])
+            self.assertEqual(len(actualXml), len(expectedXml[1]))
+            for i, expected_child in enumerate(expectedXml[1]):
+                self.checkXml(actualXml[i], expected_child)
+    
+    def assertParses(self, grammar, input, results, expectedXml=None):
         """Utility method to test that a given grammar parses an input as expected."""
         actual_results = grammar.parseString(input, parseAll=True)
-#        if len(actual_results) > 0 and hasattr(actual_results[0], 'xml') and callable(actual_results[0].xml):
-#            print CSP.ET.tostring(actual_results[0].xml(), pretty_print=False)
+        if expectedXml:
+            self.assert_(len(actual_results) > 0)
+            self.assert_(hasattr(actual_results[0], 'xml'))
+            self.assert_(callable(actual_results[0].xml))
+            actual_xml = actual_results[0].xml()
+#            print CSP.ET.tostring(actual_xml, pretty_print=False)
+            self.checkXml(actual_xml, expectedXml)
         self.checkParseResults(actual_results, results)
     
     def failIfParses(self, grammar, input):
@@ -110,15 +129,18 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.comment, '# blah blah\n')
         
     def TestParsingSimpleExpressions(self):
-        self.assertParses(csp.expr, '1', [['1']])
-        self.assertParses(csp.expr, '(A)', [['A']])
-        self.assertParses(csp.expr, '1 - 2 + 3 * 4 / 5 ^ 6', [['1', '-', '2', '+',
-                                                               ['3', '*', '4', '/', ['5', '^', '6']]]])
+        self.assertParses(csp.expr, '1', [['1']], 'cn')
+        self.assertParses(csp.expr, '(A)', [['A']], 'ci')
+        self.assertParses(csp.expr, '1 - 2 + 3 * 4 / 5 ^ 6',
+                          [['1', '-', '2', '+', ['3', '*', '4', '/', ['5', '^', '6']]]],
+                          ('apply', ['plus', ('apply', ['minus', 'cn', 'cn']),
+                                     ('apply', ['divide', ('apply', ['times', 'cn', 'cn']), ('apply', ['power', 'cn', 'cn'])])]))
         self.assertParses(csp.expr, '-(a + -3)', [['-', ['a', '+', ['-', '3']]]])
         self.assertParses(csp.expr, '1 ^ 2 ^ 3', [['1', '^', '2', '^', '3']])
         self.assertParses(csp.expr, 'not 1 < 2', [[['not', '1'], '<', '2']])
         self.assertParses(csp.expr, 'not (1 < 2)', [['not', ['1', '<', '2']]])
-        self.assertParses(csp.expr, 'not not my:var', [['not', ['not', 'my:var']]])
+        self.assertParses(csp.expr, 'not not my:var', [['not', ['not', 'my:var']]],
+                          ('apply', ['not', ('apply', ['not', 'ci'])]))
         self.assertParses(csp.expr, '1 < 2 <= (3 >= 4) > 5 == 6 != 7', [['1', '<', '2', '<=', ['3', '>=', '4'],
                                                                          '>', '5', '==', '6', '!=', '7']])
         self.assertParses(csp.expr, '1 < 2 + 4 > 3', [['1', '<', ['2', '+', '4'], '>', '3']])
