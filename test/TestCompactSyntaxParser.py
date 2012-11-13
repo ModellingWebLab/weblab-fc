@@ -561,12 +561,12 @@ return c
                       [[['inner1', ['1']], '+', ['inner2', []], '+', ['inner3', ['2']]]]]]])
     
     def TestParsingTuples(self):
-        self.assertParses(csp.tuple, '(1,2)', [['1', '2']])
+        self.assertParses(csp.tuple, '(1,2)', [['1', '2']], ('apply', ['csymbol', 'cn', 'cn']))
         self.assertParses(csp.tuple, '(1+a,2*b)', [[['1', '+', 'a'], ['2', '*', 'b']]])
-        self.assertParses(csp.tuple, '(singleton,)', [['singleton']])
+        self.assertParses(csp.tuple, '(singleton,)', [['singleton']], ('apply', ['csymbol', 'ci']))
         self.failIfParses(csp.tuple, '(1)') # You need a Python-style comma as above
-        self.assertParses(csp.expr, '(1,2)', [['1', '2']])
-        self.assertParses(csp.expr, '(1,a,3,c)', [['1', 'a', '3', 'c']])
+        self.assertParses(csp.expr, '(1,2)', [['1', '2']], ('apply', ['csymbol', 'cn', 'cn']))
+        self.assertParses(csp.expr, '(1,a,3,c)', [['1', 'a', '3', 'c']], ('apply', ['csymbol', 'cn', 'ci', 'cn', 'ci']))
         self.assertParses(csp.assignStmt, 't = (1,2)', [[['t'], [['1', '2']]]])
         self.assertParses(csp.assignStmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
     
@@ -668,13 +668,15 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
     def TestParsingAccessors(self):
         for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:
             self.assertParses(csp.accessor, '.' + accessor, [accessor])
-            self.assertParses(csp.expr, 'var.' + accessor, [['var', accessor]])
+            self.assertParses(csp.expr, 'var.' + accessor, [['var', accessor]],
+                              ('apply', [('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/accessor'}), 'ci']))
         for ptype in ['SIMPLE_VALUE', 'ARRAY', 'STRING', 'TUPLE', 'FUNCTION', 'NULL', 'DEFAULT']:
             self.assertParses(csp.accessor, '.IS_' + ptype, ['IS_' + ptype])
             self.assertParses(csp.expr, 'var.IS_' + ptype, [['var', 'IS_' + ptype]])
         self.assertParses(csp.expr, 'arr.SHAPE[1]', [[['arr', 'SHAPE'], ['1']]])
         self.assertParses(csp.expr, 'func(var).IS_ARRAY', [[['func', ['var']], 'IS_ARRAY']])
-        self.assertParses(csp.expr, 'A.SHAPE.IS_ARRAY', [['A', 'SHAPE', 'IS_ARRAY']])
+        self.assertParses(csp.expr, 'A.SHAPE.IS_ARRAY', [['A', 'SHAPE', 'IS_ARRAY']],
+                          ('apply', ['csymbol', ('apply', ['csymbol', 'ci'])]))
         self.failIfParses(csp.expr, 'arr .SHAPE')
     
     def TestParsingMap(self):
@@ -708,8 +710,8 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         self.failIfParses(csp.expr, '@N:+')
 
     def TestParsingNullAndDefault(self):
-        self.assertParses(csp.expr, 'null', [[]])
-        self.assertParses(csp.expr, 'default', [[]])
+        self.assertParses(csp.expr, 'null', [[]], ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/null'}))
+        self.assertParses(csp.expr, 'default', [[]], ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter'}))
 
     def TestParsingLibrary(self):
         self.assertParses(csp.library, 'library {}', [])

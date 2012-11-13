@@ -110,6 +110,10 @@ class Actions(object):
             """Convert all sub-tokens to XML and return the list of elements."""
             return map(lambda tok: tok.xml(), self.tokens)
         
+        def Delegate(self, action, tokens):
+            """Create another parse action to process the given tokens for us."""
+            return getattr(Actions, action)('', self.source_location, tokens)
+        
         def xml(self):
             """Main method to generate the XML syntax.
             Will add an attribute containing source location information where appropriate.
@@ -194,8 +198,7 @@ class Actions(object):
             assert len(self.tokens) > 0
             if len(self.tokens) > 1:
                 # Tuple
-                child_xml = self.GetChildrenXml()
-                return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"tuple"), *child_xml)
+                return self.Delegate('Tuple', [self.tokens]).xml()
             else:
                 # Single item
                 return self.tokens[0].xml()
@@ -222,6 +225,32 @@ class Actions(object):
             children.append(body)
             return getattr(M, 'lambda')(*children)
     
+    class _Symbol(BaseGroupAction):
+        """Parse action for csymbols."""
+        def __init__(self, s, loc, tokens, symbol):
+            super(Actions._Symbol, self).__init__(s, loc, tokens)
+            self.symbol = symbol
+        def _xml(self):
+            return M.csymbol(definitionURL=PROTO_CSYM_BASE+self.symbol)
+    
+    @staticmethod
+    def Symbol(symbol):
+        """Wrapper around the _Symbol class."""
+        def parse_action(s, loc, tokens):
+            return Actions._Symbol(s, loc, tokens, symbol)
+        return parse_action
+    
+    class Accessor(BaseGroupAction):
+        """Parse action for accessors."""
+        def _xml(self):
+            if len(self.tokens) > 2:
+                # Chained accessors, e.g. A.SHAPE.IS_ARRAY
+                return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).xml()
+            assert len(self.tokens) == 2
+            object = self.tokens[0].xml()
+            property = self.tokens[1]
+            return M.apply(M.csymbol(property, definitionURL=PROTO_CSYM_BASE+'accessor'), object)
+    
     ######################################################################
     # Post-processing language statements
     ######################################################################
@@ -246,8 +275,8 @@ class Actions(object):
         """Parse action for function definitions, which are sugar for assignment of a lambda."""
         def _xml(self):
             assert len(self.tokens) == 3
-            lambda_ = Actions.Lambda('', self.source_location, [self.tokens[1:]])
-            assign = Actions.Assignment('', self.source_location, [[self.tokens[0], lambda_]])
+            lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
+            assign = self.Delegate('Assignment', [[self.tokens[0], lambda_]])
             return assign.xml()
 
     class StatementList(BaseGroupAction):
@@ -461,8 +490,8 @@ class CompactSyntaxParser(object):
     index = p.Group(Adjacent(p.Suppress('{')) - expr + Optional(comma + (pad|shrink)) + p.Suppress('}')).setName('Index')
 
     # Special values
-    nullValue = p.Group(MakeKw('null')).setName('Null')
-    defaultValue = p.Group(MakeKw('default')).setName('Default')
+    nullValue = p.Group(MakeKw('null')).setName('Null').setParseAction(Actions.Symbol('null'))
+    defaultValue = p.Group(MakeKw('default')).setName('Default').setParseAction(Actions.Symbol('defaultParameter'))
     
     # Recognised MathML operators
     mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
@@ -478,7 +507,7 @@ class CompactSyntaxParser(object):
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
     atom = (array | wrap | number.copy().setParseAction(Actions.Number) |
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
-    expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT),
+    expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                         (viewSpec, 1, p.opAssoc.LEFT),
                                         (index, 1, p.opAssoc.LEFT),
                                         ('^', 2, p.opAssoc.LEFT, Actions.Operator),
