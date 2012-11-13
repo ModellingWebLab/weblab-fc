@@ -67,7 +67,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
                 check_result(actual[key], value)
     
     def assertHasLocalName(self, xmlElement, localName):
-        self.assert_(xmlElement.tag.endswith('}' + localName))
+        ending = '}' + localName
+        self.assertEqual(xmlElement.tag[-len(ending):], ending)
     
     def checkXml(self, actualXml, expectedXml):
         if type(expectedXml) == types.StringType:
@@ -87,7 +88,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             self.assert_(hasattr(actual_results[0], 'xml'))
             self.assert_(callable(actual_results[0].xml))
             actual_xml = actual_results[0].xml()
-#            print CSP.ET.tostring(actual_xml, pretty_print=False)
+            print CSP.ET.tostring(actual_xml, pretty_print=False)
             self.checkXml(actual_xml, expectedXml)
         self.checkParseResults(actual_results, results)
     
@@ -129,14 +130,15 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.comment, '# blah blah\n')
         
     def TestParsingSimpleExpressions(self):
-        self.assertParses(csp.expr, '1', [['1']], 'cn')
-        self.assertParses(csp.expr, '(A)', [['A']], 'ci')
+        self.assertParses(csp.expr, '1', ['1'], 'cn')
+        self.assertParses(csp.expr, '(A)', ['A'], 'ci')
         self.assertParses(csp.expr, '1 - 2 + 3 * 4 / 5 ^ 6',
                           [['1', '-', '2', '+', ['3', '*', '4', '/', ['5', '^', '6']]]],
                           ('apply', ['plus', ('apply', ['minus', 'cn', 'cn']),
                                      ('apply', ['divide', ('apply', ['times', 'cn', 'cn']), ('apply', ['power', 'cn', 'cn'])])]))
         self.assertParses(csp.expr, '-(a + -3)', [['-', ['a', '+', ['-', '3']]]])
-        self.assertParses(csp.expr, '1 ^ 2 ^ 3', [['1', '^', '2', '^', '3']])
+        self.assertParses(csp.expr, '1 ^ 2 ^ 3', [['1', '^', '2', '^', '3']],
+                          ('apply', ['power', ('apply', ['power', 'cn', 'cn']), 'cn']))
         self.assertParses(csp.expr, 'not 1 < 2', [[['not', '1'], '<', '2']])
         self.assertParses(csp.expr, 'not (1 < 2)', [['not', ['1', '<', '2']]])
         self.assertParses(csp.expr, 'not not my:var', [['not', ['not', 'my:var']]],
@@ -145,9 +147,11 @@ class TestCompactSyntaxParser(unittest.TestCase):
                                                                          '>', '5', '==', '6', '!=', '7']])
         self.assertParses(csp.expr, '1 < 2 + 4 > 3', [['1', '<', ['2', '+', '4'], '>', '3']])
         self.assertParses(csp.expr, '1 < 2 && 4 > 3', [[['1', '<', '2'], '&&', ['4', '>', '3']]])
-        self.assertParses(csp.expr, '0 || 1 && 1', [['0', '||', '1', '&&', '1']])
+        self.assertParses(csp.expr, '0 || 1 && 1', [['0', '||', '1', '&&', '1']],
+                          ('apply', ['and', ('apply', ['or', 'cn', 'cn']), 'cn']))
         self.assertParses(csp.expr, 'A + B || C * D', [[['A', '+', 'B'], '||', ['C', '*', 'D']]])
-        self.assertParses(csp.expr, 'if 1 then 2 else 3', [[['1'], ['2'], ['3']]])
+        self.assertParses(csp.expr, 'if 1 then 2 else 3', [['1', '2', '3']],
+                          ('piecewise', [('piece', ['cn', 'cn']), ('otherwise', ['cn'])]))
         self.assertParses(csp.expr, 'if 1 < 2 then 3 + 4 else 5 * 6',
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
     
@@ -162,13 +166,16 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, '(1 + 2)\n * 3', [[['1', '+', '2'], '*', '3']])
     
     def TestParsingSimpleAssignments(self):
-        self.assertParses(csp.simpleAssign, 'var = value', [['var', 'value']])
+        self.assertParses(csp.simpleAssign, 'var = value', [['var', 'value']],
+                          ('apply', ['eq', 'ci', 'ci']))
         self.assertParses(csp.simpleAssign, 'var = pre:value', [['var', 'pre:value']])
         self.failIfParses(csp.simpleAssign, 'pre:var = value')
-        self.assertParses(csp.simpleAssign, 'var = 1 + 2', [['var', ['1', '+', '2']]])
+        self.assertParses(csp.simpleAssign, 'var = 1 + 2', [['var', ['1', '+', '2']]],
+                          ('apply', ['eq', 'ci', ('apply', ['plus', 'cn', 'cn'])]))
 
-        self.assertParses(csp.simpleAssignList, 'v1 = 1\nv2=2', [['v1', '1'], ['v2', '2']])
-        self.assertParses(csp.simpleAssignList, '', [])
+        self.assertParses(csp.simpleAssignList, 'v1 = 1\nv2=2', [[['v1', '1'], ['v2', '2']]],
+                          ('apply', ['csymbol', ('apply', ['eq', 'ci', 'cn']), ('apply', ['eq', 'ci', 'cn'])]))
+        self.assertParses(csp.simpleAssignList, '', [[]])
     
     def TestParsingNamespaces(self):
         self.assertParses(csp.nsDecl, 'namespace prefix = "urn:test"', [{'prefix': 'prefix', 'uri': 'urn:test'}])
@@ -185,10 +192,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
     unlabel_time = 600000 # When to stop labelling
     use_tapasin = 1       # Whether to include Tapasin
 }
-""", [['label_duration', '300'], ['unlabel_time', '600000'], ['use_tapasin', '1']])
-        self.assertParses(csp.inputs, 'inputs {}', [])
-        self.assertParses(csp.inputs, 'inputs\n{\n}\n', [])
-        self.assertParses(csp.inputs, 'inputs{X=1}', [['X', '1']])
+""", [[['label_duration', '300'], ['unlabel_time', '600000'], ['use_tapasin', '1']]])
+        self.assertParses(csp.inputs, 'inputs {}', [[]])
+        self.assertParses(csp.inputs, 'inputs\n{\n}\n', [[]])
+        self.assertParses(csp.inputs, 'inputs{X=1}', [[['X', '1']]])
     
     def TestParsingImports(self):
         self.assertParses(csp.importStmt, 'import std = "../../../src/proto/library/BasicLibrary.xml"',
@@ -203,8 +210,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.importStmt, """import "S1S2.txt" {
     steady_state_beats = 10
     timecourse_duration = 2000
-}""", [['', 'S1S2.txt', ['steady_state_beats', '10'], ['timecourse_duration', '2000']]])
-        self.assertParses(csp.importStmt, 'import "file.txt" { }', [['', 'file.txt']])
+}""", [['', 'S1S2.txt', [['steady_state_beats', '10'], ['timecourse_duration', '2000']]]])
+        self.assertParses(csp.importStmt, 'import "file.txt" { }', [['', 'file.txt', []]])
         self.failIfParses(csp.importStmt, 'import "file.txt" { } \n')
 
     def TestParsingUseImports(self):
@@ -336,21 +343,21 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
     
     def TestParsingNestedProtocol(self):
         self.assertParses(csp.simulation, 'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { } }',
-                          ['', [['iter', 'D', ['0', '1']], [['P']]]])
+                          ['', [['iter', 'D', ['0', '1']], [['P', []]]]])
         self.assertParses(csp.simulation, """simulation nested {
     range iter units D vector [0, 1]
     nests protocol "../proto.xml" {
         input1 = 1
         input2 = 2
     }
-}""", ['', [['iter', 'D', ['0', '1']], [['../proto.xml', ['input1', '1'], ['input2', '2']]]]])
+}""", ['', [['iter', 'D', ['0', '1']], [['../proto.xml', [['input1', '1'], ['input2', '2']]]]]])
         self.assertParses(csp.simulation, """simulation nested {
     range iter units D vector [0, 1]
     nests protocol "proto.txt" {
         input = iter
         select output oname
     }
-}""", ['', [['iter', 'D', ['0', '1']], [['proto.txt', ['input', 'iter'], 'oname']]]])
+}""", ['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], 'oname']]]])
     
     def TestParsingTasks(self):
         self.assertParses(csp.tasks, """tasks {
@@ -442,7 +449,7 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
     def TestParsingAssertStatements(self):
         self.assertParses(csp.assertStmt, 'assert a + b', [[['a', '+', 'b']]])
         self.assertParses(csp.assertStmt, 'assert (a + b)', [[['a', '+', 'b']]])
-        self.assertParses(csp.assertStmt, 'assert 1', [[['1']]])
+        self.assertParses(csp.assertStmt, 'assert 1', [['1']])
     
     def TestParsingStatementLists(self):
         self.assertParses(csp.stmtList, "b=-a\nassert 1", [[['b'], [['-', 'a']]], ['1']])
@@ -478,7 +485,7 @@ return c
         self.assertParses(csp.expr, "lambda a, b { return b, a }", [[[['a'], ['b']], ['b', 'a']]])
         self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], ['a']]])
         self.assertParses(csp.expr, 'lambda { return 1 }', [[[], ['1']]])
-        self.assertParses(csp.expr, 'lambda: 1', [[[], ['1']]])
+        self.assertParses(csp.expr, 'lambda: 1', [[[], '1']])
 
     def TestParsingFunctionDefinitions(self):
         self.assertParses(csp.functionDefn, 'def double(a)\n {\n return a * 2\n }',
@@ -686,6 +693,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
             print os.path.basename(proto_filename), '...'
             csp().ParseFile(proto_filename)
+        CSP.Actions.source_file = '' # Avoid the last name leaking to following tests
 
     def TestZzzPackratWasUsed(self):
         # Method name ensures this runs last!

@@ -31,10 +31,10 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# TODO: We may be able to get rid of some of the p.Group wrapping when we add parse actions
 # TODO: Units annotations on numbers in the model interface (and possibly everywhere)
 
 import sys
+import types
 
 import pyparsing as p
 
@@ -50,6 +50,7 @@ import lxml.builder
 import lxml.etree as ET
 
 PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+PROTO_CSYM_BASE = "https://chaste.cs.ox.ac.uk/nss/protocol/"
 P = lxml.builder.ElementMaker(namespace=PROTO_NS)
 M = lxml.builder.ElementMaker(namespace="http://www.w3.org/1998/Math/MathML")
 CELLML = lxml.builder.ElementMaker(namespace="http://www.cellml.org/cellml/1.0#",
@@ -58,14 +59,15 @@ CELLML = lxml.builder.ElementMaker(namespace="http://www.cellml.org/cellml/1.0#"
 class Actions(object):
     """Container for parse actions."""
     source_file = "" # Should be filled in by main parse method
-        
+
     class BaseAction(object):
         """Base parse action.
         
         This contains the code for allowing parsed protocol elements to be compared to lists in the test code.
         """
         def __init__(self, s, loc, tokens):
-            self.tokens = tokens
+#            print 'Creating', self.__class__.__name__, tokens
+            self.tokens = tokens[0]
             self.source_location = "%s:%d:%d\t%s" % (Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
         
         def __eq__(self, other):
@@ -75,22 +77,35 @@ class Actions(object):
             elif type(other) == type([]):
                 return self.tokens == other
             elif type(other) == type(""):
-                return len(self.tokens) == 1 and str(self.tokens[0]) == other
+                return str(self.tokens) == other
             else:
                 return False
         
         def __len__(self):
             """Get the length of the encapsulated token list."""
-            return len(self.tokens)
+            if type(self.tokens) == types.StringType:
+                length = 1
+            else:
+                length = len(self.tokens)
+            return length
         
         def __getitem__(self, i):
             """Get the i'th encapsulated token."""
+            assert type(self.tokens) != types.StringType
             return self.tokens[i]
         
         def __str__(self):
-            return self.__class__.__name__ + str(self.tokens)
+            if type(self.tokens) == types.StringType:
+                detail = '[%s]' % self.tokens
+            else:
+                detail = str(self.tokens)
+            return self.__class__.__name__ + detail
         def __repr__(self):
             return str(self)
+        
+        def GetChildrenXml(self):
+            """Convert all sub-tokens to XML and return the list of elements."""
+            return map(lambda tok: tok.xml(), self.tokens)
         
         def xml(self):
             """Main method to generate the XML syntax.
@@ -109,12 +124,12 @@ class Actions(object):
     class Number(BaseAction):
         """Parse action for numbers."""
         def _xml(self):
-            return M.cn(self.tokens[0])
+            return M.cn(self.tokens)
     
     class Variable(BaseAction):
         """Parse action for variable references (identifiers)."""
         def _xml(self):
-            return M.ci(self.tokens[0])
+            return M.ci(self.tokens)
     
     class Operator(BaseAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
@@ -122,10 +137,9 @@ class Actions(object):
         OP_MAP = {'+': 'plus', '-': 'minus', '*': 'times', '/': 'divide', '^': 'power',
                   '==': 'eq', '!=': 'neq', '<': 'lt', '>': 'gt', '<=': 'leq', '>=': 'geq',
                   'not': 'not', '&&': 'and', '||': 'or'}
-        def __init__(self, s, loc, tokens, rightAssoc=False):
-#            print tokens
-            Actions.BaseAction.__init__(self, s, loc, tokens[0]) # TODO: Should the base class do the [0]?
-            self.rightAssoc = rightAssoc
+        def __init__(self, *args, **kwargs):
+            Actions.BaseAction.__init__(self, *args)
+            self.rightAssoc = kwargs.get('rightAssoc', False)
         
         def OperatorOperands(self):
             """Generator over (operator, operand) pairs."""
@@ -153,6 +167,24 @@ class Actions(object):
                 for operator, operand in self.OperatorOperands():
                     result = M.apply(self.Operator(operator), result, operand.xml())
             return result
+    
+    class Piecewise(BaseAction):
+        """Parse action for if-then-else."""
+        def _xml(self):
+            if_, then_, else_ = self.GetChildrenXml()
+            return M.piecewise(M.piece(then_, if_), M.otherwise(else_))
+    
+    class Assignment(BaseAction):
+        """Parse action for simple assignments."""
+        def _xml(self):
+            assignee, value = self.GetChildrenXml()
+            return M.apply(M.eq, assignee, value)
+    
+    class StatementList(BaseAction):
+        """Parse action for lists of post-processing language statements."""
+        def _xml(self):
+            statements = self.GetChildrenXml()
+            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"statementList"), *statements)
 
 ################################################################################
 # Helper methods for defining parsers
@@ -299,7 +331,8 @@ class CompactSyntaxParser(object):
                        optExpr + Optional(colon - optExpr + Optional(colon - optExpr)) + csquare).setName('ViewSpec')
     
     # If-then-else
-    ifExpr = p.Group(MakeKw('if') - expr + MakeKw('then') - expr + MakeKw('else') - expr).setName('IfThenElse')
+    ifExpr = p.Group(MakeKw('if') - expr + MakeKw('then') - expr +
+                     MakeKw('else') - expr).setName('IfThenElse').setParseAction(Actions.Piecewise)
     
     # Lambda definitions
     paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
@@ -368,8 +401,8 @@ class CompactSyntaxParser(object):
     ################################################
     
     # Simple assignment (i.e. not to a tuple)
-    simpleAssign = p.Group(ncIdent + eq + expr)
-    simpleAssignList = OptionalDelimitedList(simpleAssign, nl)
+    simpleAssign = p.Group(ncIdent.copy().setParseAction(Actions.Variable) + eq + expr).setParseAction(Actions.Assignment)
+    simpleAssignList = p.Group(OptionalDelimitedList(simpleAssign, nl)).setParseAction(Actions.StatementList)
     
     # Assertions and function returns
     assertStmt = p.Group(MakeKw('assert') - expr).setName('AssertStmt')
