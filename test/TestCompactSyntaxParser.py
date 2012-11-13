@@ -44,6 +44,11 @@ csp = CSP.CompactSyntaxParser
 # An end-of-string match that doesn't allow trailing whitespace
 strict_string_end = CSP.p.StringEnd().leaveWhitespace()
 
+# For debugging and error messages
+def X2S(xml):
+    """Serialize XML to a compact string."""
+    return CSP.ET.tostring(xml, pretty_print=False)
+
 class TestCompactSyntaxParser(unittest.TestCase):
     def checkParseResults(self, actual, expected):
         """Compare parse results to expected strings.
@@ -71,13 +76,13 @@ class TestCompactSyntaxParser(unittest.TestCase):
     
     def checkXml(self, actualXml, expectedXml):
         if isinstance(expectedXml, str):
-            self.assertEqual(len(actualXml), 0, '%s has unexpected children' % actualXml)
+            self.assertEqual(len(actualXml), 0, '%s has unexpected children' % X2S(actualXml))
             self.assertHasLocalName(actualXml, expectedXml)
         elif isinstance(expectedXml, tuple):
             self.assertHasLocalName(actualXml, expectedXml[0])
             for children_or_attrs in expectedXml[1:]:
                 if isinstance(children_or_attrs, list): # Child elements
-                    self.assertEqual(len(actualXml), len(children_or_attrs), '%s != %s' % (actualXml, children_or_attrs))
+                    self.assertEqual(len(actualXml), len(children_or_attrs), '%s != %s' % (X2S(actualXml), children_or_attrs))
                     for i, expected_child in enumerate(children_or_attrs):
                         self.checkXml(actualXml[i], expected_child)
                 elif isinstance(children_or_attrs, dict): # Attributes
@@ -96,7 +101,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             self.assert_(hasattr(actual_results[0], 'xml'), 'No XML available')
             self.assert_(callable(actual_results[0].xml), 'No XML available')
             actual_xml = actual_results[0].xml()
-#            print CSP.ET.tostring(actual_xml, pretty_print=False)
+#            print X2S(actual_xml)
             self.checkXml(actual_xml, expectedXml)
         self.checkParseResults(actual_results, results)
     
@@ -517,18 +522,28 @@ return c
                         [['c'], [['a', '-', 'b']]],
                         ['c']]]])
         self.assertParses(csp.expr, "lambda a, b { return b, a }", [[[['a'], ['b']], [['b', 'a']]]])
-        self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], [['a']]]])
-        self.assertParses(csp.expr, 'lambda { return 1 }', [[[], [['1']]]])
-        self.assertParses(csp.expr, 'lambda: 1', [[[], '1']])
+        self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], [['a']]]],
+                          ('lambda', [('bvar', ['ci']), ('apply', ['csymbol', ('apply', ['csymbol', 'ci'])])]))
+        self.assertParses(csp.expr, 'lambda { return 1 }', [[[], [['1']]]],
+                          ('lambda', [('apply', ['csymbol', ('apply', ['csymbol', 'cn'])])]))
+        self.assertParses(csp.expr, 'lambda: 1', [[[], '1']],
+                          ('lambda', [('cn')]))
 
     def TestParsingFunctionDefinitions(self):
         self.assertParses(csp.functionDefn, 'def double(a)\n {\n return a * 2\n }',
-                          [['double', [['a']], [[['a', '*', '2']]]]])
+                          [['double', [['a']], [[['a', '*', '2']]]]],
+                          ('apply', ['eq', 'ci',
+                                     ('lambda', [('bvar', ['ci']),
+                                                 ('apply', ['csymbol', ('apply', ['csymbol', ('apply', ['times', 'ci', 'cn'])])])])]))
         self.assertParses(csp.functionDefn, 'def double(a): a * 2',
                           [['double', [['a']], ['a', '*', '2']]])
         # A function definition is just sugar for an assignment of a lambda expression
         self.assertParses(csp.stmtList, 'def double(a) {\n    return a * 2}',
-                          [[['double', [['a']], [[['a', '*', '2']]]]]])
+                          [[['double', [['a']], [[['a', '*', '2']]]]]],
+                          ('apply', ['csymbol',
+                                     ('apply', ['eq', 'ci',
+                                                ('lambda', [('bvar', ['ci']),
+                                                            ('apply', ['csymbol', ('apply', ['csymbol', ('apply', ['times', 'ci', 'cn'])])])])])]))
         self.assertParses(csp.functionDefn, 'def noargs(): 1', [['noargs', [], '1']])
     
     def TestParsingNestedFunctions(self):

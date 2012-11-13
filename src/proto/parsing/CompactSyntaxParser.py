@@ -65,9 +65,13 @@ class Actions(object):
         This contains the code for allowing parsed protocol elements to be compared to lists in the test code.
         """
         def __init__(self, s, loc, tokens):
-#            print 'Creating', self.__class__.__name__, tokens
             self.tokens = tokens
-            self.source_location = "%s:%d:%d\t%s" % (Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
+            if isinstance(loc, str):
+                # This instance is being created manually to implement syntactic sugar.
+                self.source_location = loc
+            else:
+                self.source_location = "%s:%d:%d\t%s" % (Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
+#            print 'Creating', self.__class__.__name__, self.tokens
         
         def __eq__(self, other):
             """Comparison of these parse results to another instance or a list."""
@@ -237,6 +241,14 @@ class Actions(object):
         """Parse action for assert statements."""
         def _xml(self):
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"assert"), *self.GetChildrenXml())
+    
+    class FunctionDef(BaseGroupAction):
+        """Parse action for function definitions, which are sugar for assignment of a lambda."""
+        def _xml(self):
+            assert len(self.tokens) == 3
+            lambda_ = Actions.Lambda('', self.source_location, [self.tokens[1:]])
+            assign = Actions.Assignment('', self.source_location, [[self.tokens[0], lambda_]])
+            return assign.xml()
 
     class StatementList(BaseGroupAction):
         """Parse action for lists of post-processing language statements."""
@@ -505,8 +517,9 @@ class CompactSyntaxParser(object):
                  .setName('AssignStmt').setParseAction(Actions.Assignment)
     
     # Function definition
-    functionDefn = p.Group(MakeKw('def') - ncIdent + oparen + paramList + cparen +
-                           ((colon + expr) | (obrace + stmtList + Optional(nl) + p.Suppress('}')))).setName('FunctionDef')
+    functionDefn = p.Group(MakeKw('def') - ncIdentAsVar + oparen + paramList + cparen +
+                           ((colon + expr) | (obrace + stmtList + Optional(nl) + p.Suppress('}')))
+                           ).setName('FunctionDef').setParseAction(Actions.FunctionDef)
     
     stmtList << p.Group(p.delimitedList(assertStmt | returnStmt | functionDefn | assignStmt, nl))
     stmtList.setParseAction(Actions.StatementList)
