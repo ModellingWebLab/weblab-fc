@@ -76,9 +76,12 @@ class TestCompactSyntaxParser(unittest.TestCase):
     
     def checkXml(self, actualXml, expectedXml):
         if isinstance(expectedXml, str):
-            self.assertEqual(len(actualXml), 0, '%s has unexpected children' % X2S(actualXml))
-            self.assertHasLocalName(actualXml, expectedXml)
-        elif isinstance(expectedXml, tuple):
+            if expectedXml.startswith('csymbol-'):
+                expectedXml = ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/'+expectedXml[8:]})
+            else:
+                self.assertEqual(len(actualXml), 0, '%s has unexpected children' % X2S(actualXml))
+                self.assertHasLocalName(actualXml, expectedXml)
+        if isinstance(expectedXml, tuple):
             self.assertHasLocalName(actualXml, expectedXml[0])
             for children_or_attrs in expectedXml[1:]:
                 if isinstance(children_or_attrs, list): # Child elements
@@ -187,7 +190,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           ('apply', ['eq', 'ci', ('apply', ['plus', 'cn', 'cn'])]))
 
         self.assertParses(csp.simpleAssignList, 'v1 = 1\nv2=2', [[['v1', '1'], ['v2', '2']]],
-                          ('apply', ['csymbol', ('apply', ['eq', 'ci', 'cn']), ('apply', ['eq', 'ci', 'cn'])]))
+                          ('apply', ['csymbol-statementList', ('apply', ['eq', 'ci', 'cn']), ('apply', ['eq', 'ci', 'cn'])]))
         self.assertParses(csp.simpleAssignList, '', [[]])
     
     def TestParsingNamespaces(self):
@@ -209,7 +212,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.inputs, 'inputs {}', [[[]]], [])
         self.assertParses(csp.inputs, 'inputs\n{\n}\n', [[[]]])
         self.assertParses(csp.inputs, 'inputs{X=1}', [[[['X', '1']]]],
-                          ('inputs', [('apply', ['csymbol', ('apply', ['eq', 'ci', 'cn'])])]))
+                          ('inputs', [('apply', ['csymbol-statementList', ('apply', ['eq', 'ci', 'cn'])])]))
     
     def TestParsingImports(self):
         self.assertParses(csp.importStmt, 'import std = "../../../src/proto/library/BasicLibrary.xml"',
@@ -386,7 +389,7 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
                                nests inner }
 }
 """, [[['', [['time', 'second', ['1', '1000']]]],
-       ['main', [['n', 'dimensionless', [['i', '*', '2'], ['i', '1', '4']]], ['inner']]]]])
+       ['main', [['n', 'dimensionless', [['i', '*', '2'], ['i', ['1', '4']]]], ['inner']]]]])
     
     def TestParsingOutputSpecifications(self):
         self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', '', 'Description']])
@@ -455,38 +458,38 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
                           ('apply', ['eq', 'ci', ('apply', ['plus', 'cn', 'cn'])]))
 
         self.assertParses(csp.assignStmt, 'a, b = tuple', [[['a', 'b'], ['tuple']]],
-                          ('apply', ['eq', ('apply', ['csymbol', 'ci', 'ci']), 'ci']))
+                          ('apply', ['eq', ('apply', ['csymbol-tuple', 'ci', 'ci']), 'ci']))
         self.assertParses(csp.assignStmt, 'a, b = b, a', [[['a', 'b'], ['b', 'a']]],
-                          ('apply', ['eq', ('apply', ['csymbol', 'ci', 'ci']), ('apply', ['csymbol', 'ci', 'ci'])]))
+                          ('apply', ['eq', ('apply', ['csymbol-tuple', 'ci', 'ci']), ('apply', ['csymbol-tuple', 'ci', 'ci'])]))
         self.assertParses(csp.assignStmt, 'a, b = (b, a)', [[['a', 'b'], [['b', 'a']]]],
-                          ('apply', ['eq', ('apply', ['csymbol', 'ci', 'ci']), ('apply', ['csymbol', 'ci', 'ci'])]))
+                          ('apply', ['eq', ('apply', ['csymbol-tuple', 'ci', 'ci']), ('apply', ['csymbol-tuple', 'ci', 'ci'])]))
         self.failIfParses(csp.assignStmt, 'p:a, p:b = e')
         self.failIfParses(csp.assignStmt, '')
     
     def TestParsingReturnStatements(self):
         self.assertParses(csp.returnStmt, 'return 2 * a', [[['2', '*', 'a']]],
-                          ('apply', ['csymbol', ('apply', ['times', 'cn', 'ci'])]))
+                          ('apply', ['csymbol-return', ('apply', ['times', 'cn', 'ci'])]))
         self.assertParses(csp.returnStmt, 'return (3 - 4)', [[['3', '-', '4']]],
-                          ('apply', ['csymbol', ('apply', ['minus', 'cn', 'cn'])]))
+                          ('apply', ['csymbol-return', ('apply', ['minus', 'cn', 'cn'])]))
         self.assertParses(csp.returnStmt, 'return a, b', [['a', 'b']],
-                          ('apply', ['csymbol', 'ci', 'ci']))
+                          ('apply', ['csymbol-return', 'ci', 'ci']))
         self.assertParses(csp.returnStmt, 'return a + 1, b - 1', [[['a', '+', '1'], ['b', '-', '1']]])
         self.assertParses(csp.returnStmt, 'return (a, b)', [[['a', 'b']]],
-                          ('apply', ['csymbol', ('apply', ['csymbol', 'ci', 'ci'])]))
+                          ('apply', ['csymbol-return', ('apply', ['csymbol', 'ci', 'ci'])]))
     
     def TestParsingAssertStatements(self):
         self.assertParses(csp.assertStmt, 'assert a + b', [[['a', '+', 'b']]],
-                          ('apply', ['csymbol', ('apply', ['plus', 'ci', 'ci'])]))
+                          ('apply', ['csymbol-assert', ('apply', ['plus', 'ci', 'ci'])]))
         self.assertParses(csp.assertStmt, 'assert (a + b)', [[['a', '+', 'b']]],
-                          ('apply', ['csymbol', ('apply', ['plus', 'ci', 'ci'])]))
+                          ('apply', ['csymbol-assert', ('apply', ['plus', 'ci', 'ci'])]))
         self.assertParses(csp.assertStmt, 'assert 1', [['1']],
                           ('apply', [('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/assert'}), 'cn']))
     
     def TestParsingStatementLists(self):
         self.assertParses(csp.stmtList, "b=-a\nassert 1", [[[['b'], [['-', 'a']]], ['1']]],
-                          ('apply', ['csymbol',
+                          ('apply', ['csymbol-statementList',
                                      ('apply', ['eq', 'ci', ('apply', ['minus', 'ci'])]),
-                                     ('apply', ['csymbol', 'cn'])]))
+                                     ('apply', ['csymbol-assert', 'cn'])]))
         self.assertParses(csp.stmtList, """assert a < 0 # comments are ok
 
 # as are blank lines
@@ -523,9 +526,9 @@ return c
                         ['c']]]])
         self.assertParses(csp.expr, "lambda a, b { return b, a }", [[[['a'], ['b']], [['b', 'a']]]])
         self.assertParses(csp.expr, "lambda a { return a }", [[[['a']], [['a']]]],
-                          ('lambda', [('bvar', ['ci']), ('apply', ['csymbol', ('apply', ['csymbol', 'ci'])])]))
+                          ('lambda', [('bvar', ['ci']), ('apply', ['csymbol-statementList', ('apply', ['csymbol', 'ci'])])]))
         self.assertParses(csp.expr, 'lambda { return 1 }', [[[], [['1']]]],
-                          ('lambda', [('apply', ['csymbol', ('apply', ['csymbol', 'cn'])])]))
+                          ('lambda', [('apply', ['csymbol-statementList', ('apply', ['csymbol-return', 'cn'])])]))
         self.assertParses(csp.expr, 'lambda: 1', [[[], '1']],
                           ('lambda', [('cn')]))
 
@@ -534,7 +537,8 @@ return c
                           [['double', [['a']], [[['a', '*', '2']]]]],
                           ('apply', ['eq', 'ci',
                                      ('lambda', [('bvar', ['ci']),
-                                                 ('apply', ['csymbol', ('apply', ['csymbol', ('apply', ['times', 'ci', 'cn'])])])])]))
+                                                 ('apply', ['csymbol-statementList',
+                                                            ('apply', ['csymbol-return', ('apply', ['times', 'ci', 'cn'])])])])]))
         self.assertParses(csp.functionDefn, 'def double(a): a * 2',
                           [['double', [['a']], ['a', '*', '2']]])
         # A function definition is just sugar for an assignment of a lambda expression
@@ -543,7 +547,8 @@ return c
                           ('apply', ['csymbol',
                                      ('apply', ['eq', 'ci',
                                                 ('lambda', [('bvar', ['ci']),
-                                                            ('apply', ['csymbol', ('apply', ['csymbol', ('apply', ['times', 'ci', 'cn'])])])])])]))
+                                                            ('apply', ['csymbol-statementList',
+                                                                       ('apply', ['csymbol-return', ('apply', ['times', 'ci', 'cn'])])])])])]))
         self.assertParses(csp.functionDefn, 'def noargs(): 1', [['noargs', [], '1']])
     
     def TestParsingNestedFunctions(self):
@@ -561,32 +566,38 @@ return c
                       [[['inner1', ['1']], '+', ['inner2', []], '+', ['inner3', ['2']]]]]]])
     
     def TestParsingTuples(self):
-        self.assertParses(csp.tuple, '(1,2)', [['1', '2']], ('apply', ['csymbol', 'cn', 'cn']))
+        self.assertParses(csp.tuple, '(1,2)', [['1', '2']], ('apply', ['csymbol-tuple', 'cn', 'cn']))
         self.assertParses(csp.tuple, '(1+a,2*b)', [[['1', '+', 'a'], ['2', '*', 'b']]])
-        self.assertParses(csp.tuple, '(singleton,)', [['singleton']], ('apply', ['csymbol', 'ci']))
+        self.assertParses(csp.tuple, '(singleton,)', [['singleton']], ('apply', ['csymbol-tuple', 'ci']))
         self.failIfParses(csp.tuple, '(1)') # You need a Python-style comma as above
         self.assertParses(csp.expr, '(1,2)', [['1', '2']], ('apply', ['csymbol', 'cn', 'cn']))
-        self.assertParses(csp.expr, '(1,a,3,c)', [['1', 'a', '3', 'c']], ('apply', ['csymbol', 'cn', 'ci', 'cn', 'ci']))
+        self.assertParses(csp.expr, '(1,a,3,c)', [['1', 'a', '3', 'c']], ('apply', ['csymbol-tuple', 'cn', 'ci', 'cn', 'ci']))
         self.assertParses(csp.assignStmt, 't = (1,2)', [[['t'], [['1', '2']]]])
         self.assertParses(csp.assignStmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
     
     def TestParsingArrays(self):
-        self.assertParses(csp.expr, '[1, 2, 3]', [['1', '2', '3']])
-        self.assertParses(csp.array, '[[a, b], [c, d]]', [[['a', 'b'], ['c', 'd']]])
+        self.assertParses(csp.expr, '[1, 2, 3]', [['1', '2', '3']],
+                          ('apply', ['csymbol-newArray', 'cn', 'cn', 'cn']))
+        self.assertParses(csp.array, '[[a, b], [c, d]]', [[['a', 'b'], ['c', 'd']]],
+                          ('apply', ['csymbol-newArray', ('apply', ['csymbol-newArray', 'ci', 'ci']),
+                                     ('apply', ['csymbol-newArray', 'ci', 'ci'])]))
         self.assertParses(csp.array, '[ [ [1+2,a,b]],[[3/4,c,d] ]]', [[[[['1', '+', '2'],'a','b']],
                                                                         [[['3', '/', '4'],'c','d']]]])
 
     def TestParsingArrayComprehensions(self):
-        self.assertParses(csp.array, '[i for i in 0:N]', [['i', ['i', '0', 'N']]])
-        self.assertParses(csp.expr, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', '0', '2', '4']]])
+        self.assertParses(csp.array, '[i for i in 0:N]', [['i', ['i', ['0', 'N']]]],
+                          ('apply', ['csymbol-newArray',
+                                     ('domainofapplication', [('apply', ['csymbol-tuple', 'cn', 'cn', 'ci', 'csymbol-string'])]),
+                                     'ci']))
+        self.assertParses(csp.expr, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', ['0', '2', '4']]]])
         self.assertParses(csp.array, '[i+j*5 for i in 1:3 for j in 2:4]',
-                          [[['i', '+', ['j', '*', '5']], ['i', '1', '3'], ['j', '2', '4']]])
-        self.assertParses(csp.array, '[block for 1$i in 2:10]', [['block', ['1', 'i', '2', '10']]])
+                          [[['i', '+', ['j', '*', '5']], ['i', ['1', '3']], ['j', ['2', '4']]]])
+        self.assertParses(csp.array, '[block for 1$i in 2:10]', [['block', ['1', 'i', ['2', '10']]]])
         self.assertParses(csp.array, '[i^j for i in 1:3 for 2$j in 4:-1:2]',
-                          [[['i', '^', 'j'], ['i', '1', '3'], ['2', 'j', '4', ['-', '1'], '2']]])
+                          [[['i', '^', 'j'], ['i', ['1', '3']], ['2', 'j', ['4', ['-', '1'], '2']]]])
         # Dimension specifiers can be expressions too...
-        self.assertParses(csp.expr, '[i for (1+2)$i in 2:(3+5)]', [['i', [['1', '+', '2'], 'i', '2', ['3', '+', '5']]]])
-        self.assertParses(csp.expr, '[i for 1+2$i in 2:4]', [['i', [['1', '+', '2'], 'i', '2', '4']]])
+        self.assertParses(csp.expr, '[i for (1+2)$i in 2:(3+5)]', [['i', [['1', '+', '2'], 'i', ['2', ['3', '+', '5']]]]])
+        self.assertParses(csp.expr, '[i for 1+2$i in 2:4]', [['i', [['1', '+', '2'], 'i', ['2', '4']]]])
         self.failIfParses(csp.expr, '[i for 1 $i in 2:4]')
     
     def TestParsingViews(self):
@@ -669,14 +680,14 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:
             self.assertParses(csp.accessor, '.' + accessor, [accessor])
             self.assertParses(csp.expr, 'var.' + accessor, [['var', accessor]],
-                              ('apply', [('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/accessor'}), 'ci']))
+                              ('apply', ['csymbol-accessor', 'ci']))
         for ptype in ['SIMPLE_VALUE', 'ARRAY', 'STRING', 'TUPLE', 'FUNCTION', 'NULL', 'DEFAULT']:
             self.assertParses(csp.accessor, '.IS_' + ptype, ['IS_' + ptype])
             self.assertParses(csp.expr, 'var.IS_' + ptype, [['var', 'IS_' + ptype]])
         self.assertParses(csp.expr, 'arr.SHAPE[1]', [[['arr', 'SHAPE'], ['1']]])
         self.assertParses(csp.expr, 'func(var).IS_ARRAY', [[['func', ['var']], 'IS_ARRAY']])
         self.assertParses(csp.expr, 'A.SHAPE.IS_ARRAY', [['A', 'SHAPE', 'IS_ARRAY']],
-                          ('apply', ['csymbol', ('apply', ['csymbol', 'ci'])]))
+                          ('apply', ['csymbol-accessor', ('apply', ['csymbol-accessor', 'ci'])]))
         self.failIfParses(csp.expr, 'arr .SHAPE')
     
     def TestParsingMap(self):
@@ -710,8 +721,8 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         self.failIfParses(csp.expr, '@N:+')
 
     def TestParsingNullAndDefault(self):
-        self.assertParses(csp.expr, 'null', [[]], ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/null'}))
-        self.assertParses(csp.expr, 'default', [[]], ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter'}))
+        self.assertParses(csp.expr, 'null', [[]], 'csymbol-null')
+        self.assertParses(csp.expr, 'default', [[]], 'csymbol-defaultParameter')
 
     def TestParsingLibrary(self):
         self.assertParses(csp.library, 'library {}', [])

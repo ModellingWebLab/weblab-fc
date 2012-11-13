@@ -112,7 +112,9 @@ class Actions(object):
         
         def Delegate(self, action, tokens):
             """Create another parse action to process the given tokens for us."""
-            return getattr(Actions, action)('', self.source_location, tokens)
+            if isinstance(action, str):
+                action = getattr(Actions, action)
+            return action('', self.source_location, tokens)
         
         def xml(self):
             """Main method to generate the XML syntax.
@@ -231,7 +233,10 @@ class Actions(object):
             super(Actions._Symbol, self).__init__(s, loc, tokens)
             self.symbol = symbol
         def _xml(self):
-            return M.csymbol(definitionURL=PROTO_CSYM_BASE+self.symbol)
+            if isinstance(self.tokens, str):
+                return M.csymbol(self.tokens, definitionURL=PROTO_CSYM_BASE+self.symbol)
+            else:
+                return M.csymbol(definitionURL=PROTO_CSYM_BASE+self.symbol)
     
     @staticmethod
     def Symbol(symbol):
@@ -249,7 +254,32 @@ class Actions(object):
             assert len(self.tokens) == 2
             object = self.tokens[0].xml()
             property = self.tokens[1]
-            return M.apply(M.csymbol(property, definitionURL=PROTO_CSYM_BASE+'accessor'), object)
+            return M.apply(self.Delegate(Actions.Symbol('accessor'), [property]).xml(), object)
+    
+    class Comprehension(BaseGroupAction):
+        """Parse action for the comprehensions with array definitions."""
+        def _xml(self):
+            assert 2 <= len(self.tokens) <= 3
+            parts = []
+            if len(self.tokens) == 3:
+                # There's an explicit dimension
+                parts.append(self.tokens[0])
+            range = self.tokens[-1]
+            if len(range) == 2:
+                # Add a step of 1
+                range = [range[0], self.Delegate('Number', ['1']), range[-1]]
+            parts.extend(range)
+            parts.append(self.Delegate(Actions.Symbol('string'), [self.tokens[-2]])) # The variable name
+            return self.Delegate('Tuple', [parts]).xml()
+    
+    class Array(BaseGroupAction):
+        """Parse action for creating arrays."""
+        def _xml(self):
+            entries = self.GetChildrenXml()
+            if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
+                # Array comprehension
+                entries = [M.domainofapplication(*entries[1:]), entries[0]]
+            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+'newArray'), *entries)
     
     ######################################################################
     # Post-processing language statements
@@ -450,12 +480,13 @@ class CompactSyntaxParser(object):
     stmtList = p.Forward().setName('StatementList')
     
     # A vector written like 1:2:5 or 1:5 or A:B:C
-    numericRange = expr + colon + expr + Optional(colon + expr)
+    numericRange = p.Group(expr + colon + expr + Optional(colon + expr))
 
     # Creating arrays
     dimSpec = Optional(expr + Adjacent(dollar)) + ncIdent
-    comprehension = p.Group(MakeKw('for') - dimSpec + MakeKw('in') - numericRange)
-    array = p.Group(osquare - expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma - expr)) + csquare).setName('Array')
+    comprehension = p.Group(MakeKw('for') - dimSpec + MakeKw('in') - numericRange).setParseAction(Actions.Comprehension)
+    array = p.Group(osquare - expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma - expr)) + csquare
+                    ).setName('Array').setParseAction(Actions.Array)
     
     # Array views
     optExpr = Optional(expr, default='')
@@ -621,7 +652,7 @@ class CompactSyntaxParser(object):
     ########################
     
     # Ranges
-    uniformRange = MakeKw('uniform') + p.Group(numericRange)
+    uniformRange = MakeKw('uniform') + numericRange
     vectorRange = MakeKw('vector') + expr
     whileRange = MakeKw('while') + expr
     range = p.Group(MakeKw('range') + ncIdent + unitsRef + (uniformRange | vectorRange | whileRange)).setName('Range')
