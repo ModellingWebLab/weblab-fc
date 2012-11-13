@@ -202,6 +202,22 @@ class Actions(object):
             child_xml = self.GetChildrenXml()
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"tuple"), *child_xml)
     
+    class Lambda(BaseGroupAction):
+        """Parse action for lambda expressions."""
+        def _xml(self):
+            assert len(self.tokens) == 2
+            param_list = self.tokens[0]
+            body = self.tokens[1].xml()
+            children = []
+            for param_decl in param_list:
+                param_bvar = M.bvar(param_decl[0].xml())
+                if len(param_decl) == 1: # No default given
+                    children.append(param_bvar)
+                else: # Default value case
+                    children.append(M.semantics(param_bvar, getattr(M, 'annotation-xml')(param_decl[1].xml())))
+            children.append(body)
+            return getattr(M, 'lambda')(*children)
+    
     ######################################################################
     # Post-processing language statements
     ######################################################################
@@ -410,9 +426,10 @@ class CompactSyntaxParser(object):
                      MakeKw('else') - expr).setName('IfThenElse').setParseAction(Actions.Piecewise)
     
     # Lambda definitions
-    paramDecl = p.Group(ncIdent + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
+    paramDecl = p.Group(ncIdentAsVar + Optional(eq + expr)) # TODO: check we can write XML for a full expr as default value
     paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
-    lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon - expr) | (obrace - stmtList + embedded_cbrace))).setName('Lambda')
+    lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon - expr) | (obrace - stmtList + embedded_cbrace))
+                         ).setName('Lambda').setParseAction(Actions.Lambda)
     
     # Function calls
     argList = p.Group(OptionalDelimitedList(expr, comma))

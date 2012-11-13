@@ -496,9 +496,14 @@ return c, d""", [[[['a', '<', '0']],
         self.failIfParses(csp.stmtList, '')
     
     def TestParsingLambdaExpressions(self):
-        self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
+        self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]],
+                          ('lambda', [('bvar', ['ci']), ('apply', ['plus', 'ci', 'cn'])]))
+        self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]],
+                          ('lambda', [('bvar', ['ci']), ('bvar', ['ci']), ('apply', ['plus', 'ci', 'ci'])]))
+        self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]],
+                          ('lambda', [('bvar', ['ci']),
+                                      ('semantics', [('bvar', ['ci']), ('annotation-xml', ['cn'])]),
+                                      ('apply', ['minus', 'ci', 'ci'])]))
         self.assertParses(csp.expr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
         self.assertParses(csp.lambdaExpr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
         self.failIfParses(csp.lambdaExpr, 'lambda p:a: 5')
