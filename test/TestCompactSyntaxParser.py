@@ -77,7 +77,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
     def checkXml(self, actualXml, expectedXml):
         if isinstance(expectedXml, str):
             if ':' in expectedXml:
-                expectedXml, content = expectedXml.split(':')
+                expectedXml, content = expectedXml.split(':', 1)
                 self.assertEqual(actualXml.text, content)
             if expectedXml.startswith('csymbol-'):
                 self.assertHasLocalName(actualXml, 'csymbol')
@@ -118,15 +118,15 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertRaises(CSP.p.ParseBaseException, strict_grammar.parseString, input)
         
     def TestParsingIdentifiers(self):
-        self.assertParses(csp.ncIdent, 'abc', ['abc'])
+        self.assertParses(csp.ncIdentAsVar, 'abc', ['abc'], 'ci:abc')
         self.failIfParses(csp.ncIdent, 'abc:def')
         self.failIfParses(csp.ncIdent, '123')
 
-        self.assertParses(csp.ident, 'abc', ['abc'])
+        self.assertParses(csp.identAsVar, 'abc', ['abc'], 'ci:abc')
         self.assertParses(csp.ident, 'abc_def', ['abc_def'])
         self.assertParses(csp.ident, 'abc123', ['abc123'])
         self.assertParses(csp.ident, '_abc', ['_abc'])
-        self.assertParses(csp.ident, 'abc:def', ['abc:def'])
+        self.assertParses(csp.identAsVar, 'abc:def', ['abc:def'], 'ci:abc:def')
         self.failIfParses(csp.ident, '123')
     
     def TestParsingNumbers(self):
@@ -592,39 +592,91 @@ return c
     def TestParsingArrayComprehensions(self):
         self.assertParses(csp.array, '[i for i in 0:N]', [['i', ['i', ['0', 'N']]]],
                           ('apply', ['csymbol-newArray',
-                                     ('domainofapplication', [('apply', ['csymbol-tuple', 'cn', 'cn', 'ci', 'csymbol-string:i'])]),
-                                     'ci']))
+                                     ('domainofapplication', [('apply', ['csymbol-tuple', 'cn:0', 'cn:1', 'ci:N', 'csymbol-string:i'])]),
+                                     'ci:i']))
         self.assertParses(csp.expr, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', ['0', '2', '4']]]])
         self.assertParses(csp.array, '[i+j*5 for i in 1:3 for j in 2:4]',
                           [[['i', '+', ['j', '*', '5']], ['i', ['1', '3']], ['j', ['2', '4']]]])
         self.assertParses(csp.array, '[block for 1$i in 2:10]', [['block', ['1', 'i', ['2', '10']]]])
         self.assertParses(csp.array, '[i^j for i in 1:3 for 2$j in 4:-1:2]',
-                          [[['i', '^', 'j'], ['i', ['1', '3']], ['2', 'j', ['4', ['-', '1'], '2']]]])
+                          [[['i', '^', 'j'], ['i', ['1', '3']], ['2', 'j', ['4', ['-', '1'], '2']]]],
+                          ('apply', ['csymbol-newArray',
+                                     ('domainofapplication', [('apply', ['csymbol-tuple', 'cn:1', 'cn:1', 'cn:3', 'csymbol-string:i']),
+                                                              ('apply', ['csymbol-tuple', 'cn:2', 'cn:4', ('apply', ['minus', 'cn:1']), 'cn:2', 'csymbol-string:j'])]),
+                                     ('apply', ['power', 'ci:i', 'ci:j'])]))
         # Dimension specifiers can be expressions too...
         self.assertParses(csp.expr, '[i for (1+2)$i in 2:(3+5)]', [['i', [['1', '+', '2'], 'i', ['2', ['3', '+', '5']]]]])
-        self.assertParses(csp.expr, '[i for 1+2$i in 2:4]', [['i', [['1', '+', '2'], 'i', ['2', '4']]]])
+        self.assertParses(csp.expr, '[i for 1+2$i in 2:4]', [['i', [['1', '+', '2'], 'i', ['2', '4']]]],
+                          ('apply', ['csymbol-newArray',
+                                     ('domainofapplication', [('apply', ['csymbol-tuple', ('apply', ['plus', 'cn:1', 'cn:2']),
+                                                                         'cn:2', 'cn:1', 'cn:4', 'csymbol-string:i'])]),
+                                     'ci:i']))
         self.failIfParses(csp.expr, '[i for 1 $i in 2:4]')
     
     def TestParsingViews(self):
-        self.assertParses(csp.expr, 'A[1:3:7]', [['A', ['1', '3', '7']]])
-        self.assertParses(csp.expr, 'A[2$6:-2:4]', [['A', ['2', '6', ['-', '2'], '4']]])
-        self.assertParses(csp.expr, 'sim:res[1$2]', [['sim:res', ['1', '2']]])
+        self.assertParses(csp.expr, 'A[1:3:7]', [['A', ['1', '3', '7']]],
+                          ('apply', ['csymbol-view', 'ci:A',
+                                     ('apply', ['csymbol-tuple', 'cn:1', 'cn:3', 'cn:7']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'A[2$6:-2:4]', [['A', ['2', '6', ['-', '2'], '4']]],
+                          ('apply', ['csymbol-view', 'ci:A',
+                                     ('apply', ['csymbol-tuple', 'cn:2', 'cn:6', ('apply', ['minus', 'cn:2']), 'cn:4']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'sim:res[1$2]', [['sim:res', ['1', '2']]],
+                          ('apply', ['csymbol-view', 'ci:sim:res',
+                                     ('apply', ['csymbol-tuple', 'cn:1', 'cn:2', 'cn:0', 'cn:2']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
         self.assertParses(csp.expr, 'func(A)[5]', [[['func', ['A']], ['5']]])
-        self.assertParses(csp.expr, 'arr[:]', [['arr', ['', '']]])
-        self.assertParses(csp.expr, 'arr[2:]', [['arr', ['2', '']]])
-        self.assertParses(csp.expr, 'arr[:2:]', [['arr', ['', '2', '']]])
-        self.assertParses(csp.expr, 'arr[:-alpha]', [['arr', ['', ['-', 'alpha']]]])
+        self.assertParses(csp.expr, 'arr[:]', [['arr', ['', '']]],
+                          ('apply', ['csymbol-view', 'ci:arr',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:1', 'csymbol-null']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'arr[2:]', [['arr', ['2', '']]],
+                          ('apply', ['csymbol-view', 'ci:arr',
+                                     ('apply', ['csymbol-tuple', 'cn:2', 'cn:1', 'csymbol-null']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'arr[:2:]', [['arr', ['', '2', '']]],
+                          ('apply', ['csymbol-view', 'ci:arr',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:2', 'csymbol-null']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'arr[:-alpha]', [['arr', ['', ['-', 'alpha']]]],
+                          ('apply', ['csymbol-view', 'ci:arr',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:1', ('apply', ['minus', 'ci:alpha'])]),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
         self.assertParses(csp.expr, 'arr[-3:-1:]', [['arr', [['-', '3'], ['-', '1'], '']]])
-        self.assertParses(csp.expr, 'genericity[*$:]', [['genericity', ['*', '', '']]])
-        self.assertParses(csp.expr, 'genericity[*$0]', [['genericity', ['*', '0']]])
-        self.assertParses(csp.expr, 'genericity[*$0:5]', [['genericity', ['*', '0', '5']]])
-        self.assertParses(csp.expr, 'genericity[*$0:5:50]', [['genericity', ['*', '0', '5', '50']]])
-        self.assertParses(csp.expr, 'genericity[*$:5:]', [['genericity', ['*', '', '5', '']]])
-        self.assertParses(csp.expr, 'genericity[*$0:]', [['genericity', ['*', '0', '']]])
-        self.assertParses(csp.expr, 'multiples[3][4]', [['multiples', ['3'], ['4']]])
+        self.assertParses(csp.expr, 'genericity[*$:]', [['genericity', ['*', '', '']]],
+                          ('apply', ['csymbol-view', 'ci:genericity',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'genericity[*$0]', [['genericity', ['*', '0']]],
+                          ('apply', ['csymbol-view', 'ci:genericity',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:0', 'cn:0', 'cn:0'])]))
+        self.assertParses(csp.expr, 'genericity[*$0:5]', [['genericity', ['*', '0', '5']]],
+                          ('apply', ['csymbol-view', 'ci:genericity',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:0', 'cn:1', 'cn:5'])]))
+        self.assertParses(csp.expr, 'genericity[*$0:5:50]', [['genericity', ['*', '0', '5', '50']]],
+                          ('apply', ['csymbol-view', 'ci:genericity',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:0', 'cn:5', 'cn:50'])]))
+        self.assertParses(csp.expr, 'genericity[*$:5:]', [['genericity', ['*', '', '5', '']]],
+                          ('apply', ['csymbol-view', 'ci:genericity',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:5', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'genericity[*$0:]', [['genericity', ['*', '0', '']]],
+                          ('apply', ['csymbol-view', 'ci:genericity',
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:0', 'cn:1', 'csymbol-null'])]))
+        self.assertParses(csp.expr, 'multiples[3][4]', [['multiples', ['3'], ['4']]],
+                          ('apply', ['csymbol-view', 'ci:multiples',
+                                     ('apply', ['csymbol-tuple', 'cn:3', 'cn:0', 'cn:3']),
+                                     ('apply', ['csymbol-tuple', 'cn:4', 'cn:0', 'cn:4']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
         self.assertParses(csp.expr, 'multiples[1$3][0$:-step:0][*$0]',
-                          [['multiples', ['1', '3'], ['0', '', ['-', 'step'], '0'], ['*', '0']]])
-        self.assertParses(csp.expr, 'dimspec[dim$0:2]', [['dimspec', ['dim', '0', '2']]])
+                          [['multiples', ['1', '3'], ['0', '', ['-', 'step'], '0'], ['*', '0']]],
+                          ('apply', ['csymbol-view', 'ci:multiples',
+                                     ('apply', ['csymbol-tuple', 'cn:1', 'cn:3', 'cn:0', 'cn:3']),
+                                     ('apply', ['csymbol-tuple', 'cn:0', 'csymbol-null', ('apply', ['minus', 'ci:step']), 'cn:0']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'cn:0', 'cn:0', 'cn:0'])]))
+        self.assertParses(csp.expr, 'dimspec[dim$0:2]', [['dimspec', ['dim', '0', '2']]],
+                          ('apply', ['csymbol-view', 'ci:dimspec',
+                                     ('apply', ['csymbol-tuple', 'ci:dim', 'cn:0', 'cn:1', 'cn:2']),
+                                     ('apply', ['csymbol-tuple', 'csymbol-null', 'csymbol-null', 'cn:1', 'csymbol-null'])]))
         self.assertParses(csp.expr, 'okspace[ 0$ (1+2) : a+b : 50 ]',
                           [['okspace', ['0', ['1', '+', '2'], ['a', '+', 'b'], '50']]])
         # Some spaces aren't allowed

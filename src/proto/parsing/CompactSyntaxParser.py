@@ -301,6 +301,42 @@ class Actions(object):
                 entries = [M.domainofapplication(*entries[1:]), entries[0]]
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+'newArray'), *entries)
     
+    class View(BaseGroupAction):
+        """Parse action for array views."""
+        def _xml(self):
+            assert 2 <= len(self.tokens)
+            apply_content = [self.Delegate(Actions.Symbol('view'), [[]]).xml(), self.tokens[0].xml()]
+            seen_generic_dim = False
+            null_token = self.Delegate(Actions.Symbol('null'), [[]])
+            for viewspec in self.tokens[1:]:
+                tuple_tokens = []
+                if 'dimspec' in viewspec:
+                    dimspec = viewspec['dimspec'][0]
+                    if dimspec == '*':
+                        seen_generic_dim = True
+                        dimspec = null_token
+                    tuple_tokens.append(dimspec)
+                    viewspec = viewspec[1:]
+                if len(viewspec) == 1:
+                    # Take single value (in this dimension)
+                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['0']), viewspec[0]])
+                elif len(viewspec) == 2:
+                    # Range with step 1
+                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['1']), viewspec[1]])
+                else:
+                    # Fully specified range
+                    tuple_tokens.extend(viewspec)
+                # Replace unspecified elements with csymbol-null
+                for i, token in enumerate(tuple_tokens):
+                    if token == '':
+                        tuple_tokens[i] = null_token
+                apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
+            if not seen_generic_dim:
+                # Add a 'take everything from other dimensions' view specification
+                tuple_tokens = [null_token, null_token, self.Delegate('Number', ['1']), null_token]
+                apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
+            return M.apply(*apply_content)
+    
     ######################################################################
     # Post-processing language statements
     ######################################################################
@@ -510,7 +546,7 @@ class CompactSyntaxParser(object):
     
     # Array views
     optExpr = Optional(expr, default='')
-    viewSpec = p.Group(Adjacent(osquare) - Optional(('*' | expr) + Adjacent(dollar)) +
+    viewSpec = p.Group(Adjacent(osquare) - Optional(('*' | expr) + Adjacent(dollar))('dimspec') +
                        optExpr + Optional(colon - optExpr + Optional(colon - optExpr)) + csquare).setName('ViewSpec')
     
     # If-then-else
@@ -561,7 +597,7 @@ class CompactSyntaxParser(object):
     atom = (array | wrap | number.copy().setParseAction(Actions.Number) |
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
-                                        (viewSpec, 1, p.opAssoc.LEFT),
+                                        (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
                                         (index, 1, p.opAssoc.LEFT),
                                         ('^', 2, p.opAssoc.LEFT, Actions.Operator),
                                         ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
