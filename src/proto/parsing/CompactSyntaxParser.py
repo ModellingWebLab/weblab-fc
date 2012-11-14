@@ -188,6 +188,18 @@ class Actions(object):
                     result = M.apply(self.Operator(operator), result, operand.xml())
             return result
     
+    class Wrap(BaseGroupAction):
+        """Parse action for wrapped MathML operators."""
+        def _xml(self):
+            assert len(self.tokens) == 2
+            num_operands = self.tokens[0]
+            operator = self.tokens[1]
+            if operator.startswith('MathML:'):
+                operator = operator[7:]
+            else:
+                operator = Actions.Operator.OP_MAP[operator]
+            return self.Delegate(Actions.Symbol('wrap/' + num_operands), [operator]).xml()
+    
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
         def _xml(self):
@@ -533,7 +545,8 @@ class CompactSyntaxParser(object):
     # Wrapping MathML operators into lambdas
     mathmlOperator = (p.oneOf('^ * / + - not == != <= >= < > && ||') |
                       p.Combine('MathML:' + p.oneOf(' '.join(mathmlOperators))))
-    wrap = p.Group(p.Suppress('@') - Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator).setName('WrapMathML')
+    wrap = p.Group(p.Suppress('@') - Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator
+                   ).setName('WrapMathML').setParseAction(Actions.Wrap)
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
     atom = (array | wrap | number.copy().setParseAction(Actions.Number) |

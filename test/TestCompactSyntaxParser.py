@@ -76,7 +76,11 @@ class TestCompactSyntaxParser(unittest.TestCase):
     
     def checkXml(self, actualXml, expectedXml):
         if isinstance(expectedXml, str):
+            if ':' in expectedXml:
+                expectedXml, content = expectedXml.split(':')
+                self.assertEqual(actualXml.text, content)
             if expectedXml.startswith('csymbol-'):
+                self.assertHasLocalName(actualXml, 'csymbol')
                 expectedXml = ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/'+expectedXml[8:]})
             else:
                 self.assertEqual(len(actualXml), 0, '%s has unexpected children' % X2S(actualXml))
@@ -587,7 +591,7 @@ return c
     def TestParsingArrayComprehensions(self):
         self.assertParses(csp.array, '[i for i in 0:N]', [['i', ['i', ['0', 'N']]]],
                           ('apply', ['csymbol-newArray',
-                                     ('domainofapplication', [('apply', ['csymbol-tuple', 'cn', 'cn', 'ci', 'csymbol-string'])]),
+                                     ('domainofapplication', [('apply', ['csymbol-tuple', 'cn', 'cn', 'ci', 'csymbol-string:i'])]),
                                      'ci']))
         self.assertParses(csp.expr, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', ['0', '2', '4']]]])
         self.assertParses(csp.array, '[i+j*5 for i in 1:3 for j in 2:4]',
@@ -680,14 +684,14 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:
             self.assertParses(csp.accessor, '.' + accessor, [accessor])
             self.assertParses(csp.expr, 'var.' + accessor, [['var', accessor]],
-                              ('apply', ['csymbol-accessor', 'ci']))
+                              ('apply', ['csymbol-accessor:' + accessor, 'ci']))
         for ptype in ['SIMPLE_VALUE', 'ARRAY', 'STRING', 'TUPLE', 'FUNCTION', 'NULL', 'DEFAULT']:
             self.assertParses(csp.accessor, '.IS_' + ptype, ['IS_' + ptype])
             self.assertParses(csp.expr, 'var.IS_' + ptype, [['var', 'IS_' + ptype]])
         self.assertParses(csp.expr, 'arr.SHAPE[1]', [[['arr', 'SHAPE'], ['1']]])
         self.assertParses(csp.expr, 'func(var).IS_ARRAY', [[['func', ['var']], 'IS_ARRAY']])
         self.assertParses(csp.expr, 'A.SHAPE.IS_ARRAY', [['A', 'SHAPE', 'IS_ARRAY']],
-                          ('apply', ['csymbol-accessor', ('apply', ['csymbol-accessor', 'ci'])]))
+                          ('apply', ['csymbol-accessor:IS_ARRAY', ('apply', ['csymbol-accessor:SHAPE', 'ci'])]))
         self.failIfParses(csp.expr, 'arr .SHAPE')
     
     def TestParsingMap(self):
@@ -710,8 +714,8 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         #self.failIfParses(csp, expr, 'fold(f, A, i, d, extra)')
 
     def TestParsingWrappedMathmlOperators(self):
-        self.assertParses(csp.expr, '@3:+', [['3', '+']])
-        self.assertParses(csp.expr, '@1:MathML:sin', [['1', 'MathML:sin']])
+        self.assertParses(csp.expr, '@3:+', [['3', '+']], 'csymbol-wrap/3:plus')
+        self.assertParses(csp.expr, '@1:MathML:sin', [['1', 'MathML:sin']], 'csymbol-wrap/1:sin')
         self.assertParses(csp.expr, 'map(@2:/, a, b)', [['map', [['2', '/'], 'a', 'b']]])
         #self.failIfParses(csp.expr, '@0:+') # Best done at parse action level?
         self.failIfParses(csp.expr, '@1:non_mathml')
