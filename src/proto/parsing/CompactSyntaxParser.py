@@ -239,6 +239,14 @@ class Actions(object):
             children.append(body)
             return getattr(M, 'lambda')(*children)
     
+    class FunctionCall(BaseGroupAction):
+        """Parse action for function calls."""
+        def _xml(self):
+            assert len(self.tokens) == 2
+            func = self.tokens[0].xml()
+            args = map(lambda t: t.xml(), self.tokens[1])
+            return M.apply(func, *args)
+    
     class _Symbol(BaseGroupAction):
         """Parse action for csymbols."""
         def __init__(self, s, loc, tokens, symbol):
@@ -516,8 +524,9 @@ class CompactSyntaxParser(object):
                          ).setName('Lambda').setParseAction(Actions.Lambda)
     
     # Function calls
+    # TODO: allow lambdas, not just ident?
     argList = p.Group(OptionalDelimitedList(expr, comma))
-    functionCall = p.Group(ident + Adjacent(oparen) - argList + cparen).setName('FnCall') # TODO: allow lambdas, not just ident?
+    functionCall = p.Group(identAsVar + Adjacent(oparen) - argList + cparen).setName('FnCall').setParseAction(Actions.FunctionCall)
     
     # Tuples
     tuple = p.Group(oparen + expr + comma - OptionalDelimitedList(expr, comma) + cparen).setName('Tuple').setParseAction(Actions.Tuple)

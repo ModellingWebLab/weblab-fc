@@ -432,8 +432,9 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.assertParses(csp.plots, 'plots {}', [[]])
     
     def TestParsingFunctionCalls(self):
-        self.assertParses(csp.functionCall, 'noargs()', [['noargs', []]])
-        self.assertParses(csp.functionCall, 'swap(a, b)', [['swap', ['a', 'b']]])
+        self.assertParses(csp.functionCall, 'noargs()', [['noargs', []]], ('apply', ['ci:noargs']))
+        self.assertParses(csp.functionCall, 'swap(a, b)', [['swap', ['a', 'b']]],
+                          ('apply', ['ci:swap', 'ci:a', 'ci:b']))
         self.assertParses(csp.functionCall, 'double(33)', [['double', ['33']]])
         self.assertParses(csp.functionCall, 'double(a + b)', [['double', [['a', '+', 'b']]]])
         self.assertParses(csp.functionCall, 'std:max(A)', [['std:max', ['A']]])
