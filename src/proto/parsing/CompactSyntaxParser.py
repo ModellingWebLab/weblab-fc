@@ -116,6 +116,12 @@ class Actions(object):
                 action = getattr(Actions, action)
             return action('', self.source_location, tokens)
         
+        def DelegateSymbol(self, symbol, content=None):
+            """Create a csymbol parse action for producing part of our XML output."""
+            if content is None:
+                content = list()
+            return self.Delegate(Actions.Symbol(symbol), [content])
+        
         def xml(self):
             """Main method to generate the XML syntax.
             Will add an attribute containing source location information where appropriate.
@@ -198,7 +204,7 @@ class Actions(object):
                 operator = operator[7:]
             else:
                 operator = Actions.Operator.OP_MAP[operator]
-            return self.Delegate(Actions.Symbol('wrap/' + num_operands), [operator]).xml()
+            return self.DelegateSymbol('wrap/' + num_operands, operator).xml()
     
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
@@ -274,7 +280,7 @@ class Actions(object):
             assert len(self.tokens) == 2
             object = self.tokens[0].xml()
             property = self.tokens[1]
-            return M.apply(self.Delegate(Actions.Symbol('accessor'), [property]).xml(), object)
+            return M.apply(self.DelegateSymbol('accessor', property).xml(), object)
     
     class Comprehension(BaseGroupAction):
         """Parse action for the comprehensions with array definitions."""
@@ -289,7 +295,7 @@ class Actions(object):
                 # Add a step of 1
                 range = [range[0], self.Delegate('Number', ['1']), range[-1]]
             parts.extend(range)
-            parts.append(self.Delegate(Actions.Symbol('string'), [self.tokens[-2]])) # The variable name
+            parts.append(self.DelegateSymbol('string', self.tokens[-2])) # The variable name
             return self.Delegate('Tuple', [parts]).xml()
     
     class Array(BaseGroupAction):
@@ -305,9 +311,9 @@ class Actions(object):
         """Parse action for array views."""
         def _xml(self):
             assert 2 <= len(self.tokens)
-            apply_content = [self.Delegate(Actions.Symbol('view'), [[]]).xml(), self.tokens[0].xml()]
+            apply_content = [self.DelegateSymbol('view').xml(), self.tokens[0].xml()]
             seen_generic_dim = False
-            null_token = self.Delegate(Actions.Symbol('null'), [[]])
+            null_token = self.DelegateSymbol('null')
             for viewspec in self.tokens[1:]:
                 tuple_tokens = []
                 if 'dimspec' in viewspec:
@@ -337,6 +343,28 @@ class Actions(object):
                 apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
             return M.apply(*apply_content)
     
+    class Index(BaseGroupAction):
+        """Parse action for index expressions."""
+        def _xml(self):
+            """Construct apply(csymbol-index, indexee, indices, dim, shrink, pad, padValue).
+            shrink and pad both default to 0 (false).
+            """
+            assert len(self.tokens) == 2
+            index_tokens = self.tokens[1]
+            assert 1 <= len(index_tokens) <= 3
+            apply_content = [self.DelegateSymbol('index'), self.tokens[0], index_tokens[0]]
+            if len(index_tokens) == 2:
+                # We're shrinking
+                apply_content.append(index_tokens[1]) # Dimension to shrink along
+                apply_content.append(self.Delegate('Number', ['1'])) # shrink=true
+            elif len(index_tokens) == 3:
+                # We're padding
+                apply_content.append(index_tokens[1]) # Dimension to shrink along
+                apply_content.append(self.DelegateSymbol('defaultParameter')) # shrink=default (false)
+                apply_content.append(self.Delegate('Number', ['1'])) # pad=true
+                apply_content.append(index_tokens[2]) # Pad value
+            return M.apply(*map(lambda t: t.xml(), apply_content))
+    
     ######################################################################
     # Post-processing language statements
     ######################################################################
@@ -350,12 +378,12 @@ class Actions(object):
     class Return(BaseGroupAction):
         """Parse action for return statements."""
         def _xml(self):
-            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"return"), *self.GetChildrenXml())
+            return M.apply(self.DelegateSymbol('return').xml(), *self.GetChildrenXml())
     
     class Assert(BaseGroupAction):
         """Parse action for assert statements."""
         def _xml(self):
-            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"assert"), *self.GetChildrenXml())
+            return M.apply(self.DelegateSymbol('assert').xml(), *self.GetChildrenXml())
     
     class FunctionDef(BaseGroupAction):
         """Parse action for function definitions, which are sugar for assignment of a lambda."""
@@ -369,7 +397,7 @@ class Actions(object):
         """Parse action for lists of post-processing language statements."""
         def _xml(self):
             statements = self.GetChildrenXml()
-            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"statementList"), *statements)
+            return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
     
     ######################################################################
     # Other protocol language constructs
@@ -598,7 +626,7 @@ class CompactSyntaxParser(object):
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                         (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
-                                        (index, 1, p.opAssoc.LEFT),
+                                        (index, 1, p.opAssoc.LEFT, Actions.Index),
                                         ('^', 2, p.opAssoc.LEFT, Actions.Operator),
                                         ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),

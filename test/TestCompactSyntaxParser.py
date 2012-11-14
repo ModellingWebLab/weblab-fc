@@ -690,10 +690,13 @@ return c
         self.failIfParses(csp.expr, 'find (arr)')
         #self.failIfParses(csp.expr, 'find(arr, extra)') # Needs special support e.g. from parse actions
         
-        self.assertParses(csp.expr, 'arr{idxs}', [['arr', ['idxs']]])
+        self.assertParses(csp.expr, 'arr{idxs}', [['arr', ['idxs']]],
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs']))
         self.failIfParses(csp.expr, 'arr {spaced}')
-        self.assertParses(csp.expr, 'arr{idxs, shrink:dim}', [['arr', ['idxs', 'dim']]])
-        self.assertParses(csp.expr, 'arr{idxs, pad:dim=value}', [['arr', ['idxs', 'dim', 'value']]])
+        self.assertParses(csp.expr, 'arr{idxs, shrink:dim}', [['arr', ['idxs', 'dim']]],
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'ci:dim', 'cn:1']))
+        self.assertParses(csp.expr, 'arr{idxs, pad:dim=value}', [['arr', ['idxs', 'dim', 'value']]],
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'ci:dim', 'csymbol-defaultParameter', 'cn:1', 'ci:value']))
         self.failIfParses(csp.expr, 'arr{idxs, shrink:dim, pad:dim=value}')
         
         self.assertParses(csp.expr, 'f(1,2){find(blah), shrink:0}', [[['f', ['1', '2']], [['find', ['blah']], '0']]])
