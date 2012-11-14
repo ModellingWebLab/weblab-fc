@@ -155,7 +155,12 @@ class Actions(object):
     class Variable(BaseGroupAction):
         """Parse action for variable references (identifiers)."""
         def _xml(self):
-            return M.ci(self.tokens)
+            var_name = self.tokens
+            if var_name.startswith('MathML:'):
+                result = getattr(M, var_name[7:])
+            else:
+                result = M.ci(self.tokens)
+            return result
     
     class Operator(BaseGroupAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
@@ -249,11 +254,11 @@ class Actions(object):
         """Parse action for function calls."""
         def _xml(self):
             assert len(self.tokens) == 2
-            func_name = self.tokens[0]
-            if func_name == 'find':
-                func = self.DelegateSymbol('find').xml()
+            func_name = str(self.tokens[0].tokens)
+            if func_name in ['map', 'fold', 'find']:
+                func = self.DelegateSymbol(func_name).xml()
             else:
-                func = func_name.xml()
+                func = self.tokens[0].xml()
             args = map(lambda t: t.xml(), self.tokens[1])
             return M.apply(func, *args)
     
@@ -433,6 +438,31 @@ class Actions(object):
         """Parse action for 'use imports' constructs."""
         def _xml(self):
             return P.useImports(prefix=self.tokens[0])
+    
+    class Library(BaseAction):
+        """Parse action for the library section."""
+        def _xml(self):
+            if len(self.tokens) > 0:
+                assert len(self.tokens) == 1
+                return P.library(self.tokens[0].xml())
+    
+    class PostProcessing(BaseAction):
+        """Parse action for the post-processing section."""
+        def _xml(self):
+            if len(self.tokens) > 0:
+                # We need to group non useImports elements into statement lists, but useImports may occur anywhere
+                children, statements = [], []
+                for token in self.tokens:
+                    if isinstance(token, Actions.UseImports):
+                        if statements:
+                            children.append(self.Delegate('StatementList', [statements]).xml())
+                            statements = []
+                        children.append(self.Delegate('UseImports', [token]).xml())
+                    else:
+                        statements.append(token)
+                if statements:
+                    children.append(self.Delegate('StatementList', [statements]).xml())
+                return getattr(P, 'post-processing')(*children)
 
 ################################################################################
 # Helper methods for defining parsers
@@ -692,12 +722,12 @@ class CompactSyntaxParser(object):
     
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
-    library = (MakeKw('library') + obrace - Optional(stmtList) + cbrace).setName('Library')
+    library = (MakeKw('library') + obrace - Optional(stmtList) + cbrace).setName('Library').setParseAction(Actions.Library)
     
     # Post-processing
     postProcessing = (MakeKw('post-processing') + obrace - 
                       OptionalDelimitedList(useImports | assertStmt | returnStmt | functionDefn | assignStmt, nl) +
-                      cbrace).setName('PostProc')
+                      cbrace).setName('PostProc').setParseAction(Actions.PostProcessing)
     
     # Units definitions
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
