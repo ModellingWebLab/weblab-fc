@@ -249,7 +249,11 @@ class Actions(object):
         """Parse action for function calls."""
         def _xml(self):
             assert len(self.tokens) == 2
-            func = self.tokens[0].xml()
+            func_name = self.tokens[0]
+            if func_name == 'find':
+                func = self.DelegateSymbol('find').xml()
+            else:
+                func = func_name.xml()
             args = map(lambda t: t.xml(), self.tokens[1])
             return M.apply(func, *args)
     

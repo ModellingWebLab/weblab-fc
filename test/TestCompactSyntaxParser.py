@@ -686,7 +686,8 @@ return c
     
     def TestParsingFindAndIndex(self):
         # Curly braces represent index, with optional pad or shrink argument.  Find is a function call.
-        self.assertParses(csp.expr, 'find(arr)', [['find', ['arr']]])
+        self.assertParses(csp.expr, 'find(arr)', [['find', ['arr']]],
+                          ('apply', ['csymbol-find', 'ci:arr']))
         self.failIfParses(csp.expr, 'find (arr)')
         #self.failIfParses(csp.expr, 'find(arr, extra)') # Needs special support e.g. from parse actions
         
@@ -699,8 +700,12 @@ return c
                           ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'ci:dim', 'csymbol-defaultParameter', 'cn:1', 'ci:value']))
         self.failIfParses(csp.expr, 'arr{idxs, shrink:dim, pad:dim=value}')
         
-        self.assertParses(csp.expr, 'f(1,2){find(blah), shrink:0}', [[['f', ['1', '2']], [['find', ['blah']], '0']]])
-        self.assertParses(csp.expr, 'A{find(A), pad:0=1+2}', [['A', [['find', ['A']], '0', ['1', '+', '2']]]])
+        self.assertParses(csp.expr, 'f(1,2){find(blah), shrink:0}', [[['f', ['1', '2']], [['find', ['blah']], '0']]],
+                          ('apply', ['csymbol-index', ('apply', ['ci:f', 'cn:1', 'cn:2']),
+                                     ('apply', ['csymbol-find', 'ci:blah']), 'cn:0', 'cn:1']))
+        self.assertParses(csp.expr, 'A{find(A), pad:0=1+2}', [['A', [['find', ['A']], '0', ['1', '+', '2']]]],
+                          ('apply', ['csymbol-index', 'ci:A', ('apply', ['csymbol-find', 'ci:A']),
+                                     'cn:0', 'csymbol-defaultParameter', 'cn:1', ('apply', ['plus', 'cn:1', 'cn:2'])]))
 
     def TestParsingUnitsDefinitions(self):
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
