@@ -496,7 +496,7 @@ class Actions(object):
         def _xml(self):
             if len(self.tokens) > 0:
                 assert len(self.tokens) == 1
-                return P.library(self.tokens[0].xml())
+                return P.library(*self.GetChildrenXml())
     
     class PostProcessing(BaseAction):
         """Parse action for the post-processing section."""
@@ -515,6 +515,46 @@ class Actions(object):
                 if statements:
                     children.append(self.Delegate('StatementList', [statements]).xml())
                 return getattr(P, 'post-processing')(*children)
+    
+    class Output(BaseGroupAction):
+        """Parse action for an output specification."""
+        def _xml(self):
+            if not 'units' in self.tokens:
+                # It has to be a raw model output
+                elt = P.raw
+            else:
+                # It's a post-processed output
+                elt = P.postprocessed
+            attrs = {}
+            for key in ['name', 'ref', 'units', 'description']:
+                if key in self.tokens:
+                    value = self.tokens[key]
+                    if not isinstance(value, str):
+                        value = value[0]
+                    attrs[key] = value
+            return elt(**attrs)
+    
+    class Outputs(BaseGroupAction):
+        """Parse action for the plots section."""
+        def _xml(self):
+            if len(self.tokens) > 0:
+                return P.outputs(*self.GetChildrenXml())
+    
+    class Plot(BaseGroupAction):
+        """Parse action for simple plot specifications."""
+        def _xml(self):
+            assert len(self.tokens) == 2, "Only a single plot curve is currently supported in XML"
+            assert len(self.tokens[1]) == 2, "Only a single y variable is currently supported in XML"
+            title = str(self.tokens[0])
+            y, x = map(str, self.tokens[1])
+            return P.plot(P.title(title), P.x(x), P.y(y))
+            
+    class Plots(BaseGroupAction):
+        """Parse action for the plots section."""
+        def _xml(self):
+            if len(self.tokens) > 0:
+                return P.plots(*self.GetChildrenXml())
+    
 
 ################################################################################
 # Helper methods for defining parsers
@@ -856,18 +896,18 @@ class CompactSyntaxParser(object):
     # Output specifications
     #######################
     
-    outputDesc = Optional(quotedString, default='')
-    outputSpec = p.Group(ncIdent + ((unitsRef + outputDesc) |
-                                    (eq + ident + Optional(unitsRef, default='') + outputDesc))).setName('Output')
-    outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(useImports | outputSpec, nl) + cbrace).setName('Outputs')
+    outputDesc = Optional(quotedString)("description")
+    outputSpec = p.Group(ncIdent("name") + ((unitsRef("units") + outputDesc) |
+                                    (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))).setName('Output').setParseAction(Actions.Output)
+    outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(useImports | outputSpec, nl) + cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
     # Plot specifications
     #####################
     
     plotCurve = p.Group(p.delimitedList(ncIdent, ',') + MakeKw('against') + ncIdent).setName('Curve')
     plotSpec = p.Group(MakeKw('plot') - quotedString + obrace +
-                       plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot')
-    plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(useImports | plotSpec) + cbrace).setName('Plots')
+                       plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
+    plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(useImports | plotSpec) + cbrace).setName('Plots').setParseAction(Actions.Plots)
     
     # Parsing a full protocol
     #########################

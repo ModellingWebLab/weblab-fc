@@ -396,13 +396,18 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
        ['main', [['n', 'dimensionless', [['i', '*', '2'], ['i', ['1', '4']]]], ['inner']]]]])
     
     def TestParsingOutputSpecifications(self):
-        self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', '', 'Description']])
+        self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', 'Description']],
+                          ('raw', {'name': 'name', 'ref': 'model:var', 'description': 'Description'}))
         self.assertParses(csp.outputSpec, r'name = ref:var units U "Description \"quotes\""',
-                          [['name', 'ref:var', 'U', 'Description "quotes"']])
+                          [['name', 'ref:var', 'U', 'Description "quotes"']],
+                          ('postprocessed', {'name': 'name', 'ref': 'ref:var', 'units': 'U', 'description': 'Description "quotes"'}))
         self.assertParses(csp.outputSpec, "name = ref:var units U 'Description \\'quotes\\' \"too\"'",
-                          [['name', 'ref:var', 'U', 'Description \'quotes\' "too"']])
-        self.assertParses(csp.outputSpec, 'varname units UU', [['varname', 'UU', '']])
-        self.assertParses(csp.outputSpec, 'varname units UU "desc"', [['varname', 'UU', 'desc']])
+                          [['name', 'ref:var', 'U', 'Description \'quotes\' "too"']],
+                          ('postprocessed', {'name': 'name', 'ref': 'ref:var', 'units': 'U', 'description': 'Description \'quotes\' "too"'}))
+        self.assertParses(csp.outputSpec, 'varname units UU', [['varname', 'UU']],
+                          ('postprocessed', {'name': 'varname', 'units': 'UU'}))
+        self.assertParses(csp.outputSpec, 'varname units UU "desc"', [['varname', 'UU', 'desc']],
+                          ('postprocessed', {'name': 'varname', 'units': 'UU', 'description': 'desc'}))
         self.failIfParses(csp.outputSpec, 'varname_no_units')
         
         self.assertParses(csp.outputs, """outputs #cccc
@@ -412,10 +417,15 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         n3 = p:m 'd1'
         n4 units u2 "d2"
 } #cpc
-""", [[['proto_prefix'], ['n1', 'n2', 'u1', ''], ['n3', 'p:m', '', 'd1'], ['n4', 'u2', 'd2']]])
+""", [[['proto_prefix'], ['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2']]],
+     ('outputs', [('useImports', {'prefix': 'proto_prefix'}),
+                  ('postprocessed', {'name': 'n1', 'ref': 'n2', 'units': 'u1'}),
+                  ('raw', {'name': 'n3', 'ref': 'p:m', 'description': 'd1'}),
+                  ('postprocessed', {'name': 'n4', 'units': 'u2', 'description': 'd2'})]))
         self.assertParses(csp.outputs, "outputs {}", [[]])
     
     def TestParsingPlotSpecifications(self):
+        # TODO: Test these once the XML syntax catches up!
         self.assertParses(csp.plotCurve, 'y against x', [['y', 'x']])
         self.assertParses(csp.plotCurve, 'y, y2 against x', [['y', 'y2', 'x']])
         self.failIfParses(csp.plotCurve, 'm:y against x')
