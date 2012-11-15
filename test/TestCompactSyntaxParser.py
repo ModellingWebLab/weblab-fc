@@ -712,18 +712,25 @@ return c
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
         #  new_simple = [mult] [prefix] base [+|- offset]
         #  new_complex = p.delimitedList( [mult] [prefix] base [^expt], '.')
-        self.assertParses(csp.unitsDef, 'ms = milli second', [['ms', ['1', 'milli', 'second', '1']]])
-        self.assertParses(csp.unitsDef, 'C = kelvin - 273.15', [['C', ['1', '', 'kelvin', '1', ['-', '273.15']]]])
-        self.assertParses(csp.unitsDef, 'C=kelvin-273.15', [['C', ['1', '', 'kelvin', '1', ['-', '273.15']]]])
-        self.assertParses(csp.unitsDef, 'litre = 1000 centi metre^3', [['litre', ['1000', 'centi', 'metre', '3']]])
+        self.assertParses(csp.unitsDef, 'ms = milli second', [['ms', ['milli', 'second']]],
+                          ('units', {'name': 'ms'}, [('unit', {'units': 'second', 'prefix': 'milli'})]))
+        self.assertParses(csp.unitsDef, 'C = kelvin - 273.15', [['C', ['kelvin', ['-', '273.15']]]],
+                          ('units', {'name': 'C'}, [('unit', {'units': 'kelvin', 'offset': '-273.15'})]))
+        self.assertParses(csp.unitsDef, 'C=kelvin+(-273.15)', [['C', ['kelvin', ['+', '(-273.15)']]]],
+                          ('units', {'name': 'C'}, [('unit', {'units': 'kelvin', 'offset': '-273.14999999999998'})]))
+        self.assertParses(csp.unitsDef, 'litre = 1000 centi metre^3', [['litre', ['1000', 'centi', 'metre', '3']]],
+                          ('units', {'name': 'litre'}, [('unit', {'units': 'metre', 'multiplier': '1000', 'prefix': 'centi', 'exponent': '3'})]))
         self.assertParses(csp.unitsDef, 'accel_units = kilo metre . second^-2 "km/s^2"',
-                          [['accel_units', ['1', 'kilo', 'metre', '1'], ['1', '', 'second', '-2'], 'km/s^2']])
+                          [['accel_units', ['kilo', 'metre'], ['second', '-2'], 'km/s^2']],
+                          ('units', {'name': 'accel_units'}, [('unit', {'units': 'metre', 'prefix': 'kilo'}), ('unit', {'units': 'second', 'exponent': '-2'})]))
         self.assertParses(csp.unitsDef, 'fahrenheit = (5/9) celsius + 32.0',
-                          [['fahrenheit', [['5', '/', '9'], '', 'celsius', '1', ['+', '32.0']]]])
+                          [['fahrenheit', ['(5/9)', 'celsius', ['+', '32.0']]]],
+                          ('units', {'name': 'fahrenheit'}, [('unit', {'units': 'celsius', 'offset': '32.0', 'multiplier': '0.55555555555555558'})]))
         self.assertParses(csp.unitsDef, 'fahrenheit = (5/9) kelvin + (32 - 273.15 * 9 / 5)',
-                          [['fahrenheit', [['5', '/', '9'], '', 'kelvin', '1', ['+', ['32', '-', ['273.15', '*', '9', '/', '5']]]]]])
+                          [['fahrenheit', ['(5/9)', 'kelvin', ['+', '(32 - 273.15 * 9 / 5)']]]],
+                          ('units', {'name': 'fahrenheit'}, [('unit', {'units': 'kelvin', 'offset': '-459.66999999999996', 'multiplier': '0.55555555555555558'})]))
         
-        self.assertParses(csp.units, "units {}", [])
+        self.assertParses(csp.units, "units {}", [[]])
         self.assertParses(csp.units, """units
 {
 use imports ulib
@@ -735,12 +742,18 @@ flux = nM . hour ^ -1
 rate_const = hour^-1           # First order
 rate_const_2 = nM^-1 . hour^-1 # Second order
 }
-""", [['ulib'],
-      ['nM', ['1', 'nano', 'mole', '1'], ['1', '', 'litre', '-1']],
-      ['hour', ['3600', '', 'second', '1']],
-      ['flux', ['1', '', 'nM', '1'], ['1', '', 'hour', '-1']],
-      ['rate_const', ['1', '', 'hour', '-1']],
-      ['rate_const_2', ['1', '', 'nM', '-1'], ['1', '', 'hour', '-1']]])
+""", [[['ulib'],
+       ['nM', ['nano', 'mole'], ['litre', '-1']],
+       ['hour', ['3600', 'second']],
+       ['flux', ['nM'], ['hour', '-1']],
+       ['rate_const', ['hour', '-1']],
+       ['rate_const_2', ['nM', '-1'], ['hour', '-1']]]],
+                          ('units', [('useImports', {'prefix': 'ulib'}),
+                                     ('units', {'name': 'nM'}, [('unit', {'units': 'mole', 'prefix': 'nano'}), 'unit']),
+                                     ('units', {'name': 'hour'}, [('unit', {'units': 'second', 'multiplier': '3600'})]),
+                                     ('units', {'name': 'flux'}, [('unit', {'units': 'nM'}), ('unit', {'units': 'hour', 'exponent': '-1'})]),
+                                     ('units', {'name': 'rate_const'}, [('unit', {'units': 'hour', 'exponent': '-1'})]),
+                                     ('units', {'name': 'rate_const_2'}, ['unit', 'unit'])]))
     
     def TestParsingAccessors(self):
         for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:

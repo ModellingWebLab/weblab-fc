@@ -31,6 +31,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+from __future__ import division
+
 # TODO: Units annotations on numbers in the model interface (and possibly everywhere)
 
 import sys
@@ -439,6 +441,56 @@ class Actions(object):
         def _xml(self):
             return P.useImports(prefix=self.tokens[0])
     
+    class UnitRef(BaseGroupAction):
+        """Parse action for unit references within units definitions."""
+        def GetValue(self, token, negate=False):
+            """Get a decent string representation of the value of the given numeric token.
+            It may be a plain number, or it may be a simple expression which we have to evaluate.
+            """
+            format = "%.17g"
+            result = str(token).strip()
+            try:
+                value = float(result)
+            except ValueError:
+                # Evaluation required; somewhat risky!
+                value = eval(result)
+                if negate:
+                    value = -value
+                result = format % value
+            else:
+                # Just use the string representation in the protocol
+                if negate:
+                    if result[0] == '-':
+                        result = result[1:]
+                    else:
+                        result = '-' + result
+            return result
+        
+        def _xml(self):
+            attrs = {}
+            for attr_name in ['prefix', 'units']:
+                if attr_name in self.tokens:
+                    attrs[attr_name] = str(self.tokens[attr_name])
+            if 'exponent' in self.tokens:
+                attrs['exponent'] = str(self.tokens['exponent'][0])
+            if 'multiplier' in self.tokens:
+                attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
+            if 'offset' in self.tokens:
+                attrs['offset'] = self.GetValue(self.tokens['offset'][0][1], self.tokens['offset'][0][0] == '-')
+            return CELLML.unit(**attrs)
+    
+    class UnitsDef(BaseGroupAction):
+        """Parse action for units definitions."""
+        def _xml(self):
+            unit_refs = [t.xml() for t in self.tokens if isinstance(t, Actions.UnitRef)]
+            return CELLML.units(*unit_refs, name=str(self.tokens[0]))
+    
+    class Units(BaseAction):
+        """Parse action for the units definitions section."""
+        def _xml(self):
+            if len(self.tokens) > 0:
+                return P.units(*self.GetChildrenXml())
+    
     class Library(BaseAction):
         """Parse action for the library section."""
         def _xml(self):
@@ -732,11 +784,11 @@ class CompactSyntaxParser(object):
     # Units definitions
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
                        'deci centi milli micro nano pico femto atto zepto yocto')
-    _num_or_expr = number | (oparen + expr + cparen)
-    unitRef = p.Group(Optional(_num_or_expr, '1') + Optional(siPrefix, '') + ncIdent + Optional(p.Suppress('^') + number, '1')
-                      + Optional(p.Group(p.oneOf('- +') + _num_or_expr)))
-    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)).setName('UnitsDefinition')
-    units = (MakeKw('units') + obrace - OptionalDelimitedList(useImports | unitsDef, nl) + cbrace).setName('Units')
+    _num_or_expr = p.originalTextFor(number | (oparen + expr + cparen))
+    unitRef = p.Group(Optional(_num_or_expr)("multiplier") + Optional(siPrefix)("prefix") + ncIdent("units") + Optional(p.Suppress('^') + number)("exponent")
+                      + Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
+    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
+    units = (MakeKw('units') + obrace - OptionalDelimitedList(useImports | unitsDef, nl) + cbrace).setName('Units').setParseAction(Actions.Units)
     
     # Model interface section
     #########################
