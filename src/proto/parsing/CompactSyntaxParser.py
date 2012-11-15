@@ -112,6 +112,17 @@ class Actions(object):
             """Convert all sub-tokens to XML and return the list of elements."""
             return map(lambda tok: tok.xml(), self.tokens)
         
+        def TransferAttrs(self, *attrNames):
+            """Create an attribute dictionary for use in generating XML from named parse results."""
+            attrs = {}
+            for key in attrNames:
+                if key in self.tokens:
+                    value = self.tokens[key]
+                    if not isinstance(value, str):
+                        value = value[0]
+                    attrs[key] = value
+            return attrs
+        
         def Delegate(self, action, tokens):
             """Create another parse action to process the given tokens for us."""
             if isinstance(action, str):
@@ -411,6 +422,18 @@ class Actions(object):
             return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
     
     ######################################################################
+    # Model interface section
+    ######################################################################
+    
+    class SetTimeUnits(BaseAction):
+        def _xml(self):
+            return P.setIndependentVariableUnits(**self.TransferAttrs('units'))
+    
+    class InputVariable(BaseGroupAction):
+        def _xml(self):
+            return P.specifyInputVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+    
+    ######################################################################
     # Other protocol language constructs
     ######################################################################
     
@@ -467,12 +490,7 @@ class Actions(object):
             return result
         
         def _xml(self):
-            attrs = {}
-            for attr_name in ['prefix', 'units']:
-                if attr_name in self.tokens:
-                    attrs[attr_name] = str(self.tokens[attr_name])
-            if 'exponent' in self.tokens:
-                attrs['exponent'] = str(self.tokens['exponent'][0])
+            attrs = self.TransferAttrs('prefix', 'units', 'exponent')
             if 'multiplier' in self.tokens:
                 attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
             if 'offset' in self.tokens:
@@ -525,14 +543,7 @@ class Actions(object):
             else:
                 # It's a post-processed output
                 elt = P.postprocessed
-            attrs = {}
-            for key in ['name', 'ref', 'units', 'description']:
-                if key in self.tokens:
-                    value = self.tokens[key]
-                    if not isinstance(value, str):
-                        value = value[0]
-                    attrs[key] = value
-            return elt(**attrs)
+            return elt(**self.TransferAttrs('name', 'ref', 'units', 'description'))
     
     class Outputs(BaseGroupAction):
         """Parse action for the plots section."""
@@ -835,13 +846,12 @@ class CompactSyntaxParser(object):
     unitsRef = MakeKw('units') + ncIdent
     
     # Setting the units for the independent variable
-    setTimeUnits = MakeKw('independent') + MakeKw('var') - unitsRef
+    setTimeUnits = (MakeKw('independent') + MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
-    inputVariable = p.Group(MakeKw('input') - ident
-                            + Optional(unitsRef, default='')
-                            + Optional(eq + number, default='')).setName('InputVariable')
+    inputVariable = p.Group(MakeKw('input') - ident("name") + Optional(unitsRef)("units")
+                            + Optional(eq + number)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
     # Model outputs of interest, with optional units
-    outputVariable = p.Group(MakeKw('output') - ident + Optional(unitsRef, default='')).setName('OutputVariable')
+    outputVariable = p.Group(MakeKw('output') - ident + Optional(unitsRef)).setName('OutputVariable')
     # New variables added to the model, with optional initial value
     newVariable = p.Group(MakeKw('var') - ncIdent + unitsRef + Optional(eq + number, default='')).setName('NewVariable')
     # Adding or replacing equations in the model

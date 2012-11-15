@@ -245,14 +245,19 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.useImports, 'use imports import_prefix', [['import_prefix']], ('useImports', {'prefix': 'import_prefix'}))
 
     def TestParsingModelInterface(self):
-        self.assertParses(csp.setTimeUnits, 'independent var units u', ['u'])
+        self.assertParses(csp.setTimeUnits, 'independent var units u', [['u']],
+                          ('setIndependentVariableUnits', {'units': 'u'}))
         
-        self.assertParses(csp.inputVariable, 'input test:var units u = 1.2', [['test:var', 'u', '1.2']])
-        self.assertParses(csp.inputVariable, 'input test:var units u', [['test:var', 'u', '']])
-        self.assertParses(csp.inputVariable, 'input test:var = -1e2', [['test:var', '', '-1e2']])
-        self.assertParses(csp.inputVariable, 'input test:var', [['test:var', '', '']])
+        self.assertParses(csp.inputVariable, 'input test:var units u = 1.2', [['test:var', 'u', '1.2']],
+                          ('specifyInputVariable', {'name': 'test:var', 'units': 'u', 'initial_value': '1.2'}))
+        self.assertParses(csp.inputVariable, 'input test:var units u', [['test:var', 'u']],
+                          ('specifyInputVariable', {'name': 'test:var', 'units': 'u'}))
+        self.assertParses(csp.inputVariable, 'input test:var = -1e2', [['test:var', '-1e2']],
+                          ('specifyInputVariable', {'name': 'test:var', 'initial_value': '-1e2'}))
+        self.assertParses(csp.inputVariable, 'input test:var', [['test:var']],
+                          ('specifyInputVariable', {'name': 'test:var'}))
         
-        self.assertParses(csp.outputVariable, 'output test:var', [['test:var', '']])
+        self.assertParses(csp.outputVariable, 'output test:var', [['test:var']])
         self.assertParses(csp.outputVariable, 'output test:var units uname', [['test:var', 'uname']])
         
         self.assertParses(csp.newVariable, 'var varname units uname = 0', [['varname', 'uname', '0']])
@@ -283,12 +288,12 @@ class TestCompactSyntaxParser(unittest.TestCase):
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
     convert u1 to u2 by lambda u: u * test:v3
-}""", [[['ident'], 't', ['test:v1', '', '0'], ['test:v2', 'u', ''], ['test:time', ''], ['test:v3', 'u'],
+}""", [[['ident'], ['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
         ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]])
         self.assertParses(csp.modelInterface, 'model interface {}', [[]])
-        self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time', '']]])
-        self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time', '']]])
+        self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time']]])
+        self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time']]])
 
     def TestParsingUniformRange(self):
         self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
