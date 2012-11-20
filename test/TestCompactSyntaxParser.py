@@ -377,54 +377,89 @@ class TestCompactSyntaxParser(unittest.TestCase):
     
     def TestParsingTimecourseSimulations(self):
         self.assertParses(csp.simulation, 'simulation sim = timecourse { range time units ms uniform 1:10 }',
-                          ['sim', [['time', 'ms', ['1', '10']]]])
+                          [['sim', [['time', 'ms', ['1', '10']]]]],
+                          ('timecourseSimulation', {'prefix': 'sim'}, [('uniformStepper', {'name': 'time', 'units': 'ms'},
+                                                                        [('start', ['cn:1']), ('stop', ['cn:10']), ('step', ['cn:1'])]),
+                                                                       'modifiers']))
         self.assertParses(csp.simulation, 'simulation timecourse #c\n#c\n{\n range time units ms uniform 1:10\n\n }#c',
-                          ['', [['time', 'ms', ['1', '10']]]])
+                          [['', [['time', 'ms', ['1', '10']]]]],
+                          ('timecourseSimulation', {}, [('uniformStepper', {'name': 'time', 'units': 'ms'},
+                                                         [('start', ['cn:1']), ('stop', ['cn:10']), ('step', ['cn:1'])]),
+                                                        'modifiers']))
         self.assertParses(csp.simulation, """simulation sim = timecourse {
 range time units U while time < 100
 modifiers { at end save as prelim }
 }""",
-                          ['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]])
+                          [['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]]],
+                          ('timecourseSimulation', {'prefix': 'sim'}, [('whileStepper', {'name': 'time', 'units': 'U'},
+                                                                        [('condition', [('apply', ['lt', 'ci:time', 'cn:100'])])]),
+                                                                       ('modifiers', [('saveState', ['when:AT_END', 'name:prelim'])])]))
         self.failIfParses(csp.simulation, 'simulation sim = timecourse {}')
     
     def TestParsingOneStepSimulations(self):
-        self.assertParses(csp.simulation, 'simulation oneStep', ['', []])
-        self.assertParses(csp.simulation, 'simulation sim = oneStep', ['sim', []])
-        self.assertParses(csp.simulation, 'simulation oneStep 1.0', ['', ['1.0']])
-        self.assertParses(csp.simulation, 'simulation sim = oneStep step', ['sim', ['step']])
+        self.assertParses(csp.simulation, 'simulation oneStep', [['', []]], ('oneStep', {}))
+        self.assertParses(csp.simulation, 'simulation sim = oneStep', [['sim', []]], ('oneStep', {'prefix': 'sim'}))
+        self.assertParses(csp.simulation, 'simulation oneStep 1.0', [['', ['1.0']]], ('oneStep', {'step': '1.0'}))
+        self.assertParses(csp.simulation, 'simulation sim = oneStep step', [['sim', ['step']]],
+                          ('oneStep', {'prefix': 'sim', 'step': 'step'}))
     
     def TestParsingNestedSimulations(self):
         self.assertParses(csp.simulation,
                           'simulation rpt = nested { range run units U while not rpt:result\n nests sim }',
-                          ['rpt', [['run', 'U', ['not', 'rpt:result']], ['sim']]])
+                          [['rpt', [['run', 'U', ['not', 'rpt:result']], ['sim']]]],
+                          ('nestedSimulation', {'prefix': 'rpt'},
+                           [('whileStepper', [('condition', [('apply', ['not', 'ci:rpt:result'])])]),
+                            'modifiers', ('subTask', {'task': 'sim'})]))
         self.assertParses(csp.simulation, """simulation nested {
 range R units U uniform 3:5
 modifiers { at each loop reset to prelim }
 nests sim
 }""",
-                          ['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]])
+                          [['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]]],
+                          ('nestedSimulation', {},
+                           [('uniformStepper', [('start', ['cn:3']), ('stop', ['cn:5']), ('step', ['cn:1'])]),
+                            ('modifiers', [('resetState', ['when:EVERY_LOOP', 'state:prelim'])]),
+                            ('subTask', {'task': 'sim'})]))
         self.assertParses(csp.simulation, """simulation nested { range R units U uniform 1:2
 nests simulation timecourse { range t units u uniform 1:100 } }""",
-                          ['', [['R', 'U', ['1', '2']], ['', [['t', 'u', ['1', '100']]]]]])
+                          [['', [['R', 'U', ['1', '2']], [['', [['t', 'u', ['1', '100']]]]]]]],
+                          ('nestedSimulation', {},
+                           [('uniformStepper', [('start', ['cn:1']), ('stop', ['cn:2']), ('step', ['cn:1'])]),
+                            'modifiers',
+                            ('timecourseSimulation', {},
+                             [('uniformStepper', [('start', ['cn:1']), ('stop', ['cn:100']), ('step', ['cn:1'])]), 'modifiers'])]))
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
     
     def TestParsingNestedProtocol(self):
         self.assertParses(csp.simulation, 'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { } }',
-                          ['', [['iter', 'D', ['0', '1']], [['P', []]]]])
+                          [['', [['iter', 'D', ['0', '1']], [['P', []]]]]],
+                          ('nestedSimulation', {}, [('vectorStepper',),
+                                                    'modifiers',
+                                                    ('nestedProtocol', {'source': 'P'}, [])]))
         self.assertParses(csp.simulation, """simulation nested {
     range iter units D vector [0, 1]
     nests protocol "../proto.xml" {
         input1 = 1
         input2 = 2
     }
-}""", ['', [['iter', 'D', ['0', '1']], [['../proto.xml', [['input1', '1'], ['input2', '2']]]]]])
+}""", [['', [['iter', 'D', ['0', '1']], [['../proto.xml', [['input1', '1'], ['input2', '2']]]]]]],
+                          ('nestedSimulation', {}, [('vectorStepper',),
+                                                    'modifiers',
+                                                    ('nestedProtocol', {'source': '../proto.xml'},
+                                                     [('setInput', {'name': 'input1'}, ['cn:1']),
+                                                      ('setInput', {'name': 'input2'}, ['cn:2'])])]))
         self.assertParses(csp.simulation, """simulation nested {
     range iter units D vector [0, 1]
     nests protocol "proto.txt" {
         input = iter
         select output oname
     }
-}""", ['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], 'oname']]]])
+}""", [['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], 'oname']]]]],
+                          ('nestedSimulation', {}, [('vectorStepper',),
+                                                    'modifiers',
+                                                    ('nestedProtocol', {'source': 'proto.txt'},
+                                                     [('setInput', {'name': 'input'}, ['ci:iter']),
+                                                      ('selectOutput', {'name': 'oname'}, [])])]))
     
     def TestParsingTasks(self):
         self.assertParses(csp.tasks, """tasks {
@@ -433,7 +468,9 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
                                nests inner }
 }
 """, [[['', [['time', 'second', ['1', '1000']]]],
-       ['main', [['n', 'dimensionless', [['i', '*', '2'], ['i', ['1', '4']]]], ['inner']]]]])
+       ['main', [['n', 'dimensionless', [['i', '*', '2'], ['i', ['1', '4']]]], ['inner']]]]],
+                          ('simulations', [('timecourseSimulation', {}, [('uniformStepper',), 'modifiers']),
+                                           ('nestedSimulation', {'prefix': 'main'}, [('vectorStepper',), 'modifiers', ('subTask',)])]))
     
     def TestParsingOutputSpecifications(self):
         self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', 'Description']],

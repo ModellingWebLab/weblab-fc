@@ -522,6 +522,66 @@ class Actions(object):
         def _xml(self):
             return P.modifiers(*self.GetChildrenXml())
     
+    class TimecourseSimulation(BaseGroupAction):
+        def _xml(self):
+            args = self.GetChildrenXml()
+            if len(args) == 1:
+                # Add an empty modifiers element
+                args.append(self.Delegate('Modifiers', [[]]).xml())
+            return P.timecourseSimulation(*args)
+        
+    class NestedSimulation(BaseGroupAction):
+        def _xml(self):
+            args = map(lambda t: t.xml(), self.tokens[0:-1])
+            if len(args) == 1:
+                # Add an empty modifiers element
+                args.append(self.Delegate('Modifiers', [[]]).xml())
+            nested = self.tokens[-1][0]
+            if isinstance(nested, (Actions.Simulation, Actions.NestedProtocol)):
+                # Inline definition
+                args.append(nested.xml())
+            else:
+                # Reference to named task
+                nested = P.subTask(task=str(nested))
+                args.append(self.AddLoc(nested))
+            return P.nestedSimulation(*args)
+    
+    class OneStepSimulation(BaseGroupAction):
+        def _xml(self):
+            attrs = {}
+            if len(self.tokens) == 1:
+                attrs['step'] = str(self.tokens[0])
+            return P.oneStep(**attrs)
+    
+    class NestedProtocol(BaseGroupAction):
+        def _xml(self):
+            attrs = {'source': str(self.tokens[0])}
+            args = []
+            # TODO: consider doing setInput more like the inputs section (requires change to XML syntax)
+            assert isinstance(self.tokens[1], Actions.StatementList)
+            for assignment in self.tokens[1]:
+                input_name = assignment.tokens[0].tokens
+                input_value = assignment.tokens[1].xml()
+                args.append(self.AddLoc(P.setInput(input_value, name=input_name)))
+            for output in self.tokens[2:]:
+                args.append(self.AddLoc(P.selectOutput(name=output)))
+            return P.nestedProtocol(*args, **attrs)
+    
+    class Simulation(BaseGroupAction):
+        """Parse action for all kinds of simulation."""
+        def _xml(self):
+            sim_elt = self.tokens[1].xml()
+            prefix = str(self.tokens[0])
+            if prefix:
+                sim_elt.set('prefix', prefix)
+            return sim_elt
+    
+    class Tasks(BaseGroupAction):
+        """Parse action for a collection of simulation tasks."""
+        def _xml(self):
+            if len(self.tokens) > 0:
+                return P.simulations(*self.GetChildrenXml())
+    
     ######################################################################
     # Other protocol language constructs
     ######################################################################
@@ -994,14 +1054,17 @@ class CompactSyntaxParser(object):
     _selectOutput = (MakeKw('select') + MakeKw('output') - ncIdent).setName('SelectOutput')
     nestedProtocol = p.Group(MakeKw('protocol') - quotedUri + obrace +
                              simpleAssignList + Optional(nl) + OptionalDelimitedList(_selectOutput, nl) +
-                             cbrace).setName('NestedProtocol')
-    timecourseSim = p.Group(MakeKw('timecourse') + obrace - range + Optional(nl + modifiers) + cbrace).setName('TimecourseSim')
-    nestedSim = p.Group(MakeKw('nested') + obrace - range + nl + Optional(modifiers) +
-                        p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident)) + cbrace).setName('NestedSim')
-    oneStepSim = p.Group(MakeKw('oneStep') - Optional(expr))
-    simulation << MakeKw('simulation') - Optional(ncIdent + eq, default='') + (timecourseSim | nestedSim | oneStepSim)
+                             cbrace).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
+    timecourseSim = p.Group(MakeKw('timecourse') + obrace - range + Optional(nl + modifiers) + cbrace
+                            ).setName('TimecourseSim').setParseAction(Actions.TimecourseSimulation)
+    nestedSim = p.Group(MakeKw('nested') + obrace - range + nl + Optional(modifiers)
+                        + p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident))
+                        + cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
+    oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))).setParseAction(Actions.OneStepSimulation)
+    simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='')
+                          + (timecourseSim | nestedSim | oneStepSim)).setParseAction(Actions.Simulation)
 
-    tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(p.Group(simulation)) + cbrace).setName('Tasks')
+    tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(simulation) + cbrace).setName('Tasks').setParseAction(Actions.Tasks)
 
     # Output specifications
     #######################
