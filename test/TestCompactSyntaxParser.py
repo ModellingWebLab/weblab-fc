@@ -345,9 +345,9 @@ class TestCompactSyntaxParser(unittest.TestCase):
                            [('condition', [('apply', ['lt', 'ci:rpt', 'cn:5'])])]))
 
     def TestParsingModifiers(self):
-        self.assertParses(csp.modifierWhen, 'at start', ['start'])
-        self.assertParses(csp.modifierWhen, 'at each loop', ['each'])
-        self.assertParses(csp.modifierWhen, 'at end', ['end'])
+        self.assertParses(csp.modifierWhen, 'at start', ['start'], 'when:AT_START_ONLY')
+        self.assertParses(csp.modifierWhen, 'at each loop', ['each'], 'when:EVERY_LOOP')
+        self.assertParses(csp.modifierWhen, 'at end', ['end'], 'when:AT_END')
         
         self.assertParses(csp.setVariable, 'set model:V = 5.0', ['model:V', '5.0'])
         self.assertParses(csp.setVariable, 'set model:t = time + 10.0', ['model:t', ['time', '+', '10.0']])
@@ -369,7 +369,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
         # Blank lines OK too
         at end save as savedState
 } # Trailing comments are fine""",
-                          [[['start', []], ['each', ['model:input', 'loopVariable']], ['end', ['savedState']]]])
+                          [[['start', []], ['each', ['model:input', 'loopVariable']], ['end', ['savedState']]]],
+                          ('modifiers', [('resetState', ['when:AT_START_ONLY']),
+                                         ('setVariable', ['when:EVERY_LOOP', 'name:model:input', ('value', ['ci:loopVariable'])]),
+                                         ('saveState', ['when:AT_END', 'name:savedState'])]))
         self.assertParses(csp.modifiers, 'modifiers {at start reset}', [[['start', []]]])
     
     def TestParsingTimecourseSimulations(self):

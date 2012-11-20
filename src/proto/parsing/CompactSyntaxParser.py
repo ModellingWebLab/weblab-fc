@@ -493,6 +493,35 @@ class Actions(object):
                 range = P.whileStepper(cond, **attrs)
             return range
     
+    class ModifierWhen(BaseGroupAction):
+        """Parse action for the when part of modifiers."""
+        def _xml(self):
+            when = {'start': 'AT_START_ONLY', 'each': 'EVERY_LOOP', 'end': 'AT_END'}[self.tokens]
+            return P.when(when)
+    
+    class Modifier(BaseGroupAction):
+        """Parse action that generates all kinds of modifier."""
+        def _xml(self):
+            args = [self.tokens[0].xml()]
+            detail = self.tokens[1]
+            if 'set' in self.tokens[1]:
+                modifier = P.setVariable
+                args.append(P.name(detail[0]))
+                args.append(P.value(detail[1].xml()))
+            elif 'save' in self.tokens[1]:
+                modifier = P.saveState
+                args.append(P.name(detail[0]))
+            elif 'reset' in self.tokens[1]:
+                modifier = P.resetState
+                if len(detail) > 0:
+                    args.append(P.state(detail[0]))
+            return modifier(*args)
+    
+    class Modifiers(BaseGroupAction):
+        """Parse action for the modifiers collection."""
+        def _xml(self):
+            return P.modifiers(*self.GetChildrenXml())
+    
     ######################################################################
     # Other protocol language constructs
     ######################################################################
@@ -951,12 +980,14 @@ class CompactSyntaxParser(object):
     # Modifiers
     modifierWhen = MakeKw('at') - (MakeKw('start', False) |
                                    (MakeKw('each', False) + MakeKw('loop')) |
-                                   MakeKw('end', False))
+                                   MakeKw('end', False)).setParseAction(Actions.ModifierWhen)
     setVariable = MakeKw('set') - ident + eq + expr
-    saveState = MakeKw('save') + MakeKw('as') + ncIdent
-    resetState = MakeKw('reset') + Optional(MakeKw('to') + ncIdent)
-    modifier = p.Group(modifierWhen + p.Group(setVariable | saveState | resetState)).setName('Modifier')
-    modifiers = p.Group(MakeKw('modifiers') + obrace - OptionalDelimitedList(modifier, nl) + cbrace).setName('Modifiers')
+    saveState = MakeKw('save') + MakeKw('as') - ncIdent
+    resetState = MakeKw('reset') - Optional(MakeKw('to') + ncIdent)
+    modifier = p.Group(modifierWhen + p.Group(setVariable("set") | saveState("save") | resetState("reset"))
+                       ).setName('Modifier').setParseAction(Actions.Modifier)
+    modifiers = p.Group(MakeKw('modifiers') + obrace - OptionalDelimitedList(modifier, nl) + cbrace
+                        ).setName('Modifiers').setParseAction(Actions.Modifiers)
     
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
