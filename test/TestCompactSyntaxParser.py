@@ -316,21 +316,33 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time']]])
 
     def TestParsingUniformRange(self):
-        self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
-        self.assertParses(csp.range, 'range time units ms uniform 0:1000', [['time', 'ms', ['0', '1000']]])
-        self.assertParses(csp.range, 'range t units s uniform 0:end', [['t', 's', ['0', 'end']]])
+        self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]],
+                          ('uniformStepper', {'name': 'time', 'units': 'ms'},
+                           [('start', ['cn:0']), ('stop', ['cn:1000']), ('step', ['cn:1'])]))
+        self.assertParses(csp.range, 'range time units ms uniform 0:1000', [['time', 'ms', ['0', '1000']]],
+                          ('uniformStepper', {'name': 'time', 'units': 'ms'},
+                           [('start', ['cn:0']), ('stop', ['cn:1000']), ('step', ['cn:1'])]))
+        self.assertParses(csp.range, 'range t units s uniform 0:end', [['t', 's', ['0', 'end']]],
+                          ('uniformStepper', {'name': 't', 'units': 's'},
+                           [('start', ['cn:0']), ('stop', ['ci:end']), ('step', ['cn:1'])]))
         # Spaces or brackets are required in this case to avoid 'start:step:end' parsing as an ident
-        self.assertParses(csp.range, 'range t units s uniform start : step : end', [['t', 's', ['start', 'step', 'end']]])
+        self.assertParses(csp.range, 'range t units s uniform start : step : end', [['t', 's', ['start', 'step', 'end']]],
+                          ('uniformStepper', {'name': 't', 'units': 's'},
+                           [('start', ['ci:start']), ('stop', ['ci:end']), ('step', ['ci:step'])]))
         self.assertParses(csp.range, 'range t units s uniform start:(step):end', [['t', 's', ['start', 'step', 'end']]])
         self.failIfParses(csp.range, 'range t units s uniform start:step:end')
 
     def TestParsingVectorRange(self):
         self.assertParses(csp.range, 'range run units dimensionless vector [1, 2, 3, 4]',
-                          [['run', 'dimensionless', ['1', '2', '3', '4']]])
+                          [['run', 'dimensionless', ['1', '2', '3', '4']]],
+                          ('vectorStepper', {'name': 'run', 'units': 'dimensionless'},
+                           [('apply', ['csymbol-newArray', 'cn:1', 'cn:2', 'cn:3', 'cn:4'])]))
 
     def TestParsingWhileRange(self):
         self.assertParses(csp.range, 'range rpt units dimensionless while rpt < 5',
-                          [['rpt', 'dimensionless', ['rpt', '<', '5']]])
+                          [['rpt', 'dimensionless', ['rpt', '<', '5']]],
+                          ('whileStepper', {'name': 'rpt', 'units': 'dimensionless'},
+                           [('condition', [('apply', ['lt', 'ci:rpt', 'cn:5'])])]))
 
     def TestParsingModifiers(self):
         self.assertParses(csp.modifierWhen, 'at start', ['start'])

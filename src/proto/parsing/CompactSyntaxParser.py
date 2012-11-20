@@ -470,6 +470,30 @@ class Actions(object):
                 return P.modelInterface(*self.GetChildrenXml())
     
     ######################################################################
+    # Simulation tasks section
+    ######################################################################
+    
+    class Range(BaseGroupAction):
+        """Parse action for all the kinds of range supported."""
+        def _xml(self):
+            attrs = self.TransferAttrs('name', 'units')
+            if 'uniform' in self.tokens:
+                tokens = self.tokens['uniform'][0]
+                start = P.start(tokens[0].xml())
+                stop = P.stop(tokens[-1].xml())
+                if len(tokens) == 3:
+                    step = P.step(tokens[1].xml())
+                else:
+                    step = P.step(self.Delegate('Number', '1').xml())
+                range = P.uniformStepper(start, stop, step, **attrs)
+            elif 'vector' in self.tokens:
+                range = P.vectorStepper(self.tokens['vector'][0].xml(), **attrs)
+            elif 'while' in self.tokens:
+                cond = self.AddLoc(P.condition(self.tokens['while'][0].xml()))
+                range = P.whileStepper(cond, **attrs)
+            return range
+    
+    ######################################################################
     # Other protocol language constructs
     ######################################################################
     
@@ -920,7 +944,9 @@ class CompactSyntaxParser(object):
     uniformRange = MakeKw('uniform') + numericRange
     vectorRange = MakeKw('vector') + expr
     whileRange = MakeKw('while') + expr
-    range = p.Group(MakeKw('range') + ncIdent + unitsRef + (uniformRange | vectorRange | whileRange)).setName('Range')
+    range = p.Group(MakeKw('range') + ncIdent("name") + unitsRef("units")
+                    + (uniformRange("uniform") | vectorRange("vector") | whileRange("while"))
+                    ).setName('Range').setParseAction(Actions.Range)
     
     # Modifiers
     modifierWhen = MakeKw('at') - (MakeKw('start', False) |
