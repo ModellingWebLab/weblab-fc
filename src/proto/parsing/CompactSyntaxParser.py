@@ -715,6 +715,21 @@ class Actions(object):
             if len(self.tokens) > 0:
                 return P.plots(*self.GetChildrenXml())
     
+    class Protocol(BaseAction):
+        """Parse action for a full protocol."""
+        def _xml(self):
+            # Build namespace map
+            nsmap = {None: PROTO_NS}
+            if 'namespace' in self.tokens:
+                for prefix, uri in self.tokens['namespace']:
+                    nsmap[prefix] = uri
+            # Create root element, then add children
+            root = ET.Element('{%s}protocol' % PROTO_NS, nsmap=nsmap)
+            for token in self.tokens:
+                if isinstance(token, Actions.BaseAction):
+                    root.append(token.xml())
+            return root
+    
 
 ################################################################################
 # Helper methods for defining parsers
@@ -1086,7 +1101,7 @@ class CompactSyntaxParser(object):
     #########################
     
     protocol = p.And(map(Optional, [nl, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
-                                    tasks, postProcessing, outputs, plots])).setName('Protocol')
+                                    tasks, postProcessing, outputs, plots])).setName('Protocol').setParseAction(Actions.Protocol)
     
     def __init__(self):
         """Initialise the parser."""

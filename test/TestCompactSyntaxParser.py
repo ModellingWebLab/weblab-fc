@@ -934,9 +934,19 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
     def TestParsingFullProtocols(self):
         # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
         test_folder = 'projects/FunctionalCuration/test/protocols/compact'
+        output_folder = os.path.join(CHASTE_TEST_OUTPUT, 'TestCompactSyntaxParser')
+        try:
+            os.makedirs(output_folder)
+        except OSError:
+            pass
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
-            print os.path.basename(proto_filename), '...'
-            csp().ParseFile(proto_filename)
+            proto_base = os.path.basename(proto_filename)
+            print proto_base, '...'
+            parsed = csp().ParseFile(proto_filename)[0]
+            self.assert_(hasattr(parsed, 'xml') and callable(parsed.xml))
+            output_file = open(os.path.join(output_folder, proto_base), 'w')
+            CSP.ET.ElementTree(parsed.xml()).write(output_file, pretty_print=True, xml_declaration=True)
+            output_file.close()
         CSP.Actions.source_file = '' # Avoid the last name leaking to following tests
 
     def TestZzzPackratWasUsed(self):
