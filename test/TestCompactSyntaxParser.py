@@ -31,6 +31,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import filecmp
 import glob
 import os
 import unittest
@@ -934,20 +935,25 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
     def TestParsingFullProtocols(self):
         # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
         test_folder = 'projects/FunctionalCuration/test/protocols/compact'
+        ref_folder = 'projects/FunctionalCuration/test/data/CompactSyntaxParser'
         output_folder = os.path.join(CHASTE_TEST_OUTPUT, 'TestCompactSyntaxParser')
         try:
             os.makedirs(output_folder)
         except OSError:
             pass
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
-            proto_base = os.path.basename(proto_filename)
+            proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
             print proto_base, '...'
             parsed = csp().ParseFile(proto_filename)[0]
             self.assert_(hasattr(parsed, 'xml') and callable(parsed.xml))
-            output_file = open(os.path.join(output_folder, proto_base), 'w')
+            output_file_path = os.path.join(output_folder, proto_base + '.xml')
+            output_file = open(output_file_path, 'w')
             CSP.ET.ElementTree(parsed.xml()).write(output_file, pretty_print=True, xml_declaration=True)
             output_file.close()
-        CSP.Actions.source_file = '' # Avoid the last name leaking to following tests
+            ref_file_path = os.path.join(ref_folder, proto_base + '.xml')
+            if os.path.exists(ref_file_path):
+                self.assertTrue(filecmp.cmp(output_file_path, ref_file_path))
+        CSP.Actions.source_file = '' # Avoid the last name leaking to subsequent tests
 
     def TestZzzPackratWasUsed(self):
         # Method name ensures this runs last!

@@ -1,0 +1,435 @@
+<?xml version='1.0' encoding='ASCII'?>
+<protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" xmlns:ns0="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" ns0:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:1:1&#9;# Compact syntax version of the S1S2 protocol">
+  <inputs loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:5:1&#9;inputs {">
+    <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:1&#9;    s1_interval = 1000">
+      <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:1&#9;    s1_interval = 1000"/>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:5&#9;    s1_interval = 1000">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:5&#9;    s1_interval = 1000">s1_interval</ns0:ci>
+        <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:19&#9;    s1_interval = 1000">1000</ns0:cn>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:7:5&#9;    steady_state_beats = 1000">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:7:5&#9;    steady_state_beats = 1000">steady_state_beats</ns0:ci>
+        <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:7:26&#9;    steady_state_beats = 1000">1000</ns0:cn>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:8:5&#9;    timecourse_duration = 3000">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:8:5&#9;    timecourse_duration = 3000">timecourse_duration</ns0:ci>
+        <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:8:27&#9;    timecourse_duration = 3000">3000</ns0:cn>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:5&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:5&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">s2_intervals</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:20&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:21&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">2000</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:27&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1950</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:33&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1900</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:39&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1850</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:45&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1800</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:51&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1750</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:57&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1700</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:63&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1650</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:69&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1600</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:9:75&#9;    s2_intervals = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1600, 1550,">1550</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:21&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1500</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:27&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1450</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:33&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1400</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:39&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1350</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:45&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1300</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:51&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1250</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:57&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1200</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:63&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1150</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:69&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1100</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:75&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1050</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:10:81&#9;                    1500, 1450, 1400, 1350, 1300, 1250, 1200, 1150, 1100, 1050, 1000, ">1000</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:21&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">975</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:26&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">950</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:31&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">925</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:36&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">900</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:41&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">875</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:46&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">850</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:51&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">825</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:56&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">800</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:61&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">775</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:66&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">750</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:71&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">725</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:11:76&#9;                    975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 725, 700, ">700</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:21&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">680</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:26&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">660</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:31&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">640</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:36&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">620</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:41&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">600</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:46&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">580</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:51&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">560</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:56&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">540</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:61&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">520</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:12:66&#9;                    680, 660, 640, 620, 600, 580, 560, 540, 520, 500, ">500</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:21&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">490</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:26&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">480</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:31&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">470</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:36&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">460</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:41&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">450</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:46&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">440</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:51&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">430</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:56&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">420</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:61&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">410</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:13:66&#9;                    490, 480, 470, 460, 450, 440, 430, 420, 410, 400, ">400</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:21&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">390</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:26&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">380</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:31&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">370</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:36&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">360</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:41&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">350</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:46&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">340</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:51&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">330</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:56&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">320</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:61&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">310</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:14:66&#9;                    390, 380, 370, 360, 350, 340, 330, 320, 310, 300, ">300</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:21&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">290</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:26&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">280</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:31&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">270</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:36&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">260</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:41&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">250</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:46&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">240</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:51&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">230</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:56&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">220</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:61&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">210</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:15:66&#9;                    290, 280, 270, 260, 250, 240, 230, 220, 210, 200, ">200</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:21&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">190</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:26&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">180</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:31&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">170</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:36&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">160</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:41&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">150</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:46&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">140</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:51&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">130</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:56&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">120</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:61&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">110</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:16:66&#9;                    190, 180, 170, 160, 150, 140, 130, 120, 110, 100, ">100</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:21&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">90</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:26&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">80</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:31&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">70</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:36&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">60</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:41&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">50</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:46&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">40</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:51&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">30</ns0:cn>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:17:56&#9;                    90,  80,  70,  60,  50,  40,  30,  20]">20</ns0:cn>
+        </ns0:apply>
+      </ns0:apply>
+    </ns0:apply>
+  </inputs>
+  <import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:20:1&#9;import &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
+  <import source="../../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="true" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:21:1&#9;import &quot;../../../src/proto/library/CardiacLibrary.xml&quot;"/>
+  <units loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:23:1&#9;units {">
+    <cellml:units xmlns:cellml="http://www.cellml.org/cellml/1.0#" name="mV" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:24:5&#9;    mV = milli volt">
+      <cellml:unit units="volt" prefix="milli" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:24:10&#9;    mV = milli volt"/>
+    </cellml:units>
+    <cellml:units xmlns:cellml="http://www.cellml.org/cellml/1.0#" name="ms" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:25:5&#9;    ms = milli second">
+      <cellml:unit units="second" prefix="milli" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:25:10&#9;    ms = milli second"/>
+    </cellml:units>
+  </units>
+  <modelInterface loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:28:1&#9;model interface {">
+    <specifyInputVariable units="ms" name="oxmeta:membrane_stimulus_current_end" initial_value="100000000000" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:29:5&#9;    input oxmeta:membrane_stimulus_current_end units ms = 100000000000"/>
+    <specifyInputVariable units="ms" name="oxmeta:membrane_stimulus_current_offset" initial_value="10" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:30:5&#9;    input oxmeta:membrane_stimulus_current_offset units ms = 10"/>
+    <specifyInputVariable units="ms" name="oxmeta:membrane_stimulus_current_period" initial_value="1000" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:31:5&#9;    input oxmeta:membrane_stimulus_current_period units ms = 1000"/>
+    <specifyOutputVariable units="mV" name="oxmeta:membrane_voltage" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:33:5&#9;    output oxmeta:membrane_voltage units mV"/>
+    <specifyOutputVariable units="ms" name="oxmeta:time" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:34:5&#9;    output oxmeta:time units ms"/>
+    <addOrReplaceEquation loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:36:5&#9;    define oxmeta:membrane_stimulus_current = \">
+      <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:36:5&#9;    define oxmeta:membrane_stimulus_current = \">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:36:12&#9;    define oxmeta:membrane_stimulus_current = \">oxmeta:membrane_stimulus_current</ns0:ci>
+        <ns0:piecewise loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:9&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">
+          <ns0:piece>
+            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:14&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">oxmeta:membrane_stimulus_current_amplitude</ns0:ci>
+            <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:13&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">
+              <ns0:and/>
+              <ns0:apply>
+                <ns0:and/>
+                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:13&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">
+                  <ns0:geq/>
+                  <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:13&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">oxmeta:time</ns0:ci>
+                  <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:28&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">oxmeta:membrane_stimulus_current_offset</ns0:ci>
+                </ns0:apply>
+                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:71&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">
+                  <ns0:leq/>
+                  <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:71&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">oxmeta:time</ns0:ci>
+                  <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:86&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">oxmeta:membrane_stimulus_current_end</ns0:ci>
+                </ns0:apply>
+              </ns0:apply>
+              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:14&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">
+                <ns0:leq/>
+                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:14&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">
+                  <ns0:minus/>
+                  <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:15&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">
+                    <ns0:minus/>
+                    <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:15&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">oxmeta:membrane_stimulus_current_time</ns0:ci>
+                    <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:55&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">oxmeta:membrane_stimulus_current_offset</ns0:ci>
+                  </ns0:apply>
+                  <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:17&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                    <ns0:times/>
+                    <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:17&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                      <ns0:floor/>
+                      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:30&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                        <ns0:divide/>
+                        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:31&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                          <ns0:minus/>
+                          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:31&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">oxmeta:membrane_stimulus_current_time</ns0:ci>
+                          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:71&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">oxmeta:membrane_stimulus_current_offset</ns0:ci>
+                        </ns0:apply>
+                        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:40:30&#9;                             oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)">oxmeta:membrane_stimulus_current_period</ns0:ci>
+                      </ns0:apply>
+                    </ns0:apply>
+                    <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:40:73&#9;                             oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)">oxmeta:membrane_stimulus_current_period</ns0:ci>
+                  </ns0:apply>
+                </ns0:apply>
+                <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:41:17&#9;             &lt;= oxmeta:membrane_stimulus_current_duration))">oxmeta:membrane_stimulus_current_duration</ns0:ci>
+              </ns0:apply>
+            </ns0:apply>
+          </ns0:piece>
+          <ns0:otherwise>
+            <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">
+              <ns0:times/>
+              <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">0</ns0:cn>
+              <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:66&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">amplitude</ns0:ci>
+            </ns0:apply>
+          </ns0:otherwise>
+        </ns0:piecewise>
+      </ns0:apply>
+    </addOrReplaceEquation>
+  </modelInterface>
+  <simulations loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:45:1&#9;tasks {">
+    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:47:5&#9;    simulation timecourse {">
+      <vectorStepper units="ms" name="time" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:48:9&#9;        range time units ms vector [0, s1_interval * steady_state_beats]">
+        <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:48:36&#9;        range time units ms vector [0, s1_interval * steady_state_beats]">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:48:37&#9;        range time units ms vector [0, s1_interval * steady_state_beats]">0</ns0:cn>
+          <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:48:40&#9;        range time units ms vector [0, s1_interval * steady_state_beats]">
+            <ns0:times/>
+            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:48:40&#9;        range time units ms vector [0, s1_interval * steady_state_beats]">s1_interval</ns0:ci>
+            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:48:54&#9;        range time units ms vector [0, s1_interval * steady_state_beats]">steady_state_beats</ns0:ci>
+          </ns0:apply>
+        </ns0:apply>
+      </vectorStepper>
+      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:49:9&#9;        modifiers {">
+        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:51:13&#9;            at start set oxmeta:membrane_stimulus_current_period = s1_interval # ms">
+          <when loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:51:15&#9;            at start set oxmeta:membrane_stimulus_current_period = s1_interval # ms">AT_START_ONLY</when>
+          <name>oxmeta:membrane_stimulus_current_period</name>
+          <value>
+            <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:51:68&#9;            at start set oxmeta:membrane_stimulus_current_period = s1_interval # ms">s1_interval</ns0:ci>
+          </value>
+        </setVariable>
+        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:52:13&#9;            at start set oxmeta:membrane_stimulus_current_offset = 10          # ms">
+          <when loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:52:15&#9;            at start set oxmeta:membrane_stimulus_current_offset = 10          # ms">AT_START_ONLY</when>
+          <name>oxmeta:membrane_stimulus_current_offset</name>
+          <value>
+            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:52:68&#9;            at start set oxmeta:membrane_stimulus_current_offset = 10          # ms">10</ns0:cn>
+          </value>
+        </setVariable>
+        <saveState loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:53:13&#9;            at end save as initial_state">
+          <when loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:53:15&#9;            at end save as initial_state">AT_END</when>
+          <name>initial_state</name>
+        </saveState>
+      </modifiers>
+    </timecourseSimulation>
+    <nestedSimulation loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:57:5&#9;    simulation sim = nested {" prefix="sim">
+      <vectorStepper units="dimensionless" name="s2_interval" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:58:9&#9;        range s2_interval units dimensionless vector s2_intervals">
+        <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:58:54&#9;        range s2_interval units dimensionless vector s2_intervals">s2_intervals</ns0:ci>
+      </vectorStepper>
+      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:59:9&#9;        modifiers {">
+        <resetState loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:60:13&#9;            at each loop reset to initial_state">
+          <when loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:60:15&#9;            at each loop reset to initial_state">EVERY_LOOP</when>
+          <state>initial_state</state>
+        </resetState>
+        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:62:13&#9;            at each loop set oxmeta:membrane_stimulus_current_period = s2_interval">
+          <when loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:62:15&#9;            at each loop set oxmeta:membrane_stimulus_current_period = s2_interval">EVERY_LOOP</when>
+          <name>oxmeta:membrane_stimulus_current_period</name>
+          <value>
+            <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:62:72&#9;            at each loop set oxmeta:membrane_stimulus_current_period = s2_interval">s2_interval</ns0:ci>
+          </value>
+        </setVariable>
+        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:64:13&#9;            at each loop set oxmeta:membrane_stimulus_current_end = s2_interval * 1.5">
+          <when loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:64:15&#9;            at each loop set oxmeta:membrane_stimulus_current_end = s2_interval * 1.5">EVERY_LOOP</when>
+          <name>oxmeta:membrane_stimulus_current_end</name>
+          <value>
+            <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:64:69&#9;            at each loop set oxmeta:membrane_stimulus_current_end = s2_interval * 1.5">
+              <ns0:times/>
+              <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:64:69&#9;            at each loop set oxmeta:membrane_stimulus_current_end = s2_interval * 1.5">s2_interval</ns0:ci>
+              <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:64:83&#9;            at each loop set oxmeta:membrane_stimulus_current_end = s2_interval * 1.5">1.5</ns0:cn>
+            </ns0:apply>
+          </value>
+        </setVariable>
+      </modifiers>
+      <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:66:15&#9;        nests simulation timecourse {">
+        <uniformStepper units="ms" name="time" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:67:13&#9;            range time units ms uniform 0:1:timecourse_duration">
+          <start>
+            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:67:41&#9;            range time units ms uniform 0:1:timecourse_duration">0</ns0:cn>
+          </start>
+          <stop>
+            <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:67:45&#9;            range time units ms uniform 0:1:timecourse_duration">timecourse_duration</ns0:ci>
+          </stop>
+          <step>
+            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:67:43&#9;            range time units ms uniform 0:1:timecourse_duration">1</ns0:cn>
+          </step>
+        </uniformStepper>
+        <modifiers loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:66:26&#9;        nests simulation timecourse {"/>
+      </timecourseSimulation>
+    </nestedSimulation>
+  </simulations>
+  <post-processing loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:72:1&#9;post-processing {">
+    <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:72:1&#9;post-processing {">
+      <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:72:1&#9;post-processing {"/>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:74:5&#9;    assert sim:time.IS_ARRAY">
+        <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:74:5&#9;    assert sim:time.IS_ARRAY"/>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:74:12&#9;    assert sim:time.IS_ARRAY">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:74:12&#9;    assert sim:time.IS_ARRAY">IS_ARRAY</ns0:csymbol>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:74:12&#9;    assert sim:time.IS_ARRAY">sim:time</ns0:ci>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:75:5&#9;    assert sim:membrane_voltage.IS_ARRAY">
+        <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:75:5&#9;    assert sim:membrane_voltage.IS_ARRAY"/>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:75:12&#9;    assert sim:membrane_voltage.IS_ARRAY">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:75:12&#9;    assert sim:membrane_voltage.IS_ARRAY">IS_ARRAY</ns0:csymbol>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:75:12&#9;    assert sim:membrane_voltage.IS_ARRAY">sim:membrane_voltage</ns0:ci>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:78:5&#9;    time_1d = RemoveDim(sim:time, 0)">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:78:5&#9;    time_1d = RemoveDim(sim:time, 0)">time_1d</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:78:15&#9;    time_1d = RemoveDim(sim:time, 0)">
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:78:15&#9;    time_1d = RemoveDim(sim:time, 0)">RemoveDim</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:78:25&#9;    time_1d = RemoveDim(sim:time, 0)">sim:time</ns0:ci>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:78:35&#9;    time_1d = RemoveDim(sim:time, 0)">0</ns0:cn>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:5&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">
+        <ns0:eq/>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:5&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:5&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">raw_APD90</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:16&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">raw_DI</ns0:ci>
+        </ns0:apply>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:25&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:25&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">ApdAndDi</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:34&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">sim:membrane_voltage</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:56&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">sim:time</ns0:ci>
+          <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:66&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)">90</ns0:cn>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:70&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)"/>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:79&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)"/>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:81:88&#9;    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)"/>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:5&#9;    first_raw_DI = raw_DI[1$0][*$:]">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:5&#9;    first_raw_DI = raw_DI[1$0][*$:]">first_raw_DI</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]"/>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]">raw_DI</ns0:ci>
+          <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]">
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:27&#9;    first_raw_DI = raw_DI[1$0][*$:]">1</ns0:cn>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:29&#9;    first_raw_DI = raw_DI[1$0][*$:]">0</ns0:cn>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]">0</ns0:cn>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:29&#9;    first_raw_DI = raw_DI[1$0][*$:]">0</ns0:cn>
+          </ns0:apply>
+          <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]">
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]"/>
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]"/>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]">1</ns0:cn>
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:84:20&#9;    first_raw_DI = raw_DI[1$0][*$:]"/>
+          </ns0:apply>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:5&#9;    second_raw_APD = raw_APD90[1$1][*$:]">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:5&#9;    second_raw_APD = raw_APD90[1$1][*$:]">second_raw_APD</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]">
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]"/>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]">raw_APD90</ns0:ci>
+          <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]">
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:32&#9;    second_raw_APD = raw_APD90[1$1][*$:]">1</ns0:cn>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:34&#9;    second_raw_APD = raw_APD90[1$1][*$:]">1</ns0:cn>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]">0</ns0:cn>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:34&#9;    second_raw_APD = raw_APD90[1$1][*$:]">1</ns0:cn>
+          </ns0:apply>
+          <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]">
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]"/>
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]"/>
+            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]">1</ns0:cn>
+            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:85:22&#9;    second_raw_APD = raw_APD90[1$1][*$:]"/>
+          </ns0:apply>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:90:5&#9;    min_DI = 19">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:90:5&#9;    min_DI = 19">min_DI</ns0:ci>
+        <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:90:14&#9;    min_DI = 19">19</ns0:cn>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:5&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:5&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">DI</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:10&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:10&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">After</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:16&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">first_raw_DI</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:30&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">first_raw_DI</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:44&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)">min_DI</ns0:ci>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:91:52&#9;    DI = After(first_raw_DI, first_raw_DI, min_DI, default)"/>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:5&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:5&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">APD90</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:13&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:13&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">After</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:19&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">second_raw_APD</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:35&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">first_raw_DI</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:49&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)">min_DI</ns0:ci>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:92:57&#9;    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)"/>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:5&#9;    S1S2_slope = Grad(DI, APD90, default)">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:5&#9;    S1S2_slope = Grad(DI, APD90, default)">S1S2_slope</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:18&#9;    S1S2_slope = Grad(DI, APD90, default)">
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:18&#9;    S1S2_slope = Grad(DI, APD90, default)">Grad</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:23&#9;    S1S2_slope = Grad(DI, APD90, default)">DI</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:27&#9;    S1S2_slope = Grad(DI, APD90, default)">APD90</ns0:ci>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:95:34&#9;    S1S2_slope = Grad(DI, APD90, default)"/>
+        </ns0:apply>
+      </ns0:apply>
+      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:96:5&#9;    max_S1S2_slope = Max(S1S2_slope, default)">
+        <ns0:eq/>
+        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:96:5&#9;    max_S1S2_slope = Max(S1S2_slope, default)">max_S1S2_slope</ns0:ci>
+        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:96:22&#9;    max_S1S2_slope = Max(S1S2_slope, default)">
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:96:22&#9;    max_S1S2_slope = Max(S1S2_slope, default)">Max</ns0:ci>
+          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:96:26&#9;    max_S1S2_slope = Max(S1S2_slope, default)">S1S2_slope</ns0:ci>
+          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:96:38&#9;    max_S1S2_slope = Max(S1S2_slope, default)"/>
+        </ns0:apply>
+      </ns0:apply>
+    </ns0:apply>
+  </post-processing>
+  <outputs loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:99:1&#9;outputs {">
+    <raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:100:5&#9;    membrane_voltage = sim:membrane_voltage &quot;Transmembrane potential&quot;"/>
+    <postprocessed units="ms" name="time_1d" description="Time" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:101:5&#9;    time_1d units ms &quot;Time&quot;"/>
+    <postprocessed units="ms" name="raw_APD90" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:102:5&#9;    raw_APD90 units ms"/>
+    <postprocessed units="ms" name="raw_DI" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:103:5&#9;    raw_DI units ms"/>
+    <postprocessed units="ms" name="APD90" description="Action Potential Duration 90%" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:104:5&#9;    APD90 units ms &quot;Action Potential Duration 90%&quot;"/>
+    <postprocessed units="ms" name="DI" description="Diastolic Interval" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:105:5&#9;    DI units ms &quot;Diastolic Interval&quot;"/>
+    <postprocessed units="dimensionless" name="S1S2_slope" description="S1-S2 curve gradient" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:106:5&#9;    S1S2_slope units dimensionless &quot;S1-S2 curve gradient&quot;"/>
+    <postprocessed units="dimensionless" name="max_S1S2_slope" description="Maximum gradient of S1-S2 curve" loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:107:5&#9;    max_S1S2_slope units dimensionless &quot;Maximum gradient of S1-S2 curve&quot;"/>
+  </outputs>
+  <plots loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:110:1&#9;plots {">
+    <plot loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:111:5&#9;    plot &quot;S1-S2 curve&quot; { APD90 against DI }">
+      <title>S1-S2 curve</title>
+      <x>DI</x>
+      <y>APD90</y>
+    </plot>
+    <plot loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:112:5&#9;    plot &quot;Action potential traces&quot; { membrane_voltage against time_1d }">
+      <title>Action potential traces</title>
+      <x>time_1d</x>
+      <y>membrane_voltage</y>
+    </plot>
+  </plots>
+</protocol>

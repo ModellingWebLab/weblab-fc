@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='ASCII'?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" xmlns:ns0="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" ns0:loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:1:1&#9;# Compact version of the test_S1S2 protocol">
+  <import source="S1S2.txt" mergeDefinitions="true" loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:5:1&#9;import &quot;S1S2.txt&quot; {">
+    <setInput name="steady_state_beats">
+      <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:6:26&#9;    steady_state_beats = 10">10</ns0:cn>
+    </setInput>
+    <setInput name="timecourse_duration">
+      <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:7:27&#9;    timecourse_duration = 2000">2000</ns0:cn>
+    </setInput>
+  </import>
+</protocol>
