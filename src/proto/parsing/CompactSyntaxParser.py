@@ -135,14 +135,18 @@ class Actions(object):
                 content = list()
             return self.Delegate(Actions.Symbol(symbol), [content])
         
+        def AddLoc(self, elt):
+            """Add our location information to the given element."""
+            elt.set('{%s}loc' % PROTO_NS, self.source_location)
+            return elt
+        
         def xml(self):
             """Main method to generate the XML syntax.
             Will add an attribute containing source location information where appropriate.
             """
             result = self._xml()
             if ET.iselement(result):
-                # Add source location attribute
-                result.set('{%s}loc' % PROTO_NS, self.source_location)
+                self.AddLoc(result)
             return result
         
         def _xml(self):
@@ -432,6 +436,38 @@ class Actions(object):
     class InputVariable(BaseGroupAction):
         def _xml(self):
             return P.specifyInputVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+    
+    class OutputVariable(BaseGroupAction):
+        def _xml(self):
+            return P.specifyOutputVariable(**self.TransferAttrs('name', 'units'))
+    
+    class DeclareVariable(BaseGroupAction):
+        def _xml(self):
+            return P.declareNewVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+    
+    class ModelEquation(BaseGroupAction):
+        def _xml(self):
+            assert len(self.tokens) == 2
+            if isinstance(self.tokens[0], Actions.Variable):
+                lhs = self.tokens[0].xml()
+            else:
+                # Assigning an ODE
+                assert len(self.tokens[0]) == 2
+                bvar = M.bvar(self.tokens[0][1].xml())
+                lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
+            rhs = self.tokens[1].xml()
+            return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
+    
+    class UnitsConversion(BaseGroupAction):
+        def _xml(self):
+            attrs = self.TransferAttrs('desiredDimensions', 'actualDimensions')
+            rule = self.tokens[-1].xml()
+            return P.unitsConversionRule(rule, **attrs)
+    
+    class ModelInterface(BaseGroupAction):
+        def _xml(self):
+            if len(self.tokens) > 0:
+                return P.modelInterface(*self.GetChildrenXml())
     
     ######################################################################
     # Other protocol language constructs
@@ -836,10 +872,13 @@ class CompactSyntaxParser(object):
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
                        'deci centi milli micro nano pico femto atto zepto yocto')
     _num_or_expr = p.originalTextFor(number | (oparen + expr + cparen))
-    unitRef = p.Group(Optional(_num_or_expr)("multiplier") + Optional(siPrefix)("prefix") + ncIdent("units") + Optional(p.Suppress('^') + number)("exponent")
+    unitRef = p.Group(Optional(_num_or_expr)("multiplier") + Optional(siPrefix)("prefix") + ncIdent("units")
+                      + Optional(p.Suppress('^') + number)("exponent")
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
-    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
-    units = (MakeKw('units') + obrace - OptionalDelimitedList(useImports | unitsDef, nl) + cbrace).setName('Units').setParseAction(Actions.Units)
+    unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")
+                       ).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
+    units = (MakeKw('units') + obrace - OptionalDelimitedList(useImports | unitsDef, nl) + cbrace
+             ).setName('Units').setParseAction(Actions.Units)
     
     # Model interface section
     #########################
@@ -851,15 +890,18 @@ class CompactSyntaxParser(object):
     inputVariable = p.Group(MakeKw('input') - ident("name") + Optional(unitsRef)("units")
                             + Optional(eq + number)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
     # Model outputs of interest, with optional units
-    outputVariable = p.Group(MakeKw('output') - ident + Optional(unitsRef)).setName('OutputVariable')
+    outputVariable = p.Group(MakeKw('output') - ident("name") + Optional(unitsRef)("units")
+                             ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
     # New variables added to the model, with optional initial value
-    newVariable = p.Group(MakeKw('var') - ncIdent + unitsRef + Optional(eq + number, default='')).setName('NewVariable')
+    newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
+                          ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
     # Adding or replacing equations in the model
-    modelEquation = p.Group(MakeKw('define') - (p.Group(MakeKw('diff') + Adjacent(oparen) - ident + p.Suppress(';') + ident + cparen) |
-                                                ident) + eq + expr).setName('AddOrReplaceEquation')
+    modelEquation = p.Group(MakeKw('define')
+                            - (p.Group(MakeKw('diff') + Adjacent(oparen) - identAsVar + p.Suppress(';') + identAsVar + cparen)
+                               | identAsVar) + eq + expr).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
-    unitsConversion = p.Group(MakeKw('convert') - ncIdent + MakeKw('to') + ncIdent +
-                              MakeKw('by') - lambdaExpr).setName('UnitsConversion')
+    unitsConversion = p.Group(MakeKw('convert') - ncIdent("actualDimensions") + MakeKw('to') + ncIdent("desiredDimensions") +
+                              MakeKw('by') - lambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
     
     modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace -
                              DelimitedMultiList([(useImports, True),
@@ -868,7 +910,8 @@ class CompactSyntaxParser(object):
                                                  (outputVariable, True),
                                                  (newVariable, True),
                                                  (modelEquation, True),
-                                                 (unitsConversion, True)], nl) + cbrace).setName('ModelInterface')
+                                                 (unitsConversion, True)], nl)
+                             + cbrace).setName('ModelInterface').setParseAction(Actions.ModelInterface)
     
     # Simulation definitions
     ########################

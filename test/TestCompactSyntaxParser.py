@@ -257,24 +257,34 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.inputVariable, 'input test:var', [['test:var']],
                           ('specifyInputVariable', {'name': 'test:var'}))
         
-        self.assertParses(csp.outputVariable, 'output test:var', [['test:var']])
-        self.assertParses(csp.outputVariable, 'output test:var units uname', [['test:var', 'uname']])
+        self.assertParses(csp.outputVariable, 'output test:var', [['test:var']],
+                          ('specifyOutputVariable', {'name': 'test:var'}))
+        self.assertParses(csp.outputVariable, 'output test:var units uname', [['test:var', 'uname']],
+                          ('specifyOutputVariable', {'name': 'test:var', 'units': 'uname'}))
         
-        self.assertParses(csp.newVariable, 'var varname units uname = 0', [['varname', 'uname', '0']])
-        self.assertParses(csp.newVariable, 'var varname units uname', [['varname', 'uname', '']])
+        self.assertParses(csp.newVariable, 'var varname units uname = 0', [['varname', 'uname', '0']],
+                          ('declareNewVariable', {'name': 'varname', 'units': 'uname', 'initial_value': '0'}))
+        self.assertParses(csp.newVariable, 'var varname units uname', [['varname', 'uname']],
+                          ('declareNewVariable', {'name': 'varname', 'units': 'uname'}))
         self.failIfParses(csp.newVariable, 'var prefix:varname units uname = 0')
         self.failIfParses(csp.newVariable, 'var varname = 0')
         self.failIfParses(csp.newVariable, 'var varname')
         
         self.assertParses(csp.modelEquation, 'define local_var = 1 + model:var',
-                          [['local_var', ['1', '+', 'model:var']]])
+                          [['local_var', ['1', '+', 'model:var']]],
+                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:local_var', ('apply', ['plus', 'cn:1', 'ci:model:var'])])]))
         self.assertParses(csp.modelEquation, 'define model:var = 2.5 / local_var',
-                          [['model:var', ['2.5', '/', 'local_var']]])
+                          [['model:var', ['2.5', '/', 'local_var']]],
+                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:model:var', ('apply', ['divide', 'cn:2.5', 'ci:local_var'])])]))
         self.assertParses(csp.modelEquation, 'define diff(oxmeta:membrane_voltage; oxmeta:time) = 1',
-                          [[['oxmeta:membrane_voltage', 'oxmeta:time'], '1']])
+                          [[['oxmeta:membrane_voltage', 'oxmeta:time'], '1']],
+                          ('addOrReplaceEquation', [('apply', ['eq', ('apply', ['diff', ('bvar', ['ci:oxmeta:time']),
+                                                                                'ci:oxmeta:membrane_voltage']), 'cn:1'])]))
         
         self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var',
-                          [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]])
+                          [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]],
+                          ('unitsConversionRule', {'desiredDimensions': 'uname2', 'actualDimensions': 'uname1'},
+                           [('lambda', [('bvar', ['ci:u']), ('apply', ['divide', 'ci:u', 'ci:model:var'])])]))
 
         self.assertParses(csp.modelInterface, """model interface {  # Comments can go here
     use imports ident
@@ -290,7 +300,17 @@ class TestCompactSyntaxParser(unittest.TestCase):
     convert u1 to u2 by lambda u: u * test:v3
 }""", [[['ident'], ['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
-        ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]])
+        ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]],
+                          ('modelInterface', [('useImports', {'prefix': 'ident'}),
+                                              ('setIndependentVariableUnits', {'units': 't'}),
+                                              ('specifyInputVariable', {'name': 'test:v1', 'initial_value': '0'}),
+                                              ('specifyInputVariable', {'name': 'test:v2', 'units': 'u'}),
+                                              ('specifyOutputVariable', {'name': 'test:time'}),
+                                              ('specifyOutputVariable', {'name': 'test:v3', 'units': 'u'}),
+                                              ('declareNewVariable', {'name': 'local', 'units': 'dimensionless', 'initial_value': '5'}),
+                                              ('addOrReplaceEquation', [('apply', ['eq', 'ci:test:v3', ('apply', ['times', 'ci:test:v2', 'ci:local'])])]),
+                                              ('unitsConversionRule', {'desiredDimensions': 'u2', 'actualDimensions': 'u1'},
+                                               [('lambda', [('bvar', ['ci:u']), ('apply', ['times', 'ci:u', 'ci:test:v3'])])])]))
         self.assertParses(csp.modelInterface, 'model interface {}', [[]])
         self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time']]])
         self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time']]])
