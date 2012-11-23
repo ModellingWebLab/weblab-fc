@@ -9,11 +9,12 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.core.pathentry">
 		<pathentry kind="mac" name="CHASTE_CVODE" path="" value=""/>
+		<pathentry kind="mac" name="CHASTE_SUNDIALS_VERSION" path="" value="20500"/>
 		<pathentry kind="src" path=""/>
 		<pathentry kind="out" path=""/>
 		<pathentry kind="prj" path="/Chaste"/>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 </cproject>
