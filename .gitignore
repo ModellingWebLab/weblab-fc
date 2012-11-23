@@ -1,0 +1,12 @@
+# Ignore patterns for git
+
+*~
+
+# Compiled files
+*.[oa]
+*.pyc
+/build/*
+
+# Eclipse stuff
+/.pydevproject
+/.settings
