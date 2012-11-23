@@ -51,11 +51,13 @@ import lxml.builder
 import lxml.etree as ET
 
 PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+MATHML_NS = "http://www.w3.org/1998/Math/MathML"
+CELLML_NS = "http://www.cellml.org/cellml/1.0#"
 PROTO_CSYM_BASE = "https://chaste.cs.ox.ac.uk/nss/protocol/"
 P = lxml.builder.ElementMaker(namespace=PROTO_NS)
-M = lxml.builder.ElementMaker(namespace="http://www.w3.org/1998/Math/MathML")
-CELLML = lxml.builder.ElementMaker(namespace="http://www.cellml.org/cellml/1.0#",
-                                   nsmap={'cellml': "http://www.cellml.org/cellml/1.0#"})
+M = lxml.builder.ElementMaker(namespace=MATHML_NS)
+CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
+                                   nsmap={'cellml': CELLML_NS})
 
 class Actions(object):
     """Container for parse actions."""
@@ -718,8 +720,8 @@ class Actions(object):
     class Protocol(BaseAction):
         """Parse action for a full protocol."""
         def _xml(self):
-            # Build namespace map
-            nsmap = {None: PROTO_NS}
+            # Build namespace map based on bindings in the protocol
+            nsmap = {'proto': PROTO_NS, 'm': MATHML_NS}
             if 'namespace' in self.tokens:
                 for prefix, uri in self.tokens['namespace']:
                     nsmap[prefix] = uri
@@ -1135,9 +1137,10 @@ class CompactSyntaxParser(object):
         return r
     
     def ParseFile(self, filename):
-        """Main entry point for parsing a complete protocol file."""
+        """Main entry point for parsing a complete protocol file; returns an ElementTree."""
         Actions.source_file = filename
-        return self._Try(self.protocol.parseFile, filename, parseAll=True)
+        xml_generator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
+        return ET.ElementTree(xml_generator.xml())
     
 
 ################################################################################

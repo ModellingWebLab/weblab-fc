@@ -1,284 +1,284 @@
 <?xml version='1.0' encoding='ASCII'?>
-<protocol xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" xmlns:ns0="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" ns0:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:1:1&#9;# Compact version of the test_while_loop protocol">
-  <inputs loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:6:1&#9;inputs {">
-    <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:1&#9;    num_iters = 5">
-      <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:1&#9;    num_iters = 5"/>
-      <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:5&#9;    num_iters = 5">
-        <ns0:eq/>
-        <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:5&#9;    num_iters = 5">num_iters</ns0:ci>
-        <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:17&#9;    num_iters = 5">5</ns0:cn>
-      </ns0:apply>
-    </ns0:apply>
-  </inputs>
-  <units loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:10:1&#9;units {">
-    <cellml:units name="ms" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:11:5&#9;    ms = milli second">
-      <cellml:unit units="second" prefix="milli" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:11:10&#9;    ms = milli second"/>
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:1:1&#9;# Compact version of the test_while_loop protocol">
+  <proto:inputs proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:6:1&#9;inputs {">
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:1&#9;    num_iters = 5">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:1&#9;    num_iters = 5"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:5&#9;    num_iters = 5">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:5&#9;    num_iters = 5">num_iters</m:ci>
+        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:7:17&#9;    num_iters = 5">5</m:cn>
+      </m:apply>
+    </m:apply>
+  </proto:inputs>
+  <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:10:1&#9;units {">
+    <cellml:units name="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:11:5&#9;    ms = milli second">
+      <cellml:unit units="second" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:11:10&#9;    ms = milli second"/>
     </cellml:units>
-    <cellml:units name="mV" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:12:5&#9;    mV = milli volt">
-      <cellml:unit units="volt" prefix="milli" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:12:10&#9;    mV = milli volt"/>
+    <cellml:units name="mV" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:12:5&#9;    mV = milli volt">
+      <cellml:unit units="volt" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:12:10&#9;    mV = milli volt"/>
     </cellml:units>
-    <cellml:units name="mV_per_ms" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:13:5&#9;    mV_per_ms = milli volt . milli second^-1">
-      <cellml:unit units="volt" prefix="milli" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:13:17&#9;    mV_per_ms = milli volt . milli second^-1"/>
-      <cellml:unit units="second" prefix="milli" exponent="-1" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:13:30&#9;    mV_per_ms = milli volt . milli second^-1"/>
+    <cellml:units name="mV_per_ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:13:5&#9;    mV_per_ms = milli volt . milli second^-1">
+      <cellml:unit units="volt" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:13:17&#9;    mV_per_ms = milli volt . milli second^-1"/>
+      <cellml:unit units="second" prefix="milli" exponent="-1" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:13:30&#9;    mV_per_ms = milli volt . milli second^-1"/>
     </cellml:units>
-  </units>
-  <modelInterface loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:16:1&#9;model interface {">
-    <setIndependentVariableUnits units="ms" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:17:5&#9;    independent var units ms"/>
-    <specifyOutputVariable units="mV" name="oxmeta:membrane_voltage" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:18:5&#9;    output oxmeta:membrane_voltage units mV"/>
-    <addOrReplaceEquation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
-      <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
-        <ns0:eq/>
-        <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
-          <ns0:diff/>
-          <ns0:bvar>
-            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:42&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:time</ns0:ci>
-          </ns0:bvar>
-          <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:17&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:membrane_voltage</ns0:ci>
-        </ns0:apply>
-        <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:57&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">1</ns0:cn>
-      </ns0:apply>
-    </addOrReplaceEquation>
-  </modelInterface>
-  <simulations loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:22:1&#9;tasks {">
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:25:5&#9;    simulation sim0 = timecourse {" prefix="sim0">
-      <uniformStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:9&#9;        range t units ms uniform 0:9">
-        <start>
-          <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:34&#9;        range t units ms uniform 0:9">0</ns0:cn>
-        </start>
-        <stop>
-          <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:36&#9;        range t units ms uniform 0:9">9</ns0:cn>
-        </stop>
-        <step>
-          <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:9&#9;        range t units ms uniform 0:9">1</ns0:cn>
-        </step>
-      </uniformStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:31:5&#9;    simulation sim1= timecourse {" prefix="sim1">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:9&#9;        range t units ms while t &lt; 10">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:9&#9;        range t units ms while t &lt; 10">
-          <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:32&#9;        range t units ms while t &lt; 10">
-            <ns0:lt/>
-            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:32&#9;        range t units ms while t &lt; 10">t</ns0:ci>
-            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:36&#9;        range t units ms while t &lt; 10">10</ns0:cn>
-          </ns0:apply>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:37:5&#9;    simulation sim2 = timecourse {" prefix="sim2">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:9&#9;        range t units ms while t &lt; num_iters">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:9&#9;        range t units ms while t &lt; num_iters">
-          <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:32&#9;        range t units ms while t &lt; num_iters">
-            <ns0:lt/>
-            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:32&#9;        range t units ms while t &lt; num_iters">t</ns0:ci>
-            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:36&#9;        range t units ms while t &lt; num_iters">num_iters</ns0:ci>
-          </ns0:apply>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:43:5&#9;    simulation sim3 = timecourse {" prefix="sim3">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:9&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:9&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-          <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-            <ns0:lt/>
-            <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-              <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
-              <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">sim3:membrane_voltage</ns0:ci>
-              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-                  <ns0:minus/>
-                  <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">t</ns0:ci>
-                  <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:56&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</ns0:cn>
-                </ns0:apply>
-                <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">0</ns0:cn>
-                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-                  <ns0:minus/>
-                  <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">t</ns0:ci>
-                  <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:56&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</ns0:cn>
-                </ns0:apply>
-              </ns0:apply>
-              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
-                <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</ns0:cn>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
-              </ns0:apply>
-            </ns0:apply>
-            <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:61&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
-              <ns0:minus/>
-              <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:61&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">num_iters</ns0:ci>
-              <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:73&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</ns0:cn>
-            </ns0:apply>
-          </ns0:apply>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:49:5&#9;    simulation sim4 = timecourse {" prefix="sim4">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:9&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:9&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-          <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-            <ns0:lt/>
-            <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-              <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-              <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">sim4:membrane_voltage</ns0:ci>
-              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:54&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                  <ns0:minus/>
-                  <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:55&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</ns0:cn>
-                </ns0:apply>
-                <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">0</ns0:cn>
-                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:54&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                  <ns0:minus/>
-                  <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:55&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</ns0:cn>
-                </ns0:apply>
-              </ns0:apply>
-              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-                <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</ns0:cn>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-              </ns0:apply>
-            </ns0:apply>
-            <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-              <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-              <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">sim3:membrane_voltage</ns0:ci>
-              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:82&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                  <ns0:minus/>
-                  <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:83&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</ns0:cn>
-                </ns0:apply>
-                <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">0</ns0:cn>
-                <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:82&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                  <ns0:minus/>
-                  <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:83&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</ns0:cn>
-                </ns0:apply>
-              </ns0:apply>
-              <ns0:apply loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-                <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</ns0:cn>
-                <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
-              </ns0:apply>
-            </ns0:apply>
-          </ns0:apply>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:59:5&#9;    simulation sim5 = timecourse {" prefix="sim5">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:9&#9;        range t units ms while oxmeta:time &lt; 9">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:9&#9;        range t units ms while oxmeta:time &lt; 9">
-          <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:32&#9;        range t units ms while oxmeta:time &lt; 9">
-            <ns0:lt/>
-            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:32&#9;        range t units ms while oxmeta:time &lt; 9">oxmeta:time</ns0:ci>
-            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:46&#9;        range t units ms while oxmeta:time &lt; 9">9</ns0:cn>
-          </ns0:apply>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:65:5&#9;    simulation sim_long = timecourse {" prefix="sim_long">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:9&#9;        range t units ms while t &lt; 3001">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:9&#9;        range t units ms while t &lt; 3001">
-          <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:32&#9;        range t units ms while t &lt; 3001">
-            <ns0:lt/>
-            <ns0:ci loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:32&#9;        range t units ms while t &lt; 3001">t</ns0:ci>
-            <ns0:cn loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:36&#9;        range t units ms while t &lt; 3001">3001</ns0:cn>
-          </ns0:apply>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-    <timecourseSimulation loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:71:5&#9;    simulation not_empty = timecourse {" prefix="not_empty">
-      <whileStepper units="ms" name="t" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:72:9&#9;        range t units ms while 0 # Always fails">
-        <condition loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:72:9&#9;        range t units ms while 0 # Always fails">
-          <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:72:32&#9;        range t units ms while 0 # Always fails">0</ns0:cn>
-        </condition>
-      </whileStepper>
-      <modifiers loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-        <setVariable loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
-          <when loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</when>
-          <name>oxmeta:membrane_voltage</name>
-          <value>
-            <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</ns0:cn>
-          </value>
-        </setVariable>
-      </modifiers>
-    </timecourseSimulation>
-  </simulations>
-  <outputs loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:77:1&#9;outputs {">
-    <raw ref="sim0:membrane_voltage" name="V0" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:78:5&#9;    V0 = sim0:membrane_voltage"/>
-    <raw ref="sim1:membrane_voltage" name="V1" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:79:5&#9;    V1 = sim1:membrane_voltage"/>
-    <raw ref="sim2:membrane_voltage" name="V2" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:80:5&#9;    V2 = sim2:membrane_voltage"/>
-    <raw ref="sim3:membrane_voltage" name="V3" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:81:5&#9;    V3 = sim3:membrane_voltage"/>
-    <raw ref="sim4:membrane_voltage" name="V4" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:82:5&#9;    V4 = sim4:membrane_voltage"/>
-    <raw ref="sim5:membrane_voltage" name="V5" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:83:5&#9;    V5 = sim5:membrane_voltage"/>
-    <raw ref="sim_long:membrane_voltage" name="V_3001" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:84:5&#9;    V_3001 = sim_long:membrane_voltage"/>
-    <raw ref="not_empty:membrane_voltage" name="V_empty" loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:85:5&#9;    V_empty = not_empty:membrane_voltage"/>
-  </outputs>
-</protocol>
+  </proto:units>
+  <proto:modelInterface proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:16:1&#9;model interface {">
+    <proto:setIndependentVariableUnits units="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:17:5&#9;    independent var units ms"/>
+    <proto:specifyOutputVariable units="mV" name="oxmeta:membrane_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:18:5&#9;    output oxmeta:membrane_voltage units mV"/>
+    <proto:addOrReplaceEquation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
+        <m:eq/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
+          <m:diff/>
+          <m:bvar>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:42&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:time</m:ci>
+          </m:bvar>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:17&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:membrane_voltage</m:ci>
+        </m:apply>
+        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:57&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">1</m:cn>
+      </m:apply>
+    </proto:addOrReplaceEquation>
+  </proto:modelInterface>
+  <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:22:1&#9;tasks {">
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:25:5&#9;    simulation sim0 = timecourse {" prefix="sim0">
+      <proto:uniformStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:9&#9;        range t units ms uniform 0:9">
+        <proto:start>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:34&#9;        range t units ms uniform 0:9">0</m:cn>
+        </proto:start>
+        <proto:stop>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:36&#9;        range t units ms uniform 0:9">9</m:cn>
+        </proto:stop>
+        <proto:step>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:26:9&#9;        range t units ms uniform 0:9">1</m:cn>
+        </proto:step>
+      </proto:uniformStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:27:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:31:5&#9;    simulation sim1= timecourse {" prefix="sim1">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:9&#9;        range t units ms while t &lt; 10">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:9&#9;        range t units ms while t &lt; 10">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:32&#9;        range t units ms while t &lt; 10">
+            <m:lt/>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:32&#9;        range t units ms while t &lt; 10">t</m:ci>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:32:36&#9;        range t units ms while t &lt; 10">10</m:cn>
+          </m:apply>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:33:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:37:5&#9;    simulation sim2 = timecourse {" prefix="sim2">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:9&#9;        range t units ms while t &lt; num_iters">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:9&#9;        range t units ms while t &lt; num_iters">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:32&#9;        range t units ms while t &lt; num_iters">
+            <m:lt/>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:32&#9;        range t units ms while t &lt; num_iters">t</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:38:36&#9;        range t units ms while t &lt; num_iters">num_iters</m:ci>
+          </m:apply>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:39:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:43:5&#9;    simulation sim3 = timecourse {" prefix="sim3">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:9&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:9&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+            <m:lt/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">sim3:membrane_voltage</m:ci>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+                  <m:minus/>
+                  <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">t</m:ci>
+                  <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:56&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</m:cn>
+                </m:apply>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">0</m:cn>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+                  <m:minus/>
+                  <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:54&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">t</m:ci>
+                  <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:56&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</m:cn>
+                </m:apply>
+              </m:apply>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</m:cn>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:32&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1"/>
+              </m:apply>
+            </m:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:61&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">
+              <m:minus/>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:61&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">num_iters</m:ci>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:44:73&#9;        range t units ms while sim3:membrane_voltage[t-1] &lt; num_iters - 1">1</m:cn>
+            </m:apply>
+          </m:apply>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:45:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:49:5&#9;    simulation sim4 = timecourse {" prefix="sim4">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:9&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:9&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+            <m:lt/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">sim4:membrane_voltage</m:ci>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:54&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                  <m:minus/>
+                  <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:55&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</m:cn>
+                </m:apply>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">0</m:cn>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:54&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                  <m:minus/>
+                  <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:55&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</m:cn>
+                </m:apply>
+              </m:apply>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</m:cn>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:32&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+              </m:apply>
+            </m:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">sim3:membrane_voltage</m:ci>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:82&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                  <m:minus/>
+                  <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:83&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</m:cn>
+                </m:apply>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">0</m:cn>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:82&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                  <m:minus/>
+                  <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:83&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</m:cn>
+                </m:apply>
+              </m:apply>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]">1</m:cn>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:50:60&#9;        range t units ms while sim4:membrane_voltage[-1] &lt; sim3:membrane_voltage[-1]"/>
+              </m:apply>
+            </m:apply>
+          </m:apply>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:51:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:59:5&#9;    simulation sim5 = timecourse {" prefix="sim5">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:9&#9;        range t units ms while oxmeta:time &lt; 9">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:9&#9;        range t units ms while oxmeta:time &lt; 9">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:32&#9;        range t units ms while oxmeta:time &lt; 9">
+            <m:lt/>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:32&#9;        range t units ms while oxmeta:time &lt; 9">oxmeta:time</m:ci>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:60:46&#9;        range t units ms while oxmeta:time &lt; 9">9</m:cn>
+          </m:apply>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:61:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:65:5&#9;    simulation sim_long = timecourse {" prefix="sim_long">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:9&#9;        range t units ms while t &lt; 3001">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:9&#9;        range t units ms while t &lt; 3001">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:32&#9;        range t units ms while t &lt; 3001">
+            <m:lt/>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:32&#9;        range t units ms while t &lt; 3001">t</m:ci>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:66:36&#9;        range t units ms while t &lt; 3001">3001</m:cn>
+          </m:apply>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:67:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:71:5&#9;    simulation not_empty = timecourse {" prefix="not_empty">
+      <proto:whileStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:72:9&#9;        range t units ms while 0 # Always fails">
+        <proto:condition proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:72:9&#9;        range t units ms while 0 # Always fails">
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:72:32&#9;        range t units ms while 0 # Always fails">0</m:cn>
+        </proto:condition>
+      </proto:whileStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:9&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+        <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:21&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:23&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">AT_START_ONLY</proto:when>
+          <proto:name>oxmeta:membrane_voltage</proto:name>
+          <proto:value>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:73:60&#9;        modifiers { at start set oxmeta:membrane_voltage = 0 }">0</m:cn>
+          </proto:value>
+        </proto:setVariable>
+      </proto:modifiers>
+    </proto:timecourseSimulation>
+  </proto:simulations>
+  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:77:1&#9;outputs {">
+    <proto:raw ref="sim0:membrane_voltage" name="V0" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:78:5&#9;    V0 = sim0:membrane_voltage"/>
+    <proto:raw ref="sim1:membrane_voltage" name="V1" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:79:5&#9;    V1 = sim1:membrane_voltage"/>
+    <proto:raw ref="sim2:membrane_voltage" name="V2" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:80:5&#9;    V2 = sim2:membrane_voltage"/>
+    <proto:raw ref="sim3:membrane_voltage" name="V3" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:81:5&#9;    V3 = sim3:membrane_voltage"/>
+    <proto:raw ref="sim4:membrane_voltage" name="V4" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:82:5&#9;    V4 = sim4:membrane_voltage"/>
+    <proto:raw ref="sim5:membrane_voltage" name="V5" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:83:5&#9;    V5 = sim5:membrane_voltage"/>
+    <proto:raw ref="sim_long:membrane_voltage" name="V_3001" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:84:5&#9;    V_3001 = sim_long:membrane_voltage"/>
+    <proto:raw ref="not_empty:membrane_voltage" name="V_empty" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:85:5&#9;    V_empty = not_empty:membrane_voltage"/>
+  </proto:outputs>
+</proto:protocol>

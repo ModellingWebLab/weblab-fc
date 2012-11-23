@@ -1,93 +1,93 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:1:1&#9;# Compact syntax version of the ICaL protocol">
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:1:1&#9;# Compact syntax version of the ICaL protocol">
   <proto:inputs proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:7:1&#9;inputs {">
-    <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:1&#9;    holding_potential = -50">
-      <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:1&#9;    holding_potential = -50"/>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:5&#9;    holding_potential = -50">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:5&#9;    holding_potential = -50">holding_potential</ns0:ci>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:25&#9;    holding_potential = -50">
-          <ns0:minus/>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:26&#9;    holding_potential = -50">50</ns0:cn>
-        </ns0:apply>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:10:5&#9;    steady_state_time = 10000">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:10:5&#9;    steady_state_time = 10000">steady_state_time</ns0:ci>
-        <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:10:25&#9;    steady_state_time = 10000">10000</ns0:cn>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:5&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:5&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">test_potentials</ns0:ci>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:23&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:25&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:26&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">45.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:33&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:34&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">40.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:41&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:42&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">35.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:49&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:50&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">30.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:57&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:58&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">25.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:65&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:66&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">20.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:73&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:74&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">15.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:81&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:82&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">10.01</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:89&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
-            <ns0:minus/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:90&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">5.01</ns0:cn>
-          </ns0:apply>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:25&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">0.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:32&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">5.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:38&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">10.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:45&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">15.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:52&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">20.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:59&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">25.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:66&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">30.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:73&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">35.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:80&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">40.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:87&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">45.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:94&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">50.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:101&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">55.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:25&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">60.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:32&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">65.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:39&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">70.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:46&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">75.01</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:53&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">79.99</ns0:cn>
-        </ns0:apply>
-      </ns0:apply>
-    </ns0:apply>
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:1&#9;    holding_potential = -50">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:1&#9;    holding_potential = -50"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:5&#9;    holding_potential = -50">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:5&#9;    holding_potential = -50">holding_potential</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:25&#9;    holding_potential = -50">
+          <m:minus/>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:8:26&#9;    holding_potential = -50">50</m:cn>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:10:5&#9;    steady_state_time = 10000">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:10:5&#9;    steady_state_time = 10000">steady_state_time</m:ci>
+        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:10:25&#9;    steady_state_time = 10000">10000</m:cn>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:5&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:5&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">test_potentials</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:23&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:25&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:26&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">45.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:33&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:34&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">40.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:41&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:42&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">35.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:49&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:50&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">30.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:57&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:58&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">25.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:65&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:66&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">20.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:73&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:74&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">15.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:81&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:82&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">10.01</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:89&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">
+            <m:minus/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:12:90&#9;    test_potentials = [ -45.01, -40.01, -35.01, -30.01, -25.01, -20.01, -15.01, -10.01, -5.01,">5.01</m:cn>
+          </m:apply>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:25&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">0.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:32&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">5.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:38&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">10.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:45&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">15.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:52&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">20.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:59&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">25.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:66&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">30.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:73&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">35.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:80&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">40.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:87&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">45.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:94&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">50.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:13:101&#9;                        0.01,  5.01, 10.01, 15.01, 20.01, 25.01, 30.01, 35.01, 40.01, 45.01, 50.01, 55.01,">55.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:25&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">60.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:32&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">65.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:39&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">70.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:46&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">75.01</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:14:53&#9;                        60.01, 65.01, 70.01, 75.01, 79.99 ]">79.99</m:cn>
+        </m:apply>
+      </m:apply>
+    </m:apply>
   </proto:inputs>
   <proto:import source="../../../src/proto/library/BasicLibrary.xml" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:17:1&#9;import std = &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
   <proto:library proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:19:1&#9;library {">
-    <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">
-      <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration"/>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">default_Cao</ns0:ci>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:19&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">sim:oxmeta:extracellular_calcium_concentration</ns0:ci>
-      </ns0:apply>
-    </ns0:apply>
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">default_Cao</m:ci>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:20:19&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">sim:oxmeta:extracellular_calcium_concentration</m:ci>
+      </m:apply>
+    </m:apply>
   </proto:library>
   <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:23:1&#9;units {">
     <cellml:units name="mV" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:24:5&#9;    mV = milli volt">
@@ -121,77 +121,77 @@
     <proto:specifyOutputVariable units="ms" name="oxmeta:time" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:39:5&#9;    output oxmeta:time units ms"/>
     <proto:declareNewVariable units="uF_per_cm2" name="chaste_membrane_capacitance" initial_value="1" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:41:5&#9;    var chaste_membrane_capacitance units uF_per_cm2 = 1"/>
     <proto:unitsConversionRule desiredDimensions="uA_per_cm2" actualDimensions="A_per_F" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:5&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">
-      <ns0:lambda xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:38&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">
-        <ns0:bvar>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:45&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">rhs</ns0:ci>
-        </ns0:bvar>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:50&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">
-          <ns0:times/>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:50&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">rhs</ns0:ci>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:56&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">chaste_membrane_capacitance</ns0:ci>
-        </ns0:apply>
-      </ns0:lambda>
+      <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:38&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">
+        <m:bvar>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:45&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">rhs</m:ci>
+        </m:bvar>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:50&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">
+          <m:times/>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:50&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">rhs</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:43:56&#9;    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance">chaste_membrane_capacitance</m:ci>
+        </m:apply>
+      </m:lambda>
     </proto:unitsConversionRule>
     <proto:unitsConversionRule desiredDimensions="A_per_F" actualDimensions="uA_per_cm2" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:5&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">
-      <ns0:lambda xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:38&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">
-        <ns0:bvar>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:45&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">rhs</ns0:ci>
-        </ns0:bvar>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:50&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">
-          <ns0:divide/>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:50&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">rhs</ns0:ci>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:56&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">chaste_membrane_capacitance</ns0:ci>
-        </ns0:apply>
-      </ns0:lambda>
+      <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:38&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">
+        <m:bvar>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:45&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">rhs</m:ci>
+        </m:bvar>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:50&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">
+          <m:divide/>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:50&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">rhs</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:44:56&#9;    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance">chaste_membrane_capacitance</m:ci>
+        </m:apply>
+      </m:lambda>
     </proto:unitsConversionRule>
     <proto:unitsConversionRule desiredDimensions="uA_per_cm2" actualDimensions="microamps" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:5&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
-      <ns0:lambda xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:40&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
-        <ns0:bvar>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:47&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">rhs</ns0:ci>
-        </ns0:bvar>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:52&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
-          <ns0:times/>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:53&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
-            <ns0:divide/>
-            <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:53&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">rhs</ns0:ci>
-            <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:59&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">oxmeta:membrane_capacitance</ns0:ci>
-          </ns0:apply>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:90&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">chaste_membrane_capacitance</ns0:ci>
-        </ns0:apply>
-      </ns0:lambda>
+      <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:40&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
+        <m:bvar>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:47&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">rhs</m:ci>
+        </m:bvar>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:52&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
+          <m:times/>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:53&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">
+            <m:divide/>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:53&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">rhs</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:59&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">oxmeta:membrane_capacitance</m:ci>
+          </m:apply>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:45:90&#9;    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance">chaste_membrane_capacitance</m:ci>
+        </m:apply>
+      </m:lambda>
     </proto:unitsConversionRule>
     <proto:unitsConversionRule desiredDimensions="microamps" actualDimensions="uA_per_cm2" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:5&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
-      <ns0:lambda xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:40&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
-        <ns0:bvar>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:47&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">rhs</ns0:ci>
-        </ns0:bvar>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:52&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
-          <ns0:divide/>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:53&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
-            <ns0:times/>
-            <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:53&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">rhs</ns0:ci>
-            <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:59&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">oxmeta:membrane_capacitance</ns0:ci>
-          </ns0:apply>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:90&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">chaste_membrane_capacitance</ns0:ci>
-        </ns0:apply>
-      </ns0:lambda>
+      <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:40&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
+        <m:bvar>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:47&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">rhs</m:ci>
+        </m:bvar>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:52&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
+          <m:divide/>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:53&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">
+            <m:times/>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:53&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">rhs</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:59&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">oxmeta:membrane_capacitance</m:ci>
+          </m:apply>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:46:90&#9;    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance">chaste_membrane_capacitance</m:ci>
+        </m:apply>
+      </m:lambda>
     </proto:unitsConversionRule>
   </proto:modelInterface>
   <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:49:1&#9;tasks {">
     <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:51:5&#9;    simulation timecourse {">
       <proto:vectorStepper units="ms" name="time" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:9&#9;        range time units ms vector [0, steady_state_time]">
-        <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:36&#9;        range time units ms vector [0, steady_state_time]">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:37&#9;        range time units ms vector [0, steady_state_time]">0</ns0:cn>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:40&#9;        range time units ms vector [0, steady_state_time]">steady_state_time</ns0:ci>
-        </ns0:apply>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:36&#9;        range time units ms vector [0, steady_state_time]">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:37&#9;        range time units ms vector [0, steady_state_time]">0</m:cn>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:52:40&#9;        range time units ms vector [0, steady_state_time]">steady_state_time</m:ci>
+        </m:apply>
       </proto:vectorStepper>
       <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:53:9&#9;        modifiers {">
         <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:54:13&#9;            at start set oxmeta:membrane_voltage = holding_potential">
           <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:54:15&#9;            at start set oxmeta:membrane_voltage = holding_potential">AT_START_ONLY</proto:when>
           <proto:name>oxmeta:membrane_voltage</proto:name>
           <proto:value>
-            <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:54:52&#9;            at start set oxmeta:membrane_voltage = holding_potential">holding_potential</ns0:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:54:52&#9;            at start set oxmeta:membrane_voltage = holding_potential">holding_potential</m:ci>
           </proto:value>
         </proto:setVariable>
         <proto:saveState proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:55:13&#9;            at end save as holding_state">
@@ -202,29 +202,29 @@
     </proto:timecourseSimulation>
     <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:60:5&#9;    simulation sim = nested {" prefix="sim">
       <proto:vectorStepper units="dimensionless" name="step_calcium_ratio" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:9&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">
-        <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:61&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:62&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">0.5</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:67&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">1.0</ns0:cn>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:72&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">1.5</ns0:cn>
-        </ns0:apply>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:61&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:62&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">0.5</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:67&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">1.0</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:61:72&#9;        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]">1.5</m:cn>
+        </m:apply>
       </proto:vectorStepper>
       <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:62:9&#9;        modifiers {">
         <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:13&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">
           <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:15&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">EVERY_LOOP</proto:when>
           <proto:name>oxmeta:extracellular_calcium_concentration</proto:name>
           <proto:value>
-            <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:75&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">
-              <ns0:times/>
-              <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:75&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">step_calcium_ratio</ns0:ci>
-              <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:96&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">default_Cao</ns0:ci>
-            </ns0:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:75&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">
+              <m:times/>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:75&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">step_calcium_ratio</m:ci>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:96&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao">default_Cao</m:ci>
+            </m:apply>
           </proto:value>
         </proto:setVariable>
       </proto:modifiers>
       <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:66:15&#9;        nests simulation nested {">
         <proto:vectorStepper units="mV" name="step_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:67:13&#9;            range step_voltage units mV vector test_potentials">
-          <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:67:48&#9;            range step_voltage units mV vector test_potentials">test_potentials</ns0:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:67:48&#9;            range step_voltage units mV vector test_potentials">test_potentials</m:ci>
         </proto:vectorStepper>
         <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:68:13&#9;            modifiers {">
           <proto:resetState proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:70:17&#9;                at each loop reset to holding_state">
@@ -235,23 +235,23 @@
             <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:71:19&#9;                at each loop set oxmeta:membrane_voltage = holding_potential">EVERY_LOOP</proto:when>
             <proto:name>oxmeta:membrane_voltage</proto:name>
             <proto:value>
-              <ns0:ci xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:71:60&#9;                at each loop set oxmeta:membrane_voltage = holding_potential">holding_potential</ns0:ci>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:71:60&#9;                at each loop set oxmeta:membrane_voltage = holding_potential">holding_potential</m:ci>
             </proto:value>
           </proto:setVariable>
         </proto:modifiers>
         <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:73:19&#9;            nests simulation timecourse {">
           <proto:uniformStepper units="ms" name="time" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:17&#9;                range time units ms uniform -10:0.01:500">
             <proto:start>
-              <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:45&#9;                range time units ms uniform -10:0.01:500">
-                <ns0:minus/>
-                <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:46&#9;                range time units ms uniform -10:0.01:500">10</ns0:cn>
-              </ns0:apply>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:45&#9;                range time units ms uniform -10:0.01:500">
+                <m:minus/>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:46&#9;                range time units ms uniform -10:0.01:500">10</m:cn>
+              </m:apply>
             </proto:start>
             <proto:stop>
-              <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:54&#9;                range time units ms uniform -10:0.01:500">500</ns0:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:54&#9;                range time units ms uniform -10:0.01:500">500</m:cn>
             </proto:stop>
             <proto:step>
-              <ns0:cn xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:49&#9;                range time units ms uniform -10:0.01:500">0.01</ns0:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:74:49&#9;                range time units ms uniform -10:0.01:500">0.01</m:cn>
             </proto:step>
           </proto:uniformStepper>
           <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:75:17&#9;                modifiers {">
@@ -259,26 +259,26 @@
               <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:76:23&#9;                    at each loop set oxmeta:membrane_voltage = \">EVERY_LOOP</proto:when>
               <proto:name>oxmeta:membrane_voltage</proto:name>
               <proto:value>
-                <ns0:piecewise xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:25&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
-                  <ns0:piece>
-                    <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:61&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">step_voltage</ns0:ci>
-                    <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:28&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
-                      <ns0:lt/>
-                      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:28&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
-                        <ns0:abs/>
-                        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:39&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
-                          <ns0:minus/>
-                          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:39&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">time</ns0:ci>
-                          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:46&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">0</ns0:cn>
-                        </ns0:apply>
-                      </ns0:apply>
-                      <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:51&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">1e-6</ns0:cn>
-                    </ns0:apply>
-                  </ns0:piece>
-                  <ns0:otherwise>
-                    <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:79&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">oxmeta:membrane_voltage</ns0:ci>
-                  </ns0:otherwise>
-                </ns0:piecewise>
+                <m:piecewise proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:25&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
+                  <m:piece>
+                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:61&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">step_voltage</m:ci>
+                    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:28&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
+                      <m:lt/>
+                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:28&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
+                        <m:abs/>
+                        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:39&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">
+                          <m:minus/>
+                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:39&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">time</m:ci>
+                          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:46&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">0</m:cn>
+                        </m:apply>
+                      </m:apply>
+                      <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:51&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">1e-6</m:cn>
+                    </m:apply>
+                  </m:piece>
+                  <m:otherwise>
+                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:77:79&#9;                        if MathML:abs(time - 0) &lt; 1e-6 then step_voltage else oxmeta:membrane_voltage">oxmeta:membrane_voltage</m:ci>
+                  </m:otherwise>
+                </m:piecewise>
               </proto:value>
             </proto:setVariable>
           </proto:modifiers>
@@ -287,89 +287,89 @@
     </proto:nestedSimulation>
   </proto:simulations>
   <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:84:1&#9;post-processing {">
-    <ns0:apply xmlns:ns0="http://www.w3.org/1998/Math/MathML" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:84:1&#9;post-processing {">
-      <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:84:1&#9;post-processing {"/>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:5&#9;    assert sim:time.IS_ARRAY">
-        <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:5&#9;    assert sim:time.IS_ARRAY"/>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:12&#9;    assert sim:time.IS_ARRAY">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:12&#9;    assert sim:time.IS_ARRAY">IS_ARRAY</ns0:csymbol>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:12&#9;    assert sim:time.IS_ARRAY">sim:time</ns0:ci>
-        </ns0:apply>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:5&#9;    assert sim:membrane_voltage.IS_ARRAY">
-        <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:5&#9;    assert sim:membrane_voltage.IS_ARRAY"/>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:12&#9;    assert sim:membrane_voltage.IS_ARRAY">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:12&#9;    assert sim:membrane_voltage.IS_ARRAY">IS_ARRAY</ns0:csymbol>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:12&#9;    assert sim:membrane_voltage.IS_ARRAY">sim:membrane_voltage</ns0:ci>
-        </ns0:apply>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:5&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">
-        <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:5&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY"/>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:12&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:12&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">IS_ARRAY</ns0:csymbol>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:12&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">sim:membrane_L_type_calcium_current</ns0:ci>
-        </ns0:apply>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:5&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:5&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">membrane_L_type_calcium_tail_current</ns0:ci>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:44&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:44&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">std:After</ns0:ci>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:54&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">sim:membrane_L_type_calcium_current</ns0:ci>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:91&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">sim:time</ns0:ci>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:101&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">0</ns0:cn>
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:104&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)"/>
-        </ns0:apply>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:5&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:5&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">min_LCC</ns0:ci>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:15&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:15&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">std:RemoveDim</ns0:ci>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:29&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">
-            <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:29&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">std:Min</ns0:ci>
-            <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:37&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">membrane_L_type_calcium_tail_current</ns0:ci>
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:75&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)"/>
-          </ns0:apply>
-          <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:85&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">2</ns0:cn>
-        </ns0:apply>
-      </ns0:apply>
-      <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:5&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-        <ns0:eq/>
-        <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:5&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">final_membrane_voltage</ns0:ci>
-        <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-          <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
-          <ns0:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">sim:membrane_voltage</ns0:ci>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:51&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">2</ns0:cn>
-            <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:53&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-              <ns0:minus/>
-              <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:54&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">1</ns0:cn>
-            </ns0:apply>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</ns0:cn>
-            <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:53&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-              <ns0:minus/>
-              <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:54&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">1</ns0:cn>
-            </ns0:apply>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:57&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</ns0:cn>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:59&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</ns0:cn>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</ns0:cn>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:59&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</ns0:cn>
-          </ns0:apply>
-          <ns0:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
-            <ns0:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">1</ns0:cn>
-            <ns0:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
-          </ns0:apply>
-        </ns0:apply>
-      </ns0:apply>
-    </ns0:apply>
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:84:1&#9;post-processing {">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:84:1&#9;post-processing {"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:5&#9;    assert sim:time.IS_ARRAY">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:5&#9;    assert sim:time.IS_ARRAY"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:12&#9;    assert sim:time.IS_ARRAY">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:12&#9;    assert sim:time.IS_ARRAY">IS_ARRAY</m:csymbol>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:86:12&#9;    assert sim:time.IS_ARRAY">sim:time</m:ci>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:5&#9;    assert sim:membrane_voltage.IS_ARRAY">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:5&#9;    assert sim:membrane_voltage.IS_ARRAY"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:12&#9;    assert sim:membrane_voltage.IS_ARRAY">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:12&#9;    assert sim:membrane_voltage.IS_ARRAY">IS_ARRAY</m:csymbol>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:87:12&#9;    assert sim:membrane_voltage.IS_ARRAY">sim:membrane_voltage</m:ci>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:5&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:5&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:12&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:12&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">IS_ARRAY</m:csymbol>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:88:12&#9;    assert sim:membrane_L_type_calcium_current.IS_ARRAY">sim:membrane_L_type_calcium_current</m:ci>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:5&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:5&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">membrane_L_type_calcium_tail_current</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:44&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:44&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">std:After</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:54&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">sim:membrane_L_type_calcium_current</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:91&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">sim:time</m:ci>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:101&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)">0</m:cn>
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:91:104&#9;    membrane_L_type_calcium_tail_current = std:After(sim:membrane_L_type_calcium_current, sim:time, 0, default)"/>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:5&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:5&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">min_LCC</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:15&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:15&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">std:RemoveDim</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:29&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:29&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">std:Min</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:37&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">membrane_L_type_calcium_tail_current</m:ci>
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:75&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)"/>
+          </m:apply>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:94:85&#9;    min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)">2</m:cn>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:5&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:5&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">final_membrane_voltage</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">sim:membrane_voltage</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:51&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">2</m:cn>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:53&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+              <m:minus/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:54&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">1</m:cn>
+            </m:apply>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</m:cn>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:53&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+              <m:minus/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:54&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">1</m:cn>
+            </m:apply>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:57&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:59&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:59&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">0</m:cn>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]">1</m:cn>
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:98:30&#9;    final_membrane_voltage = sim:membrane_voltage[2$-1][0$0][*$:]"/>
+          </m:apply>
+        </m:apply>
+      </m:apply>
+    </m:apply>
   </proto:post-processing>
   <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:101:1&#9;outputs {">
     <proto:raw ref="sim:extracellular_calcium_concentration" name="extracellular_calcium_concentration" description="Extracellular calcium concentration" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:102:5&#9;    extracellular_calcium_concentration = sim:extracellular_calcium_concentration &quot;Extracellular calcium concentration&quot;"/>

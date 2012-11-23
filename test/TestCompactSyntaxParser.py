@@ -31,11 +31,14 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import difflib
 import filecmp
 import glob
+import itertools
 import os
 import unittest
 import sys
+import time
 
 # Import the module to test
 sys.path[0:0] = ['python/pycml', 'projects/FunctionalCuration/src/proto/parsing']
@@ -117,6 +120,33 @@ class TestCompactSyntaxParser(unittest.TestCase):
         """Utility method to test that a given grammar fails to parse an input."""
         strict_grammar = grammar + strict_string_end
         self.assertRaises(CSP.p.ParseBaseException, strict_grammar.parseString, input)
+    
+    def assertXmlEqual(self, newElement, refElement):
+        """Utility method for comparing two XML elements."""
+        self.assertEqual(newElement.tag, refElement.tag)
+        def Strip(text):
+            if isinstance(text, str):
+                text = text.strip()
+            return text or None
+        self.assertEqual(len(newElement), len(refElement))
+        self.assertEqual(Strip(newElement.text), Strip(refElement.text))
+        self.assertEqual(Strip(newElement.tail), Strip(refElement.tail))
+        self.assertEqual(sorted(newElement.attrib.items()), sorted(refElement.attrib.items()))
+        for newChild, refChild in itertools.izip(newElement, refElement):
+            self.assertXmlEqual(newChild, refChild)
+    
+    def assertFilesMatch(self, newFilePath, refFilePath):
+        """Utility method to check that two files have matching contents."""
+        if not filecmp.cmp(newFilePath, refFilePath):
+            # Matching failed, so print something informative
+            context_lines = 3
+            from_date = time.ctime(os.stat(refFilePath).st_mtime)
+            to_date = time.ctime(os.stat(newFilePath).st_mtime)
+            for line in difflib.unified_diff(open(refFilePath).readlines(), open(newFilePath).readlines(),
+                                             refFilePath, newFilePath,
+                                             from_date, to_date, n=context_lines):
+                print line,
+            self.fail("Output file '%s' does not match reference file '%s'" % (newFilePath, refFilePath))
         
     def TestParsingIdentifiers(self):
         self.assertParses(csp.ncIdentAsVar, 'abc', ['abc'], 'ci:abc')
@@ -933,7 +963,6 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
                                                           ('apply', ['csymbol-assert', ('apply', ['gt', 'ci:a', 'cn:5'])])])]))
     
     def TestParsingFullProtocols(self):
-        # I won't compare against expected values for these at this stage!  Eventually we could compare against the XML versions.
         test_folder = 'projects/FunctionalCuration/test/protocols/compact'
         ref_folder = 'projects/FunctionalCuration/test/data/CompactSyntaxParser'
         output_folder = os.path.join(CHASTE_TEST_OUTPUT, 'TestCompactSyntaxParser')
@@ -944,15 +973,15 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
             proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
             print proto_base, '...'
-            parsed = csp().ParseFile(proto_filename)[0]
-            self.assert_(hasattr(parsed, 'xml') and callable(parsed.xml))
+            parsed_tree = csp().ParseFile(proto_filename)
+            # We write to file for easy creation of new reference versions
             output_file_path = os.path.join(output_folder, proto_base + '.xml')
             output_file = open(output_file_path, 'w')
-            CSP.ET.ElementTree(parsed.xml()).write(output_file, pretty_print=True, xml_declaration=True)
+            parsed_tree.write(output_file, pretty_print=True, xml_declaration=True)
             output_file.close()
             ref_file_path = os.path.join(ref_folder, proto_base + '.xml')
             if os.path.exists(ref_file_path):
-                self.assertTrue(filecmp.cmp(output_file_path, ref_file_path))
+                self.assertXmlEqual(parsed_tree.getroot(), CSP.ET.parse(ref_file_path).getroot())
         CSP.Actions.source_file = '' # Avoid the last name leaking to subsequent tests
 
     def TestZzzPackratWasUsed(self):
