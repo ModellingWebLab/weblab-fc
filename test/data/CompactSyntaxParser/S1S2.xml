@@ -187,10 +187,10 @@
             </m:apply>
           </m:piece>
           <m:otherwise>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude">
               <m:times/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">0</m:cn>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:66&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 * amplitude  # TODO: 0 should have units dimensionless">amplitude</m:ci>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude" xmlns:cellml="http://www.cellml.org/cellml/1.0#" cellml:units="dimensionless">0</m:cn>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:66&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude">amplitude</m:ci>
             </m:apply>
           </m:otherwise>
         </m:piecewise>

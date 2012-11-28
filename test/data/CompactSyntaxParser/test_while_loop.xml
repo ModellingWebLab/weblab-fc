@@ -35,7 +35,7 @@
           </m:bvar>
           <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:17&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:membrane_voltage</m:ci>
         </m:apply>
-        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:57&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">1</m:cn>
+        <m:cn cellml:units="mV_per_ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:19:57&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">1</m:cn>
       </m:apply>
     </proto:addOrReplaceEquation>
   </proto:modelInterface>

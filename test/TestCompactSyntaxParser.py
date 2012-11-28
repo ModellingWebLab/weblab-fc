@@ -53,6 +53,10 @@ def X2S(xml):
     """Serialize XML to a compact string."""
     return CSP.ET.tostring(xml, pretty_print=False)
 
+def WithUnits(base, units):
+    """Shorthand for generating the test case for a number with units."""
+    return (base, {'{%s}units' % CSP.CELLML_NS: units})    
+
 class TestCompactSyntaxParser(unittest.TestCase):
     def checkParseResults(self, actual, expected):
         """Compare parse results to expected strings.
@@ -78,7 +82,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
         ending = '}' + localName
         self.assertEqual(xmlElement.tag[-len(ending):], ending, '%s does not have local name %s' % (xmlElement.tag, localName))
     
-    def checkXml(self, actualXml, expectedXml):
+    def checkXml(self, actualXml, expectedXml, checkEmpty=True):
         if isinstance(expectedXml, str):
             if ':' in expectedXml:
                 expectedXml, content = expectedXml.split(':', 1)
@@ -87,10 +91,11 @@ class TestCompactSyntaxParser(unittest.TestCase):
                 self.assertHasLocalName(actualXml, 'csymbol')
                 expectedXml = ('csymbol', {'definitionURL': 'https://chaste.cs.ox.ac.uk/nss/protocol/'+expectedXml[8:]})
             else:
-                self.assertEqual(len(actualXml), 0, '%s has unexpected children' % X2S(actualXml))
+                if checkEmpty:
+                    self.assertEqual(len(actualXml), 0, '%s has unexpected children' % X2S(actualXml))
                 self.assertHasLocalName(actualXml, expectedXml)
         if isinstance(expectedXml, tuple):
-            self.assertHasLocalName(actualXml, expectedXml[0])
+            self.checkXml(actualXml, expectedXml[0], checkEmpty=False)
             for children_or_attrs in expectedXml[1:]:
                 if isinstance(children_or_attrs, list): # Child elements
                     self.assertEqual(len(actualXml), len(children_or_attrs), '%s != %s' % (X2S(actualXml), children_or_attrs))
@@ -131,6 +136,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertEqual(len(newElement), len(refElement))
         self.assertEqual(Strip(newElement.text), Strip(refElement.text))
         self.assertEqual(Strip(newElement.tail), Strip(refElement.tail))
+        newElement.attrib.pop('{%s}loc' % CSP.PROTO_NS, None) # Remove loc attribute if present
+        refElement.attrib.pop('{%s}loc' % CSP.PROTO_NS, None) # Remove loc attribute if present
         self.assertEqual(sorted(newElement.attrib.items()), sorted(refElement.attrib.items()))
         for newChild, refChild in itertools.izip(newElement, refElement):
             self.assertXmlEqual(newChild, refChild)
@@ -175,6 +182,14 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.number, '123.')
         self.failIfParses(csp.number, '+123')
         self.failIfParses(csp.number, '1E3')
+    
+    def TestParsingNumbersWithUnits(self):
+        self.assertParses(csp.number, '123 :: dimensionless', ['123', 'dimensionless'])
+        self.assertParses(csp.number, '-4e5::mA', ['-4e5', 'mA'])
+        self.assertParses(csp.expr, '123 :: dimensionless', ['123'], WithUnits('cn:123', 'dimensionless'))
+        self.assertParses(csp.expr, '4.6e5::mA', ['4.6e5'], WithUnits('cn:4.6e5', 'mA'))
+        self.failIfParses(csp.number, '123 :: ')
+        self.failIfParses(csp.number, '123 :: prefix:units')
     
     def TestParsingComments(self):
         self.assertParses(csp.comment, '# blah blah', [])
@@ -301,16 +316,19 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.newVariable, 'var varname = 0')
         self.failIfParses(csp.newVariable, 'var varname')
         
-        self.assertParses(csp.modelEquation, 'define local_var = 1 + model:var',
+        self.assertParses(csp.modelEquation, 'define local_var = 1::U + model:var',
                           [['local_var', ['1', '+', 'model:var']]],
-                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:local_var', ('apply', ['plus', 'cn:1', 'ci:model:var'])])]))
-        self.assertParses(csp.modelEquation, 'define model:var = 2.5 / local_var',
+                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:local_var',
+                                                               ('apply', ['plus', WithUnits('cn:1', 'U'), 'ci:model:var'])])]))
+        self.assertParses(csp.modelEquation, 'define model:var = 2.5 :: units / local_var',
                           [['model:var', ['2.5', '/', 'local_var']]],
-                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:model:var', ('apply', ['divide', 'cn:2.5', 'ci:local_var'])])]))
-        self.assertParses(csp.modelEquation, 'define diff(oxmeta:membrane_voltage; oxmeta:time) = 1',
+                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:model:var',
+                                                               ('apply', ['divide', WithUnits('cn:2.5', 'units'), 'ci:local_var'])])]))
+        self.assertParses(csp.modelEquation, 'define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms',
                           [[['oxmeta:membrane_voltage', 'oxmeta:time'], '1']],
                           ('addOrReplaceEquation', [('apply', ['eq', ('apply', ['diff', ('bvar', ['ci:oxmeta:time']),
-                                                                                'ci:oxmeta:membrane_voltage']), 'cn:1'])]))
+                                                                                'ci:oxmeta:membrane_voltage']),
+                                                               WithUnits('cn:1', 'mV_per_ms')])]))
         
         self.assertParses(csp.unitsConversion, 'convert uname1 to uname2 by lambda u: u / model:var',
                           [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]],

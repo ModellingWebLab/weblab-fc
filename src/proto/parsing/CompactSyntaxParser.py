@@ -168,8 +168,19 @@ class Actions(object):
     
     class Number(BaseGroupAction):
         """Parse action for numbers."""
+        def __init__(self, s, loc, tokens):
+            super(Actions.Number, self).__init__(s, loc, tokens)
+            if len(tokens) == 2:
+                # We have a units annotation
+                self._units = tokens[1]
+            else:
+                self._units = None
+
         def _xml(self):
-            return M.cn(self.tokens)
+            elt = M.cn(self.tokens)
+            if self._units:
+                elt.set('{%s}units' % CELLML_NS, str(self._units))
+            return elt
     
     class Variable(BaseGroupAction):
         """Parse action for variable references (identifiers)."""
@@ -846,14 +857,17 @@ class CompactSyntaxParser(object):
     cbrace = (Optional(nl) + p.Suppress('}') + Optional(nl)).setName('}')
     embedded_cbrace = (Optional(nl) + p.Suppress('}')).setName('}')
     
-    # Numbers can be given in scientific notation, with an optional leading minus sign.
-    number = p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?').setName('Number')
-    
     # Identifiers
     ncIdent = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*').setName('ncIdent')
     ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('Ident')
     ncIdentAsVar = ncIdent.copy().setParseAction(Actions.Variable)
     identAsVar = ident.copy().setParseAction(Actions.Variable)
+    
+    # Numbers can be given in scientific notation, with an optional leading minus sign.
+    # They may optionally have units specified.
+    unitsAnnotation = p.Suppress('::') - ncIdent("units")
+    number = (p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?') + Optional(unitsAnnotation)).setName('Number')
+
     # Used for descriptive text
     quotedString = (p.QuotedString('"', escChar="\\") | p.QuotedString("'", escChar="\\")).setName('QuotedString')
     # This may become more specific in future
