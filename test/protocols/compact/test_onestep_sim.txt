@@ -3,7 +3,7 @@
 namespace cellml = "http://www.cellml.org/cellml/1.0#"
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
-import "../../../src/proto/library/BasicLibrary.xml"
+import std = "../../../src/proto/library/BasicLibrary.xml"
 
 units {
     ms = milli second
@@ -16,7 +16,7 @@ model interface {
     independent var units ms
     input oxmeta:membrane_voltage = 0.0
     output oxmeta:membrane_voltage units mV
-    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms
 }
 
 tasks {
