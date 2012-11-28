@@ -35,8 +35,12 @@ from __future__ import division
 
 # TODO: Units annotations on numbers in the model interface (and possibly everywhere)
 
+import os
 import sys
 
+pycml_dir = os.path.realpath(os.path.join(os.path.realpath(__file__), os.path.pardir, os.path.pardir, os.path.pardir,
+                                          os.path.pardir, os.path.pardir, os.path.pardir, 'python', 'pycml'))
+sys.path[0:0] = [pycml_dir]
 import pyparsing as p
 
 __all__ = ['CompactSyntaxParser']
@@ -1203,3 +1207,21 @@ class Debug(object):
         EnableDebug(self._grammars)
     def __exit__(self, type, value, traceback):
         DisableDebug(self._grammars)
+
+################################################################################
+# Using this as a script from C++
+################################################################################
+
+if __name__ == '__main__':
+    assert len(sys.argv) == 3
+    source_path = sys.argv[1]
+    output_dir = sys.argv[2]
+    parser = CompactSyntaxParser()
+    xml = parser.ParseFile(source_path)
+    
+    import tempfile
+    handle, output_path = tempfile.mkstemp(dir=output_dir, text=True, suffix='.xml')
+    output_file = os.fdopen(handle, 'w')
+    xml.write(output_file, pretty_print=True, xml_declaration=True)
+    output_file.close()
+    print output_path
