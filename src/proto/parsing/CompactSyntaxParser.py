@@ -1164,8 +1164,40 @@ class CompactSyntaxParser(object):
         """Main entry point for parsing a complete protocol file; returns an ElementTree."""
         Actions.source_file = filename
         xml_generator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
-        return ET.ElementTree(xml_generator.xml())
+        xml = xml_generator.xml()
+        xml.base = filename
+        return ET.ElementTree(xml)
     
+    def _ConvertSource(self, referringElt, referringProtoPath, outputDir):
+        """Possibly convert a protocol referred to by another."""
+        source_path = referringElt.attrib['source']
+        if source_path.endswith('.txt'):
+            # We'll need to convert.  Figure out the full path to the referent.
+            if not os.path.isabs(source_path):
+                source_path = os.path.join(os.path.dirname(referringProtoPath), source_path)
+            new_path = self.ConvertProtocol(source_path, outputDir)
+            referringElt.attrib['source'] = new_path
+    
+    def ConvertProtocol(self, sourcePath, outputDir):
+        """Convert a protocol from textual syntax to XML in a temporary file.
+        
+        Recursively converts imported/nested textual protocols too.
+        """
+        import tempfile
+        xml = parser.ParseFile(sourcePath)
+        # Find imported/nested textual protocols, and convert them first, updating our references to them
+        subst = {'ns': '{%s}' % PROTO_NS}
+        for import_elt in xml.iterfind('%(ns)simport' % subst):
+            self._ConvertSource(import_elt, sourcePath, outputDir)
+        for nested_proto in xml.iterfind('%(ns)ssimulations//%(ns)snestedProtocol' % subst):
+            self._ConvertSource(nested_proto, sourcePath, outputDir)
+        # Write this protocol to file
+        handle, output_path = tempfile.mkstemp(dir=outputDir, text=True, suffix='.xml')
+        output_file = os.fdopen(handle, 'w')
+        xml.write(output_file, pretty_print=True, xml_declaration=True)
+        output_file.close()
+        return output_path
+
 
 ################################################################################
 # Parser debugging support
@@ -1217,11 +1249,5 @@ if __name__ == '__main__':
     source_path = sys.argv[1]
     output_dir = sys.argv[2]
     parser = CompactSyntaxParser()
-    xml = parser.ParseFile(source_path)
-    
-    import tempfile
-    handle, output_path = tempfile.mkstemp(dir=output_dir, text=True, suffix='.xml')
-    output_file = os.fdopen(handle, 'w')
-    xml.write(output_file, pretty_print=True, xml_declaration=True)
-    output_file.close()
+    output_path = parser.ConvertProtocol(source_path, output_dir)
     print output_path

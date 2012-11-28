@@ -136,8 +136,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertEqual(len(newElement), len(refElement))
         self.assertEqual(Strip(newElement.text), Strip(refElement.text))
         self.assertEqual(Strip(newElement.tail), Strip(refElement.tail))
-        newElement.attrib.pop('{%s}loc' % CSP.PROTO_NS, None) # Remove loc attribute if present
-        refElement.attrib.pop('{%s}loc' % CSP.PROTO_NS, None) # Remove loc attribute if present
+        # Remove some attributes that we shouldn't compare, if present
+        for attr_name in ['{%s}loc' % CSP.PROTO_NS, '{http://www.w3.org/XML/1998/namespace}base']:
+            for elt in [newElement, refElement]:
+                elt.attrib.pop(attr_name, None)
         self.assertEqual(sorted(newElement.attrib.items()), sorted(refElement.attrib.items()))
         for newChild, refChild in itertools.izip(newElement, refElement):
             self.assertXmlEqual(newChild, refChild)
@@ -992,6 +994,9 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
             proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
             print proto_base, '...'
             parsed_tree = csp().ParseFile(proto_filename)
+            # Check the xml:base attribute
+            self.assert_('{http://www.w3.org/XML/1998/namespace}base' in parsed_tree.getroot().attrib)
+            self.assertEqual(parsed_tree.getroot().base, proto_filename)
             # We write to file for easy creation of new reference versions
             output_file_path = os.path.join(output_folder, proto_base + '.xml')
             output_file = open(output_file_path, 'w')

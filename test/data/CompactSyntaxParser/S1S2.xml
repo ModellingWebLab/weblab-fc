@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:1:1&#9;# Compact syntax version of the S1S2 protocol">
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:1:1&#9;# Compact syntax version of the S1S2 protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/S1S2.txt">
   <proto:inputs proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:5:1&#9;inputs {">
     <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:1&#9;    s1_interval = 1000">
       <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:6:1&#9;    s1_interval = 1000"/>
@@ -140,7 +140,7 @@
         <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:36:12&#9;    define oxmeta:membrane_stimulus_current = \">oxmeta:membrane_stimulus_current</m:ci>
         <m:piecewise proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:9&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">
           <m:piece>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:14&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude">oxmeta:membrane_stimulus_current_amplitude</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:14&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude">oxmeta:membrane_stimulus_current_amplitude</m:ci>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:13&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">
               <m:and/>
               <m:apply>
@@ -156,25 +156,25 @@
                   <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:37:86&#9;        if (oxmeta:time &gt;= oxmeta:membrane_stimulus_current_offset &amp;&amp; oxmeta:time &lt;= oxmeta:membrane_stimulus_current_end &amp;&amp;">oxmeta:membrane_stimulus_current_end</m:ci>
                 </m:apply>
               </m:apply>
-              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:14&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:14&#9;            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)">
                 <m:leq/>
-                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:14&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:14&#9;            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)">
                   <m:minus/>
-                  <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:15&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">
+                  <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:15&#9;            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)">
                     <m:minus/>
-                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:15&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">oxmeta:membrane_stimulus_current_time</m:ci>
-                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:55&#9;            ((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset)">oxmeta:membrane_stimulus_current_offset</m:ci>
+                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:15&#9;            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)">oxmeta:time</m:ci>
+                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:38:29&#9;            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)">oxmeta:membrane_stimulus_current_offset</m:ci>
                   </m:apply>
-                  <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:17&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                  <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:17&#9;             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /">
                     <m:times/>
-                    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:17&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:17&#9;             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /">
                       <m:floor/>
-                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:30&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:30&#9;             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /">
                         <m:divide/>
-                        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:31&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">
+                        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:31&#9;             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /">
                           <m:minus/>
-                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:31&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">oxmeta:membrane_stimulus_current_time</m:ci>
-                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:71&#9;             - (MathML:floor((oxmeta:membrane_stimulus_current_time - oxmeta:membrane_stimulus_current_offset) /">oxmeta:membrane_stimulus_current_offset</m:ci>
+                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:31&#9;             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /">oxmeta:time</m:ci>
+                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:39:45&#9;             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /">oxmeta:membrane_stimulus_current_offset</m:ci>
                         </m:apply>
                         <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:40:30&#9;                             oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)">oxmeta:membrane_stimulus_current_period</m:ci>
                       </m:apply>
@@ -187,10 +187,10 @@
             </m:apply>
           </m:piece>
           <m:otherwise>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude">
               <m:times/>
-              <m:cn xmlns:ns1="http://www.cellml.org/cellml/1.0#" ns1:units="dimensionless" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude">0</m:cn>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:83&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * amplitude">amplitude</m:ci>
+              <m:cn xmlns:ns1="http://www.cellml.org/cellml/1.0#" ns1:units="dimensionless" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:62&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude">0</m:cn>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:42:83&#9;        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude">oxmeta:membrane_stimulus_current_amplitude</m:ci>
             </m:apply>
           </m:otherwise>
         </m:piecewise>
