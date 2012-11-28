@@ -127,6 +127,7 @@
                       </m:apply>
                       <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">
                         <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
                         <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:52&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
                         <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
                         <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:52&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>

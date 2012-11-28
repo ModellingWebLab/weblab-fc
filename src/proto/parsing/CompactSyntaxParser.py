@@ -353,6 +353,7 @@ class Actions(object):
             apply_content = [self.DelegateSymbol('view').xml(), self.tokens[0].xml()]
             seen_generic_dim = False
             null_token = self.DelegateSymbol('null')
+            next_dimension = 0
             for viewspec in self.tokens[1:]:
                 tuple_tokens = []
                 if 'dimspec' in viewspec:
@@ -362,6 +363,11 @@ class Actions(object):
                         dimspec = null_token
                     tuple_tokens.append(dimspec)
                     viewspec = viewspec[1:]
+                else:
+                    # Since we will provide a generic specification, all tuples need 4 elements for the XML parser :(
+                    # This is very fragile!
+                    tuple_tokens.append(self.Delegate('Number', [str(next_dimension)]))
+                    next_dimension += 1
                 if len(viewspec) == 1:
                     # Take single value (in this dimension)
                     tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['0']), viewspec[0]])

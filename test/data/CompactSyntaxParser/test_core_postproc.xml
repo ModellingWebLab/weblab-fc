@@ -159,12 +159,14 @@
             <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">input2d_max</m:ci>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:40&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:40&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">0</m:cn>
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">1</m:cn>
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)"/>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)">1</m:cn>
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:21:28&#9;    map_result = map(@2:+, input2d_max[0][:], input2)"/>
@@ -276,6 +278,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:34:12&#9;    assert counting1d.SHAPE[0] == 10">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:34:12&#9;    assert counting1d.SHAPE[0] == 10">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:34:29&#9;    assert counting1d.SHAPE[0] == 10">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:34:12&#9;    assert counting1d.SHAPE[0] == 10">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:34:29&#9;    assert counting1d.SHAPE[0] == 10">0</m:cn>
@@ -359,6 +362,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:39:12&#9;    assert counting2d.SHAPE[0] == 2">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:39:12&#9;    assert counting2d.SHAPE[0] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:39:29&#9;    assert counting2d.SHAPE[0] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:39:12&#9;    assert counting2d.SHAPE[0] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:39:29&#9;    assert counting2d.SHAPE[0] == 2">0</m:cn>
@@ -453,6 +457,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:44:12&#9;    assert blocks.SHAPE[0] == 2">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:44:12&#9;    assert blocks.SHAPE[0] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:44:25&#9;    assert blocks.SHAPE[0] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:44:12&#9;    assert blocks.SHAPE[0] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:44:25&#9;    assert blocks.SHAPE[0] == 2">0</m:cn>
@@ -480,6 +485,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:45:12&#9;    assert blocks.SHAPE[1] == 2">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:45:12&#9;    assert blocks.SHAPE[1] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:45:25&#9;    assert blocks.SHAPE[1] == 2">1</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:45:12&#9;    assert blocks.SHAPE[1] == 2">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:45:25&#9;    assert blocks.SHAPE[1] == 2">1</m:cn>
@@ -504,6 +510,7 @@
             <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:48:20&#9;    assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])">input</m:ci>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:48:20&#9;    assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:48:20&#9;    assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])">0</m:cn>
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:48:20&#9;    assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])"/>
               <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:48:27&#9;    assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])">
                 <m:minus/>
@@ -703,6 +710,7 @@
             <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:74:59&#9;    assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])">input</m:ci>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:74:59&#9;    assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:74:59&#9;    assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])">0</m:cn>
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:74:59&#9;    assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])"/>
               <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:74:66&#9;    assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])">
                 <m:minus/>

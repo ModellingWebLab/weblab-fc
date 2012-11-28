@@ -59,6 +59,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:37&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:37&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
@@ -79,6 +80,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:61&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:61&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
@@ -105,6 +107,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:37&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:37&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
@@ -125,6 +128,7 @@
             </m:apply>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:61&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
               <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:61&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
