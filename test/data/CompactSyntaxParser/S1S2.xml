@@ -410,7 +410,7 @@
       </m:apply>
     </m:apply>
   </proto:post-processing>
-  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:99:1&#9;outputs {">
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:99:1&#9;outputs {">
     <proto:raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:100:5&#9;    membrane_voltage = sim:membrane_voltage &quot;Transmembrane potential&quot;"/>
     <proto:postprocessed units="ms" name="time_1d" description="Time" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:101:5&#9;    time_1d units ms &quot;Time&quot;"/>
     <proto:postprocessed units="ms" name="raw_APD90" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:102:5&#9;    raw_APD90 units ms"/>
@@ -419,7 +419,7 @@
     <proto:postprocessed units="ms" name="DI" description="Diastolic Interval" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:105:5&#9;    DI units ms &quot;Diastolic Interval&quot;"/>
     <proto:postprocessed units="dimensionless" name="S1S2_slope" description="S1-S2 curve gradient" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:106:5&#9;    S1S2_slope units dimensionless &quot;S1-S2 curve gradient&quot;"/>
     <proto:postprocessed units="dimensionless" name="max_S1S2_slope" description="Maximum gradient of S1-S2 curve" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:107:5&#9;    max_S1S2_slope units dimensionless &quot;Maximum gradient of S1-S2 curve&quot;"/>
-  </proto:outputs>
+  </proto:outputVariables>
   <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:110:1&#9;plots {">
     <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:111:5&#9;    plot &quot;S1-S2 curve&quot; { APD90 against DI }">
       <proto:title>S1-S2 curve</proto:title>

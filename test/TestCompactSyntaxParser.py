@@ -544,10 +544,10 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         n4 units u2 "d2"
 } #cpc
 """, [[['proto_prefix'], ['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2']]],
-     ('outputs', [('useImports', {'prefix': 'proto_prefix'}),
-                  ('postprocessed', {'name': 'n1', 'ref': 'n2', 'units': 'u1'}),
-                  ('raw', {'name': 'n3', 'ref': 'p:m', 'description': 'd1'}),
-                  ('postprocessed', {'name': 'n4', 'units': 'u2', 'description': 'd2'})]))
+     ('outputVariables', [('useImports', {'prefix': 'proto_prefix'}),
+                          ('postprocessed', {'name': 'n1', 'ref': 'n2', 'units': 'u1'}),
+                          ('raw', {'name': 'n3', 'ref': 'p:m', 'description': 'd1'}),
+                          ('postprocessed', {'name': 'n4', 'units': 'u2', 'description': 'd2'})]))
         self.assertParses(csp.outputs, "outputs {}", [[]])
     
     def TestParsingPlotSpecifications(self):

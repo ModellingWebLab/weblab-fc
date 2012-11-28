@@ -108,8 +108,8 @@
       </m:apply>
     </m:apply>
   </proto:post-processing>
-  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:46:1&#9;outputs {">
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:46:1&#9;outputs {">
     <proto:raw ref="nested:membrane_voltage" name="V_nested" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:47:5&#9;    V_nested = nested:membrane_voltage"/>
     <proto:raw ref="timecourse:membrane_voltage" name="V_timecourse" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:5&#9;    V_timecourse = timecourse:membrane_voltage"/>
-  </proto:outputs>
+  </proto:outputVariables>
 </proto:protocol>

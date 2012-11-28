@@ -711,7 +711,7 @@ class Actions(object):
         """Parse action for the plots section."""
         def _xml(self):
             if len(self.tokens) > 0:
-                return P.outputs(*self.GetChildrenXml())
+                return P.outputVariables(*self.GetChildrenXml())
     
     class Plot(BaseGroupAction):
         """Parse action for simple plot specifications."""

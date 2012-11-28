@@ -271,7 +271,7 @@
       </proto:modifiers>
     </proto:timecourseSimulation>
   </proto:simulations>
-  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:77:1&#9;outputs {">
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:77:1&#9;outputs {">
     <proto:raw ref="sim0:membrane_voltage" name="V0" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:78:5&#9;    V0 = sim0:membrane_voltage"/>
     <proto:raw ref="sim1:membrane_voltage" name="V1" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:79:5&#9;    V1 = sim1:membrane_voltage"/>
     <proto:raw ref="sim2:membrane_voltage" name="V2" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:80:5&#9;    V2 = sim2:membrane_voltage"/>
@@ -280,5 +280,5 @@
     <proto:raw ref="sim5:membrane_voltage" name="V5" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:83:5&#9;    V5 = sim5:membrane_voltage"/>
     <proto:raw ref="sim_long:membrane_voltage" name="V_3001" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:84:5&#9;    V_3001 = sim_long:membrane_voltage"/>
     <proto:raw ref="not_empty:membrane_voltage" name="V_empty" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt:85:5&#9;    V_empty = not_empty:membrane_voltage"/>
-  </proto:outputs>
+  </proto:outputVariables>
 </proto:protocol>

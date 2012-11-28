@@ -30,8 +30,8 @@
       </proto:nestedProtocol>
     </proto:nestedSimulation>
   </proto:simulations>
-  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:19:1&#9;outputs {">
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:19:1&#9;outputs {">
     <proto:raw ref="sim:peak_voltage" name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:20:5&#9;    peak_voltage = sim:peak_voltage"/>
     <proto:raw ref="sim:apd" name="apd90" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:21:5&#9;    apd90 = sim:apd"/>
-  </proto:outputs>
+  </proto:outputVariables>
 </proto:protocol>

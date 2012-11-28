@@ -141,11 +141,11 @@
       </m:apply>
     </m:apply>
   </proto:post-processing>
-  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:28:1&#9;outputs {">
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:28:1&#9;outputs {">
     <proto:raw ref="sim:state_variable" name="raw_state" description="State variables (raw)" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:5&#9;    raw_state = sim:state_variable &quot;State variables (raw)&quot;"/>
     <proto:raw ref="sim:time" name="time" description="Time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:5&#9;    time = sim:time &quot;Time&quot;"/>
     <proto:postprocessed units="various" ref="state_trans" name="state" description="State variables" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:5&#9;    state = state_trans units various &quot;State variables&quot;"/>
-  </proto:outputs>
+  </proto:outputVariables>
   <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:34:1&#9;plots {">
     <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:35:5&#9;    plot &quot;State variables&quot; { state against time }">
       <proto:title>State variables</proto:title>

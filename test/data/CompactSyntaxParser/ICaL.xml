@@ -371,14 +371,14 @@
       </m:apply>
     </m:apply>
   </proto:post-processing>
-  <proto:outputs proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:101:1&#9;outputs {">
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:101:1&#9;outputs {">
     <proto:raw ref="sim:extracellular_calcium_concentration" name="extracellular_calcium_concentration" description="Extracellular calcium concentration" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:102:5&#9;    extracellular_calcium_concentration = sim:extracellular_calcium_concentration &quot;Extracellular calcium concentration&quot;"/>
     <proto:raw ref="sim:membrane_L_type_calcium_current" name="membrane_L_type_calcium_current" description="L-type calcium current" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:103:5&#9;    membrane_L_type_calcium_current = sim:membrane_L_type_calcium_current &quot;L-type calcium current&quot;"/>
     <proto:raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:104:5&#9;    membrane_voltage = sim:membrane_voltage &quot;Transmembrane potential&quot;"/>
     <proto:postprocessed units="uA_per_cm2" name="membrane_L_type_calcium_tail_current" description="I_{CaL} after test potential applied" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:106:5&#9;    membrane_L_type_calcium_tail_current units uA_per_cm2 &quot;I_{CaL} after test potential applied&quot;"/>
     <proto:postprocessed units="uA_per_cm2" name="min_LCC" description="Minimum I_{CaL} current" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:107:5&#9;    min_LCC units uA_per_cm2 &quot;Minimum I_{CaL} current&quot;"/>
     <proto:postprocessed units="mV" name="final_membrane_voltage" description="Test potential" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:108:5&#9;    final_membrane_voltage units mV &quot;Test potential&quot;"/>
-  </proto:outputs>
+  </proto:outputVariables>
   <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:111:1&#9;plots {">
     <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:112:5&#9;    plot &quot;IV curve&quot; { min_LCC against final_membrane_voltage }">
       <proto:title>IV curve</proto:title>
