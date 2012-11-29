@@ -10,6 +10,7 @@ TestModelStateCollection.hpp
 TestNestedProtocols.hpp
 TestNdArray.hpp
 TestOneStepSimulation.hpp
+TestProtocolFileFinder.hpp
 TestProtocolParser.hpp
 TestS1S2Protocol.hpp
 TestSimpleProtocol.hpp
