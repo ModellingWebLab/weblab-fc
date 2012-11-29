@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:1:1&#9;# Compact syntax version of the test_onestep_sim protocol">
-  <proto:import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:6:1&#9;import &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:1:1&#9;# Compact syntax version of the test_onestep_sim protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt">
+  <proto:import source="../../../src/proto/library/BasicLibrary.xml" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:6:1&#9;import std = &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
   <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:8:1&#9;units {">
     <cellml:units name="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:9:5&#9;    ms = milli second">
       <cellml:unit units="second" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:9:10&#9;    ms = milli second"/>
@@ -17,17 +17,17 @@
     <proto:setIndependentVariableUnits units="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:16:5&#9;    independent var units ms"/>
     <proto:specifyInputVariable name="oxmeta:membrane_voltage" initial_value="0.0" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:17:5&#9;    input oxmeta:membrane_voltage = 0.0"/>
     <proto:specifyOutputVariable units="mV" name="oxmeta:membrane_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:18:5&#9;    output oxmeta:membrane_voltage units mV"/>
-    <proto:addOrReplaceEquation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
+    <proto:addOrReplaceEquation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms">
         <m:eq/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:5&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms">
           <m:diff/>
           <m:bvar>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:42&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:time</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:42&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms">oxmeta:time</m:ci>
           </m:bvar>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:17&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">oxmeta:membrane_voltage</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:17&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms">oxmeta:membrane_voltage</m:ci>
         </m:apply>
-        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:57&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1">1</m:cn>
+        <m:cn cellml:units="mV_per_ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:19:57&#9;    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms">1</m:cn>
       </m:apply>
     </proto:addOrReplaceEquation>
   </proto:modelInterface>

@@ -1,157 +1,162 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:1:1&#9;# Compact syntax version of the GraphState protocol">
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:1:1&#9;# Compact syntax version of the GraphState protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/GraphState.txt">
   <proto:import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:7:1&#9;import &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
   <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:9:1&#9;units {">
     <cellml:units name="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:10:5&#9;    ms = milli second">
       <cellml:unit units="second" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:10:10&#9;    ms = milli second"/>
     </cellml:units>
   </proto:units>
-  <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:13:1&#9;tasks {">
-    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:14:5&#9;    simulation sim = timecourse {" prefix="sim">
-      <proto:uniformStepper units="ms" name="time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:15:9&#9;        range time units ms uniform 0:1:1000">
+  <proto:modelInterface proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:13:1&#9;model interface {">
+    <proto:setIndependentVariableUnits units="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:14:5&#9;    independent var units ms"/>
+    <proto:specifyOutputVariable name="oxmeta:time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:15:5&#9;    output oxmeta:time"/>
+    <proto:specifyOutputVariable name="oxmeta:state_variable" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:16:5&#9;    output oxmeta:state_variable"/>
+  </proto:modelInterface>
+  <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:19:1&#9;tasks {">
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:5&#9;    simulation sim = timecourse {" prefix="sim">
+      <proto:uniformStepper units="ms" name="time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:21:9&#9;        range time units ms uniform 0:1:1000">
         <proto:start>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:15:37&#9;        range time units ms uniform 0:1:1000">0</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:21:37&#9;        range time units ms uniform 0:1:1000">0</m:cn>
         </proto:start>
         <proto:stop>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:15:41&#9;        range time units ms uniform 0:1:1000">1000</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:21:41&#9;        range time units ms uniform 0:1:1000">1000</m:cn>
         </proto:stop>
         <proto:step>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:15:39&#9;        range time units ms uniform 0:1:1000">1</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:21:39&#9;        range time units ms uniform 0:1:1000">1</m:cn>
         </proto:step>
       </proto:uniformStepper>
-      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:14:22&#9;    simulation sim = timecourse {"/>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:22&#9;    simulation sim = timecourse {"/>
     </proto:timecourseSimulation>
   </proto:simulations>
-  <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:19:1&#9;post-processing {">
-    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:19:1&#9;post-processing {">
-      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:19:1&#9;post-processing {"/>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:5&#9;    state_trans = Transpose(sim:state_variable)">
+  <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:1&#9;post-processing {">
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:1&#9;post-processing {">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:1&#9;post-processing {"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:26:5&#9;    state_trans = Transpose(sim:state_variable)">
         <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:5&#9;    state_trans = Transpose(sim:state_variable)">state_trans</m:ci>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:19&#9;    state_trans = Transpose(sim:state_variable)">
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:19&#9;    state_trans = Transpose(sim:state_variable)">Transpose</m:ci>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:20:29&#9;    state_trans = Transpose(sim:state_variable)">sim:state_variable</m:ci>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:26:5&#9;    state_trans = Transpose(sim:state_variable)">state_trans</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:26:19&#9;    state_trans = Transpose(sim:state_variable)">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:26:19&#9;    state_trans = Transpose(sim:state_variable)">Transpose</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:26:29&#9;    state_trans = Transpose(sim:state_variable)">sim:state_variable</m:ci>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:5&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:5&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:5&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:5&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
           <m:eq/>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">NUM_DIMS</m:csymbol>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">sim:state_variable</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">NUM_DIMS</m:csymbol>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:12&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">sim:state_variable</m:ci>
           </m:apply>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:43&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:43&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">NUM_DIMS</m:csymbol>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:23:43&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">state_trans</m:ci>
-          </m:apply>
-        </m:apply>
-      </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:5&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:5&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-          <m:eq/>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">SHAPE</m:csymbol>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">sim:state_variable</m:ci>
-            </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:37&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:37&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
-            </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-            </m:apply>
-          </m:apply>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">SHAPE</m:csymbol>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">state_trans</m:ci>
-            </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:61&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:61&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
-            </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:24:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
-            </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:43&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:43&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">NUM_DIMS</m:csymbol>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:43&#9;    assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS">state_trans</m:ci>
           </m:apply>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:5&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:5&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:5&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:5&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
           <m:eq/>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">SHAPE</m:csymbol>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">sim:state_variable</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">SHAPE</m:csymbol>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">sim:state_variable</m:ci>
             </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:37&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:37&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:37&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:37&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
             </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:12&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
             </m:apply>
           </m:apply>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">SHAPE</m:csymbol>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">state_trans</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">SHAPE</m:csymbol>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">state_trans</m:ci>
             </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:61&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:61&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:61&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:61&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
             </m:apply>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:25:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]">1</m:cn>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:43&#9;    assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]"/>
+            </m:apply>
+          </m:apply>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:5&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:5&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+          <m:eq/>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">SHAPE</m:csymbol>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">sim:state_variable</m:ci>
+            </m:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:37&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:37&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
+            </m:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:12&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+            </m:apply>
+          </m:apply>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">SHAPE</m:csymbol>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">state_trans</m:ci>
+            </m:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:61&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:61&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">0</m:cn>
+            </m:apply>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]">1</m:cn>
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:43&#9;    assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]"/>
             </m:apply>
           </m:apply>
         </m:apply>
       </m:apply>
     </m:apply>
   </proto:post-processing>
-  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:28:1&#9;outputs {">
-    <proto:raw ref="sim:state_variable" name="raw_state" description="State variables (raw)" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:29:5&#9;    raw_state = sim:state_variable &quot;State variables (raw)&quot;"/>
-    <proto:raw ref="sim:time" name="time" description="Time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:30:5&#9;    time = sim:time &quot;Time&quot;"/>
-    <proto:postprocessed units="various" ref="state_trans" name="state" description="State variables" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:31:5&#9;    state = state_trans units various &quot;State variables&quot;"/>
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:34:1&#9;outputs {">
+    <proto:raw ref="sim:state_variable" name="raw_state" description="State variables (raw)" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:35:5&#9;    raw_state = sim:state_variable &quot;State variables (raw)&quot;"/>
+    <proto:postprocessed units="various" ref="state_trans" name="state" description="State variables" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:36:5&#9;    state = state_trans units various &quot;State variables&quot;"/>
+    <proto:raw ref="sim:time" name="time" description="Time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:37:5&#9;    time = sim:time &quot;Time&quot;"/>
   </proto:outputVariables>
-  <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:34:1&#9;plots {">
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:35:5&#9;    plot &quot;State variables&quot; { state against time }">
+  <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:40:1&#9;plots {">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:41:5&#9;    plot &quot;State variables&quot; { state against time }">
       <proto:title>State variables</proto:title>
       <proto:x>time</proto:x>
       <proto:y>state</proto:y>
