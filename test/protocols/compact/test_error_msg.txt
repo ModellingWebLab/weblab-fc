@@ -1,0 +1,6 @@
+# A simple protocol to check that error reporting works as expected.
+
+post-processing {
+    sum = lambda a, dim=default: fold(@2:+, a, 0, dim)
+    bad_sum = sum(1.0)
+}
