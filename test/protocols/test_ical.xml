@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<?oxygen RNGSchema="../../src/proto/parsing/protocol.rnc" type="compact"?>
+<protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#">
+    <!-- An altered ICaL which does fewer loops, for testing. -->
+    <import source="ICaL.xml" mergeDefinitions="true">
+        <setInput name="steady_state_time">
+            <cn xmlns="http://www.w3.org/1998/Math/MathML">1000</cn>
+        </setInput>
+        <setInput name="test_potentials">
+            <apply xmlns="http://www.w3.org/1998/Math/MathML">
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+                <cn>-45.01</cn><cn>-25.01</cn><cn>0.01</cn><cn>15.01</cn><cn>40.01</cn><cn>79.99</cn>
+            </apply>
+        </setInput>
+    </import>
+</protocol>
