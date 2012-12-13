@@ -1245,9 +1245,14 @@ class Debug(object):
 ################################################################################
 
 if __name__ == '__main__':
-    assert len(sys.argv) == 3
+    assert len(sys.argv) >= 3
     source_path = sys.argv[1]
     output_dir = sys.argv[2]
-    parser = CompactSyntaxParser()
-    output_path = parser.ConvertProtocol(source_path, output_dir)
-    print output_path
+    try:
+        parser = CompactSyntaxParser()
+        output_path = parser.ConvertProtocol(source_path, output_dir)
+        print output_path
+    except:
+        if len(sys.argv) == 3:
+            raise
+        # Otherwise we swallow the error
