@@ -572,9 +572,12 @@ class Actions(object):
     class OneStepSimulation(BaseGroupAction):
         def _xml(self):
             attrs = {}
-            if len(self.tokens) == 1:
-                attrs['step'] = str(self.tokens[0])
-            return P.oneStep(**attrs)
+            args = []
+            if 'step' in self.tokens:
+                attrs['step'] = str(self.tokens['step'][0])
+            if 'modifiers' in self.tokens:
+                args.append(self.tokens['modifiers'][0].xml())
+            return P.oneStep(*args, **attrs)
     
     class NestedProtocol(BaseGroupAction):
         def _xml(self):
@@ -1101,7 +1104,8 @@ class CompactSyntaxParser(object):
     nestedSim = p.Group(MakeKw('nested') + obrace - range + nl + Optional(modifiers)
                         + p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident))
                         + cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
-    oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))).setParseAction(Actions.OneStepSimulation)
+    oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))("step")
+                         + Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(Actions.OneStepSimulation)
     simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='')
                           + (timecourseSim | nestedSim | oneStepSim)).setParseAction(Actions.Simulation)
 

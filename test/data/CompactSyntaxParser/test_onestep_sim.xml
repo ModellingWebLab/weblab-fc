@@ -73,43 +73,88 @@
         </proto:resetState>
       </proto:modifiers>
     </proto:timecourseSimulation>
+    <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:37:5&#9;    simulation nested2 = nested {" prefix="nested2">
+      <proto:uniformStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:38:9&#9;        range t units ms uniform 0:9">
+        <proto:start>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:38:34&#9;        range t units ms uniform 0:9">0</m:cn>
+        </proto:start>
+        <proto:stop>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:38:36&#9;        range t units ms uniform 0:9">9</m:cn>
+        </proto:stop>
+        <proto:step>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:38:9&#9;        range t units ms uniform 0:9">1</m:cn>
+        </proto:step>
+      </proto:uniformStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:9&#9;        modifiers {at start reset} # Since otherwise we'd start where timecourse stopped">
+        <proto:resetState proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:20&#9;        modifiers {at start reset} # Since otherwise we'd start where timecourse stopped">
+          <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:22&#9;        modifiers {at start reset} # Since otherwise we'd start where timecourse stopped">AT_START_ONLY</proto:when>
+        </proto:resetState>
+      </proto:modifiers>
+      <proto:oneStep step="1.0" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:40:15&#9;        nests simulation oneStep 1.0 {">
+        <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:41:13&#9;            modifiers { at start set oxmeta:time = t }">
+          <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:41:25&#9;            modifiers { at start set oxmeta:time = t }">
+            <proto:when proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:41:27&#9;            modifiers { at start set oxmeta:time = t }">AT_START_ONLY</proto:when>
+            <proto:name>oxmeta:time</proto:name>
+            <proto:value>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:41:52&#9;            modifiers { at start set oxmeta:time = t }">t</m:ci>
+            </proto:value>
+          </proto:setVariable>
+        </proto:modifiers>
+      </proto:oneStep>
+    </proto:nestedSimulation>
   </proto:simulations>
-  <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:37:1&#9;post-processing {">
-    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:37:1&#9;post-processing {">
-      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:37:1&#9;post-processing {"/>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:5&#9;    assert nested:membrane_voltage.IS_ARRAY">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:5&#9;    assert nested:membrane_voltage.IS_ARRAY"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:12&#9;    assert nested:membrane_voltage.IS_ARRAY">
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:12&#9;    assert nested:membrane_voltage.IS_ARRAY">IS_ARRAY</m:csymbol>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:39:12&#9;    assert nested:membrane_voltage.IS_ARRAY">nested:membrane_voltage</m:ci>
+  <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:46:1&#9;post-processing {">
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:46:1&#9;post-processing {">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:46:1&#9;post-processing {"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:5&#9;    assert nested:membrane_voltage.IS_ARRAY">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:5&#9;    assert nested:membrane_voltage.IS_ARRAY"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:12&#9;    assert nested:membrane_voltage.IS_ARRAY">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:12&#9;    assert nested:membrane_voltage.IS_ARRAY">IS_ARRAY</m:csymbol>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:12&#9;    assert nested:membrane_voltage.IS_ARRAY">nested:membrane_voltage</m:ci>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:40:5&#9;    assert timecourse:membrane_voltage.IS_ARRAY">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:40:5&#9;    assert timecourse:membrane_voltage.IS_ARRAY"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:40:12&#9;    assert timecourse:membrane_voltage.IS_ARRAY">
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:40:12&#9;    assert timecourse:membrane_voltage.IS_ARRAY">IS_ARRAY</m:csymbol>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:40:12&#9;    assert timecourse:membrane_voltage.IS_ARRAY">timecourse:membrane_voltage</m:ci>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:49:5&#9;    assert timecourse:membrane_voltage.IS_ARRAY">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:49:5&#9;    assert timecourse:membrane_voltage.IS_ARRAY"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:49:12&#9;    assert timecourse:membrane_voltage.IS_ARRAY">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:49:12&#9;    assert timecourse:membrane_voltage.IS_ARRAY">IS_ARRAY</m:csymbol>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:49:12&#9;    assert timecourse:membrane_voltage.IS_ARRAY">timecourse:membrane_voltage</m:ci>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:5&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:5&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:12&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:12&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">std:ArrayEq</m:ci>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:24&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:24&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">std:Join</m:ci>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:33&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:50:5&#9;    assert nested2:membrane_voltage.IS_ARRAY">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:50:5&#9;    assert nested2:membrane_voltage.IS_ARRAY"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:50:12&#9;    assert nested2:membrane_voltage.IS_ARRAY">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:50:12&#9;    assert nested2:membrane_voltage.IS_ARRAY">IS_ARRAY</m:csymbol>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:50:12&#9;    assert nested2:membrane_voltage.IS_ARRAY">nested2:membrane_voltage</m:ci>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:5&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:5&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:12&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:12&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">std:ArrayEq</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:24&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:24&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">std:Join</m:ci>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:33&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">
               <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:34&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">0</m:cn>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:34&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">0</m:cn>
             </m:apply>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:38&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">nested:membrane_voltage</m:ci>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:38&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">nested:membrane_voltage</m:ci>
           </m:apply>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:43:64&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">timecourse:membrane_voltage</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:53:64&#9;    assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)">timecourse:membrane_voltage</m:ci>
+        </m:apply>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:54:5&#9;    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:54:5&#9;    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:54:12&#9;    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:54:12&#9;    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)">std:ArrayEq</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:54:24&#9;    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)">nested:membrane_voltage</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:54:49&#9;    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)">nested2:membrane_voltage</m:ci>
         </m:apply>
       </m:apply>
     </m:apply>
   </proto:post-processing>
-  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:46:1&#9;outputs {">
-    <proto:raw ref="nested:membrane_voltage" name="V_nested" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:47:5&#9;    V_nested = nested:membrane_voltage"/>
-    <proto:raw ref="timecourse:membrane_voltage" name="V_timecourse" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:48:5&#9;    V_timecourse = timecourse:membrane_voltage"/>
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:57:1&#9;outputs {">
+    <proto:raw ref="nested:membrane_voltage" name="V_nested" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:58:5&#9;    V_nested = nested:membrane_voltage"/>
+    <proto:raw ref="timecourse:membrane_voltage" name="V_timecourse" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:59:5&#9;    V_timecourse = timecourse:membrane_voltage"/>
+    <proto:raw ref="nested2:membrane_voltage" name="V_nested2" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:60:5&#9;    V_nested2 = nested2:membrane_voltage"/>
   </proto:outputVariables>
 </proto:protocol>

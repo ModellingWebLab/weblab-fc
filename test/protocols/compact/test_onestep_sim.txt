@@ -32,18 +32,30 @@ tasks {
         range t units ms uniform 0:10
         modifiers { at start reset } # Since otherwise we'd start where nested stopped
     }
+
+    # We can also put modifiers on the oneStep itself
+    simulation nested2 = nested {
+        range t units ms uniform 0:9
+        modifiers {at start reset} # Since otherwise we'd start where timecourse stopped
+        nests simulation oneStep 1.0 {
+            modifiers { at start set oxmeta:time = t }
+        }
+    }
 }
 
 post-processing {
     # Check results are arrays
     assert nested:membrane_voltage.IS_ARRAY
     assert timecourse:membrane_voltage.IS_ARRAY
+    assert nested2:membrane_voltage.IS_ARRAY
     
     # Check solutions match
     assert std:ArrayEq(std:Join([0], nested:membrane_voltage), timecourse:membrane_voltage)
+    assert std:ArrayEq(nested:membrane_voltage, nested2:membrane_voltage)
 }
 
 outputs {
     V_nested = nested:membrane_voltage
     V_timecourse = timecourse:membrane_voltage
+    V_nested2 = nested2:membrane_voltage
 }

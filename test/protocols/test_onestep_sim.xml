@@ -67,6 +67,29 @@
                 </resetState>
             </modifiers>
         </timecourseSimulation>
+        
+        <!-- We can also put modifiers on the oneStep itself -->
+        <nestedSimulation prefix="nested2">
+            <uniformStepper name="t" units="ms">
+                <start>0</start>
+                <stop>9</stop>
+                <step>1</step>
+            </uniformStepper>
+            <modifiers>
+                <resetState>
+                    <when>AT_START_ONLY</when>
+                </resetState>
+            </modifiers>
+            <oneStep step="1.0">
+                <modifiers>
+                    <setVariable>
+                        <when>AT_START_ONLY</when>
+                        <name>oxmeta:time</name>
+                        <value><ci xmlns="http://www.w3.org/1998/Math/MathML">t</ci></value>
+                    </setVariable>
+                </modifiers>
+            </oneStep>
+        </nestedSimulation>
     </simulations>
     
     <post-processing>
@@ -87,6 +110,13 @@
                     <ci>timecourse:membrane_voltage</ci>
                 </apply>
             </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">IS_ARRAY</csymbol>
+                    <ci>nested2:membrane_voltage</ci>
+                </apply>
+            </apply>
             
             <!-- Check solutions match -->
             <apply>
@@ -102,11 +132,19 @@
                     <ci>timecourse:membrane_voltage</ci>
                 </apply>
             </apply>
+            <apply>
+                <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
+                <apply><ci>std:ArrayEq</ci>
+                    <ci>nested:membrane_voltage</ci>
+                    <ci>nested2:membrane_voltage</ci>
+                </apply>
+            </apply>
         </apply>
     </post-processing>
     
     <outputVariables>
         <raw name="V_nested" ref="nested:membrane_voltage"/>
         <raw name="V_timecourse" ref="timecourse:membrane_voltage"/>
+        <raw name="V_nested2" ref="nested2:membrane_voltage"/>
     </outputVariables>
 </protocol>

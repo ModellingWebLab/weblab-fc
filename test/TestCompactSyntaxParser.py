@@ -453,6 +453,9 @@ modifiers { at end save as prelim }
         self.assertParses(csp.simulation, 'simulation oneStep 1.0', [['', ['1.0']]], ('oneStep', {'step': '1.0'}))
         self.assertParses(csp.simulation, 'simulation sim = oneStep step', [['sim', ['step']]],
                           ('oneStep', {'prefix': 'sim', 'step': 'step'}))
+        self.assertParses(csp.simulation, 'simulation oneStep { modifiers { at start set a = 1 } }',
+                          [['', [[['start', ['a', '1']]]]]],
+                          ('oneStep', {}, [('modifiers', [('setVariable', ['when:AT_START_ONLY', 'name:a', ('value', ['cn:1'])])])]))
     
     def TestParsingNestedSimulations(self):
         self.assertParses(csp.simulation,

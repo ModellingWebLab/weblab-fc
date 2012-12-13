@@ -152,6 +152,7 @@ proto.combinedSimulation = element proto:combinedSimulation {
 proto.oneStepSimulation = element proto:oneStep {
     attribute prefix { nc_ident } ?,
     attribute step { xsd:double } ?
+    proto.modifiers?
     }
 
 # Initial support for nested protocols.  Eventually these will be represented as another
