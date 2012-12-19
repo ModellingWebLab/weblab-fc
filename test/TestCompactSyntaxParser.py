@@ -223,6 +223,13 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, 'if 1 < 2 then 3 + 4 else 5 * 6',
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
     
+    def TestParsingTrace(self):
+        trace = {'{%s}trace' % CSP.PROTO_NS: '1'}
+        self.assertParses(csp.expr, '1?', [['1']], ('cn:1', trace))
+        self.assertParses(csp.expr, 'var?', [['var']], ('ci:var', trace))
+        self.assertParses(csp.expr, '(1 + a)?', [[['1', '+', 'a']]], ('apply', trace, ['plus', 'cn:1', 'ci:a']))
+        self.assertParses(csp.expr, '1 + a?', [['1', '+', ['a']]], ('apply', ['plus', 'cn:1', ('ci:a', trace)]))
+    
     def TestParsingMultiLineExpressions(self):
         self.assertParses(csp.expr, '(1 + 2) * 3', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
@@ -514,6 +521,12 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
                                                     ('nestedProtocol', {'source': 'proto.txt'},
                                                      [('setInput', {'name': 'input'}, ['ci:iter']),
                                                       ('selectOutput', {'name': 'oname'}, [])])]))
+        # Tracing a nested protocol
+        self.assertParses(csp.simulation, 'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { }? }',
+                          [['', [['iter', 'D', ['0', '1']], [['P', []]]]]],
+                          ('nestedSimulation', {}, [('vectorStepper',),
+                                                    'modifiers',
+                                                    ('nestedProtocol', {'source': 'P', '{%s}trace' % CSP.PROTO_NS: '1'}, [])]))
     
     def TestParsingTasks(self):
         self.assertParses(csp.tasks, """tasks {

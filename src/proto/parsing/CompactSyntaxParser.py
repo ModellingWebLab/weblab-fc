@@ -166,6 +166,13 @@ class Actions(object):
         def __init__(self, s, loc, tokens):
             super(Actions.BaseGroupAction, self).__init__(s, loc, tokens[0])
     
+    class Trace(BaseGroupAction):
+        """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
+        def _xml(self):
+            wrapped_xml = self.tokens[0].xml()
+            wrapped_xml.set('{%s}trace' % PROTO_NS, '1')
+            return wrapped_xml
+    
     ######################################################################
     # Post-processing language expressions
     ######################################################################
@@ -580,6 +587,12 @@ class Actions(object):
             return P.oneStep(*args, **attrs)
     
     class NestedProtocol(BaseGroupAction):
+        def __init__(self, s, loc, tokens):
+            self.trace = (tokens[0][-1] == '?')
+            if self.trace:
+                tokens[0] = tokens[0][:-1]
+            super(Actions.NestedProtocol, self).__init__(s, loc, tokens)
+
         def _xml(self):
             attrs = {'source': str(self.tokens[0])}
             args = []
@@ -591,7 +604,10 @@ class Actions(object):
                 args.append(self.AddLoc(P.setInput(input_value, name=input_name)))
             for output in self.tokens[2:]:
                 args.append(self.AddLoc(P.selectOutput(name=output)))
-            return P.nestedProtocol(*args, **attrs)
+            result = P.nestedProtocol(*args, **attrs)
+            if self.trace:
+                result.set('{%s}trace' % PROTO_NS, '1')
+            return result
     
     class Simulation(BaseGroupAction):
         """Parse action for all kinds of simulation."""
@@ -951,10 +967,14 @@ class CompactSyntaxParser(object):
     wrap = p.Group(p.Suppress('@') - Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator
                    ).setName('WrapMathML').setParseAction(Actions.Wrap)
     
+    # Turning on tracing for debugging protocols
+    trace = Adjacent(p.Suppress('?'))
+    
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
     atom = (array | wrap | number.copy().setParseAction(Actions.Number) |
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
-    expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
+    expr << p.operatorPrecedence(atom, [(trace, 1, p.opAssoc.LEFT, Actions.Trace),
+                                        (accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                         (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
                                         (index, 1, p.opAssoc.LEFT, Actions.Index),
                                         ('^', 2, p.opAssoc.LEFT, Actions.Operator),
@@ -1098,7 +1118,7 @@ class CompactSyntaxParser(object):
     _selectOutput = (MakeKw('select') + MakeKw('output') - ncIdent).setName('SelectOutput')
     nestedProtocol = p.Group(MakeKw('protocol') - quotedUri + obrace +
                              simpleAssignList + Optional(nl) + OptionalDelimitedList(_selectOutput, nl) +
-                             cbrace).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
+                             cbrace + Optional('?')).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
     timecourseSim = p.Group(MakeKw('timecourse') + obrace - range + Optional(nl + modifiers) + cbrace
                             ).setName('TimecourseSim').setParseAction(Actions.TimecourseSimulation)
     nestedSim = p.Group(MakeKw('nested') + obrace - range + nl + Optional(modifiers)
