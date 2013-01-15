@@ -1,0 +1,6 @@
+# A specialisation of the steady-state runner which checks for steady alternans
+# (every 2 paces)
+
+import "SteadyStateRunner.txt" {
+    num_inner_paces = 2
+}
