@@ -151,7 +151,7 @@ proto.combinedSimulation = element proto:combinedSimulation {
 # This simulation type supports the proposed SED-ML construct, and cell-based Chaste simulations.
 proto.oneStepSimulation = element proto:oneStep {
     attribute prefix { nc_ident } ?,
-    attribute step { xsd:double } ?
+    attribute step { xsd:double } ?,
     proto.modifiers?
     }
 
