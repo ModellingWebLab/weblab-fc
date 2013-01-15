@@ -1,0 +1,63 @@
+# Run a cell model until it reaches steady state
+
+inputs {
+    pacing_period = 1000  # ms
+    num_inner_paces = 1   # How many paces to run between comparing state variables
+    max_paces = 10000     # Give up at this point
+    norm_threshold = 1e-6 # Applied to p1 norm of state variable differences
+}
+
+import std = "../../../src/proto/library/BasicLibrary.xml"
+
+library {
+    max_inner_runs = MathML:ceiling(max_paces / num_inner_paces)
+}
+
+tasks {
+    # Get the model to steady-state (if possible)
+    simulation outer = nested {
+        range paces units dimensionless while outer:norm_of_differences[-1] > norm_threshold && paces < max_inner_runs
+        nests protocol "SinglePace.txt" {
+            num_paces = num_inner_paces
+            pacing_period = pacing_period
+            select output norm_of_differences
+            select output final_state_variables
+        }
+    }
+
+    # Run a single pace in detail, to see what it looks like at steady-state
+    simulation detail = timecourse {
+        range time units ms uniform 0:(pacing_period * num_inner_paces)
+    }
+}
+
+post-processing {
+    num_nested_runs = outer:norm_of_differences.SHAPE[0]
+    num_paces = num_nested_runs * num_inner_paces
+    pace_count = [count for count in 0:num_nested_runs] # Used for plotting
+    found_steady_state = num_paces < max_paces
+    steady_state_variables = outer:final_state_variables[-1]
+    pace_final_state_variables = std:Transpose(outer:final_state_variables)
+    detailed_state = std:Transpose(detail:state_variable)
+}
+
+outputs {
+    num_paces                  units dimensionless "The number of paces required to get to an approximately steady state"
+    steady_state_variables     units mixed         "The state variables at an approximately steady state"
+    found_steady_state         units boolean       "Whether we found a pseudo-steady-state, or gave up"
+    pace_final_state_variables units mixed         "State variables at the end of each pace"
+    num_inner_paces            units dimensionless "The number of paces per check of state variables"
+    pace_count                 units dimensionless "Paces"
+
+    norm_of_differences = outer:norm_of_differences "Norm of the change in state variables over each `pace'"
+
+    detailed_time    = detail:time             "Time"
+    detailed_state     units mixed             "The state variables over the final `pace'"
+    detailed_voltage = detail:membrane_voltage "The transmembrane potential over the final `pace'"
+}
+
+plots {
+    plot "All state variables"           { pace_final_state_variables against pace_count    }
+    plot "Progress towards steady state" { norm_of_differences        against pace_count    }
+    plot "Final `pace' - voltage"        { detailed_voltage           against detailed_time }
+}

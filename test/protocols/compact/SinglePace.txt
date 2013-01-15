@@ -1,0 +1,76 @@
+# Run a single pace (or more if desired) of a cell model
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    pacing_period = 1000 # ms
+    num_paces = 1
+}
+
+import std = "../../../src/proto/library/BasicLibrary.xml"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    input oxmeta:membrane_stimulus_current_offset units ms = 10
+    input oxmeta:membrane_stimulus_current_period units ms = 1000
+
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+    output oxmeta:state_variable
+
+    define oxmeta:membrane_stimulus_current = \
+        if (oxmeta:time >= oxmeta:membrane_stimulus_current_offset &&
+            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)
+             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /
+                             oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)
+             <= oxmeta:membrane_stimulus_current_duration))
+        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude
+}
+
+tasks {
+    # Run the desired number of paces, recording start & end states only
+    simulation sim = timecourse {
+        range time units ms vector [0, pacing_period * num_paces]
+        modifiers {
+            # Set stimulus period to pacing interval, offset 10ms
+            at start set oxmeta:membrane_stimulus_current_period = pacing_period # ms
+            at start set oxmeta:membrane_stimulus_current_offset = 10            # ms
+        }
+    }
+}
+
+post-processing {
+    # Test that expected model outputs exist
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    assert sim:state_variable.IS_ARRAY
+
+    # Utility function
+    def AbsMinus(x, y): map(@1:MathML:abs, map(@2:-, x, y))
+
+    # Work out the (p1) norm of the difference between the initial & final states
+    initial_state_variables = sim:state_variable[0]
+    final_state_variables = sim:state_variable[-1]
+    difference_in_state_variables = AbsMinus(final_state_variables, initial_state_variables)
+    norm_of_differences = std:Sum(difference_in_state_variables)[0]
+}
+
+outputs {
+    membrane_voltage = sim:membrane_voltage "Transmembrane potential"
+    time             = sim:time             "Time"
+    state_variables  = sim:state_variable   "All of the state variables"
+
+    norm_of_differences           units mixed
+    difference_in_state_variables units mixed
+    initial_state_variables       units mixed
+    final_state_variables         units mixed
+    num_paces                     units dimensionless "Number of paces simulated"
+}
+
+plots {
+    plot "Initial and final potentials" { membrane_voltage against time }
+}
