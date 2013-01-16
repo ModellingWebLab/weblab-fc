@@ -33,8 +33,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import division
 
-# TODO: Units annotations on numbers in the model interface (and possibly everywhere)
-
 import os
 import sys
 
@@ -66,6 +64,7 @@ CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
 class Actions(object):
     """Container for parse actions."""
     source_file = "" # Should be filled in by main parse method
+    units_map = {}   # Will be cleared by main parse method
 
     class BaseAction(object):
         """Base parse action.
@@ -691,8 +690,11 @@ class Actions(object):
     class UnitsDef(BaseGroupAction):
         """Parse action for units definitions."""
         def _xml(self):
+            name = str(self.tokens[0])
+            if 'description' in self.tokens:
+                Actions.units_map[name] = str(self.tokens['description'])
             unit_refs = [t.xml() for t in self.tokens if isinstance(t, Actions.UnitRef)]
-            return CELLML.units(*unit_refs, name=str(self.tokens[0]))
+            return CELLML.units(*unit_refs, name=name)
     
     class Units(BaseAction):
         """Parse action for the units definitions section."""
@@ -734,6 +736,10 @@ class Actions(object):
             else:
                 # It's a post-processed output
                 elt = P.postprocessed
+                # Check if the units referenced have a description which should be used instead of their name
+                units = self.tokens['units']
+                if units[0] in Actions.units_map:
+                    units[0] = Actions.units_map[units[0]]
             return elt(**self.TransferAttrs('name', 'ref', 'units', 'description'))
     
     class Outputs(BaseGroupAction):
@@ -1187,6 +1193,7 @@ class CompactSyntaxParser(object):
     def ParseFile(self, filename):
         """Main entry point for parsing a complete protocol file; returns an ElementTree."""
         Actions.source_file = filename
+        Actions.units_map = {}
         xml_generator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
         xml = xml_generator.xml()
         xml.base = filename
@@ -1208,7 +1215,7 @@ class CompactSyntaxParser(object):
         Recursively converts imported/nested textual protocols too.
         """
         import tempfile
-        xml = parser.ParseFile(sourcePath)
+        xml = self.ParseFile(sourcePath)
         # Find imported/nested textual protocols, and convert them first, updating our references to them
         subst = {'ns': '{%s}' % PROTO_NS}
         for import_elt in xml.iterfind('%(ns)simport' % subst):
