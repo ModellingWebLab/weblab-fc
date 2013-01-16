@@ -18,6 +18,7 @@ import std = "../../../src/proto/library/BasicLibrary.xml"
 
 library {
     default_Cao = sim:oxmeta:extracellular_calcium_concentration
+    step_calcium_values = map(lambda multiple: default_Cao * multiple, [0.5, 1.0, 1.5])
 }
 
 units {
@@ -27,6 +28,7 @@ units {
     uF_per_cm2 = micro farad . centi metre^-2
     microamps = micro ampere
     A_per_F = ampere . farad^-1
+    uM = micro mole . litre^-1 "{/Symbol m}M"
 }
 
 model interface {
@@ -35,7 +37,7 @@ model interface {
     
     output oxmeta:membrane_L_type_calcium_current units uA_per_cm2
     output oxmeta:membrane_voltage units mV
-    output oxmeta:extracellular_calcium_concentration
+    output oxmeta:extracellular_calcium_concentration units uM
     output oxmeta:time units ms
     
     var chaste_membrane_capacitance units uF_per_cm2 = 1
@@ -58,10 +60,10 @@ tasks {
     
     # Now do the IV curve generation for each Cao
     simulation sim = nested {
-        range step_calcium_ratio units dimensionless vector [0.5, 1.0, 1.5]
+        range step_calcium units dimensionless vector step_calcium_values
         modifiers {
             # Set the external calcium concentration
-            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium_ratio * default_Cao
+            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium
         }
         nests simulation nested {
             range step_voltage units mV vector test_potentials
@@ -106,8 +108,9 @@ outputs {
     membrane_L_type_calcium_tail_current units uA_per_cm2 "I_{CaL} after test potential applied"
     min_LCC units uA_per_cm2 "Minimum I_{CaL} current"
     final_membrane_voltage units mV "Test potential"
+    step_calcium_values units uM "[Ca]_o"
 }
 
 plots {
-    plot "IV curve" { min_LCC against final_membrane_voltage }
+    plot "IV curve" { min_LCC against final_membrane_voltage key step_calcium_values }
 }

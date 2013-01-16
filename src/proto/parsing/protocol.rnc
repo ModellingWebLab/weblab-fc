@@ -114,17 +114,17 @@ OutputVariableDefinition =
 # Specify what to plot by default for this protocol.
 # The first plot listed should be considered as the primary output of interest.
 proto.plots = element proto:plots { ( proto.plot | proto.useImports )+ }
-# Each plot must have a title, and can either plot two 1d variables against each
-# other, or plot a single variable against the relevant stepper values.  In the
-# latter case if the variable has more than one dimension, then you get multiple
-# traces.
+# Each plot must have a title, and can either plot two variables against each
+# other, or plot a single variable against the relevant stepper values.  If the
+# y or data variable have multiple dimensions, you get multiple traces.
 proto.plot = element proto:plot {
     element proto:title { text },
     ( ( element proto:x { ident },
         element proto:y { ident }
       )
     | element proto:data { ident }
-    )
+    ),
+    element proto:key { ident }?
     }
 
 # A timecourse simulation just needs the stepper to loop over, and any modifiers to apply.

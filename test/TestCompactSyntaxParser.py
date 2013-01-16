@@ -569,20 +569,22 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.assertParses(csp.outputs, "outputs {}", [[]])
     
     def TestParsingPlotSpecifications(self):
-        # TODO: Test these once the XML syntax catches up!
+        # TODO: Test these more once the XML syntax catches up!
         self.assertParses(csp.plotCurve, 'y against x', [['y', 'x']])
         self.assertParses(csp.plotCurve, 'y, y2 against x', [['y', 'y2', 'x']])
         self.failIfParses(csp.plotCurve, 'm:y against x')
         self.failIfParses(csp.plotCurve, 'y against m:x')
         self.assertParses(csp.plotSpec, 'plot "A title\'s good" { y1, y2 against x1\n y3 against x2 }',
                           [["A title's good", ['y1', 'y2', 'x1'], ['y3', 'x2']]])
+        self.assertParses(csp.plotSpec, 'plot "Keys" { y against x key k }', [["Keys", ['y', 'x', 'k']]],
+                          ('plot', ['title:Keys', 'x:x', 'y:y', 'key:k']))
         self.failIfParses(csp.plotSpec, 'plot "only title" {}')
         self.failIfParses(csp.plotSpec, 'plot "only title"')
         
-        self.assertParses(csp.plots, """plots { plot "t1" { v1 against v2 }
+        self.assertParses(csp.plots, """plots { plot "t1" { v1 against v2 key vk }
         plot "t1" { v3, v4 against v5 }
         use imports plots_lib
-}""", [[['t1', ['v1', 'v2']], ['t1', ['v3', 'v4', 'v5']], ['plots_lib']]])
+}""", [[['t1', ['v1', 'v2', 'vk']], ['t1', ['v3', 'v4', 'v5']], ['plots_lib']]])
         self.assertParses(csp.plots, 'plots {}', [[]])
     
     def TestParsingFunctionCalls(self):

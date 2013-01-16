@@ -752,10 +752,17 @@ class Actions(object):
         """Parse action for simple plot specifications."""
         def _xml(self):
             assert len(self.tokens) == 2, "Only a single plot curve is currently supported in XML"
-            assert len(self.tokens[1]) == 2, "Only a single y variable is currently supported in XML"
+            curve = self.tokens[1]
+            key = curve.get('key', '')
+            if key:
+                curve = curve[:-1]
+            assert len(curve) == 2, "Only a single y variable is currently supported in XML"
             title = str(self.tokens[0])
-            y, x = map(str, self.tokens[1])
-            return P.plot(P.title(title), P.x(x), P.y(y))
+            y, x = map(str, curve)
+            args = [P.title(title), P.x(x), P.y(y)]
+            if key:
+                args.append(P.key(key))
+            return P.plot(*args)
             
     class Plots(BaseGroupAction):
         """Parse action for the plots section."""
@@ -1148,7 +1155,9 @@ class CompactSyntaxParser(object):
     # Plot specifications
     #####################
     
-    plotCurve = p.Group(p.delimitedList(ncIdent, ',') + MakeKw('against') + ncIdent).setName('Curve')
+    plotCurve = p.Group(p.delimitedList(ncIdent, ',')
+                        + MakeKw('against') - ncIdent
+                        + Optional(MakeKw('key') - ncIdent("key"))).setName('Curve')
     plotSpec = p.Group(MakeKw('plot') - quotedString + obrace +
                        plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
     plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(useImports | plotSpec) + cbrace).setName('Plots').setParseAction(Actions.Plots)
