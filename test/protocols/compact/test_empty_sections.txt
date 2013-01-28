@@ -1,0 +1,19 @@
+# Check that empty sections (as opposed to missing ones) are handled correctly.
+
+inputs {
+}
+
+library {
+}
+
+tasks {
+}
+
+post-processing {
+}
+
+outputs {
+}
+
+plots {
+}

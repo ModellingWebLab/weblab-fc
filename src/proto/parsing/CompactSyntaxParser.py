@@ -782,7 +782,9 @@ class Actions(object):
             root = ET.Element('{%s}protocol' % PROTO_NS, nsmap=nsmap)
             for token in self.tokens:
                 if isinstance(token, Actions.BaseAction):
-                    root.append(token.xml())
+                    xml = token.xml()
+                    if xml is not None:
+                        root.append(xml)
             return root
     
 

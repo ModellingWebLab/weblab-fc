@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='ASCII'?>
+<proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_empty_sections.txt:1:1&#9;# Check that empty sections (as opposed to missing ones) are handled correctly." xml:base="projects/FunctionalCuration/test/protocols/compact/test_empty_sections.txt">
+  <proto:inputs proto:loc="projects/FunctionalCuration/test/protocols/compact/test_empty_sections.txt:3:1&#9;inputs {">
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_empty_sections.txt:4:1&#9;}">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_empty_sections.txt:4:1&#9;}"/>
+    </m:apply>
+  </proto:inputs>
+</proto:protocol>
