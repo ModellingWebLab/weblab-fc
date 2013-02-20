@@ -10,3 +10,8 @@
 # Eclipse stuff
 /.pydevproject
 /.settings
+
+# CellML project, in case we've synced from a build machine
+/cellml
+# Test output, similarly
+/testoutput
