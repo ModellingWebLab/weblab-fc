@@ -1,1 +1,1 @@
-TestFunctionalCurationPaper.hpp
+TestFunctionalCurationLiteratePaper.hpp

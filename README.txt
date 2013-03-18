@@ -10,7 +10,9 @@ doi: 10.1016/j.pbiomolbio.2011.06.003.
 A pre-print is available at:
 http://www.cs.ox.ac.uk/chaste/publications/2011-Cooper-Functional%20Curation.pdf
 
-This code is only guaranteed to be compatible with Chaste 3.0
+This code is maintained to be compatible with the latest Chaste trunk revision, as
+swiftly as possible.  Occasional releases are made to correspond with Chaste releases,
+and are made available from the main Chaste download page.
 
 == Installation ==
 
