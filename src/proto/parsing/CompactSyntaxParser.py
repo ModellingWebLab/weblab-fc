@@ -36,7 +36,7 @@ from __future__ import division
 import os
 import sys
 
-pycml_dir = os.path.realpath(os.path.join(os.path.realpath(__file__), os.path.pardir, os.path.pardir, os.path.pardir,
+pycml_dir = os.path.realpath(os.path.join(__file__, os.path.pardir, os.path.pardir, os.path.pardir,
                                           os.path.pardir, os.path.pardir, os.path.pardir, 'python', 'pycml'))
 sys.path[0:0] = [pycml_dir]
 import pyparsing as p
