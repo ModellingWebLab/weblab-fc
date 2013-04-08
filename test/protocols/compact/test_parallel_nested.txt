@@ -1,0 +1,172 @@
+# Compact version of the test_while_loop protocol
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "../../../src/proto/library/BasicLibrary.xml"
+
+units {
+    ms = milli second
+    mV = milli volt
+    mV_per_ms = milli volt . milli second^-1
+}
+
+# Turn the model into dV/dt = 1, V(0) = 0
+model interface {
+    independent var units ms
+    input oxmeta:membrane_voltage = 0.0
+    output oxmeta:membrane_voltage units mV
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms
+}
+
+tasks {
+    #  A single level of nesting that can't be parallelised, for various reasons
+    simulation one_level_no1 = nested {
+        range iter units dimensionless uniform 1:3
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+        }
+    }
+    
+    # We could make the analysis cleverer to allow this, but it doesn't seem like a common use case!
+    simulation one_level_no2 = nested {
+        range iter units dimensionless uniform 1:3
+        modifiers {
+            at start reset # Don't follow on from previous simulation!
+            at start save as initial_state
+        }
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+            modifiers { at start reset to initial_state }
+        }
+    }
+
+    # A single level of nesting that can be parallelised, in various forms
+    simulation one_level_yes1 = nested {
+        range iter units dimensionless uniform 1:3
+        modifiers { at start reset }
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+            modifiers { at start reset }
+        }
+    }
+    
+    simulation one_level_yes2 = nested {
+        range iter units dimensionless uniform 1:3
+        modifiers { at each loop reset to initial_state }
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+        }
+    }
+
+    simulation one_level_yes3 = nested {
+        range iter units dimensionless uniform 1:3
+        modifiers { at start reset }
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+            modifiers { at start reset to initial_state }
+        }
+    }
+    
+    # Multi-level non-parallelisable simulation
+    simulation two_level_no = nested {
+        range iter1 units dimensionless uniform 1:3
+        modifiers { at start reset }
+        nests simulation nested {
+            range iter2 units dimensionless uniform 1:3
+            nests simulation timecourse {
+                range t units ms uniform 0:9
+            }
+        }
+    }
+    
+    # Multi-level parallelisable simulations
+    simulation three_level_yes1 = nested {
+        range iter1 units dimensionless uniform 1:3
+        modifiers { at start reset }
+        nests simulation nested {
+            range iter2 units dimensionless uniform 1:3
+            nests simulation nested {
+                range iter3 units dimensionless uniform 1:3
+                nests simulation timecourse {
+                    range t units ms uniform 0:9
+                    modifiers { at start reset }
+                }
+            }
+        }
+    }
+    
+    simulation three_level_yes2 = nested {
+        range iter1 units dimensionless uniform 1:3
+        modifiers { at each loop reset }
+        nests simulation nested {
+            range iter2 units dimensionless uniform 1:3
+            nests simulation nested {
+                range iter3 units dimensionless uniform 1:3
+                modifiers { at each loop reset }
+                nests simulation timecourse {
+                    range t units ms uniform 0:9
+                }
+            }
+        }
+    }
+    
+    simulation three_level_partial = nested {
+        range iter1 units dimensionless uniform 1:3
+        modifiers { at start reset }
+        nests simulation nested {
+            range iter2 units dimensionless uniform 1:3
+            nests simulation nested {
+                range iter3 units dimensionless uniform 1:3
+                modifiers { at start reset }
+                nests simulation timecourse {
+                    range t units ms uniform 0:9
+                }
+            }
+        }
+    }
+}
+
+post-processing {
+    # Define expected results
+    tlen = 10
+    iterlen = 3
+    mul1 = tlen - 1
+    mul2 = mul1 * iterlen
+    exp_1_no_reset = [ i + mul1*j for j in 0:iterlen for i in 0:tlen ]
+    exp_1_reset = [ i for j in 0:iterlen for i in 0:tlen ]
+    exp_2_no_reset = [ i + j2*mul1 + j1*mul2 for j1 in 0:iterlen for j2 in 0:iterlen for i in 0:tlen ]
+    exp_3_reset = [ i for j1 in 0:iterlen for j2 in 0:iterlen for j3 in 0:iterlen for i in 0:tlen ]
+    exp_3_partial = [ i + j3*mul1 for j1 in 0:iterlen for j2 in 0:iterlen for j3 in 0:iterlen for i in 0:tlen ]
+
+    # Check outputs of the simulations are as expected
+    def Close(a1, a2, tol=1e-6) {
+        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    }
+    assert Close(one_level_no1:membrane_voltage, exp_1_no_reset)
+    assert Close(one_level_no2:membrane_voltage, exp_1_reset)
+    assert Close(one_level_yes1:membrane_voltage, exp_1_reset)
+    assert Close(one_level_yes2:membrane_voltage, exp_1_reset)
+    assert Close(one_level_yes3:membrane_voltage, exp_1_reset)
+    assert Close(two_level_no:membrane_voltage, exp_2_no_reset)
+    assert Close(three_level_yes1:membrane_voltage, exp_3_reset)
+    assert Close(three_level_yes2:membrane_voltage, exp_3_reset)
+    assert Close(three_level_partial:membrane_voltage, exp_3_partial)
+}
+
+outputs {
+    V1n1 = one_level_no1:membrane_voltage
+    V1n2 = one_level_no2:membrane_voltage
+    V1y1 = one_level_yes1:membrane_voltage
+    V1y2 = one_level_yes2:membrane_voltage
+    V1y3 = one_level_yes3:membrane_voltage
+    V2n1 = two_level_no:membrane_voltage
+    V3y1 = three_level_yes1:membrane_voltage
+    V3y2 = three_level_yes2:membrane_voltage
+    V3p1 = three_level_partial:membrane_voltage
+    
+    E1n = exp_1_no_reset
+    E1y = exp_1_reset
+    E2n = exp_2_no_reset
+    E3y = exp_3_reset
+    E3p = exp_3_partial
+}
