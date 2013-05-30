@@ -368,3 +368,8 @@ class Geq(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Greater than or equal to operator requires its operands to be simple values")
         return V.Simple(result)  
+    
+class NameLookUp(AbstractExpression):
+    """Used to look up a name for a given environment"""
+    def Evaluate(self, name, env):
+        return env.LookUp(name)

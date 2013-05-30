@@ -39,6 +39,7 @@ sys.path[0:0] = ['python/pycml', 'projects/FunctionalCuration/src/python/']
 
 import MathExpressions as M
 import Values as V
+import Environment as E
 
 class TestBasicExpressions(unittest.TestCase):
 
@@ -92,4 +93,10 @@ class TestBasicExpressions(unittest.TestCase):
     def TestLog(self):
         self.assertAlmostEqual(M.Log(M.Const(V.Simple(3))).Evaluate({}).value, 0.4771212547196)
         self.assertAlmostEqual(M.Log(M.Const(V.Simple(4)), M.Const(V.Simple(3))).Evaluate({}).value, 0.79248125036)
+    
+    def TestNameLookUp(self):
+        env = E.Environment()
+        one = V.Simple(1)
+        env.DefineName("one", one)
+        self.assertEqual(M.NameLookUp().Evaluate("one",env), one)
     
