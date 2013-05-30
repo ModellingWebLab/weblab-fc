@@ -228,8 +228,8 @@
       </proto:modifiers>
     </proto:timecourseSimulation>
     <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:62:5&#9;    simulation sim = nested {" prefix="sim">
-      <proto:vectorStepper units="dimensionless" name="step_calcium" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:63:9&#9;        range step_calcium units dimensionless vector step_calcium_values">
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:63:55&#9;        range step_calcium units dimensionless vector step_calcium_values">step_calcium_values</m:ci>
+      <proto:vectorStepper units="uM" name="step_calcium" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:63:9&#9;        range step_calcium units uM vector step_calcium_values">
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:63:55&#9;        range step_calcium units uM vector step_calcium_values">step_calcium_values</m:ci>
       </proto:vectorStepper>
       <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:64:9&#9;        modifiers {">
         <proto:setVariable proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:66:13&#9;            at each loop set oxmeta:extracellular_calcium_concentration = step_calcium">
