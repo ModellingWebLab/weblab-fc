@@ -60,7 +60,7 @@ tasks {
     
     # Now do the IV curve generation for each Cao
     simulation sim = nested {
-        range step_calcium units dimensionless vector step_calcium_values
+        range step_calcium units uM vector step_calcium_values
         modifiers {
             # Set the external calcium concentration
             at each loop set oxmeta:extracellular_calcium_concentration = step_calcium
