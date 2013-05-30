@@ -41,7 +41,6 @@ import sys
 import time
 
 # Import the module to test
-sys.path[0:0] = ['python/pycml', 'projects/FunctionalCuration/src/proto/parsing']
 import CompactSyntaxParser as CSP
 
 csp = CSP.CompactSyntaxParser
