@@ -1,3 +1,4 @@
 TestBasicExpressions.py
 TestLogicOperators.py
 TestRelations.py
+TestEnvironment.py

@@ -38,6 +38,7 @@ import MathExpressions as M
 import Values as V
 
 class TestBasicExpressions(unittest.TestCase):
+
     def TestAddition(self):
         self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate({}).value, 3)
         self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(4))).Evaluate({}).value, 7)

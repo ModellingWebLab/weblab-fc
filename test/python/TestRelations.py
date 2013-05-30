@@ -33,7 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import unittest
 
 # Import the module to test
-import MathRelations as M
+import MathExpressions as M
 import Values as V
 
 class TestRelations(unittest.TestCase):
