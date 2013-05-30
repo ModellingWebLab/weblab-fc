@@ -34,6 +34,7 @@ from ErrorHandling import ProtocolError
 from AbstractValue import AbstractValue
 
 class Environment(object):
+    nextIdent = [0]
     
     def __init__(self, allowOverwrite=False):
         self.allowOverwrite = allowOverwrite
@@ -51,6 +52,10 @@ class Environment(object):
         for i, name in enumerate(names):
             self.DefineName(name, values[i])
                 
+    def FreshIdent(self):
+        self.nextIdent[0] += 1
+        return "~%d" % self.nextIdent[0] 
+        
     def LookUp(self, name):
         try:
             result = self.bindings[name]
