@@ -33,6 +33,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Values as V
 
+class ProtocolError(Exception):
+    pass
+
 class AbstractExpression(object):
     """Base class for expressions in the protocol language."""
     def __init__(self, *children):
@@ -49,19 +52,63 @@ class AbstractExpression(object):
         raise NotImplementedError
 
 class Const(AbstractExpression):
-    """Class for constant value as expression"""
+    """Class for constant value as expression."""
     def __init__(self, value):
         self.value = value
         
     def Evaluate(self,env):
         return self.value
-        
-class Plus(AbstractExpression):
-    """Addition."""
-    def Evaluate(self,env):
+    
+class And(AbstractExpression):
+    """Boolean And Operator"""
+    def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
+        if len(self.children) == 0:
+            raise ProtocolError("Boolean operator 'and' requires operands")
+        result = True
         try:
-            result = sum([v.value for v in operands])
+            for v in operands:
+                result = result and v.value
         except AttributeError:
-            print "Operator 'plus' requires all operands to evaluate to numbers;", v, "does not."
+            raise ProtocolError("Boolean operator 'and' requires its operands to be simple values")
         return V.Simple(result)
+    
+class Or(AbstractExpression):
+    """Boolean Or Operator"""
+    def Evaluate(self, env):
+        operands = self.EvaluateChildren(env)
+        if len(self.children) == 0:
+            raise ProtocolError("Boolean operator 'or' requires operands")
+        result = False
+        try:
+            for v in operands:
+                result = result or v.value
+        except AttributeError:
+            raise ProtocolError("Boolean operator 'or' requires its operands to be simple values")
+        return V.Simple(result)
+
+class Xor(AbstractExpression):
+    """Boolean Xor Operator"""
+    def Evaluate(self, env):
+        operands = self.EvaluateChildren(env)
+        if len(self.children) == 0:
+            raise ProtocolError("Boolean operator 'xor' requires operands")
+        result = False
+        try:
+            for v in operands:
+                result = result != v.value
+        except AttributeError:
+            raise ProtocolError("Boolean operator 'xor' requires its operands to be simple values")
+        return V.Simple(result)   
+
+class Not(AbstractExpression):
+    """Boolean Not Operator"""
+    def Evaluate(self, env):
+        operands = self.EvaluateChildren(env)
+        if len(self.children) != 1:
+            raise ProtocolError("Boolean operator 'not' requires 1 operand, not", len(self.children))
+        try:
+            result = not operands[0].value
+        except AttributeError:
+            raise ProtocolError("Boolean operator 'not' requires its operand to be a simple value")
+        return V.Simple(result) 

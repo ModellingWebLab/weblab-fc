@@ -29,9 +29,31 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import AbstractValue
 
-class Simple(AbstractValue.AbstractValue):
-    def __init__(self, value):
-        self.value = value
+import unittest
+import sys
+
+# Import the module to test
+sys.path[0:0] = ['python/pycml', 'projects/FunctionalCuration/src/python']
+import MathLogic as M
+import Values as V
+
+class TestLogicOperators(unittest.TestCase):
+    def TestAnd(self):
+        self.assertEqual(M.And(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value, 0)
+        self.assertEqual(M.And(M.Const(V.Simple(1)), M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value, 1)
+    
+    def TestOr(self):
+        self.assertEqual(M.Or(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value, 1)
+        self.assertEqual(M.Or(M.Const(V.Simple(0)), M.Const(V.Simple(0)), M.Const(V.Simple(0))).Evaluate({}).value, 0)
         
+    def TestXor(self):
+        self.assertEqual(M.Xor(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value, 1)
+        self.assertEqual(M.Xor(M.Const(V.Simple(0)), M.Const(V.Simple(0))).Evaluate({}).value, 0)
+        self.assertEqual(M.Xor(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value, 0)
+        
+    def TestNot(self):
+        self.assertEqual(M.Not(M.Const(V.Simple(1))).Evaluate({}).value, 0)
+        self.assertEqual(M.Not(M.Const(V.Simple(0))).Evaluate({}).value, 1)
+    
+    
