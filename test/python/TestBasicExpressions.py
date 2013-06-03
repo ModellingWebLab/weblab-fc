@@ -35,8 +35,6 @@ import unittest
 import sys
 
 # Import the module to test
-sys.path[0:0] = ['python/pycml', 'projects/FunctionalCuration/src/python/']
-
 import MathExpressions as M
 import Values as V
 import Environment as E
