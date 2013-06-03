@@ -1,3 +1,4 @@
+
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
@@ -29,26 +30,21 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import AbstractValue
+
+from AbstractExpression import AbstractExpression
+import Values as V
+import MathExpressions as M
 import numpy as np
 
-class Simple(AbstractValue.AbstractValue):
-    def __init__(self, value):
-        self.value = float(value)
-    
-    @property
-    def array(self):
-        return np.array(self.value)
+class NewArray(AbstractExpression):
+    """Used to create new arrays"""
+    def __init__(self, *children):
+        self.children = children
         
-class Array(AbstractValue.AbstractValue):
-    def __init__(self, array):
-        assert isinstance(array, np.ndarray)
-        self.array = array
-    
-    @property
-    def value(self):
-        if self.array.ndim == 0:
-            return self.array[()]
-        else:
-            raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
+    def Evaluate(self, env):
+        elements = self.EvaluateChildren(env)
+        elementsArr = np.array(elements)
+        return V.Array(elementsArr)
+        
+        
     

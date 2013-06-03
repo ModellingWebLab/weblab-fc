@@ -33,23 +33,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Values as V
 import math
+import numpy as np
 
 from ErrorHandling import ProtocolError
-
-class AbstractExpression(object):
-    """Base class for expressions in the protocol language."""
-    def __init__(self, *children):
-        """Create a new expression node, with a list of child expressions, possibly empty."""
-        self.children = children
-
-    def EvaluateChildren(self,env):
-        """Evaluate our child expressions and return a list of their values."""
-        childList = [child.Evaluate(env) for child in self.children]
-        return childList
-    
-    def Evaluate(self,env):
-        """Subclasses must implement this method."""
-        raise NotImplementedError
+from AbstractExpression import AbstractExpression
 
 class Const(AbstractExpression):
     """Class for constant value as expression."""
@@ -371,5 +358,52 @@ class Geq(AbstractExpression):
     
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
-    def Evaluate(self, name, env):
-        return env.LookUp(name)
+    def __init__(self, name):
+        self.name = name
+        
+    def Evaluate(self, env):
+        return env.LookUp(self.name)
+    
+class Map(AbstractExpression):
+    """Mapping function for n-dimensional arrays"""
+    def Evaluate(self, env):
+        operands = self.EvaluateChildren(env)
+        fun = operands[0]
+        if len(self.children) < 2:
+            raise ProtocolError("Map requires more than one parameter")
+        if not isinstance(fun, types.FunctionType):
+            raise ProtocolError("First parameter must be a function")
+        shape = operands[1].array.shape
+        for a in operands[2:]:
+            if a != shape:
+                raise ProtocolError("All of the arrays passed in map must be the same size") 
+        for a in operands[1:]:
+            a.array = a.array.flatten()
+        funInputs = np.empty(operands[1].array.size * (len(self.children) - 1))
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        #elt = 0
+        #for item in operands[0].array:
+         #   for a in operands[1:]:
+          #      funInputs[elt] = a.array[item]
+           #     elt += 1
+        #result = np.empty(shape)
+        #size = result.size
+        #count = 0
+        #for item in np.array([:size:(len(self.children)-1)]):
+         #   result[count] = fun(funInputs)
+        
+        
+        
+        
+        
+        
+        

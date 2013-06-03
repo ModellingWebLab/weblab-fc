@@ -38,13 +38,26 @@ import sys
 import MathExpressions as M
 import Values as V
 import Environment as E
+import numpy as np
 
 class TestBasicExpressions(unittest.TestCase):
 
     def TestAddition(self):
         self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate({}).value, 3)
         self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(4))).Evaluate({}).value, 7)
-
+    
+    def TestWith0dArray(self):
+        one = V.Array(np.array(1))
+        self.assertEqual(one.value, 1)
+        two = V.Array(np.array(2))
+        four = V.Array(np.array(4))
+        self.assertAlmostEqual(M.Plus(M.Const(one), M.Const(two)).Evaluate({}).value, 3)
+        self.assertAlmostEqual(M.Plus(M.Const(one), M.Const(two), M.Const(four)).Evaluate({}).value, 7)
+        self.assertAlmostEqual(M.Minus(M.Const(one), M.Const(two)).Evaluate({}).value, -1)
+        self.assertAlmostEqual(M.Power(M.Const(two), M.Const(four)).Evaluate({}).value, 16)
+        self.assertAlmostEqual(M.Times(M.Const(four), M.Const(two)).Evaluate({}).value, 8)
+        self.assertAlmostEqual(M.Root(M.Const(four)).Evaluate({}).value, 2)
+                
     def TestMinus(self):
         self.assertAlmostEqual(M.Minus(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate({}).value, -1)
         self.assertAlmostEqual(M.Minus(M.Const(V.Simple(4))).Evaluate({}).value, -4)
@@ -96,5 +109,13 @@ class TestBasicExpressions(unittest.TestCase):
         env = E.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
-        self.assertEqual(M.NameLookUp().Evaluate("one",env), one)
+        self.assertEqual(M.NameLookUp("one").Evaluate(env), one)
+        
+    #def TestMap(self):
+     #   array1 = np.arange(4).reshape((2,2))
+      #  array2 = np.arange(3,7).reshape((2,2))
+       # fun = M.Add
+        #actual = map(fun, array1, array2)
+        #expected = np.arange(4,8).reshape((2,2))
+        #self.AssertEqual(actual, expected)
     

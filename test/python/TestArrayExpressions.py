@@ -1,3 +1,4 @@
+
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
@@ -29,26 +30,23 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import AbstractValue
-import numpy as np
 
-class Simple(AbstractValue.AbstractValue):
-    def __init__(self, value):
-        self.value = float(value)
-    
-    @property
-    def array(self):
-        return np.array(self.value)
+import unittest
+
+# Import the module to test
+import ArrayExpressions as A
+import Values as V
+import Environment as E
+import numpy as np
+import MathExpressions as M
+
+class TestArrayExpressions(unittest.TestCase):
+
+    def TestNewArray(self):
+        arr = A.NewArray(M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(3)))
+        predictedArr = np.array([M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(3))])
+        #np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
+        for i,each in enumerate(predictedArr):
+            self.assertEqual(arr.Evaluate({}).array[i].value, each.value.value)
         
-class Array(AbstractValue.AbstractValue):
-    def __init__(self, array):
-        assert isinstance(array, np.ndarray)
-        self.array = array
-    
-    @property
-    def value(self):
-        if self.array.ndim == 0:
-            return self.array[()]
-        else:
-            raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
-    
+        
