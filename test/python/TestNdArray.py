@@ -69,11 +69,21 @@ class TestNdArray(unittest.TestCase):
         self.assertEqual(array.ndim, 4) # assert that there are four dimensions
         self.assertEqual(array.size, 3*4*2*7) # number of elements
         array = np.arange(168).reshape(3, 4, 2, 7)
-        view = array[::, ::-2, -1, ::] # can slice stepping forward, backward, picking a position...etc
+        view = array[0::2, :0:-2, -1, 1::-1] # can slice stepping forward, backward, picking a position...etc
         self.assertEqual(view.ndim, 3) # number of dimensions in this view is 3
-        #np.testing.assert_array_almost_equal(view, np.array([[0], [2], [2], [4]]))
-        #self.assertEqual(view.shape, (2,2,2,4))
-        #self.assertEqual(view.size, 2*2*2)
+        np.testing.assert_array_almost_equal(view, np.array([[[50,49], [22,21]], [[162,161], [134,133]]]))
+        self.assertEqual(view.shape, (2,2,2))
+        self.assertEqual(view.size, 2*2*2)    
+        view[0, 0, 0] = 1 # change the first element of the view
+        self.assertEqual(view[0, 0, 0], array[0, 3, 1, 1]) # changing view changed the first element of the array
+        copy = array.copy()
+        self.assertEqual(copy[0, 0, 0, 0], array[0, 0, 0, 0]) # copy is exact copy, first elements are equal
+        copy[0, 0, 0, 0] = 10 # change first element of the copy
+        self.assertNotEqual(copy[0, 0, 0, 0], array[0, 0, 0, 0]) # changing the copy doesn't affect the original
+        view = array[0, 0, 0, 1]
+        self.assertEqual(view.ndim, 0) # you can take a 0-d view of an array and treat it as a value
+        self.assertEqual(view.size, 1) # one element in the 0-d view
+        self.assertEqual(view, 1) # the 0-d array is equal to the value of the number it contains
         
         
         

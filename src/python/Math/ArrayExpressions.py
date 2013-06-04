@@ -31,20 +31,40 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from AbstractExpression import AbstractExpression
 import Values as V
 import MathExpressions as M
 import numpy as np
 
+from AbstractExpression import AbstractExpression
+from ErrorHandling import ProtocolError
+
 class NewArray(AbstractExpression):
-    """Used to create new arrays"""
-    def __init__(self, *children):
-        self.children = children
-        
+    """Used to create new arrays."""
     def Evaluate(self, env):
         elements = self.EvaluateChildren(env)
-        elementsArr = np.array(elements)
+        elementsArr = np.array([elt.array for elt in elements])
         return V.Array(elementsArr)
+    
+class View(AbstractExpression):
+    def __init__(self, array, *children):
+        #if not isinstance(array, V.Array):
+            #raise ProtocolError("First argument must be of type Values.Array")
+        self.arrayExpression = array
+        self.children = children
+        
+    def Evaluate(self,env):
+        array = self.arrayExpression.Evaluate(env).array
+        indices = self.EvaluateChildren(env) # list of tuples with indices
+        if len(indices) > self.array.ndim: # check to make sure indices = number of dimensions
+            raise ProtocolError("You entered", len(indices), "indices, but the array has", self.array.ndim, "dimensions.")
+        try:
+            begin = indices[0]
+            step = indices[1]
+            end = indices[2]
+            view = self.array[indices[begin:end:step]]
+        except IndexError: # make sure indices don't go out of range
+            raise ProtocolError("The indices for the view must be in the range of the array") # see if there are two or three elements in the tuple and return the proper array for each using slicing
+        return NewArray(view)
         
         
     

@@ -43,7 +43,7 @@ class Simple(AbstractValue.AbstractValue):
 class Array(AbstractValue.AbstractValue):
     def __init__(self, array):
         assert isinstance(array, np.ndarray)
-        self.array = array
+        self.array = np.array(array, dtype=float, copy=False)
     
     @property
     def value(self):
@@ -51,4 +51,10 @@ class Array(AbstractValue.AbstractValue):
             return self.array[()]
         else:
             raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
+        
+class Tuple(AbstractValue.AbstractValue):
+    def __init__(self, *values):
+        self.values = tuple(values)
+        
+    
     

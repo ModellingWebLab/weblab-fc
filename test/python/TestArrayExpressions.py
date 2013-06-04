@@ -40,13 +40,39 @@ import Environment as E
 import numpy as np
 import MathExpressions as M
 
+from ErrorHandling import ProtocolError
+
 class TestArrayExpressions(unittest.TestCase):
 
     def TestNewArray(self):
-        arr = A.NewArray(M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(3)))
-        predictedArr = np.array([M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(3))])
-        #np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
-        for i,each in enumerate(predictedArr):
-            self.assertEqual(arr.Evaluate({}).array[i].value, each.value.value)
+        one = M.Const(V.Simple(1))
+        two = M.Const(V.Simple(2))
+        three = M.Const(V.Simple(3))
+        arr = A.NewArray(one, two, three) # simple one-dimensional array
+        predictedArr = np.array([1, 2, 3])
+        np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
+        arr = A.NewArray(A.NewArray(one, two, three), A.NewArray(three, three, two))
+        predictedArr = np.array([[1, 2, 3], [3, 3, 2]])
+        np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
+        
+    def TestViews(self):
+        zero = M.Const(V.Simple(0))
+        one = M.Const(V.Simple(1))
+        two = M.Const(V.Simple(2))
+        three = M.Const(V.Simple(3))
+        four = M.Const(V.Simple(4))
+        arr = A.NewArray(one, two, three, four)
+        #self.assertRaises(ProtocolError, A.View, one) # first argument must be an array
+        #view = A.View(arr, (1,3)) # two parameters: beginning and end
+        predictedArr = np.array([2, 3])
+        #for i,each in enumerate(predictedArr):
+          #  self.assertEqual(arr.Evaluate({}).array[i].value, each.value.value)
+       ## view = A.View(arr, M.Const(V.Tuple(zero,two,three))).Evaluate({}) # three parameters: beginning, step, end
+        predictedArr = np.array([1, 3])
+        #np.testing
+        view = A.View(arr, (0,-1,3)) # negative step
+       ## predictedArr = np.array([three, two, one])
+        #nptesting
+        
         
         
