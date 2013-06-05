@@ -56,23 +56,48 @@ class TestArrayExpressions(unittest.TestCase):
         np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
         
     def TestViews(self):
+        minusTwo = M.Const(V.Simple(-2))
+        minusOne = M.Const(V.Simple(-1))
         zero = M.Const(V.Simple(0))
         one = M.Const(V.Simple(1))
         two = M.Const(V.Simple(2))
         three = M.Const(V.Simple(3))
         four = M.Const(V.Simple(4))
+        five = M.Const(V.Simple(5))
+        six = M.Const(V.Simple(6))
         arr = A.NewArray(one, two, three, four)
         #self.assertRaises(ProtocolError, A.View, one) # first argument must be an array
-        #view = A.View(arr, (1,3)) # two parameters: beginning and end
+        
+        view = A.View(arr, M.TupleExpression(one, three)) # two parameters: beginning and end
         predictedArr = np.array([2, 3])
-        #for i,each in enumerate(predictedArr):
-          #  self.assertEqual(arr.Evaluate({}).array[i].value, each.value.value)
-       ## view = A.View(arr, M.Const(V.Tuple(zero,two,three))).Evaluate({}) # three parameters: beginning, step, end
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+       
+        view = A.View(arr, M.TupleExpression(zero, two, four)) # three parameters: beginning, step, end
         predictedArr = np.array([1, 3])
-        #np.testing
-        view = A.View(arr, (0,-1,3)) # negative step
-       ## predictedArr = np.array([three, two, one])
-        #nptesting
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+       
+        view = A.View(arr, M.TupleExpression(three, minusOne, zero)) # negative step
+        predictedArr = np.array([4, 3, 2])
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        
+        view = A.View(arr, M.TupleExpression(one, zero, one)) # 0 as step
+        predicted = 2
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predicted)
+        view = A.View(arr, M.TupleExpression(one)) # same as immediately above, but only one number passed instead of a step of 0
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predicted)
+        
+        array = A.NewArray(A.NewArray(minusTwo, minusOne, zero), A.NewArray(one, two, three), A.NewArray(four, five, six)) # testing many aspects of views of a 2-d array
+        view = A.View(array, M.TupleExpression(zero, M.Const(V.Null()), two), M.TupleExpression(two, minusOne, zero)) # can slice stepping forward, backward, picking a position...etc
+        predictedArr = np.array([[0, -1], [3, 2]])
+        self.assertEqual(view.Evaluate({}).array.ndim, 2) 
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        
+        array = A.NewArray(A.NewArray(A.NewArray(minusTwo, minusOne, zero), A.NewArray(one, two, three)), A.NewArray(A.NewArray(four, five, six), A.NewArray(one, two, three))) # 3-d array
+        view = A.View(array, M.TupleExpression(zero, M.Const(V.Null()), two), M.TupleExpression(two, minusOne, zero), M.TupleExpression(zero, two)) 
+        predictedArr = np.array([[[1, 2]], [[1, 2]]])
+        self.assertEqual(view.Evaluate({}).array.ndim, 3) 
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        
         
         
         

@@ -31,6 +31,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 class AbstractValue(object):
-    def __init__(self, units):
+    def __init__(self, units=None):
         self.units = units
         

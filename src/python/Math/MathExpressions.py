@@ -364,6 +364,12 @@ class NameLookUp(AbstractExpression):
     def Evaluate(self, env):
         return env.LookUp(self.name)
     
+class TupleExpression(AbstractExpression):
+    def Evaluate(self, env):
+        if len(self.children) < 1:
+            raise ProtocolError("Empty tuple expressions are not allowed")
+        return V.Tuple(*self.EvaluateChildren(env))
+    
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
     def Evaluate(self, env):

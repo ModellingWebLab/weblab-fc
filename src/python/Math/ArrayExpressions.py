@@ -46,25 +46,51 @@ class NewArray(AbstractExpression):
         return V.Array(elementsArr)
     
 class View(AbstractExpression):
-    def __init__(self, array, *children):
-        #if not isinstance(array, V.Array):
-            #raise ProtocolError("First argument must be of type Values.Array")
+    def __init__(self, array, *children):     
         self.arrayExpression = array
         self.children = children
         
-    def Evaluate(self,env):
-        array = self.arrayExpression.Evaluate(env).array
+    def GetValue(self, arg):
+        if isinstance(arg, V.Null):
+            return None
+        else:
+            return arg.value
+        
+    def Evaluate(self, env):
+        array = self.arrayExpression.Evaluate(env)
+        if not isinstance(array, V.Array):
+            raise ProtocolError("First argument must be of type Values.Array")
+      
         indices = self.EvaluateChildren(env) # list of tuples with indices
-        if len(indices) > self.array.ndim: # check to make sure indices = number of dimensions
-            raise ProtocolError("You entered", len(indices), "indices, but the array has", self.array.ndim, "dimensions.")
-        try:
-            begin = indices[0]
-            step = indices[1]
-            end = indices[2]
-            view = self.array[indices[begin:end:step]]
-        except IndexError: # make sure indices don't go out of range
-            raise ProtocolError("The indices for the view must be in the range of the array") # see if there are two or three elements in the tuple and return the proper array for each using slicing
-        return NewArray(view)
+        #if len(indices) > self.arrayExpression.Evaluate(env).array.ndim: # check to make sure indices = number of dimensions
+         #   raise ProtocolError("You entered", len(indices), "indices, but the array has", self.array.ndim, "dimensions.")
+        #try:
+        slices = []
+        for index in indices:
+            if len(index.values) == 1:
+                start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
+                step = None
+                end = start + 1
+            elif len(index.values) == 2:
+                start = self.GetValue(index.values[0])
+                step = None
+                end = self.GetValue(index.values[1])
+            elif len(index.values) == 3:
+                start = self.GetValue(index.values[0])
+                step = self.GetValue(index.values[1])
+                end = self.GetValue(index.values[2])
+            else:
+                raise ProtocolError("Each slice must be a tuple that contains 1, 2, or 3 values, not", len(index))
+            if step == 0:
+                slices.append(start)
+            else:
+                slices.append(slice(start, end, step))
+        print type(array.array)
+        view = array.array[tuple(slices)]
+        print type(view)
+        #except IndexError: # make sure indices don't go out of range
+        #    raise ProtocolError("The indices for the view must be in the range of the array") # see if there are two or three elements in the tuple and return the proper array for each using slicing
+        return V.Array(view)
         
         
     

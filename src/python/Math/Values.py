@@ -42,7 +42,7 @@ class Simple(AbstractValue.AbstractValue):
         
 class Array(AbstractValue.AbstractValue):
     def __init__(self, array):
-        assert isinstance(array, np.ndarray)
+        assert isinstance(array, (np.ndarray, np.float))
         self.array = np.array(array, dtype=float, copy=False)
     
     @property
@@ -56,5 +56,6 @@ class Tuple(AbstractValue.AbstractValue):
     def __init__(self, *values):
         self.values = tuple(values)
         
-    
+class Null(AbstractValue.AbstractValue):
+    pass
     
