@@ -68,26 +68,39 @@ class View(AbstractExpression):
         slices = []
         for index in indices:
             if len(index.values) == 1:
+                dim = None
                 start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
                 step = None
                 end = start + 1
             elif len(index.values) == 2:
+                dim = None
                 start = self.GetValue(index.values[0])
                 step = None
                 end = self.GetValue(index.values[1])
             elif len(index.values) == 3:
+                dim = None
                 start = self.GetValue(index.values[0])
                 step = self.GetValue(index.values[1])
                 end = self.GetValue(index.values[2])
+            elif len(index.values) == 4:
+                dim = self.GetValue(index.values[0])
+                start = self.GetValue(index.values[1])
+                step = self.GetValue(index.values[2])
+                end = self.GetValue(index.values[3])
             else:
-                raise ProtocolError("Each slice must be a tuple that contains 1, 2, or 3 values, not", len(index))
-            if step == 0:
-                slices.append(start)
+                raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index))
+            
+            if dim != None:
+                if step == 0:
+                    slices.insert(int(dim), start)
+                else:
+                    slices.insert(int(dim), slice(start, end, step))
             else:
-                slices.append(slice(start, end, step))
-        print type(array.array)
+                if step == 0:
+                    slices.append(start)
+                else:
+                    slices.append(slice(start, end, step))
         view = array.array[tuple(slices)]
-        print type(view)
         #except IndexError: # make sure indices don't go out of range
         #    raise ProtocolError("The indices for the view must be in the range of the array") # see if there are two or three elements in the tuple and return the proper array for each using slicing
         return V.Array(view)

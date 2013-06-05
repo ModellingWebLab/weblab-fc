@@ -68,8 +68,8 @@ class TestArrayExpressions(unittest.TestCase):
         arr = A.NewArray(one, two, three, four)
         #self.assertRaises(ProtocolError, A.View, one) # first argument must be an array
         
-        view = A.View(arr, M.TupleExpression(one, three)) # two parameters: beginning and end
-        predictedArr = np.array([2, 3])
+        view = A.View(arr, M.TupleExpression(one, M.Const(V.Null()))) # two parameters: beginning and end, null represents end of original array
+        predictedArr = np.array([2, 3, 4])
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
        
         view = A.View(arr, M.TupleExpression(zero, two, four)) # three parameters: beginning, step, end
@@ -97,7 +97,11 @@ class TestArrayExpressions(unittest.TestCase):
         predictedArr = np.array([[[1, 2]], [[1, 2]]])
         self.assertEqual(view.Evaluate({}).array.ndim, 3) 
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
-        
-        
+        # use four parameters in the tuples to specify dimension explicitly
+        view = A.View(array, M.TupleExpression(zero, zero, M.Const(V.Null()), two), M.TupleExpression(one, two, minusOne, zero), M.TupleExpression(two, zero, M.Const(V.Null()), two)) 
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        # use four parameters in the tuples to specify dimension with a mix of implicit and explicit declarations
+        view = A.View(array, M.TupleExpression(zero, M.Const(V.Null()), two), M.TupleExpression(one, two, minusOne, zero), M.TupleExpression(zero, M.Const(V.Null()), two)) 
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
         
         
