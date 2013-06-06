@@ -103,5 +103,11 @@ class TestArrayExpressions(unittest.TestCase):
         # use four parameters in the tuples to specify dimension with a mix of implicit and explicit declarations
         view = A.View(array, M.TupleExpression(zero, M.Const(V.Null()), two), M.TupleExpression(one, two, minusOne, zero), M.TupleExpression(zero, M.Const(V.Null()), two)) 
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        # test leaving some parameters out so they fall to default
+        view = A.View(array, M.TupleExpression(one, two, minusOne, zero), M.TupleExpression(zero, M.Const(V.Null()), two)) 
+        view2 = A.View(array, M.TupleExpression(M.Const(V.Null()), M.Const(V.Null()), one, M.Const(V.Null())), M.TupleExpression(one, two, minusOne, zero), M.TupleExpression(zero, M.Const(V.Null()), two)) 
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        # checks to make sure the "default default" is equivalent to a tuple of (Null, Null, 1, Null)
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, view2.Evaluate({}).array)
         
         

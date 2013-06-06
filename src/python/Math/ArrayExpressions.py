@@ -91,6 +91,8 @@ class View(AbstractExpression):
                 raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index))
             
             if dim != None:
+                while len(slices) < dim:
+                    slices.append(slice(None, None, 1))
                 if step == 0:
                     slices.insert(int(dim), start)
                 else:
@@ -100,6 +102,7 @@ class View(AbstractExpression):
                     slices.append(start)
                 else:
                     slices.append(slice(start, end, step))
+        print "slices are:", slices
         view = array.array[tuple(slices)]
         #except IndexError: # make sure indices don't go out of range
         #    raise ProtocolError("The indices for the view must be in the range of the array") # see if there are two or three elements in the tuple and return the proper array for each using slicing
