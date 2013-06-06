@@ -50,22 +50,26 @@ class View(AbstractExpression):
         self.arrayExpression = array
         self.children = children
         
+        
     def GetValue(self, arg):
         if isinstance(arg, V.Null):
             return None
         else:
-            return arg.value
+            return int(arg.value)
         
     def Evaluate(self, env):
         array = self.arrayExpression.Evaluate(env)
         if not isinstance(array, V.Array):
             raise ProtocolError("First argument must be of type Values.Array")
+        if len(self.children) > array.array.ndim: # check to make sure indices = number of dimensions
+            raise ProtocolError("You entered", len(self.children), "indices, but the array has", array.array.ndim, "dimensions.")
       
         indices = self.EvaluateChildren(env) # list of tuples with indices
-        #if len(indices) > self.arrayExpression.Evaluate(env).array.ndim: # check to make sure indices = number of dimensions
-         #   raise ProtocolError("You entered", len(indices), "indices, but the array has", self.array.ndim, "dimensions.")
+        
         #try:
-        slices = []
+        implicit_dim_slices = []
+        slices = [None] * array.array.ndim
+                
         for index in indices:
             if len(index.values) == 1:
                 dim = None
@@ -88,24 +92,49 @@ class View(AbstractExpression):
                 step = self.GetValue(index.values[2])
                 end = self.GetValue(index.values[3])
             else:
-                raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index))
+                raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
+            
             
             if dim != None:
-                while len(slices) < dim:
-                    slices.append(slice(None, None, 1))
+                if dim > array.array.ndim - 1:
+                    raise ProtocolError("Array only has", array.array.ndim, "dimensions, not", dim + 1) # plus one to account for dimension zero
                 if step == 0:
-                    slices.insert(int(dim), start)
+                    if start != end:
+                        raise ProtocolError("Step is zero and start does not equal end")
+                    slices[int(dim)] = start
                 else:
-                    slices.insert(int(dim), slice(start, end, step))
+                    slices[int(dim)] = slice(start, end, step)
             else:
                 if step == 0:
-                    slices.append(start)
+                    if start != end:
+                        raise ProtocolError("Step is zero and start does not equal end")
+                    implicit_dim_slices.append(start)
                 else:
-                    slices.append(slice(start, end, step))
-        print "slices are:", slices
-        view = array.array[tuple(slices)]
-        #except IndexError: # make sure indices don't go out of range
-        #    raise ProtocolError("The indices for the view must be in the range of the array") # see if there are two or three elements in the tuple and return the proper array for each using slicing
+                    implicit_dim_slices.append(slice(start, end, step))
+            
+        for i, each in enumerate(slices):
+            dimLen = array.array.shape[i]
+            if each is None:
+                if implicit_dim_slices:
+                    if isinstance(implicit_dim_slices[0], slice):
+                        if implicit_dim_slices[0].start is not None:
+                            if abs(implicit_dim_slices[0].start + 1) > dimLen:
+                                raise ProtocolError("The start of the slice is not within the range of the dimension")
+                        if implicit_dim_slices[0].stop is not None:
+                            if abs(implicit_dim_slices[0].stop + 1) > dimLen:
+                                raise ProtocolError("The end of the slice is not within the range of the dimension")
+                        if implicit_dim_slices[0].step is not None and implicit_dim_slices[0].stop is not None and implicit_dim_slices[0].start is not None:
+                            if (implicit_dim_slices[0].stop - implicit_dim_slices[0].start) * implicit_dim_slices[0].step <= 0:
+                                raise ProtocolError("The sign of the step does not make sense")
+                        
+                    slices[i] = implicit_dim_slices.pop(0)
+                else:
+                    slices[i] = slice(None, None, 1)
+
+        try:
+            view = array.array[tuple(slices)]
+        except IndexError:
+            raise ProtocolError("The indices must be in the range of the array")
         return V.Array(view)
         
         
