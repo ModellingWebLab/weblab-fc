@@ -86,35 +86,50 @@ class TestEnvironment(unittest.TestCase):
         env.DefineName("one",one)
         self.assertEqual(env.LookUp("one"), one)
         self.assertRaises(ProtocolError, env.Remove, "three") # never added
-
-"""void TestOverwritingEnv() throw (Exception)
+        
+    def TestDelegation(self):
+        root_env = E.Environment()
+        middle_env = E.Environment(False, root_env)
+        top_env = E.Environment()
+        top_env.SetDelegateeEnv(middle_env, "middle")
+        
+        name = "name"
+        value = V.Simple(123.4)
+        root_env.DefineName(name, value)
+        self.assertEqual(top_env.LookUp(name), value)
+        
+        value2 = V.Simple(432.1)
+        middle_env.DefineName(name, value2)
+        self.assertEqual(top_env.LookUp(name), value2)
+        
+        value3 = V.Simple(6.5)
+        top_env.DefineName(name, value3)
+        self.assertEqual(top_env.LookUp(name), value3)
+        
+""" void TestDelegation() throw (Exception)
     {
+        NEW_ENV(root_env);
+        NEW_ENV_A(middle_env, (root_env.GetAsDelegatee()));
+        NEW_ENV(top_env);
+        top_env.SetDelegateeEnvironment(middle_env.GetAsDelegatee());
+
+        TS_ASSERT(!root_env.GetDelegateeEnvironment());
+        TS_ASSERT(middle_env.GetDelegateeEnvironment());
+        TS_ASSERT(top_env.GetDelegateeEnvironment());
+        TS_ASSERT(middle_env.GetDelegateeEnvironment().get() == root_env.GetAsDelegatee().get());
+        TS_ASSERT(top_env.GetDelegateeEnvironment().get() == middle_env.GetAsDelegatee().get());
+
+        const std::string name = "test_value";
+        AbstractValuePtr p_val = CV(123.4);
+        root_env.DefineName(name, p_val, "");
+        TS_ASSERT_EQUALS(top_env.Lookup(name), p_val);
 
         AbstractValuePtr p_val2 = CV(432.1);
-        TS_ASSERT_THROWS_CONTAINS(env.DefineName(name, p_val2, ""),
-                                  "Name " + name + " is already defined and may not be re-bound.");
-        env.OverwriteDefinition(name, p_val2, "");
-        TS_ASSERT_EQUALS(env.Lookup(name), p_val2);
-        TS_ASSERT_THROWS_CONTAINS(env.OverwriteDefinition("name2", p_val2, ""),
-                                  "Name name2 is not defined and may not be overwritten.");
+        middle_env.DefineName(name, p_val2, "");
+        TS_ASSERT_EQUALS(top_env.Lookup(name), p_val2);
 
-        env.RemoveDefinition(name, "");
-        TS_ASSERT_THROWS_CONTAINS(env.Lookup(name), "Name " + name + " is not defined in this environment.");
-        env.DefineName(name, p_val, "");
-        TS_ASSERT_EQUALS(env.Lookup(name), p_val);
-        TS_ASSERT_THROWS_CONTAINS(env.RemoveDefinition("name2", ""),
-                                  "Name name2 is not defined and may not be removed.");
-    }
-
-class TestEnvironment : public CxxTest::TestSuite
-{
-public:
-    void TestDefiningNames() throw (Exception)
-    {
-        TS_ASSERT_THROWS_CONTAINS(env.Lookup(env.FreshIdent()), " is not defined in this environment.");
-
-        // Test debug tracing of environments
-        DebugProto::TraceEnv(env);
-
+        AbstractValuePtr p_val3 = CV(6.5);
+        top_env.DefineName(name, p_val3, "");
+        TS_ASSERT_EQUALS(top_env.Lookup(name), p_val3);
     }
 """

@@ -36,9 +36,11 @@ from AbstractValue import AbstractValue
 class Environment(object):
     nextIdent = [0]
     
-    def __init__(self, allowOverwrite=False):
+    def __init__(self, allowOverwrite=False, delegate=None):
         self.allowOverwrite = allowOverwrite
         self.bindings = {}
+        self.delegates = {}
+        self.delegates[""] = delegate
         
     def DefineName(self, name, value):
         if not isinstance(value, AbstractValue):
@@ -57,12 +59,19 @@ class Environment(object):
         return "~%d" % self.nextIdent[0] 
         
     def LookUp(self, name):
-        try:
+        if name in self.bindings:
             result = self.bindings[name]
-        except KeyError:
+        elif len(self.delegates) != 1 or self.delegates[""] is not None:
+            for val in self.delegates.values():
+                if val is not None:
+                    result = val.LookUp(name)
+        else:
             raise ProtocolError("The name", name, "does not exist in the environment")
         return result
     
+    def SetDelegateeEnv(self, delegate, prefix):
+        self.delegates[prefix] = delegate
+        
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())
             
@@ -88,6 +97,5 @@ class Environment(object):
     
     def DefinedNames(self):
         return self.bindings.keys()
-    
             
         
