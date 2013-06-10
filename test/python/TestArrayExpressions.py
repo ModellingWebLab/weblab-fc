@@ -46,7 +46,6 @@ def N(number):
     return M.Const(V.Simple(number))
 
 class TestArrayExpressions(unittest.TestCase):
-
     def TestNewArray(self):
         one = M.Const(V.Simple(1))
         two = M.Const(V.Simple(2))
@@ -158,4 +157,72 @@ class TestArrayExpressions(unittest.TestCase):
         self.assertRaises(ProtocolError, view.Evaluate, {}) # end is before beginning of array
         view = A.View(array, M.TupleExpression(N(2), N(1), M.Const(V.Null())))
         self.assertRaises(ProtocolError, view.Evaluate, {}) # beginning is after end of array
+          
+    def TestArrayComprehension(self):
+       # view = M.TupleExpression(M.Const(V.Null()), N(1), M.Const(V.Null()))
+       # rangespec = range(10)
+       # arr1d = A.NewArray(True, view, rangespec)
+       # 
+       counting1d = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10), M.Const(V.String("i"))), comprehension=True)
+       predictedArr = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+       np.testing.assert_array_almost_equal(counting1d.Evaluate({}).array, predictedArr)
+       
+       counting2d = A.NewArray(M.Plus(M.Times(M.NameLookUp("i"), N(3)), M.NameLookUp("j")),
+                               M.TupleExpression(N(0), N(1), N(1), N(3), M.Const(V.String("i"))),
+                               M.TupleExpression(N(1), N(0), N(1), N(3), M.Const(V.String("j"))), 
+                               comprehension=True)
+       predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
+       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+
+       counting2d = A.NewArray(M.Plus(M.Times(M.NameLookUp("i"), N(3)), M.NameLookUp("j")),
+                                M.TupleExpression(N(1), N(0), N(1), N(3), M.Const(V.String("j"))),
+                                M.TupleExpression(N(0), N(1), N(1), N(3), M.Const(V.String("i"))), 
+                                comprehension=True)
+       predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
+       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+   
+       counting2d = A.NewArray(M.Plus(M.Times(M.NameLookUp("i"), N(3)), M.NameLookUp("j")),
+                             M.TupleExpression(N(1), N(0), N(1), N(3), M.Const(V.String("j"))),
+                             M.TupleExpression(N(1), N(1), N(3), M.Const(V.String("i"))), 
+                              comprehension=True)
+       predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
+       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+"""
+34       
+35        # Testing array comprehensions (and more accessors)
+36       
+37        counting1d = [ i for 0$i in 0:10 ]
+38        assert counting1d.NUM_DIMS == 1
+39        assert counting1d.SHAPE[0] == 10
+40        assert ArrayEq(counting1d, [0,1,2,3,4,5,6,7,8,9])
+41        assert ArrayEq(counting1d, [ i for i in 0:10 ]) # Implicit dimension number
+42       
+43        counting2d = [ i*3 + j for 0$i in 1:3 for 1$j in 0:3 ]
+44        assert counting2d.NUM_DIMS == 2
+45        assert counting2d.NUM_ELEMENTS == 6
+46        assert counting2d.SHAPE[0] == 2
+47        assert ArrayEq(counting2d, [[3, 4, 5], [6, 7, 8]])
+48       
+49        counting2d_alt = [ i*3 + j for 1$j in 0:3 for 0$i in 1:3 ]
+50        assert ArrayEq(counting2d, counting2d_alt)
+51       
+52        blocks = [ [[-10+j,j],[10+j,20+j]] for 1$j in 0:2 ]
+53        assert blocks.NUM_DIMS == 3
+54        assert blocks.NUM_ELEMENTS == 8
+55        assert blocks.SHAPE[0] == 2
+56        assert blocks.SHAPE[1] == 2
+57        assert ArrayEq(blocks, [ [[-10,0], [-9,1]] , [[10,20], [11,21]] ])
+58       
+59        # Test reversing an array
+60        assert ArrayEq(input[:-1:], [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ])
+61       
+62        # Test more complex negative step views
+63        # Note this is Python semantics of half-open range: the begin element is included, the end element not.
+64        assert ArrayEq(input[:-1:-3], [10, 9])
+65        assert ArrayEq(input[3:-1:], [4, 3, 2, 1])
+66        assert ArrayEq(input[4:-1:2], [5, 4])
+67        assert ArrayEq(input[2:-2:0], [3])
+68        assert ArrayEq(input[2:-2:-11], [3, 1])
+69        assert ArrayEq(input[-1:-3:], [10, 7, 4, 1])"""
+        
         

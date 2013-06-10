@@ -36,11 +36,11 @@ from AbstractValue import AbstractValue
 class Environment(object):
     nextIdent = [0]
     
-    def __init__(self, allowOverwrite=False, delegate=None):
+    def __init__(self, allowOverwrite=False, delegatee=None):
         self.allowOverwrite = allowOverwrite
         self.bindings = {}
         self.delegates = {}
-        self.delegates[""] = delegate
+        self.delegates[""] = delegatee
         
     def DefineName(self, name, value):
         if not isinstance(value, AbstractValue):
@@ -69,8 +69,8 @@ class Environment(object):
             raise ProtocolError("The name", name, "does not exist in the environment")
         return result
     
-    def SetDelegateeEnv(self, delegate, prefix):
-        self.delegates[prefix] = delegate
+    def SetDelegateeEnv(self, delegatee, prefix):
+        self.delegates[prefix] = delegatee
         
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())

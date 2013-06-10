@@ -58,4 +58,8 @@ class Tuple(AbstractValue.AbstractValue):
         
 class Null(AbstractValue.AbstractValue):
     pass
+
+class String(AbstractValue.AbstractValue):
+    def __init__(self, value):
+        self.value = value
     

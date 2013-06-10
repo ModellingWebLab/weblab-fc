@@ -34,13 +34,100 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Values as V
 import MathExpressions as M
 import numpy as np
+import Environment as E
+import itertools
+from operator import mul
 
 from AbstractExpression import AbstractExpression
 from ErrorHandling import ProtocolError
 
 class NewArray(AbstractExpression):
     """Used to create new arrays."""
+    def __init__(self, *children, **kwargs):
+        self.comprehension = kwargs.get('comprehension', False)
+        if self.comprehension:
+            self.children = children[1:]
+            self.genExpr = children[0]
+        else:
+            self.children = children
+        
+    def GetValue(self, arg):
+        if isinstance(arg, V.Null):
+            return None
+        else:
+            return int(arg.value)
+            
     def Evaluate(self, env):
+        if self.comprehension:
+            return self._DoComprehension(env)
+        else:
+            return self._DoListMembers(env)
+    
+    def _DoComprehension(self, env):
+        rangeSpecs = self.EvaluateChildren(env)
+        ranges = []
+        range_name = []
+        implicit_dim_slices = {}
+        explicit_dim_slices = {}
+        explicit_dim_names = {}
+        for spec in rangeSpecs:
+            if len(spec.values) == 4:
+                dim = None
+                start = self.GetValue(spec.values[0])
+                step = self.GetValue(spec.values[1])
+                end = self.GetValue(spec.values[2])
+                implicit_dim_slices[spec.values[3].value] = range(int(start), int(end), int(step))
+            elif len(spec.values) == 5:
+                dim = self.GetValue(spec.values[0])
+                start = self.GetValue(spec.values[1])
+                step = self.GetValue(spec.values[2])
+                end = self.GetValue(spec.values[3])
+                if dim in explicit_dim_slices:
+                    raise ProtocolError("Dimension", dim, "has already been assigned")
+                explicit_dim_slices[dim] = range(int(start), int(end), int(step))
+                explicit_dim_names[dim] = spec.values[4].value
+            else:
+                raise ProtocolError("Each slice must be a tuple that contains 4, or 5 values, not", len(spec.values))
+        
+        ranges = [None] * (max(explicit_dim_slices) + 1)
+        range_name = [None] * (max(explicit_dim_slices) + 1)
+        for key in explicit_dim_slices:
+            ranges[key] = explicit_dim_slices[key]
+            range_name[key] = explicit_dim_names[key]
+            
+        for i,implicit_name in enumerate(implicit_dim_slices):
+            if ranges[i] is None:
+                ranges[i] = implicit_dim_slices[implicit_name]
+            elif i > len(ranges):
+                ranges.append(range(int(start), int(end), int(step)))
+            if range_name[i] is None:
+                range_name[i] = implicit_name
+            elif i > len(range_name):
+                range_name.append(implicit_name)
+        product = 1
+        dims = []
+        rangeDims = []
+        for each in ranges:
+            product *= len(each)
+            dims.append(len(each))
+            rangeDims.append(range(len(each)))
+        result = np.array([None] * product).reshape(tuple(dims))
+        rangesList = list(itertools.chain(*ranges))
+        
+        for range_spec_indices in itertools.product(*rangeDims):
+             # collect everything in range_spec_indices that is a number, not a slice
+            range_specs = [ranges[dim][idx]
+                           for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
+            sub_env = E.Environment(delegatee=env)
+            for i, range_value in enumerate(range_specs):
+                sub_env.DefineName(range_name[i], V.Simple(range_value))
+            sub_array = self.genExpr.Evaluate(sub_env).value
+            # Check sub_array shape
+            result[tuple(range_spec_indices)] = sub_array
+        return V.Array(np.array(result))
+    
+        
+    def _DoListMembers(self, env):
         elements = self.EvaluateChildren(env)
         elementsArr = np.array([elt.array for elt in elements])
         return V.Array(elementsArr)

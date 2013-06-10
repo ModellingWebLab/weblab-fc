@@ -89,7 +89,7 @@ class TestEnvironment(unittest.TestCase):
         
     def TestDelegation(self):
         root_env = E.Environment()
-        middle_env = E.Environment(False, root_env)
+        middle_env = E.Environment(delegatee=root_env)
         top_env = E.Environment()
         top_env.SetDelegateeEnv(middle_env, "middle")
         
