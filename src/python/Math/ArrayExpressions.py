@@ -77,6 +77,8 @@ class NewArray(AbstractExpression):
                 start = self.GetValue(spec.values[0])
                 step = self.GetValue(spec.values[1])
                 end = self.GetValue(spec.values[2])
+                if range(int(start), int(end), int(step)) == []:
+                    raise ProtocolError("The indices you entered created an empty range")
                 implicit_dim_slices.append(range(int(start), int(end), int(step)))
                 implicit_dim_names.append(spec.values[3].value)
             elif len(spec.values) == 5:
@@ -86,13 +88,15 @@ class NewArray(AbstractExpression):
                 end = self.GetValue(spec.values[3])
                 if dim in explicit_dim_slices:
                     raise ProtocolError("Dimension", dim, "has already been assigned")
+                if range(int(start), int(end), int(step)) == []:
+                    raise ProtocolError("The indices you entered created an empty range")
                 explicit_dim_slices[dim] = range(int(start), int(end), int(step))
                 explicit_dim_names[dim] = spec.values[4].value
             else:
                 raise ProtocolError("Each slice must be a tuple that contains 4, or 5 values, not", len(spec.values))
-        
-        ranges = [None] * (max(explicit_dim_slices) + 1)
-        range_name = [None] * (max(explicit_dim_slices) + 1)
+        if explicit_dim_slices:
+            ranges = [None] * (max(explicit_dim_slices) + 1)
+            range_name = [None] * (max(explicit_dim_slices) + 1)
         for key in explicit_dim_slices:
             ranges[key] = explicit_dim_slices[key]
             range_name[key] = explicit_dim_names[key]
@@ -105,21 +109,25 @@ class NewArray(AbstractExpression):
                     range_name[i] = implicit_dim_names.pop(0)
                 else:
                     ranges[i] = slice(None, None, 1)
-                    implicit_dim_names.append(None)
                     numGaps += 1
                     
         for i,implicit_slice in enumerate(implicit_dim_slices):
             ranges.append(implicit_slice)
             range_name.append(implicit_dim_names[i])
-            
+        
+        range_name = filter(None, range_name) # Remove None entries
+                    
         product = 1
         dims = []
         rangeDims = []
         for each in ranges:
-            dims.append(len(each))
-            rangeDims.append(range(len(each)))
+            if isinstance(each, slice):
+                dims.append(None)
+                rangeDims.append([slice(None, None, 1)])
+            else:
+                dims.append(len(each))
+                rangeDims.append(range(len(each)))
         result = None
-        
         for range_spec_indices in itertools.product(*rangeDims):
              # collect everything in range_spec_indices that is a number, not a slice
             range_specs = [ranges[dim][idx]
@@ -130,9 +138,21 @@ class NewArray(AbstractExpression):
             sub_array = self.genExpr.Evaluate(sub_env).array
             if result is None:
                 # Create result array
-                sub_array.shape
+                if sub_array.ndim < numGaps:
+                    raise ProtocolError("The sub-array only has", sub_array.ndim, 
+                                        "dimensions, which is not enough to fill", numGaps, "gaps")
+                sub_array_shape = sub_array.shape
+                count = 0
+                for i,dimension in enumerate(dims):
+                    if dimension is None:
+                        dims[i] = sub_array_shape[count]
+                        count += 1
+                dims.extend(sub_array_shape[count:])
                 result = np.empty(tuple(dims), dtype=float)
             # Check sub_array shape
+            if sub_array.shape != sub_array_shape:
+                raise ProtocolError("The given sub-array has shape:", sub_array.shape, 
+                                    "when it should be", sub_array_shape)
             result[tuple(range_spec_indices)] = sub_array
         return V.Array(np.array(result))
     

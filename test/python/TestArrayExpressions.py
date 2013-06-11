@@ -160,7 +160,7 @@ class TestArrayExpressions(unittest.TestCase):
           
     def TestArrayComprehension(self):
        
-       # 2-d array
+       # 1-d array
        counting1d = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10), M.Const(V.String("i"))), comprehension=True)
        predictedArr = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
        np.testing.assert_array_almost_equal(counting1d.Evaluate({}).array, predictedArr)
@@ -197,16 +197,34 @@ class TestArrayExpressions(unittest.TestCase):
        predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
        np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
        
+       # comprehension using arrays in generator expression with one variable
        blocks = A.NewArray(A.NewArray(A.NewArray(M.Plus(N(-10), M.NameLookUp("j")), 
                                                  M.NameLookUp("j")), 
                                       A.NewArray(M.Plus(N(10), M.NameLookUp("j")), 
                                                  M.Plus(N(20), M.NameLookUp("j")))),
                            M.TupleExpression(N(1), N(0), N(1), N(2), M.Const(V.String("j"))),
                            comprehension=True)
-       #  blocks = [ [[-10+j,j],[10+j,20+j]] for 1$j in 0:2 ]
        predictedArr = np.array([ [[-10,0], [-9,1]] , [[10,20], [11,21]] ])
-       #np.testing.assert_array_almost_equal(blocks.Evaluate({}).array, predictedArr)
+       np.testing.assert_array_almost_equal(blocks.Evaluate(E.Environment()).array, predictedArr)
+       
+#        # comprehension using arrays in generator expression with two variables
+#        blocks = A.NewArray(A.NewArray(A.NewArray(M.Plus(N(-10), M.NameLookUp("j")), 
+#                                                  M.NameLookUp("j")), 
+#                                       A.NewArray(M.Plus(N(10), M.NameLookUp("i")), 
+#                                                  M.Plus(N(20), M.NameLookUp("i")))),
+#                            M.TupleExpression(N(0), N(1), N(2), M.Const(V.String("j"))),
+#                            M.TupleExpression(N(0), N(1), N(2), M.Const(V.String("i"))),
+#                            comprehension=True)
+#        predictedArr = np.array([ ])
+#        np.testing.assert_array_almost_equal(blocks.Evaluate(E.Environment()).array, predictedArr)
+       
+       # creates an empty array because the start is greater than the end
+       fail = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(10), N(1), N(0), M.Const(V.String("i"))), comprehension=True)
+       self.assertRaises(ProtocolError, fail.Evaluate, {})
    
+       # creates an empty array because the step is negative when it should be positive
+       fail = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(-1), N(10), M.Const(V.String("i"))), comprehension=True)
+       self.assertRaises(ProtocolError, fail.Evaluate, {})
 """
 34       
 35        # Testing array comprehensions (and more accessors)
