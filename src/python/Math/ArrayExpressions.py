@@ -67,7 +67,8 @@ class NewArray(AbstractExpression):
         rangeSpecs = self.EvaluateChildren(env)
         ranges = []
         range_name = []
-        implicit_dim_slices = {}
+        implicit_dim_slices = []
+        implicit_dim_names = []
         explicit_dim_slices = {}
         explicit_dim_names = {}
         for spec in rangeSpecs:
@@ -76,7 +77,8 @@ class NewArray(AbstractExpression):
                 start = self.GetValue(spec.values[0])
                 step = self.GetValue(spec.values[1])
                 end = self.GetValue(spec.values[2])
-                implicit_dim_slices[spec.values[3].value] = range(int(start), int(end), int(step))
+                implicit_dim_slices.append(range(int(start), int(end), int(step)))
+                implicit_dim_names.append(spec.values[3].value)
             elif len(spec.values) == 5:
                 dim = self.GetValue(spec.values[0])
                 start = self.GetValue(spec.values[1])
@@ -94,25 +96,29 @@ class NewArray(AbstractExpression):
         for key in explicit_dim_slices:
             ranges[key] = explicit_dim_slices[key]
             range_name[key] = explicit_dim_names[key]
+        
+        numGaps = 0
+        for i,each in enumerate(ranges):
+            if each is None:
+                if implicit_dim_slices:
+                    ranges[i] = implicit_dim_slices.pop(0)
+                    range_name[i] = implicit_dim_names.pop(0)
+                else:
+                    ranges[i] = slice(None, None, 1)
+                    implicit_dim_names.append(None)
+                    numGaps += 1
+                    
+        for i,implicit_slice in enumerate(implicit_dim_slices):
+            ranges.append(implicit_slice)
+            range_name.append(implicit_dim_names[i])
             
-        for i,implicit_name in enumerate(implicit_dim_slices):
-            if ranges[i] is None:
-                ranges[i] = implicit_dim_slices[implicit_name]
-            elif i > len(ranges):
-                ranges.append(range(int(start), int(end), int(step)))
-            if range_name[i] is None:
-                range_name[i] = implicit_name
-            elif i > len(range_name):
-                range_name.append(implicit_name)
         product = 1
         dims = []
         rangeDims = []
         for each in ranges:
-            product *= len(each)
             dims.append(len(each))
             rangeDims.append(range(len(each)))
-        result = np.array([None] * product).reshape(tuple(dims))
-        rangesList = list(itertools.chain(*ranges))
+        result = None
         
         for range_spec_indices in itertools.product(*rangeDims):
              # collect everything in range_spec_indices that is a number, not a slice
@@ -121,7 +127,11 @@ class NewArray(AbstractExpression):
             sub_env = E.Environment(delegatee=env)
             for i, range_value in enumerate(range_specs):
                 sub_env.DefineName(range_name[i], V.Simple(range_value))
-            sub_array = self.genExpr.Evaluate(sub_env).value
+            sub_array = self.genExpr.Evaluate(sub_env).array
+            if result is None:
+                # Create result array
+                sub_array.shape
+                result = np.empty(tuple(dims), dtype=float)
             # Check sub_array shape
             result[tuple(range_spec_indices)] = sub_array
         return V.Array(np.array(result))

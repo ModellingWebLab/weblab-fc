@@ -266,7 +266,7 @@ class Xor(AbstractExpression):
             raise ProtocolError("Boolean operator 'xor' requires operands")
         result = False
         try:
-            for v in operands:
+            for v in operands: 
                 result = result != v.value
         except AttributeError:
             raise ProtocolError("Boolean operator 'xor' requires its operands to be simple values")
