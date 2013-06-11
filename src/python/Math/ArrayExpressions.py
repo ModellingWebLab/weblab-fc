@@ -64,14 +64,14 @@ class NewArray(AbstractExpression):
             return self._DoListMembers(env)
     
     def _DoComprehension(self, env):
-        rangeSpecs = self.EvaluateChildren(env)
+        range_specs = self.EvaluateChildren(env)
         ranges = []
         range_name = []
         implicit_dim_slices = []
         implicit_dim_names = []
         explicit_dim_slices = {}
         explicit_dim_names = {}
-        for spec in rangeSpecs:
+        for spec in range_specs:
             if len(spec.values) == 4:
                 dim = None
                 start = self.GetValue(spec.values[0])
@@ -101,7 +101,7 @@ class NewArray(AbstractExpression):
             ranges[key] = explicit_dim_slices[key]
             range_name[key] = explicit_dim_names[key]
         
-        numGaps = 0
+        num_gaps = 0
         for i,each in enumerate(ranges):
             if each is None:
                 if implicit_dim_slices:
@@ -109,7 +109,7 @@ class NewArray(AbstractExpression):
                     range_name[i] = implicit_dim_names.pop(0)
                 else:
                     ranges[i] = slice(None, None, 1)
-                    numGaps += 1
+                    num_gaps += 1
                     
         for i,implicit_slice in enumerate(implicit_dim_slices):
             ranges.append(implicit_slice)
@@ -119,16 +119,16 @@ class NewArray(AbstractExpression):
                     
         product = 1
         dims = []
-        rangeDims = []
+        range_dims = []
         for each in ranges:
             if isinstance(each, slice):
                 dims.append(None)
-                rangeDims.append([slice(None, None, 1)])
+                range_dims.append([slice(None, None, 1)])
             else:
                 dims.append(len(each))
-                rangeDims.append(range(len(each)))
+                range_dims.append(range(len(each)))
         result = None
-        for range_spec_indices in itertools.product(*rangeDims):
+        for range_spec_indices in itertools.product(*range_dims):
              # collect everything in range_spec_indices that is a number, not a slice
             range_specs = [ranges[dim][idx]
                            for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
@@ -138,9 +138,9 @@ class NewArray(AbstractExpression):
             sub_array = self.genExpr.Evaluate(sub_env).array
             if result is None:
                 # Create result array
-                if sub_array.ndim < numGaps:
+                if sub_array.ndim < num_gaps:
                     raise ProtocolError("The sub-array only has", sub_array.ndim, 
-                                        "dimensions, which is not enough to fill", numGaps, "gaps")
+                                        "dimensions, which is not enough to fill", num_gaps, "gaps")
                 sub_array_shape = sub_array.shape
                 count = 0
                 for i,dimension in enumerate(dims):
@@ -159,8 +159,8 @@ class NewArray(AbstractExpression):
         
     def _DoListMembers(self, env):
         elements = self.EvaluateChildren(env)
-        elementsArr = np.array([elt.array for elt in elements])
-        return V.Array(elementsArr)
+        elements_arr = np.array([elt.array for elt in elements])
+        return V.Array(elements_arr)
     
 class View(AbstractExpression):
     def __init__(self, array, *children):     
@@ -230,15 +230,15 @@ class View(AbstractExpression):
                     implicit_dim_slices.append(slice(start, end, step))
             
         for i, each in enumerate(slices):
-            dimLen = array.array.shape[i]
+            dim_len = array.array.shape[i]
             if each is None:
                 if implicit_dim_slices:
                     if isinstance(implicit_dim_slices[0], slice):
                         if implicit_dim_slices[0].start is not None:
-                            if abs(implicit_dim_slices[0].start + 1) > dimLen:
+                            if abs(implicit_dim_slices[0].start + 1) > dim_len:
                                 raise ProtocolError("The start of the slice is not within the range of the dimension")
                         if implicit_dim_slices[0].stop is not None:
-                            if abs(implicit_dim_slices[0].stop + 1) > dimLen:
+                            if abs(implicit_dim_slices[0].stop + 1) > dim_len:
                                 raise ProtocolError("The end of the slice is not within the range of the dimension")
                         if implicit_dim_slices[0].step is not None and implicit_dim_slices[0].stop is not None and implicit_dim_slices[0].start is not None:
                             if (implicit_dim_slices[0].stop - implicit_dim_slices[0].start) * implicit_dim_slices[0].step <= 0:

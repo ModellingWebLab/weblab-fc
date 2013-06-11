@@ -217,15 +217,15 @@ class Log(AbstractExpression):
     def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1 and len(self.children) != 2:
-            raise ProtocolError("Logarithm operator requires one operand and optionally a logbase qualifier, you entered", len(self.children), "inputs")
-        logbase = 10
+            raise ProtocolError("Logarithm operator requires one operand and optionally a log_base qualifier, you entered", len(self.children), "inputs")
+        log_base = 10
         if len(self.children) == 2:
-            logbase = operands[0].value
+            log_base = operands[0].value
         try:
-            if logbase == 10:
+            if log_base == 10:
                 result = math.log10(operands[0].value)
             else:
-                result = math.log(operands[1].value,logbase)
+                result = math.log(operands[1].value,log_base)
         except AttributeError:
             raise ProtocolError("Logarithm operator requires its operands to evaluate to numbers")
         return V.Simple(result)
@@ -385,7 +385,7 @@ class Map(AbstractExpression):
                 raise ProtocolError("All of the arrays passed in map must be the same size") 
         for a in operands[1:]:
             a.array = a.array.flatten()
-        funInputs = np.empty(operands[1].array.size * (len(self.children) - 1))
+        fun_inputs = np.empty(operands[1].array.size * (len(self.children) - 1))
         
         
         
@@ -399,13 +399,13 @@ class Map(AbstractExpression):
         #elt = 0
         #for item in operands[0].array:
          #   for a in operands[1:]:
-          #      funInputs[elt] = a.array[item]
+          #      fun_inputs[elt] = a.array[item]
            #     elt += 1
         #result = np.empty(shape)
         #size = result.size
         #count = 0
         #for item in np.array([:size:(len(self.children)-1)]):
-         #   result[count] = fun(funInputs)
+         #   result[count] = fun(fun_inputs)
         
         
         
