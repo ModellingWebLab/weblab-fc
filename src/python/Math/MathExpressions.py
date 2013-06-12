@@ -46,6 +46,29 @@ class Const(AbstractExpression):
     def Evaluate(self,env):
         return self.value
         
+class FunctionCall(AbstractExpression):
+    def __init__(self, functionName, children):
+        self.functionName = functionName
+        self.children = children
+        
+    def Evaluate(self, env):
+        actual_params = self.EvaluateChildren(env)
+        function = env.LookUp(self.functionName)
+        print "function", function
+        print "actual params", actual_params
+        if not isinstance(function, V.LambdaClosure):
+            raise ProtocolError(function, "is not a function")
+        return function.Evaluate(env, actual_params)
+        
+class LambdaExpression(AbstractExpression):
+    def __init__(self, formalParameters, body, defaultParameters):
+        self.formalParameters = formalParameters
+        self.body = body
+        self.defaultParameters = defaultParameters
+        
+    def Evaluate(self, env):
+        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)      
+        
 class Plus(AbstractExpression):
     """Addition."""
     def Evaluate(self, env):

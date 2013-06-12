@@ -4,3 +4,4 @@ TestRelations.py
 TestEnvironment.py
 TestNdArray.py
 TestArrayExpressions.py
+TestFunctions.py

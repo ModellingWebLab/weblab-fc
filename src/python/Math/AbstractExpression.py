@@ -37,11 +37,11 @@ class AbstractExpression(object):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         self.children = children
 
-    def EvaluateChildren(self,env):
+    def EvaluateChildren(self, env):
         """Evaluate our child expressions and return a list of their values."""
         childList = [child.Evaluate(env) for child in self.children]
         return childList
     
-    def Evaluate(self,env):
+    def Evaluate(self, env):
         """Subclasses must implement this method."""
         raise NotImplementedError

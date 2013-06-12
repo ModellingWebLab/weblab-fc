@@ -31,6 +31,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import AbstractValue
 import numpy as np
+import Environment as E
 
 class Simple(AbstractValue.AbstractValue):
     def __init__(self, value):
@@ -62,4 +63,54 @@ class Null(AbstractValue.AbstractValue):
 class String(AbstractValue.AbstractValue):
     def __init__(self, value):
         self.value = value
+        
+class DefaultParameter(AbstractValue.AbstractValue):
+    pass
+        
+class LambdaClosure(AbstractValue.AbstractValue):
+    def __init__(self, definingEnv, formalParameters, body, defaultParameters):
+        self.formalParameters = formalParameters
+        self.body = body
+        self.defaultParameters = defaultParameters
+        self.definingEnv = definingEnv
+    
+    def Evaluate(self, env, actualParameters):
+        local_env = E.Environment(delegatee=self.definingEnv)
+        print "params", actualParameters[0].value, actualParameters[1].value
+        for i,param in enumerate(actualParameters):
+            if not isinstance(param, DefaultParameter):
+                local_env.DefineName(self.formalParameters[i], param)
+            elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
+                local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
+            else:
+                raise ProtocolError("One of the parameters is not defined and has no default value")
+        print "returned by execute", local_env.ExecuteStatements(self.body, returnAllowed=True)
+        return local_env.ExecuteStatements(self.body, returnAllowed=True)
+        
+        
+         #lambda closure is a value, functioncall and lambdaexpression are both expressions
+        #closure just has information about formal parameters (names for parameters, 
+        #...list of strings) so for f(a, b=1, c), the list of formal parameters are a,b,c
+        # if the function f from above returns a+b+c
+        # defaultparameter is its own value in values.py and is like the null
+        # you can call the f function like f(3,defaultparameter,1)
+        # default parameters here would be [None, v.simple(1), None] or [Default, v.simple(1), default]
+        # body = [statements]
+        # definingEnv is an environment and is env that function is evaluated in
+        # in evaluate for lambdaexpression, you return lambdaclosure(..., env) and so closure stores this env as definingEnv
+        # lambda expression just takes formalparams, body, default params and returns lambda closure with those things
+        # in __init for lamexpr, if isinstance(body, abstractexpression) then body = [returnstatement(body)]
+        # function call takes in function to call (an expression), and the arguments (parameters) which is a list of expressions
+        # function call in its evaluate method just calls closure = func.evaluate (the func that is passed in), test to make sure it returns a closure, if it doesn't then error because its not a function
+        # function call evaluates children to get the parameter values and calls closure (from above, closure.evaluate(parameters
+        # closure evaluate just takes in actual params as a list of values which have already been evaluated
+        # evaluate method in closure: sets up env to execute statements in body
+        # execute body is just calling execute statements on environment created just before
+        # created env delegates to definingEnv and within the local env, it defines names 
+        #...for local parameters and the assigned value is actual param if its 
+        #...assigned or the default parameters (if no default parameter, cuz value 
+        #...of default is none or default, then throw an error)
+        # closure evaluate returns local_env.executestatements(body, returnAllowed=True)
+            
+        
     

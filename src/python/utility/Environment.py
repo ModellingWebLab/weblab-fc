@@ -97,5 +97,39 @@ class Environment(object):
     
     def DefinedNames(self):
         return self.bindings.keys()
+    
+    def ExecuteStatements(self, statements, returnAllowed=False):
+        for statement in statements:
+            result = statement.Evaluate(self)
+            if not isinstance(result, V.Null) and result is not None:
+                if returnAllowed == True:
+                    break
+                else:
+                    raise ProtocolError("Return statement not allowed outside of function")           
+        return result
+            
+        # evaluate each statement until one is null and returns are allowed, then return that value, otherwise returns null
+        # reassign result to the next statement evaluated and break when its null
+        
+        #lambda closure is a value, functioncall and lambdaexpression are both expressions
+        #closure just has information about formal parameters (names for parameters, list of strings) so for f(a, b=1, c), the list of formal parameters are a,b,c
+        # if the function f from above returns a+b+c
+        # default parameters list would be 
+        # defaultparameter is its only value in values.py and is like the null
+        # you can call the f function like f(3,defaultparameter,1)
+        # default parameters here would be [None, v.simple(1), None] or [Default, v.simple(1), default]
+        # body = [statements]
+        # definingEnv is an environment and is env that function is evaluated in
+        # in evaluate for lambdaexpression, you return lambdaclosure(..., env) and so closure stores this env as definingEnv
+        # lambda expression just takes formalparams, body, default params and returns lambda closure with those things
+        # in __init for lamexpr, if isinstance(body, abstractexpression) then body = [returnstatement(body)]
+        # function call takes in function to call (an expression), and the arguments (parameters) which is a list of expressions
+        # function call in its evaluate method just calls closure = func.evaluate (the func that is passed in), test to make sure it returns a closure, if it doesn't then error because its not a function
+        # function call evaluates children to get the parameter values and calls closure (from above, closure.evaluate(parameters
+        # closure evaluate just takes in actual params as a list of values which have already been evaluated
+        # evaluate method in closure: sets up env to execute statements in body
+        # execute body is just calling execute statements on environment created just before
+        # created env delegates to definingEnv and within the local env, it defines names for local parameters and the assigned value is actual param if its assigned or the default parameters (if no default parameter, cuz value of default is none or default, then throw an error)
+        # closure evaluate returns local_env.executestatements(body, returnAllowed=True)
             
         
