@@ -145,6 +145,11 @@ class Actions(object):
             elt.set('{%s}loc' % PROTO_NS, self.source_location)
             return elt
         
+        def AddTrace(self, elt):
+            """Turn on tracing of the construct represented by the given element."""
+            elt.set('{%s}trace' % PROTO_NS, '1')
+            return elt
+        
         def xml(self):
             """Main method to generate the XML syntax.
             Will add an attribute containing source location information where appropriate.
@@ -169,8 +174,7 @@ class Actions(object):
         """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
         def _xml(self):
             wrapped_xml = self.tokens[0].xml()
-            wrapped_xml.set('{%s}trace' % PROTO_NS, '1')
-            return wrapped_xml
+            return self.AddTrace(wrapped_xml)
     
     ######################################################################
     # Post-processing language expressions
@@ -605,7 +609,7 @@ class Actions(object):
                 args.append(self.AddLoc(P.selectOutput(name=output)))
             result = P.nestedProtocol(*args, **attrs)
             if self.trace:
-                result.set('{%s}trace' % PROTO_NS, '1')
+                self.AddTrace(result)
             return result
     
     class Simulation(BaseGroupAction):
@@ -615,6 +619,8 @@ class Actions(object):
             prefix = str(self.tokens[0])
             if prefix:
                 sim_elt.set('prefix', prefix)
+            if self.tokens[-1] == '?':
+                self.AddTrace(sim_elt)
             return sim_elt
     
     class Tasks(BaseGroupAction):
@@ -1142,7 +1148,7 @@ class CompactSyntaxParser(object):
     oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))("step")
                          + Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(Actions.OneStepSimulation)
     simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='')
-                          + (timecourseSim | nestedSim | oneStepSim)).setParseAction(Actions.Simulation)
+                          + (timecourseSim | nestedSim | oneStepSim) - Optional('?' + nl)).setParseAction(Actions.Simulation)
 
     tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(simulation) + cbrace).setName('Tasks').setParseAction(Actions.Tasks)
 
