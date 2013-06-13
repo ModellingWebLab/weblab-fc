@@ -47,21 +47,22 @@ class Const(AbstractExpression):
         return self.value
         
 class FunctionCall(AbstractExpression):
-    def __init__(self, functionName, children):
-        self.functionName = functionName
+    def __init__(self, functionOrName, children):
+        if isinstance(functionOrName, str):
+            self.function = NameLookUp(functionOrName)
+        else:
+            self.function = functionOrName
         self.children = children
         
     def Evaluate(self, env):
         actual_params = self.EvaluateChildren(env)
-        function = env.LookUp(self.functionName)
-        print "function", function
-        print "actual params", actual_params
+        function = self.function.Evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError(function, "is not a function")
         return function.Evaluate(env, actual_params)
         
 class LambdaExpression(AbstractExpression):
-    def __init__(self, formalParameters, body, defaultParameters):
+    def __init__(self, formalParameters, body, defaultParameters=None):
         self.formalParameters = formalParameters
         self.body = body
         self.defaultParameters = defaultParameters

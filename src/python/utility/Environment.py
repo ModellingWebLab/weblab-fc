@@ -46,7 +46,7 @@ class Environment(object):
         if not isinstance(value, AbstractValue):
             raise ProtocolError(value, "is not a value type")
         if name in self.bindings:
-            raise ProtocolError(name, "is already defined and may not be re-bound")
+            raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
         else:
             self.bindings[name] = value
     

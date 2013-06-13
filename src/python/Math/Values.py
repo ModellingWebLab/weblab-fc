@@ -76,7 +76,8 @@ class LambdaClosure(AbstractValue.AbstractValue):
     
     def Evaluate(self, env, actualParameters):
         local_env = E.Environment(delegatee=self.definingEnv)
-        print "params", actualParameters[0].value, actualParameters[1].value
+        if len(actualParameters) < len(self.formalParameters):
+            actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
         for i,param in enumerate(actualParameters):
             if not isinstance(param, DefaultParameter):
                 local_env.DefineName(self.formalParameters[i], param)
@@ -84,8 +85,8 @@ class LambdaClosure(AbstractValue.AbstractValue):
                 local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
-        print "returned by execute", local_env.ExecuteStatements(self.body, returnAllowed=True)
-        return local_env.ExecuteStatements(self.body, returnAllowed=True)
+        result = local_env.ExecuteStatements(self.body, returnAllowed=True)
+        return result
         
         
          #lambda closure is a value, functioncall and lambdaexpression are both expressions
