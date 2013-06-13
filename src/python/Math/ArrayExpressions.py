@@ -255,4 +255,66 @@ class View(AbstractExpression):
         return V.Array(view)
         
         
+class Map(AbstractExpression):
+    """Mapping function for n-dimensional arrays"""
+
+    def __init__(self, functionExpr, *children):
+        self.functionExpr = functionExpr
+        self.children = children
+        
     
+    def Evaluate(self, env):
+        function = self.functionExpr.Evaluate(env)
+        if not isinstance(function, V.LambdaClosure):
+            raise ProtocolError("Function passed is not a function")
+        arrays = self.EvaluateChildren(env)
+        if len(self.children) < 1:
+            raise ProtocolError("Map requires at least one parameter")
+        shape = arrays[0].array.shape
+        for array in arrays:
+            if array.array.shape != shape:
+                raise ProtocolError(array, "is not the same shape as the first array input")
+        result = np.empty(shape, dtype=float)
+        dim_range = []
+        for dim in shape:
+            dim_range.append(range(dim)) 
+        for index in itertools.product(*dim_range):
+            function_inputs = []
+            for array in arrays:
+                function_inputs.append(V.Simple(float(array.array[index])))
+            result[index] = function.Evaluate(env, function_inputs).value
+        protocol_result = V.Array(result)
+        
+        return protocol_result
+
+#         for array in arrays:
+#             a.array = a.array.flatten()
+#         fun_inputs = np.empty(operands[1].array.size * (len(self.children) - 1))
+
+# MAP
+# applies functions element-wise to arrays
+# abstractexpression and in its constructor is the function, and *arrays (the arrays to which the function
+#...will be applied, and there must be at least one here
+# there's an evaluate method and in it, you need to evaluate the function (function = functionExpr.Evaluate())
+# use evaluate children to get the arrays to be used
+# make sure each array has the same shape
+# use itertools.zip to iterate through each array to get values, at each point evaluate the function
+# first thing you have to do is create the result with the same shape array as the inputs (just use np.empty)
+# when you do evaluate children, you have protocol language arrays
+# use Array.array to get underlying nparray
+# use map(v.simple, elements) to wrap each of the elements in the python arrays to get a list of protocol language numbers
+# check the function is a lambda closure, then evaluate it using the wrapped values from above as 
+#...the argument which gives you a result as a protocol value, convert those to python doubles, 
+#...stick them in result array, then wrap that result array in a protocol language array
+    
+           
+        #elt = 0
+        #for item in operands[0].array:
+         #   for a in operands[1:]:
+          #      fun_inputs[elt] = a.array[item]
+           #     elt += 1
+        #result = np.empty(shape)
+        #size = result.size
+        #count = 0
+        #for item in np.array([:size:(len(self.children)-1)]):
+         #   result[count] = fun(fun_inputs)

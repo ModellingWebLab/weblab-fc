@@ -34,6 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Values as V
 import math
 import numpy as np
+import itertools
 
 from ErrorHandling import ProtocolError
 from AbstractExpression import AbstractExpression
@@ -393,43 +394,6 @@ class TupleExpression(AbstractExpression):
         if len(self.children) < 1:
             raise ProtocolError("Empty tuple expressions are not allowed")
         return V.Tuple(*self.EvaluateChildren(env))
-    
-class Map(AbstractExpression):
-    """Mapping function for n-dimensional arrays"""
-    def Evaluate(self, env):
-        operands = self.EvaluateChildren(env)
-        fun = operands[0]
-        if len(self.children) < 2:
-            raise ProtocolError("Map requires more than one parameter")
-        if not isinstance(fun, types.FunctionType):
-            raise ProtocolError("First parameter must be a function")
-        shape = operands[1].array.shape
-        for a in operands[2:]:
-            if a != shape:
-                raise ProtocolError("All of the arrays passed in map must be the same size") 
-        for a in operands[1:]:
-            a.array = a.array.flatten()
-        fun_inputs = np.empty(operands[1].array.size * (len(self.children) - 1))
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        #elt = 0
-        #for item in operands[0].array:
-         #   for a in operands[1:]:
-          #      fun_inputs[elt] = a.array[item]
-           #     elt += 1
-        #result = np.empty(shape)
-        #size = result.size
-        #count = 0
-        #for item in np.array([:size:(len(self.children)-1)]):
-         #   result[count] = fun(fun_inputs)
         
         
         
