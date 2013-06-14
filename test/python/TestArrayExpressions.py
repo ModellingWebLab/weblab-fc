@@ -269,7 +269,17 @@ class TestArrayExpressions(unittest.TestCase):
        b = A.NewArray(A.NewArray(A.NewArray(N(4), N(3)), A.NewArray(N(6),N(1))), A.NewArray(A.NewArray(N(0), N(6)), A.NewArray(N(5),N(3))))
        c = A.NewArray(A.NewArray(A.NewArray(N(2), N(2)), A.NewArray(N(8),N(0))), A.NewArray(A.NewArray(N(4), N(2)), A.NewArray(N(2),N(1))))
        result = A.Map(add_times, a, b, c)
-       predicted = V.Array(np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]]))
-       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+       predicted = np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]])
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+       
+    def TestMapWithFunctionWithDefaults(self):
+       env = E.Environment()
+       body = [Statement.Return(M.Plus(M.NameLookUp('item'), M.NameLookUp('incr')))]
+       add = M.LambdaExpression(['item', 'incr'], body, defaultParameters = [M.Const(V.DefaultParameter()), V.Simple(3)])
+       item = A.NewArray(N(1), N(3), N(5))
+       result = A.Map(add, item)
+       predicted = np.array([4, 6, 8])
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+       
         
         

@@ -254,6 +254,35 @@ class View(AbstractExpression):
             raise ProtocolError("The indices must be in the range of the array")
         return V.Array(view)
         
+# class Fold(AbstractExpression):
+#     def __init__(self, *children):
+#         self.children = children
+#         
+#     def Evaluate(self, env):
+#         if len(self.children) < 2 or len(self.children) > 4:
+#             raise ProtocolError("Fold requires 2-4 function inputs, not", len(self.children))
+#         operands = self.EvaluateChildren(env)
+#         if len(self.children) == 2:
+#             function = operands[0]
+#             array = operands[1]
+#             initial = None
+#             dimension = None
+#         if len(self.children) == 3:
+#             function = operands[0]
+#             array = operands[1]
+#             initial = operands[2]
+#             dimension = None
+#         if len(self.children) == 4:
+#             function = operands[0]
+#             array = operands[1]
+#              initial = operands[2]
+#              dimension = operands[3]             
+#              if dimension > array.array.ndim:
+#                  raise ProtocolError("Cannot operate on dimension", dimension, 
+#                                      "because the array only has", array.array.ndim, "dimensions")
+
+
+        
         
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
@@ -274,7 +303,7 @@ class Map(AbstractExpression):
         for array in arrays:
             if array.array.shape != shape:
                 raise ProtocolError(array, "is not the same shape as the first array input")
-        result = np.empty(shape, dtype=float)
+        result = np.empty_like(arrays[0].array)
         dim_range = []
         for dim in shape:
             dim_range.append(range(dim)) 
@@ -287,9 +316,27 @@ class Map(AbstractExpression):
         
         return protocol_result
 
+## flatten could help here possibly
 #         for array in arrays:
 #             a.array = a.array.flatten()
 #         fun_inputs = np.empty(operands[1].array.size * (len(self.children) - 1))
+
+## check out the kinda thing below using numba to speed it up
+# @autojit
+# def generate_power_func(n):
+#     @jit(float_(float_))
+#     def nth_power(x):
+#         return x ** n
+# 
+#     # This is a native call
+#     print(nth_power(10))
+# 
+#     # Return closure and keep all cell variables alive
+#     return nth_power
+# 
+# for n in range(2, 5):
+#     func = generate_power_func(n)
+#     print([func(x) for x in linspace(1.,2.,10.)])
 
 # MAP
 # applies functions element-wise to arrays
