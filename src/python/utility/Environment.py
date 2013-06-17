@@ -43,8 +43,8 @@ class Environment(object):
         self.delegates[""] = delegatee
         
     def DefineName(self, name, value):
-        if not isinstance(value, AbstractValue):
-            raise ProtocolError(value, "is not a value type")
+#         if not isinstance(value, AbstractValue):
+#             raise ProtocolError(value, "is not a value type")
         if name in self.bindings:
             raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
         else:

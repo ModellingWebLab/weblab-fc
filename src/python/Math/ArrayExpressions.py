@@ -299,20 +299,21 @@ class Map(AbstractExpression):
         arrays = self.EvaluateChildren(env)
         if len(self.children) < 1:
             raise ProtocolError("Map requires at least one parameter")
-        shape = arrays[0].array.shape
-        for array in arrays:
-            if array.array.shape != shape:
-                raise ProtocolError(array, "is not the same shape as the first array input")
-        result = np.empty_like(arrays[0].array)
-        dim_range = []
-        for dim in shape:
-            dim_range.append(range(dim)) 
-        for index in itertools.product(*dim_range):
-            function_inputs = []
-            for array in arrays:
-                function_inputs.append(V.Simple(float(array.array[index])))
-            result[index] = function.Evaluate(env, function_inputs).value
-        protocol_result = V.Array(result)
+        protocol_result = function.Evaluate(env, arrays)
+#        shape = arrays[0].array.shape
+#         for array in arrays:
+#             if array.array.shape != shape:
+#                 raise ProtocolError(array, "is not the same shape as the first array input")
+#         result = np.empty_like(arrays[0].array)
+#         dim_range = []
+#         for dim in shape:
+#             dim_range.append(range(dim)) 
+#         for index in itertools.product(*dim_range):
+#             function_inputs = []
+#             for array in arrays:
+#                 function_inputs.append(V.Simple(float(array.array[index])))
+#             result[index] = function.Evaluate(env, function_inputs).value
+#         protocol_result = V.Array(result)
         
         return protocol_result
 

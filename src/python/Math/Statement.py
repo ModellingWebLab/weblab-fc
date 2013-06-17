@@ -46,6 +46,7 @@ class Assign(AbstractStatement):
                 
     def Evaluate(self, env):
         results = self.rhs.Evaluate(env)
+        #evaluate here using dictionary in env but only values that are python values
         if len(self.names) > 1:
             if not isinstance(results, V.Tuple):
                 raise ProtocolError("When assigning multiple names the value to assign must be a tuple.")

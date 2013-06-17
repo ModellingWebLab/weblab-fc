@@ -35,6 +35,7 @@ import Values as V
 import math
 import numpy as np
 import itertools
+import numexpr as ne
 
 from ErrorHandling import ProtocolError
 from AbstractExpression import AbstractExpression
@@ -75,11 +76,21 @@ class Plus(AbstractExpression):
     """Addition."""
     def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
-        try:
-            result = sum([v.value for v in operands])
-        except AttributeError:
-            raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers;", v, "does not.")
-        return V.Simple(result)
+        if isinstance(operands[0], V.Array):
+            arr_names = ['a' + str(i) for i in range(len(operands))]
+            arr_dict = {}            
+            for i,operand in enumerate(operands):
+                arr_name = 'a' + str(i)
+                arr_dict[arr_names[i]] = operand.array
+            expression = ' + '.join(arr_names)   
+            result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
+            
+        else:  
+            try:
+                result = V.Simple(sum([v.value for v in operands]))
+            except AttributeError:
+                raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers or an Array;", v, "does not.")
+        return result
     
 class Minus(AbstractExpression):
     """Subtraction."""
@@ -100,11 +111,20 @@ class Times(AbstractExpression):
     """Multiplication"""
     def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
-        try:
-            result = reduce(lambda x, y: x*y, [v.value for v in operands], 1)
-        except AttributeError:
-            raise ProtocolError("Operator 'times' requires all operands to evaluate to numbers;", v, "does not.")
-        return V.Simple(result)
+        if isinstance(operands[0], V.Array):
+            arr_names = ['a' + str(i) for i in range(len(operands))]
+            arr_dict = {}            
+            for i,operand in enumerate(operands):
+                arr_name = 'a' + str(i)
+                arr_dict[arr_names[i]] = operand.array
+            expression = ' * '.join(arr_names)   
+            result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
+        else:
+            try:
+                result = V.Simple(reduce(lambda x, y: x*y, [v.value for v in operands], 1))
+            except AttributeError:
+                raise ProtocolError("Operator 'times' requires all operands to evaluate to an Array or numbers;", v, "does not.")
+        return result
     
 class Divide(AbstractExpression):
     """Division."""
