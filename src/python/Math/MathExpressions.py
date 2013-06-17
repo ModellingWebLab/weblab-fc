@@ -77,10 +77,9 @@ class Plus(AbstractExpression):
     def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
         if isinstance(operands[0], V.Array):
-            arr_names = ['a' + str(i) for i in range(len(operands))]
-            arr_dict = {}            
+            arr_names = [env.FreshIdent() for i in range(len(operands))]
+            arr_dict = {}           
             for i,operand in enumerate(operands):
-                arr_name = 'a' + str(i)
                 arr_dict[arr_names[i]] = operand.array
             expression = ' + '.join(arr_names)   
             result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
@@ -91,6 +90,21 @@ class Plus(AbstractExpression):
             except AttributeError:
                 raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers or an Array;", v, "does not.")
         return result
+    
+    def Compile(self, env):
+        operands = self.EvaluateChildren(env)
+        arr_names = [env.FreshIdent() for i in range(len(operands))]
+        arr_dict = {}            
+        for i,operand in enumerate(operands):
+            if isinstance(operand, V.Array):
+                arr_dict[arr_names[i]] = operand.array
+            elif isinstance(operand, V.Simple):
+                arr_dict[arr_names[i]] = operand.value
+            elif isinstance(operand, V.Null):
+                arr_dict[arr_names[i]] = None
+        env.DefineNames(arr_names, arr_dict.values())
+        expression = ' + '.join(arr_names)  
+        return expression 
     
 class Minus(AbstractExpression):
     """Subtraction."""
@@ -112,10 +126,9 @@ class Times(AbstractExpression):
     def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
         if isinstance(operands[0], V.Array):
-            arr_names = ['a' + str(i) for i in range(len(operands))]
+            arr_names = [env.FreshIdent() for i in range(len(operands))]
             arr_dict = {}            
             for i,operand in enumerate(operands):
-                arr_name = 'a' + str(i)
                 arr_dict[arr_names[i]] = operand.array
             expression = ' * '.join(arr_names)   
             result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
@@ -125,6 +138,21 @@ class Times(AbstractExpression):
             except AttributeError:
                 raise ProtocolError("Operator 'times' requires all operands to evaluate to an Array or numbers;", v, "does not.")
         return result
+    
+    def Compile(self, env):
+        operands = self.EvaluateChildren(env)
+        arr_names = [env.FreshIdent() for i in range(len(operands))]
+        arr_dict = {}            
+        for i,operand in enumerate(operands):
+            if isinstance(operand, V.Array):
+                arr_dict[arr_names[i]] = operand.array
+            elif isinstance(operand, V.Simple):
+                arr_dict[arr_names[i]] = operand.value
+            elif isinstance(operand, V.Null):
+                arr_dict[arr_names[i]] = None
+        env.DefineNames(arr_names, arr_dict.values())
+        expression = ' * '.join(arr_names)  
+        return expression 
     
 class Divide(AbstractExpression):
     """Division."""
@@ -341,6 +369,21 @@ class Eq(AbstractExpression):
             raise ProtocolError("Equality operator requires its operands to be simple values")
         return V.Simple(result)
     
+    def Compile(self, env):
+        operands = self.EvaluateChildren(env)
+        arr_names = [env.FreshIdent() for i in range(len(operands))]
+        arr_dict = {}            
+        for i,operand in enumerate(operands):
+            if isinstance(operand, V.Array):
+                arr_dict[arr_names[i]] = operand.array
+            elif isinstance(operand, V.Simple):
+                arr_dict[arr_names[i]] = operand.value
+            elif isinstance(operand, V.Null):
+                arr_dict[arr_names[i]] = None
+        env.DefineNames(arr_names, arr_dict.values())
+        expression = ' == '.join(arr_names)  
+        return expression 
+    
 class Neq(AbstractExpression):
     """Not equal Operator"""
     def Evaluate(self, env):
@@ -408,6 +451,9 @@ class NameLookUp(AbstractExpression):
         
     def Evaluate(self, env):
         return env.LookUp(self.name)
+    
+    def Compile(self, env):
+        return self.name
     
 class TupleExpression(AbstractExpression):
     def Evaluate(self, env):

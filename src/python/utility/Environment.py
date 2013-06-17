@@ -56,7 +56,7 @@ class Environment(object):
                 
     def FreshIdent(self):
         self.nextIdent[0] += 1
-        return "~%d" % self.nextIdent[0] 
+        return "___%d" % self.nextIdent[0] 
         
     def LookUp(self, name):
         if name in self.bindings:

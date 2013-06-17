@@ -259,7 +259,7 @@ class TestArrayExpressions(unittest.TestCase):
        result = A.Map(add, a, b, c)
        predicted = V.Array(np.array([[7, 7], [16, 4]]))
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)   
-         
+          
          # more complex function and more complex array
        env = E.Environment()
        parameters = ['a', 'b', 'c']
@@ -271,7 +271,7 @@ class TestArrayExpressions(unittest.TestCase):
        result = A.Map(add_times, a, b, c)
        predicted = np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]])
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-       
+        
     def TestUsingManyOperationsinFunction(self):
        env = E.Environment()
        parameters = ['a', 'b', 'c']
@@ -283,7 +283,7 @@ class TestArrayExpressions(unittest.TestCase):
        result = A.Map(add_times, a, b, c)
        predicted = np.array([[9, 16], [100, 9]])
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-         
+          
     def TestMapWithFunctionWithDefaults(self):
        env = E.Environment()
        body = [Statement.Return(M.Plus(M.NameLookUp('item'), M.NameLookUp('incr')))]
@@ -293,5 +293,19 @@ class TestArrayExpressions(unittest.TestCase):
        predicted = np.array([4, 6, 8])
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
        
+    def TestNestedFunction(self):
+        env = E.Environment()
+        nested_body = [Statement.Return(M.Plus(M.NameLookUp('input'), M.NameLookUp('outer_var')))]
+        nested_function = M.LambdaExpression(["input"], nested_body)
+        body = [Statement.Assign(["nested_fn"], nested_function),
+                Statement.Assign(["outer_var"], N(1)),
+                Statement.Return(M.Eq(M.FunctionCall("nested_fn", [N(1)]), N(2)))]
+        nested_scope = M.LambdaExpression([], body)
+        nested_call = M.FunctionCall(nested_scope, [])
+        result = nested_call.Evaluate(env)
+        self.assertEqual(result.value, 1)
         
+ 
         
+         
+         

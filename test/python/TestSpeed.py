@@ -30,47 +30,32 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+
+import unittest
+
+# Import the module to test
+import ArrayExpressions as A
 import Values as V
+import Environment as E
+import Statement
+import numpy as np
 import MathExpressions as M
-import numexpr as ne
+
 from ErrorHandling import ProtocolError
 
-class AbstractStatement(object):
-    """Base class for statements in the protocol language."""
-    def Evaluate(self, env):
-        raise NotImplementedError
+def N(number):
+    return M.Const(V.Simple(number))
 
-class Assign(AbstractStatement):
-    def __init__(self, names, rhs):
-        self.names = names
-        self.rhs = rhs
-                
-    def Evaluate(self, env):
-        results = self.rhs.Evaluate(env)
-        #results = ne.evaluate(rhs.Compile(env), local_dict=env.bindings)
-        if len(self.names) > 1:
-            if not isinstance(results, V.Tuple):
-                raise ProtocolError("When assigning multiple names the value to assign must be a tuple.")
-            env.DefineNames(self.names, results.values)
-        else:
-            env.DefineName(self.names[0], results)
-    #define names in the environment using names and rhs after rhs is evaluated, rhs should evaluate to tuple with number of names
-        return V.Null()
-
-class Return(AbstractStatement):
-    def __init__(self, *parameters):
-        self.parameters = parameters
-                
-    def Evaluate(self, env):
-        try:
-            results = [V.Array(ne.evaluate(rhs.Compile(env), local_dict=env.bindings)) for rhs in self.parameters]
-        except:
-            results = [expr.Evaluate(env) for expr in self.parameters]
-        if len(results) == 0:
-            return V.Null()
-        elif len(results) == 1:
-            return results[0]
-        else:
-            return V.Tuple(*results)
-    #evaluate children and return as a tuple if more than one, just the one if one, and null if there aren't any
-        
+class TestSpeed(unittest.TestCase):
+    def TestAddingLargeArrays(self):       
+       # 1-d array
+       env = E.Environment()
+       parameters = ['large_array1', 'large_array2']
+       body = [Statement.Return(M.Plus(M.NameLookUp('large_array1'), M.NameLookUp('large_array2')))]
+       add = M.LambdaExpression(parameters, body)
+       large_array1 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+       large_array2 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+       result = A.Map(add, large_array1, large_array2)
+       predicted = 2*np.arange(10000000)
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+       
