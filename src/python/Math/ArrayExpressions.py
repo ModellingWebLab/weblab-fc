@@ -286,12 +286,11 @@ class View(AbstractExpression):
         
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
-
     def __init__(self, functionExpr, *children):
         self.functionExpr = functionExpr
         self.children = children
+
         
-    
     def Evaluate(self, env):
         function = self.functionExpr.Evaluate(env)
         if not isinstance(function, V.LambdaClosure):
@@ -299,22 +298,11 @@ class Map(AbstractExpression):
         arrays = self.EvaluateChildren(env)
         if len(self.children) < 1:
             raise ProtocolError("Map requires at least one parameter")
+        shape = arrays[0].array.shape
+        for array in arrays:
+            if array.array.shape != shape:
+                raise ProtocolError(array, "is not the same shape as the first array input")
         protocol_result = function.Evaluate(env, arrays)
-#        shape = arrays[0].array.shape
-#         for array in arrays:
-#             if array.array.shape != shape:
-#                 raise ProtocolError(array, "is not the same shape as the first array input")
-#         result = np.empty_like(arrays[0].array)
-#         dim_range = []
-#         for dim in shape:
-#             dim_range.append(range(dim)) 
-#         for index in itertools.product(*dim_range):
-#             function_inputs = []
-#             for array in arrays:
-#                 function_inputs.append(V.Simple(float(array.array[index])))
-#             result[index] = function.Evaluate(env, function_inputs).value
-#         protocol_result = V.Array(result)
-        
         return protocol_result
 
 ## flatten could help here possibly
@@ -322,22 +310,6 @@ class Map(AbstractExpression):
 #             a.array = a.array.flatten()
 #         fun_inputs = np.empty(operands[1].array.size * (len(self.children) - 1))
 
-## check out the kinda thing below using numba to speed it up
-# @autojit
-# def generate_power_func(n):
-#     @jit(float_(float_))
-#     def nth_power(x):
-#         return x ** n
-# 
-#     # This is a native call
-#     print(nth_power(10))
-# 
-#     # Return closure and keep all cell variables alive
-#     return nth_power
-# 
-# for n in range(2, 5):
-#     func = generate_power_func(n)
-#     print([func(x) for x in linspace(1.,2.,10.)])
 
 # MAP
 # applies functions element-wise to arrays

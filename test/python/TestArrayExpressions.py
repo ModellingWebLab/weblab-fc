@@ -40,6 +40,7 @@ import Environment as E
 import Statement
 import numpy as np
 import MathExpressions as M
+import math
 
 from ErrorHandling import ProtocolError
 
@@ -271,6 +272,19 @@ class TestArrayExpressions(unittest.TestCase):
        result = A.Map(add_times, a, b, c)
        predicted = np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]])
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+       
+#        env = E.Environment()
+#        parameters = ['a', 'b']
+#        body = [Statement.Return(M.Times(M.Plus(M.NameLookUp('a'), M.NameLookUp('b')), M.NameLookUp('c')))]
+#        lambda_test = M.LambdaExpression(parameters, body)
+#        a = A.NewArray(N(1), N(2))
+#        b = A.NewArray(N(2), N(4))
+#        c = A.NewArray(N(3), N(7))
+#        result = A.Map(add_times, a, b, c)
+#        predicted = np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]])
+#        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+       
+       #map(lambda a, b=[0,1,2]: a^2*b[0] + a*b[1] + b[2], [1,2,3]) == [6,11,18]
         
     def TestUsingManyOperationsinFunction(self):
        env = E.Environment()
@@ -303,9 +317,238 @@ class TestArrayExpressions(unittest.TestCase):
         nested_scope = M.LambdaExpression([], body)
         nested_call = M.FunctionCall(nested_scope, [])
         result = nested_call.Evaluate(env)
-        self.assertEqual(result.value, 1)
+        predicted = np.array([True])
+        self.assertEqual(result.value, predicted)
+         
+    def TestCompileMethodsForMathExpression(self):
+       # Minus
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Minus(M.NameLookUp('a'), M.NameLookUp('b')))]
+       minus = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(4), N(2))
+       b = A.NewArray(N(2), N(1))
+       result = A.Map(minus, a, b)
+       predicted = V.Array(np.array([2, 1])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
         
+       # Divide
+       body = [Statement.Return(M.Divide(M.NameLookUp('a'), M.NameLookUp('b')))]
+       divide = M.LambdaExpression(parameters, body)
+       result = A.Map(divide, a, b)
+       predicted = V.Array(np.array([2, 2]))
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
  
+       # Remainder
+       body = [Statement.Return(M.Rem(M.NameLookUp('a'), M.NameLookUp('b')))]
+       rem = M.LambdaExpression(parameters, body)
+       result = A.Map(rem, a, b)
+       predicted = V.Array(np.array([0, 0]))
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
         
+       # Power
+       body = [Statement.Return(M.Power(M.NameLookUp('a'), M.NameLookUp('b')))]
+       power = M.LambdaExpression(parameters, body)
+       result = A.Map(power, a, b)
+       predicted = V.Array(np.array([16, 2]))
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
+ 
+       # Root with one argument
+       body = [Statement.Return(M.Root(M.NameLookUp('a')))]
+       root = M.LambdaExpression('a', body)
+       result = A.Map(root, a)
+       predicted = V.Array(np.array([2, 1.41421356]))
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
+        
+       #Root with two arguments
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Root(M.NameLookUp('a'), M.NameLookUp('b')))]
+       root = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(8))
+       b = A.NewArray(N(3))
+       result = A.Map(root, a, b)
+       predicted = V.Array(np.array([2])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
+ 
+       # Absolute value
+       env = E.Environment()
+       parameters = ['a']
+       body = [Statement.Return(M.Abs(M.NameLookUp('a')))]
+       absolute = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(4), N(-2))
+       result = A.Map(absolute, a)
+       predicted = V.Array(np.array([4, 2]))
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Exponential 
+       env = E.Environment()
+       parameters = ['a']
+       body = [Statement.Return(M.Exp(M.NameLookUp('a')))]
+       exponential = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(3))
+       result = A.Map(exponential, a)
+       predicted = V.Array(np.array([20.0855369231])) 
+       #np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Natural Log
+       env = E.Environment()
+       body = [Statement.Return(M.Ln(M.NameLookUp('a')))]
+       ln = M.LambdaExpression(parameters, body)
+       result = A.Map(ln, a)
+       predicted = V.Array(np.array([1.0986122886])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Log with One Argument (Log base 10)
+       env = E.Environment()
+       body = [Statement.Return(M.Log(M.NameLookUp('a')))]
+       log = M.LambdaExpression(parameters, body)
+       result = A.Map(log, a)
+       predicted = V.Array(np.array([0.4771212547196])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Log with two arguments, second is log base qualifier
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Log(M.NameLookUp('a'), M.NameLookUp('b')))]
+       log = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(4))
+       b = A.NewArray(N(3))
+       result = A.Map(log, a, b)
+       predicted = V.Array(np.array([0.79248125036])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Max
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Max(M.NameLookUp('a'), M.NameLookUp('b')))]
+       max = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(4), N(5), N(1))
+       b = A.NewArray(N(3), N(6), N(0))
+       result = A.Map(max, a, b)
+       predicted = V.Array(np.array([4, 6, 1])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Floor 
+       env = E.Environment()
+       parameters = ['a']
+       body = [Statement.Return(M.Floor(M.NameLookUp('a')))]
+       floor = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(3.2), N(3.7))
+       result = A.Map(floor, a)
+       predicted = V.Array(np.array([3, 3])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Ceiling
+       env = E.Environment()
+       parameters = ['a']
+       body = [Statement.Return(M.Ceiling(M.NameLookUp('a')))]
+       ceiling = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(3.2), N(3.7))
+       result = A.Map(ceiling, a)
+       predicted = V.Array(np.array([4, 4])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+    
+        
+    def TestCompileMethodsForLogicalExpressions(self):
+       # And
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.And(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_and = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(1))
+       b = A.NewArray(N(0), N(1))
+       result = A.Map(test_and, a, b)
+       predicted = V.Array(np.array([False, True])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Or
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Or(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_or = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(1), N(0))
+       b = A.NewArray(N(0), N(1), N(0))
+       result = A.Map(test_or, a, b)
+       predicted = V.Array(np.array([True, True, False])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Xor
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Xor(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_xor = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(1), N(0))
+       b = A.NewArray(N(0), N(1), N(0))
+       result = A.Map(test_xor, a, b)
+       predicted = V.Array(np.array([True, False, False])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        
+       # Not
+       env = E.Environment()
+       parameters = ['a']
+       body = [Statement.Return(M.Not(M.NameLookUp('a')))]
+       test_not = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(0))
+       result = A.Map(test_not, a)
+       predicted = V.Array(np.array([False, True])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+  
+        # greater than
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Gt(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_greater = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(0), N(0))
+       b = A.NewArray(N(0), N(0), N(1))
+       result = A.Map(test_greater, a, b)
+       predicted = V.Array(np.array([True, False, False])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)     
+ 
+        # less than
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Lt(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_less = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(0), N(0))
+       b = A.NewArray(N(0), N(0), N(1))
+       result = A.Map(test_less, a, b)
+       predicted = V.Array(np.array([False, False, True])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)   
+  
+        # greater than equal to
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Geq(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_greater_eq = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(0), N(0))
+       b = A.NewArray(N(0), N(0), N(1))
+       result = A.Map(test_greater_eq, a, b)
+       predicted = V.Array(np.array([True, True, False])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)  
+ 
+        # less than equal to
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Leq(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_less_eq = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(0), N(0))
+       b = A.NewArray(N(0), N(0), N(1))
+       result = A.Map(test_less_eq, a, b)
+       predicted = V.Array(np.array([False, True, True])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
+ 
+        # not equal
+       env = E.Environment()
+       parameters = ['a', 'b']
+       body = [Statement.Return(M.Neq(M.NameLookUp('a'), M.NameLookUp('b')))]
+       test_not_eq = M.LambdaExpression(parameters, body)
+       a = A.NewArray(N(1), N(0), N(0))
+       b = A.NewArray(N(0), N(0), N(1))
+       result = A.Map(test_not_eq, a, b)
+       predicted = V.Array(np.array([True, False, True])) 
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)   
+       
+       
          
          

@@ -33,6 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Values as V
 import MathExpressions as M
 import numexpr as ne
+import numpy
+import math
 from ErrorHandling import ProtocolError
 
 class AbstractStatement(object):
@@ -47,14 +49,12 @@ class Assign(AbstractStatement):
                 
     def Evaluate(self, env):
         results = self.rhs.Evaluate(env)
-        #results = ne.evaluate(rhs.Compile(env), local_dict=env.bindings)
         if len(self.names) > 1:
             if not isinstance(results, V.Tuple):
                 raise ProtocolError("When assigning multiple names the value to assign must be a tuple.")
             env.DefineNames(self.names, results.values)
         else:
             env.DefineName(self.names[0], results)
-    #define names in the environment using names and rhs after rhs is evaluated, rhs should evaluate to tuple with number of names
         return V.Null()
 
 class Return(AbstractStatement):
@@ -63,9 +63,16 @@ class Return(AbstractStatement):
                 
     def Evaluate(self, env):
         try:
-            results = [V.Array(ne.evaluate(rhs.Compile(env), local_dict=env.bindings)) for rhs in self.parameters]
+            for rhs in self.parameters:
+                print "rhs.Compile", rhs.Compile()
+            results = [V.Array(ne.evaluate(rhs.Compile(), local_dict=env.unwrappedBindings)) for rhs in self.parameters]
         except:
-            results = [expr.Evaluate(env) for expr in self.parameters]
+            try:
+                results = [V.Array(eval(rhs.Compile(), globals(), env.unwrappedBindings)) for rhs in self.parameters]
+            except:
+                results = [expr.Evaluate(env) for expr in self.parameters]
+            #all above will happen in map, map will call compile on the function via the lambda closure compile
+        #map does the numexpr evaluate
         if len(results) == 0:
             return V.Null()
         elif len(results) == 1:

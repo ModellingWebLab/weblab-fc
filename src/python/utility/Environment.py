@@ -41,6 +41,7 @@ class Environment(object):
         self.bindings = {}
         self.delegates = {}
         self.delegates[""] = delegatee
+        self.unwrappedBindings = {}
         
     def DefineName(self, name, value):
 #         if not isinstance(value, AbstractValue):
@@ -49,6 +50,12 @@ class Environment(object):
             raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
         else:
             self.bindings[name] = value
+            if isinstance(value, V.Array):
+                self.unwrappedBindings[name] = value.array
+            elif isinstance(value, V.Simple):
+                self.unwrappedBindings[name] = value.value
+            elif isinstance(value, V.Null):
+                self.unwrappedBindings[name] = None
     
     def DefineNames(self, names, values):
         for i, name in enumerate(names):
@@ -81,6 +88,7 @@ class Environment(object):
         if name not in self.bindings:
             raise ProtocolError(name, "is not defined in this environment and thus cannot be removed")
         del (self.bindings[name])
+        del (self.unwrappedBindings[name])
         
     def OverwriteDefinition(self, name, value):
         if not self.allowOverwrite:
@@ -88,6 +96,12 @@ class Environment(object):
         if name not in self.bindings:
             raise ProtocolError(name, "is not defined in this environment and thus cannot be overwritten")
         self.bindings[name]= value #can't use DefineName because error would be thrown for name already being in environment
+        if isinstance(value, V.Array):
+                self.unwrappedBindings[name] = value.array
+        elif isinstance(value, V.Simple):
+                self.unwrappedBindings[name] = value.value
+        elif isinstance(value, V.Null):
+                self.unwrappedBindings[name] = None  
             
     def Clear(self):
         self.bindings.clear()
@@ -107,29 +121,4 @@ class Environment(object):
                 else:
                     raise ProtocolError("Return statement not allowed outside of function")           
         return result
-            
-        # evaluate each statement until one is null and returns are allowed, then return that value, otherwise returns null
-        # reassign result to the next statement evaluated and break when its null
-        
-        #lambda closure is a value, functioncall and lambdaexpression are both expressions
-        #closure just has information about formal parameters (names for parameters, list of strings) so for f(a, b=1, c), the list of formal parameters are a,b,c
-        # if the function f from above returns a+b+c
-        # default parameters list would be 
-        # defaultparameter is its only value in values.py and is like the null
-        # you can call the f function like f(3,defaultparameter,1)
-        # default parameters here would be [None, v.simple(1), None] or [Default, v.simple(1), default]
-        # body = [statements]
-        # definingEnv is an environment and is env that function is evaluated in
-        # in evaluate for lambdaexpression, you return lambdaclosure(..., env) and so closure stores this env as definingEnv
-        # lambda expression just takes formalparams, body, default params and returns lambda closure with those things
-        # in __init for lamexpr, if isinstance(body, abstractexpression) then body = [returnstatement(body)]
-        # function call takes in function to call (an expression), and the arguments (parameters) which is a list of expressions
-        # function call in its evaluate method just calls closure = func.evaluate (the func that is passed in), test to make sure it returns a closure, if it doesn't then error because its not a function
-        # function call evaluates children to get the parameter values and calls closure (from above, closure.evaluate(parameters
-        # closure evaluate just takes in actual params as a list of values which have already been evaluated
-        # evaluate method in closure: sets up env to execute statements in body
-        # execute body is just calling execute statements on environment created just before
-        # created env delegates to definingEnv and within the local env, it defines names for local parameters and the assigned value is actual param if its assigned or the default parameters (if no default parameter, cuz value of default is none or default, then throw an error)
-        # closure evaluate returns local_env.executestatements(body, returnAllowed=True)
-            
         

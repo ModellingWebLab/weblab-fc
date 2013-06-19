@@ -91,19 +91,9 @@ class Plus(AbstractExpression):
                 raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers or an Array;", v, "does not.")
         return result
     
-    def Compile(self, env):
-        operands = self.EvaluateChildren(env)
-        arr_names = [env.FreshIdent() for i in range(len(operands))]
-        arr_dict = {}            
-        for i,operand in enumerate(operands):
-            if isinstance(operand, V.Array):
-                arr_dict[arr_names[i]] = operand.array
-            elif isinstance(operand, V.Simple):
-                arr_dict[arr_names[i]] = operand.value
-            elif isinstance(operand, V.Null):
-                arr_dict[arr_names[i]] = None
-        env.DefineNames(arr_names, arr_dict.values())
-        expression = ' + '.join(arr_names)  
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' + '.join(operands)  
         return expression 
     
 class Minus(AbstractExpression):
@@ -120,6 +110,14 @@ class Minus(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Operator 'minus' requires all operands to evaluate numbers")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = -operands[0]
+        else:
+            expression = ' - '.join(operands) 
+        return expression
 
 class Times(AbstractExpression):
     """Multiplication"""
@@ -139,20 +137,10 @@ class Times(AbstractExpression):
                 raise ProtocolError("Operator 'times' requires all operands to evaluate to an Array or numbers;", v, "does not.")
         return result
     
-    def Compile(self, env):
-        operands = self.EvaluateChildren(env)
-        arr_names = [env.FreshIdent() for i in range(len(operands))]
-        arr_dict = {}            
-        for i,operand in enumerate(operands):
-            if isinstance(operand, V.Array):
-                arr_dict[arr_names[i]] = operand.array
-            elif isinstance(operand, V.Simple):
-                arr_dict[arr_names[i]] = operand.value
-            elif isinstance(operand, V.Null):
-                arr_dict[arr_names[i]] = None
-        env.DefineNames(arr_names, arr_dict.values())
-        expression = ' * '.join(arr_names)  
-        return expression 
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' * '.join(operands) 
+        return expression
     
 class Divide(AbstractExpression):
     """Division."""
@@ -166,6 +154,11 @@ class Divide(AbstractExpression):
             raise ProtocolError("Operator 'divide' requires all operands to evaluate to numbers")
         return V.Simple(result)
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' / '.join(operands) 
+        return expression
+    
 class Max(AbstractExpression):
     """Returns maximum value."""
     def Evaluate(self, env):
@@ -175,6 +168,11 @@ class Max(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Operator 'max' requires all operands to evaluate to numbers")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = "numpy.maximum(" + ','.join(operands) + ")"  
+        return expression 
             
 class Min(AbstractExpression):
     """Returns minimum value."""
@@ -185,6 +183,11 @@ class Min(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Operator 'min' requires all operands to evaluate to numbers")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = "numpy.minimum(" + ','.join(arr_names) + ")"  
+        return expression 
     
 class Rem(AbstractExpression):
     """Remainder operator."""
@@ -198,6 +201,11 @@ class Rem(AbstractExpression):
             raise ProtocolError("Operator 'rem' requires all operands to evaluate to numbers")
         return V.Simple(result)
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' % '.join(operands)  
+        return expression 
+    
 class Power(AbstractExpression):
     """Power operator."""
     def Evaluate(self, env):
@@ -207,8 +215,13 @@ class Power(AbstractExpression):
         try:
             result = operands[0].value ** operands[1].value
         except AttributeError:
-            raise ProtocolError("Operator 'rem' requires all operands to evaluate to numbers")
+            raise ProtocolError("Operator 'power' requires all operands to evaluate to numbers")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = operands[0] + ' ** ' + operands[1] 
+        return expression 
     
 class Root(AbstractExpression):
     """Root operator."""
@@ -225,6 +238,16 @@ class Root(AbstractExpression):
             raise ProtocolError("Operator 'root' requires its operand to evaluate to a number")
         return V.Simple(result)
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = operands[0] + "** .5"
+        elif len(operands) == 2:
+            expression = operands[0] + "** (1/" + operands[1] + ")"
+        else:
+            raise ProtocolError("Root operator requires one argument, (not",len(operands), ") optionally with a degree qualifier")
+        return expression 
+    
 class Abs(AbstractExpression):
     """Absolute value operator."""
     def Evaluate(self, env):
@@ -236,6 +259,14 @@ class Abs(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Operator 'absolute value' requires its operand to evaluate to a number")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "abs(" + operands[0] + ")"
+        else:
+            raise ProtocolError("abs operator requires one argument, not", len(operands))
+        return expression 
 
 class Floor(AbstractExpression):
     """Floor operator."""
@@ -249,6 +280,14 @@ class Floor(AbstractExpression):
             raise ProtocolError("Operator 'floor' requires its operand to evaluate to a number")
         return V.Simple(result)
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "numpy.floor(" + operands[0] + ")"
+        else:
+            raise ProtocolError("floor operator requires one argument, not", len(operands))
+        return expression 
+    
 class Ceiling(AbstractExpression):
     """Ceiling operator."""
     def Evaluate(self, env):
@@ -260,6 +299,14 @@ class Ceiling(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Operator 'ceiling' requires its operand to evaluate to a number")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "numpy.ceil(" + operands[0] + ")"
+        else:
+            raise ProtocolError("ceiling operator requires one argument, not", len(operands))
+        return expression
 
 class Exp(AbstractExpression):
     """Exponential operator."""
@@ -273,6 +320,15 @@ class Exp(AbstractExpression):
             raise ProtocolError("Operator 'exp' requires a number as its operand")
         return V.Simple(result)
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "exp(" + operands[0] + ")"
+        else:
+            raise ProtocolError("exp operator requires one argument, not", len(operands))
+        return expression 
+    
+    
 class Ln(AbstractExpression):
     """Natural logarithm operator."""
     def Evaluate(self, env):
@@ -284,13 +340,21 @@ class Ln(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Natural logarithm operator requires a number as its operand")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "log(" + operands[0] + ")"
+        else:
+            raise ProtocolError("ln operator requires one argument, not", len(operands))
+        return expression 
         
 class Log(AbstractExpression):
-    """Natural logarithm operator."""
+    """logarithmic operator."""
     def Evaluate(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1 and len(self.children) != 2:
-            raise ProtocolError("Logarithm operator requires one operand and optionally a log_base qualifier, you entered", len(self.children), "inputs")
+            raise ProtocolError("Logarithmic operator requires one operand and optionally a log_base qualifier, you entered", len(self.children), "inputs")
         log_base = 10
         if len(self.children) == 2:
             log_base = operands[0].value
@@ -302,6 +366,16 @@ class Log(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Logarithm operator requires its operands to evaluate to numbers")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "log10(" + operands[0] + ")"
+        elif len(operands) == 2:
+            expression = "log10(" + operands[1] + ") / log10(" + operands[0] + ")"
+        else:
+            raise ProtocolError("log operator requires one argument, (not", len(operands)), ") optionally with a log-base qualifier"
+        return expression 
     
 class And(AbstractExpression):
     """Boolean And Operator"""
@@ -317,6 +391,11 @@ class And(AbstractExpression):
             raise ProtocolError("Boolean operator 'and' requires its operands to be simple values")
         return V.Simple(result)
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = "numpy.logical_and(" + ','.join(operands) + ")"  
+        return expression 
+    
 class Or(AbstractExpression):
     """Boolean Or Operator"""
     def Evaluate(self, env):
@@ -330,6 +409,11 @@ class Or(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Boolean operator 'or' requires its operands to be simple values")
         return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = "numpy.logical_or(" + ','.join(operands) + ")"  
+        return expression 
 
 class Xor(AbstractExpression):
     """Boolean Xor Operator"""
@@ -343,7 +427,12 @@ class Xor(AbstractExpression):
                 result = result != v.value
         except AttributeError:
             raise ProtocolError("Boolean operator 'xor' requires its operands to be simple values")
-        return V.Simple(result)   
+        return V.Simple(result)
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = "numpy.logical_xor(" + ','.join(operands) + ")"  
+        return expression 
 
 class Not(AbstractExpression):
     """Boolean Not Operator"""
@@ -357,6 +446,16 @@ class Not(AbstractExpression):
             raise ProtocolError("Boolean operator 'not' requires its operand to be a simple value")
         return V.Simple(result) 
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        if len(operands) == 1:
+            expression = "numpy.logical_not(" + operands[0] + ")"
+        else:
+            raise ProtocolError("not operator requires one argument, not", len(operands))
+        return expression 
+    
+
+    
 class Eq(AbstractExpression):
     """Equality Operator"""
     def Evaluate(self, env):
@@ -369,19 +468,9 @@ class Eq(AbstractExpression):
             raise ProtocolError("Equality operator requires its operands to be simple values")
         return V.Simple(result)
     
-    def Compile(self, env):
-        operands = self.EvaluateChildren(env)
-        arr_names = [env.FreshIdent() for i in range(len(operands))]
-        arr_dict = {}            
-        for i,operand in enumerate(operands):
-            if isinstance(operand, V.Array):
-                arr_dict[arr_names[i]] = operand.array
-            elif isinstance(operand, V.Simple):
-                arr_dict[arr_names[i]] = operand.value
-            elif isinstance(operand, V.Null):
-                arr_dict[arr_names[i]] = None
-        env.DefineNames(arr_names, arr_dict.values())
-        expression = ' == '.join(arr_names)  
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = "numpy.equal(" + ','.join(operands) + ")"  
         return expression 
     
 class Neq(AbstractExpression):
@@ -394,7 +483,13 @@ class Neq(AbstractExpression):
             result = operands[0].value != operands[1].value
         except AttributeError:
             raise ProtocolError("Not equal operator requires its operands to be simple values")
-        return V.Simple(result)    
+        return V.Simple(result) 
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' != '.join(operands)  
+        return expression 
+       
     
 class Lt(AbstractExpression):
     """Less than Operator"""
@@ -406,7 +501,13 @@ class Lt(AbstractExpression):
             result = operands[0].value < operands[1].value
         except AttributeError:
             raise ProtocolError("Less than operator requires its operands to be simple values")
-        return V.Simple(result)        
+        return V.Simple(result)       
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' < '.join(operands)  
+        return expression 
+     
     
 class Gt(AbstractExpression):
     """Greater than Operator"""
@@ -420,6 +521,12 @@ class Gt(AbstractExpression):
             raise ProtocolError("Greater than operator requires its operands to be simple values")
         return V.Simple(result) 
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' > '.join(operands)  
+        return expression 
+    
+    
 class Leq(AbstractExpression):
     """Less than or equal to Operator"""
     def Evaluate(self, env):
@@ -432,6 +539,12 @@ class Leq(AbstractExpression):
             raise ProtocolError("Less than or equal to operator requires its operands to be simple values")
         return V.Simple(result) 
     
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' <= '.join(operands)  
+        return expression 
+    
+    
 class Geq(AbstractExpression):
     """Greater than or equal to Operator"""
     def Evaluate(self, env):
@@ -442,7 +555,13 @@ class Geq(AbstractExpression):
             result = operands[0].value >= operands[1].value
         except AttributeError:
             raise ProtocolError("Greater than or equal to operator requires its operands to be simple values")
-        return V.Simple(result)  
+        return V.Simple(result) 
+    
+    def Compile(self):
+        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        expression = ' >= '.join(operands)  
+        return expression 
+     
     
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
@@ -452,7 +571,7 @@ class NameLookUp(AbstractExpression):
     def Evaluate(self, env):
         return env.LookUp(self.name)
     
-    def Compile(self, env):
+    def Compile(self):
         return self.name
     
 class TupleExpression(AbstractExpression):
