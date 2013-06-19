@@ -34,14 +34,14 @@ import unittest
 import sys
 
 # Import the module to test
-import Environment as E
+import Environment as Env
 import Values as V
 
 from ErrorHandling import ProtocolError
 
 class TestEnvironment(unittest.TestCase):
     def TestDefiningNames(self):
-        env = E.Environment()
+        env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
         self.assertEqual(env.LookUp("one"), one)
@@ -58,7 +58,7 @@ class TestEnvironment(unittest.TestCase):
         self.assertEqual(len(env), 4)
         for i,name in enumerate(names):
             self.assertEqual((env.LookUp(names[i])),values[i])
-        env2 = E.Environment()
+        env2 = Env.Environment()
         env2.Merge(env)
         fresh1 = env.FreshIdent()
         fresh2 = env2.FreshIdent()
@@ -70,7 +70,7 @@ class TestEnvironment(unittest.TestCase):
         self.assertEqual(env.LookUp("one"), one)
                 
     def TestOverwritingEnv(self):
-        env = E.Environment()
+        env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
         self.assertEqual(env.LookUp("one"), one)
@@ -88,9 +88,9 @@ class TestEnvironment(unittest.TestCase):
         self.assertRaises(ProtocolError, env.Remove, "three") # never added
         
     def TestDelegation(self):
-        root_env = E.Environment()
-        middle_env = E.Environment(delegatee=root_env)
-        top_env = E.Environment()
+        root_env = Env.Environment()
+        middle_env = Env.Environment(delegatee=root_env)
+        top_env = Env.Environment()
         top_env.SetDelegateeEnv(middle_env, "middle")
         
         name = "name"

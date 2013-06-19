@@ -63,8 +63,6 @@ class Return(AbstractStatement):
                 
     def Evaluate(self, env):
         try:
-            for rhs in self.parameters:
-                print "rhs.Compile", rhs.Compile()
             results = [V.Array(ne.evaluate(rhs.Compile(), local_dict=env.unwrappedBindings)) for rhs in self.parameters]
         except:
             try:

@@ -27,11 +27,11 @@ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
 GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
 import AbstractValue
 import numpy as np
-import Environment as E
+import Environment as Env
 
 class Simple(AbstractValue.AbstractValue):
     def __init__(self, value):
@@ -80,7 +80,7 @@ class LambdaClosure(AbstractValue.AbstractValue):
 #         return expression,local_env
     
     def Evaluate(self, env, actualParameters):
-        local_env = E.Environment(delegatee=self.definingEnv)
+        local_env = Env.Environment(delegatee=self.definingEnv)
         if len(actualParameters) < len(self.formalParameters):
             actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
         for i,param in enumerate(actualParameters):

@@ -28,7 +28,7 @@ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
 GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
 
 import unittest
@@ -36,8 +36,8 @@ import unittest
 # Import the module to test
 import ArrayExpressions as A
 import Values as V
-import Environment as E
-import Statement
+import Environment as Env
+import Statements as S
 import numpy as np
 import MathExpressions as M
 
@@ -50,9 +50,9 @@ class TestSpeed(unittest.TestCase):
     def TestAddingLargeArrays(self):    
         pass   
 #        # 1-d array
-#        env = E.Environment()
+#        env = Env.Environment()
 #        parameters = ['large_array1', 'large_array2']
-#        body = [Statement.Return(M.Plus(M.NameLookUp('large_array1'), M.NameLookUp('large_array2')))]
+#        body = [S.Return(M.Plus(M.NameLookUp('large_array1'), M.NameLookUp('large_array2')))]
 #        add = M.LambdaExpression(parameters, body)
 #        large_array1 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
 #        large_array2 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
@@ -61,9 +61,9 @@ class TestSpeed(unittest.TestCase):
 #        #timeit.timeit('result_array = result.Evalute(env).array', number=1)
 #        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
        
-#        env = E.Environment()
+#        env = Env.Environment()
 #        parameters = ['a', 'b', 'c']
-#        body = [Statement.Return(M.Times(M.Plus(M.NameLookUp('a'), M.NameLookUp('b')), M.NameLookUp('c')))]
+#        body = [S.Return(M.Times(M.Plus(M.NameLookUp('a'), M.NameLookUp('b')), M.NameLookUp('c')))]
 #        add_times = M.LambdaExpression(parameters, body)
 #        a = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
 #        b = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)

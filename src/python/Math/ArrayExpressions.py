@@ -33,8 +33,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Values as V
 import MathExpressions as M
+import Environment as Env
+import Expressions as E
 import numpy as np
-import Environment as E
 import itertools
 from operator import mul
 
@@ -132,7 +133,7 @@ class NewArray(AbstractExpression):
              # collect everything in range_spec_indices that is a number, not a slice
             range_specs = [ranges[dim][idx]
                            for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
-            sub_env = E.Environment(delegatee=env)
+            sub_env = Env.Environment(delegatee=env)
             for i, range_value in enumerate(range_specs):
                 sub_env.DefineName(range_name[i], V.Simple(range_value))
             sub_array = self.genExpr.Evaluate(sub_env).array

@@ -32,11 +32,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import Values as V
-import math
-import numpy as np
-import itertools
 import numexpr as ne
-
+import math
 from ErrorHandling import ProtocolError
 from AbstractExpression import AbstractExpression
 
@@ -46,31 +43,7 @@ class Const(AbstractExpression):
         self.value = value
         
     def Evaluate(self,env):
-        return self.value
-        
-class FunctionCall(AbstractExpression):
-    def __init__(self, functionOrName, children):
-        if isinstance(functionOrName, str):
-            self.function = NameLookUp(functionOrName)
-        else:
-            self.function = functionOrName
-        self.children = children
-        
-    def Evaluate(self, env):
-        actual_params = self.EvaluateChildren(env)
-        function = self.function.Evaluate(env)
-        if not isinstance(function, V.LambdaClosure):
-            raise ProtocolError(function, "is not a function")
-        return function.Evaluate(env, actual_params)
-        
-class LambdaExpression(AbstractExpression):
-    def __init__(self, formalParameters, body, defaultParameters=None):
-        self.formalParameters = formalParameters
-        self.body = body
-        self.defaultParameters = defaultParameters
-        
-    def Evaluate(self, env):
-        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)      
+        return self.value    
         
 class Plus(AbstractExpression):
     """Addition."""
@@ -560,29 +533,4 @@ class Geq(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         expression = ' >= '.join(operands)  
-        return expression 
-     
-    
-class NameLookUp(AbstractExpression):
-    """Used to look up a name for a given environment"""
-    def __init__(self, name):
-        self.name = name
-        
-    def Evaluate(self, env):
-        return env.LookUp(self.name)
-    
-    def Compile(self):
-        return self.name
-    
-class TupleExpression(AbstractExpression):
-    def Evaluate(self, env):
-        if len(self.children) < 1:
-            raise ProtocolError("Empty tuple expressions are not allowed")
-        return V.Tuple(*self.EvaluateChildren(env))
-        
-        
-        
-        
-        
-        
-        
+        return expression  
