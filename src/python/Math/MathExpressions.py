@@ -61,7 +61,7 @@ class Plus(AbstractExpression):
             try:
                 result = V.Simple(sum([v.value for v in operands]))
             except AttributeError:
-                raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers or an Array;", v, "does not.")
+                raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers;", v, "does not.")
         return result
     
     def Compile(self):
@@ -96,11 +96,14 @@ class Times(AbstractExpression):
     """Multiplication"""
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
-        if isinstance(operands[0], V.Array):
+        if any(isinstance(operand, V.Array) for operand in operands):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
             arr_dict = {}            
             for i,operand in enumerate(operands):
-                arr_dict[arr_names[i]] = operand.array
+                try:
+                    arr_dict[arr_names[i]] = operand.array
+                except AttributeError:
+                    arr_dict[arr_names[i]] = operand.value
             expression = ' * '.join(arr_names)   
             result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
         else:

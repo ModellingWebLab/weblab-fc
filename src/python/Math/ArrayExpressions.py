@@ -189,29 +189,34 @@ class View(AbstractExpression):
         slices = [None] * array.array.ndim
                 
         for index in indices:
-            if len(index.values) == 1:
+            try:
+                if len(index.values) == 1:
+                    dim = None
+                    start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
+                    step = 0
+                    end = start
+                elif len(index.values) == 2:
+                    dim = None
+                    start = self.GetValue(index.values[0])
+                    step = None
+                    end = self.GetValue(index.values[1])
+                elif len(index.values) == 3:
+                    dim = None
+                    start = self.GetValue(index.values[0])
+                    step = self.GetValue(index.values[1])
+                    end = self.GetValue(index.values[2])
+                elif len(index.values) == 4:
+                    dim = self.GetValue(index.values[0])
+                    start = self.GetValue(index.values[1])
+                    step = self.GetValue(index.values[2])
+                    end = self.GetValue(index.values[3])
+                else:
+                    raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
+            except AttributeError:
                 dim = None
-                start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
-                step = None
-                end = start + 1
-            elif len(index.values) == 2:
-                dim = None
-                start = self.GetValue(index.values[0])
-                step = None
-                end = self.GetValue(index.values[1])
-            elif len(index.values) == 3:
-                dim = None
-                start = self.GetValue(index.values[0])
-                step = self.GetValue(index.values[1])
-                end = self.GetValue(index.values[2])
-            elif len(index.values) == 4:
-                dim = self.GetValue(index.values[0])
-                start = self.GetValue(index.values[1])
-                step = self.GetValue(index.values[2])
-                end = self.GetValue(index.values[3])
-            else:
-                raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
-            
+                start = index.value
+                step = 0
+                end = start
             
             if dim != None:
                 if dim > array.array.ndim - 1:
@@ -236,10 +241,10 @@ class View(AbstractExpression):
                 if implicit_dim_slices:
                     if isinstance(implicit_dim_slices[0], slice):
                         if implicit_dim_slices[0].start is not None:
-                            if abs(implicit_dim_slices[0].start + 1) > dim_len:
+                            if implicit_dim_slices[0].start < -dim_len or implicit_dim_slices[0].start >= dim_len:
                                 raise ProtocolError("The start of the slice is not within the range of the dimension")
                         if implicit_dim_slices[0].stop is not None:
-                            if abs(implicit_dim_slices[0].stop + 1) > dim_len:
+                            if implicit_dim_slices[0].stop < -(dim_len + 1) or implicit_dim_slices[0].stop >= (dim_len + 1):
                                 raise ProtocolError("The end of the slice is not within the range of the dimension")
                         if implicit_dim_slices[0].step is not None and implicit_dim_slices[0].stop is not None and implicit_dim_slices[0].start is not None:
                             if (implicit_dim_slices[0].stop - implicit_dim_slices[0].start) * implicit_dim_slices[0].step <= 0:
@@ -283,7 +288,15 @@ class View(AbstractExpression):
 #                                      "because the array only has", array.array.ndim, "dimensions")
 
 
-        
+        #good for like sums and max's and stuff
+        #fold lets you collapse an array along one dimension so that the dimension becomes one number
+        # so for fold you take an operation that usually applies to two numbers and you can give it a value to start
+        # with or you can just use the first element of the list
+        # always a left fold
+        # takes the function to fold with, the value to start with, and the array you're folding over and what dimension you're folding along
+        # defaults to the last dimension
+        # same number of dimensions as original, but length of dimension folded over is 1
+        # no passing in m.plus, have to pass in function that is a lambdaexpression like a,b = mplus(a,b)
         
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
@@ -302,15 +315,22 @@ class Map(AbstractExpression):
         for array in arrays:
             if array.array.shape != shape:
                 raise ProtocolError(array, "is not the same shape as the first array input")
-       # protocol_result = function.Evaluate(env, arrays)
-        expression,local_env = function.Compile(env, arrays)
+        # protocol_result = function.Evaluate(env, arrays)
+        interpret = False
         try:
-            protocol_result = V.Array(expression, local_dict=local_env.unwrappedBindings)
-        except:
+            expression,local_env = function.Compile(env, arrays)
+        except NotImplementedError:
+            interpret = True
+        else:
             try:
-                protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
+                protocol_result = V.Array(numexpr.evaluate(expression, local_dict=local_env.unwrappedBindings))
             except:
-                protocol_result = self.Interpret(local_env, arrays, function)
+                try:
+                    protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
+                except:
+                    interpret = True
+        if interpret:
+            protocol_result = self.Interpret(env, arrays, function)
         return protocol_result
     
     def Interpret(self, env, arrays, function):

@@ -119,7 +119,21 @@ class TestArrayExpressions(unittest.TestCase):
         view = A.View(array, E.TupleExpression(N(1), M.Const(V.Null()), N(-1), N(0)), 
                       E.TupleExpression(N(0), N(0), M.Const(V.Null()), M.Const(V.Null())))
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr) # tests explicitly assigning dimension one before explicitly defining dimension zero
-         
+        
+        #View([[0,1,2],[3,4,5]], M.Const(1), E.Tuple(M.Const(1), M.Const(3))) == [4,5]
+        
+        
+        array = A.NewArray(A.NewArray(N(0), N(1), N(2)), A.NewArray(N(3), N(4), N(5)))
+        view = A.View(array, N(1), E.TupleExpression(N(1), N(3)))
+        predictedArr = np.array([4, 5])
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        
+        #View([[0,1,2],[3,4,5]], M.Const(1), E.Tuple(M.Const(1))) == 4 
+        array = A.NewArray(A.NewArray(N(0), N(1), N(2)), A.NewArray(N(3), N(4), N(5)))
+        view = A.View(array, N(1), E.TupleExpression(N(1)))
+        predictedArr = np.array([4])
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
+        
     def TestArrayCreationProtocolErrors(self):
         array = A.NewArray(A.NewArray(A.NewArray(N(-2), N(-1), N(0)), 
                                       A.NewArray(N(1), N(2), N(3))), 
@@ -146,7 +160,7 @@ class TestArrayExpressions(unittest.TestCase):
         self.assertRaises(ProtocolError, view.Evaluate, {}) # start and end aren't equal and there's a step of 0
         view = A.View(array, E.TupleExpression(N(-4), N(1), N(2)))
         self.assertRaises(ProtocolError, view.Evaluate, {}) # start is before beginning of array
-        view = A.View(array, E.TupleExpression(N(-2), N(1), N(2)))
+        view = A.View(array, E.TupleExpression(N(-2), N(1), N(3)))
         self.assertRaises(ProtocolError, view.Evaluate, {}) # end is after end of array
         view = A.View(array, E.TupleExpression(M.Const(V.Null()), N(1), N(-4)))
         self.assertRaises(ProtocolError, view.Evaluate, {}) # end is before beginning of array
@@ -223,7 +237,7 @@ class TestArrayExpressions(unittest.TestCase):
        predictedArr = np.array([[ [[-10, 0],[10, 20]] ,[[-10,0],[11,21]] ],[[ [-9, 1],[10, 20] ], [[-9, 1], [11, 21]]]])
        np.testing.assert_array_almost_equal(blocks.Evaluate(Env.Environment()).array, predictedArr)
         
-    def TestViewProtocolErrors(self):
+    def TestArrayExpressionProtocolErrors(self):
        # creates an empty array because the start is greater than the end
        fail = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(10), N(1), N(0), M.Const(V.String("i"))), comprehension=True)
        self.assertRaises(ProtocolError, fail.Evaluate, {})
@@ -237,6 +251,16 @@ class TestArrayExpressions(unittest.TestCase):
                                       E.TupleExpression(N(3), N(0), N(1), N(2), M.Const(V.String("j"))),
                                       comprehension=True)
        self.assertRaises(ProtocolError, blocks.Evaluate, {})
+       
+       #map(lambda a, b=[0,1,2]: a + b, [1,2,3]) should give an error
+       env = Env.Environment()
+       parameters = ['a', 'b']
+       body = [S.Return(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')))]
+       array_default = E.LambdaExpression(parameters, body,
+                                          defaultParameters=[V.DefaultParameter(), V.Array(np.array([0, 1, 2]))])
+       a = A.NewArray(N(1), N(2), N(3))
+       result = A.Map(array_default, a)
+       self.assertRaises(ProtocolError, result.Evaluate, env)
         
     def TestSimpleMap(self):
        env = Env.Environment()
@@ -274,19 +298,21 @@ class TestArrayExpressions(unittest.TestCase):
        predicted = np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]])
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
        
-#        env = Env.Environment()
-#        parameters = ['a', 'b']
-#        body = [S.Return(M.Times(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]
-#        lambda_test = E.LambdaExpression(parameters, body)
-#        a = A.NewArray(N(1), N(2))
-#        b = A.NewArray(N(2), N(4))
-#        c = A.NewArray(N(3), N(7))
-#        result = A.Map(add_times, a, b, c)
-#        predicted = np.array([[[10, 10], [64, 0]], [[4, 16], [14, 6]]])
-#        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-       
-       #map(lambda a, b=[0,1,2]: a^2*b[0] + a*b[1] + b[2], [1,2,3]) == [6,11,18]
+       # test complicated expression involving views of a default that is an array
+       env = Env.Environment()
+       parameters = ['a', 'b']
+       body = [S.Return(M.Plus(M.Times(M.Power(E.NameLookUp('a'), N(2)), A.View(E.NameLookUp('b'), N(0))), 
+                               M.Times(E.NameLookUp('a'), A.View(E.NameLookUp('b'), N(1))),
+                               A.View(E.NameLookUp('b'), N(2))))]
+       default_array_test = E.LambdaExpression(parameters, body,
+                                               defaultParameters=[V.DefaultParameter(), V.Array(np.array([1, 2, 3]))])
+       a = A.NewArray(N(1), N(2), N(3))
+       result = A.Map(default_array_test, a)
+       predicted = np.array([6, 11, 18])
+       np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
         
+       #map(lambda a, b=[0,1,2]: (a^2)*b[0] + a*b[1] + b[2], [1,2,3]) == [6,11,18]
+       
     def TestUsingManyOperationsinFunction(self):
        env = Env.Environment()
        parameters = ['a', 'b', 'c']
@@ -302,7 +328,7 @@ class TestArrayExpressions(unittest.TestCase):
     def TestMapWithFunctionWithDefaults(self):
        env = Env.Environment()
        body = [S.Return(M.Plus(E.NameLookUp('item'), E.NameLookUp('incr')))]
-       add = E.LambdaExpression(['item', 'incr'], body, defaultParameters = [M.Const(V.DefaultParameter()), V.Simple(3)])
+       add = E.LambdaExpression(['item', 'incr'], body, defaultParameters = [V.DefaultParameter(), V.Simple(3)])
        item = A.NewArray(N(1), N(3), N(5))
        result = A.Map(add, item)
        predicted = np.array([4, 6, 8])
