@@ -58,7 +58,7 @@ class NewArray(AbstractExpression):
         else:
             return int(arg.value)
             
-    def Evaluate(self, env):
+    def Interpret(self, env):
         if self.comprehension:
             return self._DoComprehension(env)
         else:
@@ -175,7 +175,7 @@ class View(AbstractExpression):
         else:
             return int(arg.value)
         
-    def Evaluate(self, env):
+    def Interpret(self, env):
         array = self.arrayExpression.Evaluate(env)
         if not isinstance(array, V.Array):
             raise ProtocolError("First argument must be of type Values.Array")
@@ -254,12 +254,12 @@ class View(AbstractExpression):
         except IndexError:
             raise ProtocolError("The indices must be in the range of the array")
         return V.Array(view)
-        
+    
 # class Fold(AbstractExpression):
 #     def __init__(self, *children):
 #         self.children = children
 #         
-#     def Evaluate(self, env):
+#     def Interpret(self, env):
 #         if len(self.children) < 2 or len(self.children) > 4:
 #             raise ProtocolError("Fold requires 2-4 function inputs, not", len(self.children))
 #         operands = self.EvaluateChildren(env)
@@ -291,7 +291,6 @@ class Map(AbstractExpression):
         self.functionExpr = functionExpr
         self.children = children
 
-        
     def Evaluate(self, env):
         function = self.functionExpr.Evaluate(env)
         if not isinstance(function, V.LambdaClosure):
@@ -303,7 +302,30 @@ class Map(AbstractExpression):
         for array in arrays:
             if array.array.shape != shape:
                 raise ProtocolError(array, "is not the same shape as the first array input")
-        protocol_result = function.Evaluate(env, arrays)
+       # protocol_result = function.Evaluate(env, arrays)
+        expression,local_env = function.Compile(env, arrays)
+        try:
+            protocol_result = V.Array(expression, local_dict=local_env.unwrappedBindings)
+        except:
+            try:
+                protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
+            except:
+                protocol_result = self.Interpret(local_env, arrays, function)
+        return protocol_result
+    
+    def Interpret(self, env, arrays, function):
+        result = np.empty_like(arrays[0].array)
+        dim_range = []
+        shape = arrays[0].array.shape
+        for dim in shape:
+            dim_range.append(range(dim)) 
+        for index in itertools.product(*dim_range):
+            function_inputs = []
+            for array in arrays:
+                function_inputs.append(V.Simple(float(array.array[index])))
+            result[index] = function.Evaluate(env, function_inputs).value
+        protocol_result = V.Array(result)
+           
         return protocol_result
 
 ## flatten could help here possibly

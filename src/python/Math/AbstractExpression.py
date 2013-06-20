@@ -30,18 +30,38 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+import numexpr as ne
+import numpy
 
 class AbstractExpression(object):
     """Base class for expressions in the protocol language."""
+    
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         self.children = children
+        self._compiled = None
 
     def EvaluateChildren(self, env):
         """Evaluate our child expressions and return a list of their values."""
         childList = [child.Evaluate(env) for child in self.children]
         return childList
     
+    def Interpret(self, env):
+        """Old evaluate method. Called if numexpr and numpy can't evaluate string from compile"""
+        raise NotImplementedError
+    
+    def Compile(self):
+        raise NotImplementedError
+    
     def Evaluate(self, env):
         """Subclasses must implement this method."""
-        raise NotImplementedError
+        try:
+            results = V.Array(ne.evaluate(self.Compile(), local_dict=env.unwrappedBindings))
+        except:
+            try:
+                results = V.Array(eval(self.Compile(), globals(), env.unwrappedBindings))
+            except:
+                results = self.Interpret(env)
+        return results
+    
+    

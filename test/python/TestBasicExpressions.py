@@ -125,6 +125,7 @@ class TestBasicExpressions(unittest.TestCase):
         env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
+        print "namelookup", E.NameLookUp("one")
         self.assertEqual(E.NameLookUp("one").Evaluate(env), one)
         
     #def TestMap(self):

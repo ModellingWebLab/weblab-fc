@@ -42,12 +42,12 @@ class Const(AbstractExpression):
     def __init__(self, value):
         self.value = value
         
-    def Evaluate(self,env):
+    def Interpret(self, env):
         return self.value    
         
 class Plus(AbstractExpression):
     """Addition."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if isinstance(operands[0], V.Array):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
@@ -71,7 +71,7 @@ class Plus(AbstractExpression):
     
 class Minus(AbstractExpression):
     """Subtraction."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1 and len(self.children) != 2:
             raise ProtocolError("Operator 'minus' requires one or two operands, not", len(self.children))
@@ -94,7 +94,7 @@ class Minus(AbstractExpression):
 
 class Times(AbstractExpression):
     """Multiplication"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if isinstance(operands[0], V.Array):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
@@ -117,7 +117,7 @@ class Times(AbstractExpression):
     
 class Divide(AbstractExpression):
     """Division."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Operator 'divide' requires two operands, not", len(self.children))
@@ -134,7 +134,7 @@ class Divide(AbstractExpression):
     
 class Max(AbstractExpression):
     """Returns maximum value."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         try:
             result = max([v.value for v in operands])
@@ -149,7 +149,7 @@ class Max(AbstractExpression):
             
 class Min(AbstractExpression):
     """Returns minimum value."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         try:
             result = min([v.value for v in operands])
@@ -164,7 +164,7 @@ class Min(AbstractExpression):
     
 class Rem(AbstractExpression):
     """Remainder operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Operator 'rem' requires two operands, not", len(self.children))
@@ -181,7 +181,7 @@ class Rem(AbstractExpression):
     
 class Power(AbstractExpression):
     """Power operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Operator 'power' requires two operands, not", len(self.children))
@@ -198,7 +198,7 @@ class Power(AbstractExpression):
     
 class Root(AbstractExpression):
     """Root operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1 and len(self.children) != 2:
             raise ProtocolError("Operator 'root' requires one operand, optionally with a degree qualifier, you entered", len(self.children), "inputs")
@@ -223,7 +223,7 @@ class Root(AbstractExpression):
     
 class Abs(AbstractExpression):
     """Absolute value operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1:
             raise ProtocolError("Operator 'absolute value' requires one operand, not", len(self.children))
@@ -243,7 +243,7 @@ class Abs(AbstractExpression):
 
 class Floor(AbstractExpression):
     """Floor operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1:
             raise ProtocolError("Operator 'floor' requires one operand, not", len(self.children))
@@ -263,7 +263,7 @@ class Floor(AbstractExpression):
     
 class Ceiling(AbstractExpression):
     """Ceiling operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1:
             raise ProtocolError("Operator 'ceiling' requires one operand, not", len(self.children))
@@ -283,7 +283,7 @@ class Ceiling(AbstractExpression):
 
 class Exp(AbstractExpression):
     """Exponential operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1:
             raise ProtocolError("Exponential operator requires one operand, not", len(self.children))
@@ -301,10 +301,9 @@ class Exp(AbstractExpression):
             raise ProtocolError("exp operator requires one argument, not", len(operands))
         return expression 
     
-    
 class Ln(AbstractExpression):
     """Natural logarithm operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1:
             raise ProtocolError("Natural logarithm operator requires one operand, not", len(self.children))
@@ -324,7 +323,7 @@ class Ln(AbstractExpression):
         
 class Log(AbstractExpression):
     """logarithmic operator."""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1 and len(self.children) != 2:
             raise ProtocolError("Logarithmic operator requires one operand and optionally a log_base qualifier, you entered", len(self.children), "inputs")
@@ -352,7 +351,7 @@ class Log(AbstractExpression):
     
 class And(AbstractExpression):
     """Boolean And Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'and' requires operands")
@@ -371,7 +370,7 @@ class And(AbstractExpression):
     
 class Or(AbstractExpression):
     """Boolean Or Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'or' requires operands")
@@ -390,7 +389,7 @@ class Or(AbstractExpression):
 
 class Xor(AbstractExpression):
     """Boolean Xor Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'xor' requires operands")
@@ -409,7 +408,7 @@ class Xor(AbstractExpression):
 
 class Not(AbstractExpression):
     """Boolean Not Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 1:
             raise ProtocolError("Boolean operator 'not' requires 1 operand, not", len(self.children))
@@ -427,11 +426,9 @@ class Not(AbstractExpression):
             raise ProtocolError("not operator requires one argument, not", len(operands))
         return expression 
     
-
-    
 class Eq(AbstractExpression):
     """Equality Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Equality operator requires 2 operands, not", len(self.children))
@@ -448,7 +445,7 @@ class Eq(AbstractExpression):
     
 class Neq(AbstractExpression):
     """Not equal Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Not equal operator requires 2 operands, not", len(self.children))
@@ -462,11 +459,10 @@ class Neq(AbstractExpression):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         expression = ' != '.join(operands)  
         return expression 
-       
     
 class Lt(AbstractExpression):
     """Less than Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Less than operator requires 2 operands, not", len(self.children))
@@ -480,11 +476,10 @@ class Lt(AbstractExpression):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         expression = ' < '.join(operands)  
         return expression 
-     
     
 class Gt(AbstractExpression):
     """Greater than Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Greater than operator requires 2 operands, not", len(self.children))
@@ -502,7 +497,7 @@ class Gt(AbstractExpression):
     
 class Leq(AbstractExpression):
     """Less than or equal to Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Less than or equal to operator requires 2 operands, not", len(self.children))
@@ -517,10 +512,9 @@ class Leq(AbstractExpression):
         expression = ' <= '.join(operands)  
         return expression 
     
-    
 class Geq(AbstractExpression):
     """Greater than or equal to Operator"""
-    def Evaluate(self, env):
+    def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) != 2:
             raise ProtocolError("Greater than or equal to operator requires 2 operands, not", len(self.children))

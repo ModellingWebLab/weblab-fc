@@ -62,20 +62,22 @@ class Return(AbstractStatement):
         self.parameters = parameters
                 
     def Evaluate(self, env):
-        try:
-            results = [V.Array(ne.evaluate(rhs.Compile(), local_dict=env.unwrappedBindings)) for rhs in self.parameters]
-        except:
-            try:
-                results = [V.Array(eval(rhs.Compile(), globals(), env.unwrappedBindings)) for rhs in self.parameters]
-            except:
-                results = [expr.Evaluate(env) for expr in self.parameters]
-            #all above will happen in map, map will call compile on the function via the lambda closure compile
-        #map does the numexpr evaluate
+        results = [expr.Evaluate(env) for expr in self.parameters]
         if len(results) == 0:
             return V.Null()
         elif len(results) == 1:
             return results[0]
         else:
             return V.Tuple(*results)
+    
+    def Compile(self, env):
+        if len(self.parameters) == 1:
+            expression = self.parameters[0].Compile()
+        else:
+            raise NotImplementedError
+        return expression
+            #all above will happen in map, map will call compile on the function via the lambda closure compile
+        #map does the numexpr evaluate
+#         
     #evaluate children and return as a tuple if more than one, just the one if one, and null if there aren't any
         

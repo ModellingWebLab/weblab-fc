@@ -74,10 +74,26 @@ class LambdaClosure(AbstractValue.AbstractValue):
         self.defaultParameters = defaultParameters
         self.definingEnv = definingEnv
     
-#     def Compile(self, env, actualP):
-#         #compile each statement in the body if there's only a return statement
-#         # returns compiled expression and env
-#         return expression,local_env
+    def Compile(self, env, actualParameters):
+        local_env = Env.Environment(delegatee=self.definingEnv)
+        if len(actualParameters) < len(self.formalParameters):
+            actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
+        for i,param in enumerate(actualParameters):
+            if not isinstance(param, DefaultParameter):
+                local_env.DefineName(self.formalParameters[i], param)
+            elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
+                if isinstance(self.defaultParameters[i], Simple):
+                    local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
+                else:
+                    raise ProtocolError("The default parameters must be simple values.")
+                #check default is a protocol simple value for a compile case
+            else:
+                raise ProtocolError("One of the parameters is not defined and has no default value")
+        if len(self.body) == 1:
+            expression = self.body[0].Compile(env)
+         #compile each statement in the body if there's only a return statement
+         # returns compiled expression and env
+        return expression,local_env
     
     def Evaluate(self, env, actualParameters):
         local_env = Env.Environment(delegatee=self.definingEnv)

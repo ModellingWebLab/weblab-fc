@@ -46,30 +46,30 @@ class FunctionCall(AbstractExpression):
             self.function = functionOrName
         self.children = children
         
-    def Evaluate(self, env):
+    def Interpret(self, env):
         actual_params = self.EvaluateChildren(env)
         function = self.function.Evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError(function, "is not a function")
         return function.Evaluate(env, actual_params)
     
+    
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
     def __init__(self, name):
         self.name = name
         
-    def Evaluate(self, env):
+    def Interpret(self, env):
         return env.LookUp(self.name)
     
     def Compile(self):
         return self.name
     
 class TupleExpression(AbstractExpression):
-    def Evaluate(self, env):
+    def Interpret(self, env):
         if len(self.children) < 1:
             raise ProtocolError("Empty tuple expressions are not allowed")
         return V.Tuple(*self.EvaluateChildren(env))
-    
         
 class LambdaExpression(AbstractExpression):
     def __init__(self, formalParameters, body, defaultParameters=None):
@@ -77,5 +77,7 @@ class LambdaExpression(AbstractExpression):
         self.body = body
         self.defaultParameters = defaultParameters
         
-    def Evaluate(self, env):
+    def Interpret(self, env):
         return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)  
+
+    
