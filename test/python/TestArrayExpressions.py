@@ -576,6 +576,72 @@ class TestArrayExpressions(unittest.TestCase):
        predicted = V.Array(np.array([True, False, True])) 
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)   
        
-       
+    def TestFold(self):
+        # 1-d array, add fold
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')))]
+        add = E.LambdaExpression(parameters, body)
+        array = A.NewArray(N(0), N(1), N(2))
+        result = A.Fold(add, array, N(0), N(0)).Interpret(env)
+        predicted = np.array([3])
+        np.testing.assert_array_almost_equal(result.array, predicted)   
+        
+        # 2-d array, add fold over dimension 0
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')))]
+        add = E.LambdaExpression(parameters, body)
+        array = A.NewArray(A.NewArray(N(0), N(1), N(2)), A.NewArray(N(3), N(4), N(5)))
+        result = A.Fold(add, array, N(0), N(0)).Interpret(env)
+        predicted = np.array([[3, 5, 7]])
+        np.testing.assert_array_almost_equal(result.array, predicted)   
          
+        # 2-d array, add fold over dimension 1 and non-zero initial value
+        result = A.Fold(add, array, N(5), N(1)).Interpret(env)
+        predicted = np.array([[8],[17]])
+        np.testing.assert_array_almost_equal(result.array, predicted)   
+        
+        # 2-d array, add fold over dimension 1 using implicitly defined dimension
+        result = A.Fold(add, array, N(0)).Interpret(env)
+        predicted = np.array([[3],[12]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # 2-d array, add fold over dimension 1 using implicitly defined dimension and initial
+        # can you implicitly define initial and explicitly define dimension?
+        array = A.NewArray(A.NewArray(N(1), N(2), N(3)), A.NewArray(N(3), N(4), N(5)))
+        result = A.Fold(add, array).Interpret(env)
+        predicted = np.array([[6],[12]])
+        np.testing.assert_array_almost_equal(result.array, predicted)    
+        
+        # 3-d array, times fold over dimension 0
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Times(E.NameLookUp('a'), E.NameLookUp('b')))]
+        times = E.LambdaExpression(parameters, body)
+        array = A.NewArray(A.NewArray(A.NewArray(N(1), N(2), N(3)), A.NewArray(N(4), N(2), N(1))),
+                           A.NewArray(A.NewArray(N(3), N(0), N(5)), A.NewArray(N(2), N(2), N(1))))
+        result = A.Fold(times, array, N(1), N(0)).Interpret(env)
+        predicted = np.array([[[3, 0, 15], [8, 4, 1]]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # 3-d array, times fold over dimension 1
+        result = A.Fold(times, array, N(1), N(1)).Interpret(env)
+        predicted = np.array([[[4, 4, 3]], [[6, 0, 5]]])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+         
+        # 3-d array, times fold over dimension 2
+        result = A.Fold(times, array, N(1), N(2)).Interpret(env)
+        predicted = np.array([[[6], [8]], [[0], [4]]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # 3-d array, times fold over dimension 2 (defined implicitly)
+        result = A.Fold(times, array, N(1)).Interpret(env)
+        predicted = np.array([[[6], [8]], [[0], [4]]])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+         
+        # 3-d array, times fold over dimension 2 (defined implicitly) with no initial value input
+        result = A.Fold(times, array).Interpret(env)
+        predicted = np.array([[[6], [8]], [[0], [4]]])
+        np.testing.assert_array_almost_equal(result.array, predicted)  
          

@@ -42,6 +42,9 @@ from operator import mul
 from AbstractExpression import AbstractExpression
 from ErrorHandling import ProtocolError
 
+def N(number):
+    return M.Const(V.Simple(number))
+
 class NewArray(AbstractExpression):
     """Used to create new arrays."""
     def __init__(self, *children, **kwargs):
@@ -260,43 +263,67 @@ class View(AbstractExpression):
             raise ProtocolError("The indices must be in the range of the array")
         return V.Array(view)
     
-# class Fold(AbstractExpression):
-#     def __init__(self, *children):
-#         self.children = children
-#         
-#     def Interpret(self, env):
-#         if len(self.children) < 2 or len(self.children) > 4:
-#             raise ProtocolError("Fold requires 2-4 function inputs, not", len(self.children))
-#         operands = self.EvaluateChildren(env)
-#         if len(self.children) == 2:
-#             function = operands[0]
-#             array = operands[1]
-#             initial = None
-#             dimension = None
-#         if len(self.children) == 3:
-#             function = operands[0]
-#             array = operands[1]
-#             initial = operands[2]
-#             dimension = None
-#         if len(self.children) == 4:
-#             function = operands[0]
-#             array = operands[1]
-#              initial = operands[2]
-#              dimension = operands[3]             
-#              if dimension > array.array.ndim:
-#                  raise ProtocolError("Cannot operate on dimension", dimension, 
-#                                      "because the array only has", array.array.ndim, "dimensions")
+class Fold(AbstractExpression):
+    
+    def __init__(self, *children):
+        self.children = children
+        
+    def Interpret(self, env):
+        operands = self.EvaluateChildren(env)
+        if len(self.children) == 2:
+            function = operands[0]
+            array = operands[1].array
+            initial = None
+            dimension = int(array.ndim - 1)
+        elif len(self.children) == 3:
+            function = operands[0]
+            array = operands[1].array
+            initial = operands[2].value
+            dimension = int(array.ndim - 1)
+        elif len(self.children) == 4:
+            function = operands[0]
+            array = operands[1].array
+            initial = operands[2].value
+            dimension = int(operands[3].value)          
+            if dimension > array.ndim:
+                raise ProtocolError("Cannot operate on dimension", dimension, 
+                                     "because the array only has", array.ndim, "dimensions")
+        else:
+            raise ProtocolError("Fold requires 2-4 inputs, not", len(self.children))
+        shape = array.shape
+        size = shape[dimension]
+        
+        if not isinstance(function, V.LambdaClosure):
+            raise ProtocolError("The function passed into fold must be a lambda expression, not", type(function))
+            
+        env = Env.Environment()
+        result_shape = list(shape)
+        result_shape[dimension] = 1
+        result = np.empty(result_shape)
+        dim_ranges = []
+        
+        total_so_far = initial
+       
+        for i,dim in enumerate(shape):
+            if i == dimension:
+                dim_ranges.append(range(1))
+            else:
+                dim_ranges.append(range(dim))  
 
-
-        #good for like sums and max's and stuff
-        #fold lets you collapse an array along one dimension so that the dimension becomes one number
-        # so for fold you take an operation that usually applies to two numbers and you can give it a value to start
-        # with or you can just use the first element of the list
-        # always a left fold
-        # takes the function to fold with, the value to start with, and the array you're folding over and what dimension you're folding along
-        # defaults to the last dimension
-        # same number of dimensions as original, but length of dimension folded over is 1
-        # no passing in m.plus, have to pass in function that is a lambdaexpression like a,b = mplus(a,b)
+        for indices in itertools.product(*dim_ranges):
+            modifiable_indices = list(indices)
+            for index in range(size):
+                modifiable_indices[dimension] = index
+                next_index = tuple(modifiable_indices)
+                if total_so_far is None:
+                    total_so_far = array[next_index]
+                else:
+                    args = [V.Simple(total_so_far), V.Simple(array[next_index])]
+                    total_so_far = function.Evaluate(env, args).value
+            result[indices] = total_so_far
+            total_so_far = initial
+    
+        return V.Array(result)
         
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
@@ -315,7 +342,6 @@ class Map(AbstractExpression):
         for array in arrays:
             if array.array.shape != shape:
                 raise ProtocolError(array, "is not the same shape as the first array input")
-        # protocol_result = function.Evaluate(env, arrays)
         interpret = False
         try:
             expression,local_env = function.Compile(env, arrays)
@@ -347,37 +373,3 @@ class Map(AbstractExpression):
         protocol_result = V.Array(result)
            
         return protocol_result
-
-## flatten could help here possibly
-#         for array in arrays:
-#             a.array = a.array.flatten()
-#         fun_inputs = np.empty(operands[1].array.size * (len(self.children) - 1))
-
-
-# MAP
-# applies functions element-wise to arrays
-# abstractexpression and in its constructor is the function, and *arrays (the arrays to which the function
-#...will be applied, and there must be at least one here
-# there's an evaluate method and in it, you need to evaluate the function (function = functionExpr.Evaluate())
-# use evaluate children to get the arrays to be used
-# make sure each array has the same shape
-# use itertools.zip to iterate through each array to get values, at each point evaluate the function
-# first thing you have to do is create the result with the same shape array as the inputs (just use np.empty)
-# when you do evaluate children, you have protocol language arrays
-# use Array.array to get underlying nparray
-# use map(v.simple, elements) to wrap each of the elements in the python arrays to get a list of protocol language numbers
-# check the function is a lambda closure, then evaluate it using the wrapped values from above as 
-#...the argument which gives you a result as a protocol value, convert those to python doubles, 
-#...stick them in result array, then wrap that result array in a protocol language array
-    
-           
-        #elt = 0
-        #for item in operands[0].array:
-         #   for a in operands[1:]:
-          #      fun_inputs[elt] = a.array[item]
-           #     elt += 1
-        #result = np.empty(shape)
-        #size = result.size
-        #count = 0
-        #for item in np.array([:size:(len(self.children)-1)]):
-         #   result[count] = fun(fun_inputs)
