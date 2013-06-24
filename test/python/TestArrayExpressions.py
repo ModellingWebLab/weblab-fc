@@ -639,9 +639,19 @@ class TestArrayExpressions(unittest.TestCase):
         result = A.Fold(times, array, N(1)).Interpret(env)
         predicted = np.array([[[6], [8]], [[0], [4]]])
         np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # 3-d array, times fold over dimension 2 (defined explicitly as default)
+        result = A.Fold(times, array, N(1), M.Const(V.DefaultParameter())).Interpret(env)
+        predicted = np.array([[[6], [8]], [[0], [4]]])
+        np.testing.assert_array_almost_equal(result.array, predicted)
          
         # 3-d array, times fold over dimension 2 (defined implicitly) with no initial value input
         result = A.Fold(times, array).Interpret(env)
+        predicted = np.array([[[6], [8]], [[0], [4]]])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # 3-d array, times fold over dimension 2 using default parameter for both initial value and dimension
+        result = A.Fold(times, array, M.Const(V.DefaultParameter()), M.Const(V.DefaultParameter())).Interpret(env)
         predicted = np.array([[[6], [8]], [[0], [4]]])
         np.testing.assert_array_almost_equal(result.array, predicted)
         

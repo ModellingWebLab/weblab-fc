@@ -278,13 +278,22 @@ class Fold(AbstractExpression):
         elif len(self.children) == 3:
             function = operands[0]
             array = operands[1].array
-            initial = operands[2].value
+            try:
+                initial = operands[2].value
+            except AttributeError:
+                initial = None                
             dimension = int(array.ndim - 1)
         elif len(self.children) == 4:
             function = operands[0]
             array = operands[1].array
-            initial = operands[2].value
-            dimension = int(operands[3].value)          
+            try:
+                initial = operands[2].value
+            except AttributeError:
+                initial = None 
+            try :
+                dimension = int(operands[3].value)
+            except AttributeError:
+                dimension = int(array.ndim - 1)         
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension, 
                                      "because the array only has", array.ndim, "dimensions")
@@ -373,3 +382,90 @@ class Map(AbstractExpression):
         protocol_result = V.Array(result)
            
         return protocol_result
+    
+class Find(AbstractExpression):
+    def __init__(self, *children):
+        self.children = children
+        
+    def Evaluate(self, env):
+        operands = self.EvaluateChildren(env)
+        operands 
+    
+class Index(AbstractExpression):
+    def __init__(self, *children):
+        self.children = children
+        
+    def Interpret(self, env):
+        operands = self.EvaluateChildren(env)
+        if len(self.children) == 2:
+            operand = operands[0]
+            indices = operands[1]
+            dim = operand.array.ndim - 1
+            shrink = V.Simple(0)
+            pad = V.Simple(0)
+            pad_value = infinity
+        elif len(self.children) == 3:
+            operand = operands[0]
+            indices = operands[1]
+            dim = operands[2]
+            shrink = V.Simple(0)
+            pad = V.Simple(0)
+            pad_value = infinity
+        elif len(self.children) == 4:
+            operand = operands[0]
+            indices = operands[1]
+            dim = operands[2]
+            shrink = operands[3]
+            pad = V.Simple(0)
+            pad_value = infinity
+        elif len(self.children) == 5:
+            operand = operands[0]
+            indices = operands[1]
+            dim = operands[2]
+            shrink = operands[3]
+            pad = operands[4]
+            pad_value = infinity
+        elif len(self.children) == 6:
+            operand = operands[0]
+            indices = operands[1]
+            dim = operands[2]
+            shrink = operands[3]
+            pad = operands[4]
+            pad_value = operands[5]
+        else:
+            raise ProtocolError("Index requires 2-6 arguments, not", len(self.children))
+        
+        # check for errors in inputs
+        if not isinstance(operand, V.Array) or not isinstance(indices, V.Array):
+                raise ProtocolError("The first two inputs should be Arrays.")
+        if indices.array.ndim != 2:
+            raise ProtocolError("The dimension of the indices array must be 2, not", indices.array.ndim)
+        if not isinstance(dim, V.Simple):
+                raise ProtocolError("The dimension input should be a simple value, not a", type(dim))
+        if dim > operand.array.ndim:
+            raise ProtocolError("The operand to index has", operand.array.ndim, "dimensions, so it cannot be folded along dimension", dim)
+        if not isinstance(shrink, V.Simple):
+                raise ProtocolError("The shrink input should be a simple value, not a", type(shrink))
+        if not isinstance(pad, V.Simple):
+                raise ProtocolError("The pad input should be a simple value, not a", type(pad))
+        if shrink != 0 and pad != 0:
+            raise ProtocolError("You cannot both pad and shrink!")
+        if not isinstance(pad, V.Simple):
+                raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
+            
+        shape = operand.array.shape
+        shape[dim] = 1
+        
+        # find will take an array and return the indices of all of the non-zero entries in order
+        # just use a numpy filter function
+        # manually would start off with as big of array as you need if all are non zero and cuts it off
+        # when its done
+        
+        # indices for index is usually the result of a call to find
+        # dimension is the dimension you're collapsing or expanding to make the shape regular
+        # pad_value defaults to sys.float_info.max or infinity
+        # if shrink is 1 then it shrinks to smallest possible size, it must be 1 or 0 or -1
+        # pad is nonzero then you fill in the pad value to make the array whatever size it needs to be
+        # if pad or shrink is negative, you start at the other end of the array and fill 
+        
+        
