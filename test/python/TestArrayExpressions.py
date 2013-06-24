@@ -643,5 +643,47 @@ class TestArrayExpressions(unittest.TestCase):
         # 3-d array, times fold over dimension 2 (defined implicitly) with no initial value input
         result = A.Fold(times, array).Interpret(env)
         predicted = np.array([[[6], [8]], [[0], [4]]])
-        np.testing.assert_array_almost_equal(result.array, predicted)  
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+    def TestFoldWithDifferentFunctions(self):
+        # fold with max function
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Max(E.NameLookUp('a'), E.NameLookUp('b')))]
+        max_function = E.LambdaExpression(parameters, body)
+        array = A.NewArray(A.NewArray(N(0), N(1), N(8)), A.NewArray(N(3), N(4), N(5)))
+        result = A.Fold(max_function, array, N(0), N(0)).Interpret(env)
+        predicted = np.array([[3, 4, 8]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # fold with min function
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Min(E.NameLookUp('a'), E.NameLookUp('b')))]
+        min_function = E.LambdaExpression(parameters, body)
+        array = A.NewArray(A.NewArray(N(0), N(1), N(8)), A.NewArray(N(3), N(-4), N(5)))
+        result = A.Fold(min_function, array).Interpret(env)
+        predicted = np.array([[0],[-4]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # fold with minus function
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Minus(E.NameLookUp('a'), E.NameLookUp('b')))]
+        minus_function = E.LambdaExpression(parameters, body)
+        array = A.NewArray(A.NewArray(N(0), N(1), N(4)), A.NewArray(N(3), N(1), N(5)))
+        result = A.Fold(minus_function, array, N(5), N(1)).Interpret(env)
+        predicted = np.array([[0], [-4]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # fold with divide function
+        env = Env.Environment()
+        parameters = ['a', 'b']
+        body = [S.Return(M.Divide(E.NameLookUp('a'), E.NameLookUp('b')))]
+        divide_function = E.LambdaExpression(parameters, body)
+        array = A.NewArray(A.NewArray(N(2), N(2), N(4)), A.NewArray(N(16), N(2), N(1)))
+        result = A.Fold(divide_function, array, N(32), N(1)).Interpret(env)
+        predicted = np.array([[2], [1]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
          
