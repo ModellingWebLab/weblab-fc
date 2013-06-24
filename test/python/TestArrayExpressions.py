@@ -694,6 +694,17 @@ class TestArrayExpressions(unittest.TestCase):
         array = A.NewArray(A.NewArray(N(2), N(2), N(4)), A.NewArray(N(16), N(2), N(1)))
         result = A.Fold(divide_function, array, N(32), N(1)).Interpret(env)
         predicted = np.array([[2], [1]])
-        np.testing.assert_array_almost_equal(result.array, predicted) 
+        np.testing.assert_array_almost_equal(result.array, predicted)
         
+    def TestFind(self): 
+        # Find with 2-d array as input
+        env = Env.Environment()
+        array = V.Array(np.array([[1, 0, 2, 3], [0, 0, 3, 9]]))
+        result = A.Find(array).Evaluate(env)
+        predicted = np.array(np.array([[0, 0], [0, 2], [0, 3], [1,2], [1,3]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # Should raise error if non-array passed in
+        array = V.Simple(1)
+        self.assertRaises(ProtocolError, A.Find, array)
          

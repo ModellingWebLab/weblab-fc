@@ -384,12 +384,18 @@ class Map(AbstractExpression):
         return protocol_result
     
 class Find(AbstractExpression):
-    def __init__(self, *children):
-        self.children = children
+    def __init__(self, operand):
+        self.operand = operand
+        if not isinstance(operand, V.Array):
+            raise ProtocolError("Operand for find must be an Array, not a", type(operand))
         
-    def Evaluate(self, env):
-        operands = self.EvaluateChildren(env)
-        operands 
+    def Interpret(self, env):
+        return V.Array(np.transpose(np.nonzero(self.operand.array)))
+        
+        # find will take an array and return the indices of all of the non-zero entries in order
+        # just use a numpy filter function
+        # manually would start off with as big of array as you need if all are non zero and cuts it off
+        # when its done
     
 class Index(AbstractExpression):
     def __init__(self, *children):
