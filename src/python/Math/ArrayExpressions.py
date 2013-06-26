@@ -37,10 +37,12 @@ import Environment as Env
 import Expressions as E
 import numpy as np
 import itertools
+import sys
 from operator import mul
 
 from AbstractExpression import AbstractExpression
 from ErrorHandling import ProtocolError
+from operator import itemgetter
 
 def N(number):
     return M.Const(V.Simple(number))
@@ -384,19 +386,15 @@ class Map(AbstractExpression):
         return protocol_result
     
 class Find(AbstractExpression):
-    def __init__(self, operand):
-        self.operand = operand
+    def __init__(self, operandExpr):
+        self.operandExpr = operandExpr 
+         
+    def Interpret(self, env):
+        operand = self.operandExpr.Evaluate(env)
         if not isinstance(operand, V.Array):
             raise ProtocolError("Operand for find must be an Array, not a", type(operand))
+        return V.Array(np.transpose(np.nonzero(operand.array)))
         
-    def Interpret(self, env):
-        return V.Array(np.transpose(np.nonzero(self.operand.array)))
-        
-        # find will take an array and return the indices of all of the non-zero entries in order
-        # just use a numpy filter function
-        # manually would start off with as big of array as you need if all are non zero and cuts it off
-        # when its done
-    
 class Index(AbstractExpression):
     def __init__(self, *children):
         self.children = children
@@ -409,35 +407,35 @@ class Index(AbstractExpression):
             dim = operand.array.ndim - 1
             shrink = V.Simple(0)
             pad = V.Simple(0)
-            pad_value = infinity
+            pad_value = sys.float_info.max
         elif len(self.children) == 3:
             operand = operands[0]
             indices = operands[1]
             dim = operands[2]
             shrink = V.Simple(0)
             pad = V.Simple(0)
-            pad_value = infinity
+            pad_value = sys.float_info.max
         elif len(self.children) == 4:
             operand = operands[0]
             indices = operands[1]
             dim = operands[2]
             shrink = operands[3]
             pad = V.Simple(0)
-            pad_value = infinity
+            pad_value = sys.float_info.max
         elif len(self.children) == 5:
             operand = operands[0]
             indices = operands[1]
             dim = operands[2]
             shrink = operands[3]
             pad = operands[4]
-            pad_value = infinity
+            pad_value = sys.float_info.max
         elif len(self.children) == 6:
             operand = operands[0]
             indices = operands[1]
             dim = operands[2]
             shrink = operands[3]
             pad = operands[4]
-            pad_value = operands[5]
+            pad_value = operands[5].value
         else:
             raise ProtocolError("Index requires 2-6 arguments, not", len(self.children))
         
@@ -448,30 +446,60 @@ class Index(AbstractExpression):
             raise ProtocolError("The dimension of the indices array must be 2, not", indices.array.ndim)
         if not isinstance(dim, V.Simple):
                 raise ProtocolError("The dimension input should be a simple value, not a", type(dim))
-        if dim > operand.array.ndim:
-            raise ProtocolError("The operand to index has", operand.array.ndim, "dimensions, so it cannot be folded along dimension", dim)
+        if dim.value >= operand.array.ndim:
+            raise ProtocolError("The operand to index has", operand.array.ndim, "dimensions, so it cannot be folded along dimension", dim.value)
         if not isinstance(shrink, V.Simple):
                 raise ProtocolError("The shrink input should be a simple value, not a", type(shrink))
         if not isinstance(pad, V.Simple):
                 raise ProtocolError("The pad input should be a simple value, not a", type(pad))
-        if shrink != 0 and pad != 0:
+        if shrink.value != 0 and pad.value != 0:
             raise ProtocolError("You cannot both pad and shrink!")
         if not isinstance(pad, V.Simple):
                 raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
             
-        shape = operand.array.shape
-        shape[dim] = 1
+        dim_val = int(dim.value)
+        shape = list(operand.array.shape)
+        extents = (operand.array != 0).sum(dim_val)
+        max_extent = np.amax(extents)
+        min_extent = np.amin(extents)
+        if min_extent == 0 and pad.value == 0 or (min_extent != max_extent and shrink.value == 0 and pad.value == 0):
+            raise ProtocolError("Cannot index if the result is irregular (extent ranges from", min_extent, "to", max_extent, ").")
+        if pad.value != 0:
+            extent = max_extent
+        else:
+            extent = min_extent 
+        shape[dim_val] = extent
+        num_entries = indices.array.shape[0]
+        result = np.empty(shape)
+        if pad != 0:
+            result.fill(pad_value)
+        if shrink.value + pad.value < 0:
+            begin = num_entries - 1   
+            end = -1
+            move = -1
+        else:
+            begin = 0
+            end = num_entries
+            move = 1
         
-        # find will take an array and return the indices of all of the non-zero entries in order
-        # just use a numpy filter function
-        # manually would start off with as big of array as you need if all are non zero and cuts it off
-        # when its done
-        
-        # indices for index is usually the result of a call to find
-        # dimension is the dimension you're collapsing or expanding to make the shape regular
-        # pad_value defaults to sys.float_info.max or infinity
-        # if shrink is 1 then it shrinks to smallest possible size, it must be 1 or 0 or -1
-        # pad is nonzero then you fill in the pad value to make the array whatever size it needs to be
-        # if pad or shrink is negative, you start at the other end of the array and fill 
+        # The next_index array keeps track of how far along dimension dim_val we should put the next kept entry at each location
+        shape[dim_val] = 1
+        next_index = np.zeros(shape)
+        for i in range(begin, end, move):
+            idxs = list(indices.array[i])
+            value = operand.array[tuple(idxs)]
+            # Figure out where to put this value in the result
+            idxs[dim_val] = 0
+            this_next_index = next_index[tuple(idxs)]
+            if this_next_index < extent:
+                if shrink.value + pad.value < 0:
+                    idxs[dim_val] = extent-this_next_index-1 
+                else:
+                    idxs[dim_val] = this_next_index
+                result[tuple(idxs)] = value
+                idxs[dim_val] = 0
+                next_index[tuple(idxs)] += 1
+                
+        return V.Array(result)
         
         

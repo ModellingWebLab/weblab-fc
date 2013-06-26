@@ -699,12 +699,46 @@ class TestArrayExpressions(unittest.TestCase):
     def TestFind(self): 
         # Find with 2-d array as input
         env = Env.Environment()
-        array = V.Array(np.array([[1, 0, 2, 3], [0, 0, 3, 9]]))
+        array = A.NewArray(A.NewArray(N(1), N(0), N(2), N(3)), A.NewArray(N(0), N(0), N(3), N(9)))
         result = A.Find(array).Evaluate(env)
         predicted = np.array(np.array([[0, 0], [0, 2], [0, 3], [1,2], [1,3]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
         
         # Should raise error if non-array passed in
-        array = V.Simple(1)
-        self.assertRaises(ProtocolError, A.Find, array)
-         
+        array = M.Const(V.Simple(1))
+        result = A.Find(array)
+        self.assertRaises(ProtocolError, result.Evaluate, env)
+        
+    def TestIndex(self):
+        env = Env.Environment()
+        array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
+        # [ [1, 0, 2]
+        #   [0, 3, 0]
+        #   [1, 1, 1] ]
+        find = A.Find(array)
+        result = A.Index(array, find, N(1), N(0), N(1), N(45)).Interpret(env)
+        predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        env = Env.Environment()
+        array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
+        # [ [1, 0, 2]
+        #   [0, 3, 0]
+        #   [1, 1, 1] ]
+        find = A.Find(array)
+        result = A.Index(array, find, N(0), N(0), N(1), N(45)).Interpret(env)
+        predicted = np.array(np.array([[1, 3, 2], [1, 1, 1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        env = Env.Environment()
+        array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
+        # [ [1, 0, 2]
+        #   [0, 3, 0]
+        #   [1, 1, 1] ]
+        find = A.Find(array)
+        result = A.Index(array, find, N(1), N(0), N(-1), N(45)).Interpret(env)
+        predicted = np.array(np.array([[45, 1, 2], [45, 45, 3], [1, 1, 1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        
+        
