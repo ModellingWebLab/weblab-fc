@@ -71,6 +71,14 @@ class TestFunctions(unittest.TestCase):
         self.assert_(isinstance(result, V.Tuple))
         self.assertAlmostEqual(result.values[0].value, 5)
         self.assertAlmostEqual(result.values[1].value, 3)  
+        
+        # test function using lambdaexpression.wrap
+        env = Env.Environment()
+        #add = E.LambdaExpression.Wrap(M.Plus, 3)
+        args = [N(1), N(2), N(3)]
+        #add_call = E.FunctionCall(add, args)
+        #result = add_call.Evaluate(env)
+        #self.assertEqual(result.value, 6)
 
     def TestNestedFunction(self):
         env = Env.Environment()
@@ -134,3 +142,9 @@ class TestFunctions(unittest.TestCase):
         add_call = E.FunctionCall(add, args)
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 10)
+#         
+#         max_function = E.LambdaExpression.Wrap(M.Max, 2)
+#         parameters = ['a', 'b']
+#         body = [S.Return(M.Max(E.NameLookUp('a'), E.NameLookUp('b')))]
+#         max_function = E.LambdaExpression(parameters, body)
+        

@@ -41,6 +41,9 @@ import Values as V
 import Environment as Env
 import numpy as np
 
+def N(number):
+    return M.Const(V.Simple(number))
+
 class TestBasicExpressions(unittest.TestCase):
     def TestAddition(self):
         env = Env.Environment()
@@ -125,8 +128,17 @@ class TestBasicExpressions(unittest.TestCase):
         env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
-        print "namelookup", E.NameLookUp("one")
         self.assertEqual(E.NameLookUp("one").Evaluate(env), one)
+        
+    def TestIf(self):
+        # test is true
+        env = Env.Environment()
+        result = E.If(N(1), M.Plus(N(1), N(2)), M.Minus(N(1), N(2))).Evaluate(env)
+        self.assertEqual(3, result.value)
+        
+        # test is false
+        result = E.If(N(0), M.Plus(N(1), N(2)), M.Minus(N(1), N(2))).Evaluate(env)
+        self.assertEqual(-1, result.value)
         
     #def TestMap(self):
      #   array1 = np.arange(4).reshape((2,2))

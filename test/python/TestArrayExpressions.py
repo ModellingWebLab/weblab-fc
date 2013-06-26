@@ -803,3 +803,4 @@ class TestArrayExpressions(unittest.TestCase):
         result = A.Index(N(1), A.NewArray(N(1), N(2)), array, N(1), N(1), N(45))
         self.assertRaises(ProtocolError, result.Interpret, env)
         
+        

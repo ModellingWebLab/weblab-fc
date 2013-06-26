@@ -34,6 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Values as V
 import numpy as np
 import numexpr as ne
+import Statements as S
 
 from ErrorHandling import ProtocolError
 from AbstractExpression import AbstractExpression
@@ -53,6 +54,21 @@ class FunctionCall(AbstractExpression):
             raise ProtocolError(function, "is not a function")
         return function.Evaluate(env, actual_params)
     
+class If(AbstractExpression):
+    def __init__(self, testExpr, thenExpr, elseExpr):
+        self.testExpr = testExpr
+        self.thenExpr = thenExpr
+        self.elseExpr = elseExpr
+    
+    def Interpret(self, env):
+        test = self.testExpr.Evaluate(env)
+        if not isinstance(test, V.Simple):
+            raise ProtocolError("The test in an if expression must be a Simple value.")
+        if test.value:
+            result = self.thenExpr.Evaluate(env)
+        else:
+            result = self.elseExpr.Evaluate(env)
+        return result
     
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
@@ -78,6 +94,20 @@ class LambdaExpression(AbstractExpression):
         self.defaultParameters = defaultParameters
         
     def Interpret(self, env):
-        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)  
+        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters) 
+    
+    def Wrap(self, operator, numParams): 
+        parameters = []
+        look_up_list = []
+        for i in range(numParams):
+            parameters.append("___" + str(i))
+            look_up_list.append(NameLookUp("____" + str(i))) 
+        print "look up list", look_up_list
+        print "parameters", parameters
+        body = [S.Return(operator(*look_up_list))]
+        function = LambdaExpression(parameters, body)
+        return function
+        
+        
 
     
