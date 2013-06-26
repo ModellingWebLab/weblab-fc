@@ -42,6 +42,7 @@ import Statements as S
 import numpy as np
 import MathExpressions as M
 import math
+import sys
 
 from ErrorHandling import ProtocolError
 
@@ -710,6 +711,7 @@ class TestArrayExpressions(unittest.TestCase):
         self.assertRaises(ProtocolError, result.Evaluate, env)
         
     def TestIndex(self):
+        # 2-d pad first dimension to the left
         env = Env.Environment()
         array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
         # [ [1, 0, 2]
@@ -720,25 +722,84 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
         
-        env = Env.Environment()
-        array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
-        # [ [1, 0, 2]
-        #   [0, 3, 0]
-        #   [1, 1, 1] ]
-        find = A.Find(array)
+        # 2-d pad dimension 0 to the left
         result = A.Index(array, find, N(0), N(0), N(1), N(45)).Interpret(env)
         predicted = np.array(np.array([[1, 3, 2], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
         
-        env = Env.Environment()
-        array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
-        # [ [1, 0, 2]
-        #   [0, 3, 0]
-        #   [1, 1, 1] ]
-        find = A.Find(array)
+        # 2-d pad dimension 0 to the left with defaults for shrink, pad, pad_value
+        result = A.Index(array, find, N(0)).Interpret(env)
+        predicted = np.array(np.array([[1, 3, 2], [1, 1, 1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # 2-d pad first dimension to the right
         result = A.Index(array, find, N(1), N(0), N(-1), N(45)).Interpret(env)
         predicted = np.array(np.array([[45, 1, 2], [45, 45, 3], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
         
+        # 2-d pad first dimension to the right with default max value for pad_value
+        result = A.Index(array, find, N(1), N(0), N(-1)).Interpret(env)
+        predicted = np.array(np.array([[sys.float_info.max, 1, 2], [sys.float_info.max, sys.float_info.max, 3], [1, 1, 1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
         
+        # 2-d shrink first dimension to the left with defaults for pad and pad_value
+        result = A.Index(array, find, N(1), N(1)).Interpret(env)
+        predicted = np.array(np.array([[1], [3], [1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # 2-d shrink first dimension to the right with defaults for pad and pad_value
+        result = A.Index(array, find, N(1), N(-1)).Interpret(env)
+        predicted = np.array(np.array([[2], [3], [1]]))
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # 1-d
+        env = Env.Environment()
+        array = A.NewArray(N(1), N(0), N(2), N(0))
+        # [1, 0, 2, 0]
+        find = A.Find(array)
+        result = A.Index(array, find).Interpret(env)
+        predicted = np.array([1, 2])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        # a few more tests for 1-d array, should all yield the same result
+        result = A.Index(array, find, N(0)).Interpret(env)
+        predicted = np.array([1, 2])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        result = A.Index(array, find, N(0), N(1)).Interpret(env)
+        predicted = np.array([1, 2])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        result = A.Index(array, find, N(0), N(0), N(0), N(0)).Interpret(env)
+        predicted = np.array([1, 2])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        result = A.Index(array, find, N(0), N(0), N(-1), N(100)).Interpret(env)
+        predicted = np.array([1, 2])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+    def TestIndexProtocolErrors(self):
+        # index over dimension 2 in 2 dimensional array (out of range)
+        env = Env.Environment()
+        array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
+        find = A.Find(array)
+        result = A.Index(array, find, N(2), N(0), N(1), N(45))
+        self.assertRaises(ProtocolError, result.Interpret, env)
+        
+        # index by shrinking and padding at the same time
+        result = A.Index(array, find, N(1), N(1), N(1), N(45))
+        self.assertRaises(ProtocolError, result.Interpret, env)
+        
+        # shrink and pad are both 0, but output is irregular
+        result = A.Index(array, find, N(1), N(0), N(0), N(45))
+        self.assertRaises(ProtocolError, result.Interpret, env)
+        
+        # input an array of indices that is not 2-d
+        result = A.Index(array, A.NewArray(N(1), N(2)), N(1), N(1), N(1), N(45))
+        self.assertRaises(ProtocolError, result.Interpret, env)
+        
+        # input array for dimension value instead of simple value
+        result = A.Index(array, A.NewArray(N(1), N(2)), array, N(1), N(1), N(45))
+        self.assertRaises(ProtocolError, result.Interpret, env)
+        
+        # input simple value for array instead of array
+        result = A.Index(N(1), A.NewArray(N(1), N(2)), array, N(1), N(1), N(45))
+        self.assertRaises(ProtocolError, result.Interpret, env)
         

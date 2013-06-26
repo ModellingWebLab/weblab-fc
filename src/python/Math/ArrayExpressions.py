@@ -404,7 +404,7 @@ class Index(AbstractExpression):
         if len(self.children) == 2:
             operand = operands[0]
             indices = operands[1]
-            dim = operand.array.ndim - 1
+            dim = V.Simple(operand.array.ndim - 1)
             shrink = V.Simple(0)
             pad = V.Simple(0)
             pad_value = sys.float_info.max
