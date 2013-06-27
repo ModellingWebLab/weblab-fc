@@ -47,18 +47,249 @@ import numpy as np
 import MathExpressions as M
 
 class TestSyntaxInterface(unittest.TestCase):
-    def TestParsingNumbers(self):
+    def TestParsingNumber(self):
+        # number
         parse_action = csp.expr.parseString('1.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, M.Const)
         env = Env.Environment()
         self.assertEqual(expr.Evaluate(env).value, 1.0)
         
-#         parse_action = csp.expr.parseString('1.0 + 2.0', parseAll=True)
-#         expr = parse_action[0].expr()
-#         self.assertIsInstance(expr, M.Plus)
-#         env = Env.Environment()
-#         self.assertEqual(expr.Evaluate(env).value, 3.0)
+    def TestParsingVariable(self):
+        parse_action = csp.expr.parseString('a', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.NameLookUp)
+        env = Env.Environment()
+        env.DefineName('a', V.Simple(3.0))
+        self.assertEqual(expr.Evaluate(env).value, 3.0)
         
-        # a  ->  E.NameLookup('a')
-        # 1+2, 1/2, 3+(4*5)-6
+    def TestParsingAddition(self):
+        parse_action = csp.expr.parseString('1.0 + 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Plus)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 3.0)
+        
+    def TestParsingSubtraction(self):
+        parse_action = csp.expr.parseString('5.0 - 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Minus)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 3.0)
+        
+    def TestParsingTimes(self):
+        parse_action = csp.expr.parseString('4.0 * 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Times)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 8.0)
+        
+    def TestParsingDivisionandInfinityValue(self):
+        parse_action = csp.expr.parseString('6.0 / 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Divide)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 3.0)
+        
+        parse_action = csp.expr.parseString('1/MathML:infinity', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Divide)
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+    def TestParsingPower(self):
+        parse_action = csp.expr.parseString('4.0 ^ 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Power)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 16.0)
+        
+    def TestParsingGt(self):
+        parse_action = csp.expr.parseString('4.0 > 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Gt)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('2.0 > 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Gt)
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+    def TestParsingLt(self):
+        parse_action = csp.expr.parseString('4.0 < 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Lt)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+        parse_action = csp.expr.parseString('2.0 < 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Lt)
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+    def TestParsingLeq(self):
+        parse_action = csp.expr.parseString('4.0 <= 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Leq)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+        parse_action = csp.expr.parseString('2.0 <= 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Leq)
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('1.0 <= 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Leq)
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+    def TestParsingEq(self):
+        parse_action = csp.expr.parseString('2.0 == 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Eq)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        
+    def TestParsingNeq(self):
+        parse_action = csp.expr.parseString('2.0 != 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Neq)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+        parse_action = csp.expr.parseString('1.0 != 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Neq)
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+    def TestParsingAnd(self):
+        parse_action = csp.expr.parseString('1.0 && 1.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.And)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('0.0 && 1.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.And)
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+    def TestParsingOrandTrueandFalseValues(self):
+        parse_action = csp.expr.parseString('MathML:true || MathML:true', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Or)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('MathML:false || MathML:true', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Or)
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('MathML:false || MathML:false', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Or)
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+    def TestParsingNot(self):
+        parse_action = csp.expr.parseString('not 1', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Not)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 0)
+        
+        parse_action = csp.expr.parseString('not 0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Not)
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+    def TestParsingComplicatedMath(self):
+        parse_action = csp.expr.parseString('1.0 + (4.0 * 2.0)', parseAll=True)
+        expr = parse_action[0].expr()
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 9.0)
+        
+        parse_action = csp.expr.parseString('(2.0 ^ 3.0) + (5.0 * 2.0) - 10.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertEqual(expr.Evaluate(env).value, 8.0)
+        
+        parse_action = csp.expr.parseString('2.0 ^ 3.0 == 5.0 + 3.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+    def TestParsingCeiling(self):
+        parse_action = csp.expr.parseString('MathML:ceiling(1.2)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Ceiling)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 2.0)
+        
+    def TestParsingFloor(self):
+        parse_action = csp.expr.parseString('MathML:floor(1.8)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Floor)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1.0)
+        
+    def TestParsingLnandE(self):
+        parse_action = csp.expr.parseString('MathML:ln(MathML:exponentiale)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Ln)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+    def TestParsingLog(self):
+        parse_action = csp.expr.parseString('MathML:log(10)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Log)
+        env = Env.Environment()
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+    def TestParsingExpandInfinityValue(self):
+        parse_action = csp.expr.parseString('MathML:exp(MathML:ln(10))', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Exp)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 10)
+        
+    def TestParsingAbs(self):
+        parse_action = csp.expr.parseString('MathML:abs(-10)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Abs)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 10)
+        
+    def TestParsingRoot(self):
+        parse_action = csp.expr.parseString('MathML:root(100)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Root)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 10)
+        
+    def TestParsingRem(self):
+        parse_action = csp.expr.parseString('MathML:rem(100, 97)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Rem)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 3.0)
+        
+    def TestParsingMax(self):
+        parse_action = csp.expr.parseString('MathML:max(100, 97, 105)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Max)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 105)
+        
+    def TestParsingMinandPiValue(self):
+        parse_action = csp.expr.parseString('MathML:min(100, 97, 105, MathML:pi)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Min)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 3.1415926535)
+    # MathML:exp(MathML:ln(3)) -> 3
+    # true, false, exponentiale, infinity, pi, notanumber
+    # if a then b else c
+        
+        

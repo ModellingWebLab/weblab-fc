@@ -63,14 +63,21 @@ CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
 
 # Support for interfacing to the Python implementation, rather than generating XML
 def ImportPythonImplementation():
-    global M, E, V, S, A
+    global M, E, V, S, A, OPERATORS, MATHML, VALUES
     import Expressions as E
     import MathExpressions as M
     import ArrayExpressions as A
     import Values as V
     import Statements as S
-    
-    OPERATORS = {'+': M.Plus}
+    import math
+    OPERATORS = {'+': M.Plus, '-': M.Minus, '*': M.Times, '/': M.Divide, '^': M.Power, 
+                 '==': M.Eq, '!=': M.Neq, '<': M.Lt, '>': M.Gt, '<=': M.Leq, '>=':M.Geq,
+                 'not': M.Not, '&&': M.And, '||': M.Or}
+    MATHML = {'log': M.Log, 'ln': M.Ln, 'exp': M.Exp, 'abs': M.Abs, 'ceiling': M.Ceiling, 
+              'floor': M.Floor, 'max': M.Max, 'min': M.Min, 'rem': M.Rem, 'root': M.Root}
+    VALUES = {'true': M.Const(V.Simple(True)), 'false': M.Const(V.Simple(False)), 
+              'exponentiale': M.Const(V.Simple(math.e)), 'infinity': M.Const(V.Simple(float('inf'))),
+              'pi': M.Const(V.Simple(math.pi))}
 
 class Actions(object):
     """Container for parse actions."""
@@ -220,6 +227,18 @@ class Actions(object):
                 result = M.ci(self.tokens)
             return result
     
+        def expr(self):
+            var_name = self.tokens
+            if var_name.startswith('MathML:'):
+                actual_var = var_name[7:]
+                if actual_var in MATHML:
+                    result = MATHML[actual_var]
+                else:
+                    result = VALUES[actual_var]
+            else:
+                result = E.NameLookUp(var_name)
+            return result
+        
     class Operator(BaseGroupAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
         # Map from operator symbols used to MathML element names
@@ -257,7 +276,17 @@ class Actions(object):
                     result = M.apply(self.Operator(operator), result, operand.xml())
             return result
         
-    #    def expr(self):
+        def expr(self):
+            if self.rightAssoc:
+                # The only right-associative operators are also unary
+                result = self.tokens[-1].expr()
+                for operator in self.tokens[-2:-1:]:
+                    result = OPERATORS[operator](result)
+            else:
+                result = self.tokens[0].expr()
+                for operator, operand in self.OperatorOperands():
+                    result = OPERATORS[operator](result, operand.expr())
+            return result
     # similar but result = M.Plus or whatever operation operator(
     # result = OPERATORS[operator](result, operand.expr())
     class Wrap(BaseGroupAction):
@@ -322,6 +351,17 @@ class Actions(object):
                 func = self.tokens[0].xml()
             args = map(lambda t: t.xml(), self.tokens[1])
             return M.apply(func, *args)
+        
+        def expr(self):
+            assert len(self.tokens) == 2
+            assert isinstance(self.tokens[0], Actions.Variable)
+            func = self.tokens[0].expr()
+            args = map(lambda t: t.expr(), self.tokens[1])
+            if not isinstance(func, E.NameLookUp):
+                result = func(*args)
+            else:
+                result = E.FunctionCall(func, *args)
+            return result
     
     class _Symbol(BaseGroupAction):
         """Parse action for csymbols."""
