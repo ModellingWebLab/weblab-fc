@@ -107,9 +107,56 @@ class LambdaExpression(AbstractExpression):
         function = LambdaExpression(parameters, body)
         return function
 
+class Accessor(AbstractExpression):
+    IS_SIMPLE_VALUE = 0
+    IS_ARRAY = 1
+    IS_STRING = 2
+    IS_FUNCTION = 3
+    IS_TUPLE = 4
+    IS_NULL = 5
+    IS_DEFAULT = 6 
+    NUM_DIMS = 7
+    NUM_ELEMENTS = 8
+    SHAPE = 9
+    
+    def __init__(self, variableExpr, attribute):
+        self.variableExpr = variableExpr
+        self.attribute = attribute
         
-# returns shape of array as a 1-d array if its an array
-# returns one or zero
-# E.Accessor (variable, Accessor.IS_ARRAY)
+    def Interpret(self, env):
+        variable = self.variableExpr.Evaluate(env)
+        if self.attribute == 0:
+            result = isinstance(variable, V.Simple)
+        elif self.attribute == 1:
+            result = isinstance(variable, V.Array)
+        elif self.attribute == 2:
+            result = isinstance(variable, V.String)
+        elif self.attribute == 3:
+            result = isinstance(variable, V.LambdaClosure)
+        elif self.attribute == 4:
+            result = isinstance(variable, V.Tuple)
+        elif self.attribute == 5:
+            result = isinstance(variable, V.Null)
+        elif self.attribute == 6:
+            result = isinstance(variable, V.DefaultParameter)
+        elif self.attribute == 7:
+            try:
+                result = variable.array.ndim
+            except AttributeError:
+                raise ProtocolError("Cannot get number of dimensions of type", type(variable))
+        elif self.attribute == 8:
+            try:
+                result = variable.array.size
+            except AttributeError:
+                raise ProtocolError("Cannot get number of elements of type", type(variable))
+        elif self.attribute == 9:
+            try:
+                result = V.Array(np.array(variable.array.shape))
+            except AttributeError:
+                raise ProtocolError("Cannot get shape of type", type(variable))
+        if isinstance(result, V.Array):
+            return result
+        else:
+            return V.Simple(result)
 
     

@@ -40,6 +40,8 @@ import Expressions as E
 import Values as V
 import Environment as Env
 import numpy as np
+import ArrayExpressions as A
+from ErrorHandling import ProtocolError
 
 def N(number):
     return M.Const(V.Simple(number))
@@ -140,11 +142,59 @@ class TestBasicExpressions(unittest.TestCase):
         result = E.If(N(0), M.Plus(N(1), N(2)), M.Minus(N(1), N(2))).Evaluate(env)
         self.assertEqual(-1, result.value)
         
-    #def TestMap(self):
-     #   array1 = np.arange(4).reshape((2,2))
-      #  array2 = np.arange(3,7).reshape((2,2))
-       # fun = M.Add
-        #actual = map(fun, array1, array2)
-        #expected = np.arange(4,8).reshape((2,2))
-        #self.AssertEqual(actual, expected)
+    def TestAccessor(self):
+        env = Env.Environment()
+        
+        # test simple value
+        simple = N(1)
+        result = E.Accessor(simple, E.Accessor.IS_SIMPLE_VALUE).Interpret(env) 
+        self.assertEqual(1, result.value)
+        
+        # test array
+        array = A.NewArray(A.NewArray(N(1), N(2)), A.NewArray(N(3), N(4)))
+        result = E.Accessor(array, E.Accessor.IS_ARRAY).Interpret(env)
+        self.assertEqual(1, result.value)
+        result = E.Accessor(array, E.Accessor.NUM_DIMS).Interpret(env)
+        self.assertEqual(2, result.value)
+        result = E.Accessor(array, E.Accessor.NUM_ELEMENTS).Interpret(env)
+        self.assertEqual(4, result.value)
+        result = E.Accessor(array, E.Accessor.SHAPE).Interpret(env)
+        np.testing.assert_array_almost_equal(result.array, np.array([2,2]))
+
+        # test string
+        string_test = M.Const(V.String("hi"))
+        result = E.Accessor(string_test, E.Accessor.IS_STRING).Interpret(env)
+        self.assertEqual(1, result.value)
+        result = E.Accessor(array, E.Accessor.IS_STRING).Interpret(env)
+        self.assertEqual(0, result.value)
+        
+        # test function
+        function = E.LambdaExpression.Wrap(M.Plus, 3)
+        result = E.Accessor(function, E.Accessor.IS_FUNCTION).Interpret(env)
+        self.assertEqual(1, result.value)
+        result = E.Accessor(string_test, E.Accessor.IS_FUNCTION).Interpret(env)
+        self.assertEqual(0, result.value)
+        
+        # test tuple
+        tuple_test = E.TupleExpression(N(1), N(2))
+        result = E.Accessor(tuple_test, E.Accessor.IS_TUPLE).Interpret(env)
+        self.assertEqual(1, result.value)
+        
+        # test null
+        null_test = M.Const(V.Null())
+        result = E.Accessor(null_test, E.Accessor.IS_NULL).Interpret(env)
+        self.assertEqual(1, result.value)
+        
+        # test default
+        default_test = M.Const(V.DefaultParameter())
+        result = E.Accessor(default_test, E.Accessor.IS_DEFAULT).Interpret(env)
+        self.assertEqual(1, result.value)
+        result = E.Accessor(null_test, E.Accessor.IS_DEFAULT).Interpret(env)
+        self.assertEqual(0, result.value)
+        
+        # test if non-array variables have array attributes, should raise errors
+        self.assertRaises(ProtocolError, E.Accessor(default_test, E.Accessor.NUM_DIMS).Interpret, env)
+        self.assertRaises(ProtocolError, E.Accessor(function, E.Accessor.SHAPE).Interpret, env)
+        self.assertRaises(ProtocolError, E.Accessor(string_test, E.Accessor.NUM_ELEMENTS).Interpret, env)
+
     

@@ -68,6 +68,7 @@ class Assert(AbstractStatement):
                 raise ProtocolError("Assertion failed.")
         else:
             raise ProtocolError("Assertion did not yield a Simple value or 0-d Array.")
+        return V.Null()
 
 class Return(AbstractStatement):
     def __init__(self, *parameters):

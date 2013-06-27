@@ -150,10 +150,5 @@ class TestFunctions(unittest.TestCase):
         # evaluates to zero, assertion should fail
         self.assertRaises(ProtocolError, env.ExecuteStatements, [S.Assert(N(0))])
         # evaluates to non-simple value, assertion should fail
-        self.assertRaises(ProtocolError, env.ExecuteStatements, [S.Assert(M.Const(1))])
-#         
-#         max_function = E.LambdaExpression.Wrap(M.Max, 2)
-#         parameters = ['a', 'b']
-#         body = [S.Return(M.Max(E.NameLookUp('a'), E.NameLookUp('b')))]
-#         max_function = E.LambdaExpression(parameters, body)
+        self.assertRaises(ProtocolError, env.ExecuteStatements, [S.Assert(M.Const(V.DefaultParameter()))])
         
