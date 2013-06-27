@@ -1,7 +1,8 @@
-TestBasicExpressions.py
-TestLogicOperators.py
-TestRelations.py
-TestEnvironment.py
-TestNdArray.py
 TestArrayExpressions.py
+TestBasicExpressions.py
+TestEnvironment.py
 TestFunctions.py
+TestLogicOperators.py
+TestNdArray.py
+TestRelations.py
+TestSyntaxInterface.py

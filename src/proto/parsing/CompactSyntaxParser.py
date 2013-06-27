@@ -1,5 +1,5 @@
 
-"""Copyright (c) 2005-2012, University of Oxford.
+"""Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -60,6 +60,17 @@ P = lxml.builder.ElementMaker(namespace=PROTO_NS)
 M = lxml.builder.ElementMaker(namespace=MATHML_NS)
 CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
                                    nsmap={'cellml': CELLML_NS})
+
+# Support for interfacing to the Python implementation, rather than generating XML
+def ImportPythonImplementation():
+    global M, E, V, S, A
+    import Expressions as E
+    import MathExpressions as M
+    import ArrayExpressions as A
+    import Values as V
+    import Statements as S
+    
+    OPERATORS = {'+': M.Plus}
 
 class Actions(object):
     """Container for parse actions."""
@@ -195,6 +206,9 @@ class Actions(object):
             if self._units:
                 elt.set('{%s}units' % CELLML_NS, str(self._units))
             return elt
+        
+        def expr(self):
+            return M.Const(V.Simple(self.tokens))
     
     class Variable(BaseGroupAction):
         """Parse action for variable references (identifiers)."""
@@ -242,7 +256,10 @@ class Actions(object):
                 for operator, operand in self.OperatorOperands():
                     result = M.apply(self.Operator(operator), result, operand.xml())
             return result
-    
+        
+    #    def expr(self):
+    # similar but result = M.Plus or whatever operation operator(
+    # result = OPERATORS[operator](result, operand.expr())
     class Wrap(BaseGroupAction):
         """Parse action for wrapped MathML operators."""
         def _xml(self):
@@ -1287,20 +1304,3 @@ class Debug(object):
         EnableDebug(self._grammars)
     def __exit__(self, type, value, traceback):
         DisableDebug(self._grammars)
-
-################################################################################
-# Using this as a script from C++
-################################################################################
-
-if __name__ == '__main__':
-    assert len(sys.argv) >= 3
-    source_path = sys.argv[1]
-    output_dir = sys.argv[2]
-    try:
-        parser = CompactSyntaxParser()
-        output_path = parser.ConvertProtocol(source_path, output_dir)
-        print output_path
-    except:
-        if len(sys.argv) == 3:
-            raise
-        # Otherwise we swallow the error
