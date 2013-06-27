@@ -62,14 +62,14 @@ class If(AbstractExpression):
     
     def Interpret(self, env):
         test = self.testExpr.Evaluate(env)
-        if not isinstance(test, V.Simple):
-            raise ProtocolError("The test in an if expression must be a Simple value.")
+        if not hasattr(test, 'value'):
+            raise ProtocolError("The test in an if expression must be a Simple value or 0-d array.")
         if test.value:
             result = self.thenExpr.Evaluate(env)
         else:
             result = self.elseExpr.Evaluate(env)
         return result
-    
+      
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
     def __init__(self, name):
@@ -96,18 +96,20 @@ class LambdaExpression(AbstractExpression):
     def Interpret(self, env):
         return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters) 
     
-    def Wrap(self, operator, numParams): 
+    @staticmethod
+    def Wrap(operator, numParams): 
         parameters = []
         look_up_list = []
         for i in range(numParams):
             parameters.append("___" + str(i))
-            look_up_list.append(NameLookUp("____" + str(i))) 
-        print "look up list", look_up_list
-        print "parameters", parameters
+            look_up_list.append(NameLookUp("___" + str(i))) 
         body = [S.Return(operator(*look_up_list))]
         function = LambdaExpression(parameters, body)
         return function
+
         
-        
+# returns shape of array as a 1-d array if its an array
+# returns one or zero
+# E.Accessor (variable, Accessor.IS_ARRAY)
 
     

@@ -56,6 +56,18 @@ class Assign(AbstractStatement):
         else:
             env.DefineName(self.names[0], results)
         return V.Null()
+    
+class Assert(AbstractStatement):
+    def __init__(self, expr):
+        self.expr = expr
+        
+    def Evaluate(self, env):
+        result = self.expr.Evaluate(env)
+        if hasattr(result, 'value'):
+            if not result.value:
+                raise ProtocolError("Assertion failed.")
+        else:
+            raise ProtocolError("Assertion did not yield a Simple value or 0-d Array.")
 
 class Return(AbstractStatement):
     def __init__(self, *parameters):

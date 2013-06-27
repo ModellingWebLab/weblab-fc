@@ -74,11 +74,11 @@ class TestFunctions(unittest.TestCase):
         
         # test function using lambdaexpression.wrap
         env = Env.Environment()
-        #add = E.LambdaExpression.Wrap(M.Plus, 3)
+        add = E.LambdaExpression.Wrap(M.Plus, 3)
         args = [N(1), N(2), N(3)]
-        #add_call = E.FunctionCall(add, args)
-        #result = add_call.Evaluate(env)
-        #self.assertEqual(result.value, 6)
+        add_call = E.FunctionCall(add, args)
+        result = add_call.Evaluate(env)
+        self.assertEqual(result.value, 6)
 
     def TestNestedFunction(self):
         env = Env.Environment()
@@ -142,6 +142,15 @@ class TestFunctions(unittest.TestCase):
         add_call = E.FunctionCall(add, args)
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 10)
+        
+    def TestAssertStatement(self):
+        env = Env.Environment()
+        # evaluates to one, assertion should pass
+        env.ExecuteStatements([S.Assert(N(1))])
+        # evaluates to zero, assertion should fail
+        self.assertRaises(ProtocolError, env.ExecuteStatements, [S.Assert(N(0))])
+        # evaluates to non-simple value, assertion should fail
+        self.assertRaises(ProtocolError, env.ExecuteStatements, [S.Assert(M.Const(1))])
 #         
 #         max_function = E.LambdaExpression.Wrap(M.Max, 2)
 #         parameters = ['a', 'b']
