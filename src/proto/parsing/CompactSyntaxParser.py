@@ -77,7 +77,7 @@ def ImportPythonImplementation():
               'floor': M.Floor, 'max': M.Max, 'min': M.Min, 'rem': M.Rem, 'root': M.Root}
     VALUES = {'true': M.Const(V.Simple(True)), 'false': M.Const(V.Simple(False)), 
               'exponentiale': M.Const(V.Simple(math.e)), 'infinity': M.Const(V.Simple(float('inf'))),
-              'pi': M.Const(V.Simple(math.pi))}
+              'pi': M.Const(V.Simple(math.pi)), 'notanumber': M.Const(V.Simple(float('nan')))}
 
 class Actions(object):
     """Container for parse actions."""

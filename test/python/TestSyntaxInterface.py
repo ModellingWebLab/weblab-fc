@@ -152,7 +152,7 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         
-    def TestParsingNeq(self):
+    def TestParsingNeqandNanValue(self):
         parse_action = csp.expr.parseString('2.0 != 2.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, M.Neq)
@@ -160,6 +160,11 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         parse_action = csp.expr.parseString('1.0 != 2.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Neq)
+        self.assertEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('MathML:notanumber != MathML:notanumber', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, M.Neq)
         self.assertEqual(expr.Evaluate(env).value, 1)
@@ -288,8 +293,7 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertIsInstance(expr, M.Min)
         env = Env.Environment()
         self.assertAlmostEqual(expr.Evaluate(env).value, 3.1415926535)
-    # MathML:exp(MathML:ln(3)) -> 3
-    # true, false, exponentiale, infinity, pi, notanumber
+
     # if a then b else c
         
         
