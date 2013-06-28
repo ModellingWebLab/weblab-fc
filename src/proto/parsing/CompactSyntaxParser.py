@@ -243,6 +243,9 @@ class Actions(object):
                 result = E.NameLookUp(var_name)
             return result
         
+        def names(self):
+            return [map(str, self.tokens)]
+        
     class Operator(BaseGroupAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
         # Map from operator symbols used to MathML element names
@@ -291,8 +294,7 @@ class Actions(object):
                 for operator, operand in self.OperatorOperands():
                     result = OPERATORS[operator](result, operand.expr())
             return result
-    # similar but result = M.Plus or whatever operation operator(
-    # result = OPERATORS[operator](result, operand.expr())
+        
     class Wrap(BaseGroupAction):
         """Parse action for wrapped MathML operators."""
         def _xml(self):
@@ -325,6 +327,15 @@ class Actions(object):
             else:
                 # Single item
                 return self.tokens[0].xml()
+            
+        def expr(self):
+            assert len(self.tokens) > 0
+            if len(self.tokens) > 1:
+                # Tuple
+                return self.Delegate('Tuple', [self.tokens]).expr()
+            else:
+                # Single item
+                return self.tokens[0].expr() #should be list containing names
         
         def names(self):
             return map(str, self.tokens)
@@ -355,7 +366,19 @@ class Actions(object):
             children.append(body)
             return getattr(M, 'lambda')(*children)
         
-        # return e.lambdaexpression
+        def expr(self):
+            assert len(self.tokens) == 2
+            param_list = self.tokens[0]
+            body = self.tokens[1].expr() # expr
+            children = []
+            for param_decl in param_list:
+                param_bvar = M.bvar(param_decl[0].names()) # names method
+                if len(param_decl) == 1: # No default given
+                    children.append(param_bvar)
+                else: # Default value case
+                    children.append(M.semantics(param_bvar, getattr(M, 'annotation-expr')(param_decl[1].expr())))
+            children.append(body)
+            return E.LambdaExpression(*children)
     
     class FunctionCall(BaseGroupAction):
         """Parse action for function calls."""
@@ -523,16 +546,30 @@ class Actions(object):
         def _xml(self):
             assignee, value = self.GetChildrenXml()
             return M.apply(M.eq, assignee, value)
+        
+        def expr(self):
+            assignee, value = self.GetChildrenExpr()
+            if isinstance(assignee, E.NameLookUp):
+                var_list = [assignee.name]
+            elif isinstance(assignee, E.TupleExpression):
+                var_list = [child.name for child in assignee.children]
+            return S.Assign(var_list, value)
     
     class Return(BaseGroupAction):
         """Parse action for return statements."""
         def _xml(self):
             return M.apply(self.DelegateSymbol('return').xml(), *self.GetChildrenXml())
+        
+        def expr(self):
+            return S.Return(*self.GetChildrenExpr())
     
     class Assert(BaseGroupAction):
         """Parse action for assert statements."""
         def _xml(self):
             return M.apply(self.DelegateSymbol('assert').xml(), *self.GetChildrenXml())
+        
+        def expr(self):
+            return S.Assert(*self.GetChildrenExpr())
     
     class FunctionDef(BaseGroupAction):
         """Parse action for function definitions, which are sugar for assignment of a lambda."""

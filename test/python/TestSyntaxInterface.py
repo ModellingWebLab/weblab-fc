@@ -45,6 +45,7 @@ import Expressions as E
 import Statements as S
 import numpy as np
 import MathExpressions as M
+from ErrorHandling import ProtocolError
 
 def N(number):
     return M.Const(V.Simple(number))
@@ -355,6 +356,63 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         np.testing.assert_array_equal(expr.Evaluate(env).array, np.array([3]))
+        
+        parse_action = csp.expr.parseString('[1, 2, 3].NUM_DIMS', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        np.testing.assert_array_equal(expr.Evaluate(env).array, np.array([1]))
+        
+        parse_action = csp.expr.parseString('[1, 2, 3].NUM_ELEMENTS', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        np.testing.assert_array_equal(expr.Evaluate(env).array, np.array([3]))
+
+        
+    def TestStatements(self):
+         # test assertion
+         parse_action = csp.assertStmt.parseString("assert 1", parseAll=True)
+         expr = parse_action[0].expr()
+         self.assertIsInstance(expr, S.Assert)
+         env = Env.Environment()
+         expr.Evaluate(env) # checked simply by not raising protocol error
+         
+         #test assign
+         env = Env.Environment()
+         parse_action = csp.assignStmt.parseString('a = 1.0 + 2.0', parseAll=True)
+         expr = parse_action[0].expr()
+         self.assertIsInstance(expr, S.Assign)
+         expr.Evaluate(env)
+         self.assertEqual(env.LookUp('a').value, 3)
+         
+         parse_action = csp.assignStmt.parseString('b, c = 1.0, 2.0', parseAll=True)
+         expr = parse_action[0].expr()
+         self.assertIsInstance(expr, S.Assign)
+         expr.Evaluate(env)
+         self.assertEqual(env.LookUp('b').value, 1)
+         self.assertEqual(env.LookUp('c').value, 2)
+         
+         parse_action = csp.assignStmt.parseString('d, e, f = 1.0, 2 + 2.0, (3*4)-2', parseAll=True)
+         expr = parse_action[0].expr()
+         self.assertIsInstance(expr, S.Assign)
+         expr.Evaluate(env)
+         self.assertEqual(env.LookUp('d').value, 1)
+         self.assertEqual(env.LookUp('e').value, 4)
+         self.assertEqual(env.LookUp('f').value, 10)
+         
+#          env = Env.Environment()
+#          parse_action = csp.expr.parseString('return 1', parseAll=True)
+#          expr = parse_action[0].expr()
+#          self.assertIsInstance(expr, E.Accessor)
+#          expr.Evaluate(env)
+#          print env.LookUp('a')
+#          
+#          env = Env.Environment()
+#          parse_action = csp.expr.parseString('lambda a: return a+1', parseAll=True)
+#          expr = parse_action[0].expr()
+#          self.assertIsInstance(expr, E.Accessor)
+#          expr.Evaluate(env)
+#          print env.LookUp('a')
+        
         
         # assign- 'a = 1' ; 'a, b = 1, 2'
         # return - return 1+2  ; return 1, 2
