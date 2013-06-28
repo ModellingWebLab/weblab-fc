@@ -122,12 +122,14 @@ class Accessor(AbstractExpression):
     def __init__(self, variableExpr, attribute):
         self.variableExpr = variableExpr
         self.attribute = attribute
+        print "attribute is", self.attribute
         
     def Interpret(self, env):
         variable = self.variableExpr.Evaluate(env)
         if self.attribute == 0:
             result = isinstance(variable, V.Simple)
         elif self.attribute == 1:
+            print "type is", type(variable)
             result = isinstance(variable, V.Array)
         elif self.attribute == 2:
             result = isinstance(variable, V.String)

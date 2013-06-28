@@ -46,6 +46,9 @@ import Statements as S
 import numpy as np
 import MathExpressions as M
 
+def N(number):
+    return M.Const(V.Simple(number))
+
 class TestSyntaxInterface(unittest.TestCase):
     def TestParsingNumber(self):
         # number
@@ -293,7 +296,70 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertIsInstance(expr, M.Min)
         env = Env.Environment()
         self.assertAlmostEqual(expr.Evaluate(env).value, 3.1415926535)
+        
+    def TestParsingIf(self):
+        parse_action = csp.expr.parseString('if 1 then 2 + 3 else 4-2', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.If)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 5)
+        
+        parse_action = csp.expr.parseString('if MathML:false then 2 + 3 else 4-2', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.If)
+        self.assertAlmostEqual(expr.Evaluate(env).value, 2)
+        
+    def TestParsingTupleExpression(self):
+        parse_action = csp.expr.parseString('(1, 2)', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.TupleExpression)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).values[0].value, 1)
+        self.assertAlmostEqual(expr.Evaluate(env).values[1].value, 2)
+        
+    def TestParsingArrayExpression(self):
+        parse_action = csp.expr.parseString('[1, 2, 3]', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, A.NewArray)
+        env = Env.Environment()
+        np.testing.assert_array_almost_equal(expr.Evaluate(env).array, np.array([1, 2, 3]))
+        
+    def TestParsingAccessor(self):
+        parse_action = csp.expr.parseString('1.IS_SIMPLE_VALUE', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        env = Env.Environment()
+        self.assertAlmostEqual(expr.Evaluate(env).value, 1)
 
-    # if a then b else c
+        parse_action = csp.expr.parseString('[1, 2].IS_ARRAY', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
+        parse_action = csp.expr.parseString('(1, 2).IS_TUPLE', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
+        parse_action = csp.expr.parseString('[1, 2].IS_TUPLE', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        self.assertAlmostEqual(expr.Evaluate(env).value, 0)
+        
+        parse_action = csp.expr.parseString('[1, 2, 3].SHAPE.IS_ARRAY', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        self.assertAlmostEqual(expr.Evaluate(env).value, 1)
+        
+        parse_action = csp.expr.parseString('[1, 2, 3].SHAPE', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, E.Accessor)
+        np.testing.assert_array_equal(expr.Evaluate(env).array, np.array([3]))
+        
+        # assign- 'a = 1' ; 'a, b = 1, 2'
+        # return - return 1+2  ; return 1, 2
+        # assert - assert 0
+        # lambda - lambda a, b=1: return a+b
+    #    parse_action = csp.stmtList.parseString('''f = lambda a: a+2\nassert f(1) == 3''')
+    #    statements = parse_action[0].expr()
+    #    env.ExecuteStatements(statements)

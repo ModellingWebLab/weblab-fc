@@ -135,6 +135,10 @@ class Actions(object):
             """Convert all sub-tokens to XML and return the list of elements."""
             return map(lambda tok: tok.xml(), self.tokens)
         
+        def GetChildrenExpr(self):
+            """Convert all sub-tokens to expr and return the list of elements."""
+            return map(lambda tok: tok.expr(), self.tokens)
+        
         def TransferAttrs(self, *attrNames):
             """Create an attribute dictionary for use in generating XML from named parse results."""
             attrs = {}
@@ -307,6 +311,10 @@ class Actions(object):
             if_, then_, else_ = self.GetChildrenXml()
             return M.piecewise(M.piece(then_, if_), M.otherwise(else_))
     
+        def expr(self):
+            if_, then_, else_ = self.GetChildrenExpr()
+            return E.If(if_, then_, else_)
+        
     class MaybeTuple(BaseGroupAction):
         """Parse action for elements that may be grouped into a tuple, or might be a single item."""
         def _xml(self):
@@ -317,28 +325,37 @@ class Actions(object):
             else:
                 # Single item
                 return self.tokens[0].xml()
+        
+        def names(self):
+            return map(str, self.tokens)
     
     class Tuple(BaseGroupAction):
         """Parse action for tuples."""
         def _xml(self):
             child_xml = self.GetChildrenXml()
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"tuple"), *child_xml)
+        
+        def expr(self):
+            child_expr = self.GetChildrenExpr()
+            return E.TupleExpression(*child_expr)
     
     class Lambda(BaseGroupAction):
         """Parse action for lambda expressions."""
         def _xml(self):
             assert len(self.tokens) == 2
             param_list = self.tokens[0]
-            body = self.tokens[1].xml()
+            body = self.tokens[1].xml() # expr
             children = []
             for param_decl in param_list:
-                param_bvar = M.bvar(param_decl[0].xml())
+                param_bvar = M.bvar(param_decl[0].xml()) # names method
                 if len(param_decl) == 1: # No default given
                     children.append(param_bvar)
                 else: # Default value case
                     children.append(M.semantics(param_bvar, getattr(M, 'annotation-xml')(param_decl[1].xml())))
             children.append(body)
             return getattr(M, 'lambda')(*children)
+        
+        # return e.lambdaexpression
     
     class FunctionCall(BaseGroupAction):
         """Parse action for function calls."""
@@ -391,6 +408,15 @@ class Actions(object):
             object = self.tokens[0].xml()
             property = self.tokens[1]
             return M.apply(self.DelegateSymbol('accessor', property).xml(), object)
+        
+        def expr(self):
+            if len(self.tokens) > 2:
+                # Chained accessors, e.g. A.SHAPE.IS_ARRAY
+                return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).expr()
+            assert len(self.tokens) == 2
+            object = self.tokens[0].expr()
+            property = getattr(E.Accessor, self.tokens[1])
+            return E.Accessor(object, property)
     
     class Comprehension(BaseGroupAction):
         """Parse action for the comprehensions with array definitions."""
@@ -416,6 +442,13 @@ class Actions(object):
                 # Array comprehension
                 entries = [M.domainofapplication(*entries[1:]), entries[0]]
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+'newArray'), *entries)
+        
+        def expr(self):
+            entries = self.GetChildrenExpr()
+            if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
+                # Array comprehension
+                entries = [M.domainofapplication(*entries[1:]), entries[0]]
+            return A.NewArray(*entries)
     
     class View(BaseGroupAction):
         """Parse action for array views."""
@@ -508,13 +541,14 @@ class Actions(object):
             lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
             assign = self.Delegate('Assignment', [[self.tokens[0], lambda_]])
             return assign.xml()
+        # def f(a, b=1): return a+b
 
     class StatementList(BaseGroupAction):
         """Parse action for lists of post-processing language statements."""
         def _xml(self):
             statements = self.GetChildrenXml()
             return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
-    
+    # just put in a python list
     ######################################################################
     # Model interface section
     ######################################################################
