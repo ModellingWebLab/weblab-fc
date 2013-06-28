@@ -244,7 +244,7 @@ class Actions(object):
             return result
         
         def names(self):
-            return [map(str, self.tokens)]
+            return map(str, self.tokens)
         
     class Operator(BaseGroupAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
@@ -371,14 +371,23 @@ class Actions(object):
             param_list = self.tokens[0]
             body = self.tokens[1].expr() # expr
             children = []
+            default_params = []
             for param_decl in param_list:
-                param_bvar = M.bvar(param_decl[0].names()) # names method
+                param_bvar = param_decl[0].names() # names method
                 if len(param_decl) == 1: # No default given
                     children.append(param_bvar)
+                    default_params = None
                 else: # Default value case
-                    children.append(M.semantics(param_bvar, getattr(M, 'annotation-expr')(param_decl[1].expr())))
-            children.append(body)
-            return E.LambdaExpression(*children)
+                    default_params.append(param_decl[1].expr())
+            lambda_params = [[var for each in children for var in each]]       
+            lambda_params.append([S.Return(body)])
+            #defaults = {"defaultParameters" : default_params}
+            #return E.LambdaExpression(*children, **defaults)
+            
+            if default_params is not None:
+                return E.LambdaExpression(*lambda_params, defaultParameters=default_params)
+            else:
+                return E.LambdaExpression(*lambda_params)
     
     class FunctionCall(BaseGroupAction):
         """Parse action for function calls."""
