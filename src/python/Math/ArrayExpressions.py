@@ -122,7 +122,6 @@ class NewArray(AbstractExpression):
             range_name.append(implicit_dim_names[i])
         
         range_name = filter(None, range_name) # Remove None entries
-                    
         product = 1
         dims = []
         range_dims = []

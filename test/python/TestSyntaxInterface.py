@@ -437,6 +437,29 @@ class TestSyntaxInterface(unittest.TestCase):
          self.assertIsInstance(expr, E.LambdaExpression)
          result = E.FunctionCall(expr, [M.Const(V.DefaultParameter())]).Evaluate(env)
          self.assertEqual(result.value, 5)
+         
+    def TestArrayComprehensions(self):
+        env = Env.Environment()
+        parse_action = csp.array.parseString('[i for i in 0:10]', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, A.NewArray)
+        result = expr.Evaluate(env)
+        predicted = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        np.testing.assert_array_almost_equal(predicted, result.array)
+
+        parse_action = csp.array.parseString('[i*2 for i in 0:2:4]', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, A.NewArray)
+        result = expr.Evaluate(env)
+        predicted = np.array([0, 4])
+        np.testing.assert_array_almost_equal(predicted, result.array)
+        
+        parse_action = csp.array.parseString('[i+j*5 for i in 1:3 for j in 2:4]', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, A.NewArray)
+        result = expr.Evaluate(env)
+        predicted = np.array([[11, 16], [12, 17]])
+        np.testing.assert_array_almost_equal(predicted, result.array)
 
 
         

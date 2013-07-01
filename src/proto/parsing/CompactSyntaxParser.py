@@ -409,7 +409,7 @@ class Actions(object):
             args = map(lambda t: t.expr(), self.tokens[1])
             if not isinstance(func, E.NameLookUp):
                 result = func(*args)
-            else:
+            else:# if map fold or find A.Map(*args)=result
                 result = E.FunctionCall(func, *args)
             return result
     
@@ -417,12 +417,21 @@ class Actions(object):
         """Parse action for csymbols."""
         def __init__(self, s, loc, tokens, symbol):
             super(Actions._Symbol, self).__init__(s, loc, tokens)
-            self.symbol = symbol
+            self.symbol = symbol # check if null or default or string and return m.const of it
+            
         def _xml(self):
             if isinstance(self.tokens, str):
                 return M.csymbol(self.tokens, definitionURL=PROTO_CSYM_BASE+self.symbol)
             else:
                 return M.csymbol(definitionURL=PROTO_CSYM_BASE+self.symbol)
+        
+        def expr(self):
+            if self.symbol == "null":
+                return M.Const(V.Null())
+            elif self.symbol == "default":
+                return M.Const(V.DefaultParameter())
+            if isinstance(self.tokens, str):
+                return M.Const(V.String(self.tokens))
     
     @staticmethod
     def Symbol(symbol):
@@ -466,6 +475,20 @@ class Actions(object):
             parts.extend(range)
             parts.append(self.DelegateSymbol('string', self.tokens[-2])) # The variable name
             return self.Delegate('Tuple', [parts]).xml()
+        
+        def expr(self):
+            assert 2 <= len(self.tokens) <= 3
+            parts = []
+            if len(self.tokens) == 3:
+                # There's an explicit dimension
+                parts.append(self.tokens[0])
+            range = self.tokens[-1]
+            if len(range) == 2:
+                # Add a step of 1
+                range = [range[0], self.Delegate('Number', ['1']), range[-1]]
+            parts.extend(range)
+            parts.append(self.DelegateSymbol('string', self.tokens[-2])) # The variable name
+            return self.Delegate('Tuple', [parts]).expr()
     
     class Array(BaseGroupAction):
         """Parse action for creating arrays."""
@@ -480,8 +503,9 @@ class Actions(object):
             entries = self.GetChildrenExpr()
             if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
                 # Array comprehension
-                entries = [M.domainofapplication(*entries[1:]), entries[0]]
-            return A.NewArray(*entries)
+                return A.NewArray(*entries, comprehension=True)
+            else:
+                return A.NewArray(*entries)
     
     class View(BaseGroupAction):
         """Parse action for array views."""
