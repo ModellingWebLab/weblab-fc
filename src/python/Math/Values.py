@@ -104,6 +104,8 @@ class LambdaClosure(AbstractValue.AbstractValue):
             actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
         for i,param in enumerate(actualParameters):
             if not isinstance(param, DefaultParameter):
+                print "param", param
+                print "formalparams", self.formalParameters
                 local_env.DefineName(self.formalParameters[i], param)
             elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
                 local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])

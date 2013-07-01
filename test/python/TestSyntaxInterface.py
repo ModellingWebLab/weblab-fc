@@ -418,14 +418,22 @@ class TestSyntaxInterface(unittest.TestCase):
          self.assertIsInstance(expr, E.LambdaExpression)
          result = E.FunctionCall(expr, [N(4), N(2)]).Evaluate(env)
          self.assertEqual(result.value, 8)
-         
-#          # test lambda with default
-#          env = Env.Environment()
-#          parse_action = csp.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
-#          expr = parse_action[0].expr()
-#          self.assertIsInstance(expr, E.LambdaExpression)
-#          result = E.FunctionCall(expr).Evaluate(env)
-#          self.assertEqual(result.value, 3)
+          
+         # test lambda with defaults unused
+         env = Env.Environment()
+         parse_action = csp.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
+         expr = parse_action[0].expr()
+         self.assertIsInstance(expr, E.LambdaExpression)
+         result = E.FunctionCall(expr, [N(2), N(6)]).Evaluate(env)
+         self.assertEqual(result.value, 8)
+            
+         # test lambda with defaults used
+         env = Env.Environment()
+         parse_action = csp.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
+         expr = parse_action[0].expr()
+         self.assertIsInstance(expr, E.LambdaExpression)
+         result = E.FunctionCall(expr, [M.Const(V.DefaultParameter())]).Evaluate(env)
+         self.assertEqual(result.value, 5)
 
 
         

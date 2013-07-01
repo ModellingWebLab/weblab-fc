@@ -378,7 +378,8 @@ class Actions(object):
                     children.append(param_bvar)
                     default_params = None
                 else: # Default value case
-                    default_params.append(param_decl[1].expr())
+                    default_params.append(param_decl[1].expr().value)
+                    children.append(param_bvar)
             lambda_params = [[var for each in children for var in each]]       
             lambda_params.append([S.Return(body)])
             #defaults = {"defaultParameters" : default_params}
