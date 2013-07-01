@@ -407,7 +407,14 @@ class Actions(object):
             assert isinstance(self.tokens[0], Actions.Variable)
             func = self.tokens[0].expr()
             args = map(lambda t: t.expr(), self.tokens[1])
-            if not isinstance(func, E.NameLookUp):
+            if hasattr(func, 'name'):
+                if func.name == 'map':
+                    result = A.Map(*args)
+                elif func.name == 'fold':
+                    result = A.Fold(*args)
+                elif func.name == 'find':
+                    result = A.Find(*args)
+            elif not isinstance(func, E.NameLookUp):
                 result = func(*args)
             else:# if map fold or find A.Map(*args)=result
                 result = E.FunctionCall(func, *args)
@@ -548,6 +555,41 @@ class Actions(object):
                 tuple_tokens = [null_token, null_token, self.Delegate('Number', ['1']), null_token]
                 apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
             return M.apply(*apply_content)
+        
+        def expr(self):
+            assert 2 <= len(self.tokens)
+            apply_content = [self.tokens[0].expr()]
+            null_token = self.DelegateSymbol('null')
+            next_dimension = 0
+            for viewspec in self.tokens[1:]:
+                tuple_tokens = []
+                if 'dimspec' in viewspec:
+                    dimspec = viewspec['dimspec'][0]
+                    if dimspec == '*':
+                        seen_generic_dim = True
+                        dimspec = null_token
+                    tuple_tokens.append(dimspec)
+                    viewspec = viewspec[1:]
+                else:
+                    # Since we will provide a generic specification, all tuples need 4 elements for the XML parser :(
+                    # This is very fragile!
+                    tuple_tokens.append(self.Delegate('Number', [str(next_dimension)]))
+                    next_dimension += 1
+                if len(viewspec) == 1:
+                    # Take single value (in this dimension)
+                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['0']), viewspec[0]])
+                elif len(viewspec) == 2:
+                    # Range with step 1
+                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['1']), viewspec[1]])
+                else:
+                    # Fully specified range
+                    tuple_tokens.extend(viewspec)
+                # Replace unspecified elements with csymbol-null
+                for i, token in enumerate(tuple_tokens):
+                    if token == '':
+                        tuple_tokens[i] = null_token
+                apply_content.append(self.Delegate('Tuple', [tuple_tokens]).expr())
+            return A.View(*apply_content)
     
     class Index(BaseGroupAction):
         """Parse action for index expressions."""
@@ -570,6 +612,27 @@ class Actions(object):
                 apply_content.append(self.Delegate('Number', ['1'])) # pad=true
                 apply_content.append(index_tokens[2]) # Pad value
             return M.apply(*map(lambda t: t.xml(), apply_content))
+        
+        def expr(self):
+            """Construct apply(csymbol-index, indexee, indices, dim, shrink, pad, padValue).
+            shrink and pad both default to 0 (false).
+            """
+            assert len(self.tokens) == 2
+            index_tokens = self.tokens[1]
+            assert 1 <= len(index_tokens) <= 3
+            apply_content = [self.tokens[0], index_tokens[0]]
+            if len(index_tokens) == 2:
+                # We're shrinking
+                apply_content.append(index_tokens[1]) # Dimension to shrink along
+                apply_content.append(self.Delegate('Number', ['1'])) # shrink=true
+            elif len(index_tokens) == 3:
+                # We're padding
+                apply_content.append(index_tokens[1]) # Dimension to shrink along
+                apply_content.append(self.DelegateSymbol('defaultParameter')) # shrink=default (false)
+                apply_content.append(self.Delegate('Number', ['1'])) # pad=true
+                apply_content.append(index_tokens[2]) # Pad value
+            apply_content = [each.expr() for each in apply_content]
+            return A.Index(*apply_content) # why is this from 1 to the end?
     
     ######################################################################
     # Post-processing language statements
