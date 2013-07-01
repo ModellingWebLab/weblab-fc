@@ -436,7 +436,7 @@
                                                         <cn>1</cn>
                                                         <apply><plus/><ci>num_dims</ci><cn>1</cn></apply>
                                                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/string">i</csymbol>
-                                                    </apply>                                                    
+                                                    </apply>
                                                 </domainofapplication>
                                                 <piecewise>
                                                     <piece>
@@ -469,7 +469,7 @@
                                                                         <cn>0</cn>
                                                                         <apply><minus/><ci>num_dims</ci><cn>1</cn></apply>
                                                                     </apply>
-                                                                </apply>                                                                
+                                                                </apply>
                                                                 <apply><eq/><ci>i</ci><apply><minus/><ci>num_dims</ci><cn>1</cn></apply></apply>
                                                             </piece>
                                                             <otherwise>
