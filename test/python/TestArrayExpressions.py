@@ -76,7 +76,7 @@ class TestArrayExpressions(unittest.TestCase):
         view = A.View(arr, E.TupleExpression(N(1), N(0), N(1))) # 0 as step
         predicted = 2
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predicted)
-        view = A.View(arr, E.TupleExpression(N(1))) # same as immediately above, but only one number passed instead of a step of 0
+        view = A.View(arr, N(1)) # same as immediately above, but only one number passed instead of a step of 0
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predicted)
          
         array = A.NewArray(A.NewArray(N(-2), N(-1), N(0)), A.NewArray(N(1), N(2), N(3)), A.NewArray(N(4), N(5), N(6))) # testing many aspects of views of a 2-d array
@@ -125,7 +125,7 @@ class TestArrayExpressions(unittest.TestCase):
         
         
         array = A.NewArray(A.NewArray(N(0), N(1), N(2)), A.NewArray(N(3), N(4), N(5)))
-        view = A.View(array, N(1), E.TupleExpression(N(1), N(3)))
+        view = A.View(array, E.TupleExpression(N(1)), E.TupleExpression(N(1), N(3)))
         predictedArr = np.array([4, 5])
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
         
@@ -169,11 +169,12 @@ class TestArrayExpressions(unittest.TestCase):
         self.assertRaises(ProtocolError, view.Evaluate, {}) # beginning is after end of array
            
     def TestArrayComprehension(self):
+       env = Env.Environment()
         
        # 1-d array
        counting1d = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10), M.Const(V.String("i"))), comprehension=True)
        predictedArr = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-       np.testing.assert_array_almost_equal(counting1d.Evaluate({}).array, predictedArr)
+       np.testing.assert_array_almost_equal(counting1d.Evaluate(env).array, predictedArr)
         
        # 2-d array, explicitly defined dimensions
        counting2d = A.NewArray(M.Plus(M.Times(E.NameLookUp("i"), N(3)), E.NameLookUp("j")),
@@ -181,7 +182,7 @@ class TestArrayExpressions(unittest.TestCase):
                                E.TupleExpression(N(1), N(0), N(1), N(3), M.Const(V.String("j"))), 
                                comprehension=True)
        predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
-       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+       np.testing.assert_array_almost_equal(counting2d.Evaluate(env).array, predictedArr)
  
        # 2-d array, order of variable definitions opposite of previous test
        counting2d = A.NewArray(M.Plus(M.Times(E.NameLookUp("i"), N(3)), E.NameLookUp("j")),
@@ -189,7 +190,7 @@ class TestArrayExpressions(unittest.TestCase):
                                 E.TupleExpression(N(0), N(1), N(1), N(3), M.Const(V.String("i"))), 
                                 comprehension=True)
        predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
-       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+       np.testing.assert_array_almost_equal(counting2d.Evaluate(env).array, predictedArr)
         
        # 2-d array with implicitly defined dimension assigned after explicit
        counting2d = A.NewArray(M.Plus(M.Times(E.NameLookUp("i"), N(3)), E.NameLookUp("j")),
@@ -197,7 +198,7 @@ class TestArrayExpressions(unittest.TestCase):
                              E.TupleExpression(N(1), N(1), N(3), M.Const(V.String("i"))), 
                               comprehension=True)
        predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
-       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+       np.testing.assert_array_almost_equal(counting2d.Evaluate(env).array, predictedArr)
         
        # 2-d array with implicitly defined dimension assigned before explicit
        counting2d = A.NewArray(M.Plus(M.Times(E.NameLookUp("i"), N(3)), E.NameLookUp("j")),
@@ -205,7 +206,7 @@ class TestArrayExpressions(unittest.TestCase):
                              E.TupleExpression(N(0), N(1), N(1), N(3), M.Const(V.String("i"))), 
                               comprehension=True)
        predictedArr = np.array([[3, 4, 5],[6, 7, 8]])
-       np.testing.assert_array_almost_equal(counting2d.Evaluate({}).array, predictedArr)
+       np.testing.assert_array_almost_equal(counting2d.Evaluate(env).array, predictedArr)
         
        # comprehension using arrays in generator expression with one variable
        blocks = A.NewArray(A.NewArray(A.NewArray(M.Plus(N(-10), E.NameLookUp("j")), 

@@ -36,6 +36,7 @@ import MathExpressions as M
 import Environment as Env
 import Expressions as E
 import numpy as np
+import numexpr as ne
 import itertools
 import sys
 from operator import mul
@@ -68,6 +69,44 @@ class NewArray(AbstractExpression):
             return self._DoComprehension(env)
         else:
             return self._DoListMembers(env)
+        
+    def DevelopResultWithCompile(self, range_name, ranges, compiled_gen_expr, env):
+        local_dict = {}
+        for i,name in enumerate(range_name):
+            local_dict[name] = np.array(ranges[i], dtype=float)
+        print 'dict', local_dict
+        result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrappedBindings)
+        return result
+            
+    def DevelopResultWithInterpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
+        result = None
+        for range_spec_indices in itertools.product(*range_dims):
+             # collect everything in range_spec_indices that is a number, not a slice
+            range_specs = [ranges[dim][idx]
+                           for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
+            sub_env = Env.Environment(delegatee=env)
+            for i, range_value in enumerate(range_specs):
+                sub_env.DefineName(range_name[i], V.Simple(range_value))
+            sub_array = self.genExpr.Evaluate(sub_env).array
+            if result is None:
+                # Create result array
+                if sub_array.ndim < num_gaps:
+                    raise ProtocolError("The sub-array only has", sub_array.ndim, 
+                                        "dimensions, which is not enough to fill", num_gaps, "gaps")
+                sub_array_shape = sub_array.shape
+                count = 0
+                for i,dimension in enumerate(dims):
+                    if dimension is None:
+                        dims[i] = sub_array_shape[count]
+                        count += 1
+                dims.extend(sub_array_shape[count:])
+                result = np.empty(tuple(dims), dtype=float)
+            # Check sub_array shape
+            if sub_array.shape != sub_array_shape:
+                raise ProtocolError("The given sub-array has shape:", sub_array.shape, 
+                                    "when it should be", sub_array_shape)
+            result[tuple(range_spec_indices)] = sub_array
+        return np.array(result)
     
     def _DoComprehension(self, env):
         range_specs = self.EvaluateChildren(env)
@@ -132,35 +171,16 @@ class NewArray(AbstractExpression):
             else:
                 dims.append(len(each))
                 range_dims.append(range(len(each)))
-        result = None
-        for range_spec_indices in itertools.product(*range_dims):
-             # collect everything in range_spec_indices that is a number, not a slice
-            range_specs = [ranges[dim][idx]
-                           for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
-            sub_env = Env.Environment(delegatee=env)
-            for i, range_value in enumerate(range_specs):
-                sub_env.DefineName(range_name[i], V.Simple(range_value))
-            sub_array = self.genExpr.Evaluate(sub_env).array
-            if result is None:
-                # Create result array
-                if sub_array.ndim < num_gaps:
-                    raise ProtocolError("The sub-array only has", sub_array.ndim, 
-                                        "dimensions, which is not enough to fill", num_gaps, "gaps")
-                sub_array_shape = sub_array.shape
-                count = 0
-                for i,dimension in enumerate(dims):
-                    if dimension is None:
-                        dims[i] = sub_array_shape[count]
-                        count += 1
-                dims.extend(sub_array_shape[count:])
-                result = np.empty(tuple(dims), dtype=float)
-            # Check sub_array shape
-            if sub_array.shape != sub_array_shape:
-                raise ProtocolError("The given sub-array has shape:", sub_array.shape, 
-                                    "when it should be", sub_array_shape)
-            result[tuple(range_spec_indices)] = sub_array
-        return V.Array(np.array(result))
-    
+        try:
+            compiled_gen_expr = self.genExpr.Compile()
+            compiled = True
+        except:
+            compiled = False
+        if compiled and num_gaps == 0:
+            result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env)           
+        else:       
+            result = self.DevelopResultWithInterpret(range_dims, range_name, ranges, env, num_gaps, dims) 
+        return V.Array(result)
         
     def _DoListMembers(self, env):
         elements = self.EvaluateChildren(env)
@@ -195,7 +215,11 @@ class View(AbstractExpression):
         slices = [None] * array.array.ndim
                 
         for index in indices:
-            if len(index.values) == 1:
+            if hasattr(index, 'value'):
+                dim = None
+                start = end = index.value
+                step = 0
+            elif len(index.values) == 1:
                 dim = None
                 start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
                 step = 0
@@ -271,9 +295,15 @@ class Fold(AbstractExpression):
     def __init__(self, *children):
         self.children = children
         
+    def GetValue(self, arg):
+        if isinstance(arg, V.Null):
+            return None
+        else:
+            return int(arg.value)
+        
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
-        defaultParameters = [None, None, None, int(operands[1].array.ndim - 1)]
+        defaultParameters = [V.Null(), V.Null(), V.Null(), V.Simple(operands[1].array.ndim - 1)]
         for i,oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
                 operands[i] = defaultParameters[i]
@@ -285,13 +315,13 @@ class Fold(AbstractExpression):
         elif len(self.children) == 3:
             function = operands[0]
             array = operands[1].array
-            initial = operands[2].value             
+            initial = self.GetValue(operands[2])             
             dimension = int(array.ndim - 1)
         elif len(self.children) == 4:
             function = operands[0]
             array = operands[1].array
-            initial = operands[2].value
-            dimension = int(operands[3].value)      
+            initial = self.GetValue(operands[2])
+            dimension = self.GetValue(operands[3])      
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension, 
                                      "because the array only has", array.ndim, "dimensions")

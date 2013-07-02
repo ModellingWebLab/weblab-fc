@@ -71,5 +71,4 @@ class TestSpeed(unittest.TestCase):
         result = A.Map(add_times, a, b, c)
         predicted = np.arange(10000000)*(2*np.arange(10000000))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
         
