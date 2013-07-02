@@ -176,6 +176,8 @@ class View(AbstractExpression):
     def GetValue(self, arg):
         if isinstance(arg, V.Null):
             return None
+        if isinstance(arg, V.DefaultParameter):
+            return 'default'    
         else:
             return int(arg.value)
         
@@ -193,33 +195,33 @@ class View(AbstractExpression):
         slices = [None] * array.array.ndim
                 
         for index in indices:
-            try:
-                if len(index.values) == 1:
-                    dim = None
-                    start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
-                    step = 0
-                    end = start
-                elif len(index.values) == 2:
-                    dim = None
-                    start = self.GetValue(index.values[0])
-                    step = None
-                    end = self.GetValue(index.values[1])
-                elif len(index.values) == 3:
-                    dim = None
-                    start = self.GetValue(index.values[0])
-                    step = self.GetValue(index.values[1])
-                    end = self.GetValue(index.values[2])
-                elif len(index.values) == 4:
-                    dim = self.GetValue(index.values[0])
-                    start = self.GetValue(index.values[1])
-                    step = self.GetValue(index.values[2])
-                    end = self.GetValue(index.values[3])
-                else:
-                    raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
-            except AttributeError:
+            if len(index.values) == 1:
                 dim = None
-                start = index.value
+                start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
                 step = 0
+                end = start
+            elif len(index.values) == 2:
+                dim = None
+                start = self.GetValue(index.values[0])
+                step = None
+                end = self.GetValue(index.values[1])
+            elif len(index.values) == 3:
+                dim = None
+                start = self.GetValue(index.values[0])
+                step = self.GetValue(index.values[1])
+                end = self.GetValue(index.values[2])
+            elif len(index.values) == 4:
+                dim = self.GetValue(index.values[0])
+                start = self.GetValue(index.values[1])
+                step = self.GetValue(index.values[2])
+                end = self.GetValue(index.values[3])
+            else:
+                raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
+            if dim == 'default':
+                dim = None
+            if step == 'default':
+                step = 0
+            if end == 'default':
                 end = start
             
             if dim != None:
@@ -271,6 +273,10 @@ class Fold(AbstractExpression):
         
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
+        defaultParameters = [None, None, None, int(operands[1].array.ndim - 1)]
+        for i,oper in enumerate(operands):
+            if isinstance(oper, V.DefaultParameter):
+                operands[i] = defaultParameters[i]
         if len(self.children) == 2:
             function = operands[0]
             array = operands[1].array
@@ -279,22 +285,13 @@ class Fold(AbstractExpression):
         elif len(self.children) == 3:
             function = operands[0]
             array = operands[1].array
-            try:
-                initial = operands[2].value
-            except AttributeError:
-                initial = None                
+            initial = operands[2].value             
             dimension = int(array.ndim - 1)
         elif len(self.children) == 4:
             function = operands[0]
             array = operands[1].array
-            try:
-                initial = operands[2].value
-            except AttributeError:
-                initial = None 
-            try :
-                dimension = int(operands[3].value)
-            except AttributeError:
-                dimension = int(array.ndim - 1)         
+            initial = operands[2].value
+            dimension = int(operands[3].value)      
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension, 
                                      "because the array only has", array.ndim, "dimensions")
@@ -400,6 +397,10 @@ class Index(AbstractExpression):
         
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
+        defaultParameters = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), sys.float_info.max]
+        for i,oper in enumerate(operands):
+            if isinstance(oper, V.DefaultParameter):
+                operands[i] = defaultParameters[i]
         if len(self.children) == 2:
             operand = operands[0]
             indices = operands[1]

@@ -284,6 +284,12 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertIsInstance(expr, M.Min)
         self.assertAlmostEqual(expr.Evaluate(env).value, 3.1415926535)
         
+        # null
+        parse_action = csp.expr.parseString('null', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, M.Const)
+        self.assertIsInstance(expr.value, V.Null)
+        
     def TestParsingIf(self):
         parse_action = csp.expr.parseString('if 1 then 2 + 3 else 4-2', parseAll=True)
         expr = parse_action[0].expr()
@@ -304,7 +310,7 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertAlmostEqual(expr.Evaluate(env).values[0].value, 1)
         self.assertAlmostEqual(expr.Evaluate(env).values[1].value, 2)
         
-    def TestParsingArrayExpression(self):
+    def TestParsingArray(self):
         parse_action = csp.expr.parseString('[1, 2, 3]', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, A.NewArray)
@@ -405,6 +411,11 @@ class TestSyntaxInterface(unittest.TestCase):
          self.assertEqual(result1.value, 1)
          self.assertEqual(result2.value, 3)
          
+         # test statement list
+         parse_action = csp.stmtList.parseString('z = lambda a: a+2\nassert z(2) == 4', parseAll=True)
+         result = parse_action[0].expr()
+         env.ExecuteStatements(result)
+         
     def TestParsingLambda(self):
          # no default, one variable
          env = Env.Environment()
@@ -438,9 +449,7 @@ class TestSyntaxInterface(unittest.TestCase):
          result = E.FunctionCall(expr, [M.Const(V.DefaultParameter())]).Evaluate(env)
          self.assertEqual(result.value, 5)
          
-         #'null'  -> M.Const(V.Null)
-         #lambda a=null: a
-         # 
+
          #  'def f(a=1): return a\nassert f(default) == 1'
          
     def TestArrayComprehensions(self):
@@ -476,15 +485,6 @@ class TestSyntaxInterface(unittest.TestCase):
         result = expr.Evaluate(env)
         predicted = np.array([1, 3, 5, 7, 9])
         np.testing.assert_array_almost_equal(predicted, result.array)
-        
-#         arr2 = V.Array(np.array([[[1, 2, 3, 4, 5], [4, 5, 6, 7, 8]], [[1, 3, 5, 7, 8], [1, 5, 0, 7 ,5]]]))
-#         env.DefineName('arr2', arr2)
-#         parse_action = csp.expr.parseString('arr2[1:3, :, 0:3]', parseAll=True)
-#         expr = parse_action[0].expr()
-#         self.assertIsInstance(expr, A.View)
-#         result = expr.Evaluate(env)
-#         predicted = np.array([1, 3, 5, 7, 9])
-#         np.testing.assert_array_almost_equal(predicted, result.array)
 
     def TestParsingArrayExpressions(self):
         # find
@@ -507,28 +507,23 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([1, 2, 3])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-#         arr3 = V.Array(np.array([[1, 0, 2], [0, 3, 0], [1, 1, 1]]))
-#         env.DefineName('arr3', arr3)
-#         find_parse_action = csp.expr.parseString('find(arr3)', parseAll=True)
-#         expr = find_parse_action[0].expr()
-#         indices = expr.Evaluate(env)
-#         np.testing.assert_array_almost_equal(indices.array, predicted)
-#         env.DefineName('indices', indices)
-#         index_parse_action = csp.expr.parseString('arr3{indices, pad:1=45}', parseAll=True)
-#         expr = index_parse_action[0].expr()
-#         result = expr.Interpret(env)
-#         predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
-#         np.testing.assert_array_almost_equal(predicted, result.array)
+        arr1 = V.Array(np.array([[1, 0, 2], [0, 3, 0], [1, 1, 1]]))
+        env.DefineName('arr1', arr1)
+        find_parse_action = csp.expr.parseString('find(arr1)', parseAll=True)
+        expr = find_parse_action[0].expr()
+        indices = expr.Evaluate(env)
+        env.DefineName('indices', indices)
+        index_parse_action = csp.expr.parseString('arr1{indices, pad:1=45}', parseAll=True)
+        expr = index_parse_action[0].expr()
+        result = expr.Interpret(env)
+        predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
+        np.testing.assert_array_almost_equal(predicted, result.array)
         
-#          env = Env.Environment()
-#         array = A.NewArray(A.NewArray(N(1), N(0), N(2)), A.NewArray(N(0), N(3), N(0)), A.NewArray(N(1), N(1), N(1)))
-#         # [ [1, 0, 2]
-#         #   [0, 3, 0]
-#         #   [1, 1, 1] ]
-#         find = A.Find(array)
-#         result = A.Index(array, find, N(1), N(0), N(1), N(45)).Interpret(env)
-#         predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
-#         np.testing.assert_array_almost_equal(result.array, predicted)
+        index_parse_action = csp.expr.parseString('arr1{indices, shrink: 1}', parseAll=True)
+        expr = index_parse_action[0].expr()
+        result = expr.Interpret(env)
+        predicted = np.array(np.array([[1], [3], [1]]))
+        np.testing.assert_array_almost_equal(predicted, result.array)
         
         # map
         arr2 = V.Array(np.array([4, 5, 6, 7]))
@@ -543,20 +538,18 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([4, 6, 8, 10])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-        #fold 
-        fold_parse_action = csp.expr.parseString('fold(add_function, arr, 0, 0)', parseAll=True)
+        # fold 
+        fold_parse_action = csp.expr.parseString('fold(add_function, arr, 2, 0)', parseAll=True)
         expr = fold_parse_action[0].expr()
         self.assertIsInstance(expr, A.Fold)
         result = expr.Evaluate(env)
-        predicted = np.array([6])
+        predicted = np.array([8])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-        
-        
-        # assign- 'a = 1' ; 'a, b = 1, 2'
-        # return - return 1+2  ; return 1, 2
-        # assert - assert 0
-        # lambda - lambda a, b=1: return a+b
-    #    parse_action = csp.stmtList.parseString('''f = lambda a: a+2\nassert f(1) == 3''')
-    #    statements = parse_action[0].expr()
-    #    env.ExecuteStatements(statements)
+        arr3 = V.Array(np.array([[1, 2, 3], [3, 4, 5]]))
+        env.DefineName('arr3', arr3)
+        fold_parse_action = csp.expr.parseString('fold(add_function, arr3, 4, 1)')
+        expr = fold_parse_action[0].expr()
+        result = expr.Evaluate(env)
+        predicted = np.array([[10], [16]])
+        np.testing.assert_array_almost_equal(result.array, predicted)  

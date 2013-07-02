@@ -414,10 +414,12 @@ class Actions(object):
                     result = A.Fold(*args)
                 elif func.name == 'find':
                     result = A.Find(*args)
+                else:
+                    result = E.FunctionCall(func, args)
             elif not isinstance(func, E.NameLookUp):
                 result = func(*args)
-            else:# if map fold or find A.Map(*args)=result
-                result = E.FunctionCall(func, *args)
+            else:
+                result = E.FunctionCall(func, args)
             return result
     
     class _Symbol(BaseGroupAction):
@@ -435,7 +437,7 @@ class Actions(object):
         def expr(self):
             if self.symbol == "null":
                 return M.Const(V.Null())
-            elif self.symbol == "default":
+            elif self.symbol == "defaultParameter":
                 return M.Const(V.DefaultParameter())
             if isinstance(self.tokens, str):
                 return M.Const(V.String(self.tokens))
@@ -620,19 +622,19 @@ class Actions(object):
             assert len(self.tokens) == 2
             index_tokens = self.tokens[1]
             assert 1 <= len(index_tokens) <= 3
-            apply_content = [self.tokens[0], index_tokens[0]]
+            args = [self.tokens[0], index_tokens[0]]
             if len(index_tokens) == 2:
                 # We're shrinking
-                apply_content.append(index_tokens[1]) # Dimension to shrink along
-                apply_content.append(self.Delegate('Number', ['1'])) # shrink=true
+                args.append(index_tokens[1]) # Dimension to shrink along
+                args.append(self.Delegate('Number', ['1'])) # shrink=true
             elif len(index_tokens) == 3:
                 # We're padding
-                apply_content.append(index_tokens[1]) # Dimension to shrink along
-                apply_content.append(self.DelegateSymbol('defaultParameter')) # shrink=default (false)
-                apply_content.append(self.Delegate('Number', ['1'])) # pad=true
-                apply_content.append(index_tokens[2]) # Pad value
-            apply_content = [each.expr() for each in apply_content]
-            return A.Index(*apply_content) # why is this from 1 to the end?
+                args.append(index_tokens[1]) # Dimension to shrink along
+                args.append(self.DelegateSymbol('defaultParameter')) # shrink=default (false)
+                args.append(self.Delegate('Number', ['1'])) # pad=true
+                args.append(index_tokens[2]) # Pad value
+            args = [each.expr() for each in args]
+            return A.Index(*args) 
     
     ######################################################################
     # Post-processing language statements
@@ -682,6 +684,10 @@ class Actions(object):
         def _xml(self):
             statements = self.GetChildrenXml()
             return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
+        
+        def expr(self):
+            statements = self.GetChildrenExpr()
+            return statements
     # just put in a python list
     ######################################################################
     # Model interface section

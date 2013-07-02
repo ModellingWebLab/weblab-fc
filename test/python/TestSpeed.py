@@ -48,28 +48,27 @@ def N(number):
 
 class TestSpeed(unittest.TestCase):
     def TestAddingLargeArrays(self):    
-        pass   
-#        # 1-d array
-#        env = Env.Environment()
-#        parameters = ['large_array1', 'large_array2']
-#        body = [S.Return(M.Plus(M.NameLookUp('large_array1'), M.NameLookUp('large_array2')))]
-#        add = M.LambdaExpression(parameters, body)
-#        large_array1 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-#        large_array2 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-#        result = A.Map(add, large_array1, large_array2)
-#        predicted = 2*np.arange(10000000)
-#        #timeit.timeit('result_array = result.Evalute(env).array', number=1)
-#        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-       
-#        env = Env.Environment()
-#        parameters = ['a', 'b', 'c']
-#        body = [S.Return(M.Times(M.Plus(M.NameLookUp('a'), M.NameLookUp('b')), M.NameLookUp('c')))]
-#        add_times = M.LambdaExpression(parameters, body)
-#        a = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-#        b = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-#        c = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-#        result = A.Map(add_times, a, b, c)
-#        predicted = np.arange(10000000)*(2*np.arange(10000000))
-#        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-#        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-#        
+        # 1-d array
+        env = Env.Environment()
+        parameters = ['large_array1', 'large_array2']
+        body = [S.Return(M.Plus(M.NameLookUp('large_array1'), M.NameLookUp('large_array2')))]
+        add = M.LambdaExpression(parameters, body)
+        large_array1 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        large_array2 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        result = A.Map(add, large_array1, large_array2)
+        predicted = 2*np.arange(10000000)
+        #timeit.timeit('result_array = result.Evalute(env).array', number=1)
+        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+        
+        env = Env.Environment()
+        parameters = ['a', 'b', 'c']
+        body = [S.Return(M.Times(M.Plus(M.NameLookUp('a'), M.NameLookUp('b')), M.NameLookUp('c')))]
+        add_times = M.LambdaExpression(parameters, body)
+        a = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        b = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        c = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        result = A.Map(add_times, a, b, c)
+        predicted = np.arange(10000000)*(2*np.arange(10000000))
+        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
+        
