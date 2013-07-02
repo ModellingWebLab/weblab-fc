@@ -40,6 +40,7 @@ import Environment as Env
 import Statements as S
 import numpy as np
 import MathExpressions as M
+import Expressions as E
 
 from ErrorHandling import ProtocolError
 
@@ -51,10 +52,10 @@ class TestSpeed(unittest.TestCase):
         # 1-d array
         env = Env.Environment()
         parameters = ['large_array1', 'large_array2']
-        body = [S.Return(M.Plus(M.NameLookUp('large_array1'), M.NameLookUp('large_array2')))]
-        add = M.LambdaExpression(parameters, body)
-        large_array1 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        large_array2 = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        body = [S.Return(M.Plus(E.NameLookUp('large_array1'), E.NameLookUp('large_array2')))]
+        add = E.LambdaExpression(parameters, body)
+        large_array1 = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        large_array2 = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
         result = A.Map(add, large_array1, large_array2)
         predicted = 2*np.arange(10000000)
         #timeit.timeit('result_array = result.Evalute(env).array', number=1)
@@ -62,11 +63,11 @@ class TestSpeed(unittest.TestCase):
         
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
-        body = [S.Return(M.Times(M.Plus(M.NameLookUp('a'), M.NameLookUp('b')), M.NameLookUp('c')))]
-        add_times = M.LambdaExpression(parameters, body)
-        a = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        b = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        c = A.NewArray(M.NameLookUp("i"), M.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        body = [S.Return(M.Times(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]
+        add_times = E.LambdaExpression(parameters, body)
+        a = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        b = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
+        c = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
         result = A.Map(add_times, a, b, c)
         predicted = np.arange(10000000)*(2*np.arange(10000000))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
