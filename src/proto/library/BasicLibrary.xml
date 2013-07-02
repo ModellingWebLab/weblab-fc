@@ -946,7 +946,7 @@
                             <apply>
                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor">SHAPE</csymbol>
                                 <ci>xs</ci>
-                            </apply>                            
+                            </apply>
                         </apply>
                         <apply>
                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert"/>
@@ -1689,7 +1689,7 @@
                                             <apply>
                                                 <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
                                                 <ci>i</ci><cn>0</cn><ci>i</ci>
-                                            </apply>                                                
+                                            </apply>
                                         </apply>
                                         <cn>0</cn>
                                         <apply>
@@ -1932,11 +1932,11 @@
                                                             <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
                                                             <lambda>
                                                                 <bvar><ci>elt</ci></bvar>
-                                                                <apply><gt/><ci>elt</ci><ci>pivot</ci></apply>                                                                    
+                                                                <apply><gt/><ci>elt</ci><ci>pivot</ci></apply>
                                                             </lambda>
                                                             <ci>vector</ci>
                                                         </apply>
-                                                    </apply>                                                
+                                                    </apply>
                                                 </apply>
                                                 <apply><eq/>
                                                     <ci>result_below</ci>
