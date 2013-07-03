@@ -17,8 +17,8 @@ inputs {
                     90,  80,  70,  60,  50,  40,  30,  20]
 }
 
-import "../../../src/proto/library/BasicLibrary.xml"
-import "../../../src/proto/library/CardiacLibrary.xml"
+import "../../../src/proto/library/BasicLibrary.txt"
+import "../../../src/proto/library/CardiacLibrary.txt"
 
 units {
     mV = milli volt

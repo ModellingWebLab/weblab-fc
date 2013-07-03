@@ -1,0 +1,52 @@
+library
+{
+
+def Apd(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
+    t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
+    return map(@2:-, t_ap_ends, t_ap_starts)
+}
+
+def ApdAndDi(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
+    t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
+    num_dims = V.NUM_DIMS
+    assert t_ap_starts.SHAPE[num_dims - 1] >= 2
+    apds = map(@2:-, t_ap_ends, t_ap_starts)
+    dis = map(@2:-, Diff(t_ap_starts), apds[num_dims-1$:-1])
+    return (apds, dis)
+}
+
+def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize=50) {
+    dim = DefaultDim(V, dim_)
+    assert ShapeEq(V, t)
+    input_shape = V.SHAPE
+    num_dims = V.NUM_DIMS
+    assert percent.IS_SIMPLE_VALUE
+    assert percent <= 100 && percent >= 0
+    assert dvdtThreshold.IS_SIMPLE_VALUE
+    assert windowSize.IS_SIMPLE_VALUE
+    
+    dVdt = Grad(t, V, dim)
+    assert MultiFold(@2:MathML:min, dVdt) < dvdtThreshold && MultiFold(@2:MathML:max, dVdt) > dvdtThreshold
+    max_upstroke_idxs = find(map(lambda slope, max_slope: slope == max_slope && slope > dvdtThreshold,
+                                 dVdt, Localise(Max, dVdt, windowSize, dim)))
+    fake_upstroke_time = (t{max_upstroke_idxs, dim, shrink:1})[*$0]
+    times_nonextended = t{max_upstroke_idxs, dim, pad:1=fake_upstroke_time}
+    extended_shape = [ if i == num_dims then input_shape[i-1] else
+                       if i == num_dims-1 then times_nonextended.SHAPE[num_dims-1] else input_shape[i]
+                       for i in 0:num_dims+1 ]
+    max_upstroke_times = Stretch(AddDim(times_nonextended, num_dims), extended_shape, num_dims)
+    local_Vmax = Stretch(AddDim(Localise(Max, V, 1, dim), num_dims-1), extended_shape, num_dims-1)
+    extended_V = Stretch(AddDim(V, num_dims-1), extended_shape, num_dims-1)
+    extended_time = Stretch(AddDim(t, num_dims-1), extended_shape, num_dims-1)
+    peak_idxs = find(map(lambda V, Vmax, t, t_up: V == Vmax && t > t_up,
+                         extended_V, local_Vmax, extended_time, max_upstroke_times))
+    t_peak = (extended_time{peak_idxs, num_dims, shrink:1})[num_dims$0:1]
+    V_peak = (extended_V{peak_idxs, num_dims, shrink:1})[num_dims$0:1]
+    V_rest = Min(extended_V, num_dims)
+    V_relax = map(lambda V_peak, V_rest: V_rest + (1-percent/100)*(V_peak-V_rest), V_peak, V_rest)
+    t_ap_starts = RemoveDim(Interp(extended_time, extended_V, V_relax, t_peak, 0, num_dims), num_dims)
+    t_ap_ends = RemoveDim(Interp(extended_time, extended_V, V_relax, t_peak, 1, num_dims), num_dims)
+    return t_ap_starts, t_ap_ends
+}
+
+}
