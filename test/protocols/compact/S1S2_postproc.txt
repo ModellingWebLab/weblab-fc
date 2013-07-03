@@ -1,0 +1,245 @@
+# This file contains the post-processing section of the S1-S2 protocol, with all imports resolved
+
+post-processing
+{
+
+# Basic library
+
+def Max(a, dim=default): fold(@2:MathML:max, a, default, dim)
+
+def Min(a, dim=default): fold(@2:MathML:min, a, default, dim)
+
+def Sum(a, dim=default): fold(@2:+, a, 0, dim)
+
+def Product(a, dim=default): fold(@2:*, a, 1, dim)
+
+def DefaultDim(a, dim_) {
+    assert a.IS_ARRAY
+    dim = if dim_.IS_DEFAULT then a.NUM_DIMS-1 else dim_
+    assert dim.IS_SIMPLE_VALUE
+    assert dim < a.NUM_DIMS
+    return dim
+}
+
+def Mean(a, dim_=default) {
+    dim = DefaultDim(a, dim_)
+    dim_len = a.SHAPE[dim]
+    f = lambda sum: sum/dim_len
+    return map(f, Sum(a, dim))
+}
+
+def Diff(a, dim_=default) {
+    dim = DefaultDim(a, dim_)
+    return map(@2:-, a[dim$1:], a[dim$:-1])
+}
+
+def Grad(x, y, dim=default): map(@2:/, Diff(y, dim), Diff(x, dim))
+
+def Join(a1, a2, dim_=default) {
+    dim = DefaultDim(a1, dim_)
+    return [if i < 0 then a1[dim$i] else a2[dim$i] for dim$i in -a1.SHAPE[dim] : a2.SHAPE[dim] ]
+}
+
+def Stretch(a, lengthSpec, dim_=default) {
+    dim = DefaultDim(a, dim_)
+    assert a.SHAPE[dim] == 1
+    assert lengthSpec.IS_SIMPLE_VALUE || (lengthSpec.IS_ARRAY && lengthSpec.NUM_DIMS == 1 && lengthSpec.SHAPE[0] == a.NUM_DIMS)
+    length = if lengthSpec.IS_SIMPLE_VALUE then lengthSpec else lengthSpec[dim]
+    return [ a[dim$0] for dim$i in 0:length ]
+}
+
+def Shift(a, distance, dim_=default) {
+    dim = DefaultDim(a, dim_)
+    return if distance == 0 then a else
+            if distance > 0 then Join(Stretch(a[dim$0:1], distance, dim), a[dim$0:-distance], dim)
+                            else Join(a[dim$-distance:], Stretch(a[dim$-1:], -distance, dim), dim)
+}
+
+def Window(a, size, dim=default) {
+    assert a.IS_ARRAY
+    return [ Shift(a, i, dim) for i in (-size):(size+1) ]
+}
+
+def MultiFold(op, a, init): if a.NUM_DIMS == 0 then a else MultiFold(op, fold(op, a, init, 0)[0], init)
+
+def ArrayEq(a1, a2): MultiFold(@2:&&, map(@2:==, a1, a2), 1)
+
+def ShapeEq(a1, a2) {
+    assert a1.IS_ARRAY
+    assert a2.IS_ARRAY
+    return ArrayEq(a1.SHAPE, a2.SHAPE)
+}
+
+def Interp(xs, ys, targets, starts, afterStarts=1, dim_=default) {
+    dim = DefaultDim(xs, dim_)
+    input_shape = xs.SHAPE
+    result_shape = [if i == dim then 1 else input_shape[i] for i in 0:xs.NUM_DIMS]
+    assert ArrayEq(result_shape, starts.SHAPE)
+    assert ArrayEq(result_shape, targets.SHAPE)
+    
+    stretched_starts = Stretch(starts, input_shape, dim)
+    stretched_targets = Stretch(targets, input_shape, dim)
+    y_starts = ys{find(map(@2:==, xs, stretched_starts)), dim}
+    increasing = map(@2:<, y_starts, targets)
+    y_matches = map(lambda inc, y, t: if inc then y>=t else y<=t, Stretch(increasing, input_shape, dim), ys, stretched_targets)
+    idxs = find(map(if afterStarts then lambda match, x, start: match && x >= start
+                                   else lambda match, x, start: match && x <= start,
+                    y_matches, xs, stretched_starts))
+    gradient = Grad(ys, xs, dim)
+    zero_array = map(lambda _: 0, targets)
+    gradient_extended = Join(if afterStarts then zero_array else gradient,
+                             if afterStarts then gradient else zero_array,
+                             dim)
+    shift_dir = if afterStarts then 1 else 0
+    target_minus_ys = Shift(map(@2:-, stretched_targets, ys), shift_dir, dim)
+    shifted_xs = Shift(xs, shift_dir, dim)
+    result = map(lambda shifted_x, t_minus_y, x_over_y: shifted_x + t_minus_y*x_over_y,
+                 shifted_xs, target_minus_ys, gradient_extended){idxs, dim, shrink:if afterStarts then 1 else -1}
+    return result[dim$(if afterStarts then 0 else -1):(if afterStarts then 1 else null)]
+}
+
+def After(a, index, testValue, dim_=default) {
+    dim = DefaultDim(a, dim_)
+    assert index.IS_ARRAY
+    assert testValue.IS_SIMPLE_VALUE
+    return a{find(map(lambda idx_value: idx_value > testValue, index)), dim}
+}
+
+def RemoveDim(a, dim): a[dim$0]
+
+def AddDim(a, dim): [a for dim$_ in 0:1]
+
+def Localise(fn, a, windowSize, dim=default) {
+    return RemoveDim(fn(Window(a, windowSize, dim), 0), 0)
+}
+
+def Transpose(matrix) {
+    assert matrix.IS_ARRAY
+    assert matrix.NUM_DIMS == 2
+    return [ matrix[dim1][dim0] for dim0 in 0:matrix.SHAPE[1] for dim1 in 0:matrix.SHAPE[0] ]
+}
+
+def Count(a, predicate): find(map(predicate, a)).SHAPE[0]
+
+def Last(a, dim_=default): a[DefaultDim(a, dim_):-1]
+
+def Permute(a, permutation, dim_=default) {
+    dim = DefaultDim(a, dim_)
+    assert permutation.NUM_DIMS == 1
+    len = permutation.SHAPE[0]
+    assert a.SHAPE[dim] == len
+    return [ a[dim$permutation[i]] for dim$i in 0:len ]
+}
+
+def Filter(a, predicate, dim=default, shrink=default, pad=default, padValue=default): a{find(map(predicate, a)), dim, shrink:shrink, pad:pad=padValue}
+
+def GetSortPermutation(vector, orig_indices_=default) {
+    assert vector.NUM_DIMS == 1
+    len = vector.SHAPE[0]
+    orig_indices = if orig_indices_.IS_DEFAULT then [i for i in 0:len] else orig_indices_
+    recursive_case = lambda {
+        curr_pivot_idx = MathML:floor(len / 2)
+        pivot = vector[curr_pivot_idx]
+        orig_pivot_idx = orig_indices[curr_pivot_idx]
+        num_below = Count(vector, lambda elt: elt <= pivot)
+        num_above = len - (num_below + 1)
+        all_idxs_below = find(map(lambda elt: elt <= pivot, vector))
+        idxs_below = if num_below > 0 then Filter(all_idxs_below, lambda idx: idx != curr_pivot_idx, 0, 1) else null
+        idxs_above = if num_above > 0 then find(map(lambda elt: elt > pivot, vector)) else null
+        result_below = if num_below > 0 then GetSortPermutation(vector{idxs_below}, orig_indices{idxs_below}) else null
+        result_above = if num_above > 0 then GetSortPermutation(vector{idxs_above}, orig_indices{idxs_above}) else null
+        return if result_below.IS_NULL then Join([orig_pivot_idx], result_above) else
+               if result_above.IS_NULL then Join(result_below, [orig_pivot_idx]) else
+                                            Join(result_below, [orig_pivot_idx], result_above)
+    }
+    return (if len == 1 then orig_indices else recursive_case())
+}
+
+def Sort(vector) {
+    permutation = GetSortPermutation(vector)
+    return Permute(vector, permutation)
+}
+
+def SortBy(array, key, dim=default) {
+    permutation = GetSortPermutation(key)
+    return Permute(array, permutation, dim)
+}
+
+# Cardiac library
+
+def Apd(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
+    t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
+    return map(@2:-, t_ap_ends, t_ap_starts)
+}
+
+def ApdAndDi(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
+    t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
+    num_dims = V.NUM_DIMS
+    assert t_ap_starts.SHAPE[num_dims - 1] >= 2
+    apds = map(@2:-, t_ap_ends, t_ap_starts)
+    dis = map(@2:-, Diff(t_ap_starts), apds[num_dims-1$:-1])
+    return (apds, dis)
+}
+
+def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize=50) {
+    dim = DefaultDim(V, dim_)
+    assert ShapeEq(V, t)
+    num_dims = V.NUM_DIMS
+    assert percent.IS_SIMPLE_VALUE
+    assert percent <= 100 && percent >= 0
+    assert dvdtThreshold.IS_SIMPLE_VALUE
+    assert windowSize.IS_SIMPLE_VALUE
+    
+    dVdt = Grad(t, V, dim)
+    assert MultiFold(@2:MathML:min, dVdt) < dvdtThreshold && MultiFold(@2:MathML:max, dVdt) > dvdtThreshold
+    max_upstroke_idxs = find(map(lambda slope, max_slope: slope == max_slope && slope > dvdtThreshold,
+                                 dVdt, Localise(Max, dVdt, windowSize, dim)))
+    fake_upstroke_time = (t{max_upstroke_idxs, dim, shrink:1})[*$0]
+    times_nonextended = t{max_upstroke_idxs, dim, pad:1=fake_upstroke_time}
+    extended_shape = [ if i == num_dims then input_shape[i-1] else
+                       if i == num_dims-1 then times_nonextended.SHAPE[num_dims-1] else input_shape[i]
+                       for i in 0:num_dims+1 ]
+    max_upstroke_times = Stretch(AddDim(times_nonextended, num_dims), extended_shape, num_dims)
+    local_Vmax = Stretch(AddDim(Localise(Max, V, 1, dim), num_dims-1), extended_shape, num_dims-1)
+    extended_V = Stretch(AddDim(V, num_dims-1), extended_shape, num_dims-1)
+    extended_time = Stretch(AddDim(time, num_dims-1), extended_shape, num_dims-1)
+    peak_idxs = find(map(lambda V, Vmax, t, t_up: V == Vmax && t > t_up,
+                         extended_V, local_Vmax, extended_time, max_upstroke_times))
+    t_peak = (extended_time{peak_idxs, num_dims, shrink:1})[num_dims$0:1]
+    V_peak = (extended_V{peak_idxs, num_dims, shrink:1})[num_dims$0:1]
+    V_rest = Min(extended_V, num_dims)
+    V_relax = map(lambda V_peak, V_rest: V_rest + (1-percent/100)*(V_peak-V_rest), V_peak, V_rest)
+    t_ap_starts = RemoveDim(Interp(extended_time, extended_V, V_relax, t_peak, 0, num_dims), num_dims)
+    t_ap_ends = RemoveDim(Interp(extended_time, extended_V, V_relax, t_peak, 1, num_dims), num_dims)
+    return t_ap_starts, t_ap_ends
+}
+
+# S1-S2 specific
+
+    # Test that expected model outputs exist
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    
+    # Get out a single 1D array for time (for plotting)
+    time_1d = RemoveDim(sim:time, 0)
+    
+    # Compute APD90
+    raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)
+
+    # Just consider the first DI and the second AP to be of interest
+    first_raw_DI = raw_DI[1$0][*$:]
+    second_raw_APD = raw_APD90[1$1][*$:]
+    
+    # Remove entries for negative DIs from both the DI and APD arrays.
+    # This removes entries where the S2 stimulus was applied before repolarisation from the last S1 pulse.
+    # Also ignore entries with DI <= 19ms (which tend to skew the graph scales).
+    min_DI = 19
+    DI = After(first_raw_DI, first_raw_DI, min_DI, default)
+    APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)
+    
+    # Calculate slope information
+    S1S2_slope = Grad(DI, APD90, default)
+    max_S1S2_slope = Max(S1S2_slope, default)
+
+
+}

@@ -601,24 +601,16 @@ class Actions(object):
             """
             assert len(self.tokens) == 2
             index_tokens = self.tokens[1]
-            assert 1 <= len(index_tokens) <= 3
+            assert 1 <= len(index_tokens)
             apply_content = [self.DelegateSymbol('index'), self.tokens[0], index_tokens[0]]
-            if len(index_tokens) == 2:
-                # We're shrinking
-                apply_content.append(index_tokens[1]) # Dimension to shrink along
-                apply_content.append(self.Delegate('Number', ['1'])) # shrink=true
-            elif len(index_tokens) == 3:
-                # We're padding
-                apply_content.append(index_tokens[1]) # Dimension to shrink along
-                apply_content.append(self.DelegateSymbol('defaultParameter')) # shrink=default (false)
-                apply_content.append(self.Delegate('Number', ['1'])) # pad=true
-                apply_content.append(index_tokens[2]) # Pad value
+            apply_content.append(index_tokens.get('dim', self.DelegateSymbol('defaultParameter')))
+            apply_content.append(index_tokens.get('shrink', [self.DelegateSymbol('defaultParameter')])[0])
+            if 'pad' in index_tokens:
+                assert len(index_tokens['pad']) == 2
+                apply_content.extend(index_tokens['pad']) # Pad direction & value
             return M.apply(*map(lambda t: t.xml(), apply_content))
         
         def expr(self):
-            """Construct apply(csymbol-index, indexee, indices, dim, shrink, pad, padValue).
-            shrink and pad both default to 0 (false).
-            """
             assert len(self.tokens) == 2
             index_tokens = self.tokens[1]
             assert 1 <= len(index_tokens) <= 3
@@ -1199,9 +1191,10 @@ class CompactSyntaxParser(object):
                                  'NUM_DIMS NUM_ELEMENTS SHAPE')).setName('Accessor')
 
     # Indexing
-    pad = MakeKw('pad') + Adjacent(colon) - expr + eq + expr
-    shrink = MakeKw('shrink') + Adjacent(colon) - expr
-    index = p.Group(Adjacent(p.Suppress('{')) - expr + Optional(comma + (pad|shrink)) + p.Suppress('}')).setName('Index')
+    pad = (MakeKw('pad') + Adjacent(colon) - expr + eq + expr).setResultsName('pad')
+    shrink = (MakeKw('shrink') + Adjacent(colon) - expr).setResultsName('shrink')
+    index_dim = expr.setResultsName('dim')
+    index = p.Group(Adjacent(p.Suppress('{')) - expr + p.ZeroOrMore(comma - (pad|shrink|index_dim)) + p.Suppress('}')).setName('Index')
 
     # Special values
     nullValue = p.Group(MakeKw('null')).setName('Null').setParseAction(Actions.Symbol('null'))

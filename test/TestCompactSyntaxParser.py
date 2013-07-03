@@ -848,20 +848,22 @@ return c
         #self.failIfParses(csp.expr, 'find(arr, extra)') # Needs special support e.g. from parse actions
         
         self.assertParses(csp.expr, 'arr{idxs}', [['arr', ['idxs']]],
-                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs']))
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'csymbol-defaultParameter', 'csymbol-defaultParameter']))
         self.failIfParses(csp.expr, 'arr {spaced}')
-        self.assertParses(csp.expr, 'arr{idxs, shrink:dim}', [['arr', ['idxs', 'dim']]],
-                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'ci:dim', 'cn:1']))
-        self.assertParses(csp.expr, 'arr{idxs, pad:dim=value}', [['arr', ['idxs', 'dim', 'value']]],
+        self.assertParses(csp.expr, 'arr{idxs, shrink:1}', [['arr', ['idxs', '1']]],
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'csymbol-defaultParameter', 'cn:1']))
+        self.assertParses(csp.expr, 'arr{idxs, dim, shrink:-1}', [['arr', ['idxs', 'dim', ['-', '1']]]],
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'ci:dim', ('apply', ['minus', 'cn:1'])]))
+        self.assertParses(csp.expr, 'arr{idxs, dim, pad:1=value}', [['arr', ['idxs', 'dim', '1', 'value']]],
                           ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'ci:dim', 'csymbol-defaultParameter', 'cn:1', 'ci:value']))
-        self.failIfParses(csp.expr, 'arr{idxs, shrink:dim, pad:dim=value}')
-        
-        self.assertParses(csp.expr, 'f(1,2){find(blah), shrink:0}', [[['f', ['1', '2']], [['find', ['blah']], '0']]],
+        self.assertParses(csp.expr, 'arr{idxs, shrink:0, pad:1=value}', [['arr', ['idxs', '0', '1', 'value']]],
+                          ('apply', ['csymbol-index', 'ci:arr', 'ci:idxs', 'csymbol-defaultParameter', 'cn:0', 'cn:1', 'ci:value']))
+        self.assertParses(csp.expr, 'f(1,2){find(blah), 0, shrink:1}', [[['f', ['1', '2']], [['find', ['blah']], '0', '1']]],
                           ('apply', ['csymbol-index', ('apply', ['ci:f', 'cn:1', 'cn:2']),
                                      ('apply', ['csymbol-find', 'ci:blah']), 'cn:0', 'cn:1']))
-        self.assertParses(csp.expr, 'A{find(A), pad:0=1+2}', [['A', [['find', ['A']], '0', ['1', '+', '2']]]],
+        self.assertParses(csp.expr, 'A{find(A), 0, pad:-1=1+2}', [['A', [['find', ['A']], '0', ['-', '1'], ['1', '+', '2']]]],
                           ('apply', ['csymbol-index', 'ci:A', ('apply', ['csymbol-find', 'ci:A']),
-                                     'cn:0', 'csymbol-defaultParameter', 'cn:1', ('apply', ['plus', 'cn:1', 'cn:2'])]))
+                                     'cn:0', 'csymbol-defaultParameter', ('apply', ['minus', 'cn:1']), ('apply', ['plus', 'cn:1', 'cn:2'])]))
 
     def TestParsingUnitsDefinitions(self):
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)

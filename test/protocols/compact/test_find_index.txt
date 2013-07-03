@@ -10,7 +10,7 @@ post-processing {
     # All but one entry
     all_bar_largest = map(lambda x: x < input_max, input)
     all_bar_largest_idxs = find(all_bar_largest)
-    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}
+    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}
     
     # Recursive function to fold along every dimension in turn, starting from zero
     def MultiFold(op, array, init) {
