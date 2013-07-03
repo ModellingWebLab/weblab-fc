@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:1:1&#9;# Compact version of the test_find_index protocol">
+<proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:1:1&#9;# Compact version of the test_find_index protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt">
   <proto:import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:3:1&#9;import &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
   <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {">
     <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {">
@@ -67,19 +67,19 @@
           <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:12:33&#9;    all_bar_largest_idxs = find(all_bar_largest)">all_bar_largest</m:ci>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:5&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:5&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">
         <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:5&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">all_bar_largest_indexed</m:ci>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}"/>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">input</m:ci>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:37&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">all_bar_largest_idxs</m:ci>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:63&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">0</m:cn>
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}"/>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">1</m:cn>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:65&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:5&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">all_bar_largest_indexed</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}"/>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">input</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:37&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">all_bar_largest_idxs</m:ci>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:59&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">0</m:cn>
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:31&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}"/>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:66&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">1</m:cn>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:68&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">
             <m:minus/>
-            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:66&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, pad:0=-1}">1</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:13:69&#9;    all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}">1</m:cn>
           </m:apply>
         </m:apply>
       </m:apply>
@@ -208,6 +208,8 @@
           <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
           <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}">input</m:ci>
           <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:33&#9;    all_entries_indexed = input{all_entries_idxs}">all_entries_idxs</m:ci>
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
         </m:apply>
       </m:apply>
       <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:5&#9;    assert ArrayEq(all_entries_indexed, input)">
