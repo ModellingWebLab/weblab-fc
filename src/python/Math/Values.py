@@ -105,7 +105,7 @@ class LambdaClosure(AbstractValue.AbstractValue):
         for i,param in enumerate(actualParameters):
             if not isinstance(param, DefaultParameter):
                 local_env.DefineName(self.formalParameters[i], param)
-            elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
+            elif self.defaultParameters[i] is not None:
                 local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
                 #check default is a protocol simple value for a compile case
             else:

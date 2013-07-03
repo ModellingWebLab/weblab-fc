@@ -355,15 +355,17 @@ class Log(AbstractExpression):
 class And(AbstractExpression):
     """Boolean And Operator"""
     def Interpret(self, env):
-        operands = self.EvaluateChildren(env)
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'and' requires operands")
         result = True
-        try:
-            for v in operands:
+        for child in self.children:
+            v = child.Evaluate(env)
+            try:
                 result = result and v.value
-        except AttributeError:
-            raise ProtocolError("Boolean operator 'and' requires its operands to be simple values")
+            except AttributeError:
+                raise ProtocolError("Boolean operator 'and' requires its operands to be simple values")
+            if not v.value:
+                break
         return V.Simple(result)
     
     def Compile(self):
@@ -374,15 +376,17 @@ class And(AbstractExpression):
 class Or(AbstractExpression):
     """Boolean Or Operator"""
     def Interpret(self, env):
-        operands = self.EvaluateChildren(env)
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'or' requires operands")
         result = False
-        try:
-            for v in operands:
+        for child in self.children:
+            v = child.Evaluate(env)
+            try:
                 result = result or v.value
-        except AttributeError:
-            raise ProtocolError("Boolean operator 'or' requires its operands to be simple values")
+            except AttributeError:
+                raise ProtocolError("Boolean operator 'or' requires its operands to be simple values")
+            if v.value:
+                break
         return V.Simple(result)
     
     def Compile(self):

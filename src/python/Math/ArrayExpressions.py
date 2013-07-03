@@ -192,9 +192,12 @@ class View(AbstractExpression):
         self.children = children
         
         
-    def GetValue(self, arg):
+    def GetValue(self, arg, arg_name='not dim'):
         if isinstance(arg, V.Null):
-            return None
+            if arg_name == 'dim':
+                return V.Null()
+            else:
+                return None
         if isinstance(arg, V.DefaultParameter):
             return 'default'    
         else:
@@ -203,7 +206,7 @@ class View(AbstractExpression):
     def Interpret(self, env):
         array = self.arrayExpression.Evaluate(env)
         if not isinstance(array, V.Array):
-            raise ProtocolError("First argument must be of type Values.Array")
+            raise ProtocolError("First argument must be of type Values.Array, not", type(array))
         if len(self.children) > array.array.ndim: # check to make sure indices = number of dimensions
             raise ProtocolError("You entered", len(self.children), "indices, but the array has", array.array.ndim, "dimensions.")
       
@@ -212,7 +215,7 @@ class View(AbstractExpression):
         #try:
         implicit_dim_slices = []
         slices = [None] * array.array.ndim
-                
+        apply_to_rest = False
         for index in indices:
             if hasattr(index, 'value'):
                 dim = None
@@ -234,7 +237,7 @@ class View(AbstractExpression):
                 step = self.GetValue(index.values[1])
                 end = self.GetValue(index.values[2])
             elif len(index.values) == 4:
-                dim = self.GetValue(index.values[0])
+                dim = self.GetValue(index.values[0], 'dim') # if this is null, then every dim in the input array that isn't specified uses this
                 start = self.GetValue(index.values[1])
                 step = self.GetValue(index.values[2])
                 end = self.GetValue(index.values[3])
@@ -247,7 +250,7 @@ class View(AbstractExpression):
             if end == 'default':
                 end = start
             
-            if dim != None:
+            if dim != None and not isinstance(dim, V.Null):
                 if dim > array.array.ndim - 1:
                     raise ProtocolError("Array only has", array.array.ndim, "dimensions, not", dim + 1) # plus one to account for dimension zero
                 if step == 0:
@@ -256,12 +259,18 @@ class View(AbstractExpression):
                     slices[int(dim)] = start
                 else:
                     slices[int(dim)] = slice(start, end, step)
-            else:
+            else:               
                 if step == 0:
+                    if isinstance(dim, V.Null):
+                        null_slice = slice(start)
+                        apply_to_rest = True
                     if start != end:
                         raise ProtocolError("Step is zero and start does not equal end")
                     implicit_dim_slices.append(start)
                 else:
+                    if isinstance(dim, V.Null):
+                        null_slice = slice(start, end, step)
+                        apply_to_rest = True
                     implicit_dim_slices.append(slice(start, end, step))
             
         for i, each in enumerate(slices):
@@ -281,7 +290,10 @@ class View(AbstractExpression):
                         
                     slices[i] = implicit_dim_slices.pop(0)
                 else:
-                    slices[i] = slice(None, None, 1)
+                    if apply_to_rest:
+                        slices[i] = null_slice
+                    else:
+                        slices[i] = slice(None, None, 1)
 
         try:
             view = array.array[tuple(slices)]

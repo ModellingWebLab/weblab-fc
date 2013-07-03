@@ -42,24 +42,32 @@ csp = CSP.CompactSyntaxParser
 
 import Environment as Env
 import Values as V
+import ArrayExpressions as A
+import Expressions as E
+import MathExpressions as M
 import numpy as np
+import os
 
+def N(v):
+    return M.Const(V.Simple(v))
 
 class TestSpeedRealProto(unittest.TestCase):
     def TestS1S2(self):
         # Parse the protocol into a sequence of post-processing statements
-        proto_file = 'projects/FunctionalCuration/test/protocols/S1S2_postproc.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2_postproc.txt'
         parser = csp()
         CSP.source_file = proto_file
         generator = parser._Try(csp.protocol.parseFile, proto_file, parseAll=True)[0]
         self.assertIsInstance(generator, CSP.Actions.Protocol)
-        statements = generator.expr()
+        statements = generator.expr()[0]
         # Load the raw simulation data from file
         env = Env.Environment()
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto'
         membrane_voltage = self.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
         time_1d = self.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
-        time_2d = A.NewArray(time_1d).Evaluate(env)
+        time_2d = A.NewArray(M.Const(time_1d),
+                             E.TupleExpression(N(0), N(0), N(1), N(91), M.Const(V.String('_'))),
+                             comprehension=True).Evaluate(env)
         env.DefineName('sim:time', time_2d)
         env.DefineName('sim:membrane_voltage', membrane_voltage)
         # Run the protocol
@@ -72,7 +80,8 @@ class TestSpeedRealProto(unittest.TestCase):
     def Load(self, filePath):
         f = open(filePath, 'r')
         f.readline() # Strip comment line
-        dims = f.readline().split(',')
+        dims = map(int, f.readline().split(','))[1:]
+        print dims
         array = np.loadtxt(f, dtype=float)
         f.close()
         return V.Array(array.reshape(tuple(dims)))

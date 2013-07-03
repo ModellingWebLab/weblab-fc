@@ -51,6 +51,7 @@ p.ParserElement.enablePackrat()
 ################################################################################
 import lxml.builder
 import lxml.etree as ET
+from Locatable import Locatable
 
 PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
 MATHML_NS = "http://www.w3.org/1998/Math/MathML"
@@ -70,6 +71,7 @@ def ImportPythonImplementation():
     import Values as V
     import Statements as S
     import math
+    
     OPERATORS = {'+': M.Plus, '-': M.Minus, '*': M.Times, '/': M.Divide, '^': M.Power, 
                  '==': M.Eq, '!=': M.Neq, '<': M.Lt, '>': M.Gt, '<=': M.Leq, '>=':M.Geq,
                  'not': M.Not, '&&': M.And, '||': M.Or}
@@ -172,6 +174,13 @@ class Actions(object):
             elt.set('{%s}trace' % PROTO_NS, '1')
             return elt
         
+        def expr(self):
+            """Updates location in parent locatable class and calls _expr method."""
+            result = self._expr()
+            if issubclass(type(self), Locatable):
+                self.location = 'source location:', self.source_location
+            return result
+        
         def xml(self):
             """Main method to generate the XML syntax.
             Will add an attribute containing source location information where appropriate.
@@ -218,7 +227,7 @@ class Actions(object):
                 elt.set('{%s}units' % CELLML_NS, str(self._units))
             return elt
         
-        def expr(self):
+        def _expr(self):
             return M.Const(V.Simple(self.tokens))
     
     class Variable(BaseGroupAction):
@@ -231,7 +240,7 @@ class Actions(object):
                 result = M.ci(self.tokens)
             return result
     
-        def expr(self):
+        def _expr(self):
             var_name = self.tokens
             if var_name.startswith('MathML:'):
                 actual_var = var_name[7:]
@@ -244,7 +253,7 @@ class Actions(object):
             return result
         
         def names(self):
-            return map(str, self.tokens)
+            return [str(self.tokens)]
         
     class Operator(BaseGroupAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
@@ -283,7 +292,7 @@ class Actions(object):
                     result = M.apply(self.Operator(operator), result, operand.xml())
             return result
         
-        def expr(self):
+        def _expr(self):
             if self.rightAssoc:
                 # The only right-associative operators are also unary
                 result = self.tokens[-1].expr()
@@ -306,6 +315,16 @@ class Actions(object):
             else:
                 operator = Actions.Operator.OP_MAP[operator]
             return self.DelegateSymbol('wrap/' + num_operands, operator).xml()
+        
+        def _expr(self):
+            assert len(self.tokens) == 2
+            operator_name = self.tokens[1]
+            if operator_name.startswith('MathML:'):
+                operator = MATHML[operator_name[7:]]
+            else:
+                operator = OPERATORS[operator_name]
+            num_operands = int(self.tokens[0])
+            return E.LambdaExpression.Wrap(operator, num_operands)
     
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
@@ -313,7 +332,7 @@ class Actions(object):
             if_, then_, else_ = self.GetChildrenXml()
             return M.piecewise(M.piece(then_, if_), M.otherwise(else_))
     
-        def expr(self):
+        def _expr(self):
             if_, then_, else_ = self.GetChildrenExpr()
             return E.If(if_, then_, else_)
         
@@ -328,7 +347,7 @@ class Actions(object):
                 # Single item
                 return self.tokens[0].xml()
             
-        def expr(self):
+        def _expr(self):
             assert len(self.tokens) > 0
             if len(self.tokens) > 1:
                 # Tuple
@@ -346,7 +365,7 @@ class Actions(object):
             child_xml = self.GetChildrenXml()
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+"tuple"), *child_xml)
         
-        def expr(self):
+        def _expr(self):
             child_expr = self.GetChildrenExpr()
             return E.TupleExpression(*child_expr)
     
@@ -366,7 +385,7 @@ class Actions(object):
             children.append(body)
             return getattr(M, 'lambda')(*children)
         
-        def expr(self):
+        def _expr(self):
             assert len(self.tokens) == 2
             param_list = self.tokens[0]
             body = self.tokens[1].expr() # expr
@@ -376,12 +395,15 @@ class Actions(object):
                 param_bvar = param_decl[0].names() # names method
                 if len(param_decl) == 1: # No default given
                     children.append(param_bvar)
-                    default_params = None
+                    default_params.append(None)
                 else: # Default value case
                     default_params.append(param_decl[1].expr().value)
                     children.append(param_bvar)
-            lambda_params = [[var for each in children for var in each]]       
-            lambda_params.append([S.Return(body)])
+            lambda_params = [[var for each in children for var in each]]
+            if not isinstance(body, list):
+                lambda_params.append([S.Return(body)])
+            else:
+                lambda_params.append(body)
             #defaults = {"defaultParameters" : default_params}
             #return E.LambdaExpression(*children, **defaults)
             
@@ -402,7 +424,7 @@ class Actions(object):
             args = map(lambda t: t.xml(), self.tokens[1])
             return M.apply(func, *args)
         
-        def expr(self):
+        def _expr(self):
             assert len(self.tokens) == 2
             assert isinstance(self.tokens[0], Actions.Variable)
             func = self.tokens[0].expr()
@@ -434,7 +456,7 @@ class Actions(object):
             else:
                 return M.csymbol(definitionURL=PROTO_CSYM_BASE+self.symbol)
         
-        def expr(self):
+        def _expr(self):
             if self.symbol == "null":
                 return M.Const(V.Null())
             elif self.symbol == "defaultParameter":
@@ -460,7 +482,7 @@ class Actions(object):
             property = self.tokens[1]
             return M.apply(self.DelegateSymbol('accessor', property).xml(), object)
         
-        def expr(self):
+        def _expr(self):
             if len(self.tokens) > 2:
                 # Chained accessors, e.g. A.SHAPE.IS_ARRAY
                 return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).expr()
@@ -485,7 +507,7 @@ class Actions(object):
             parts.append(self.DelegateSymbol('string', self.tokens[-2])) # The variable name
             return self.Delegate('Tuple', [parts]).xml()
         
-        def expr(self):
+        def _expr(self):
             assert 2 <= len(self.tokens) <= 3
             parts = []
             if len(self.tokens) == 3:
@@ -508,7 +530,7 @@ class Actions(object):
                 entries = [M.domainofapplication(*entries[1:]), entries[0]]
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE+'newArray'), *entries)
         
-        def expr(self):
+        def _expr(self):
             entries = self.GetChildrenExpr()
             if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
                 # Array comprehension
@@ -558,40 +580,17 @@ class Actions(object):
                 apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
             return M.apply(*apply_content)
         
-        def expr(self):
+        def _expr(self):
             assert 2 <= len(self.tokens)
-            apply_content = [self.tokens[0].expr()]
-            null_token = self.DelegateSymbol('null')
-            next_dimension = 0
+            args = [self.tokens[0].expr()]
             for viewspec in self.tokens[1:]:
                 tuple_tokens = []
                 if 'dimspec' in viewspec:
                     dimspec = viewspec['dimspec'][0]
-                    if dimspec == '*':
-                        seen_generic_dim = True
-                        dimspec = null_token
-                    tuple_tokens.append(dimspec)
                     viewspec = viewspec[1:]
-                else:
-                    # Since we will provide a generic specification, all tuples need 4 elements for the XML parser :(
-                    # This is very fragile!
-                    tuple_tokens.append(self.Delegate('Number', [str(next_dimension)]))
-                    next_dimension += 1
-                if len(viewspec) == 1:
-                    # Take single value (in this dimension)
-                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['0']), viewspec[0]])
-                elif len(viewspec) == 2:
-                    # Range with step 1
-                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['1']), viewspec[1]])
-                else:
-                    # Fully specified range
-                    tuple_tokens.extend(viewspec)
-                # Replace unspecified elements with csymbol-null
-                for i, token in enumerate(tuple_tokens):
-                    if token == '':
-                        tuple_tokens[i] = null_token
-                apply_content.append(self.Delegate('Tuple', [tuple_tokens]).expr())
-            return A.View(*apply_content)
+                tuple_tokens.extend(viewspec)
+                args.append(self.Delegate('Tuple', [tuple_tokens]).expr())
+            return A.View(*args)
     
     class Index(BaseGroupAction):
         """Parse action for index expressions."""
@@ -610,7 +609,7 @@ class Actions(object):
                 apply_content.extend(index_tokens['pad']) # Pad direction & value
             return M.apply(*map(lambda t: t.xml(), apply_content))
         
-        def expr(self):
+        def _expr(self):
             assert len(self.tokens) == 2
             index_tokens = self.tokens[1]
             assert 1 <= len(index_tokens)
@@ -633,7 +632,7 @@ class Actions(object):
             assignee, value = self.GetChildrenXml()
             return M.apply(M.eq, assignee, value)
         
-        def expr(self):
+        def _expr(self):
             assignee, value = self.GetChildrenExpr()
             if isinstance(assignee, E.NameLookUp):
                 var_list = [assignee.name]
@@ -646,7 +645,7 @@ class Actions(object):
         def _xml(self):
             return M.apply(self.DelegateSymbol('return').xml(), *self.GetChildrenXml())
         
-        def expr(self):
+        def _expr(self):
             return S.Return(*self.GetChildrenExpr())
     
     class Assert(BaseGroupAction):
@@ -654,7 +653,7 @@ class Actions(object):
         def _xml(self):
             return M.apply(self.DelegateSymbol('assert').xml(), *self.GetChildrenXml())
         
-        def expr(self):
+        def _expr(self):
             return S.Assert(*self.GetChildrenExpr())
     
     class FunctionDef(BaseGroupAction):
@@ -664,6 +663,12 @@ class Actions(object):
             lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
             assign = self.Delegate('Assignment', [[self.tokens[0], lambda_]])
             return assign.xml()
+        
+        def _expr(self):
+            assert len(self.tokens) == 3
+            lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
+            assign = self.Delegate('Assignment', [[self.tokens[0], lambda_]])
+            return assign.expr()
         # def f(a, b=1): return a+b
 
     class StatementList(BaseGroupAction):
@@ -672,7 +677,7 @@ class Actions(object):
             statements = self.GetChildrenXml()
             return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
         
-        def expr(self):
+        def _expr(self):
             statements = self.GetChildrenExpr()
             return statements
     # just put in a python list
@@ -951,7 +956,7 @@ class Actions(object):
                     children.append(self.Delegate('StatementList', [statements]).xml())
                 return getattr(P, 'post-processing')(*children)
             
-        def expr(self):
+        def _expr(self):
             if len(self.tokens) > 0:
                 return self.Delegate('StatementList', [self.tokens]).expr()
 #                 children, statements = [], []
@@ -1020,7 +1025,7 @@ class Actions(object):
                         root.append(xml)
             return root
         
-        def expr(self):
+        def _expr(self):
             root = []
             for token in self.tokens:
                 if isinstance(token, Actions.BaseAction):

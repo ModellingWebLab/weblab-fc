@@ -475,7 +475,6 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([[11, 16], [12, 17]])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-    def TestArrayViews(self):
         env = Env.Environment()
         arr = V.Array(np.arange(10))
         env.DefineName('arr', arr)
@@ -487,8 +486,32 @@ class TestSyntaxInterface(unittest.TestCase):
         np.testing.assert_array_almost_equal(predicted, result.array)
 
     def TestParsingArrayExpressions(self):
-        # find
+        #view
         env = Env.Environment()
+        view_arr = V.Array(np.arange(10))
+        env.DefineName('view_arr', view_arr)
+        view_parse_action = csp.expr.parseString('view_arr[4]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array(4)
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        view_parse_action = csp.expr.parseString('view_arr[2:5]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array([2, 3, 4])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+
+        view_parse_action = csp.expr.parseString('view_arr[1:2:10]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array([1, 3, 5, 7, 9])
+        np.testing.assert_array_almost_equal(predicted, result.array)
+        
+        # find
         arr = V.Array(np.arange(4))
         env.DefineName('arr', arr)
         find_parse_action = csp.expr.parseString('find(arr)', parseAll=True)
@@ -556,10 +579,10 @@ class TestSyntaxInterface(unittest.TestCase):
         
     def TestProtocolandPostProcessing(self):
         env = Env.Environment()
-        parse_action = csp.postProcessing.parseString('post-processing{a=1}')
+        parse_action = csp.postProcessing.parseString('post-processing{a=2}')
         expr = parse_action[0].expr()
-        print "expr", expr
-        #env.Execute...
+        result = env.ExecuteStatements(expr)
+        self.assertEquals(env.LookUp('a').value, 2)
         
         
         

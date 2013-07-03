@@ -36,8 +36,9 @@ import numexpr as ne
 import numpy
 import math
 from ErrorHandling import ProtocolError
+from Locatable import Locatable
 
-class AbstractStatement(object):
+class AbstractStatement(Locatable):
     """Base class for statements in the protocol language."""
     def Evaluate(self, env):
         raise NotImplementedError
