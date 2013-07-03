@@ -613,20 +613,15 @@ class Actions(object):
         def expr(self):
             assert len(self.tokens) == 2
             index_tokens = self.tokens[1]
-            assert 1 <= len(index_tokens) <= 3
+            assert 1 <= len(index_tokens)
             args = [self.tokens[0], index_tokens[0]]
-            if len(index_tokens) == 2:
-                # We're shrinking
-                args.append(index_tokens[1]) # Dimension to shrink along
-                args.append(self.Delegate('Number', ['1'])) # shrink=true
-            elif len(index_tokens) == 3:
-                # We're padding
-                args.append(index_tokens[1]) # Dimension to shrink along
-                args.append(self.DelegateSymbol('defaultParameter')) # shrink=default (false)
-                args.append(self.Delegate('Number', ['1'])) # pad=true
-                args.append(index_tokens[2]) # Pad value
+            args.append(index_tokens.get('dim', self.DelegateSymbol('defaultParameter')))
+            args.append(index_tokens.get('shrink', [self.DelegateSymbol('defaultParameter')])[0])
+            if 'pad' in index_tokens:
+                assert len(index_tokens['pad']) == 2
+                args.extend(index_tokens['pad']) # Pad direction & value
             args = [each.expr() for each in args]
-            return A.Index(*args) 
+            return A.Index(*args)
     
     ######################################################################
     # Post-processing language statements
@@ -955,6 +950,15 @@ class Actions(object):
                 if statements:
                     children.append(self.Delegate('StatementList', [statements]).xml())
                 return getattr(P, 'post-processing')(*children)
+            
+        def expr(self):
+            if len(self.tokens) > 0:
+                return self.Delegate('StatementList', [self.tokens]).expr()
+#                 children, statements = [], []
+#                 for token in self.tokens:
+#                     children.append(self.Delegate('StatementList', [token]))  
+#                 return children
+
     
     class Output(BaseGroupAction):
         """Parse action for an output specification."""
@@ -1014,6 +1018,15 @@ class Actions(object):
                     xml = token.xml()
                     if xml is not None:
                         root.append(xml)
+            return root
+        
+        def expr(self):
+            root = []
+            for token in self.tokens:
+                if isinstance(token, Actions.BaseAction):
+                    expr = token.expr()
+                    if expr is not None:
+                        root.append(expr)
             return root
     
 

@@ -513,13 +513,13 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = find_parse_action[0].expr()
         indices = expr.Evaluate(env)
         env.DefineName('indices', indices)
-        index_parse_action = csp.expr.parseString('arr1{indices, pad:1=45}', parseAll=True)
+        index_parse_action = csp.expr.parseString('arr1{indices, 1, pad:1=45}', parseAll=True)
         expr = index_parse_action[0].expr()
         result = expr.Interpret(env)
         predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-        index_parse_action = csp.expr.parseString('arr1{indices, shrink: 1}', parseAll=True)
+        index_parse_action = csp.expr.parseString('arr1{indices, 1, shrink: 1}', parseAll=True)
         expr = index_parse_action[0].expr()
         result = expr.Interpret(env)
         predicted = np.array(np.array([[1], [3], [1]]))
@@ -553,3 +553,14 @@ class TestSyntaxInterface(unittest.TestCase):
         result = expr.Evaluate(env)
         predicted = np.array([[10], [16]])
         np.testing.assert_array_almost_equal(result.array, predicted)  
+        
+    def TestProtocolandPostProcessing(self):
+        env = Env.Environment()
+        parse_action = csp.postProcessing.parseString('post-processing{a=1}')
+        expr = parse_action[0].expr()
+        print "expr", expr
+        #env.Execute...
+        
+        
+        
+        

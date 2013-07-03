@@ -74,7 +74,6 @@ class NewArray(AbstractExpression):
         local_dict = {}
         for i,name in enumerate(range_name):
             local_dict[name] = np.array(ranges[i], dtype=float)
-        print 'dict', local_dict
         result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrappedBindings)
         return result
             
