@@ -511,6 +511,37 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([1, 3, 5, 7, 9])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
+        env = Env.Environment()
+        view_arr = V.Array(np.array([[0, 1, 2, 3, 4], [7, 8, 12, 3, 9]]))
+        env.DefineName('view_arr', view_arr)
+        view_parse_action = csp.expr.parseString('view_arr[1$2]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array([2, 12])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        view_parse_action = csp.expr.parseString('view_arr[1$3:]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array([[3, 4], [3, 9]])
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        view_parse_action = csp.expr.parseString('view_arr[*$1]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array(8)
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
+        view_parse_action = csp.expr.parseString('view_arr[*$1][0]', parseAll=True)
+        expr = view_parse_action[0].expr()
+        self.assertIsInstance(expr, A.View)
+        result = expr.Evaluate(env)
+        predicted = np.array(1)
+        np.testing.assert_array_almost_equal(result.array, predicted)
+        
         # find
         arr = V.Array(np.arange(4))
         env.DefineName('arr', arr)
@@ -521,7 +552,21 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([[1], [2], [3]])
         np.testing.assert_array_almost_equal(find_result.array, predicted)
         
-        # index
+        find_arr = V.Array(np.array([[1, 0 , 3, 0, 0], [0, 7, 0, 0, 10], [0, 0, 13, 14, 0],
+                                     [0, 0, 0, 19, 20], [0, 0, 0, 0, 25]]))
+        index_arr = V.Array(np.arange(1,26).reshape(5,5))
+        env.DefineName('find_arr', find_arr)
+        env.DefineName('index_arr', index_arr)
+        find_parse_action = csp.expr.parseString('find(find_arr)', parseAll=True)
+        expr = find_parse_action[0].expr()
+        indices_from_find = expr.Evaluate(env)
+        env.DefineName('indices_from_find', indices_from_find)
+        index_parse_action = csp.expr.parseString('index_arr{indices_from_find, 1, pad:1=0}')
+        expr = index_parse_action[0].expr()
+        index_result = expr.Interpret(env)
+        predicted = np.array([[1, 3], [7, 10], [13, 14], [19, 20], [25, 0]])
+        np.testing.assert_array_almost_equal(index_result.array, predicted)
+
         env.DefineName('find_result', find_result)
         index_parse_action = csp.expr.parseString('arr{find_result}', parseAll=True)
         expr = index_parse_action[0].expr()

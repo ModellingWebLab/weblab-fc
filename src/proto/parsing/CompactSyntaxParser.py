@@ -177,8 +177,8 @@ class Actions(object):
         def expr(self):
             """Updates location in parent locatable class and calls _expr method."""
             result = self._expr()
-            if issubclass(type(self), Locatable):
-                self.location = 'source location:', self.source_location
+            if isinstance(result, Locatable):
+                result.location = 'source location:', self.source_location
             return result
         
         def xml(self):
@@ -583,13 +583,28 @@ class Actions(object):
         def _expr(self):
             assert 2 <= len(self.tokens)
             args = [self.tokens[0].expr()]
+            null_token = self.DelegateSymbol('null')
             for viewspec in self.tokens[1:]:
                 tuple_tokens = []
+                dimspec = None
                 if 'dimspec' in viewspec:
                     dimspec = viewspec['dimspec'][0]
                     viewspec = viewspec[1:]
                 tuple_tokens.extend(viewspec)
-                args.append(self.Delegate('Tuple', [tuple_tokens]).expr())
+                if dimspec is not None:
+                    if len(tuple_tokens) == 1:
+                        real_tuple_tokens = [dimspec, tuple_tokens[0], self.Delegate('Number',['0']), tuple_tokens[0]]
+                    elif len(tuple_tokens) == 2:
+                        real_tuple_tokens = [dimspec, tuple_tokens[0], self.Delegate('Number',['1']), tuple_tokens[1]]
+                    else:
+                        real_tuple_tokens = [dimspec, tuple_tokens[0], tuple_tokens[1], tuple_tokens[2]]
+                else:
+                    real_tuple_tokens = tuple_tokens
+                # Replace unspecified elements with csymbol-null
+                for i, token in enumerate(real_tuple_tokens):
+                    if token == '' or token == '*':
+                        real_tuple_tokens[i] = null_token
+                args.append(self.Delegate('Tuple', [real_tuple_tokens]).expr())
             return A.View(*args)
     
     class Index(BaseGroupAction):

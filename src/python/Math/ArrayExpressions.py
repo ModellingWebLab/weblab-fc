@@ -261,17 +261,19 @@ class View(AbstractExpression):
                     slices[int(dim)] = slice(start, end, step)
             else:               
                 if step == 0:
-                    if isinstance(dim, V.Null):
-                        null_slice = slice(start)
-                        apply_to_rest = True
                     if start != end:
                         raise ProtocolError("Step is zero and start does not equal end")
-                    implicit_dim_slices.append(start)
+                    if isinstance(dim, V.Null):
+                        null_slice = start
+                        apply_to_rest = True
+                    else:
+                        implicit_dim_slices.append(start)
                 else:
                     if isinstance(dim, V.Null):
                         null_slice = slice(start, end, step)
                         apply_to_rest = True
-                    implicit_dim_slices.append(slice(start, end, step))
+                    else:
+                        implicit_dim_slices.append(slice(start, end, step))
             
         for i, each in enumerate(slices):
             dim_len = array.array.shape[i]
@@ -497,10 +499,17 @@ class Index(AbstractExpression):
             raise ProtocolError("You cannot both pad and shrink!")
         if not isinstance(pad, V.Simple):
                 raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
-            
+
         dim_val = int(dim.value)
         shape = list(operand.array.shape)
-        extents = (operand.array != 0).sum(dim_val)
+        num_entries = indices.array.shape[0]
+        shape[dim_val] = 1
+        extents = np.zeros(tuple(shape), dtype=float)
+        for index in indices.array:
+            extents_index = list(index)
+            extents_index[dim_val] = 0
+            extents[tuple(extents_index)] += 1
+
         max_extent = np.amax(extents)
         min_extent = np.amin(extents)
         if min_extent == 0 and pad.value == 0 or (min_extent != max_extent and shrink.value == 0 and pad.value == 0):
@@ -510,7 +519,7 @@ class Index(AbstractExpression):
         else:
             extent = min_extent 
         shape[dim_val] = extent
-        num_entries = indices.array.shape[0]
+        
         result = np.empty(shape)
         if pad != 0:
             result.fill(pad_value)
