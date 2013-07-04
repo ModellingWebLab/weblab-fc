@@ -56,13 +56,14 @@ class AbstractExpression(Locatable):
     
     def Evaluate(self, env):
         """Subclasses must implement this method."""
-        try:
-            results = V.Array(ne.evaluate(self.Compile(), local_dict=env.unwrappedBindings))     
-        except:
-            try:
-                results = V.Array(eval(self.Compile(), globals(), env.unwrappedBindings))
-            except:
-                results = self.Interpret(env)
+        # try self.Compile(), if works, try ne.evaluate then eval; if compile fails straight to Interpret
+#         try:
+#             results = V.Array(ne.evaluate(self.Compile(), local_dict=env.unwrappedBindings))     
+#         except:
+#             try:
+#                 results = V.Array(eval(self.Compile(), globals(), env.unwrappedBindings))
+#             except:
+        results = self.Interpret(env)
         return results
     
     

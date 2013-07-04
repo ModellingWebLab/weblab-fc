@@ -345,7 +345,7 @@ class Fold(AbstractExpression):
         
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError("The function passed into fold must be a lambda expression, not", type(function))
-            
+        # if the function is plus, then do sum...etc from numpy except sum and prod in numexpr
         env = Env.Environment()
         result_shape = list(shape)
         result_shape[dimension] = 1
@@ -393,20 +393,20 @@ class Map(AbstractExpression):
             if array.array.shape != shape:
                 raise ProtocolError(array, "is not the same shape as the first array input")
         interpret = False
-        try:
-            expression,local_env = function.Compile(env, arrays)
-        except NotImplementedError:
-            interpret = True
-        else:
-            try:
-                protocol_result = V.Array(numexpr.evaluate(expression, local_dict=local_env.unwrappedBindings))
-            except:
-                try:
-                    protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
-                except:
-                    interpret = True
-        if interpret:
-            protocol_result = self.Interpret(env, arrays, function)
+#         try:
+#             expression,local_env = function.Compile(env, arrays)
+#         except NotImplementedError:
+#             interpret = True
+#         else:
+#             try:
+#                 protocol_result = V.Array(numexpr.evaluate(expression, local_dict=local_env.unwrappedBindings))
+#             except:
+#                 try:
+#                     protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
+#                 except:
+#                     interpret = True
+#         if interpret:
+        protocol_result = self.Interpret(env, arrays, function)
         return protocol_result
     
     def Interpret(self, env, arrays, function):
@@ -519,6 +519,7 @@ class Index(AbstractExpression):
         else:
             extent = min_extent 
         shape[dim_val] = extent
+        # if extents are the same call fancy indexing in numpy
         
         result = np.empty(shape)
         if pad != 0:

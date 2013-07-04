@@ -405,8 +405,8 @@ class TestArrayExpressions(unittest.TestCase):
        parameters = ['a', 'b']
        body = [S.Return(M.Root(E.NameLookUp('a'), E.NameLookUp('b')))]
        root = E.LambdaExpression(parameters, body)
-       a = A.NewArray(N(8))
-       b = A.NewArray(N(3))
+       a = A.NewArray(N(3))
+       b = A.NewArray(N(8))
        result = A.Map(root, a, b)
        predicted = V.Array(np.array([2])) 
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
