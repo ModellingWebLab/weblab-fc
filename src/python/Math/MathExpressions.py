@@ -147,7 +147,7 @@ class Max(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "numpy.maximum(" + ','.join(operands) + ")"  
+        expression = "np.maximum(" + ','.join(operands) + ")"  
         return expression 
             
 class Min(AbstractExpression):
@@ -162,7 +162,7 @@ class Min(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "numpy.minimum(" + ','.join(arr_names) + ")"  
+        expression = "np.minimum(" + ','.join(arr_names) + ")"  
         return expression 
     
 class Rem(AbstractExpression):
@@ -259,7 +259,7 @@ class Floor(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
-            expression = "numpy.floor(" + operands[0] + ")"
+            expression = "np.floor(" + operands[0] + ")"
         else:
             raise ProtocolError("floor operator requires one argument, not", len(operands))
         return expression 
@@ -279,7 +279,7 @@ class Ceiling(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
-            expression = "numpy.ceil(" + operands[0] + ")"
+            expression = "np.ceil(" + operands[0] + ")"
         else:
             raise ProtocolError("ceiling operator requires one argument, not", len(operands))
         return expression
@@ -370,7 +370,7 @@ class And(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "numpy.logical_and(" + ','.join(operands) + ")"  
+        expression = "np.logical_and(" + ','.join(operands) + ")"  
         return expression 
     
 class Or(AbstractExpression):
@@ -391,7 +391,7 @@ class Or(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "numpy.logical_or(" + ','.join(operands) + ")"  
+        expression = "np.logical_or(" + ','.join(operands) + ")"  
         return expression 
 
 class Xor(AbstractExpression):
@@ -410,7 +410,7 @@ class Xor(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "numpy.logical_xor(" + ','.join(operands) + ")"  
+        expression = "np.logical_xor(" + ','.join(operands) + ")"  
         return expression 
 
 class Not(AbstractExpression):
@@ -428,7 +428,7 @@ class Not(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
-            expression = "numpy.logical_not(" + operands[0] + ")"
+            expression = "np.logical_not(" + operands[0] + ")"
         else:
             raise ProtocolError("not operator requires one argument, not", len(operands))
         return expression 
@@ -447,7 +447,7 @@ class Eq(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "numpy.equal(" + ','.join(operands) + ")"  
+        expression = "np.equal(" + ','.join(operands) + ")"  
         return expression 
     
 class Neq(AbstractExpression):

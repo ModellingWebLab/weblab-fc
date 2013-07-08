@@ -340,12 +340,36 @@ class Fold(AbstractExpression):
                                      "because the array only has", array.ndim, "dimensions")
         else:
             raise ProtocolError("Fold requires 2-4 inputs, not", len(self.children))
-        shape = array.shape
+        shape = list(array.shape)
         size = shape[dimension]
         
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError("The function passed into fold must be a lambda expression, not", type(function))
         # if the function is plus, then do sum...etc from numpy except sum and prod in numexpr
+        if len(function.body[0].parameters) == 1:
+            shape[dimension] = 1
+            if isinstance(function.body[0].parameters[0], M.Plus):   
+                result = ne.evaluate('sum(array, axis=' + str(dimension) + ')')
+                if initial is not None:
+                    result = ne.evaluate('result + initial')
+                return V.Array(np.array([result]).reshape(tuple(shape)))
+            if isinstance(function.body[0].parameters[0], M.Times):
+                result = ne.evaluate('prod(array, axis=' + str(dimension) + ')')
+                if initial is not None:
+                    result = ne.evaluate('result * initial')
+                return V.Array(np.array([result]).reshape(tuple(shape)))
+            if isinstance(function.body[0].parameters[0], M.Max):
+                if initial is not None:
+                    max_array = np.maximum(initial, array)
+                else:
+                    max_array = array
+                return V.Array(np.amax(max_array, axis=dimension).reshape(tuple(shape))) #keepdims=True not working
+            if isinstance(function.body[0].parameters[0], M.Min):
+                if initial is not None:
+                    min_array = np.minimum(initial, array)
+                else:
+                    min_array = array
+                return V.Array(np.amin(min_array, axis=dimension).reshape(tuple(shape))) #keepdims=True not working
         env = Env.Environment()
         result_shape = list(shape)
         result_shape[dimension] = 1
@@ -393,23 +417,25 @@ class Map(AbstractExpression):
             if array.array.shape != shape:
                 raise ProtocolError(array, "is not the same shape as the first array input")
         interpret = False
-#         try:
-#             expression,local_env = function.Compile(env, arrays)
-#         except NotImplementedError:
-#             interpret = True
-#         else:
-#             try:
-#                 protocol_result = V.Array(numexpr.evaluate(expression, local_dict=local_env.unwrappedBindings))
-#             except:
-#                 try:
-#                     protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
-#                 except:
-#                     interpret = True
-#         if interpret:
-        protocol_result = self.Interpret(env, arrays, function)
+        try:
+            expression,local_env = function.Compile(env, arrays)
+        except NotImplementedError:
+            interpret = True
+        else:
+            try:
+                protocol_result = V.Array(ne.evaluate(expression, local_dict=local_env.unwrappedBindings))
+            except:
+                
+                try:
+                    protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
+                except:
+                    interpret = True
+        if interpret:
+            protocol_result = self.Interpret(env, arrays, function)
         return protocol_result
     
     def Interpret(self, env, arrays, function):
+        print "interpreted", function.body[0].parameters
         result = np.empty_like(arrays[0].array)
         dim_range = []
         shape = arrays[0].array.shape

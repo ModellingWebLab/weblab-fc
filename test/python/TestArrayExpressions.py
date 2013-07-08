@@ -625,7 +625,7 @@ class TestArrayExpressions(unittest.TestCase):
         array = A.NewArray(A.NewArray(N(1), N(2), N(3)), A.NewArray(N(3), N(4), N(5)))
         result = A.Fold(add, array).Interpret(env)
         predicted = np.array([[6],[12]])
-        np.testing.assert_array_almost_equal(result.array, predicted)    
+        np.testing.assert_array_almost_equal(result.array, predicted)      
         
         # 3-d array, times fold over dimension 0
         env = Env.Environment()
@@ -677,6 +677,12 @@ class TestArrayExpressions(unittest.TestCase):
         array = A.NewArray(A.NewArray(N(0), N(1), N(8)), A.NewArray(N(3), N(4), N(5)))
         result = A.Fold(max_function, array, N(0), N(0)).Interpret(env)
         predicted = np.array([[3, 4, 8]])
+        np.testing.assert_array_almost_equal(result.array, predicted) 
+        
+        # fold with max function with an initial value that affects output
+        array = A.NewArray(A.NewArray(N(0), N(1), N(8)), A.NewArray(N(3), N(4), N(5)))
+        result = A.Fold(max_function, array, N(7), N(0)).Interpret(env)
+        predicted = np.array([[7, 7, 8]])
         np.testing.assert_array_almost_equal(result.array, predicted) 
         
         # fold with min function
