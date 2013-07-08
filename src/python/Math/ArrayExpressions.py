@@ -58,6 +58,11 @@ class NewArray(AbstractExpression):
         else:
             self.children = children
         
+        try:
+            line_profile.add_function(self.DevelopResultWithInterpret)
+        except NameError:
+            pass
+        
     def GetValue(self, arg):
         if isinstance(arg, V.Null):
             return None

@@ -48,7 +48,7 @@ def N(number):
     return M.Const(V.Simple(number))
  
 class TestSpeed(unittest.TestCase):
-    def TestAddingLargeArrays(self):    
+    def TestAddingLargeArrays(self):
         # 1-d array
         env = Env.Environment()
         parameters = ['large_array1', 'large_array2']
@@ -60,7 +60,7 @@ class TestSpeed(unittest.TestCase):
         predicted = 2*np.arange(10000000)
         #timeit.timeit('result_array = result.Evalute(env).array', number=1)
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-         
+
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
         body = [S.Return(M.Times(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]
@@ -71,4 +71,3 @@ class TestSpeed(unittest.TestCase):
         result = A.Map(add_times, a, b, c)
         predicted = np.arange(10000000)*(2*np.arange(10000000))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-         
