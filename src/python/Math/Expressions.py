@@ -70,6 +70,13 @@ class If(AbstractExpression):
             result = self.elseExpr.Evaluate(env)
         return result
       
+      #compile using where
+    def Compile(self):
+        test = self.testExpr.Compile()
+        then = self.thenExpr.Compile()
+        else_ = self.elseExpr.Compile()
+        return '___np.where(%s,%s,%s)' % (test, then, else_)
+        
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
     def __init__(self, name):

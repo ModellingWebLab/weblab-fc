@@ -44,6 +44,13 @@ class Const(AbstractExpression):
         
     def Interpret(self, env):
         return self.value    
+    
+    def Compile(self):
+        try:
+            return str(self.value.value)
+        except AttributeError:
+            raise NotImplementedError
+    
         
 class Plus(AbstractExpression):
     """Addition."""
@@ -147,7 +154,7 @@ class Max(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "np.maximum(" + ','.join(operands) + ")"  
+        expression = "___np.maximum(" + ','.join(operands) + ")"  
         return expression 
             
 class Min(AbstractExpression):
@@ -162,7 +169,7 @@ class Min(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "np.minimum(" + ','.join(arr_names) + ")"  
+        expression = "___np.minimum(" + ','.join(arr_names) + ")"  
         return expression 
     
 class Rem(AbstractExpression):
@@ -259,7 +266,7 @@ class Floor(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
-            expression = "np.floor(" + operands[0] + ")"
+            expression = "___np.floor(" + operands[0] + ")"
         else:
             raise ProtocolError("floor operator requires one argument, not", len(operands))
         return expression 
@@ -279,7 +286,7 @@ class Ceiling(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
-            expression = "np.ceil(" + operands[0] + ")"
+            expression = "___np.ceil(" + operands[0] + ")"
         else:
             raise ProtocolError("ceiling operator requires one argument, not", len(operands))
         return expression
@@ -370,7 +377,7 @@ class And(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "np.logical_and(" + ','.join(operands) + ")"  
+        expression = "___np.logical_and(" + ','.join(operands) + ")"  
         return expression 
     
 class Or(AbstractExpression):
@@ -391,7 +398,7 @@ class Or(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "np.logical_or(" + ','.join(operands) + ")"  
+        expression = "___np.logical_or(" + ','.join(operands) + ")"  
         return expression 
 
 class Xor(AbstractExpression):
@@ -410,7 +417,7 @@ class Xor(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "np.logical_xor(" + ','.join(operands) + ")"  
+        expression = "___np.logical_xor(" + ','.join(operands) + ")"  
         return expression 
 
 class Not(AbstractExpression):
@@ -426,9 +433,9 @@ class Not(AbstractExpression):
         return V.Simple(result) 
     
     def Compile(self):
-        operands = [ "(" + child.Compile() + ")" for child in self.children]
+        operands = [ "bool(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
-            expression = "np.logical_not(" + operands[0] + ")"
+            expression = "___np.logical_not(" + ','.join(operands) + ")"  
         else:
             raise ProtocolError("not operator requires one argument, not", len(operands))
         return expression 
@@ -447,8 +454,8 @@ class Eq(AbstractExpression):
     
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = "np.equal(" + ','.join(operands) + ")"  
-        return expression 
+        expression = ' == '.join(operands) 
+        return expression
     
 class Neq(AbstractExpression):
     """Not equal Operator"""

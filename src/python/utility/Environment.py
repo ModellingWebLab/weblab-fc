@@ -32,6 +32,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Values as V
 from ErrorHandling import ProtocolError
 from AbstractValue import AbstractValue
+import numpy as np
 
 class Environment(object):
     nextIdent = [0]
@@ -42,6 +43,7 @@ class Environment(object):
         self.delegates = {}
         self.delegates[""] = delegatee
         self.unwrappedBindings = {}
+        self.unwrappedBindings['___np'] = np
         
     def DefineName(self, name, value):
 #         if not isinstance(value, AbstractValue):

@@ -629,6 +629,15 @@ class TestSyntaxInterface(unittest.TestCase):
         result = env.ExecuteStatements(expr)
         self.assertEquals(env.LookUp('a').value, 2)
         
+        parse_action = csp.lambdaExpr.parseString('lambda t: 0*t')
+        expr = parse_action[0].expr()
+        result = E.FunctionCall(expr, [A.NewArray(A.NewArray(N(1), N(2), N(3)), A.NewArray(N(3), N(4), N(5)))]).Evaluate(env)
+        predicted = np.array([[0, 0, 0], [0, 0, 0]])
+        np.testing.assert_array_almost_equal(predicted, result.array)
+        
+
+        
+        
         
         
         

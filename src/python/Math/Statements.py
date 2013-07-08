@@ -86,6 +86,8 @@ class Return(AbstractStatement):
     
     def Compile(self, env):
         if len(self.parameters) == 1:
+            if isinstance(self.parameters[0], M.Const):
+                raise NotImplementedError
             expression = self.parameters[0].Compile()
         else:
             raise NotImplementedError

@@ -77,8 +77,13 @@ class NewArray(AbstractExpression):
         
     def DevelopResultWithCompile(self, range_name, ranges, compiled_gen_expr, env):
         local_dict = {}
+        defined_ranges = 0
         for i,name in enumerate(range_name):
             local_dict[name] = np.array(ranges[i], dtype=float)
+            defined_ranges += 1
+        if defined_ranges > 1:
+            raise NotImplementedError
+        
         result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrappedBindings)
         return result
             
@@ -180,8 +185,8 @@ class NewArray(AbstractExpression):
             compiled = True
         except:
             compiled = False
-        if compiled and num_gaps == 0:
-            result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env)           
+        if compiled and num_gaps == 0 and len(ranges) <= 1:
+            result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env) 
         else:       
             result = self.DevelopResultWithInterpret(range_dims, range_name, ranges, env, num_gaps, dims) 
         return V.Array(result)
@@ -424,23 +429,21 @@ class Map(AbstractExpression):
         interpret = False
         try:
             expression,local_env = function.Compile(env, arrays)
-        except NotImplementedError:
+        except NotImplementedError, e:
             interpret = True
         else:
-            try:
-                protocol_result = V.Array(ne.evaluate(expression, local_dict=local_env.unwrappedBindings))
-            except:
-                
+            try: 
+                protocol_result = V.Array(ne.evaluate(expression, local_dict=local_env.unwrappedBindings, global_dict=env.unwrappedBindings))
+            except Exception, e:
                 try:
-                    protocol_result = V.Array(eval(expression, globals(), local_env.unwrappedBindings))
-                except:
+                    protocol_result = V.Array(eval(expression, env.unwrappedBindings, local_env.unwrappedBindings))
+                except Exception, e:
                     interpret = True
         if interpret:
             protocol_result = self.Interpret(env, arrays, function)
         return protocol_result
     
     def Interpret(self, env, arrays, function):
-        print "interpreted", function.body[0].parameters
         result = np.empty_like(arrays[0].array)
         dim_range = []
         shape = arrays[0].array.shape
@@ -540,7 +543,9 @@ class Index(AbstractExpression):
             extents_index = list(index)
             extents_index[dim_val] = 0
             extents[tuple(extents_index)] += 1
-
+# try to catch the join and stretch methods
+# do line profiling for index
+# make a double for loop work in compile
         max_extent = np.amax(extents)
         min_extent = np.amin(extents)
         if min_extent == 0 and pad.value == 0 or (min_extent != max_extent and shrink.value == 0 and pad.value == 0):
@@ -550,8 +555,13 @@ class Index(AbstractExpression):
         else:
             extent = min_extent 
         shape[dim_val] = extent
-        # if extents are the same call fancy indexing in numpy
         
+        if min_extent == max_extent:
+            result = operand.array[tuple(np.transpose(indices.array.astype(int)))]
+            return V.Array(result.reshape(shape))
+            
+        # if extents are the same call fancy indexing in numpy
+        # return operand[transposed indices] if min and max extent are the same
         result = np.empty(shape)
         if pad != 0:
             result.fill(pad_value)
