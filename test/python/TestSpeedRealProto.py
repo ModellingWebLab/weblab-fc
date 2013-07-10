@@ -1,13 +1,13 @@
- 
+
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
- 
+
 University of Oxford means the Chancellor, Masters and Scholars of the
 University of Oxford, having an administrative office at Wellington
 Square, Oxford OX1 2JD, UK.
- 
+
 This file is part of Chaste.
- 
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
  * Redistributions of source code must retain the above copyright notice,
@@ -18,7 +18,7 @@ modification, are permitted provided that the following conditions are met:
  * Neither the name of the University of Oxford nor the names of its
    contributors may be used to endorse or promote products derived from this
    software without specific prior written permission.
- 
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,16 +30,16 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
- 
+
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
- 
+
 import CompactSyntaxParser as CSP
 CSP.ImportPythonImplementation()
 csp = CSP.CompactSyntaxParser
- 
+
 import Environment as Env
 import Values as V
 import ArrayExpressions as A
@@ -47,10 +47,10 @@ import Expressions as E
 import MathExpressions as M
 import numpy as np
 import os
- 
+
 def N(v):
     return M.Const(V.Simple(v))
- 
+
 class TestSpeedRealProto(unittest.TestCase):
     def TestS1S2(self):
         # Parse the protocol into a sequence of post-processing statements
@@ -72,11 +72,22 @@ class TestSpeedRealProto(unittest.TestCase):
         env.DefineName('sim:membrane_voltage', membrane_voltage)
         # Run the protocol
         env.ExecuteStatements(statements)
-     
+
+        for var in ['raw_APD90', 'raw_DI']:
+            expected = self.Load2d(os.path.join(data_folder, 'outputs_' + var + '.csv'))
+            actual = env.LookUp(var)
+            np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
+        for var in ['max_S1S2_slope']:
+            expected = self.Load(os.path.join(data_folder, 'outputs_' + var + '.csv'))
+            actual = env.LookUp(var)
+            np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
+
     def Load2d(self, filePath):
         array = np.loadtxt(filePath, dtype=float, delimiter=',', unpack=True) # unpack transposes the array
+        if array.ndim == 1:
+            array = array[:, np.newaxis]
         return V.Array(array)
- 
+
     def Load(self, filePath):
         f = open(filePath, 'r')
         f.readline() # Strip comment line
