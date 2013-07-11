@@ -51,6 +51,8 @@ class Const(AbstractExpression):
         except AttributeError:
             raise NotImplementedError
     
+    def GetUsedVariables(self):
+        return set()
         
 class Plus(AbstractExpression):
     """Addition."""

@@ -54,6 +54,12 @@ class AbstractExpression(Locatable):
     def Compile(self):
         raise NotImplementedError
     
+    def GetUsedVariables(self):
+        result = set()
+        for child in self.children:
+            result |= child.GetUsedVariables()
+        return result
+    
     def Evaluate(self, env):
         """Subclasses must implement this method."""
         # try self.Compile(), if works, try ne.evaluate then eval; if compile fails straight to Interpret

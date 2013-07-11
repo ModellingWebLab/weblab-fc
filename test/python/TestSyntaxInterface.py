@@ -635,8 +635,34 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([[0, 0, 0], [0, 0, 0]])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
+    def TestGetUsedVars(self):
+        env = Env.Environment()
+        parse_action = csp.array.parseString('[i for i in 0:10]', parseAll=True)
+        expr = parse_action[0].expr()
+        used_vars = expr.GetUsedVariables()
+        self.assertEqual(used_vars, set()) 
 
+        parse_action = csp.array.parseString('[i*2 for j in 0:2:4]', parseAll=True)
+        expr = parse_action[0].expr()
+        used_vars = expr.GetUsedVariables()
+        self.assertEqual(used_vars, set(['i']))
         
+        parse_action = csp.array.parseString('[i+j*5 for j in 1:3 for l in 2:4]', parseAll=True)
+        expr = parse_action[0].expr()
+        used_vars = expr.GetUsedVariables()
+        self.assertEqual(used_vars, set(['i']))
+        
+        env.DefineName('a', N(1))
+        env.DefineName('b', N(2))
+        parse_action = csp.expr.parseString('a + b', parseAll=True)
+        expr = parse_action[0].expr()
+        used_vars = expr.GetUsedVariables()
+        self.assertEqual(used_vars, set(['a', 'b']))
+        
+        parse_action = csp.expr.parseString('if a then b else 0', parseAll=True)
+        expr = parse_action[0].expr()
+        used_vars = expr.GetUsedVariables()
+        self.assertEqual(used_vars, set(['a', 'b']))
         
         
         

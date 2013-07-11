@@ -69,6 +69,13 @@ class If(AbstractExpression):
         else:
             result = self.elseExpr.Evaluate(env)
         return result
+    
+    def GetUsedVariables(self):
+        result = self.testExpr.GetUsedVariables()
+        result |= self.thenExpr.GetUsedVariables()
+        result |= self.elseExpr.GetUsedVariables()
+        return result
+
       
       #compile using where
     def Compile(self):
@@ -87,6 +94,9 @@ class NameLookUp(AbstractExpression):
     
     def Compile(self):
         return self.name
+    
+    def GetUsedVariables(self):
+        return set([self.name])
     
 class TupleExpression(AbstractExpression):
     def Interpret(self, env):

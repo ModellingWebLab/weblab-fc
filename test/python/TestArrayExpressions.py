@@ -258,6 +258,7 @@ class TestArrayExpressions(unittest.TestCase):
        # creates an empty array because the step is negative when it should be positive
        fail = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(-1), N(10), M.Const(V.String("i"))), comprehension=True)
        self.assertRaises(ProtocolError, fail.Evaluate, {})
+       
         
        blocks = A.NewArray(A.NewArray(A.NewArray(E.NameLookUp("j")), 
                                       A.NewArray(E.NameLookUp("j"))),
@@ -407,7 +408,7 @@ class TestArrayExpressions(unittest.TestCase):
        root = E.LambdaExpression(parameters, body)
        a = A.NewArray(N(3))
        b = A.NewArray(N(8))
-       result = A.Map(root, a, b)
+       result = A.Map(root, b, a)
        predicted = V.Array(np.array([2])) 
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array) 
  
@@ -740,7 +741,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
         
-        # 2-d pad dimension 0 to the left
+        # 2-d pad dimension 0 up
         result = A.Index(array, find, N(0), N(0), N(1), N(45)).Interpret(env)
         predicted = np.array(np.array([[1, 3, 2], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
@@ -820,5 +821,20 @@ class TestArrayExpressions(unittest.TestCase):
         # input simple value for array instead of array
         result = A.Index(N(1), A.NewArray(N(1), N(2)), array, N(1), N(1), N(45))
         self.assertRaises(ProtocolError, result.Interpret, env)
+        
+    def TestJoinAndStretch(self):
+        env = Env.Environment()
+        env.DefineName('repeated_arr', V.Array(np.array([1, 2, 3])))
+        stretch = A.NewArray(E.NameLookUp("repeated_arr"),
+                             E.TupleExpression(N(1), N(0), N(1), N(3), M.Const(V.String("j"))), 
+                             comprehension=True)
+        predictedArr = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
+        np.testing.assert_array_almost_equal(stretch.Evaluate(env).array, predictedArr)
+        
+        stretch = A.NewArray(E.NameLookUp("repeated_arr"),
+                             E.TupleExpression(N(0), N(0), N(1), N(3), M.Const(V.String("j"))), 
+                             comprehension=True)
+        predictedArr = np.array([[1, 2, 3], [1, 2, 3], [1, 2, 3]])
+        np.testing.assert_array_almost_equal(stretch.Evaluate(env).array, predictedArr)
         
         

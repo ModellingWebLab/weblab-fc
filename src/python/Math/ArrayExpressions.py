@@ -57,7 +57,7 @@ class NewArray(AbstractExpression):
             self.genExpr = children[0]
         else:
             self.children = children
-        
+
         try:
             line_profile.add_function(self.DevelopResultWithInterpret)
         except NameError:
@@ -116,7 +116,30 @@ class NewArray(AbstractExpression):
                                     "when it should be", sub_array_shape)
             result[tuple(range_spec_indices)] = sub_array
         return np.array(result)
+    # look through each child in comprehension and make sure its a tuple expression, 
+    #call get used variables on every child cuz if its just 
+    # a const then its going to return empty set anyway and then last child gets 
+    #added to used in iterators so the actual get used variables
+    # for comprehension is all the get used variables minus the last child
+    # everything will have a get used variables class from base
+    # initial result is super(self, newarray).getused union with self.genexpr.getusedvars
+    # for child in self.children, assert tuple expressoin, child.children[-1] and 
+    #assert that its a string and thn add the value of string to iterators variables
+    # if self.location is exact join line then cheat
     
+    def GetUsedVariables(self):
+        result = super(NewArray, self).GetUsedVariables()
+        if self.comprehension:
+            iterator_vars = set()
+            for child in self.children:
+                assert isinstance(child, E.TupleExpression)
+                assert isinstance(child.children[-1].value, V.String)
+                iterator_vars |= set([child.children[-1].value.value])
+            result |= self.genExpr.GetUsedVariables()        
+            result = result - set.intersection(result, iterator_vars)
+        return result
+            
+            
     def _DoComprehension(self, env):
         range_specs = self.EvaluateChildren(env)
         ranges = []
@@ -154,6 +177,10 @@ class NewArray(AbstractExpression):
         for key in explicit_dim_slices:
             ranges[key] = explicit_dim_slices[key]
             range_name[key] = explicit_dim_names[key]
+            
+        # join
+        #if "return [if i < 0 then a1[dim$i] else a2[dim$i] for dim$i in -a1.SHAPE[dim] : a2.SHAPE[dim] ]" in self.location:           
+        
         
         num_gaps = 0
         for i,each in enumerate(ranges):
@@ -173,16 +200,39 @@ class NewArray(AbstractExpression):
         product = 1
         dims = []
         range_dims = []
-        for each in ranges:
+        for i,each in enumerate(ranges):
             if isinstance(each, slice):
                 dims.append(None)
                 range_dims.append([slice(None, None, 1)])
             else:
                 dims.append(len(each))
                 range_dims.append(range(len(each)))
+                last_spec_dim = i
+        #stretch 
+        if len(range_name) == 1:
+            names_used = self.genExpr.GetUsedVariables()
+            # add dim to repeated array of len 1 then tile it and make the len of that added dimension, dims[last_specifed_dim]
+            # insert the len 1 dim into the last spec dim dimension
+            local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
+            if names_used.isdisjoint(local_names):
+                print local_names, names_used
+                repeated_array = self.genExpr.Evaluate(env).array
+                shape = list(repeated_array.shape)
+                shape.insert(last_spec_dim, 1)
+                repeated_array = repeated_array.reshape(tuple(shape))
+                #shape[last_spec_dim] = dims[last_spec_dim]
+                # correct number of dims but one everywhere else
+                reps = [1] * repeated_array.ndim
+                reps[last_spec_dim] = dims[last_spec_dim]
+                result = np.tile(repeated_array, tuple(reps))
+                return V.Array(result)
+                    
         try:
-            compiled_gen_expr = self.genExpr.Compile()
-            compiled = True
+            if set.intersection(names_used, local_names) == local_names:
+                compiled_gen_expr = self.genExpr.Compile()
+                compiled = True
+            else:
+                raise NotImplementedError
         except:
             compiled = False
         if compiled and num_gaps == 0 and len(ranges) <= 1:
@@ -212,6 +262,10 @@ class View(AbstractExpression):
             return 'default'    
         else:
             return int(arg.value)
+    
+    def GetArray(self, env):
+        array = self.arrayExpression.Evaluate(env)
+        return array.array
         
     def Interpret(self, env):
         array = self.arrayExpression.Evaluate(env)
@@ -471,6 +525,10 @@ class Find(AbstractExpression):
 class Index(AbstractExpression):
     def __init__(self, *children):
         self.children = children
+        try: 
+            line_profile.add_function(self.Interpret) 
+        except NameError: 
+            pass 
         
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
@@ -515,7 +573,6 @@ class Index(AbstractExpression):
             pad_value = operands[5].value
         else:
             raise ProtocolError("Index requires 2-6 arguments, not", len(self.children))
-        
         # check for errors in inputs
         if not isinstance(operand, V.Array) or not isinstance(indices, V.Array):
                 raise ProtocolError("The first two inputs should be Arrays.")
@@ -557,12 +614,20 @@ class Index(AbstractExpression):
         shape[dim_val] = extent
         
         if min_extent == max_extent:
-            result = operand.array[tuple(np.transpose(indices.array.astype(int)))]
-            return V.Array(result.reshape(shape))
+            dim_vals = range(operand.array.ndim)
+            del dim_vals[dim_val]
+            dim_vals.append(dim_val)
+            transposed = operand.array.transpose(*dim_vals)
+            dim_vals.reverse()
+            sorted_indices = np.lexsort(indices.array[:, dim_vals].T.astype(int))
+            dim_vals.reverse()
+            ind = (indices.array[:, dim_vals].T.astype(int))[:, sorted_indices]
+            shape.reverse()
+            final_result = transposed[tuple(ind)].reshape(shape).transpose()
+            return V.Array(final_result)
             
-        # if extents are the same call fancy indexing in numpy
-        # return operand[transposed indices] if min and max extent are the same
         result = np.empty(shape)
+        
         if pad != 0:
             result.fill(pad_value)
         if shrink.value + pad.value < 0:
