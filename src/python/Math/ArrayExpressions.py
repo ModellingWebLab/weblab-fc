@@ -215,7 +215,6 @@ class NewArray(AbstractExpression):
             # insert the len 1 dim into the last spec dim dimension
             local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
             if names_used.isdisjoint(local_names):
-                print local_names, names_used
                 repeated_array = self.genExpr.Evaluate(env).array
                 shape = list(repeated_array.shape)
                 shape.insert(last_spec_dim, 1)
@@ -578,17 +577,17 @@ class Index(AbstractExpression):
                 raise ProtocolError("The first two inputs should be Arrays.")
         if indices.array.ndim != 2:
             raise ProtocolError("The dimension of the indices array must be 2, not", indices.array.ndim)
-        if not isinstance(dim, V.Simple):
+        if not hasattr(dim, 'value'):
                 raise ProtocolError("The dimension input should be a simple value, not a", type(dim))
         if dim.value >= operand.array.ndim:
             raise ProtocolError("The operand to index has", operand.array.ndim, "dimensions, so it cannot be folded along dimension", dim.value)
-        if not isinstance(shrink, V.Simple):
+        if not hasattr(shrink, 'value'):
                 raise ProtocolError("The shrink input should be a simple value, not a", type(shrink))
-        if not isinstance(pad, V.Simple):
+        if not hasattr(pad, 'value'):
                 raise ProtocolError("The pad input should be a simple value, not a", type(pad))
         if shrink.value != 0 and pad.value != 0:
             raise ProtocolError("You cannot both pad and shrink!")
-        if not isinstance(pad, V.Simple):
+        if not hasattr(pad, 'value'):
                 raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
 
         dim_val = int(dim.value)

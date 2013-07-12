@@ -33,12 +33,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import numexpr as ne
 import numpy
 from Locatable import Locatable
+import Values as V
 
 class AbstractExpression(Locatable):
     """Base class for expressions in the protocol language."""
     
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
+        super(AbstractExpression, self).__init__()
         self.children = children
         self._compiled = None
 
@@ -67,9 +69,9 @@ class AbstractExpression(Locatable):
             compiled = self.Compile()
             try:
                 results = V.Array(ne.evaluate(compiled, local_dict=env.unwrappedBindings)) 
-            except:
+            except Exception, e:
                 results = V.Array(eval(compiled, globals(), env.unwrappedBindings))               
-        except:
+        except Exception, e:
             results = self.Interpret(env)
         return results
     

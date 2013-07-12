@@ -142,21 +142,21 @@ class Accessor(AbstractExpression):
         
     def Interpret(self, env):
         variable = self.variableExpr.Evaluate(env)
-        if self.attribute == 0:
-            result = isinstance(variable, V.Simple)
-        elif self.attribute == 1:
-            result = isinstance(variable, V.Array)
-        elif self.attribute == 2:
+        if self.attribute == self.IS_SIMPLE_VALUE:
+            result = hasattr(variable, 'value')
+        elif self.attribute == self.IS_ARRAY:
+            result = hasattr(variable, 'array')
+        elif self.attribute == self.IS_STRING:
             result = isinstance(variable, V.String)
-        elif self.attribute == 3:
+        elif self.attribute == self.IS_FUNCTION:
             result = isinstance(variable, V.LambdaClosure)
-        elif self.attribute == 4:
+        elif self.attribute == self.IS_TUPLE:
             result = isinstance(variable, V.Tuple)
-        elif self.attribute == 5:
+        elif self.attribute == self.IS_NULL:
             result = isinstance(variable, V.Null)
-        elif self.attribute == 6:
+        elif self.attribute == self.IS_DEFAULT:
             result = isinstance(variable, V.DefaultParameter)
-        elif self.attribute == 7:
+        elif self.attribute == self.NUM_DIMS:
             try:
                 result = variable.array.ndim
             except AttributeError:
