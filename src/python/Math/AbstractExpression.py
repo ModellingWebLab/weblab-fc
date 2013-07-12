@@ -43,6 +43,14 @@ class AbstractExpression(Locatable):
         super(AbstractExpression, self).__init__()
         self.children = children
         self._compiled = None
+        
+    @property
+    def compiled(self):
+        try:
+            return self._compiled
+        except:
+            c = self._compiled = self.Compile()
+            return c
 
     def EvaluateChildren(self, env):
         """Evaluate our child expressions and return a list of their values."""
@@ -66,7 +74,7 @@ class AbstractExpression(Locatable):
         """Subclasses must implement this method."""
         # try self.Compile(), if works, try ne.evaluate then eval; if compile fails straight to Interpret
         try:
-            compiled = self.Compile()
+            compiled = self.compiled
             try:
                 results = V.Array(ne.evaluate(compiled, local_dict=env.unwrappedBindings)) 
             except Exception, e:

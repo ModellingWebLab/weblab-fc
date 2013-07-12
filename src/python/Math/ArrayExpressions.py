@@ -51,6 +51,7 @@ def N(number):
 class NewArray(AbstractExpression):
     """Used to create new arrays."""
     def __init__(self, *children, **kwargs):
+        super(NewArray, self).__init__()
         self.comprehension = kwargs.get('comprehension', False)
         if self.comprehension:
             self.children = children[1:]
@@ -209,22 +210,22 @@ class NewArray(AbstractExpression):
                 range_dims.append(range(len(each)))
                 last_spec_dim = i
         #stretch 
-        if len(range_name) == 1:
-            names_used = self.genExpr.GetUsedVariables()
-            # add dim to repeated array of len 1 then tile it and make the len of that added dimension, dims[last_specifed_dim]
-            # insert the len 1 dim into the last spec dim dimension
-            local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
-            if names_used.isdisjoint(local_names):
-                repeated_array = self.genExpr.Evaluate(env).array
-                shape = list(repeated_array.shape)
-                shape.insert(last_spec_dim, 1)
-                repeated_array = repeated_array.reshape(tuple(shape))
-                #shape[last_spec_dim] = dims[last_spec_dim]
-                # correct number of dims but one everywhere else
-                reps = [1] * repeated_array.ndim
-                reps[last_spec_dim] = dims[last_spec_dim]
-                result = np.tile(repeated_array, tuple(reps))
-                return V.Array(result)
+#         if len(range_name) == 1:
+#             names_used = self.genExpr.GetUsedVariables()
+#             # add dim to repeated array of len 1 then tile it and make the len of that added dimension, dims[last_specifed_dim]
+#             # insert the len 1 dim into the last spec dim dimension
+#             local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
+#             if names_used.isdisjoint(local_names):
+#                 repeated_array = self.genExpr.Evaluate(env).array
+#                 shape = list(repeated_array.shape)
+#                 shape.insert(last_spec_dim, 1)
+#                 repeated_array = repeated_array.reshape(tuple(shape))
+#                 #shape[last_spec_dim] = dims[last_spec_dim]
+#                 # correct number of dims but one everywhere else
+#                 reps = [1] * repeated_array.ndim
+#                 reps[last_spec_dim] = dims[last_spec_dim]
+#                 result = np.tile(repeated_array, tuple(reps))
+#                 return V.Array(result)
                     
         try:
             if set.intersection(names_used, local_names) == local_names:
@@ -246,10 +247,10 @@ class NewArray(AbstractExpression):
         return V.Array(elements_arr)
     
 class View(AbstractExpression):
-    def __init__(self, array, *children):     
+    def __init__(self, array, *children):   
+        super(View, self).__init__()  
         self.arrayExpression = array
         self.children = children
-        
         
     def GetValue(self, arg, arg_name='not dim'):
         if isinstance(arg, V.Null):
@@ -268,13 +269,11 @@ class View(AbstractExpression):
         
     def Interpret(self, env):
         array = self.arrayExpression.Evaluate(env)
-        if not isinstance(array, V.Array):
-            raise ProtocolError("First argument must be of type Values.Array, not", type(array))
         if len(self.children) > array.array.ndim: # check to make sure indices = number of dimensions
             raise ProtocolError("You entered", len(self.children), "indices, but the array has", array.array.ndim, "dimensions.")
-      
         indices = self.EvaluateChildren(env) # list of tuples with indices
-        
+        if not isinstance(array, V.Array):
+            raise ProtocolError("First argument must be an Array, not", type(array))
         #try:
         implicit_dim_slices = []
         slices = [None] * array.array.ndim
@@ -369,7 +368,9 @@ class View(AbstractExpression):
 class Fold(AbstractExpression):
     
     def __init__(self, *children):
-        self.children = children
+        super(Fold, self).__init__(*children)
+        if len(self.children) < 2 or len(self.children) > 4:
+            raise ProtocolError("Fold requires 2-4 inputs, not", len(self.children))
         
     def GetValue(self, arg):
         if isinstance(arg, V.Null):
@@ -401,8 +402,6 @@ class Fold(AbstractExpression):
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension, 
                                      "because the array only has", array.ndim, "dimensions")
-        else:
-            raise ProtocolError("Fold requires 2-4 inputs, not", len(self.children))
         shape = list(array.shape)
         size = shape[dimension]
         
@@ -465,16 +464,18 @@ class Fold(AbstractExpression):
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
     def __init__(self, functionExpr, *children):
+        super(Map, self).__init__()
         self.functionExpr = functionExpr
         self.children = children
+        if len(self.children) < 1:
+            raise ProtocolError("Map requires at least one parameter")
 
     def Evaluate(self, env):
         function = self.functionExpr.Evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError("Function passed is not a function")
         arrays = self.EvaluateChildren(env)
-        if len(self.children) < 1:
-            raise ProtocolError("Map requires at least one parameter")
+
         shape = arrays[0].array.shape
         for array in arrays:
             if array.array.shape != shape:
@@ -513,8 +514,9 @@ class Map(AbstractExpression):
     
 class Find(AbstractExpression):
     def __init__(self, operandExpr):
-        self.operandExpr = operandExpr 
-         
+        super(Find, self).__init__()
+        self.operandExpr = operandExpr
+        
     def Interpret(self, env):
         operand = self.operandExpr.Evaluate(env)
         if not isinstance(operand, V.Array):
@@ -523,7 +525,9 @@ class Find(AbstractExpression):
         
 class Index(AbstractExpression):
     def __init__(self, *children):
-        self.children = children
+        super(Index, self).__init__(*children)
+        if len(self.children ) < 2 or len(self.children) > 6:
+            raise ProtocolError("Index requires 2-6 operands, not", len(self.children))
         try: 
             line_profile.add_function(self.Interpret) 
         except NameError: 
@@ -570,8 +574,7 @@ class Index(AbstractExpression):
             shrink = operands[3]
             pad = operands[4]
             pad_value = operands[5].value
-        else:
-            raise ProtocolError("Index requires 2-6 arguments, not", len(self.children))
+
         # check for errors in inputs
         if not isinstance(operand, V.Array) or not isinstance(indices, V.Array):
                 raise ProtocolError("The first two inputs should be Arrays.")

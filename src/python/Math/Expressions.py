@@ -41,6 +41,7 @@ from AbstractExpression import AbstractExpression
 
 class FunctionCall(AbstractExpression):
     def __init__(self, functionOrName, children):
+        super(FunctionCall, self).__init__()
         if isinstance(functionOrName, str):
             self.function = NameLookUp(functionOrName)
         else:
@@ -56,6 +57,7 @@ class FunctionCall(AbstractExpression):
     
 class If(AbstractExpression):
     def __init__(self, testExpr, thenExpr, elseExpr):
+        super(If, self).__init__()
         self.testExpr = testExpr
         self.thenExpr = thenExpr
         self.elseExpr = elseExpr
@@ -87,6 +89,7 @@ class If(AbstractExpression):
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
     def __init__(self, name):
+        super(NameLookUp, self).__init__()
         self.name = name
         
     def Interpret(self, env):
@@ -99,13 +102,17 @@ class NameLookUp(AbstractExpression):
         return set([self.name])
     
 class TupleExpression(AbstractExpression):
-    def Interpret(self, env):
+    def __init__(self, *children):
+        super(TupleExpression, self).__init__(*children)
         if len(self.children) < 1:
             raise ProtocolError("Empty tuple expressions are not allowed")
+        
+    def Interpret(self, env):
         return V.Tuple(*self.EvaluateChildren(env))
         
 class LambdaExpression(AbstractExpression):
     def __init__(self, formalParameters, body, defaultParameters=None):
+        super(LambdaExpression, self).__init__()
         self.formalParameters = formalParameters
         self.body = body
         self.defaultParameters = defaultParameters
@@ -137,6 +144,7 @@ class Accessor(AbstractExpression):
     SHAPE = 9
     
     def __init__(self, variableExpr, attribute):
+        super(Accessor, self).__init__()
         self.variableExpr = variableExpr
         self.attribute = attribute
         

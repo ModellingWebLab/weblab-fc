@@ -240,7 +240,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = csp.expr.parseString('MathML:ln(MathML:exponentiale)', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, M.Ln)
-        self.assertEqual(expr.Evaluate(env).value, 1)
+        self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
         # log
         parse_action = csp.expr.parseString('MathML:log(10)', parseAll=True)
