@@ -130,8 +130,10 @@ class TestBasicExpressions(unittest.TestCase):
         env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
-        self.assertEqual(E.NameLookUp("one").Evaluate(env), one)
-        
+        # Note that Evaluate will try to optimise using numexpr, and so always returns a V.Array (0d in this case)
+        self.assertEqual(E.NameLookUp("one").Interpret(env), one)
+        np.testing.assert_array_equal(E.NameLookUp("one").Evaluate(env).array, np.array(1))
+
     def TestIf(self):
         # test is true
         env = Env.Environment()
