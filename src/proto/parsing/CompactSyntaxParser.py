@@ -51,7 +51,6 @@ p.ParserElement.enablePackrat()
 ################################################################################
 import lxml.builder
 import lxml.etree as ET
-from Locatable import Locatable
 
 PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
 MATHML_NS = "http://www.w3.org/1998/Math/MathML"
@@ -64,12 +63,13 @@ CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
 
 # Support for interfacing to the Python implementation, rather than generating XML
 def ImportPythonImplementation():
-    global M, E, V, S, A, OPERATORS, MATHML, VALUES
+    global M, E, V, S, A, Locatable, OPERATORS, MATHML, VALUES
     import Expressions as E
     import MathExpressions as M
     import ArrayExpressions as A
     import Values as V
     import Statements as S
+    from Locatable import Locatable
     import math
     
     OPERATORS = {'+': M.Plus, '-': M.Minus, '*': M.Times, '/': M.Divide, '^': M.Power, 
