@@ -34,8 +34,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Values as V
 import numexpr as ne
 import math
-from ErrorHandling import ProtocolError
-from AbstractExpression import AbstractExpression
+
+import AbstractExpression as AE
+import ErrorHandling
+
+AbstractExpression = AE.AbstractExpression
+ProtocolError = ErrorHandling.ProtocolError
 
 class Const(AbstractExpression):
     """Class for constant value as expression."""

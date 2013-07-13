@@ -32,13 +32,15 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import Values as V
 import MathExpressions as M
-import numexpr as ne
-import numpy
-import math
-from ErrorHandling import ProtocolError
-from Locatable import Locatable
+import Locatable
 
-class AbstractStatement(Locatable):
+import AbstractExpression as AE
+import ErrorHandling
+
+AbstractExpression = AE.AbstractExpression
+ProtocolError = ErrorHandling.ProtocolError
+
+class AbstractStatement(Locatable.Locatable):
     """Base class for statements in the protocol language."""
     def Evaluate(self, env):
         raise NotImplementedError

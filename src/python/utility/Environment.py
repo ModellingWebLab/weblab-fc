@@ -29,10 +29,15 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Values as V
-from ErrorHandling import ProtocolError
-from AbstractValue import AbstractValue
+
 import numpy as np
+import Values as V
+import AbstractValue as AV
+import ErrorHandling
+
+AbstractValue = AV.AbstractValue
+ProtocolError = ErrorHandling.ProtocolError
+
 
 class Environment(object):
     nextIdent = [0]
@@ -40,8 +45,7 @@ class Environment(object):
     def __init__(self, allowOverwrite=False, delegatee=None):
         self.allowOverwrite = allowOverwrite
         self.bindings = {}
-        self.delegates = {}
-        self.delegates[""] = delegatee
+        self.delegates = {"": delegatee}
         self.unwrappedBindings = {}
         self.unwrappedBindings['___np'] = np
         

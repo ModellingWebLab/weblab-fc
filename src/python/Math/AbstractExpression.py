@@ -32,23 +32,29 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import numexpr as ne
 import numpy
-from Locatable import Locatable
+import Locatable
 import Values as V
 
-class AbstractExpression(Locatable):
+
+class AbstractExpression(Locatable.Locatable):
     """Base class for expressions in the protocol language."""
     
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         super(AbstractExpression, self).__init__()
         self.children = children
-        self._compiled = None
-        
+
+#        try:
+#            line_profile.add_function(self.Evaluate)
+#        except NameError:
+#            pass
+
     @property
     def compiled(self):
         try:
             return self._compiled
-        except:
+        except AttributeError:
+            # We haven't called Compile yet; cache the result
             c = self._compiled = self.Compile()
             return c
 

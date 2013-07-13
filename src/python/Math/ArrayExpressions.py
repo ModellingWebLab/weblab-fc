@@ -39,11 +39,14 @@ import numpy as np
 import numexpr as ne
 import itertools
 import sys
-from operator import mul
 
-from AbstractExpression import AbstractExpression
-from ErrorHandling import ProtocolError
-from operator import itemgetter
+import AbstractExpression as AE
+import ErrorHandling
+
+AbstractExpression = AE.AbstractExpression
+ProtocolError = ErrorHandling.ProtocolError
+
+from operator import itemgetter, mul
 
 def N(number):
     return M.Const(V.Simple(number))
@@ -496,43 +499,47 @@ class Map(AbstractExpression):
         if interpret:
             protocol_result = self.Interpret(env, arrays, function)
         return protocol_result
-    
+
     def Interpret(self, env, arrays, function):
         result = np.empty_like(arrays[0].array)
         dim_range = []
         shape = arrays[0].array.shape
         for dim in shape:
-            dim_range.append(range(dim)) 
+            dim_range.append(range(dim))
         for index in itertools.product(*dim_range):
             function_inputs = []
             for array in arrays:
                 function_inputs.append(V.Simple(float(array.array[index])))
-            result[index] = function.Evaluate(env, function_inputs).value
+            fn_result = function.Evaluate(env, function_inputs)
+            try:
+                result[index] = fn_result.value
+            except AttributeError:
+                raise ProtocolError("A mapped function must always return simple values, not " + str(fn_result))
         protocol_result = V.Array(result)
-           
+
         return protocol_result
-    
+
 class Find(AbstractExpression):
     def __init__(self, operandExpr):
         super(Find, self).__init__()
         self.operandExpr = operandExpr
-        
+
     def Interpret(self, env):
         operand = self.operandExpr.Evaluate(env)
-        if not isinstance(operand, V.Array):
-            raise ProtocolError("Operand for find must be an Array, not a", type(operand))
+        if not isinstance(operand, V.Array) or operand.array.ndim == 0:
+            raise ProtocolError("Operand for find must be a non-generate Array, not " + str(operand))
         return V.Array(np.transpose(np.nonzero(operand.array)))
-        
+
 class Index(AbstractExpression):
     def __init__(self, *children):
         super(Index, self).__init__(*children)
         if len(self.children ) < 2 or len(self.children) > 6:
             raise ProtocolError("Index requires 2-6 operands, not", len(self.children))
-        try: 
-            line_profile.add_function(self.Interpret) 
-        except NameError: 
-            pass 
-        
+#        try: 
+#            line_profile.add_function(self.Interpret) 
+#        except NameError: 
+#            pass 
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         defaultParameters = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), sys.float_info.max]

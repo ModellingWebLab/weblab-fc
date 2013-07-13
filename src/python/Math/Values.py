@@ -29,11 +29,14 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
-import AbstractValue
+
 import numpy as np
+
+import AbstractValue
 import Environment as Env
-from ErrorHandling import ProtocolError
-import ArrayExpressions as A
+
+import ErrorHandling
+ProtocolError = ErrorHandling.ProtocolError
 
 class Simple(AbstractValue.AbstractValue):
     def __init__(self, value):

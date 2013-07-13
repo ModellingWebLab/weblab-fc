@@ -36,8 +36,11 @@ import numpy as np
 import numexpr as ne
 import Statements as S
 
-from ErrorHandling import ProtocolError
-from AbstractExpression import AbstractExpression
+import AbstractExpression as AE
+import ErrorHandling
+
+AbstractExpression = AE.AbstractExpression
+ProtocolError = ErrorHandling.ProtocolError
 
 class FunctionCall(AbstractExpression):
     def __init__(self, functionOrName, children):
