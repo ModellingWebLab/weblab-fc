@@ -47,6 +47,7 @@ import Expressions as E
 import MathExpressions as M
 import numpy as np
 import os
+import Protocol
 
 def N(v):
     return M.Const(V.Simple(v))
@@ -55,31 +56,33 @@ class TestSpeedRealProto(unittest.TestCase):
     def TestS1S2(self):
         # Parse the protocol into a sequence of post-processing statements
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2_postproc.txt'
-        parser = csp()
-        CSP.source_file = proto_file
-        generator = parser._Try(csp.protocol.parseFile, proto_file, parseAll=True)[0]
-        self.assertIsInstance(generator, CSP.Actions.Protocol)
-        statements = generator.expr()[0]
+        proto = Protocol.Protocol(proto_file)
+#         parser = csp()
+#         CSP.source_file = proto_file
+#         generator = parser._Try(csp.protocol.parseFile, proto_file, parseAll=True)[0]
+#         self.assertIsInstance(generator, CSP.Actions.Protocol)
+#         statements = generator.expr()[0]
         # Load the raw simulation data from file
-        env = Env.Environment()
+#         env = Env.Environment()
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto'
         membrane_voltage = self.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
         time_1d = self.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
         time_2d = A.NewArray(M.Const(time_1d),
                              E.TupleExpression(N(0), N(0), N(1), N(91), M.Const(V.String('_'))),
-                             comprehension=True).Evaluate(env)
-        env.DefineName('sim:time', time_2d)
-        env.DefineName('sim:membrane_voltage', membrane_voltage)
+                             comprehension=True).Evaluate(proto.env)
+        proto.env.DefineName('sim:time', time_2d)
+        proto.env.DefineName('sim:membrane_voltage', membrane_voltage)
         # Run the protocol
-        env.ExecuteStatements(statements)
+#         env.ExecuteStatements(statements)
+        proto.Run()
 
         for var in ['raw_APD90', 'raw_DI']:
             expected = self.Load2d(os.path.join(data_folder, 'outputs_' + var + '.csv'))
-            actual = env.LookUp(var)
+            actual = proto.env.LookUp(var)
             np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
         for var in ['max_S1S2_slope']:
             expected = self.Load(os.path.join(data_folder, 'outputs_' + var + '.csv'))
-            actual = env.LookUp(var)
+            actual = proto.env.LookUp(var)
             np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
 
     def Load2d(self, filePath):
