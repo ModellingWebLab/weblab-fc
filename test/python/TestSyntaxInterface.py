@@ -48,6 +48,7 @@ import Expressions as E
 import Statements as S
 import numpy as np
 import MathExpressions as M
+import Protocol
 from ErrorHandling import ProtocolError
 
 def N(number):
@@ -666,6 +667,16 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         used_vars = expr.GetUsedVariables()
         self.assertEqual(used_vars, set(['a', 'b']))
+        
+    def TestTxtFiles(self):
+        # Parse the protocol into a sequence of post-processing statements
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_find_index.txt'
+        proto = Protocol.Protocol(proto_file)
+        proto.Run()
+        
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt'
+        proto = Protocol.Protocol(proto_file)
+        proto.Run()
         
         
         

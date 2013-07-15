@@ -1,6 +1,6 @@
 # Compact version of the test_find_index protocol
 
-import "../../../src/proto/library/BasicLibrary.xml"
+import "../../../src/proto/library/BasicLibrary.txt"
 
 post-processing {
     # Create 3x5 input array
@@ -11,17 +11,6 @@ post-processing {
     all_bar_largest = map(lambda x: x < input_max, input)
     all_bar_largest_idxs = find(all_bar_largest)
     all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}
-    
-    # Recursive function to fold along every dimension in turn, starting from zero
-    def MultiFold(op, array, init) {
-        # Base case: 0d input - return the single value
-        return if array.NUM_DIMS == 0 then array else \
-            # Recursive case: fold zeroth dimension
-            MultiFold(op, fold(op, array, init, 0)[0], init)
-    }
-    
-    # Function to check array equality elementwise
-    ArrayEq = lambda a1, a2: MultiFold(@2:&&, map(@2:==, a1, a2), 1)
     
     # Whole array
     all_entries = map(lambda x: x < input_max + 1, input)

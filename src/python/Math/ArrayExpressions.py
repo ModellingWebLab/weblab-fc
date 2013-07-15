@@ -541,7 +541,7 @@ class Index(AbstractExpression):
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
-        defaultParameters = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), sys.float_info.max]
+        defaultParameters = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
         for i,oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
                 operands[i] = defaultParameters[i]
@@ -620,19 +620,6 @@ class Index(AbstractExpression):
         else:
             extent = min_extent 
         shape[dim_val] = extent
-        
-        if min_extent == max_extent:
-            dim_vals = range(operand.array.ndim)
-            del dim_vals[dim_val]
-            dim_vals.append(dim_val)
-            transposed = operand.array.transpose(*dim_vals)
-            dim_vals.reverse()
-            sorted_indices = np.lexsort(indices.array[:, dim_vals].T.astype(int))
-            dim_vals.reverse()
-            ind = (indices.array[:, dim_vals].T.astype(int))[:, sorted_indices]
-            shape.reverse()
-            final_result = transposed[tuple(ind)].reshape(shape).transpose()
-            return V.Array(final_result)
             
         result = np.empty(shape)
         
