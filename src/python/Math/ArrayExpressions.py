@@ -213,23 +213,22 @@ class NewArray(AbstractExpression):
                 range_dims.append(range(len(each)))
                 last_spec_dim = i
         #stretch 
-#         if len(range_name) == 1:
-#             names_used = self.genExpr.GetUsedVariables()
-#             # add dim to repeated array of len 1 then tile it and make the len of that added dimension, dims[last_specifed_dim]
-#             # insert the len 1 dim into the last spec dim dimension
-#             local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
-#             if names_used.isdisjoint(local_names):
-#                 repeated_array = self.genExpr.Evaluate(env).array
-#                 shape = list(repeated_array.shape)
-#                 shape.insert(last_spec_dim, 1)
-#                 repeated_array = repeated_array.reshape(tuple(shape))
-#                 #shape[last_spec_dim] = dims[last_spec_dim]
-#                 # correct number of dims but one everywhere else
-#                 reps = [1] * repeated_array.ndim
-#                 reps[last_spec_dim] = dims[last_spec_dim]
-#                 result = np.tile(repeated_array, tuple(reps))
-#                 return V.Array(result)
-                    
+        if len(range_name) == 1:
+            names_used = self.genExpr.GetUsedVariables()
+            # add dim to repeated array of len 1 then tile it and make the len of that added dimension, dims[last_specifed_dim]
+            # insert the len 1 dim into the last spec dim dimension
+            local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
+            if names_used.isdisjoint(local_names):
+                repeated_array = self.genExpr.Evaluate(env).array
+                shape = list(repeated_array.shape)
+                shape.insert(last_spec_dim, 1)
+                repeated_array = repeated_array.reshape(tuple(shape))
+                #shape[last_spec_dim] = dims[last_spec_dim]
+                # correct number of dims but one everywhere else
+                reps = [1] * repeated_array.ndim
+                reps[last_spec_dim] = dims[last_spec_dim]
+                result = np.tile(repeated_array, tuple(reps))
+                return V.Array(result)
         try:
             if set.intersection(names_used, local_names) == local_names:
                 compiled_gen_expr = self.genExpr.Compile()

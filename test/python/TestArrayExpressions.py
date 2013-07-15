@@ -740,9 +740,9 @@ class TestArrayExpressions(unittest.TestCase):
         result = A.Index(array, find, N(1), N(0), N(1), N(45)).Interpret(env)
         predicted = np.array(np.array([[1, 2, 45], [3, 45, 45], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
-        
+
         # 2-d pad dimension 0 up
-        result = A.Index(array, find, N(0), N(0), N(1), N(45)).Interpret(env)
+        result = A.Index(array, A.Find(array), N(0), N(0), N(1), N(45)).Interpret(env)
         predicted = np.array(np.array([[1, 3, 2], [1, 1, 1]]))
         np.testing.assert_array_almost_equal(result.array, predicted)
         

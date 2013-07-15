@@ -66,6 +66,9 @@ class Environment(object):
     def DefineNames(self, names, values):
         for i, name in enumerate(names):
             self.DefineName(name, values[i])
+            
+#     def EvaluateExpr(self, expr):
+        
                 
     def FreshIdent(self):
         self.nextIdent[0] += 1

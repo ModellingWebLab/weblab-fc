@@ -242,6 +242,9 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertIsInstance(expr, M.Ln)
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
+        # evaluate expression in environment will parse and evaluate so do the parse action line
+        # the expr line, and the expr.Evaluate(env) line return result of evaluating 
+        
         # log
         parse_action = csp.expr.parseString('MathML:log(10)', parseAll=True)
         expr = parse_action[0].expr()
