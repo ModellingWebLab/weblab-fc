@@ -14,7 +14,7 @@ inputs {
                         60.01, 65.01, 70.01, 75.01, 79.99 ]
 }
 
-import std = "../../../src/proto/library/BasicLibrary.xml"
+import std = "../../../src/proto/library/BasicLibrary.txt"
 
 library {
     default_Cao = sim:oxmeta:extracellular_calcium_concentration

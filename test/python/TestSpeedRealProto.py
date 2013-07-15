@@ -45,9 +45,11 @@ import Values as V
 import ArrayExpressions as A
 import Expressions as E
 import MathExpressions as M
+import Protocol
+
 import numpy as np
 import os
-import Protocol
+import time
 
 def N(v):
     return M.Const(V.Simple(v))
@@ -67,7 +69,7 @@ class TestSpeedRealProto(unittest.TestCase):
         proto.env.DefineName('sim:time', time_2d)
         proto.env.DefineName('sim:membrane_voltage', membrane_voltage)
         # Run the protocol
-        proto.Run()
+        self.Time(proto.Run)
         # Check the results
         self.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
 
@@ -80,13 +82,21 @@ class TestSpeedRealProto(unittest.TestCase):
                              self.Load(os.path.join(data_folder, 'outputs_membrane_L_type_calcium_current.csv')))
         proto.env.DefineName('sim:extracellular_calcium_concentration',
                              self.Load(os.path.join(data_folder, 'outputs_extracellular_calcium_concentration.csv')))
+        proto.env.DefineName('sim:oxmeta:extracellular_calcium_concentration',
+                             V.Simple(proto.env.LookUp('sim:extracellular_calcium_concentration').array[1,0,0]))
         shape = list(proto.env.LookUp('sim:membrane_voltage').array.shape)
         shape[-1] = 1
-        time = np.arange(-10.0, 500.01, 0.01).tile(shape)
+        time = V.Array(np.tile(np.arange(-10.0, 500.01, 0.01), shape))
         proto.env.DefineName('sim:time', time)
-        proto.Run()
+        self.Time(proto.Run)
         # Check the results
         self.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
+
+    def Time(self, func):
+        start = time.time()
+        func()
+        end = time.time()
+        print "Protocol execution took", (end - start), "seconds"
 
     def CheckResults(self, proto, expectedSpec, dataFolder):
         """Check protocol results against saved values.
@@ -101,15 +111,34 @@ class TestSpeedRealProto(unittest.TestCase):
             expected = method(data_file)
             actual = proto.env.LookUp(name)
             np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
+    
+    def CheckFileCompression(self, filePath):
+        """Return (real_path, is_compressed) if a .gz compressed version of filePath exists."""
+        real_path = filePath
+        if filePath.endswith('.gz'):
+            is_compressed = True
+        else:
+            if os.path.exists(filePath):
+                is_compressed = False
+            elif os.path.exists(filePath + '.gz'):
+                real_path += '.gz'
+                is_compressed = True
+        return real_path, is_compressed
 
     def Load2d(self, filePath):
-        array = np.loadtxt(filePath, dtype=float, delimiter=',', unpack=True) # unpack transposes the array
+        real_path, is_compressed = self.CheckFileCompression(filePath)
+        array = np.loadtxt(real_path, dtype=float, delimiter=',', unpack=True) # unpack transposes the array
         if array.ndim == 1:
             array = array[:, np.newaxis]
         return V.Array(array)
 
     def Load(self, filePath):
-        f = open(filePath, 'r')
+        real_path, is_compressed = self.CheckFileCompression(filePath)
+        if is_compressed:
+            import gzip
+            f = gzip.GzipFile(real_path, 'rb')
+        else:
+            f = open(real_path, 'r')
         f.readline() # Strip comment line
         dims = map(int, f.readline().split(','))[1:]
         array = np.loadtxt(f, dtype=float)
