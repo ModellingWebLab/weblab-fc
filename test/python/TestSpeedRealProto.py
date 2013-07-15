@@ -57,14 +57,8 @@ class TestSpeedRealProto(unittest.TestCase):
         # Parse the protocol into a sequence of post-processing statements
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
         proto = Protocol.Protocol(proto_file)
-#         parser = csp()
-#         CSP.source_file = proto_file
-#         generator = parser._Try(csp.protocol.parseFile, proto_file, parseAll=True)[0]
-#         self.assertIsInstance(generator, CSP.Actions.Protocol)
-#         statements = generator.expr()[0]
         # Load the raw simulation data from file
-#         env = Env.Environment()
-        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto'
+        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/S1S2'
         membrane_voltage = self.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
         time_1d = self.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
         time_2d = A.NewArray(M.Const(time_1d),
@@ -73,16 +67,39 @@ class TestSpeedRealProto(unittest.TestCase):
         proto.env.DefineName('sim:time', time_2d)
         proto.env.DefineName('sim:membrane_voltage', membrane_voltage)
         # Run the protocol
-#         env.ExecuteStatements(statements)
         proto.Run()
+        # Check the results
+        self.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
 
-        for var in ['raw_APD90', 'raw_DI']:
-            expected = self.Load2d(os.path.join(data_folder, 'outputs_' + var + '.csv'))
-            actual = proto.env.LookUp(var)
-            np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
-        for var in ['max_S1S2_slope']:
-            expected = self.Load(os.path.join(data_folder, 'outputs_' + var + '.csv'))
-            actual = proto.env.LookUp(var)
+    def TestIcal(self):
+        proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
+        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
+        proto.env.DefineName('sim:membrane_voltage',
+                             self.Load(os.path.join(data_folder, 'outputs_membrane_voltage.csv')))
+        proto.env.DefineName('sim:membrane_L_type_calcium_current',
+                             self.Load(os.path.join(data_folder, 'outputs_membrane_L_type_calcium_current.csv')))
+        proto.env.DefineName('sim:extracellular_calcium_concentration',
+                             self.Load(os.path.join(data_folder, 'outputs_extracellular_calcium_concentration.csv')))
+        shape = list(proto.env.LookUp('sim:membrane_voltage').array.shape)
+        shape[-1] = 1
+        time = np.arange(-10.0, 500.01, 0.01).tile(shape)
+        proto.env.DefineName('sim:time', time)
+        proto.Run()
+        # Check the results
+        self.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
+
+    def CheckResults(self, proto, expectedSpec, dataFolder):
+        """Check protocol results against saved values.
+        expectedSpec is a dictionary mapping result name to number of dimensions, so we can use the correct Load* method.
+        """
+        for name, ndims in expectedSpec.iteritems():
+            data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
+            if ndims == 2:
+                method = self.Load2d
+            else:
+                method = self.Load
+            expected = method(data_file)
+            actual = proto.env.LookUp(name)
             np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
 
     def Load2d(self, filePath):
