@@ -67,8 +67,23 @@ class Environment(object):
         for i, name in enumerate(names):
             self.DefineName(name, values[i])
             
-#     def EvaluateExpr(self, expr):
+    def EvaluateExpr(self, exprStr, env):
+        import CompactSyntaxParser as CSP
+        CSP.ImportPythonImplementation()
+        csp = CSP.CompactSyntaxParser
         
+        parse_action = csp.expr.parseString(exprStr, parseAll=True)
+        expr = parse_action[0].expr()
+        return expr.Evaluate(env)
+    
+    def EvaluateStatement(self, stmtStr, env):
+        import CompactSyntaxParser as CSP
+        CSP.ImportPythonImplementation()
+        csp = CSP.CompactSyntaxParser
+        
+        parse_action = csp.stmtList.parseString(stmtStr, parseAll=True)
+        stmt_list = parse_action[0].expr()
+        return env.ExecuteStatements(stmt_list)
                 
     def FreshIdent(self):
         self.nextIdent[0] += 1

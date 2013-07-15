@@ -36,6 +36,7 @@ import sys
 # Import the module to test
 import Environment as Env
 import Values as V
+import numpy as np
 
 from ErrorHandling import ProtocolError
 
@@ -106,30 +107,29 @@ class TestEnvironment(unittest.TestCase):
         top_env.DefineName(name, value3)
         self.assertEqual(top_env.LookUp(name), value3)
         
-""" void TestDelegation() throw (Exception)
-    {
-        NEW_ENV(root_env);
-        NEW_ENV_A(middle_env, (root_env.GetAsDelegatee()));
-        NEW_ENV(top_env);
-        top_env.SetDelegateeEnvironment(middle_env.GetAsDelegatee());
-
-        TS_ASSERT(!root_env.GetDelegateeEnvironment());
-        TS_ASSERT(middle_env.GetDelegateeEnvironment());
-        TS_ASSERT(top_env.GetDelegateeEnvironment());
-        TS_ASSERT(middle_env.GetDelegateeEnvironment().get() == root_env.GetAsDelegatee().get());
-        TS_ASSERT(top_env.GetDelegateeEnvironment().get() == middle_env.GetAsDelegatee().get());
-
-        const std::string name = "test_value";
-        AbstractValuePtr p_val = CV(123.4);
-        root_env.DefineName(name, p_val, "");
-        TS_ASSERT_EQUALS(top_env.Lookup(name), p_val);
-
-        AbstractValuePtr p_val2 = CV(432.1);
-        middle_env.DefineName(name, p_val2, "");
-        TS_ASSERT_EQUALS(top_env.Lookup(name), p_val2);
-
-        AbstractValuePtr p_val3 = CV(6.5);
-        top_env.DefineName(name, p_val3, "");
-        TS_ASSERT_EQUALS(top_env.Lookup(name), p_val3);
-    }
-"""
+    def TestEvaluateExprAndStmt(self):
+        # basic mathml function
+        env = Env.Environment()
+        expr_str = 'MathML:max(100, 115, 98)'
+        self.assertEqual(env.EvaluateExpr(expr_str, env).value, 115)
+        
+        # array creation
+        arr = V.Array(np.arange(10))
+        env.DefineName('arr', arr)
+        expr_str = 'arr[1:2:10]'
+        predicted = np.array([1, 3, 5, 7, 9])
+        np.testing.assert_array_almost_equal(predicted, env.EvaluateExpr(expr_str, env).array)
+        
+        # view of an array
+        view_arr = V.Array(np.arange(10))
+        env.DefineName('view_arr', view_arr)
+        expr_str = 'view_arr[4]'
+        predicted = np.array(4)
+        np.testing.assert_array_almost_equal(env.EvaluateExpr(expr_str, env).array, predicted)
+        
+        # statement list
+        stmt_str = 'z = lambda a: a+2\nassert z(2) == 4'
+        env.EvaluateStatement(stmt_str, env) # assertion built into list, no extra test needed
+        
+        
+        

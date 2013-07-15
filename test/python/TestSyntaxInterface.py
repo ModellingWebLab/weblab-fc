@@ -640,7 +640,7 @@ class TestSyntaxInterface(unittest.TestCase):
         
     def TestGetUsedVars(self):
         env = Env.Environment()
-        parse_action = csp.array.parseString('[i for i in 0:10]', parseAll=True)
+        parse_action = csp.expr.parseString('[i for i in 0:10]', parseAll=True)
         expr = parse_action[0].expr()
         used_vars = expr.GetUsedVariables()
         self.assertEqual(used_vars, set()) 
