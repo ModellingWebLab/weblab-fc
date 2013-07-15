@@ -34,19 +34,32 @@ import CompactSyntaxParser as CSP
 CSP.ImportPythonImplementation()
 csp = CSP.CompactSyntaxParser
 import Environment as Env
+import os
 
 class Protocol(object):
     
-    def __init__(self, proto_file):
-        self.proto_file = proto_file
+    def __init__(self, protoFile):
+        self.protoFile = protoFile
         self.env = Env.Environment()
+        self.library = []
+        self.postProcessing = []
         parser = csp()
-        CSP.source_file = proto_file
-        generator = parser._Try(csp.protocol.parseFile, proto_file, parseAll=True)[0]
+        CSP.Actions.source_file = protoFile
+        generator = parser._Try(csp.protocol.parseFile, protoFile, parseAll=True)[0]
         assert isinstance(generator, CSP.Actions.Protocol)
-        statements = generator.expr()[0]
-        self.statements = statements
-        # Load the raw simulation data from file
+        details = generator.expr()
+        assert isinstance(details, dict)
+        for path in details.get('imports', []):
+            imported_proto = Protocol(self.GetPath(protoFile, path))
+            self.library.extend(imported_proto.library)
+            self.postProcessing.extend(imported_proto.postProcessing)
+        self.library.extend(details.get('library', []))
+        self.postProcessing.extend(details.get('postprocessing', []))      
 
     def Run(self):
-        self.env.ExecuteStatements(self.statements)
+        self.env.ExecuteStatements(self.library)
+        self.env.ExecuteStatements(self.postProcessing)
+        
+    def GetPath(self, basePath, path):
+        return os.path.join(os.path.dirname(basePath), path)
+       # join and dirname on protoFile and path in details, joins dirnmae of basepath and path

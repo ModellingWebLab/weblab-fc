@@ -9,7 +9,7 @@ def Sum(a, dim=default): fold(@2:+, a, 0, dim)
 
 def Product(a, dim=default): fold(@2:*, a, 1, dim)
 
-def DefaultDim(a, dim_) {
+def DefaultDim(a, dim_=default) {
     assert a.IS_ARRAY
     dim = if dim_.IS_DEFAULT then a.NUM_DIMS-1 else dim_
     assert dim.IS_SIMPLE_VALUE
@@ -82,7 +82,7 @@ def Interp(xs, ys, targets, starts, afterStarts=1, dim_=default) {
                                    else lambda match, x, start: match && x <= start,
                     y_matches, xs, stretched_starts))
     gradient = Grad(ys, xs, dim)
-    zero_array = map(lambda _: 0, targets)
+    zero_array = map(lambda t: 0*t, targets)
     gradient_extended = Join(if afterStarts then zero_array else gradient,
                              if afterStarts then gradient else zero_array,
                              dim)

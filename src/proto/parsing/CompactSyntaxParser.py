@@ -178,7 +178,7 @@ class Actions(object):
             """Updates location in parent locatable class and calls _expr method."""
             result = self._expr()
             if isinstance(result, Locatable):
-                result.location = 'source location:', self.source_location
+                result.location = self.source_location
             return result
         
         def xml(self):
@@ -892,6 +892,11 @@ class Actions(object):
                 for set_input in self.tokens[2].tokens:
                     children.append(P.setInput(set_input.tokens[1].xml(), name=set_input.tokens[0].tokens))
             return getattr(P, 'import')(*children, **attrs)
+        
+        def _expr(self):
+            assert len(self.tokens) >= 2
+            return self.tokens[1]
+            
     
     class UseImports(BaseGroupAction):
         """Parse action for 'use imports' constructs."""
@@ -952,6 +957,11 @@ class Actions(object):
             if len(self.tokens) > 0:
                 assert len(self.tokens) == 1
                 return P.library(*self.GetChildrenXml())
+            
+        def _expr(self):
+            if len(self.tokens) > 0:
+                assert len(self.tokens) == 1
+                return self.tokens[0].expr()
     
     class PostProcessing(BaseAction):
         """Parse action for the post-processing section."""
@@ -1041,13 +1051,16 @@ class Actions(object):
             return root
         
         def _expr(self):
-            root = []
+            d = {}
+            d['imports'] = []
             for token in self.tokens:
-                if isinstance(token, Actions.BaseAction):
-                    expr = token.expr()
-                    if expr is not None:
-                        root.append(expr)
-            return root
+                if isinstance(token, Actions.Library):
+                    d['library'] = token.expr()
+                if isinstance(token, Actions.PostProcessing):
+                    d['postprocessing'] = token.expr()
+                if isinstance(token, Actions.Import):
+                    d['imports'].append(token.expr())
+            return d
     
 
 ################################################################################

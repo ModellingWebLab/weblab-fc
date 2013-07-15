@@ -55,7 +55,7 @@ def N(v):
 class TestSpeedRealProto(unittest.TestCase):
     def TestS1S2(self):
         # Parse the protocol into a sequence of post-processing statements
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2_postproc.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
         proto = Protocol.Protocol(proto_file)
 #         parser = csp()
 #         CSP.source_file = proto_file

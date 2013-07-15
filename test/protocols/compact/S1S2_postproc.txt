@@ -1,6 +1,6 @@
 # This file contains the post-processing section of the S1-S2 protocol, with all imports resolved
 
-post-processing
+library
 {
 
 # Basic library
@@ -215,7 +215,10 @@ def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize
     return t_ap_starts, t_ap_ends
 }
 
+}
+
 # S1-S2 specific
+post-processing {
 
     # Test that expected model outputs exist
     assert sim:time.IS_ARRAY
