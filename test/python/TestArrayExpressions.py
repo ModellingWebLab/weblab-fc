@@ -251,23 +251,22 @@ class TestArrayExpressions(unittest.TestCase):
        np.testing.assert_array_almost_equal(blocks.Evaluate(Env.Environment()).array, predictedArr)
         
     def TestArrayExpressionProtocolErrors(self):
+       env = Env.Environment()
        # creates an empty array because the start is greater than the end
        fail = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(10), N(1), N(0), M.Const(V.String("i"))), comprehension=True)
-       self.assertRaises(ProtocolError, fail.Evaluate, {})
+       self.assertRaises(ProtocolError, fail.Evaluate, env)
     
        # creates an empty array because the step is negative when it should be positive
        fail = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(-1), N(10), M.Const(V.String("i"))), comprehension=True)
-       self.assertRaises(ProtocolError, fail.Evaluate, {})
-       
+       self.assertRaises(ProtocolError, fail.Evaluate, env)
         
        blocks = A.NewArray(A.NewArray(A.NewArray(E.NameLookUp("j")), 
                                       A.NewArray(E.NameLookUp("j"))),
                                       E.TupleExpression(N(3), N(0), N(1), N(2), M.Const(V.String("j"))),
                                       comprehension=True)
-       self.assertRaises(ProtocolError, blocks.Evaluate, {})
+       self.assertRaises(ProtocolError, blocks.Evaluate, env)
        
        #map(lambda a, b=[0,1,2]: a + b, [1,2,3]) should give an error
-       env = Env.Environment()
        parameters = ['a', 'b']
        body = [S.Return(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')))]
        array_default = E.LambdaExpression(parameters, body,
