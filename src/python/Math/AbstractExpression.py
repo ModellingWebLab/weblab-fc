@@ -51,6 +51,7 @@ class AbstractExpression(Locatable.Locatable):
 
     @property
     def compiled(self):
+        """Compile this expression and cache the result."""
         try:
             return self._compiled
         except AttributeError:
@@ -64,29 +65,26 @@ class AbstractExpression(Locatable.Locatable):
         return childList
     
     def Interpret(self, env):
-        """Old evaluate method. Called if numexpr and numpy can't evaluate string from compile"""
+        """Evaluate this expression by interpreting the expression tree.
+        Must be implemented by subclasses.
+        """
         raise NotImplementedError
     
     def Compile(self):
+        """Create a string representation of this expression for evaluation by numexpr or numpy.
+        
+        Evaluation of the generated string is only guaranteed to give correct results (as defined
+        by the Interpret method) in certain array contexts, for instance maps and array comprehensions.
+        """
         raise NotImplementedError
     
     def GetUsedVariables(self):
+        """Get the set of (non-local) identifiers referenced within this expression."""
         result = set()
         for child in self.children:
             result |= child.GetUsedVariables()
         return result
     
     def Evaluate(self, env):
-        """Subclasses must implement this method."""
-        # try self.Compile(), if works, try ne.evaluate then eval; if compile fails straight to Interpret
-#         try:
-#             compiled = self.compiled
-#             try:
-#                 results = V.Array(ne.evaluate(compiled, local_dict=env.unwrappedBindings)) 
-#             except Exception, e:
-#                 results = V.Array(eval(compiled, globals(), env.unwrappedBindings))               
-#         except Exception, e:
-        results = self.Interpret(env)
-        return results
-    
-    
+        """We always default to using Interpret for evaluating standalone expressions."""
+        return self.Interpret(env)
