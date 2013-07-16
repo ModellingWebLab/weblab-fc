@@ -38,20 +38,22 @@ import ErrorHandling
 AbstractValue = AV.AbstractValue
 ProtocolError = ErrorHandling.ProtocolError
 
-
 class Environment(object):
     nextIdent = [0]
     
     def __init__(self, allowOverwrite=False, delegatee=None):
         self.allowOverwrite = allowOverwrite
-        self.bindings = {}
-        self.delegates = {"": delegatee}
-        self.unwrappedBindings = {}
+        self.bindings = DelegatingDict()
+        self.unwrappedBindings = DelegatingDict()
         self.unwrappedBindings['___np'] = np
+        if delegatee is not None:
+            self.SetDelegateeEnv(delegatee, "")
         
     def DefineName(self, name, value):
 #         if not isinstance(value, AbstractValue):
 #             raise ProtocolError(value, "is not a value type")
+        if ':' in name:
+            raise ProtocolError('Names such as', name, 'with a colon are not allowed.')
         if name in self.bindings:
             raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
         else:
@@ -90,18 +92,12 @@ class Environment(object):
         return "___%d" % self.nextIdent[0] 
         
     def LookUp(self, name):
-        if name in self.bindings:
-            result = self.bindings[name]
-        elif len(self.delegates) != 1 or self.delegates[""] is not None:
-            for val in self.delegates.values():
-                if val is not None:
-                    result = val.LookUp(name)
-        else:
-            raise ProtocolError("The name", name, "does not exist in the environment")
+        result = self.bindings[name]
         return result
     
-    def SetDelegateeEnv(self, delegatee, prefix):
-        self.delegates[prefix] = delegatee
+    def SetDelegateeEnv(self, delegatee, prefix=""):
+        self.bindings.SetDelegatee(delegatee.bindings, prefix)
+        self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
         
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())
@@ -111,8 +107,8 @@ class Environment(object):
             raise ProtocolError("This environment does not support overwriting mappings")
         if name not in self.bindings:
             raise ProtocolError(name, "is not defined in this environment and thus cannot be removed")
-        del (self.bindings[name])
-        del (self.unwrappedBindings[name])
+        del self.bindings[name]
+        del self.unwrappedBindings[name]
         
     def OverwriteDefinition(self, name, value):
         if not self.allowOverwrite:
@@ -145,4 +141,50 @@ class Environment(object):
                 else:
                     raise ProtocolError("Return statement not allowed outside of function")           
         return result
+    
+class DelegatingDict(dict): 
+    def __init__(self, *args, **kwargs):
+        super(DelegatingDict, self).__init__(*args, **kwargs)
+        self.delegatees = {}
+        
+    def __missing__(self, key):
+        parts = key.split(":", 1)
+        if len(parts) == 2:
+            prefix, name = parts
+            if prefix in self.delegatees:
+                return self.delegatees[prefix][name]
+        if '' in self.delegatees:
+            return self.delegatees[''][key]
+        raise ProtocolError("Name", key, "is not defined in env or any delegatee env")
+        
+#         if len(parts) == 1:
+#             prefix, name = "", parts[0]
+#         else:
+#             prefix, name = parts
+#         if prefix in self.delegatees:
+#             delegatee = self.delegatees[prefix]
+#             if prefix == "":
+#                 print 'bindings', delegatee.bindings
+#         else:
+#             raise ProtocolError("No environment exists associated with the prefix", prefix)
+#         try:
+#             return delegatee.LookUp(name)
+#         except AttributeError:
+#             raise ProtocolError("Name", name, "is not defined in env or any delegatee env")
+#         else:
+#             raise ProtocolError(key, "is not defined in env associated with prefix", prefix)
+        
+    def SetDelegatee(self, delegatee, prefix):
+        self.delegatees[prefix] = delegatee
+        
+ # class for bindings/unwrapped bindings called DelegatingDict(dict)
+ # __missing__ method (self, key) for delegation
+ # missing means key isn't found locally, so call parts=key.split(":", 1) to see if it's prefixed or not
+ # if parts is length one then look up in default delegatee, so if len(parts) ==1 
+ # then prefix, name = "", parts[0] else prefix,name = parts
+ # just look up the prefix in self.delegatees and return value, otherwise say it's not found anywhere and raise protocolerror
+ # setDelegatee(self, prefix, delegatee) will be called by set delegatee in environment class
+ # __init__(self, *args, **kwargs) will need super(delegatingdict, self).init__(*args, **kwargs)
+ # self.delegatees = {}
+ # look up keys in both wrapped and unwrapped bindings
         

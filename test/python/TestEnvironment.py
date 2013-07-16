@@ -92,7 +92,7 @@ class TestEnvironment(unittest.TestCase):
         root_env = Env.Environment()
         middle_env = Env.Environment(delegatee=root_env)
         top_env = Env.Environment()
-        top_env.SetDelegateeEnv(middle_env, "middle")
+        top_env.SetDelegateeEnv(middle_env)
         
         name = "name"
         value = V.Simple(123.4)
@@ -106,6 +106,27 @@ class TestEnvironment(unittest.TestCase):
         value3 = V.Simple(6.5)
         top_env.DefineName(name, value3)
         self.assertEqual(top_env.LookUp(name), value3)
+        
+    def TestPrefixedDelegation(self):
+        root_env = Env.Environment()
+        env_a = Env.Environment()
+        env_b = Env.Environment()
+        env_a.DefineName("A", V.Simple(1))
+        env_b.DefineName("B", V.Simple(2))
+        root_env.SetDelegateeEnv(env_a, 'a')
+        root_env.SetDelegateeEnv(env_b, 'b')
+        
+        self.assertRaises(ProtocolError, env_a.DefineName, 'a:b', V.Simple(1))
+        self.assertEqual(root_env.LookUp('a:A').value, 1)
+        self.assertEqual(root_env.LookUp('b:B').value, 2)
+        self.assertRaises(ProtocolError, root_env.LookUp, 'a:n')
+        self.assertRaises(ProtocolError, root_env.LookUp, 'c:c')
+        
+        env_aa = Env.Environment(delegatee=env_a)
+        env_aa.DefineName('A', V.Simple(3))
+        env_a.SetDelegateeEnv(env_aa, 'a')
+        self.assertEqual(env_a.LookUp('a:A').value, 3)
+        self.assertEqual(root_env.LookUp('a:a:A').value, 3)
         
     def TestEvaluateExprAndStmt(self):
         # basic mathml function
