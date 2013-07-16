@@ -66,8 +66,10 @@ class TestSpeedRealProto(unittest.TestCase):
         time_2d = A.NewArray(M.Const(time_1d),
                              E.TupleExpression(N(0), N(0), N(1), N(91), M.Const(V.String('_'))),
                              comprehension=True).Evaluate(proto.env)
-        proto.env.DefineName('sim:time', time_2d)
-        proto.env.DefineName('sim:membrane_voltage', membrane_voltage)
+        local_env = Env.Environment()
+        local_env.DefineName('time', time_2d)
+        local_env.DefineName('membrane_voltage', membrane_voltage)
+        proto.libraryEnv.SetDelegateeEnv(local_env, 'sim')
         # Run the protocol
         self.Time(proto.Run)
         # Check the results
@@ -76,18 +78,22 @@ class TestSpeedRealProto(unittest.TestCase):
     def TestIcal(self):
         proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
-        proto.env.DefineName('sim:membrane_voltage',
+        local_env = Env.Environment()
+        local_env.DefineName('membrane_voltage',
                              self.Load(os.path.join(data_folder, 'outputs_membrane_voltage.csv')))
-        proto.env.DefineName('sim:membrane_L_type_calcium_current',
+        local_env.DefineName('membrane_L_type_calcium_current',
                              self.Load(os.path.join(data_folder, 'outputs_membrane_L_type_calcium_current.csv')))
-        proto.env.DefineName('sim:extracellular_calcium_concentration',
+        local_env.DefineName('extracellular_calcium_concentration',
                              self.Load(os.path.join(data_folder, 'outputs_extracellular_calcium_concentration.csv')))
-        proto.env.DefineName('sim:oxmeta:extracellular_calcium_concentration',
-                             V.Simple(proto.env.LookUp('sim:extracellular_calcium_concentration').array[1,0,0]))
-        shape = list(proto.env.LookUp('sim:membrane_voltage').array.shape)
+        oxmeta_env = Env.Environment()
+        oxmeta_env.DefineName('extracellular_calcium_concentration',
+                             V.Simple(local_env.LookUp('extracellular_calcium_concentration').array[1,0,0]))
+        local_env.SetDelegateeEnv(oxmeta_env, 'oxmeta')
+        proto.libraryEnv.SetDelegateeEnv(local_env, 'sim')
+        shape = list(local_env.LookUp('membrane_voltage').array.shape)
         shape[-1] = 1
         time = V.Array(np.tile(np.arange(-10.0, 500.01, 0.01), shape))
-        proto.env.DefineName('sim:time', time)
+        local_env.DefineName('time', time)
         self.Time(proto.Run)
         # Check the results
         self.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
@@ -109,7 +115,7 @@ class TestSpeedRealProto(unittest.TestCase):
             else:
                 method = self.Load
             expected = method(data_file)
-            actual = proto.env.LookUp(name)
+            actual = proto.postProcessingEnv.LookUp(name)
             np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
     
     def CheckFileCompression(self, filePath):

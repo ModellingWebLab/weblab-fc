@@ -895,7 +895,7 @@ class Actions(object):
         
         def _expr(self):
             assert len(self.tokens) >= 2
-            return self.tokens[1]
+            return self.tokens[0], self.tokens[1]
             
     
     class UseImports(BaseGroupAction):

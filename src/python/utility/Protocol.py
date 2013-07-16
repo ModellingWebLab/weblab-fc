@@ -41,6 +41,8 @@ class Protocol(object):
     def __init__(self, protoFile):
         self.protoFile = protoFile
         self.env = Env.Environment()
+        self.libraryEnv = Env.Environment() #is where its own library is executed
+        self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv) #for own postprocessing which delegates to library env
         self.library = []
         self.postProcessing = []
         parser = csp()
@@ -49,16 +51,22 @@ class Protocol(object):
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
-        for path in details.get('imports', []):
+        # if prefix is empty then do below, if not then do self.libraryenv.setdelegatee(importedproto.libraryenv, prefix)
+        for prefix, path in details.get('imports', []):
+            # if prefix is not empty then do importedproto.libraryenv.executestaement(importedproto.library)        
             imported_proto = Protocol(self.GetPath(protoFile, path))
-            self.library.extend(imported_proto.library)
-            self.postProcessing.extend(imported_proto.postProcessing)
+            if prefix == "":    
+                self.library.extend(imported_proto.library)
+                self.postProcessing.extend(imported_proto.postProcessing)
+            else:
+                self.libraryEnv.SetDelegateeEnv(imported_proto.libraryEnv, prefix)
+                imported_proto.libraryEnv.ExecuteStatements(imported_proto.library)
         self.library.extend(details.get('library', []))
         self.postProcessing.extend(details.get('postprocessing', []))      
 
     def Run(self):
-        self.env.ExecuteStatements(self.library)
-        self.env.ExecuteStatements(self.postProcessing)
+        self.libraryEnv.ExecuteStatements(self.library)
+        self.postProcessingEnv.ExecuteStatements(self.postProcessing)
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)

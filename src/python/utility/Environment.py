@@ -157,23 +157,6 @@ class DelegatingDict(dict):
             return self.delegatees[''][key]
         raise ProtocolError("Name", key, "is not defined in env or any delegatee env")
         
-#         if len(parts) == 1:
-#             prefix, name = "", parts[0]
-#         else:
-#             prefix, name = parts
-#         if prefix in self.delegatees:
-#             delegatee = self.delegatees[prefix]
-#             if prefix == "":
-#                 print 'bindings', delegatee.bindings
-#         else:
-#             raise ProtocolError("No environment exists associated with the prefix", prefix)
-#         try:
-#             return delegatee.LookUp(name)
-#         except AttributeError:
-#             raise ProtocolError("Name", name, "is not defined in env or any delegatee env")
-#         else:
-#             raise ProtocolError(key, "is not defined in env associated with prefix", prefix)
-        
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee
         
