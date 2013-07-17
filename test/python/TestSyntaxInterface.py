@@ -525,7 +525,7 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([2, 12])
         np.testing.assert_array_almost_equal(result.array, predicted)
         
-        view_parse_action = csp.expr.parseString('view_arr[1$3:]', parseAll=True)
+        view_parse_action = csp.expr.parseString('view_arr[1$(3):]', parseAll=True)
         expr = view_parse_action[0].expr()
         self.assertIsInstance(expr, A.View)
         result = expr.Evaluate(env)
