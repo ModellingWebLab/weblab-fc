@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:1:1&#9;# Compact version of the test_find_index protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt">
-  <proto:import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:3:1&#9;import &quot;../../../src/proto/library/BasicLibrary.xml&quot;"/>
+  <proto:import source="../../../src/proto/library/BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:3:1&#9;import &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
   <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {">
     <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {">
       <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {"/>
@@ -83,141 +83,53 @@
           </m:apply>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:5&#9;    def MultiFold(op, array, init) {">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:5&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
         <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:9&#9;    def MultiFold(op, array, init) {">MultiFold</m:ci>
-        <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:5&#9;    def MultiFold(op, array, init) {">
-          <m:bvar>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:19&#9;    def MultiFold(op, array, init) {">op</m:ci>
-          </m:bvar>
-          <m:bvar>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:23&#9;    def MultiFold(op, array, init) {">array</m:ci>
-          </m:bvar>
-          <m:bvar>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:30&#9;    def MultiFold(op, array, init) {">init</m:ci>
-          </m:bvar>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:9&#9;        return if array.NUM_DIMS == 0 then array else \">
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:9&#9;        return if array.NUM_DIMS == 0 then array else \"/>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:9&#9;        return if array.NUM_DIMS == 0 then array else \">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:9&#9;        return if array.NUM_DIMS == 0 then array else \"/>
-              <m:piecewise proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:16&#9;        return if array.NUM_DIMS == 0 then array else \">
-                <m:piece>
-                  <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:44&#9;        return if array.NUM_DIMS == 0 then array else \">array</m:ci>
-                  <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:19&#9;        return if array.NUM_DIMS == 0 then array else \">
-                    <m:eq/>
-                    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:19&#9;        return if array.NUM_DIMS == 0 then array else \">
-                      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/accessor" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:19&#9;        return if array.NUM_DIMS == 0 then array else \">NUM_DIMS</m:csymbol>
-                      <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:19&#9;        return if array.NUM_DIMS == 0 then array else \">array</m:ci>
-                    </m:apply>
-                    <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:37&#9;        return if array.NUM_DIMS == 0 then array else \">0</m:cn>
-                  </m:apply>
-                </m:piece>
-                <m:otherwise>
-                  <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:13&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">
-                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:13&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">MultiFold</m:ci>
-                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:23&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">op</m:ci>
-                    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">
-                      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)"/>
-                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">
-                        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/fold" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)"/>
-                        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:32&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">op</m:ci>
-                        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:36&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">array</m:ci>
-                        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:43&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">init</m:ci>
-                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:49&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
-                      </m:apply>
-                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">
-                        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
-                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:52&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
-                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
-                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:52&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">0</m:cn>
-                      </m:apply>
-                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">
-                        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
-                        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)"/>
-                        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)"/>
-                        <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">1</m:cn>
-                        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:27&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)"/>
-                      </m:apply>
-                    </m:apply>
-                    <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:20:56&#9;            MultiFold(op, fold(op, array, init, 0)[0], init)">init</m:ci>
-                  </m:apply>
-                </m:otherwise>
-              </m:piecewise>
-            </m:apply>
-          </m:apply>
-        </m:lambda>
-      </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:5&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">
-        <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:5&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">ArrayEq</m:ci>
-        <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:15&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">
-          <m:bvar>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:22&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">a1</m:ci>
-          </m:bvar>
-          <m:bvar>
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:26&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">a2</m:ci>
-          </m:bvar>
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:30&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">
-            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:30&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">MultiFold</m:ci>
-            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:40&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">and</m:csymbol>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:47&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:47&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)"/>
-              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:51&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">eq</m:csymbol>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:58&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">a1</m:ci>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:62&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">a2</m:ci>
-            </m:apply>
-            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:24:67&#9;    ArrayEq = lambda a1, a2: MultiFold(@2:&amp;&amp;, map(@2:==, a1, a2), 1)">1</m:cn>
-          </m:apply>
-        </m:lambda>
-      </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:5&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
-        <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:5&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">all_entries</m:ci>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:19&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:19&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)"/>
-          <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:23&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:5&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">all_entries</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:19&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:19&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)"/>
+          <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:23&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
             <m:bvar>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:30&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">x</m:ci>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:30&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">x</m:ci>
             </m:bvar>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:33&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:33&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
               <m:lt/>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:33&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">x</m:ci>
-              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:37&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:33&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">x</m:ci>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:37&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">
                 <m:plus/>
-                <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:37&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">input_max</m:ci>
-                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:49&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">1</m:cn>
+                <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:37&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">input_max</m:ci>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:49&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">1</m:cn>
               </m:apply>
             </m:apply>
           </m:lambda>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:27:52&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">input</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:16:52&#9;    all_entries = map(lambda x: x &lt; input_max + 1, input)">input</m:ci>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:28:5&#9;    all_entries_idxs = find(all_entries)">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:17:5&#9;    all_entries_idxs = find(all_entries)">
         <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:28:5&#9;    all_entries_idxs = find(all_entries)">all_entries_idxs</m:ci>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:28:24&#9;    all_entries_idxs = find(all_entries)">
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:28:24&#9;    all_entries_idxs = find(all_entries)"/>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:28:29&#9;    all_entries_idxs = find(all_entries)">all_entries</m:ci>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:17:5&#9;    all_entries_idxs = find(all_entries)">all_entries_idxs</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:17:24&#9;    all_entries_idxs = find(all_entries)">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:17:24&#9;    all_entries_idxs = find(all_entries)"/>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:17:29&#9;    all_entries_idxs = find(all_entries)">all_entries</m:ci>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:5&#9;    all_entries_indexed = input{all_entries_idxs}">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:5&#9;    all_entries_indexed = input{all_entries_idxs}">
         <m:eq/>
-        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:5&#9;    all_entries_indexed = input{all_entries_idxs}">all_entries_indexed</m:ci>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}">
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}">input</m:ci>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:33&#9;    all_entries_indexed = input{all_entries_idxs}">all_entries_idxs</m:ci>
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
-          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:29:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:5&#9;    all_entries_indexed = input{all_entries_idxs}">all_entries_indexed</m:ci>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:27&#9;    all_entries_indexed = input{all_entries_idxs}">
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/index" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:27&#9;    all_entries_indexed = input{all_entries_idxs}">input</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:33&#9;    all_entries_indexed = input{all_entries_idxs}">all_entries_idxs</m:ci>
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
+          <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:18:27&#9;    all_entries_indexed = input{all_entries_idxs}"/>
         </m:apply>
       </m:apply>
-      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:5&#9;    assert ArrayEq(all_entries_indexed, input)">
-        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:5&#9;    assert ArrayEq(all_entries_indexed, input)"/>
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:12&#9;    assert ArrayEq(all_entries_indexed, input)">
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:12&#9;    assert ArrayEq(all_entries_indexed, input)">ArrayEq</m:ci>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:20&#9;    assert ArrayEq(all_entries_indexed, input)">all_entries_indexed</m:ci>
-          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:30:41&#9;    assert ArrayEq(all_entries_indexed, input)">input</m:ci>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:19:5&#9;    assert ArrayEq(all_entries_indexed, input)">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:19:5&#9;    assert ArrayEq(all_entries_indexed, input)"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:19:12&#9;    assert ArrayEq(all_entries_indexed, input)">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:19:12&#9;    assert ArrayEq(all_entries_indexed, input)">ArrayEq</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:19:20&#9;    assert ArrayEq(all_entries_indexed, input)">all_entries_indexed</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:19:41&#9;    assert ArrayEq(all_entries_indexed, input)">input</m:ci>
         </m:apply>
       </m:apply>
     </m:apply>
