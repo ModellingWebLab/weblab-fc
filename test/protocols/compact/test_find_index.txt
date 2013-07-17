@@ -11,10 +11,48 @@ post-processing {
     all_bar_largest = map(lambda x: x < input_max, input)
     all_bar_largest_idxs = find(all_bar_largest)
     all_bar_largest_indexed = input{all_bar_largest_idxs, 0, pad:1=-1}
+    assert all_bar_largest_indexed.NUM_DIMS == 2
+    assert all_bar_largest_indexed.NUM_ELEMENTS == input.NUM_ELEMENTS
+    assert ArrayEq(all_bar_largest_indexed, [ if i == 2 && j == 4 then -1 else input[i][j] for i in 0:3 for j in 0:5 ])
     
     # Whole array
     all_entries = map(lambda x: x < input_max + 1, input)
     all_entries_idxs = find(all_entries)
     all_entries_indexed = input{all_entries_idxs}
     assert ArrayEq(all_entries_indexed, input)
+    
+    # Odd entries
+    odd_entries = map(lambda x: MathML:rem(x, 2), input)
+    odd_indices = find(odd_entries)
+    assert odd_entries[0][0] == 0
+    assert odd_entries[0][1] == 1
+    assert odd_entries[0][2] == 0
+    assert odd_indices.NUM_DIMS == 2
+    assert odd_indices.SHAPE[0] == 7
+    assert odd_indices.SHAPE[1] == 2
+    assert odd_indices[0][0] == 0
+    assert odd_indices[0][1] == 1 # [0,1] is odd
+    assert odd_indices[1][0] == 0
+    assert odd_indices[1][1] == 3 # [0,3] is odd
+    # Note that indexing using odd_indices as-is would fail as result is irregular; we can't check this here
+    shrink_right = input{odd_indices, 1, shrink:1}
+    shrink_left = input{odd_indices, 1, shrink:-1}
+    assert ArrayEq(shrink_right.SHAPE, [3, 2])
+    assert ArrayEq(shrink_left.SHAPE, [3, 2])
+    assert ArrayEq(shrink_right, [[1, 3], [5, 7], [11, 13]])
+    assert ArrayEq(shrink_left, [[1, 3], [7, 9], [11, 13]])
+    
+    # Explicitly construct a regular index
+    reg_indices = [ [i/2, [1,3,0,2,1,3][i]] for i in 0:6 ]
+    some_odd_entries = input{reg_indices} # Dimension defaults to 1
+    assert ArrayEq(some_odd_entries.SHAPE, [3, 2])
+    assert ArrayEq(some_odd_entries, shrink_right)
+    
+    # Now try with padding instead
+    pad_right = input{odd_indices, 1, pad:1=55}
+    pad_left = input{odd_indices, 1, pad:-1=-55}
+    assert ArrayEq(pad_right.SHAPE, [3,3])
+    assert ArrayEq(pad_left.SHAPE, [3,3])
+    assert ArrayEq(pad_right, [ [1,3,55], [5,7,9], [11,13,55] ])
+    assert ArrayEq(pad_left, [ [-55,1,3], [5,7,9], [-55,11,13] ])
 }
