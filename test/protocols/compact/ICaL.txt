@@ -91,7 +91,7 @@ post-processing {
     
     # Only examine the "tail currents" after t=0
     first_index = find(map(lambda t: t > 0, sim:time[0][0]))[0][0]
-    membrane_L_type_calcium_tail_current = sim:membrane_L_type_calcium_current[-1$first_index:]
+    membrane_L_type_calcium_tail_current = sim:membrane_L_type_calcium_current[2$first_index:]
     
     # Get the minimum tail current (this has the largest magnitude) as a 2d array
     min_LCC = std:RemoveDim(std:Min(membrane_L_type_calcium_tail_current, default), 2)
