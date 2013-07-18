@@ -1,4 +1,3 @@
-
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
@@ -31,10 +30,35 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-class Locatable(object):
-    """Base class for expressions in the protocol language."""  
-    def __init__(self, location='unknown'):
-        """Create a new expression node, with a list of child expressions, possibly empty."""
-        self.location = location
-    
-    
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
+import Values as V
+import Environment as Env
+from Model import TestOdeModel
+from ErrorHandling import ProtocolError
+
+def N(number):
+    return M.Const(V.Simple(number))
+
+class TestSyntaxInterface(unittest.TestCase):
+    def TestSimpleODE(self):
+        a = 5
+        model = TestOdeModel(a)
+        for t in range(10):
+            if t > 0:
+                model.Simulate(t)
+            self.assertEqual(model.GetOutputs().LookUp('a').value, a)
+            self.assertAlmostEqual(model.GetOutputs().LookUp('y').value, t*a)
+        
+        range_ = Ranges.UniformRange(0, 10, 1)
+        time_sim = Simulations.Timecourse(model, range_)
+        results = time_sim.Run()
+        self.assertEqual(results.LookUp('a').array, np.array([5]*11))
+        self.assertEqual(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+            
+            
+            
+            

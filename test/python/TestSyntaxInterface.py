@@ -678,6 +678,11 @@ class TestSyntaxInterface(unittest.TestCase):
         proto = Protocol.Protocol(proto_file)
         proto.Run()
         
+    def TestProtocolError(self):
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
+        proto = Protocol.Protocol(proto_file)
+        proto.Run()
+        
         
         
         

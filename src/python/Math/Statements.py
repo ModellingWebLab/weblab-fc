@@ -47,6 +47,7 @@ class AbstractStatement(Locatable.Locatable):
 
 class Assign(AbstractStatement):
     def __init__(self, names, rhs):
+        super(Assign, self).__init__()
         self.names = names
         self.rhs = rhs
                 
@@ -62,6 +63,7 @@ class Assign(AbstractStatement):
     
 class Assert(AbstractStatement):
     def __init__(self, expr):
+        super(Assert, self).__init__()
         self.expr = expr
         
     def Evaluate(self, env):
@@ -75,6 +77,7 @@ class Assert(AbstractStatement):
 
 class Return(AbstractStatement):
     def __init__(self, *parameters):
+        super(Return, self).__init__()
         self.parameters = parameters
                 
     def Evaluate(self, env):

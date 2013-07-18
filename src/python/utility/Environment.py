@@ -34,6 +34,8 @@ import numpy as np
 import Values as V
 import AbstractValue as AV
 import ErrorHandling
+import sys
+from Locatable import Locatable
 
 AbstractValue = AV.AbstractValue
 ProtocolError = ErrorHandling.ProtocolError
@@ -133,6 +135,7 @@ class Environment(object):
         return self.bindings.keys()
     
     def ExecuteStatements(self, statements, returnAllowed=False):
+        result = V.Null()
         for statement in statements:
             result = statement.Evaluate(self)
             if not isinstance(result, V.Null) and result is not None:

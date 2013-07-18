@@ -404,7 +404,10 @@ class Fold(AbstractExpression):
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension, 
                                      "because the array only has", array.ndim, "dimensions")
+        if array.ndim == 0:
+            raise ProtocolError('Array has zero dimensions.')
         shape = list(array.shape)
+        
         size = shape[dimension]
         
         if not isinstance(function, V.LambdaClosure):

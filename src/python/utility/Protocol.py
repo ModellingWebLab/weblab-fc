@@ -35,6 +35,9 @@ CSP.ImportPythonImplementation()
 csp = CSP.CompactSyntaxParser
 import Environment as Env
 import os
+import sys
+from Locatable import Locatable
+from ErrorHandling import ProtocolError
 
 class Protocol(object):
     
@@ -65,8 +68,21 @@ class Protocol(object):
         self.postProcessing.extend(details.get('postprocessing', []))      
 
     def Run(self):
-        self.libraryEnv.ExecuteStatements(self.library)
-        self.postProcessingEnv.ExecuteStatements(self.postProcessing)
+        try:
+            self.libraryEnv.ExecuteStatements(self.library)
+            self.postProcessingEnv.ExecuteStatements(self.postProcessing)
+        except ProtocolError:
+            locations = []
+            current_trace = sys.exc_info()[2]               
+            while current_trace is not None:
+                local_vars = current_trace.tb_frame.f_locals 
+                if 'self' in local_vars:
+                    if isinstance(local_vars['self'], Locatable) and (not locations or local_vars['self'].location != locations[-1]):
+                        locations.append(local_vars['self'].location)
+                current_trace = current_trace.tb_next
+            for location in locations:
+                print location
+            raise
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)
