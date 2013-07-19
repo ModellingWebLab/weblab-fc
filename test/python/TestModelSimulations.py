@@ -39,6 +39,9 @@ import Values as V
 import Environment as Env
 from Model import TestOdeModel
 from ErrorHandling import ProtocolError
+import Ranges
+import Simulations
+import numpy as np
 
 def N(number):
     return M.Const(V.Simple(number))
@@ -53,11 +56,13 @@ class TestSyntaxInterface(unittest.TestCase):
             self.assertEqual(model.GetOutputs().LookUp('a').value, a)
             self.assertAlmostEqual(model.GetOutputs().LookUp('y').value, t*a)
         
+        a = 5
+        model = TestOdeModel(a)
         range_ = Ranges.UniformRange(0, 10, 1)
         time_sim = Simulations.Timecourse(model, range_)
         results = time_sim.Run()
-        self.assertEqual(results.LookUp('a').array, np.array([5]*11))
-        self.assertEqual(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
+        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
             
             
             
