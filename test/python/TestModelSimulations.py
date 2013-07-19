@@ -48,6 +48,7 @@ def N(number):
 
 class TestSyntaxInterface(unittest.TestCase):
     def TestSimpleODE(self):
+        # using range made in python
         a = 5
         model = TestOdeModel(a)
         for t in range(10):
@@ -56,6 +57,7 @@ class TestSyntaxInterface(unittest.TestCase):
             self.assertEqual(model.GetOutputs().LookUp('a').value, a)
             self.assertAlmostEqual(model.GetOutputs().LookUp('y').value, t*a)
         
+        # using UniformRange from Ranges class
         a = 5
         model = TestOdeModel(a)
         range_ = Ranges.UniformRange(0, 10, 1)
@@ -63,7 +65,14 @@ class TestSyntaxInterface(unittest.TestCase):
         results = time_sim.Run()
         np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
         np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
-            
-            
+        
+        # using VectorRange from Ranges class   
+        a = 5
+        model = TestOdeModel(a)
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        time_sim = Simulations.Timecourse(model, range_)
+        results = time_sim.Run()
+        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
+        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
             
             
