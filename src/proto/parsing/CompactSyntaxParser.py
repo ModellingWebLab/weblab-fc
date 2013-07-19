@@ -52,7 +52,9 @@ p.ParserElement.enablePackrat()
 import lxml.builder
 import lxml.etree as ET
 import Ranges
+import Simulations
 import numpy as np
+from Model import TestOdeModel
 
 PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
 MATHML_NS = "http://www.w3.org/1998/Math/MathML"
@@ -72,6 +74,7 @@ def ImportPythonImplementation():
     import Values as V
     import Statements as S
     import Ranges
+    import Simulations
     from Locatable import Locatable
     import math
     
@@ -771,7 +774,6 @@ class Actions(object):
             attrs = self.TransferAttrs('name', 'units')
             if 'uniform' in self.tokens:
                 tokens = self.tokens['uniform'][0]
-                print "tokens", tokens
                 start = tokens[0].expr().value
                 stop = tokens[-1].expr().value
                 if len(tokens) == 3:
@@ -823,6 +825,14 @@ class Actions(object):
                 # Add an empty modifiers element
                 args.append(self.Delegate('Modifiers', [[]]).xml())
             return P.timecourseSimulation(*args)
+        
+        def _expr(self):
+            args = self.GetChildrenExpr()
+            print 'args', args
+            if len(args) == 1:
+                a = 5
+                args.insert(0, TestOdeModel(a))
+            return Simulations.Timecourse(*args)
         
     class NestedSimulation(BaseGroupAction):
         def _xml(self):
@@ -884,6 +894,10 @@ class Actions(object):
                 self.AddTrace(sim_elt)
             return sim_elt
     
+        def _expr(self):
+            sim = self.tokens[1].expr()
+            return sim.Run()
+        
     class Tasks(BaseGroupAction):
         """Parse action for a collection of simulation tasks."""
         def _xml(self):

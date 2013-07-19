@@ -46,7 +46,7 @@ import numpy as np
 def N(number):
     return M.Const(V.Simple(number))
 
-class TestSyntaxInterface(unittest.TestCase):
+class TestModelSimulation(unittest.TestCase):
     def TestSimpleODE(self):
         # using range made in python
         a = 5

@@ -50,6 +50,8 @@ import numpy as np
 import MathExpressions as M
 import Protocol
 import Ranges
+import Simulations
+from Model import TestOdeModel
 from ErrorHandling import ProtocolError
 
 def N(number):
@@ -686,20 +688,36 @@ class TestSyntaxInterface(unittest.TestCase):
 #         proto.Run()
         
     def TestRangesAndSimulations(self):
+        # test parsing uniform range
         parse_action = csp.range.parseString('range t units s uniform 0:10', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Ranges.UniformRange)
         r = range(11)
         for i,num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
-            
+        
+        # test parsing vector range
         parse_action = csp.range.parseString('range run units dimensionless vector [1, 3, 4]', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Ranges.VectorRange)
         r = [1, 3, 4]
         for i,num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
-
+            
+        # test parsing timecourse simulation
+        parse_action = csp.simulation.parseString('simulation sim = timecourse { range time units ms uniform 0:10 }', parseAll=True)
+        expr = parse_action[0].expr()
+        np.testing.assert_array_almost_equal(expr.LookUp('a').array, np.array([5]*11))
+        np.testing.assert_array_almost_equal(expr.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+        
+        # test parsing timecourse simulation
+#         parse_action = csp.tasks.parseString("""tasks {
+#                                 simulation timecourse { range time units second uniform 1:10 }
+#                                 simulation timecourse = { range time units second uniform 10:20 } 
+#                                 } }""", parseAll=True)
+#         expr = parse_action[0].expr()
+        
+        
         
         
         
