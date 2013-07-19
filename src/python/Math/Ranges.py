@@ -41,10 +41,10 @@ class AbstractRange(object):
     # vector range is given a v.array of the numbers you want to iterate over
 class UniformRange(AbstractRange):
     def __init__(self, start, end, step):
-        self.start = start
-        self.end = end
-        self.step = step
-        self.current = start
+        self.start = start.value
+        self.end = end.value
+        self.step = step.value
+        self.current = self.start
         self.count = 0
         
     def __iter__(self):

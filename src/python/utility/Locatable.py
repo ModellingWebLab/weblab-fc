@@ -30,10 +30,11 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+import inspect
 
 class Locatable(object):
     """Base class for expressions in the protocol language."""  
-    def __init__(self, location='unknown'):
+    def __init__(self, location = str(inspect.getouterframes(inspect.currentframe())[2][1:5])):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         self.location = location
     

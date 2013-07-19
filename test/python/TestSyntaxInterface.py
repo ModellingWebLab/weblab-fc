@@ -49,6 +49,7 @@ import Statements as S
 import numpy as np
 import MathExpressions as M
 import Protocol
+import Ranges
 from ErrorHandling import ProtocolError
 
 def N(number):
@@ -678,11 +679,27 @@ class TestSyntaxInterface(unittest.TestCase):
         proto = Protocol.Protocol(proto_file)
         proto.Run()
         
-        # test below is just to test that we get the correct output for a protocol error
+        #test below is just to test that we get the correct output for a protocol error
 #     def TestProtocolError(self):
 #         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
 #         proto = Protocol.Protocol(proto_file)
 #         proto.Run()
+        
+    def TestRangesAndSimulations(self):
+        parse_action = csp.range.parseString('range t units s uniform 0:10', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Ranges.UniformRange)
+        r = range(11)
+        for i,num in enumerate(expr):
+            self.assertAlmostEqual(r[i], num)
+            
+        parse_action = csp.range.parseString('range run units dimensionless vector [1, 3, 4]', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Ranges.VectorRange)
+        r = [1, 3, 4]
+        for i,num in enumerate(expr):
+            self.assertAlmostEqual(r[i], num)
+
         
         
         

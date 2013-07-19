@@ -60,7 +60,7 @@ class TestSyntaxInterface(unittest.TestCase):
         # using UniformRange from Ranges class
         a = 5
         model = TestOdeModel(a)
-        range_ = Ranges.UniformRange(0, 10, 1)
+        range_ = Ranges.UniformRange(V.Simple(0), V.Simple(10), V.Simple(1))
         time_sim = Simulations.Timecourse(model, range_)
         results = time_sim.Run()
         np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))

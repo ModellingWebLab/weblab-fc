@@ -51,6 +51,8 @@ p.ParserElement.enablePackrat()
 ################################################################################
 import lxml.builder
 import lxml.etree as ET
+import Ranges
+import numpy as np
 
 PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
 MATHML_NS = "http://www.w3.org/1998/Math/MathML"
@@ -69,6 +71,7 @@ def ImportPythonImplementation():
     import ArrayExpressions as A
     import Values as V
     import Statements as S
+    import Ranges
     from Locatable import Locatable
     import math
     
@@ -763,6 +766,26 @@ class Actions(object):
                 cond = self.AddLoc(P.condition(self.tokens['while'][0].xml()))
                 range = P.whileStepper(cond, **attrs)
             return range
+        
+        def _expr(self):
+            attrs = self.TransferAttrs('name', 'units')
+            if 'uniform' in self.tokens:
+                tokens = self.tokens['uniform'][0]
+                print "tokens", tokens
+                start = tokens[0].expr().value
+                stop = tokens[-1].expr().value
+                if len(tokens) == 3:
+                    step = tokens[1].expr()
+                else:
+                    step = V.Simple(1)
+                range_ = Ranges.UniformRange(start, stop, step)
+            elif 'vector' in self.tokens:
+                np_array = np.array([ child.value.value for child in self.tokens['vector'][0].expr().children])
+                range_ = Ranges.VectorRange(V.Array(np_array))
+#             elif 'while' in self.tokens:
+#                 cond = self.AddLoc(P.condition(self.tokens['while'][0].expr()))
+#                 range = P.whileStepper(cond, **attrs)
+            return range_
     
     class ModifierWhen(BaseGroupAction):
         """Parse action for the when part of modifiers."""
