@@ -47,8 +47,12 @@ class TestOdeModel(AbstractModel):
     def f(self, t, y):
         return self.a
 
+    def SetInitialTime(self, t):
+        self.r.set_initial_value(self.r.y, 0)
+        
     def Simulate(self, endPoint):
         self.y = self.r.integrate(endPoint)
+        assert self.r.successful()
         #self.y = scipy.integrate.odeint(self.f, 0, self.r.t)
     
     def GetOutputs(self):

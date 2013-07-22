@@ -828,10 +828,10 @@ class Actions(object):
         
         def _expr(self):
             args = self.GetChildrenExpr()
-            print 'args', args
             if len(args) == 1:
                 a = 5
                 args.insert(0, TestOdeModel(a))
+                # model should be optional for simulation constructor, starts as none
             return Simulations.Timecourse(*args)
         
     class NestedSimulation(BaseGroupAction):
@@ -896,13 +896,20 @@ class Actions(object):
     
         def _expr(self):
             sim = self.tokens[1].expr()
-            return sim.Run()
+            return sim
         
     class Tasks(BaseGroupAction):
         """Parse action for a collection of simulation tasks."""
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.simulations(*self.GetChildrenXml())
+            
+        def _expr(self):
+            sims = self.GetChildrenExpr()
+            #sims[0].Merge(sims[1])
+            for sim in sims:
+                print 'sim', sim
+                
     
     ######################################################################
     # Other protocol language constructs
@@ -1097,6 +1104,8 @@ class Actions(object):
                     d['postprocessing'] = token.expr()
                 if isinstance(token, Actions.Import):
                     d['imports'].append(token.expr())
+                if isinstance(token, Actions.Tasks):
+                    d['tasks'].append(token.expr())
             return d
     
 

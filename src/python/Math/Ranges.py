@@ -32,13 +32,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Environment as Env
 import scipy.integrate
 import Values as V
-import math
 
 class AbstractRange(object):
-    """Base class for statements in the protocol language."""
+    """Base class for ranges in the protocol language."""
     def Simulate(self):
         raise NotImplementedError    
-    # vector range is given a v.array of the numbers you want to iterate over
+    
 class UniformRange(AbstractRange):
     def __init__(self, start, end, step):
         self.start = start.value
@@ -48,6 +47,7 @@ class UniformRange(AbstractRange):
         self.count = 0
         
     def __iter__(self):
+        self.count = 0
         return self
     
     def next(self):
@@ -57,16 +57,15 @@ class UniformRange(AbstractRange):
             self.count += 1
             self.current = self.start + self.step * (self.count - 1)
             return self.current
-        # change this to multiplying step by count
         
     def GetNumberOfOutputPoints(self):
-        return math.round(self.end-self.start)/self.step
+        return (round(self.end-self.start)/self.step) + 1
     
     def GetCurrentOutputPoint(self):
         return self.current
     
     def GetCurrentOutputNumber(self):
-        return self.count
+        return self.count - 1
     
 class VectorRange(AbstractRange):
     def __init__(self, arrRange):
@@ -75,14 +74,15 @@ class VectorRange(AbstractRange):
         self.count = 0
         
     def __iter__(self):
+        self.count = 0
         return self
     
     def next(self):
-        if self.current >= self.arrRange[-1]:
+        if self.count >= len(self.arrRange):
             raise StopIteration     
         else:
+            self.current = self.arrRange[self.count]
             self.count += 1
-            self.current = self.arrRange[self.count-1]
             return self.current
         
     def GetNumberOfOutputPoints(self):
@@ -92,7 +92,7 @@ class VectorRange(AbstractRange):
         return self.current
     
     def GetCurrentOutputNumber(self):
-        return self.count
+        return self.count - 1
         
     
     

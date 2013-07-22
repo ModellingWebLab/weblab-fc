@@ -707,15 +707,21 @@ class TestSyntaxInterface(unittest.TestCase):
         # test parsing timecourse simulation
         parse_action = csp.simulation.parseString('simulation sim = timecourse { range time units ms uniform 0:10 }', parseAll=True)
         expr = parse_action[0].expr()
-        np.testing.assert_array_almost_equal(expr.LookUp('a').array, np.array([5]*11))
-        np.testing.assert_array_almost_equal(expr.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+        a = 5
+        run_sim.SetModel(TestOdeModel(a)) # implement this
+        run_sim = expr.Run()
+        np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5]*11))
+        np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t*5 for t in range(11)]))   
         
         # test parsing timecourse simulation
-#         parse_action = csp.tasks.parseString("""tasks {
-#                                 simulation timecourse { range time units second uniform 1:10 }
-#                                 simulation timecourse = { range time units second uniform 10:20 } 
-#                                 } }""", parseAll=True)
-#         expr = parse_action[0].expr()
+        parse_action = csp.tasks.parseString("""tasks {
+                                simulation timecourse { range time units second uniform 1:10 }
+                                simulation timecourse { range time units second uniform 10:20 } 
+                                 }""", parseAll=True)
+        expr = parse_action[0].expr()
+        # expr should just be a list of simulation objects
+        
+        
         
         
         

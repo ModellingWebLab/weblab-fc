@@ -35,56 +35,71 @@ import Values as V
 import numpy as np
 
 class AbstractSimulation(object):
-    """Base class for statements in the protocol language."""
-    def InternalRun(self, env=None):
-        raise NotImplementedError    
+    """Base class for simulations in the protocol language."""
+    def __init__(self, prefix=None):
+        self.prefix = prefix
+        self.ranges = range
+#         if prefix:
+        self.results = Env.Environment()
+#         else:
+#             self.results = None
+    
+    def InternalRun(self):
+        raise NotImplementedError 
+    
+    def SetModel(self, model):
+        self.model = model   
     
     def Run(self):
-        return env
+        self.InternalRun()
+        return self.results
+        # run results of internal run
     
-    def AddIterationOutputs(self):
-        pass
+    def AddIterationOutputs(self, env):
+        if self.results is not None and not self.results:  
+            range_dims = tuple([r.GetNumberOfOutputPoints() for r in self.ranges])         
+            for name in env.DefinedNames():
+                output = env.LookUp(name)
+                results = np.empty(range_dims + output.array.shape)
+                self.results.DefineName(name, V.Array(results))
+        if self.results:
+            range_indices = tuple([r.GetCurrentOutputNumber() for r in self.ranges])
+            for name in env.DefinedNames():
+                result = self.results.LookUp(name).array
+                result[range_indices] = env.LookUp(name).array
         
-class Timecourse(AbstractSimulation):
-    def __init__(self, model, range_):
-        self.model = model
+class Timecourse(AbstractSimulation):   
+    def __init__(self, range_):
+        super(Timecourse, self).__init__()
+        self.model = None
         self.range_ = range_
+        self.ranges = [self.range_]     
         
-    def Run(self):
-        results = {}
-        env = None
+    def InternalRun(self):
         for t in self.range_:
             if self.range_.count == 1:
-                env = self.model.GetOutputs()
-                for name in env.DefinedNames():
-                    results[name] = [env.LookUp(name).value]
+                self.model.SetInitialTime(t)
+                self.AddIterationOutputs(self.model.GetOutputs())
             else:
                 self.model.Simulate(t)
-                for name in env.DefinedNames():
-                    results[name].append(self.model.GetOutputs().LookUp(name).value)
-        env_results = Env.Environment()
-        for name in results:
-            env_results.DefineName(name, V.Array(np.array(results[name])))
-        return env_results
+                self.AddIterationOutputs(self.model.GetOutputs())
     
+class Nested(AbstractSimulation):
+    def __init__(self, nestedSim, range_, modifiers=[]):
+        super(Nested, self).__init__()
+        self.nestedSim = nestedSim
+        self.range_ = range_
+        self.modifiers = modifiers
+        self.ranges = self.nestedSim.ranges
+        self.ranges.insert(0, self.range_)
+        self.results = self.nestedSim.results
     
-    # abstract simulation class has two run methods, raise notimplemented error and 
-    #the other has no arguments and returns an environment
-    # internalRun(env=None) is notimplementederror so its implemented in timecoursesimulation
-    # addIterationOutputs
-    # in constructor for abstract simulation is model and range (range is an instance of 
-    #abstract range) uniformrange is subclass of abstractrange
-    # implement iterator method for abstract range  (method iter returns self) and you need
-    #a method __next__
-    #uniformrange takes start, end, step size
-    #get number of output points just returns number of steps
-    #timecoursesimulation just loops through the uniformrange values and simulates for each
-    # save outputs of each point along the way
-    # additerationoutputs is method for abstractsimulation- end up with array with results of
-    #each time step
-    # getcurrentoutput number in abstractrange class returns current place in range so that you can do
-    #result of that index and assign it for that time step
-    # timecoursesimulation is a subclass of simulation
+    def ZeroInitialiseResults(self):
+        pass
+    
+    def InternalRun(self):
+        for t in self.range_:
+            self.nestedSim.Run()
     
     
     
