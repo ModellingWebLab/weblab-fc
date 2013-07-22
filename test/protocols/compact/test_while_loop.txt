@@ -1,6 +1,5 @@
 # Compact version of the test_while_loop protocol
 
-namespace cellml = "http://www.cellml.org/cellml/1.0#"
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 inputs {
@@ -72,6 +71,22 @@ tasks {
         range t units ms while 0 # Always fails
         modifiers { at start set oxmeta:membrane_voltage = 0 }
     }
+}
+
+post-processing {
+    def Check(V, N) {
+        assert V.NUM_ELEMENTS == N
+        assert MathML:abs(V[-1] - (N-1)) < 1e-12
+    }
+
+    Check(sim0:membrane_voltage, 10)
+    Check(sim1:membrane_voltage, 10)
+    Check(sim2:membrane_voltage, num_iters)
+    Check(sim3:membrane_voltage, 10)
+    Check(sim4:membrane_voltage, 10)
+    Check(sim5:membrane_voltage, 10)
+    Check(sim_long:membrane_voltage, 3001)
+    Check(not_empty:membrane_voltage, 1)
 }
 
 outputs {
