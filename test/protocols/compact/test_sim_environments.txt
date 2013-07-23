@@ -1,0 +1,105 @@
+# This protocol tests various aspects of nested and timecourse simulations,
+# especially how the environments in which they are run delegate.
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "../../../src/proto/library/BasicLibrary.txt"
+
+library {
+    loop_array = [i*3 for i in 1:5]
+    parameter = 3
+    multiplier = -1.5
+}
+
+units {
+    ms = milli second
+    mV = milli volt
+    mV_per_ms = milli volt . milli second^-1
+}
+
+# Turn the model into dV/dt = a, V(0) = 0, a = 1
+model interface {
+    independent var units ms
+    input oxmeta:leakage_current units mV_per_ms = 1
+    input oxmeta:membrane_voltage = 0.0
+    output oxmeta:membrane_voltage units mV
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = oxmeta:leakage_current
+}
+
+tasks {
+    # Straightforward timecourse with a=parameter (from library)
+    simulation tc3 = timecourse {
+        range t units ms uniform 0:10
+        modifiers {
+            at start set oxmeta:leakage_current = parameter
+        }
+    }
+    
+    # Timecourse following on from where the previous one left off, with a different parameter
+    simulation tc_follow = timecourse {
+        range t units ms uniform 0:10
+        modifiers {
+            at start set oxmeta:leakage_current = oxmeta:leakage_current * 2
+        }
+    }
+    
+    # Timecourse setting parameter based on previous simulation
+    simulation tc_sim = timecourse {
+        range t units ms uniform 0:10
+        modifiers {
+            at start reset
+            at start set oxmeta:leakage_current = tc3:membrane_voltage[-1] # = 30
+        }
+    }
+
+    # Nested loop setting the model parameter using loop and library variables
+    simulation n1 = nested {
+        range c units dimensionless vector [0, 2, 4]
+        modifiers {
+            at each loop reset
+        }
+        nests simulation timecourse {
+            range t units ms uniform 0:10
+            modifiers {
+                at start set oxmeta:leakage_current = c * multiplier
+            }
+        }
+    }
+    
+    # Nested loop using a pre-defined vector for iterating
+    simulation n2 = nested {
+        range c units dimensionless vector loop_array
+        modifiers {
+            at each loop set oxmeta:leakage_current = c
+        }
+        nests simulation timecourse {
+            range t units ms uniform 0:10
+            modifiers {
+                at start reset
+            }
+        }
+    }
+    
+}
+
+post-processing {
+
+    # Check outputs of the simulations are as expected
+    def Close(a1, a2, tol=1e-6) {
+        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    }
+    
+    assert Close(tc3:membrane_voltage, [i*3 for i in 0:11])
+    assert Close(tc_follow:membrane_voltage, [30+i*6 for i in 0:11])
+    assert Close(tc_sim:membrane_voltage, [i*30 for i in 0:11])
+    assert Close(n1:membrane_voltage, [ [ j*i*multiplier for j in 0:11] for i in 0:2:5 ])
+    assert Close(n2:membrane_voltage, [ [ j*i*3 for j in 0:11 ] for i in 1:5 ])
+}
+
+outputs {
+    V3 = tc3:membrane_voltage
+    V6_30 = tc_follow:membrane_voltage
+    V30 = tc_sim:membrane_voltage
+    Vn1 = n1:membrane_voltage
+    Vn3 = n2:membrane_voltage
+}

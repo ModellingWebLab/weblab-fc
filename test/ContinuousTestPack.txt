@@ -15,6 +15,7 @@ TestProtocolFileFinder.hpp
 TestProtocolParser.hpp
 TestS1S2Protocol.hpp
 TestSimpleProtocol.hpp
+TestSimulationEnvironments.hpp
 TestSteadyPacingProtocol.hpp
 TestSteppers.hpp
 TestWhileLoops.hpp
