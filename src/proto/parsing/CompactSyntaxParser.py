@@ -1318,7 +1318,7 @@ class CompactSyntaxParser(object):
                                         ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        ('not', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
