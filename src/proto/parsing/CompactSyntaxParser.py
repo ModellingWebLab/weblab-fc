@@ -53,6 +53,8 @@ import lxml.builder
 import lxml.etree as ET
 import Ranges
 import Simulations
+from Modifiers import AbstractModifier
+import Modifiers
 import numpy as np
 from Model import TestOdeModel
 
@@ -794,6 +796,10 @@ class Actions(object):
         def _xml(self):
             when = {'start': 'AT_START_ONLY', 'each': 'EVERY_LOOP', 'end': 'AT_END'}[self.tokens]
             return P.when(when)
+        
+        def _expr(self):
+            when = {'start': 'START_ONLY', 'each': 'EACH_LOOP', 'end': 'END_ONLY'}[self.tokens]
+            return getattr(AbstractModifier, when)
     
     class Modifier(BaseGroupAction):
         """Parse action that generates all kinds of modifier."""
@@ -802,21 +808,41 @@ class Actions(object):
             detail = self.tokens[1]
             if 'set' in self.tokens[1]:
                 modifier = P.setVariable
-                args.append(P.name(detail[0]))
-                args.append(P.value(detail[1].xml()))
+                args.append(detail[0])
+                args.append(detail[1].expr())
             elif 'save' in self.tokens[1]:
                 modifier = P.saveState
-                args.append(P.name(detail[0]))
+                args.append(detail[0])
             elif 'reset' in self.tokens[1]:
                 modifier = P.resetState
                 if len(detail) > 0:
-                    args.append(P.state(detail[0]))
+                    args.append(detail[0])
+            return modifier(*args)
+        
+        def _expr(self):
+            args = [self.tokens[0].expr()]
+            detail = self.tokens[1]
+            if 'set' in self.tokens[1]:
+                modifier = Modifiers.SetVariable
+                print 'details', detail
+                args.append(detail[0])
+                args.append(detail[1].expr())
+            elif 'save' in self.tokens[1]:
+                modifier = Modifiers.SaveState
+                args.append(detail[0])
+            elif 'reset' in self.tokens[1]:
+                modifier = Modifiers.ResetState
+                if len(detail) > 0:
+                    args.append(detail[0])
             return modifier(*args)
     
     class Modifiers(BaseGroupAction):
         """Parse action for the modifiers collection."""
         def _xml(self):
             return P.modifiers(*self.GetChildrenXml())
+        
+        def _expr(self):
+            return self.GetChildrenExpr()
     
     class TimecourseSimulation(BaseGroupAction):
         def _xml(self):
@@ -828,9 +854,6 @@ class Actions(object):
         
         def _expr(self):
             args = self.GetChildrenExpr()
-            if len(args) == 1:
-                a = 5
-                args.insert(0, TestOdeModel(a))
                 # model should be optional for simulation constructor, starts as none
             return Simulations.Timecourse(*args)
         
@@ -907,8 +930,8 @@ class Actions(object):
         def _expr(self):
             sims = self.GetChildrenExpr()
             #sims[0].Merge(sims[1])
-            for sim in sims:
-                print 'sim', sim
+#             for sim in sims:
+#                 print 'sim', sim
                 
     
     ######################################################################

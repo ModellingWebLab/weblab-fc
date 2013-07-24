@@ -52,6 +52,7 @@ class UniformRange(AbstractRange):
     
     def next(self):
         if self.current >= self.end:
+            self.count = 0
             raise StopIteration
         else:
             self.count += 1
@@ -79,6 +80,7 @@ class VectorRange(AbstractRange):
     
     def next(self):
         if self.count >= len(self.arrRange):
+            self.count = 0
             raise StopIteration     
         else:
             self.current = self.arrRange[self.count]
@@ -90,6 +92,32 @@ class VectorRange(AbstractRange):
     
     def GetCurrentOutputPoint(self):
         return self.current
+    
+    def GetCurrentOutputNumber(self):
+        return self.count - 1
+    
+class While(AbstractRange):
+    def __init__(self, condition):
+        self.condition = condition
+        self.count = 0
+        
+    def __iter__(self):
+        self.count = 0
+        return self
+    
+    def next(self):
+        if not self.condition:
+            self.count = 0
+            raise StopIteration     
+        else:
+            self.count += 1
+            return self.count
+        
+    def GetNumberOfOutputPoints(self):
+        return self.count
+    
+    def GetCurrentOutputPoint(self):
+        return self.count
     
     def GetCurrentOutputNumber(self):
         return self.count - 1

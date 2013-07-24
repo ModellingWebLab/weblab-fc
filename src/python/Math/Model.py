@@ -32,6 +32,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Environment as Env
 import scipy.integrate
 import Values as V
+from ErrorHandling import ProtocolError
 
 class AbstractModel(object):
     """Base class for statements in the protocol language."""
@@ -40,9 +41,11 @@ class AbstractModel(object):
     
 class TestOdeModel(AbstractModel):
     def __init__(self, a):
+        self.savedStates = {} # key is name, value is numpy array of saved state
         self.a = a
         self.r = scipy.integrate.ode(self.f)
         self.r.set_initial_value(0, 0)
+        self.modifiers = []
         
     def f(self, t, y):
         return self.a
@@ -50,6 +53,20 @@ class TestOdeModel(AbstractModel):
     def SetInitialTime(self, t):
         self.r.set_initial_value(self.r.y, 0)
         
+    def SetVariable(self, when, variableName, value):
+        if not hasattr(self, variableName):
+            raise ProtocolError("Type", type(self), "does not have a variable named", variableName)
+        setattr(self, variableName, value)
+    
+    def SaveState(self, when, name):
+        self.savedStates[name] = self.r.y
+    
+    def ResetState(self, when, name):
+        if name is None:
+            self.r.set_initial_value(0, 0)
+        else:
+            self.r.set_initial_value(self.savedStates[name], 0)
+                
     def Simulate(self, endPoint):
         self.y = self.r.integrate(endPoint)
         assert self.r.successful()

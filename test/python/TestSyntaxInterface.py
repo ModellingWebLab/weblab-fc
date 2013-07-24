@@ -48,11 +48,13 @@ import Expressions as E
 import Statements as S
 import numpy as np
 import MathExpressions as M
+import Modifiers
 import Protocol
 import Ranges
 import Simulations
 from Model import TestOdeModel
 from ErrorHandling import ProtocolError
+from Modifiers import AbstractModifier
 
 def N(number):
     return M.Const(V.Simple(number))
@@ -708,7 +710,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = csp.simulation.parseString('simulation sim = timecourse { range time units ms uniform 0:10 }', parseAll=True)
         expr = parse_action[0].expr()
         a = 5
-        run_sim.SetModel(TestOdeModel(a)) # implement this
+        expr.SetModel(TestOdeModel(a))
         run_sim = expr.Run()
         np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5]*11))
         np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t*5 for t in range(11)]))   
@@ -720,6 +722,42 @@ class TestSyntaxInterface(unittest.TestCase):
                                  }""", parseAll=True)
         expr = parse_action[0].expr()
         # expr should just be a list of simulation objects
+        
+    def TestParsingModifiers(self):
+        parse_action = csp.modifierWhen.parseString('at start', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertEqual(expr, AbstractModifier.START_ONLY)
+        
+        parse_action = csp.modifierWhen.parseString('at each loop', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertEqual(expr, AbstractModifier.EACH_LOOP)
+        
+        parse_action = csp.modifierWhen.parseString('at end', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertEqual(expr, AbstractModifier.END_ONLY)
+        
+        parse_action = csp.modifier.parseString('at start set model:a = 5.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Modifiers.SetVariable)
+        self.assertEqual(expr.variableName, 'model:a')
+        self.assertEqual(expr.value.value.value, 5)
+        
+        parse_action = csp.modifier.parseString('at start set model:t = 10.0', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Modifiers.SetVariable)
+        self.assertEqual(expr.variableName, 'model:t')
+        self.assertEqual(expr.value.value.value, 10)
+        
+        parse_action = csp.modifier.parseString('at start save as state_name', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Modifiers.SaveState)
+        self.assertEqual(expr.stateName, 'state_name')
+        
+        parse_action = csp.modifier.parseString('at start reset to state_name', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Modifiers.ResetState)
+        self.assertEqual(expr.stateName, 'state_name')
+        
         
         
         

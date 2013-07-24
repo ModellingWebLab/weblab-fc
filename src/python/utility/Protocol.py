@@ -44,6 +44,7 @@ class Protocol(object):
     def __init__(self, protoFile):
         self.protoFile = protoFile
         self.env = Env.Environment()
+        self.inputEnv = Env.Environment()
         self.libraryEnv = Env.Environment() #is where its own library is executed
         self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv) #for own postprocessing which delegates to library env
         self.library = []

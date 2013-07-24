@@ -41,6 +41,8 @@ from Model import TestOdeModel
 from ErrorHandling import ProtocolError
 import Ranges
 import Simulations
+import Modifiers
+from Modifiers import AbstractModifier
 import numpy as np
 
 def N(number):
@@ -48,44 +50,141 @@ def N(number):
 
 class TestModelSimulation(unittest.TestCase):
     def TestSimpleODE(self):
-#         # using range made in python
-#         a = 5
-#         model = TestOdeModel(a)
-#         for t in range(10):
-#             if t > 0:
-#                 model.Simulate(t)
-#             self.assertEqual(model.GetOutputs().LookUp('a').value, a)
-#             self.assertAlmostEqual(model.GetOutputs().LookUp('y').value, t*a)
-#         
-#         # using UniformRange from Ranges class
-#         a = 5
-#         model = TestOdeModel(a)
-#         range_ = Ranges.UniformRange(V.Simple(0), V.Simple(10), V.Simple(1))
-#         time_sim = Simulations.Timecourse(range_)
-#         time_sim.SetModel(model)
-#         results = time_sim.Run()
-#         np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
-#         np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+        # using range made in python
+        a = 5
+        model = TestOdeModel(a)
+        for t in range(10):
+            if t > 0:
+                model.Simulate(t)
+            self.assertEqual(model.GetOutputs().LookUp('a').value, a)
+            self.assertAlmostEqual(model.GetOutputs().LookUp('y').value, t*a)
         
-        # using VectorRange from Ranges class   
+    def TestUniformRange(self): 
+        a = 5
+        model = TestOdeModel(a)
+        range_ = Ranges.UniformRange(V.Simple(0), V.Simple(10), V.Simple(1))
+        time_sim = Simulations.Timecourse(range_)
+        time_sim.SetModel(model)
+        results = time_sim.Run()
+        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
+        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+     
+    def TestVectorRange(self):    
         a = 5
         model = TestOdeModel(a)
         range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
-        # set model method
         time_sim = Simulations.Timecourse(range_)
         time_sim.SetModel(model)
-#         results = time_sim.Run()
-#         np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
-#         np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
+        results = time_sim.Run()
+        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
+        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))   
         
-        # test nested simulations
+    def TestNestedSimulations(self):
         a = 5
         model = TestOdeModel(a)
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        time_sim = Simulations.Timecourse(range_)
+        time_sim.SetModel(model)
         range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(0, 51, 5), np.arange(50, 101, 5), np.arange(100, 151, 5), np.arange(150, 201, 5)])
         np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
-        # results would be like [[0, 5, 10] [10, 15..
-            
+        
+        # test while loop
+        
+    def TestReset(self):        
+        # do a time course and save the state with a name at the end, so like save at y = 50
+        #then do a nested and you reset to the saved state at each point 
+        #output is 50, 55...etc each row
+         
+        # nested each loop set a=range(count) so a would be 0,1,2 each time through the loop
+        # probably want to combine this by reseting the state each time too, two modifiers test
+        # first one is four 0's then 0 1 2 3 then 0 2 4 6
+        
+        # reset at the start with modifier on time sim of nested simul
+        a = 5
+        model = TestOdeModel(a)
+        when = AbstractModifier.START_ONLY
+        modifier = Modifiers.ResetState(when)
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        time_sim = Simulations.Timecourse(range_, modifiers=[modifier])
+
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3])))
+        nested_sim = Simulations.Nested(time_sim, range_)
+        nested_sim.SetModel(model)
+        results = nested_sim.Run()
+        predicted = np.array([np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5)])
+        np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
+        
+        # reset at each loop with modifier on nested simul, should be same result as above
+        a = 5
+        model = TestOdeModel(a)
+        when = AbstractModifier.EACH_LOOP
+        modifier = Modifiers.ResetState(when)
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        time_sim = Simulations.Timecourse(range_)
+          
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3])))
+        nested_sim = Simulations.Nested(time_sim, range_, modifiers=[modifier])
+        nested_sim.SetModel(model)
+        results = nested_sim.Run()
+        predicted = np.array([np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5)])
+        np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
+        
+    def TestSaveAndReset(self): 
+        # save state and reset using save state
+        a = 5
+        model = TestOdeModel(a)
+        save_modifier = Modifiers.SaveState(AbstractModifier.START_ONLY, 'start')
+        reset_modifier = Modifiers.ResetState(AbstractModifier.EACH_LOOP, 'start')
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        time_sim = Simulations.Timecourse(range_)       
+
+        range_ = Ranges.VectorRange(V.Array(np.array([1, 2, 3])))
+        nested_sim = Simulations.Nested(time_sim, range_, modifiers=[save_modifier, reset_modifier])
+        nested_sim.SetModel(model)
+        results = nested_sim.Run()
+        predicted = np.array([np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5)])
+        np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
+        
+        # save state and reset using save state
+        a = 5
+        model = TestOdeModel(a)
+        save_modifier = Modifiers.SaveState(AbstractModifier.END_ONLY, 'start')
+        reset_modifier = Modifiers.ResetState(AbstractModifier.EACH_LOOP, 'start')
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        initial_time_sim = Simulations.Timecourse(range_, modifiers = [save_modifier])
+        initial_time_sim.SetModel(model)
+        initial_time_sim.Run()
+        
+        import copy
+        inner_time_sim = Simulations.Timecourse(copy.deepcopy(range_))
+        range_ = Ranges.VectorRange(V.Array(np.array([1, 2, 3])))
+        nested_sim = Simulations.Nested(inner_time_sim, range_, modifiers=[reset_modifier])
+        nested_sim.SetModel(model)
+        results = nested_sim.Run()
+        predicted = np.array([np.arange(50, 101, 5), np.arange(50, 101, 5), np.arange(50, 101, 5)])
+        np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
+        
+    def TestSetVariable(self): 
+        # set variable
+        a = 5
+        model = TestOdeModel(a)
+        modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'a', 1)
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        time_sim = Simulations.Timecourse(range_)       
+
+        range_ = Ranges.VectorRange(V.Array(np.array([0, 1, 2, 3])))
+        nested_sim = Simulations.Nested(time_sim, range_, modifiers=[modifier])
+        nested_sim.SetModel(model)
+        results = nested_sim.Run()
+        predicted = np.array([np.arange(0, 11), np.arange(10, 21), np.arange(20, 31), np.arange(30, 41)])
+        np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
+         
+         
+        # change into many methods, change set model, check instances, imports in CSP
+         
+         
+             

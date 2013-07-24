@@ -33,6 +33,7 @@ import Environment as Env
 import scipy.integrate
 import Values as V
 import numpy as np
+from Modifiers import AbstractModifier
 
 class AbstractSimulation(object):
     """Base class for simulations in the protocol language."""
@@ -44,12 +45,26 @@ class AbstractSimulation(object):
 #         else:
 #             self.results = None
     
+    # hooks loop through the when's of the modifier and get called when the time matches
+    
     def InternalRun(self):
         raise NotImplementedError 
     
-    def SetModel(self, model):
-        self.model = model   
+    def LoopBodyStartHook(self):
+        for modifier in self.modifiers:
+            if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 1:
+                modifier.Apply(self)
+            elif modifier.when == AbstractModifier.EACH_LOOP:
+                modifier.Apply(self)
     
+    def LoopBodyEndHook(self):
+        for modifier in self.modifiers:
+            if modifier.when == AbstractModifier.END_ONLY:
+                modifier.Apply(self)
+    
+    def SetModel(self, model):
+        self.model = model
+        
     def Run(self):
         self.InternalRun()
         return self.results
@@ -69,20 +84,23 @@ class AbstractSimulation(object):
                 result[range_indices] = env.LookUp(name).array
         
 class Timecourse(AbstractSimulation):   
-    def __init__(self, range_):
+    def __init__(self, range_, modifiers=[]):
         super(Timecourse, self).__init__()
         self.model = None
         self.range_ = range_
         self.ranges = [self.range_]     
+        self.modifiers = modifiers
         
     def InternalRun(self):
         for t in self.range_:
+            self.LoopBodyStartHook()
             if self.range_.count == 1:
                 self.model.SetInitialTime(t)
                 self.AddIterationOutputs(self.model.GetOutputs())
             else:
                 self.model.Simulate(t)
                 self.AddIterationOutputs(self.model.GetOutputs())
+        self.LoopBodyEndHook()
     
 class Nested(AbstractSimulation):
     def __init__(self, nestedSim, range_, modifiers=[]):
@@ -99,7 +117,13 @@ class Nested(AbstractSimulation):
     
     def InternalRun(self):
         for t in self.range_:
+            self.LoopBodyStartHook()
             self.nestedSim.Run()
+        self.LoopBodyEndHook()
+        
+    def SetModel(self, model):
+        self.model = model
+        self.nestedSim.model = model
     
     
     
