@@ -39,11 +39,14 @@ class AbstractSimulation(object):
     """Base class for simulations in the protocol language."""
     def __init__(self, prefix=None):
         self.prefix = prefix
-        self.ranges = range
+        self.ranges = [self.range_]
+        self.model = None
 #         if prefix:
         self.results = Env.Environment()
 #         else:
 #             self.results = None
+        self.env = Env.Environment()
+        self.env.DefineName(self.range_.name, self.range_)
     
     # hooks loop through the when's of the modifier and get called when the time matches
     
@@ -85,9 +88,8 @@ class AbstractSimulation(object):
         
 class Timecourse(AbstractSimulation):   
     def __init__(self, range_, modifiers=[]):
-        super(Timecourse, self).__init__()
-        self.model = None
         self.range_ = range_
+        super(Timecourse, self).__init__()
         self.ranges = [self.range_]     
         self.modifiers = modifiers
         
@@ -104,13 +106,14 @@ class Timecourse(AbstractSimulation):
     
 class Nested(AbstractSimulation):
     def __init__(self, nestedSim, range_, modifiers=[]):
+        self.range_ = range_
         super(Nested, self).__init__()
         self.nestedSim = nestedSim
-        self.range_ = range_
         self.modifiers = modifiers
         self.ranges = self.nestedSim.ranges
         self.ranges.insert(0, self.range_)
         self.results = self.nestedSim.results
+        nestedSim.env.SetDelegateeEnv(self.env)
     
     def ZeroInitialiseResults(self):
         pass

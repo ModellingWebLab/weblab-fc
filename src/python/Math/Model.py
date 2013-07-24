@@ -53,7 +53,7 @@ class TestOdeModel(AbstractModel):
     def SetInitialTime(self, t):
         self.r.set_initial_value(self.r.y, 0)
         
-    def SetVariable(self, when, variableName, value):
+    def SetVariable(self, when, env, variableName, value):
         if not hasattr(self, variableName):
             raise ProtocolError("Type", type(self), "does not have a variable named", variableName)
         setattr(self, variableName, value)

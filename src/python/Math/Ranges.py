@@ -33,13 +33,18 @@ import Environment as Env
 import scipy.integrate
 import Values as V
 
-class AbstractRange(object):
+class AbstractRange(V.Simple):
     """Base class for ranges in the protocol language."""
     def Simulate(self):
-        raise NotImplementedError    
+        raise NotImplementedError  
+    
+    @property
+    def value(self):
+        return self.current  
     
 class UniformRange(AbstractRange):
-    def __init__(self, start, end, step):
+    def __init__(self, name, start, end, step):
+        self.name = name
         self.start = start.value
         self.end = end.value
         self.step = step.value
@@ -69,7 +74,8 @@ class UniformRange(AbstractRange):
         return self.count - 1
     
 class VectorRange(AbstractRange):
-    def __init__(self, arrRange):
+    def __init__(self, name, arrRange):
+        self.name = name
         self.arrRange = arrRange.array
         self.current = self.arrRange[0]
         self.count = 0
@@ -97,7 +103,8 @@ class VectorRange(AbstractRange):
         return self.count - 1
     
 class While(AbstractRange):
-    def __init__(self, condition):
+    def __init__(self, name, condition):
+        self.name = name
         self.condition = condition
         self.count = 0
         
