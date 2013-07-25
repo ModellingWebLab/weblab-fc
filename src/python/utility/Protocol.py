@@ -48,6 +48,7 @@ class Protocol(object):
         self.libraryEnv = Env.Environment() #is where its own library is executed
         self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv) #for own postprocessing which delegates to library env
         self.library = []
+        self.simulations = []
         self.postProcessing = []
         parser = csp()
         CSP.Actions.source_file = protoFile
@@ -61,16 +62,23 @@ class Protocol(object):
             imported_proto = Protocol(self.GetPath(protoFile, path))
             if prefix == "":    
                 self.library.extend(imported_proto.library)
+                self.simulations.extend(imported_proto.simulations)
                 self.postProcessing.extend(imported_proto.postProcessing)
             else:
                 self.libraryEnv.SetDelegateeEnv(imported_proto.libraryEnv, prefix)
                 imported_proto.libraryEnv.ExecuteStatements(imported_proto.library)
         self.library.extend(details.get('library', []))
+        self.simulations.extend(details.get('simulations', []))
         self.postProcessing.extend(details.get('postprocessing', []))      
 
     def Run(self):
         try:
             self.libraryEnv.ExecuteStatements(self.library)
+            for sim in self.simulations:
+                sim.env.SetDelegateeEnv(self.libraryEnv)
+                sim.Initialise()
+                results = sim.Run()
+                self.libraryEnv.SetDelegateeEnv(results, sim.prefix)
             self.postProcessingEnv.ExecuteStatements(self.postProcessing)
         except ProtocolError:
             locations = []
@@ -84,6 +92,10 @@ class Protocol(object):
             for location in locations:
                 print location
             raise
+        
+    def SetModel(self, model):
+        for sim in self.simulations:
+            sim.SetModel(model)
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)

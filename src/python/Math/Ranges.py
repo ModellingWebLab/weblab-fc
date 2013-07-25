@@ -35,8 +35,8 @@ import Values as V
 
 class AbstractRange(V.Simple):
     """Base class for ranges in the protocol language."""
-    def Simulate(self):
-        raise NotImplementedError  
+    def Initialise(self, env):
+        pass
     
     @property
     def value(self):
@@ -53,6 +53,7 @@ class UniformRange(AbstractRange):
         
     def __iter__(self):
         self.count = 0
+        self.current = self.start
         return self
     
     def next(self):
@@ -64,6 +65,10 @@ class UniformRange(AbstractRange):
             self.current = self.start + self.step * (self.count - 1)
             return self.current
         
+    def Initialise(self, env):
+        self.env = env
+        
+        
     def GetNumberOfOutputPoints(self):
         return (round(self.end-self.start)/self.step) + 1
     
@@ -74,11 +79,22 @@ class UniformRange(AbstractRange):
         return self.count - 1
     
 class VectorRange(AbstractRange):
-    def __init__(self, name, arrRange):
+    def __init__(self, name, arrOrExpr):
         self.name = name
-        self.arrRange = arrRange.array
-        self.current = self.arrRange[0]
+        if isinstance(arrOrExpr, V.Array):
+            self.expr = None
+            self.arrRange = arrOrExpr
+            self.current = self.arrRange[0]
+        else:
+            self.expr = arrOrExpr
+            self.current = float('nan')
         self.count = 0
+    
+    def Initialise(self, env):
+        self.env = env
+        if self.expr:
+            self.arrRange = self.expr.Evaluate(env).array
+            self.current = self.arrRange[0]
         
     def __iter__(self):
         self.count = 0
@@ -90,6 +106,7 @@ class VectorRange(AbstractRange):
             raise StopIteration     
         else:
             self.current = self.arrRange[self.count]
+            self.env.unwrappedBindings[self.name] = self.current
             self.count += 1
             return self.current
         

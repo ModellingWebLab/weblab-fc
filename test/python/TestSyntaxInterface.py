@@ -683,6 +683,18 @@ class TestSyntaxInterface(unittest.TestCase):
         proto = Protocol.Protocol(proto_file)
         proto.Run()
         
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = TestOdeModel(1)
+        proto.SetModel(model)
+        proto.Run()
+        
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_parallel_nested.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = TestOdeModel(1)
+        proto.SetModel(model)
+        proto.Run()
+        
         #test below is just to test that we get the correct output for a protocol error
 #     def TestProtocolError(self):
 #         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
@@ -702,6 +714,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = csp.range.parseString('range run units dimensionless vector [1, 3, 4]', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Ranges.VectorRange)
+        expr.Initialise(Env.Environment())
         r = [1, 3, 4]
         for i,num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
@@ -721,7 +734,8 @@ class TestSyntaxInterface(unittest.TestCase):
                                 simulation timecourse { range time units second uniform 10:20 } 
                                  }""", parseAll=True)
         expr = parse_action[0].expr()
-        # expr should just be a list of simulation objects
+        for sim in expr:
+            self.assertIsInstance(sim, Simulations.AbstractSimulation)
         
     def TestParsingModifiers(self):
         parse_action = csp.modifierWhen.parseString('at start', parseAll=True)
@@ -740,13 +754,13 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.SetVariable)
         self.assertEqual(expr.variableName, 'model:a')
-        self.assertEqual(expr.value.value.value, 5)
+        self.assertEqual(expr.valueExpr.value.value, 5)
         
         parse_action = csp.modifier.parseString('at start set model:t = 10.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.SetVariable)
         self.assertEqual(expr.variableName, 'model:t')
-        self.assertEqual(expr.value.value.value, 10)
+        self.assertEqual(expr.valueExpr.value.value, 10)
         
         parse_action = csp.modifier.parseString('at start save as state_name', parseAll=True)
         expr = parse_action[0].expr()
@@ -758,9 +772,7 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertIsInstance(expr, Modifiers.ResetState)
         self.assertEqual(expr.stateName, 'state_name')
         
-        
-        
-        
+
         
         
         

@@ -782,13 +782,10 @@ class Actions(object):
                     step = tokens[1].expr()
                 else:
                     step = V.Simple(1)
-                range_ = Ranges.UniformRange(start, stop, step)
+                range_ = Ranges.UniformRange(attrs['name'], start, stop, step)
             elif 'vector' in self.tokens:
-                np_array = np.array([ child.value.value for child in self.tokens['vector'][0].expr().children])
-                range_ = Ranges.VectorRange(V.Array(np_array))
-#             elif 'while' in self.tokens:
-#                 cond = self.AddLoc(P.condition(self.tokens['while'][0].expr()))
-#                 range = P.whileStepper(cond, **attrs)
+                expr = self.tokens['vector'][0].expr()
+                range_ = Ranges.VectorRange(attrs['name'], expr)
             return range_
     
     class ModifierWhen(BaseGroupAction):
@@ -809,7 +806,7 @@ class Actions(object):
             if 'set' in self.tokens[1]:
                 modifier = P.setVariable
                 args.append(detail[0])
-                args.append(detail[1].expr())
+                args.append(detail[1].xml())
             elif 'save' in self.tokens[1]:
                 modifier = P.saveState
                 args.append(detail[0])
@@ -824,7 +821,6 @@ class Actions(object):
             detail = self.tokens[1]
             if 'set' in self.tokens[1]:
                 modifier = Modifiers.SetVariable
-                print 'details', detail
                 args.append(detail[0])
                 args.append(detail[1].expr())
             elif 'save' in self.tokens[1]:
@@ -854,7 +850,6 @@ class Actions(object):
         
         def _expr(self):
             args = self.GetChildrenExpr()
-                # model should be optional for simulation constructor, starts as none
             return Simulations.Timecourse(*args)
         
     class NestedSimulation(BaseGroupAction):
@@ -872,6 +867,17 @@ class Actions(object):
                 nested = P.subTask(task=str(nested))
                 args.append(self.AddLoc(nested))
             return P.nestedSimulation(*args)
+        
+        def _expr(self):
+            args = map(lambda t: t.expr(), self.tokens[0:-1])
+            if len(args) == 1:
+                # Add an empty modifiers element
+                args.append(self.Delegate('Modifiers', [[]]).expr())
+            nested = self.tokens[-1][0]
+            if isinstance(nested, (Actions.Simulation, Actions.NestedProtocol)):
+                # Inline definition
+                args.append(nested.expr())
+            return Simulations.Nested(args[2], args[0], args[1])
     
     class OneStepSimulation(BaseGroupAction):
         def _xml(self):
@@ -919,6 +925,7 @@ class Actions(object):
     
         def _expr(self):
             sim = self.tokens[1].expr()
+            sim.prefix = str(self.tokens[0])
             return sim
         
     class Tasks(BaseGroupAction):
@@ -929,9 +936,7 @@ class Actions(object):
             
         def _expr(self):
             sims = self.GetChildrenExpr()
-            #sims[0].Merge(sims[1])
-#             for sim in sims:
-#                 print 'sim', sim
+            return sims
                 
     
     ######################################################################
@@ -1128,7 +1133,7 @@ class Actions(object):
                 if isinstance(token, Actions.Import):
                     d['imports'].append(token.expr())
                 if isinstance(token, Actions.Tasks):
-                    d['tasks'].append(token.expr())
+                    d['simulations'] = token.expr()
             return d
     
 

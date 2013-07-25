@@ -48,8 +48,10 @@ class AbstractSimulation(object):
         self.env = Env.Environment()
         self.env.DefineName(self.range_.name, self.range_)
     
-    # hooks loop through the when's of the modifier and get called when the time matches
-    
+    def Initialise(self):
+        for r in self.ranges:
+            r.Initialise(self.env)
+        
     def InternalRun(self):
         raise NotImplementedError 
     
@@ -67,11 +69,15 @@ class AbstractSimulation(object):
     
     def SetModel(self, model):
         self.model = model
+        model_env = model.GetEnvironmentMap()
+        for prefix in model_env.keys():
+            self.env.SetDelegateeEnv(model_env[prefix], prefix)
+            self.results.SetDelegateeEnv(model_env[prefix], prefix)
+        # add model's environment(s) as prefixed delegatees to self.env and self.results
         
     def Run(self):
         self.InternalRun()
         return self.results
-        # run results of internal run
     
     def AddIterationOutputs(self, env):
         if self.results is not None and not self.results:  
@@ -126,7 +132,7 @@ class Nested(AbstractSimulation):
         
     def SetModel(self, model):
         self.model = model
-        self.nestedSim.model = model
+        self.nestedSim.SetModel(model)
     
     
     

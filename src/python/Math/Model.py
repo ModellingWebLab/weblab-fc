@@ -30,9 +30,11 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import Environment as Env
+import MathExpressions as M
+from ErrorHandling import ProtocolError
 import scipy.integrate
 import Values as V
-from ErrorHandling import ProtocolError
+
 
 class AbstractModel(object):
     """Base class for statements in the protocol language."""
@@ -41,15 +43,20 @@ class AbstractModel(object):
     
 class TestOdeModel(AbstractModel):
     def __init__(self, a):
-        self.savedStates = {} # key is name, value is numpy array of saved state
+        self.savedStates = {}
         self.a = a
         self.r = scipy.integrate.ode(self.f)
         self.r.set_initial_value(0, 0)
+        self.y = self.r.y
         self.modifiers = []
+        self.env = Env.ModelWrapperEnvironment(self)
         
     def f(self, t, y):
         return self.a
-
+    
+    def SaveState(self, when, name):
+        self.savedStates[name] = self.r.y
+        
     def SetInitialTime(self, t):
         self.r.set_initial_value(self.r.y, 0)
         
@@ -58,25 +65,35 @@ class TestOdeModel(AbstractModel):
             raise ProtocolError("Type", type(self), "does not have a variable named", variableName)
         setattr(self, variableName, value)
     
-    def SaveState(self, when, name):
-        self.savedStates[name] = self.r.y
+    def SetVariableNow(self, name, value):
+        setattr(self, name, value)
+        
+    def GetEnvironmentMap(self):
+#         self.env.OverwriteDefinition('membrane_voltage', V.Simple(self.r.y[0]))
+#         self.env.OverwriteDefinition('leakage_current', V.Simple(self.a))
+        #define self.env as an environment with the variables for the model in it
+        # membrane_voltage = self.y, leakage_current = self.a
+        return {'oxmeta': self.env}
     
     def ResetState(self, when, name):
         if name is None:
-            self.r.set_initial_value(0, 0)
+            self.r.set_initial_value(0, 0)   
         else:
             self.r.set_initial_value(self.savedStates[name], 0)
+        self.y = self.r.y
                 
     def Simulate(self, endPoint):
         self.y = self.r.integrate(endPoint)
         assert self.r.successful()
-        #self.y = scipy.integrate.odeint(self.f, 0, self.r.t)
     
     def GetOutputs(self):
         env = Env.Environment()
         env.DefineName('a', V.Simple(self.a))
         env.DefineName('y', V.Simple(self.r.y))
+        env.DefineName('leakage_current', V.Simple(self.a))
+        env.DefineName('membrane_voltage', V.Simple(self.r.y))
         return env
+
 
 class AbstractOdeModel(AbstractModel):
     """This is a base class for ODE system models converted from CellML by PyCml.
@@ -155,16 +172,3 @@ class AbstractOdeModel(AbstractModel):
         assert self.solver.successful()
 
 
-# for simulate time always starts from 0 and returns the integration of the differential equation 
-#at the point given
-# get outputs returns an environment where the inputs 
-# testodemodel constructor initializes self.y to zero and 
-# dydt = a
-# define y as V.Simple(self.y) in environment for getoutputs
-# def f(self, t, a): as method of testodemodel
-# return self.a
-# testodemodel sets up scipy.integrate.ode and simulate will call testodemodel.solver.integrate 
-#or something
-# constructor will call like r = scipy.integrate.ode(f)
-# r.setinitialvalue for y=0 in constructor for test as well
-# simulate will call integrate on r 

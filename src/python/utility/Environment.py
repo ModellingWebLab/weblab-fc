@@ -94,6 +94,12 @@ class Environment(object):
         return "___%d" % self.nextIdent[0] 
         
     def LookUp(self, name):
+#         if name == 'oxmeta:leakage_current':
+#             name = 'a'
+#             #tc3:a
+#         if name == 'oxmeta:membrane_voltage':
+#             name = 'y'
+            #tc3:y
         result = self.bindings[name]
         return result
     
@@ -162,6 +168,59 @@ class DelegatingDict(dict):
         
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee
+        
+class ModelWrapperEnvironment(Environment):
+    class _BindingsDict(dict):
+        def __init__(self, unwrapped):
+            self._unwrapped = unwrapped
+        def __getitem__(self, key):
+            py_value = self._unwrapped[key]
+            if isinstance(py_value, np.ndarray):
+                return V.Array(py_value)
+            else:
+                return V.Simple(py_value)
+        def __setitem__(self, key, value):
+            pass
+#             try:
+#                 self._unwrapped[key] = value.value
+#             except AttributeError:
+#                 self._unwrapped[key] = value.array
+        def __contains__(self, key):
+            return key in ['a', 'y', 'leakage_current', 'membrane_voltage']
+    
+    class _UnwrappedBindingsDict(dict):
+        def __init__(self, model):
+            self._model = model
+        def __getitem__(self, key):
+            if key == 'leakage_current':
+                key = 'a'
+            if key == 'membrane_voltage':
+                key = 'y'
+            return getattr(self._model, key)
+        def __setitem__(self, key, value):
+            self._model.SetVariableNow(key, value)
+        def __contains__(self, key):
+            return key in ['a', 'y', 'leakage_current', 'membrane_voltage']
+    
+    def __init__(self, model):
+        super(ModelWrapperEnvironment, self).__init__(allowOverwrite=True)
+        self.model = model
+        self.unwrappedBindings = self._UnwrappedBindingsDict(model)
+        self.bindings = self._BindingsDict(self.unwrappedBindings)
+            
+    def DefineName(self, name, value):
+        raise ProtocolError("Defining names in a model is not allowed.")
+    
+#     def LookUp(self, name):
+#         if name == 'leakage_current':
+#             name = 'a'
+#         if name == 'membrane_voltage':
+#             name = 'y'
+#         return getattr(model, name)
+#     
+#     def OverwriteDefinition(self, name, value):
+#         self.model.SetVariableNow(name, value.value)
+        
         
  # class for bindings/unwrapped bindings called DelegatingDict(dict)
  # __missing__ method (self, key) for delegation
