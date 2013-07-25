@@ -196,7 +196,15 @@ class TestModelSimulation(unittest.TestCase):
         predicted = np.array([[0, 0, 0, 0], [0, 1, 2, 3], [0, 2, 4, 6], [0, 3, 6, 9]])
         np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
          
-         
+    def TestWhiles(self):
+        while_range = Ranges.While('while', M.Lt(E.NameLookup('while'), N(10)))
+        predicted = range(10)
+        actual = list(while_range)
+        self.assertEqual(predicted, actual)
+        
+        #test_while_loop.txt after adding to the csp
+        #comment out line 35 block and line 58, sims 2 and 5
+        #library delegates to self.inputsenv which contains input variables from inputs section of protocol which is a sequence of assignement statsements so just do execute statements within the inputs environment
         # change into many methods, change set model, check instances, imports in CSP
          
          

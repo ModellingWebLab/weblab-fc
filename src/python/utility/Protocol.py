@@ -77,8 +77,8 @@ class Protocol(object):
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
                 sim.Initialise()
+                self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
                 results = sim.Run()
-                self.libraryEnv.SetDelegateeEnv(results, sim.prefix)
             self.postProcessingEnv.ExecuteStatements(self.postProcessing)
         except ProtocolError:
             locations = []

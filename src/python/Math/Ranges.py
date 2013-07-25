@@ -124,10 +124,20 @@ class While(AbstractRange):
         self.name = name
         self.condition = condition
         self.count = 0
+        self.numberOfOutputs
         
     def __iter__(self):
         self.count = 0
         return self
+    
+    # initialize class saves the environment locally which is used to evaluate the condition expression in next
+    # in simulation run, once the simulation is complete, you resize the outputs to make sure
+    #that the results arrays are the proper size instead of the multiple of 1000
+    # check in loopstarthook to see if the 0 dimension of anything in the results array is greater than
+    # or equal to Getnumberofoutputpoints and if it is then it resizes the 0th dimension 
+    # of each thing in the results array by increasing by 1000. this resizing happens in hook, changing
+    #self.numberofoutputs happens in the next method
+    
     
     def next(self):
         if not self.condition:

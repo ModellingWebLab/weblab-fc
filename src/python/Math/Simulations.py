@@ -62,10 +62,17 @@ class AbstractSimulation(object):
             elif modifier.when == AbstractModifier.EACH_LOOP:
                 modifier.Apply(self)
     
-    def LoopBodyEndHook(self):
+    def LoopEndHook(self):
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.END_ONLY:
                 modifier.Apply(self)
+    #loopbodyend happens at the end of the loop but still inside the loop. before next iteration
+    # loopbodyend checks if its a while loop and iterates over output names in results and defines
+    #the same names in the fake environment but defines the names as a view from the beginning
+    #of each array to the current count of the while loop for the 0th dimension and pretty much
+    #everything for all other dimensions
+    #self.viewEnv is added as delegatee to self.env (with simulations prefix) and only created
+    #if you're in a while loop
     
     def SetModel(self, model):
         self.model = model

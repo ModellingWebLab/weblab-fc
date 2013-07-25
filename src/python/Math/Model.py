@@ -170,5 +170,6 @@ class AbstractOdeModel(AbstractModel):
         """Simulate the model up to the given end point (value of the free variable)."""
         self.state = self.solver.integrate(endPoint)
         assert self.solver.successful()
+        self.freeVariable = endPoint
 
 
