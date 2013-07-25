@@ -805,15 +805,15 @@ class Actions(object):
             detail = self.tokens[1]
             if 'set' in self.tokens[1]:
                 modifier = P.setVariable
-                args.append(detail[0])
-                args.append(detail[1].xml())
+                args.append(P.name(detail[0]))
+                args.append(P.value(detail[1].xml()))
             elif 'save' in self.tokens[1]:
                 modifier = P.saveState
-                args.append(detail[0])
+                args.append(P.name(detail[0]))
             elif 'reset' in self.tokens[1]:
                 modifier = P.resetState
                 if len(detail) > 0:
-                    args.append(detail[0])
+                    args.append(P.state(detail[0]))
             return modifier(*args)
         
         def _expr(self):
