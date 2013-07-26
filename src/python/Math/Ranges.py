@@ -68,7 +68,6 @@ class UniformRange(AbstractRange):
     def Initialise(self, env):
         self.env = env
         
-        
     def GetNumberOfOutputPoints(self):
         return (round(self.end-self.start)/self.step) + 1
     
@@ -98,6 +97,7 @@ class VectorRange(AbstractRange):
         
     def __iter__(self):
         self.count = 0
+        self.current = 0
         return self
     
     def next(self):
@@ -144,6 +144,8 @@ class While(AbstractRange):
     
     def Initialise(self, env):
         self.env = env
+        self.env.bindings[self.name] = V.Simple(self.current)
+        self.env.unwrappedBindings[self.name] = self.current
         
     def next(self):
         if self.count >= self.numberOfOutputs:
@@ -153,6 +155,8 @@ class While(AbstractRange):
         else:
             self.count += 1
             self.current += 1
+            self.env.bindings[self.name] = V.Simple(self.current)
+            self.env.unwrappedBindings[self.name] = self.current
             return self.count - 1
         
     def GetNumberOfOutputPoints(self):

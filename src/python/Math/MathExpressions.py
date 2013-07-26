@@ -513,7 +513,7 @@ class Lt(AbstractExpression):
         try:
             result = operands[0].value < operands[1].value
         except AttributeError:
-            raise ProtocolError("Less than operator requires its operands to be simple values")
+            raise ProtocolError("Less than operator requires its operands to be simple values, you entered a", type(operands[0]), 'and', type(operands[1]))
         return V.Simple(result)       
     
     def Compile(self):

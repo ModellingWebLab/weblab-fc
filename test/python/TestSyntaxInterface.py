@@ -695,13 +695,19 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.SetModel(model)
         proto.Run()
         
+#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+#         proto = Protocol.Protocol(proto_file)
+#         model = TestOdeModel(1)
+#         proto.SetModel(model)
+#         proto.Run()
+
         #test below is just to test that we get the correct output for a protocol error
 #     def TestProtocolError(self):
 #         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
 #         proto = Protocol.Protocol(proto_file)
 #         proto.Run()
         
-    def TestRangesAndSimulations(self):
+    def TestParsingRanges(self):
         # test parsing uniform range
         parse_action = csp.range.parseString('range t units s uniform 0:10', parseAll=True)
         expr = parse_action[0].expr()
@@ -719,6 +725,16 @@ class TestSyntaxInterface(unittest.TestCase):
         for i,num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
             
+        # test parsing while range
+        parse_action = csp.range.parseString('range rpt units dimensionless while rpt < 5', parseAll=True)
+        expr = parse_action[0].expr()
+        self.assertIsInstance(expr, Ranges.While)
+        expr.Initialise(Env.Environment())
+        r = range(5)
+        for i,num in enumerate(expr):
+            self.assertAlmostEqual(r[i], num)
+        
+    def TestParsingSimulations(self):
         # test parsing timecourse simulation
         parse_action = csp.simulation.parseString('simulation sim = timecourse { range time units ms uniform 0:10 }', parseAll=True)
         expr = parse_action[0].expr()
@@ -728,7 +744,7 @@ class TestSyntaxInterface(unittest.TestCase):
         np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5]*11))
         np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t*5 for t in range(11)]))   
         
-        # test parsing timecourse simulation
+        # test parsing tasks
         parse_action = csp.tasks.parseString("""tasks {
                                 simulation timecourse { range time units second uniform 1:10 }
                                 simulation timecourse { range time units second uniform 10:20 } 

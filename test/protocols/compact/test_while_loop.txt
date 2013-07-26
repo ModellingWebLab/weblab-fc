@@ -33,10 +33,10 @@ tasks {
     }
     
     # While loop with end point taken from protocol input
-    simulation sim2 = timecourse {
-        range t units ms while t < num_iters
-        modifiers { at start set oxmeta:membrane_voltage = 0 }
-    }
+#    simulation sim2 = timecourse {
+#        range t units ms while t < num_iters
+#        modifiers { at start set oxmeta:membrane_voltage = 0 }
+#    }
 
     # While loop with condition using outputs
     simulation sim3 = timecourse {
@@ -55,10 +55,10 @@ tasks {
     # but before solving the model up to the next time.  The model's free variable is updated in
     # the solve.  Hence we need to continue until the free variable reaches its desired final value
     # of 9, in contrast to the case where we test against the loop counter.
-    simulation sim5 = timecourse {
-        range t units ms while oxmeta:time < 9
-        modifiers { at start set oxmeta:membrane_voltage = 0 }
-    }
+#    simulation sim5 = timecourse {
+#        range t units ms while oxmeta:time < 9
+#        modifiers { at start set oxmeta:membrane_voltage = 0 }
+#    }
     
     # A long simulation to check that arrays get extended
     simulation sim_long = timecourse {

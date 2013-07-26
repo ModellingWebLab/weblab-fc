@@ -786,6 +786,9 @@ class Actions(object):
             elif 'vector' in self.tokens:
                 expr = self.tokens['vector'][0].expr()
                 range_ = Ranges.VectorRange(attrs['name'], expr)
+            elif 'while' in self.tokens:
+                cond = self.tokens['while'][0].expr()
+                range_ = Ranges.While(attrs['name'], cond)
             return range_
     
     class ModifierWhen(BaseGroupAction):

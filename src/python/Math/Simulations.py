@@ -75,7 +75,7 @@ class AbstractSimulation(object):
         if isinstance(self.range_, Ranges.While):
             for name in self.results.DefinedNames():
                 result = self.results.LookUp(name)
-                result.array = result.array[0:self.range_.count]
+                result.array = result.array[0:self.range_.count] #resize function doesn't work with references
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.END_ONLY:
                 modifier.Apply(self)
