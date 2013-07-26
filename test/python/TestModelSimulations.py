@@ -66,6 +66,7 @@ class TestModelSimulation(unittest.TestCase):
         model = TestOdeModel(a)
         range_ = Ranges.UniformRange('count', V.Simple(0), V.Simple(10), V.Simple(1))
         time_sim = Simulations.Timecourse(range_)
+        time_sim.Initialise()       
         time_sim.SetModel(model)
         results = time_sim.Run()
         np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
@@ -76,6 +77,7 @@ class TestModelSimulation(unittest.TestCase):
         model = TestOdeModel(a)
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
+        time_sim.Initialise()       
         time_sim.SetModel(model)
         results = time_sim.Run()
         np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
@@ -86,9 +88,11 @@ class TestModelSimulation(unittest.TestCase):
         model = TestOdeModel(a)
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
+        time_sim.Initialise()       
         time_sim.SetModel(model)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
+        nested_sim.Initialise()       
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(0, 51, 5), np.arange(50, 101, 5), np.arange(100, 151, 5), np.arange(150, 201, 5)])
@@ -108,9 +112,11 @@ class TestModelSimulation(unittest.TestCase):
         modifier = Modifiers.ResetState(when)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_, modifiers=[modifier])
+        time_sim.Initialise()       
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
+        nested_sim.Initialise() 
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5)])
@@ -123,9 +129,11 @@ class TestModelSimulation(unittest.TestCase):
         modifier = Modifiers.ResetState(when)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
+        time_sim.Initialise()       
           
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_, modifiers=[modifier])
+        nested_sim.Initialise() 
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5)])
@@ -138,10 +146,12 @@ class TestModelSimulation(unittest.TestCase):
         save_modifier = Modifiers.SaveState(AbstractModifier.START_ONLY, 'start')
         reset_modifier = Modifiers.ResetState(AbstractModifier.EACH_LOOP, 'start')
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
-        time_sim = Simulations.Timecourse(range_)       
+        time_sim = Simulations.Timecourse(range_)     
+        time_sim.Initialise()         
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_, modifiers=[save_modifier, reset_modifier])
+        nested_sim.Initialise() 
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(0, 51, 5), np.arange(0, 51, 5), np.arange(0, 51, 5)])
@@ -154,13 +164,16 @@ class TestModelSimulation(unittest.TestCase):
         reset_modifier = Modifiers.ResetState(AbstractModifier.EACH_LOOP, 'start')
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         initial_time_sim = Simulations.Timecourse(range_, modifiers = [save_modifier])
+        initial_time_sim.Initialise()       
         initial_time_sim.SetModel(model)
         initial_time_sim.Run()
         
-        import copy
-        inner_time_sim = Simulations.Timecourse(copy.deepcopy(range_))
+        range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
+        inner_time_sim = Simulations.Timecourse(range_)
+        inner_time_sim.Initialise()       
         range_ = Ranges.VectorRange('range', V.Array(np.array([1, 2, 3])))
         nested_sim = Simulations.Nested(inner_time_sim, range_, modifiers=[reset_modifier])
+        nested_sim.Initialise() 
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(50, 101, 5), np.arange(50, 101, 5), np.arange(50, 101, 5)])
@@ -173,9 +186,11 @@ class TestModelSimulation(unittest.TestCase):
         modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'a', N(1))
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)       
+        time_sim.Initialise()       
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_, modifiers=[modifier])
+        nested_sim.Initialise() 
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([np.arange(0, 11), np.arange(10, 21), np.arange(20, 31), np.arange(30, 41)])
@@ -187,24 +202,34 @@ class TestModelSimulation(unittest.TestCase):
         set_modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'a', E.NameLookUp('count'))
         reset_modifier = Modifiers.ResetState(AbstractModifier.START_ONLY)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3])))
-        time_sim = Simulations.Timecourse(range_, modifiers=[set_modifier, reset_modifier])       
+        time_sim = Simulations.Timecourse(range_, modifiers=[set_modifier, reset_modifier])
+        time_sim.Initialise()       
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
+        nested_sim.Initialise() 
         nested_sim.SetModel(model)
         results = nested_sim.Run()
         predicted = np.array([[0, 0, 0, 0], [0, 1, 2, 3], [0, 2, 4, 6], [0, 3, 6, 9]])
         np.testing.assert_array_almost_equal(predicted, results.LookUp('y').array)
          
     def TestWhiles(self):
-        while_range = Ranges.While('while', M.Lt(E.NameLookup('while'), N(10)))
-        predicted = range(10)
-        actual = list(while_range)
-        self.assertEqual(predicted, actual)
+        a = 10
+        model = TestOdeModel(a)
+        while_range = Ranges.While('while', M.Lt(E.NameLookUp('while'), N(10)))
+        time_sim = Simulations.Timecourse(while_range)
+        time_sim.SetModel(model)
+        time_sim.Initialise()
+        results = time_sim.Run()
+        predicted = np.arange(0, 100, 10)
+        actual = results.LookUp('y').array
+        np.testing.assert_array_almost_equal(predicted, actual)
         
         #test_while_loop.txt after adding to the csp
         #comment out line 35 block and line 58, sims 2 and 5
-        #library delegates to self.inputsenv which contains input variables from inputs section of protocol which is a sequence of assignement statsements so just do execute statements within the inputs environment
+        #library delegates to self.inputsenv which contains input variables 
+        #from inputs section of protocol which is a sequence of assignement 
+        #statsements so just do execute statements within the inputs environment
         # change into many methods, change set model, check instances, imports in CSP
          
          

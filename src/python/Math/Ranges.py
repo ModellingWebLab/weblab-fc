@@ -83,7 +83,7 @@ class VectorRange(AbstractRange):
         self.name = name
         if isinstance(arrOrExpr, V.Array):
             self.expr = None
-            self.arrRange = arrOrExpr
+            self.arrRange = arrOrExpr.array
             self.current = self.arrRange[0]
         else:
             self.expr = arrOrExpr
@@ -124,34 +124,42 @@ class While(AbstractRange):
         self.name = name
         self.condition = condition
         self.count = 0
-        self.numberOfOutputs
+        self.current = self.count
+        self.numberOfOutputs = 1000
         
     def __iter__(self):
         self.count = 0
+        self.current = 0
         return self
     
-    # initialize class saves the environment locally which is used to evaluate the condition expression in next
+    # initialize class saves the environment locally which is used to evaluate the 
+    #condition expression in next
     # in simulation run, once the simulation is complete, you resize the outputs to make sure
     #that the results arrays are the proper size instead of the multiple of 1000
     # check in loopstarthook to see if the 0 dimension of anything in the results array is greater than
     # or equal to Getnumberofoutputpoints and if it is then it resizes the 0th dimension 
-    # of each thing in the results array by increasing by 1000. this resizing happens in hook, changing
+    # of each thing in the results array by increasing by 1000. this resizing happens in hook, 
+    #changing
     #self.numberofoutputs happens in the next method
     
-    
+    def Initialise(self, env):
+        self.env = env
+        
     def next(self):
-        if not self.condition:
-            self.count = 0
+        if self.count >= self.numberOfOutputs:
+            self.numberOfOutputs += 1000
+        if not self.condition.Evaluate(self.env).value:
             raise StopIteration     
         else:
             self.count += 1
-            return self.count
+            self.current += 1
+            return self.count - 1
         
     def GetNumberOfOutputPoints(self):
-        return self.count
+        return self.numberOfOutputs
     
     def GetCurrentOutputPoint(self):
-        return self.count
+        return self.current
     
     def GetCurrentOutputNumber(self):
         return self.count - 1

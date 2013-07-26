@@ -29,11 +29,20 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Environment as Env
-import scipy.integrate
-import Values as V
-import numpy as np
 from Modifiers import AbstractModifier
+import ArrayExpressions as A
+import Environment as Env
+import Expressions as E
+import scipy.integrate
+import MathExpressions as M
+import numpy as np
+import Ranges
+import Values as V
+
+
+
+def N(number):
+    return M.Const(V.Simple(number))
 
 class AbstractSimulation(object):
     """Base class for simulations in the protocol language."""
@@ -63,9 +72,20 @@ class AbstractSimulation(object):
                 modifier.Apply(self)
     
     def LoopEndHook(self):
+        if isinstance(self.range_, Ranges.While):
+            for name in self.results.DefinedNames():
+                result = self.results.LookUp(name)
+                result.array = result.array[0:self.range_.count]
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.END_ONLY:
                 modifier.Apply(self)
+                
+    def LoopBodyEndHook(self):
+        if isinstance(self.range_, Ranges.While):
+            viewEnv = Env.Environment()
+            for result in self.results.DefinedNames():
+                viewEnv.DefineName(result, A.View(self.results.LookUp(result), E.TupleExpression(N(0), N(self.range_.count))))
+                self.env.SetDelegateeEnv(viewEnv)
     #loopbodyend happens at the end of the loop but still inside the loop. before next iteration
     # loopbodyend checks if its a while loop and iterates over output names in results and defines
     #the same names in the fake environment but defines the names as a view from the beginning
@@ -115,7 +135,8 @@ class Timecourse(AbstractSimulation):
             else:
                 self.model.Simulate(t)
                 self.AddIterationOutputs(self.model.GetOutputs())
-        self.LoopBodyEndHook()
+            self.LoopBodyEndHook()
+        self.LoopEndHook()
     
 class Nested(AbstractSimulation):
     def __init__(self, nestedSim, range_, modifiers=[]):
@@ -135,7 +156,8 @@ class Nested(AbstractSimulation):
         for t in self.range_:
             self.LoopBodyStartHook()
             self.nestedSim.Run()
-        self.LoopBodyEndHook()
+            self.LoopBodyEndHook()
+        self.LoopEndHook()
         
     def SetModel(self, model):
         self.model = model
