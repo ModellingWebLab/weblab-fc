@@ -46,30 +46,28 @@ __all__ = ['CompactSyntaxParser']
 # Necessary for reasonable speed when using operatorPrecedences
 p.ParserElement.enablePackrat()
 
-################################################################################
-# Parse actions that can generate the XML syntax
-################################################################################
-import lxml.builder
-import lxml.etree as ET
-import Ranges
-import Simulations
-from Modifiers import AbstractModifier
-import Modifiers
-import numpy as np
-from Model import TestOdeModel
 
-PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
-MATHML_NS = "http://www.w3.org/1998/Math/MathML"
-CELLML_NS = "http://www.cellml.org/cellml/1.0#"
-PROTO_CSYM_BASE = "https://chaste.cs.ox.ac.uk/nss/protocol/"
-P = lxml.builder.ElementMaker(namespace=PROTO_NS)
-M = lxml.builder.ElementMaker(namespace=MATHML_NS)
-CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
-                                   nsmap={'cellml': CELLML_NS})
+#################################################################################
+# Parse actions that can generate the XML syntax or Python implementation objects
+#################################################################################
 
-# Support for interfacing to the Python implementation, rather than generating XML
-def ImportPythonImplementation():
-    global M, E, V, S, A, Locatable, OPERATORS, MATHML, VALUES
+# Choose which set of generator modules to import based on how this module is being used.
+# The Python implementation will always import it as a module, whereas the C++ code
+# (which is largely what needs the XML generation) will call it as a script.
+
+if __name__ == '__main__':
+    import lxml.builder
+    import lxml.etree as ET
+
+    PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+    MATHML_NS = "http://www.w3.org/1998/Math/MathML"
+    CELLML_NS = "http://www.cellml.org/cellml/1.0#"
+    PROTO_CSYM_BASE = "https://chaste.cs.ox.ac.uk/nss/protocol/"
+    P = lxml.builder.ElementMaker(namespace=PROTO_NS)
+    M = lxml.builder.ElementMaker(namespace=MATHML_NS)
+    CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
+                                       nsmap={'cellml': CELLML_NS})
+else:
     import Expressions as E
     import MathExpressions as M
     import ArrayExpressions as A
@@ -77,9 +75,11 @@ def ImportPythonImplementation():
     import Statements as S
     import Ranges
     import Simulations
+    import Modifiers
     from Locatable import Locatable
+    import numpy as np
     import math
-    
+
     OPERATORS = {'+': M.Plus, '-': M.Minus, '*': M.Times, '/': M.Divide, '^': M.Power, 
                  '==': M.Eq, '!=': M.Neq, '<': M.Lt, '>': M.Gt, '<=': M.Leq, '>=':M.Geq,
                  'not': M.Not, '&&': M.And, '||': M.Or}
@@ -88,6 +88,7 @@ def ImportPythonImplementation():
     VALUES = {'true': M.Const(V.Simple(True)), 'false': M.Const(V.Simple(False)), 
               'exponentiale': M.Const(V.Simple(math.e)), 'infinity': M.Const(V.Simple(float('inf'))),
               'pi': M.Const(V.Simple(math.pi)), 'notanumber': M.Const(V.Simple(float('nan')))}
+
 
 class Actions(object):
     """Container for parse actions."""
@@ -799,7 +800,7 @@ class Actions(object):
         
         def _expr(self):
             when = {'start': 'START_ONLY', 'each': 'EACH_LOOP', 'end': 'END_ONLY'}[self.tokens]
-            return getattr(AbstractModifier, when)
+            return getattr(Modifiers.AbstractModifier, when)
     
     class Modifier(BaseGroupAction):
         """Parse action that generates all kinds of modifier."""
@@ -1641,3 +1642,22 @@ class Debug(object):
         EnableDebug(self._grammars)
     def __exit__(self, type, value, traceback):
         DisableDebug(self._grammars)
+
+
+
+################################################################################
+# Script for conversion to XML syntax, callable by C++ code
+################################################################################
+
+if __name__ == '__main__':
+    assert len(sys.argv) >= 3
+    source_path = sys.argv[1]
+    output_dir = sys.argv[2]
+    try:
+        parser = CompactSyntaxParser()
+        output_path = parser.ConvertProtocol(source_path, output_dir)
+        print output_path
+    except:
+        if len(sys.argv) == 3:
+            raise
+        # Otherwise we swallow the error

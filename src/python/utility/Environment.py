@@ -70,36 +70,28 @@ class Environment(object):
     def DefineNames(self, names, values):
         for i, name in enumerate(names):
             self.DefineName(name, values[i])
-            
+
     def EvaluateExpr(self, exprStr, env):
         import CompactSyntaxParser as CSP
-        CSP.ImportPythonImplementation()
         csp = CSP.CompactSyntaxParser
-        
+
         parse_action = csp.expr.parseString(exprStr, parseAll=True)
         expr = parse_action[0].expr()
         return expr.Evaluate(env)
-    
+
     def EvaluateStatement(self, stmtStr, env):
         import CompactSyntaxParser as CSP
-        CSP.ImportPythonImplementation()
         csp = CSP.CompactSyntaxParser
-        
+
         parse_action = csp.stmtList.parseString(stmtStr, parseAll=True)
         stmt_list = parse_action[0].expr()
         return env.ExecuteStatements(stmt_list)
-                
+
     def FreshIdent(self):
         self.nextIdent[0] += 1
         return "___%d" % self.nextIdent[0] 
-        
+
     def LookUp(self, name):
-#         if name == 'oxmeta:leakage_current':
-#             name = 'a'
-#             #tc3:a
-#         if name == 'oxmeta:membrane_voltage':
-#             name = 'y'
-            #tc3:y
         result = self.bindings[name]
         return result
     
@@ -109,7 +101,7 @@ class Environment(object):
         
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())
-            
+
     def Remove(self, name):
         if not self.allowOverwrite:
             raise ProtocolError("This environment does not support overwriting mappings")
@@ -123,7 +115,7 @@ class Environment(object):
             raise ProtocolError("This environment does not support overwriting mappings")
         if name not in self.bindings:
             raise ProtocolError(name, "is not defined in this environment and thus cannot be overwritten")
-        self.bindings[name]= value #can't use DefineName because error would be thrown for name already being in environment
+        self.bindings[name] = value #can't use DefineName because error would be thrown for name already being in environment
         if isinstance(value, V.Array):
                 self.unwrappedBindings[name] = value.array
         elif isinstance(value, V.Simple):

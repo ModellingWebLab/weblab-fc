@@ -37,7 +37,6 @@ except ImportError:
     import unittest
 
 import CompactSyntaxParser as CSP
-CSP.ImportPythonImplementation()
 csp = CSP.CompactSyntaxParser
 
 import Environment as Env

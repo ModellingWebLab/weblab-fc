@@ -31,7 +31,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import CompactSyntaxParser as CSP
-CSP.ImportPythonImplementation()
 csp = CSP.CompactSyntaxParser
 import Environment as Env
 import os

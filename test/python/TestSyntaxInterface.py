@@ -38,7 +38,6 @@ except ImportError:
 
 # Import the modules to test
 import CompactSyntaxParser as CSP
-CSP.ImportPythonImplementation()
 csp = CSP.CompactSyntaxParser
 
 import ArrayExpressions as A
