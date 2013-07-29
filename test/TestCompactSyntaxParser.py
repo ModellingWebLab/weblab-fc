@@ -42,6 +42,7 @@ import time
 
 # Import the module to test
 import CompactSyntaxParser as CSP
+CSP.DoXmlImports() # The default for this module now is to assume the Python implementation
 
 csp = CSP.CompactSyntaxParser
 # An end-of-string match that doesn't allow trailing whitespace

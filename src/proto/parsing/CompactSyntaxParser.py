@@ -55,7 +55,7 @@ p.ParserElement.enablePackrat()
 # The Python implementation will always import it as a module, whereas the C++ code
 # (which is largely what needs the XML generation) will call it as a script.
 
-if __name__ == '__main__':
+def DoXmlImports():
     import lxml.builder
     import lxml.etree as ET
 
@@ -67,6 +67,13 @@ if __name__ == '__main__':
     M = lxml.builder.ElementMaker(namespace=MATHML_NS)
     CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
                                        nsmap={'cellml': CELLML_NS})
+    
+    local_defs = locals()
+    for name in local_defs:
+        globals()[name] = local_defs[name]
+
+if __name__ == '__main__':
+    DoXmlImports()
 else:
     import Expressions as E
     import MathExpressions as M
