@@ -60,7 +60,7 @@ class TestOdeModel(AbstractModel):
         self.savedStates[name] = self.r.y
         
     def SetInitialTime(self, t):
-        # self.time is t
+        self.time = t
         self.r.set_initial_value(self.r.y, 0)
         
     def SetVariable(self, when, env, variableName, value):
@@ -90,7 +90,8 @@ class TestOdeModel(AbstractModel):
                 
     def Simulate(self, endPoint):
         self.y = self.r.integrate(endPoint)
-        assert self.r.successful() # self.time is endpoint
+        self.time = endPoint
+        assert self.r.successful()
     
     def GetOutputs(self):
         env = Env.Environment()

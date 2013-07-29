@@ -64,7 +64,7 @@ class TestModelSimulation(unittest.TestCase):
     def TestUniformRange(self): 
         a = 5
         model = TestOdeModel(a)
-        range_ = Ranges.UniformRange('count', V.Simple(0), V.Simple(10), V.Simple(1))
+        range_ = Ranges.UniformRange('count', N(0), N(10), N(1))
         time_sim = Simulations.Timecourse(range_)
         time_sim.Initialise()       
         time_sim.SetModel(model)

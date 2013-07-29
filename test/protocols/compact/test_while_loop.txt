@@ -55,10 +55,10 @@ tasks {
     # but before solving the model up to the next time.  The model's free variable is updated in
     # the solve.  Hence we need to continue until the free variable reaches its desired final value
     # of 9, in contrast to the case where we test against the loop counter.
-#    simulation sim5 = timecourse {
-#        range t units ms while oxmeta:time < 9
-#        modifiers { at start set oxmeta:membrane_voltage = 0 }
-#    }
+    simulation sim5 = timecourse {
+        range t units ms while oxmeta:time < 9
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
     
     # A long simulation to check that arrays get extended
     simulation sim_long = timecourse {
@@ -85,7 +85,7 @@ post-processing {
     assert Check(sim2:membrane_voltage, num_iters)
     assert Check(sim3:membrane_voltage, 10)
     assert Check(sim4:membrane_voltage, 10)
-#    assert Check(sim5:membrane_voltage, 10)
+    assert Check(sim5:membrane_voltage, 10)
     assert Check(sim_long:membrane_voltage, 3001)
     assert Check(not_empty:membrane_voltage, 1)
 }
@@ -96,7 +96,7 @@ outputs {
     V2 = sim2:membrane_voltage
     V3 = sim3:membrane_voltage
     V4 = sim4:membrane_voltage
-#    V5 = sim5:membrane_voltage
+    V5 = sim5:membrane_voltage
     V_3001 = sim_long:membrane_voltage
     V_empty = not_empty:membrane_voltage
 }

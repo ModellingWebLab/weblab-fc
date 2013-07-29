@@ -776,12 +776,12 @@ class Actions(object):
             attrs = self.TransferAttrs('name', 'units')
             if 'uniform' in self.tokens:
                 tokens = self.tokens['uniform'][0]
-                start = tokens[0].expr().value
-                stop = tokens[-1].expr().value
+                start = tokens[0].expr()
+                stop = tokens[-1].expr()
                 if len(tokens) == 3:
                     step = tokens[1].expr()
                 else:
-                    step = V.Simple(1)
+                    step = M.Const(V.Simple(1))
                 range_ = Ranges.UniformRange(attrs['name'], start, stop, step)
             elif 'vector' in self.tokens:
                 expr = self.tokens['vector'][0].expr()

@@ -725,6 +725,7 @@ class TestSyntaxInterface(unittest.TestCase):
         # test parsing uniform range
         parse_action = csp.range.parseString('range t units s uniform 0:10', parseAll=True)
         expr = parse_action[0].expr()
+        expr.Initialise(Env.Environment())
         self.assertIsInstance(expr, Ranges.UniformRange)
         r = range(11)
         for i,num in enumerate(expr):
@@ -752,6 +753,7 @@ class TestSyntaxInterface(unittest.TestCase):
         # test parsing timecourse simulation
         parse_action = csp.simulation.parseString('simulation sim = timecourse { range time units ms uniform 0:10 }', parseAll=True)
         expr = parse_action[0].expr()
+        expr.Initialise()
         a = 5
         expr.SetModel(TestOdeModel(a))
         run_sim = expr.Run()

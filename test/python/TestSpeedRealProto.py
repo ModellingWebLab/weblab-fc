@@ -60,6 +60,7 @@ class TestSpeedRealProto(unittest.TestCase):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
         proto = Protocol.Protocol(proto_file)
         # Load the raw simulation data from file
+        proto.simulations = []
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/S1S2'
         membrane_voltage = self.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
         time_1d = self.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
@@ -77,6 +78,7 @@ class TestSpeedRealProto(unittest.TestCase):
 
     def TestIcal(self):
         proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
+        proto.simulations = []
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
         local_env = Env.Environment()
         local_env.DefineName('membrane_voltage',

@@ -43,12 +43,12 @@ class AbstractRange(V.Simple):
         return self.current  
     
 class UniformRange(AbstractRange):
-    def __init__(self, name, start, end, step):
+    def __init__(self, name, startExpr, endExpr, stepExpr):
         self.name = name
-        self.start = start.value
-        self.end = end.value
-        self.step = step.value
-        self.current = self.start
+        self.startExpr = startExpr
+        self.endExpr = endExpr
+        self.stepExpr = stepExpr
+        self.current = float('nan')
         self.count = 0
         
     def __iter__(self):
@@ -67,6 +67,10 @@ class UniformRange(AbstractRange):
         
     def Initialise(self, env):
         self.env = env
+        self.start = self.startExpr.Evaluate(self.env).value
+        self.step = self.stepExpr.Evaluate(self.env).value
+        self.end = self.endExpr.Evaluate(self.env).value
+        self.current = self.start
         
     def GetNumberOfOutputPoints(self):
         return (round(self.end-self.start)/self.step) + 1
