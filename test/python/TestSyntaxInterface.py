@@ -52,6 +52,7 @@ import Modifiers
 import Protocol
 import Ranges
 import Simulations
+import Statements
 from Model import TestOdeModel
 from ErrorHandling import ProtocolError
 from Modifiers import AbstractModifier
@@ -673,33 +674,46 @@ class TestSyntaxInterface(unittest.TestCase):
         used_vars = expr.GetUsedVariables()
         self.assertEqual(used_vars, set(['a', 'b']))
         
-    def TestTxtFiles(self):
+    def TestFindIndexTxt(self):
         # Parse the protocol into a sequence of post-processing statements
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_find_index.txt'
         proto = Protocol.Protocol(proto_file)
         proto.Run()
-        
+    
+    def TestCorePostProcTxt(self):    
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt'
         proto = Protocol.Protocol(proto_file)
         proto.Run()
-        
+    
+    def TestSimEnvTxt(self):    
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
         proto = Protocol.Protocol(proto_file)
         model = TestOdeModel(1)
         proto.SetModel(model)
         proto.Run()
-        
+     
+    def TestParallelNextedTxt(self):   
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_parallel_nested.txt'
         proto = Protocol.Protocol(proto_file)
         model = TestOdeModel(1)
         proto.SetModel(model)
         proto.Run()
+    
+    def TestWhileLoopTxt(self):   
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = TestOdeModel(1)
+        proto.SetModel(model)
+        proto.SetInput('num_iters', N(10))
+        proto.Run()
         
-#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
-#         proto = Protocol.Protocol(proto_file)
-#         model = TestOdeModel(1)
-#         proto.SetModel(model)
-#         proto.Run()
+    def TestParsingInputs(self):
+        parse_action = csp.inputs.parseString('inputs{X=1}', parseAll=True)
+        expr = parse_action[0].expr()
+        for each in expr:
+            self.assertIsInstance(each, Statements.Assign)
+        
+
 
         #test below is just to test that we get the correct output for a protocol error
 #     def TestProtocolError(self):

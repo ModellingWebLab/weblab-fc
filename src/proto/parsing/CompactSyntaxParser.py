@@ -952,6 +952,11 @@ class Actions(object):
             assert len(self.tokens) <= 1
             if len(self.tokens) == 1: # Don't create an empty element
                 return P.inputs(self.tokens[0].xml())
+            
+        def _expr(self):
+            assert len(self.tokens) <= 1
+            if len(self.tokens) == 1: # Don't create an empty element
+                return self.tokens[0].expr()
     
     class Import(BaseGroupAction):
         """Parse action for protocol imports."""
@@ -1137,6 +1142,8 @@ class Actions(object):
                     d['imports'].append(token.expr())
                 if isinstance(token, Actions.Tasks):
                     d['simulations'] = token.expr()
+                if isinstance(token, Actions.Inputs):
+                    d['inputs'] = token.expr()
             return d
     
 

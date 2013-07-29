@@ -27,16 +27,16 @@ tasks {
     }
     
     # While loop with fixed end point
-    simulation sim1= timecourse {
+    simulation sim1 = timecourse {
         range t units ms while t < 10
         modifiers { at start set oxmeta:membrane_voltage = 0 }
     }
-    
+     
     # While loop with end point taken from protocol input
-#    simulation sim2 = timecourse {
-#        range t units ms while t < num_iters
-#        modifiers { at start set oxmeta:membrane_voltage = 0 }
-#    }
+    simulation sim2 = timecourse {
+        range t units ms while t < num_iters
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+    }
 
     # While loop with condition using outputs
     simulation sim3 = timecourse {
@@ -85,7 +85,7 @@ post-processing {
     assert Check(sim2:membrane_voltage, num_iters)
     assert Check(sim3:membrane_voltage, 10)
     assert Check(sim4:membrane_voltage, 10)
-    assert Check(sim5:membrane_voltage, 10)
+#    assert Check(sim5:membrane_voltage, 10)
     assert Check(sim_long:membrane_voltage, 3001)
     assert Check(not_empty:membrane_voltage, 1)
 }
@@ -96,7 +96,7 @@ outputs {
     V2 = sim2:membrane_voltage
     V3 = sim3:membrane_voltage
     V4 = sim4:membrane_voltage
-    V5 = sim5:membrane_voltage
+#    V5 = sim5:membrane_voltage
     V_3001 = sim_long:membrane_voltage
     V_empty = not_empty:membrane_voltage
 }

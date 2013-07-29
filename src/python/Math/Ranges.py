@@ -124,12 +124,14 @@ class While(AbstractRange):
         self.name = name
         self.condition = condition
         self.count = 0
-        self.current = self.count
         self.numberOfOutputs = 1000
         
+    @property
+    def current(self):
+        return self.count - 1
+    
     def __iter__(self):
         self.count = 0
-        self.current = 0
         return self
     
     # initialize class saves the environment locally which is used to evaluate the 
@@ -146,18 +148,19 @@ class While(AbstractRange):
         self.env = env
         self.env.bindings[self.name] = V.Simple(self.current)
         self.env.unwrappedBindings[self.name] = self.current
+        #self.env.DefineName(name, self.current)
         
     def next(self):
+        self.count += 1
+        self.env.bindings[self.name] = self
+        self.env.unwrappedBindings[self.name] = self.current
         if self.count >= self.numberOfOutputs:
             self.numberOfOutputs += 1000
-        if not self.condition.Evaluate(self.env).value:
-            raise StopIteration     
+        if self.count > 1 and not self.condition.Evaluate(self.env).value:
+            self.numberOfOutputs = self.count - 1
+            raise StopIteration
         else:
-            self.count += 1
-            self.current += 1
-            self.env.bindings[self.name] = V.Simple(self.current)
-            self.env.unwrappedBindings[self.name] = self.current
-            return self.count - 1
+            return self.current
         
     def GetNumberOfOutputPoints(self):
         return self.numberOfOutputs

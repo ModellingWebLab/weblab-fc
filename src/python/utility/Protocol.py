@@ -44,7 +44,7 @@ class Protocol(object):
     def __init__(self, protoFile):
         self.protoFile = protoFile
         self.env = Env.Environment()
-        self.inputEnv = Env.Environment()
+        self.inputEnv = Env.Environment(allowOverwrite=True)
         self.libraryEnv = Env.Environment() #is where its own library is executed
         self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv) #for own postprocessing which delegates to library env
         self.library = []
@@ -67,8 +67,12 @@ class Protocol(object):
             else:
                 self.libraryEnv.SetDelegateeEnv(imported_proto.libraryEnv, prefix)
                 imported_proto.libraryEnv.ExecuteStatements(imported_proto.library)
+        self.inputEnv.ExecuteStatements(details.get('inputs', []))
+        self.libraryEnv.SetDelegateeEnv(self.inputEnv)
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
+#         for sim in self.simulations:
+#             sim.env.ExecuteStatements(details.get('inputs', []))
         self.postProcessing.extend(details.get('postprocessing', []))      
 
     def Run(self):
@@ -77,7 +81,8 @@ class Protocol(object):
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
                 sim.Initialise()
-                self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
+                if sim.prefix:
+                    self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
                 results = sim.Run()
             self.postProcessingEnv.ExecuteStatements(self.postProcessing)
         except ProtocolError:
@@ -93,10 +98,14 @@ class Protocol(object):
                 print location
             raise
         
+    def SetInput(self, name, valueExpr):
+        value = valueExpr.Evaluate(self.inputEnv)
+        self.inputEnv.OverwriteDefinition(name, value)
+        
     def SetModel(self, model):
         for sim in self.simulations:
             sim.SetModel(model)
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)
-       # join and dirname on protoFile and path in details, joins dirnmae of basepath and path
+       # join and dirname on protoFile and path in details, joins dirname of basepath and path

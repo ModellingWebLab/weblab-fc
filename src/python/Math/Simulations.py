@@ -58,13 +58,20 @@ class AbstractSimulation(object):
         self.env.DefineName(self.range_.name, self.range_)
     
     def Initialise(self):
-        for r in self.ranges:
-            r.Initialise(self.env)
+        self.range_.Initialise(self.env)
+        if isinstance(self.range_, Ranges.While) and self.prefix:
+            self.viewEnv = Env.Environment(allowOverwrite=True)
+            self.env.SetDelegateeEnv(self.viewEnv, self.prefix) # range or env?
         
     def InternalRun(self):
         raise NotImplementedError 
     
     def LoopBodyStartHook(self):
+        if isinstance(self.range_, Ranges.While) and self.range_.count > 1 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
+            for name in self.results.DefinedNames():
+                self.results.LookUp(name).array.resize(self.range_.GetNumberOfOutputPoints(), refcheck=False)
+#                 empty = np.empty(int(self.range_.GetNumberOfOutputPoints() - self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]))
+#                 self.results.LookUp(name).array = np.concatenate([self.results.LookUp(name).array, empty])
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 1:
                 modifier.Apply(self)
@@ -75,17 +82,19 @@ class AbstractSimulation(object):
         if isinstance(self.range_, Ranges.While):
             for name in self.results.DefinedNames():
                 result = self.results.LookUp(name)
-                result.array = result.array[0:self.range_.count] #resize function doesn't work with references
+                result.array = result.array[0:self.range_.GetNumberOfOutputPoints()] #resize function doesn't work with references
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.END_ONLY:
                 modifier.Apply(self)
                 
     def LoopBodyEndHook(self):
-        if isinstance(self.range_, Ranges.While):
-            viewEnv = Env.Environment()
+        if isinstance(self.range_, Ranges.While) and self.prefix:
             for result in self.results.DefinedNames():
-                viewEnv.DefineName(result, A.View(self.results.LookUp(result), E.TupleExpression(N(0), N(self.range_.count))))
-                self.env.SetDelegateeEnv(viewEnv)
+                if result not in self.viewEnv.DefinedNames():
+                    self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
+                else:
+                    self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
+                
     #loopbodyend happens at the end of the loop but still inside the loop. before next iteration
     # loopbodyend checks if its a while loop and iterates over output names in results and defines
     #the same names in the fake environment but defines the names as a view from the beginning
@@ -152,6 +161,11 @@ class Nested(AbstractSimulation):
     def ZeroInitialiseResults(self):
         pass
     
+    def Initialise(self): 
+        self.range_.Initialise(self.env)
+        self.nestedSim.Initialise()
+        super(Nested, self).Initialise()
+        
     def InternalRun(self):
         for t in self.range_:
             self.LoopBodyStartHook()

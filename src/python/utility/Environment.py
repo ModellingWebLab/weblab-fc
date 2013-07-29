@@ -174,6 +174,10 @@ class ModelWrapperEnvironment(Environment):
         def __init__(self, unwrapped):
             self._unwrapped = unwrapped
         def __getitem__(self, key):
+            if key == 'leakage_current':
+                key = 'a'
+            if key == 'membrane_voltage':
+                key = 'y'
             py_value = self._unwrapped[key]
             if isinstance(py_value, np.ndarray):
                 return V.Array(py_value)
@@ -186,7 +190,7 @@ class ModelWrapperEnvironment(Environment):
 #             except AttributeError:
 #                 self._unwrapped[key] = value.array
         def __contains__(self, key):
-            return key in ['a', 'y', 'leakage_current', 'membrane_voltage']
+            return key in ['a', 'y', 'leakage_current', 'membrane_voltage', 'time']
     
     class _UnwrappedBindingsDict(dict):
         def __init__(self, model):
@@ -200,7 +204,7 @@ class ModelWrapperEnvironment(Environment):
         def __setitem__(self, key, value):
             self._model.SetVariableNow(key, value)
         def __contains__(self, key):
-            return key in ['a', 'y', 'leakage_current', 'membrane_voltage']
+            return key in ['a', 'y', 'leakage_current', 'membrane_voltage', 'time']
     
     def __init__(self, model):
         super(ModelWrapperEnvironment, self).__init__(allowOverwrite=True)

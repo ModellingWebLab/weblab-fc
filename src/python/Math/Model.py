@@ -31,6 +31,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import Environment as Env
 import MathExpressions as M
+import numpy as np
 from ErrorHandling import ProtocolError
 import scipy.integrate
 import Values as V
@@ -50,6 +51,7 @@ class TestOdeModel(AbstractModel):
         self.y = self.r.y
         self.modifiers = []
         self.env = Env.ModelWrapperEnvironment(self)
+        self.time = 0
         
     def f(self, t, y):
         return self.a
@@ -58,12 +60,16 @@ class TestOdeModel(AbstractModel):
         self.savedStates[name] = self.r.y
         
     def SetInitialTime(self, t):
+        # self.time is t
         self.r.set_initial_value(self.r.y, 0)
         
     def SetVariable(self, when, env, variableName, value):
         if not hasattr(self, variableName):
             raise ProtocolError("Type", type(self), "does not have a variable named", variableName)
-        setattr(self, variableName, value)
+        if variableName == 'y':
+            self.r.y = np.array([value])
+        else:
+            setattr(self, variableName, value)
     
     def SetVariableNow(self, name, value):
         setattr(self, name, value)
@@ -84,7 +90,7 @@ class TestOdeModel(AbstractModel):
                 
     def Simulate(self, endPoint):
         self.y = self.r.integrate(endPoint)
-        assert self.r.successful()
+        assert self.r.successful() # self.time is endpoint
     
     def GetOutputs(self):
         env = Env.Environment()
