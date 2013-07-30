@@ -29,19 +29,16 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
-import numpy as np
-import Values as V
-import AbstractValue as AV
-import ErrorHandling
-import sys
+from AbstractValue import AbstractValue
 from Locatable import Locatable
-
-AbstractValue = AV.AbstractValue
-ProtocolError = ErrorHandling.ProtocolError
+import numpy as np
+from ErrorHandling import ProtocolError
+import sys
+import Values as V
 
 class Environment(object):
-    nextIdent = [0]
+    """Base class for environments in the protocol language."""
+    next_ident = [0]
     
     def __init__(self, allowOverwrite=False, delegatee=None):
         self.allowOverwrite = allowOverwrite
@@ -52,8 +49,6 @@ class Environment(object):
             self.SetDelegateeEnv(delegatee, "")
         
     def DefineName(self, name, value):
-#         if not isinstance(value, AbstractValue):
-#             raise ProtocolError(value, "is not a value type")
         if ':' in name:
             raise ProtocolError('Names such as', name, 'with a colon are not allowed.')
         if name in self.bindings:
@@ -88,8 +83,8 @@ class Environment(object):
         return env.ExecuteStatements(stmt_list)
 
     def FreshIdent(self):
-        self.nextIdent[0] += 1
-        return "___%d" % self.nextIdent[0] 
+        self.next_ident[0] += 1
+        return "___%d" % self.next_ident[0] 
 
     def LookUp(self, name):
         result = self.bindings[name]
@@ -193,10 +188,7 @@ class ModelWrapperEnvironment(Environment):
             
         def __setitem__(self, key, value):
             pass
-#             try:
-#                 self._unwrapped[key] = value.value
-#             except AttributeError:
-#                 self._unwrapped[key] = value.array
+
         def __contains__(self, key):
             return key in self._unwrapped
     
@@ -213,11 +205,6 @@ class ModelWrapperEnvironment(Environment):
                 return self._model.freeVariable
             else:
                 raise ProtocolError('Name', key, 'is not defined.')
-#             if key == 'leakage_current':
-#                 key = 'a'
-#             if key == 'membrane_voltage':
-#                 key = 'y'
-#             return getattr(self._model, key)
         
         def __setitem__(self, key, value):
             if key in self._model.parameterMap:
@@ -247,26 +234,4 @@ class ModelWrapperEnvironment(Environment):
     
     def DefinedNames(self):
         return self.names
-    
-#     def LookUp(self, name):
-#         if name == 'leakage_current':
-#             name = 'a'
-#         if name == 'membrane_voltage':
-#             name = 'y'
-#         return getattr(model, name)
-#     
-#     def OverwriteDefinition(self, name, value):
-#         self.model.SetVariableNow(name, value.value)
-        
-        
- # class for bindings/unwrapped bindings called DelegatingDict(dict)
- # __missing__ method (self, key) for delegation
- # missing means key isn't found locally, so call parts=key.split(":", 1) to see if it's prefixed or not
- # if parts is length one then look up in default delegatee, so if len(parts) ==1 
- # then prefix, name = "", parts[0] else prefix,name = parts
- # just look up the prefix in self.delegatees and return value, otherwise say it's not found anywhere and raise protocolerror
- # setDelegatee(self, prefix, delegatee) will be called by set delegatee in environment class
- # __init__(self, *args, **kwargs) will need super(delegatingdict, self).init__(*args, **kwargs)
- # self.delegatees = {}
- # look up keys in both wrapped and unwrapped bindings
         

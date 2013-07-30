@@ -35,18 +35,19 @@ import unittest
 import sys
 
 # Import the module to test
-import MathExpressions as M
-import Expressions as E
-import Values as V
-import Environment as Env
-import numpy as np
 import ArrayExpressions as A
+import Environment as Env
+import Expressions as E
+import MathExpressions as M
+import numpy as np
 from ErrorHandling import ProtocolError
+import Values as V
 
 def N(number):
     return M.Const(V.Simple(number))
 
 class TestBasicExpressions(unittest.TestCase):
+    """Test basic math expressions using simple, null, and default values.""" 
     def TestAddition(self):
         env = Env.Environment()
         self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate(env).value, 3)

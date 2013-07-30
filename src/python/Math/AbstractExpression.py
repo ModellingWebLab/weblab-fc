@@ -30,24 +30,17 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+import Locatable
 import numexpr as ne
 import numpy
-import Locatable
 import Values as V
 
-
 class AbstractExpression(Locatable.Locatable):
-    """Base class for expressions in the protocol language."""
-    
+    """Base class for expressions in the protocol language."""   
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         super(AbstractExpression, self).__init__()
         self.children = children
-
-#        try:
-#            line_profile.add_function(self.Evaluate)
-#        except NameError:
-#            pass
 
     @property
     def compiled(self):
@@ -61,8 +54,8 @@ class AbstractExpression(Locatable.Locatable):
 
     def EvaluateChildren(self, env):
         """Evaluate our child expressions and return a list of their values."""
-        childList = [child.Evaluate(env) for child in self.children]
-        return childList
+        child_list = [child.Evaluate(env) for child in self.children]
+        return child_list
     
     def Interpret(self, env):
         """Evaluate this expression by interpreting the expression tree.

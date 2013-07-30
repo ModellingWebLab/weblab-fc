@@ -36,12 +36,10 @@ from ErrorHandling import ProtocolError
 import scipy.integrate
 import Values as V
 
-
 class AbstractModel(object):
-    """Base class for statements in the protocol language."""
+    """Base class for models in the protocol language."""
     def Simulate(self):
         raise NotImplementedError    
-
 
 class AbstractOdeModel(AbstractModel):
     """This is a base class for ODE system models converted from CellML by PyCml.
@@ -135,31 +133,6 @@ class TestOdeModel(AbstractOdeModel):
         
     def EvaluateRhs(self, t, y):
         return self.parameters[0]
-    
-#     def SaveState(self, when, name):
-#         self.savedStates[name] = self.r.y
-#         
-        
-#         if variableName == 'y':
-#             self.r.y = np.array([value])
-#         else:
-#             setattr(self, variableName, value)
-    
-#     def SetVariableNow(self, name, value):
-#         setattr(self, name, value)
-        
-    
-#     def ResetState(self, when, name):
-#         if name is None:
-#             self.r.set_initial_value(0, 0)   
-#         else:
-#             self.r.set_initial_value(self.savedStates[name], 0)
-#         self.y = self.r.y
-#                 
-#     def Simulate(self, endPoint):
-#         self.y = self.r.integrate(endPoint)
-#         self.time = endPoint
-#         assert self.r.successful()
         
     def GetOutputs(self):
         env = Env.Environment()

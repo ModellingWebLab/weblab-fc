@@ -30,29 +30,23 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
-import Values as V
-import MathExpressions as M
+from AbstractExpression import AbstractExpression
 import Environment as Env
 import Expressions as E
-import numpy as np
-import numexpr as ne
-import itertools
-import sys
-
-import AbstractExpression as AE
-import ErrorHandling
-
-AbstractExpression = AE.AbstractExpression
-ProtocolError = ErrorHandling.ProtocolError
-
 from operator import itemgetter, mul
+import itertools
+import MathExpressions as M
+import numexpr as ne
+import numpy as np
+from ErrorHandling import ProtocolError
+import sys
+import Values as V
 
 def N(number):
     return M.Const(V.Simple(number))
 
 class NewArray(AbstractExpression):
-    """Used to create new arrays."""
+    """Used to create new arrays, has keyword input comprehension."""
     def __init__(self, *children, **kwargs):
         super(NewArray, self).__init__()
         self.comprehension = kwargs.get('comprehension', False)
@@ -120,16 +114,6 @@ class NewArray(AbstractExpression):
                                     "when it should be", sub_array_shape)
             result[tuple(range_spec_indices)] = sub_array
         return np.array(result)
-    # look through each child in comprehension and make sure its a tuple expression, 
-    #call get used variables on every child cuz if its just 
-    # a const then its going to return empty set anyway and then last child gets 
-    #added to used in iterators so the actual get used variables
-    # for comprehension is all the get used variables minus the last child
-    # everything will have a get used variables class from base
-    # initial result is super(self, newarray).getused union with self.genexpr.getusedvars
-    # for child in self.children, assert tuple expressoin, child.children[-1] and 
-    #assert that its a string and thn add the value of string to iterators variables
-    # if self.location is exact join line then cheat
     
     def GetUsedVariables(self):
         result = super(NewArray, self).GetUsedVariables()
@@ -142,8 +126,7 @@ class NewArray(AbstractExpression):
             result |= self.genExpr.GetUsedVariables()        
             result = result - set.intersection(result, iterator_vars)
         return result
-            
-            
+              
     def _DoComprehension(self, env):
         range_specs = self.EvaluateChildren(env)
         ranges = []
@@ -181,10 +164,6 @@ class NewArray(AbstractExpression):
         for key in explicit_dim_slices:
             ranges[key] = explicit_dim_slices[key]
             range_name[key] = explicit_dim_names[key]
-            
-        # join
-        #if "return [if i < 0 then a1[dim$i] else a2[dim$i] for dim$i in -a1.SHAPE[dim] : a2.SHAPE[dim] ]" in self.location:           
-        
         
         num_gaps = 0
         for i,each in enumerate(ranges):
@@ -215,16 +194,12 @@ class NewArray(AbstractExpression):
         #stretch 
         if len(range_name) == 1:
             names_used = self.genExpr.GetUsedVariables()
-            # add dim to repeated array of len 1 then tile it and make the len of that added dimension, dims[last_specifed_dim]
-            # insert the len 1 dim into the last spec dim dimension
-            local_names = set(range_name) # return set([self.name]), namelookup, array comprehensions, functions, arrayexpressions
+            local_names = set(range_name) 
             if names_used.isdisjoint(local_names):
                 repeated_array = self.genExpr.Evaluate(env).array
                 shape = list(repeated_array.shape)
                 shape.insert(last_spec_dim, 1)
                 repeated_array = repeated_array.reshape(tuple(shape))
-                #shape[last_spec_dim] = dims[last_spec_dim]
-                # correct number of dims but one everywhere else
                 reps = [1] * repeated_array.ndim
                 reps[last_spec_dim] = dims[last_spec_dim]
                 result = np.tile(repeated_array, tuple(reps))
@@ -249,6 +224,7 @@ class NewArray(AbstractExpression):
         return V.Array(elements_arr)
     
 class View(AbstractExpression):
+    """Take a view of an already existing array."""
     def __init__(self, array, *children):   
         super(View, self).__init__()  
         self.arrayExpression = array
@@ -271,7 +247,7 @@ class View(AbstractExpression):
         
     def Interpret(self, env):
         array = self.arrayExpression.Evaluate(env)
-        if len(self.children) > array.array.ndim: # check to make sure indices = number of dimensions
+        if len(self.children) > array.array.ndim: 
             raise ProtocolError("You entered", len(self.children), "indices, but the array has", array.array.ndim, "dimensions.")
         indices = self.EvaluateChildren(env) # list of tuples with indices
         if not isinstance(array, V.Array):
@@ -287,7 +263,7 @@ class View(AbstractExpression):
                 step = 0
             elif len(index.values) == 1:
                 dim = None
-                start = self.GetValue(index.values[0]) # if isinstance(arg, Null) return None else arg.value
+                start = self.GetValue(index.values[0])
                 step = 0
                 end = start
             elif len(index.values) == 2:
@@ -368,7 +344,7 @@ class View(AbstractExpression):
         return V.Array(view)
     
 class Fold(AbstractExpression):
-    
+    "Fold an array along a specified dimension using a specified function."
     def __init__(self, *children):
         super(Fold, self).__init__(*children)
         if len(self.children) < 2 or len(self.children) > 4:
@@ -382,10 +358,10 @@ class Fold(AbstractExpression):
         
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
-        defaultParameters = [V.Null(), V.Null(), V.Null(), V.Simple(operands[1].array.ndim - 1)]
+        default_params = [V.Null(), V.Null(), V.Null(), V.Simple(operands[1].array.ndim - 1)]
         for i,oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
-                operands[i] = defaultParameters[i]
+                operands[i] = default_params[i]
         if len(self.children) == 2:
             function = operands[0]
             array = operands[1].array
@@ -430,13 +406,13 @@ class Fold(AbstractExpression):
                     max_array = np.maximum(initial, array)
                 else:
                     max_array = array
-                return V.Array(np.amax(max_array, axis=dimension).reshape(tuple(shape))) #keepdims=True not working
+                return V.Array(np.amax(max_array, axis=dimension).reshape(tuple(shape)))
             if isinstance(function.body[0].parameters[0], M.Min):
                 if initial is not None:
                     min_array = np.minimum(initial, array)
                 else:
                     min_array = array
-                return V.Array(np.amin(min_array, axis=dimension).reshape(tuple(shape))) #keepdims=True not working
+                return V.Array(np.amin(min_array, axis=dimension).reshape(tuple(shape)))
         env = Env.Environment()
         result_shape = list(shape)
         result_shape[dimension] = 1
@@ -522,6 +498,7 @@ class Map(AbstractExpression):
         return protocol_result
 
 class Find(AbstractExpression):
+    """Find function for n-dimensional arrays."""
     def __init__(self, operandExpr):
         super(Find, self).__init__()
         self.operandExpr = operandExpr
@@ -533,21 +510,18 @@ class Find(AbstractExpression):
         return V.Array(np.transpose(np.nonzero(operand.array)))
 
 class Index(AbstractExpression):
+    """Index function for n-dimensional arrays."""
     def __init__(self, *children):
         super(Index, self).__init__(*children)
         if len(self.children ) < 2 or len(self.children) > 6:
             raise ProtocolError("Index requires 2-6 operands, not", len(self.children))
-#        try: 
-#            line_profile.add_function(self.Interpret) 
-#        except NameError: 
-#            pass 
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
-        defaultParameters = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
+        default_params = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
         for i,oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
-                operands[i] = defaultParameters[i]
+                operands[i] = default_params[i]
         if len(self.children) == 2:
             operand = operands[0]
             indices = operands[1]
@@ -611,9 +585,6 @@ class Index(AbstractExpression):
             extents_index = list(index)
             extents_index[dim_val] = 0
             extents[tuple(extents_index)] += 1
-# try to catch the join and stretch methods
-# do line profiling for index
-# make a double for loop work in compile
         max_extent = np.amax(extents)
         min_extent = np.amin(extents)
         if min_extent == 0 and pad.value == 0 or (min_extent != max_extent and shrink.value == 0 and pad.value == 0):
@@ -655,6 +626,4 @@ class Index(AbstractExpression):
                 idxs[dim_val] = 0
                 next_index[tuple(idxs)] += 1
                 
-        return V.Array(result)
-        
-        
+        return V.Array(result)  

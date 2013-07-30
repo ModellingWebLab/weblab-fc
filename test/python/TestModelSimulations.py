@@ -52,6 +52,7 @@ def N(number):
     return M.Const(V.Simple(number))
 
 class TestModelSimulation(unittest.TestCase):
+    """Test models, simulations, ranges, and modifiers."""
     def TestSimpleODE(self):
         # using range made in python
         a = 5
@@ -102,11 +103,6 @@ class TestModelSimulation(unittest.TestCase):
         # test while loop
         
     def TestReset(self):                
-        # nested each loop set a=range(count) so a would be 0,1,2 each time through the loop
-        # probably want to combine this by reseting the state each time too, two modifiers test
-        # first one is four 0's then 0 1 2 3 then 0 2 4 6
-        
-        # reset at the start with modifier on time sim of nested simul
         a = 5
         model = TestOdeModel(a)
         when = AbstractModifier.START_ONLY
@@ -183,7 +179,7 @@ class TestModelSimulation(unittest.TestCase):
     def TestSetVariable(self): 
         # set variable
         a = 5
-        model = TestOdeModel(a)#E.NameLookup('count')
+        model = TestOdeModel(a)
         modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'oxmeta:leakage_current', N(1))
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)       
@@ -226,7 +222,7 @@ class TestModelSimulation(unittest.TestCase):
         actual = results.LookUp('y').array
         np.testing.assert_array_almost_equal(predicted, actual)
         
-    def TestPyCML(self):
+    def TestPyCmlLuoRudy(self):
         import tempfile, subprocess, sys, imp
         import subprocess
         dir = tempfile.mkdtemp()
@@ -234,7 +230,7 @@ class TestModelSimulation(unittest.TestCase):
         xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', test_while, dir])
         xml_file = xml_file.strip()
         class_name = 'GeneratedModel'
-        code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' +xml_file, 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml', '-c', class_name, '-o', '-'])
+        code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' + xml_file, 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml', '-c', class_name, '-o', '-'])
         module = imp.new_module(class_name)
         exec code in module.__dict__
         for name in module.__dict__.keys():
@@ -244,6 +240,34 @@ class TestModelSimulation(unittest.TestCase):
         proto.SetModel(model)
         proto.SetInput('num_iters', N(10))
         proto.Run()
-         
+        
+#     def TestPyCmlLuoRudyStringModel(self):
+#         # shorter test after properly implementing set model into protocol
+#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+#         proto = Protocol.Protocol(proto_file)
+#         model = 'luo_rudy_1991.cellml'
+#         print 'proto', proto
+#         proto.SetModel(model)
+#         proto.SetInput('num_iters', N(10))
+#         proto.Run()
+        
+        #courtemanche_ramirez_nattel_1998
+#     def TestPyCMLRealProto(self):
+#         import tempfile, subprocess, sys, imp
+#         import subprocess
+#         dir = tempfile.mkdtemp()
+#         test_while = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
+#         xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', test_while, dir])
+#         xml_file = xml_file.strip()
+#         class_name = 'GeneratedModel'
+#         code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' +xml_file, 'projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998', '-c', class_name, '-o', '-'])
+#         module = imp.new_module(class_name)
+#         exec code in module.__dict__
+#         for name in module.__dict__.keys():
+#             if name.startswith(class_name):
+#                 model = getattr(module, name)()
+#         proto = Protocol.Protocol(test_while)
+#         proto.SetModel(model)
+#         proto.Run()
          
              

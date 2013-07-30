@@ -34,19 +34,18 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import unittest
 
 # Import the module to test
-import MathExpressions as M
-import Values as V
 import Environment as Env
-import Statements as S
 import Expressions as E
-
 from ErrorHandling import ProtocolError
+import MathExpressions as M
+import Statements as S
+import Values as V
 
 def N(number):
     return M.Const(V.Simple(number))
 
 class TestFunctions(unittest.TestCase):
- 
+    """Test lambda expressions and all function methods."""
     def TestFuncDefinitions(self):
         env = Env.Environment()
         parameters = ["a", "b"]
@@ -72,7 +71,7 @@ class TestFunctions(unittest.TestCase):
         self.assertAlmostEqual(result.values[0].value, 5)
         self.assertAlmostEqual(result.values[1].value, 3)  
         
-        # test function using lambdaexpression.wrap
+    def TestLambdaExpressionWrap(self):
         env = Env.Environment()
         add = E.LambdaExpression.Wrap(M.Plus, 3)
         args = [N(1), N(2), N(3)]

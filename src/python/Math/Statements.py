@@ -30,15 +30,14 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Values as V
-import MathExpressions as M
-import Locatable
-
 import AbstractExpression as AE
-import ErrorHandling
+import Locatable
+import MathExpressions as M
+from ErrorHandling import ProtocolError
+import Values as V
 
 AbstractExpression = AE.AbstractExpression
-ProtocolError = ErrorHandling.ProtocolError
+
 
 class AbstractStatement(Locatable.Locatable):
     """Base class for statements in the protocol language."""
@@ -46,6 +45,7 @@ class AbstractStatement(Locatable.Locatable):
         raise NotImplementedError
 
 class Assign(AbstractStatement):
+    """Assign statements in the protocol language."""
     def __init__(self, names, rhs):
         super(Assign, self).__init__()
         self.names = names
@@ -97,8 +97,3 @@ class Return(AbstractStatement):
         else:
             raise NotImplementedError
         return expression
-            #all above will happen in map, map will call compile on the function via the lambda closure compile
-        #map does the numexpr evaluate
-#         
-    #evaluate children and return as a tuple if more than one, just the one if one, and null if there aren't any
-        

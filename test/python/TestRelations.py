@@ -38,6 +38,7 @@ import MathExpressions as M
 import Values as V
 
 class TestRelations(unittest.TestCase):
+    """Test relations (eq, neq, lt, gt, lte, gte) using simple values."""
     def TestEq(self):
         self.assertFalse(M.Eq(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
         self.assertTrue(M.Eq(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)

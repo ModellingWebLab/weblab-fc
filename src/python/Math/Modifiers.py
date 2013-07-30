@@ -31,8 +31,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import Environment as Env
 import scipy.integrate
-import Values as V
 import numpy as np
+import Values as V
+
 
 class AbstractModifier(object):
     """Base class for modifiers in the protocol language."""
@@ -67,8 +68,4 @@ class ResetState(AbstractModifier):
             self.stateName = stateName
             
         def Apply(self, simul):
-            simul.model.ResetState(self.stateName)
-                
-                #all classes call methods of model to do work
-
-        
+            simul.model.ResetState(self.stateName)       

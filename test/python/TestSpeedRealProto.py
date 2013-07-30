@@ -36,19 +36,18 @@ try:
 except ImportError:
     import unittest
 
-import CompactSyntaxParser as CSP
-csp = CSP.CompactSyntaxParser
-
-import Environment as Env
-import Values as V
 import ArrayExpressions as A
+import CompactSyntaxParser as CSP
+import Environment as Env
 import Expressions as E
 import MathExpressions as M
-import Protocol
-
 import numpy as np
 import os
+import Protocol
 import time
+import Values as V
+
+csp = CSP.CompactSyntaxParser
 
 def N(v):
     return M.Const(V.Simple(v))

@@ -35,19 +35,19 @@ import unittest
  
 # Import the module to test
 import ArrayExpressions as A
-import Values as V
 import Environment as Env
-import Statements as S
-import numpy as np
-import MathExpressions as M
 import Expressions as E
- 
+import MathExpressions as M
+import numpy as np
 from ErrorHandling import ProtocolError
- 
+import Statements as S
+import Values as V
+
 def N(number):
     return M.Const(V.Simple(number))
  
 class TestSpeed(unittest.TestCase):
+    """Test speed of python implementation using simple expressions involving very large arrays."""
     def TestAddingLargeArrays(self):
         # 1-d array
         env = Env.Environment()
@@ -58,9 +58,9 @@ class TestSpeed(unittest.TestCase):
         large_array2 = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
         result = A.Map(add, large_array1, large_array2)
         predicted = 2*np.arange(10000000)
-        #timeit.timeit('result_array = result.Evalute(env).array', number=1)
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-
+    
+    def TestMultipleOperationExpressionWithLargeArrays(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
         body = [S.Return(M.Times(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]

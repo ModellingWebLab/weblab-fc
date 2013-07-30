@@ -39,8 +39,6 @@ import numpy as np
 import Ranges
 import Values as V
 
-
-
 def N(number):
     return M.Const(V.Simple(number))
 
@@ -50,10 +48,7 @@ class AbstractSimulation(object):
         self.prefix = prefix
         self.ranges = [self.range_]
         self.model = None
-#         if prefix:
         self.results = Env.Environment()
-#         else:
-#             self.results = None
         self.env = Env.Environment()
         self.env.DefineName(self.range_.name, self.range_)
     
@@ -61,7 +56,7 @@ class AbstractSimulation(object):
         self.range_.Initialise(self.env)
         if isinstance(self.range_, Ranges.While) and self.prefix:
             self.viewEnv = Env.Environment(allowOverwrite=True)
-            self.env.SetDelegateeEnv(self.viewEnv, self.prefix) # range or env?
+            self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
         
     def InternalRun(self):
         raise NotImplementedError 
@@ -70,8 +65,6 @@ class AbstractSimulation(object):
         if isinstance(self.range_, Ranges.While) and self.range_.count > 1 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
             for name in self.results.DefinedNames():
                 self.results.LookUp(name).array.resize(self.range_.GetNumberOfOutputPoints(), refcheck=False)
-#                 empty = np.empty(int(self.range_.GetNumberOfOutputPoints() - self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]))
-#                 self.results.LookUp(name).array = np.concatenate([self.results.LookUp(name).array, empty])
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 1:
                 modifier.Apply(self)
@@ -94,14 +87,6 @@ class AbstractSimulation(object):
                     self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
                 else:
                     self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
-                
-    #loopbodyend happens at the end of the loop but still inside the loop. before next iteration
-    # loopbodyend checks if its a while loop and iterates over output names in results and defines
-    #the same names in the fake environment but defines the names as a view from the beginning
-    #of each array to the current count of the while loop for the 0th dimension and pretty much
-    #everything for all other dimensions
-    #self.viewEnv is added as delegatee to self.env (with simulations prefix) and only created
-    #if you're in a while loop
     
     def SetModel(self, model):
         self.model = model
@@ -109,7 +94,6 @@ class AbstractSimulation(object):
         for prefix in model_env.keys():
             self.env.SetDelegateeEnv(model_env[prefix], prefix)
             self.results.SetDelegateeEnv(model_env[prefix], prefix)
-        # add model's environment(s) as prefixed delegatees to self.env and self.results
         
     def Run(self):
         self.InternalRun()
@@ -158,9 +142,6 @@ class Nested(AbstractSimulation):
         self.results = self.nestedSim.results
         nestedSim.env.SetDelegateeEnv(self.env)
     
-    def ZeroInitialiseResults(self):
-        pass
-    
     def Initialise(self): 
         self.range_.Initialise(self.env)
         self.nestedSim.Initialise()
@@ -176,6 +157,3 @@ class Nested(AbstractSimulation):
     def SetModel(self, model):
         super(Nested, self).SetModel(model)
         self.nestedSim.SetModel(model)
-    
-    
-    

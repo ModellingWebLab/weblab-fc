@@ -35,21 +35,21 @@ import unittest
 
 # Import the module to test
 import ArrayExpressions as A
-import Values as V
 import Environment as Env
 import Expressions as E
-import Statements as S
-import numpy as np
-import MathExpressions as M
 import math
-import sys
-
+import MathExpressions as M
+import numpy as np
 from ErrorHandling import ProtocolError
+import Statements as S
+import sys
+import Values as V
 
 def N(number):
     return M.Const(V.Simple(number))
 
 class TestArrayExpressions(unittest.TestCase):
+    """Test array creation, view, map, fold, index, join, and stretch."""
     def TestNewArray(self):
         arr = A.NewArray(N(1), N(2), N(3)) # simple one-dimensional array
         predictedArr = np.array([1, 2, 3])
@@ -130,17 +130,13 @@ class TestArrayExpressions(unittest.TestCase):
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
         view = A.View(array, E.TupleExpression(N(1), M.Const(V.Null()), N(-1), N(0)), 
                       E.TupleExpression(N(0), N(0), M.Const(V.Null()), M.Const(V.Null())))
-        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr) # tests explicitly assigning dimension one before explicitly defining dimension zero
-        
-        #View([[0,1,2],[3,4,5]], M.Const(1), E.Tuple(M.Const(1), M.Const(3))) == [4,5]
-        
+        np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr) # tests explicitly assigning dimension one before explicitly defining dimension zero        
         
         array = A.NewArray(A.NewArray(N(0), N(1), N(2)), A.NewArray(N(3), N(4), N(5)))
         view = A.View(array, E.TupleExpression(N(1)), E.TupleExpression(N(1), N(3)))
         predictedArr = np.array([4, 5])
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
         
-        #View([[0,1,2],[3,4,5]], M.Const(1), E.Tuple(M.Const(1))) == 4 
         array = A.NewArray(A.NewArray(N(0), N(1), N(2)), A.NewArray(N(3), N(4), N(5)))
         view = A.View(array, N(1), E.TupleExpression(N(1)))
         predictedArr = np.array([4])
@@ -299,7 +295,7 @@ class TestArrayExpressions(unittest.TestCase):
        predicted = V.Array(np.array([[7, 7], [16, 4]]))
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)   
           
-         # more complex function and more complex array
+       # more complex function and more complex array
        env = Env.Environment()
        parameters = ['a', 'b', 'c']
        body = [S.Return(M.Times(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]
@@ -323,9 +319,7 @@ class TestArrayExpressions(unittest.TestCase):
        result = A.Map(default_array_test, a)
        predicted = np.array([6, 11, 18])
        np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
-        
-       #map(lambda a, b=[0,1,2]: (a^2)*b[0] + a*b[1] + b[2], [1,2,3]) == [6,11,18]
-       
+           
     def TestUsingManyOperationsinFunction(self):
        env = Env.Environment()
        parameters = ['a', 'b', 'c']

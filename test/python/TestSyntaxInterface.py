@@ -37,31 +37,31 @@ except ImportError:
     import unittest
 
 # Import the modules to test
-import CompactSyntaxParser as CSP
-csp = CSP.CompactSyntaxParser
 
+from Modifiers import AbstractModifier
 import ArrayExpressions as A
-import Values as V
+import CompactSyntaxParser as CSP
 import Environment as Env
 import Expressions as E
-import Statements as S
-import numpy as np
 import MathExpressions as M
 import Modifiers
+import numpy as np
 import Protocol
+from ErrorHandling import ProtocolError
 import Ranges
 import Simulations
-import Statements
+import Statements as S
 from Model import TestOdeModel
-from ErrorHandling import ProtocolError
-from Modifiers import AbstractModifier
+import Values as V
+
+csp = CSP.CompactSyntaxParser
 
 def N(number):
     return M.Const(V.Simple(number))
 
 class TestSyntaxInterface(unittest.TestCase):
+    """Test expr methods of compact syntax parser."""
     def TestParsingNumber(self):
-        # number
         parse_action = csp.expr.parseString('1.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, M.Const)
@@ -248,9 +248,6 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertIsInstance(expr, M.Ln)
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
-        # evaluate expression in environment will parse and evaluate so do the parse action line
-        # the expr line, and the expr.Evaluate(env) line return result of evaluating 
-        
         # log
         parse_action = csp.expr.parseString('MathML:log(10)', parseAll=True)
         expr = parse_action[0].expr()
@@ -327,42 +324,50 @@ class TestSyntaxInterface(unittest.TestCase):
         np.testing.assert_array_almost_equal(expr.Evaluate(env).array, np.array([1, 2, 3]))
         
     def TestParsingAccessor(self):
+        # is simple true
         parse_action = csp.expr.parseString('1.IS_SIMPLE_VALUE', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         env = Env.Environment()
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
-
+        
+        # is array true
         parse_action = csp.expr.parseString('[1, 2].IS_ARRAY', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
+        # is tuple true
         parse_action = csp.expr.parseString('(1, 2).IS_TUPLE', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
+        # is tuple false
         parse_action = csp.expr.parseString('[1, 2].IS_TUPLE', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         self.assertAlmostEqual(expr.Evaluate(env).value, 0)
         
+        # multiple accessors- .shape.is_array
         parse_action = csp.expr.parseString('[1, 2, 3].SHAPE.IS_ARRAY', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
+        # shape
         parse_action = csp.expr.parseString('[1, 2, 3].SHAPE', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         np.testing.assert_array_equal(expr.Evaluate(env).array, np.array([3]))
         
+        # number of dimensions
         parse_action = csp.expr.parseString('[1, 2, 3].NUM_DIMS', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
         np.testing.assert_array_equal(expr.Evaluate(env).array, np.array([1]))
         
+        # number of elements
         parse_action = csp.expr.parseString('[1, 2, 3].NUM_ELEMENTS', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.Accessor)
@@ -378,6 +383,8 @@ class TestSyntaxInterface(unittest.TestCase):
          expr.Evaluate(env) # checked simply by not raising protocol error
          
          # test assign
+         
+         # assign one variable to an expression
          env = Env.Environment()
          parse_action = csp.assignStmt.parseString('a = 1.0 + 2.0', parseAll=True)
          expr = parse_action[0].expr()
@@ -385,6 +392,7 @@ class TestSyntaxInterface(unittest.TestCase):
          expr.Evaluate(env)
          self.assertEqual(env.LookUp('a').value, 3)
          
+         # assign two variables at once to numbers
          parse_action = csp.assignStmt.parseString('b, c = 1.0, 2.0', parseAll=True)
          expr = parse_action[0].expr()
          self.assertIsInstance(expr, S.Assign)
@@ -392,6 +400,7 @@ class TestSyntaxInterface(unittest.TestCase):
          self.assertEqual(env.LookUp('b').value, 1)
          self.assertEqual(env.LookUp('c').value, 2)
          
+         # assign three variables at once to expressions
          parse_action = csp.assignStmt.parseString('d, e, f = 1.0, 2 + 2.0, (3*4)-2', parseAll=True)
          expr = parse_action[0].expr()
          self.assertIsInstance(expr, S.Assign)
@@ -401,18 +410,22 @@ class TestSyntaxInterface(unittest.TestCase):
          self.assertEqual(env.LookUp('f').value, 10)
          
          # test return
+         
+         # return one number
          parse_action = csp.returnStmt.parseString('return 1', parseAll=True)
          expr = parse_action[0].expr()
          self.assertIsInstance(expr, S.Return)
          results = expr.Evaluate(env)
          self.assertEqual(results.value, 1)
          
+         #return one expression involving variables
          parse_action = csp.returnStmt.parseString('return d + e', parseAll=True)
          expr = parse_action[0].expr()
          self.assertIsInstance(expr, S.Return)
          results = expr.Evaluate(env)
          self.assertEqual(results.value, 5)
-
+         
+         # return two numbers
          parse_action = csp.returnStmt.parseString('return 1, 3', parseAll=True)
          expr = parse_action[0].expr()
          self.assertIsInstance(expr, S.Return)
@@ -458,9 +471,6 @@ class TestSyntaxInterface(unittest.TestCase):
          result = E.FunctionCall(expr, [M.Const(V.DefaultParameter())]).Evaluate(env)
          self.assertEqual(result.value, 5)
          
-
-         #  'def f(a=1): return a\nassert f(default) == 1'
-         
     def TestArrayComprehensions(self):
         env = Env.Environment()
         parse_action = csp.array.parseString('[i for i in 0:10]', parseAll=True)
@@ -494,8 +504,7 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([1, 3, 5, 7, 9])
         np.testing.assert_array_almost_equal(predicted, result.array)
 
-    def TestParsingArrayExpressions(self):
-        #view
+    def TestParsingViews(self):
         env = Env.Environment()
         view_arr = V.Array(np.arange(10))
         env.DefineName('view_arr', view_arr)
@@ -551,7 +560,8 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array(1)
         np.testing.assert_array_almost_equal(result.array, predicted)
         
-        # find
+    def ParsingFindAndIndexArray(self):
+        env = Env.Environment()
         arr = V.Array(np.arange(4))
         env.DefineName('arr', arr)
         find_parse_action = csp.expr.parseString('find(arr)', parseAll=True)
@@ -602,9 +612,12 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array(np.array([[1], [3], [1]]))
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-        # map
+    def TestParsingMapAndFold(self):
+        # test map
+        env = Env.Environment()
+        arr = V.Array(np.arange(4))
         arr2 = V.Array(np.array([4, 5, 6, 7]))
-        env.DefineName('arr2', arr2)
+        env.DefineNames(['arr', 'arr2'], [arr, arr2])
         lambda_parse_action = csp.lambdaExpr.parseString('lambda a, b: a + b', parseAll=True)
         add_function = lambda_parse_action[0].expr()
         env.DefineName('add_function', add_function.Interpret(env))
@@ -615,7 +628,7 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([4, 6, 8, 10])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
-        # fold 
+        # test fold
         fold_parse_action = csp.expr.parseString('fold(add_function, arr, 2, 0)', parseAll=True)
         expr = fold_parse_action[0].expr()
         self.assertIsInstance(expr, A.Fold)
@@ -674,7 +687,6 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(used_vars, set(['a', 'b']))
         
     def TestFindIndexTxt(self):
-        # Parse the protocol into a sequence of post-processing statements
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_find_index.txt'
         proto = Protocol.Protocol(proto_file)
         proto.Run()
@@ -710,7 +722,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = csp.inputs.parseString('inputs{X=1}', parseAll=True)
         expr = parse_action[0].expr()
         for each in expr:
-            self.assertIsInstance(each, Statements.Assign)
+            self.assertIsInstance(each, S.Assign)
         
         # test below is just to test that we get the correct output for a protocol error
         # it's commented out because it causes a protocol error every time
@@ -801,10 +813,3 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.ResetState)
         self.assertEqual(expr.stateName, 'state_name')
-        
-
-        
-        
-        
-        
-        

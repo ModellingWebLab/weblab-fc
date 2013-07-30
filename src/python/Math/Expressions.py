@@ -30,19 +30,15 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
-import Values as V
-import numpy as np
+from AbstractExpression import AbstractExpression
+from ErrorHandling import ProtocolError
 import numexpr as ne
+import numpy as np
 import Statements as S
-
-import AbstractExpression as AE
-import ErrorHandling
-
-AbstractExpression = AE.AbstractExpression
-ProtocolError = ErrorHandling.ProtocolError
+import Values as V
 
 class FunctionCall(AbstractExpression):
+    """Used to call a function in the protocol language."""
     def __init__(self, functionOrName, children):
         super(FunctionCall, self).__init__()
         if isinstance(functionOrName, str):
@@ -59,6 +55,7 @@ class FunctionCall(AbstractExpression):
         return function.Evaluate(env, actual_params)
     
 class If(AbstractExpression):
+    """If, then, else statement in protocol language."""
     def __init__(self, testExpr, thenExpr, elseExpr):
         super(If, self).__init__()
         self.testExpr = testExpr
@@ -81,8 +78,6 @@ class If(AbstractExpression):
         result |= self.elseExpr.GetUsedVariables()
         return result
 
-      
-      #compile using where
     def Compile(self):
         test = self.testExpr.Compile()
         then = self.thenExpr.Compile()
@@ -105,6 +100,7 @@ class NameLookUp(AbstractExpression):
         return set([self.name])
     
 class TupleExpression(AbstractExpression):
+    """Expression that returns a protocol language tuple when evaluated."""
     def __init__(self, *children):
         super(TupleExpression, self).__init__(*children)
         if len(self.children) < 1:
@@ -114,6 +110,7 @@ class TupleExpression(AbstractExpression):
         return V.Tuple(*self.EvaluateChildren(env))
         
 class LambdaExpression(AbstractExpression):
+    """Expression for function in protocol language."""
     def __init__(self, formalParameters, body, defaultParameters=None):
         super(LambdaExpression, self).__init__()
         self.formalParameters = formalParameters
@@ -135,6 +132,7 @@ class LambdaExpression(AbstractExpression):
         return function
 
 class Accessor(AbstractExpression):
+    """Expression that reports type of protocol language value."""
     IS_SIMPLE_VALUE = 0
     IS_ARRAY = 1
     IS_STRING = 2

@@ -31,21 +31,22 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import CompactSyntaxParser as CSP
-csp = CSP.CompactSyntaxParser
 import Environment as Env
-import os
-import sys
 from Locatable import Locatable
+import os
 from ErrorHandling import ProtocolError
+import sys
+
+csp = CSP.CompactSyntaxParser
 
 class Protocol(object):
-    
+    """Base class for protocols in the protocol language."""
     def __init__(self, protoFile):
         self.protoFile = protoFile
         self.env = Env.Environment()
         self.inputEnv = Env.Environment(allowOverwrite=True)
-        self.libraryEnv = Env.Environment() #is where its own library is executed
-        self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv) #for own postprocessing which delegates to library env
+        self.libraryEnv = Env.Environment()
+        self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv)
         self.library = []
         self.simulations = []
         self.postProcessing = []
@@ -55,9 +56,7 @@ class Protocol(object):
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
-        # if prefix is empty then do below, if not then do self.libraryenv.setdelegatee(importedproto.libraryenv, prefix)
         for prefix, path in details.get('imports', []):
-            # if prefix is not empty then do importedproto.libraryenv.executestaement(importedproto.library)        
             imported_proto = Protocol(self.GetPath(protoFile, path))
             if prefix == "":    
                 self.library.extend(imported_proto.library)
@@ -70,8 +69,6 @@ class Protocol(object):
         self.libraryEnv.SetDelegateeEnv(self.inputEnv)
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
-#         for sim in self.simulations:
-#             sim.env.ExecuteStatements(details.get('inputs', []))
         self.postProcessing.extend(details.get('postprocessing', []))      
 
     def Run(self):
@@ -102,9 +99,24 @@ class Protocol(object):
         self.inputEnv.OverwriteDefinition(name, value)
         
     def SetModel(self, model):
-        for sim in self.simulations:
-            sim.SetModel(model)
+        if isinstance(model, str):
+            import tempfile, subprocess, sys, imp
+            import subprocess
+            dir = tempfile.mkdtemp()
+            xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', self.protoFile, dir])
+            xml_file = xml_file.strip()
+            class_name = 'GeneratedModel'
+            code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' + xml_file, 'projects/FunctionalCuration/cellml/' + model, '-c', class_name, '-o', '-'])
+            module = imp.new_module(class_name)
+            exec code in module.__dict__
+            for name in module.__dict__.keys():
+                if name.startswith(class_name):
+                    model = getattr(module, name)()
+            for sim in self.simulations:
+                sim.SetModel(model)
+        else:
+            for sim in self.simulations:
+                sim.SetModel(model)
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)
-       # join and dirname on protoFile and path in details, joins dirname of basepath and path

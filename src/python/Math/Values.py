@@ -30,15 +30,13 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
 
-import numpy as np
-
 import AbstractValue
 import Environment as Env
-
-import ErrorHandling
-ProtocolError = ErrorHandling.ProtocolError
+import numpy as np
+from ErrorHandling import ProtocolError
 
 class Simple(AbstractValue.AbstractValue):
+    """Simple value class in the protocol language for numbers."""
     def __init__(self, value):
         self.value = float(value)
     
@@ -47,6 +45,7 @@ class Simple(AbstractValue.AbstractValue):
         return np.array(self.value)
         
 class Array(AbstractValue.AbstractValue):
+    """Class in the protocol langugage for arrays."""
     def __init__(self, array):
         assert isinstance(array, (np.ndarray, np.float))
         self.array = np.array(array, dtype=float, copy=False)
@@ -59,20 +58,25 @@ class Array(AbstractValue.AbstractValue):
             raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
         
 class Tuple(AbstractValue.AbstractValue):
+    """Tuple class in the protocol language."""
     def __init__(self, *values):
         self.values = tuple(values)
         
 class Null(AbstractValue.AbstractValue):
+    """Null class in the protocol language."""
     pass
 
 class String(AbstractValue.AbstractValue):
+    """String class in the protocol language."""
     def __init__(self, value):
         self.value = value
         
 class DefaultParameter(AbstractValue.AbstractValue):
+    """Class in protocol language used for default values."""
     pass
         
 class LambdaClosure(AbstractValue.AbstractValue):
+    """LambdaClosure class for functions in the protocol language."""
     def __init__(self, definingEnv, formalParameters, body, defaultParameters):
         self.formalParameters = formalParameters
         self.body = body
@@ -86,19 +90,15 @@ class LambdaClosure(AbstractValue.AbstractValue):
             params.extend([DefaultParameter()] * (len(self.formalParameters) - len(params)))
         for i,param in enumerate(params):
             if not isinstance(param, DefaultParameter):
-                #print "defined", self.formalParameters[i], "as", param
                 local_env.DefineName(self.formalParameters[i], param)
             elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
                 if not hasattr(self.defaultParameters[i], 'value'):
                     raise NotImplementedError
                 local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
-                #check default is a protocol simple value for a compile case
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
         if len(self.body) == 1:
-            expression = self.body[0].Compile(env) # should this be evaluate?
-         #compile each statement in the body if there's only a return statement
-         # returns compiled expression and env
+            expression = self.body[0].Compile(env)
         return expression,local_env
     
     def Evaluate(self, env, actualParameters):
@@ -110,7 +110,6 @@ class LambdaClosure(AbstractValue.AbstractValue):
                 local_env.DefineName(self.formalParameters[i], param)
             elif self.defaultParameters[i] is not None:
                 local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
-                #check default is a protocol simple value for a compile case
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
         result = local_env.ExecuteStatements(self.body, returnAllowed=True)

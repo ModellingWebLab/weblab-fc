@@ -35,12 +35,12 @@ import sys
 
 # Import the module to test
 import Environment as Env
-import Values as V
 import numpy as np
-
 from ErrorHandling import ProtocolError
+import Values as V
 
 class TestEnvironment(unittest.TestCase):
+    """Test environment and delegations and associated functions."""
     def TestDefiningNames(self):
         env = Env.Environment()
         one = V.Simple(1)

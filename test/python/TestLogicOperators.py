@@ -38,6 +38,7 @@ import MathExpressions as M
 import Values as V
 
 class TestLogicOperators(unittest.TestCase):
+    """Tests logic using simple values. Tests and, or, xor, not."""
     def TestAnd(self):
         self.assertEqual(M.And(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value, 0)
         self.assertEqual(M.And(M.Const(V.Simple(1)), M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value, 1)

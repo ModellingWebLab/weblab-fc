@@ -30,16 +30,11 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
-import Values as V
-import numexpr as ne
+from AbstractExpression import AbstractExpression
 import math
-
-import AbstractExpression as AE
-import ErrorHandling
-
-AbstractExpression = AE.AbstractExpression
-ProtocolError = ErrorHandling.ProtocolError
+import numexpr as ne
+from ErrorHandling import ProtocolError
+import Values as V
 
 class Const(AbstractExpression):
     """Class for constant value as expression."""
@@ -540,8 +535,7 @@ class Gt(AbstractExpression):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         expression = ' > '.join(operands)  
         return expression 
-    
-    
+     
 class Leq(AbstractExpression):
     """Less than or equal to Operator"""
     def __init__(self, *children):
@@ -563,12 +557,12 @@ class Leq(AbstractExpression):
         return expression 
     
 class Geq(AbstractExpression):
+    """Greater than or equal to Operator"""
     def __init__(self, *children):
         super(Geq, self).__init__(*children)
         if len(self.children) != 2:
             raise ProtocolError("Boolean operator 'greater than or equal to' requires two operands, not", len(self.children))
         
-    """Greater than or equal to Operator"""
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         try:

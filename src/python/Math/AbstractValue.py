@@ -31,6 +31,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 class AbstractValue(object):
+    """Base class for values in the protocol language."""
     def __init__(self, units=None):
         self.units = units
         

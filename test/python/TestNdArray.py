@@ -33,6 +33,7 @@ import unittest
 import numpy as np
 
 class TestNdArray(unittest.TestCase):
+    """Test functionality of numpy arrays. No protocol arrays tested here."""
     def Test0dArray(self):
         array = np.array(0)
         self.assertEqual(array.ndim, 0) # number of dimensions is 0
@@ -84,66 +85,3 @@ class TestNdArray(unittest.TestCase):
         self.assertEqual(view.ndim, 0) # you can take a 0-d view of an array and treat it as a value
         self.assertEqual(view.size, 1) # one element in the 0-d view
         self.assertEqual(view, 1) # the 0-d array is equal to the value of the number it contains
-        
-        
-        
-        
-        
-        
-        
-"""TestMoreIterationAndViews() throw (Exception)
-    {
-        Extents extents = boost::assign::list_of(3)(4)(2)(7);
-
-        Array arr(extents);
-        TS_ASSERT_EQUALS(arr.GetNumDimensions(), 4u);
-        TS_ASSERT_EQUALS(arr.GetNumElements(), 3u*4u*2u*7u);
-
-        // Fill in the array using iterators (and note that it++ works too)
-        double value = 0.0;
-        for (Iterator it = arr.Begin(); it != arr.End(); it++)
-        {
-            *it = (value--)/2.0;
-        }
-
-        // Check we can take a view missing 'internal' dimensions
-        RangeSpec view_indices = boost::assign::list_of(R(0, 2, R::END))  // First & last elements from dim 0
-                                                       (R(R::END, -2, 1)) // Dim 1 reversed step 2 (elts 3, 1)
-                                                       (R(-1))            // Last element of dim 2
-                                                       (R(2, -1, 0));     // First 2 elements of dim 3 reversed
-        Array view = arr[view_indices];
-        TS_ASSERT_EQUALS(view.GetNumDimensions(), 3u);
-        TS_ASSERT_EQUALS(view.GetNumElements(), 2u*2u*2u);
-        TS_ASSERT_EQUALS(view.GetShape()[0], 2u);
-        TS_ASSERT_EQUALS(view.GetShape()[1], 2u);
-        TS_ASSERT_EQUALS(view.GetShape()[2], 2u);
-        // Original array multipliers are: 56, 14, 7, 1
-        // So offsets into it are 50,49,22,21, 162,161,134,133
-        std::vector<double> expected = boost::assign::list_of(-25.0)(-49.0/2)(-11.0)(-21.0/2)
-                                                             (-81.0)(-161.0/2)(-67.0)(-133.0/2);
-        unsigned i=0;
-        for (ConstIterator it=view.Begin(); it != view.End(); ++it)
-        {
-            TS_ASSERT_EQUALS(*it, expected[i]);
-            // Views should ideally alias the original data, not copy it
-            TS_ASSERT_EQUALS(it, arr.Begin() + (ptrdiff_t)(-2*expected[i]));
-            i++;
-        }
-
-        // Check that copying a view gives us a fresh array
-        Array view_copy = view.Copy();
-        TS_ASSERT_DIFFERS(view_copy.Begin(), view.Begin());
-        for (ConstIterator it=view.Begin(), copy_it=view_copy.Begin(); it != view.End(); ++it, ++copy_it)
-        {
-            TS_ASSERT_EQUALS(*it, *copy_it);
-        }
-
-        // And check that a 0d view works
-        view_indices = boost::assign::list_of(R(1))(R(2))(R(1))(R(3));
-        view = arr[view_indices];
-        TS_ASSERT_EQUALS(view.GetNumDimensions(), 0u);
-        TS_ASSERT_EQUALS(view.GetNumElements(), 1u);
-        TS_ASSERT_EQUALS(*view.Begin(), -0.5*(56+28+7+3));
-        TS_ASSERT_EQUALS(++view.Begin(), view.End());
-    }
-};"""
