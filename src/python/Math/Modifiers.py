@@ -47,14 +47,11 @@ class SetVariable(AbstractModifier):
             self.when = when
             self.variableName = variableName
             self.valueExpr = valueExpr
-            if variableName == 'oxmeta:membrane_voltage':
-                self.variableName = 'y'
-            elif variableName == 'oxmeta:leakage_current':
-                self.variableName = 'a'
         
         def Apply(self, simul):
-            value = self.valueExpr.Evaluate(simul.env).value
-            simul.model.SetVariable(self.when, simul.env, self.variableName, value)
+            value = self.valueExpr.Evaluate(simul.env)
+            simul.env.allowOverwrite = True
+            simul.env.OverwriteDefinition(self.variableName, value)
         
 class SaveState(AbstractModifier):
         def __init__(self, when, stateName):
@@ -62,7 +59,7 @@ class SaveState(AbstractModifier):
             self.stateName = stateName
         
         def Apply(self, simul):
-            simul.model.SaveState(self.when, self.stateName)
+            simul.model.SaveState(self.stateName)
     
 class ResetState(AbstractModifier):
         def __init__(self, when, stateName=None):
@@ -70,7 +67,7 @@ class ResetState(AbstractModifier):
             self.stateName = stateName
             
         def Apply(self, simul):
-            simul.model.ResetState(self.when, self.stateName)
+            simul.model.ResetState(self.stateName)
                 
                 #all classes call methods of model to do work
 

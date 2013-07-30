@@ -139,7 +139,7 @@ class Timecourse(AbstractSimulation):
         for t in self.range_:
             self.LoopBodyStartHook()
             if self.range_.count == 1:
-                self.model.SetInitialTime(t)
+                self.model.SetFreeVariable(t)
                 self.AddIterationOutputs(self.model.GetOutputs())
             else:
                 self.model.Simulate(t)
@@ -174,7 +174,7 @@ class Nested(AbstractSimulation):
         self.LoopEndHook()
         
     def SetModel(self, model):
-        self.model = model
+        super(Nested, self).SetModel(model)
         self.nestedSim.SetModel(model)
     
     

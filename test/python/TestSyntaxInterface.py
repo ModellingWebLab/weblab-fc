@@ -712,9 +712,8 @@ class TestSyntaxInterface(unittest.TestCase):
         for each in expr:
             self.assertIsInstance(each, Statements.Assign)
         
-
-
-        #test below is just to test that we get the correct output for a protocol error
+        # test below is just to test that we get the correct output for a protocol error
+        # it's commented out because it causes a protocol error every time
 #     def TestProtocolError(self):
 #         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
 #         proto = Protocol.Protocol(proto_file)

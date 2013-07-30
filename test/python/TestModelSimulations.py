@@ -42,6 +42,7 @@ import MathExpressions as M
 from Model import TestOdeModel
 import Modifiers
 import numpy as np
+import Protocol
 from ErrorHandling import ProtocolError
 import Ranges
 import Simulations
@@ -183,7 +184,7 @@ class TestModelSimulation(unittest.TestCase):
         # set variable
         a = 5
         model = TestOdeModel(a)#E.NameLookup('count')
-        modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'a', N(1))
+        modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'oxmeta:leakage_current', N(1))
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)       
         time_sim.Initialise()       
@@ -199,7 +200,7 @@ class TestModelSimulation(unittest.TestCase):
     def TestSetWithRange(self):
         a = 5
         model = TestOdeModel(a)
-        set_modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'a', E.NameLookUp('count'))
+        set_modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'oxmeta:leakage_current', E.NameLookUp('count'))
         reset_modifier = Modifiers.ResetState(AbstractModifier.START_ONLY)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3])))
         time_sim = Simulations.Timecourse(range_, modifiers=[set_modifier, reset_modifier])
@@ -225,12 +226,24 @@ class TestModelSimulation(unittest.TestCase):
         actual = results.LookUp('y').array
         np.testing.assert_array_almost_equal(predicted, actual)
         
-        #test_while_loop.txt after adding to the csp
-        #comment out line 35 block and line 58, sims 2 and 5
-        #library delegates to self.inputsenv which contains input variables 
-        #from inputs section of protocol which is a sequence of assignement 
-        #statsements so just do execute statements within the inputs environment
-        # change into many methods, change set model, check instances, imports in CSP
+    def TestPyCML(self):
+        import tempfile, subprocess, sys, imp
+        import subprocess
+        dir = tempfile.mkdtemp()
+        test_while = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+        xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', test_while, dir])
+        xml_file = xml_file.strip()
+        class_name = 'GeneratedModel'
+        code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' +xml_file, 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml', '-c', class_name, '-o', '-'])
+        module = imp.new_module(class_name)
+        exec code in module.__dict__
+        for name in module.__dict__.keys():
+            if name.startswith(class_name):
+                model = getattr(module, name)()
+        proto = Protocol.Protocol(test_while)
+        proto.SetModel(model)
+        proto.SetInput('num_iters', N(10))
+        proto.Run()
          
          
              

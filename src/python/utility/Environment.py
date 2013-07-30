@@ -113,16 +113,34 @@ class Environment(object):
     def OverwriteDefinition(self, name, value):
         if not self.allowOverwrite:
             raise ProtocolError("This environment does not support overwriting mappings")
-        if name not in self.bindings:
-            raise ProtocolError(name, "is not defined in this environment and thus cannot be overwritten")
-        self.bindings[name] = value #can't use DefineName because error would be thrown for name already being in environment
         if isinstance(value, V.Array):
-                self.unwrappedBindings[name] = value.array
+                unwrapped_val = value.array
         elif isinstance(value, V.Simple):
-                self.unwrappedBindings[name] = value.value
+                unwrapped_val = value.value
         elif isinstance(value, V.Null):
-                self.unwrappedBindings[name] = None  
-            
+                unwrapped_val = None  
+        defined = False       
+        if name in self.bindings:
+            defined = True
+            self.bindings[name] = value #can't use DefineName because error would be thrown for name already being in environment
+            self.unwrappedBindings[name] = unwrapped_val    
+        else:     
+            parts = name.split(":", 1)
+            if len(parts) == 2:
+                prefix, name = parts
+                if prefix in self.bindings.delegatees:
+                    if name in self.bindings.delegatees[prefix]:
+                        defined = True
+                        self.bindings.delegatees[prefix][name] = value
+                        self.unwrappedBindings.delegatees[prefix][name] = unwrapped_val
+            if '' in self.bindings.delegatees:
+                if name in self.bindings.delegatees['']:
+                    defined = True
+                    self.bindings.delegatees[''][name] = value
+                    self.unwrappedBindings.delegatees[''][name] = unwrapped_val
+        if not defined:
+            raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")    
+    
     def Clear(self):
         self.bindings.clear()
             
@@ -165,16 +183,14 @@ class ModelWrapperEnvironment(Environment):
     class _BindingsDict(dict):
         def __init__(self, unwrapped):
             self._unwrapped = unwrapped
+            
         def __getitem__(self, key):
-            if key == 'leakage_current':
-                key = 'a'
-            if key == 'membrane_voltage':
-                key = 'y'
-            py_value = self._unwrapped[key]
-            if isinstance(py_value, np.ndarray):
-                return V.Array(py_value)
+            val = self._unwrapped[key]
+            if isinstance(val, np.ndarray):
+                return V.Array(val)
             else:
-                return V.Simple(py_value)
+                return V.Simple(val)
+            
         def __setitem__(self, key, value):
             pass
 #             try:
@@ -182,30 +198,55 @@ class ModelWrapperEnvironment(Environment):
 #             except AttributeError:
 #                 self._unwrapped[key] = value.array
         def __contains__(self, key):
-            return key in ['a', 'y', 'leakage_current', 'membrane_voltage', 'time']
+            return key in self._unwrapped
     
     class _UnwrappedBindingsDict(dict):
         def __init__(self, model):
             self._model = model
+            
         def __getitem__(self, key):
-            if key == 'leakage_current':
-                key = 'a'
-            if key == 'membrane_voltage':
-                key = 'y'
-            return getattr(self._model, key)
+            if key in self._model.parameterMap:
+                return self._model.parameters[self._model.parameterMap[key]]
+            elif key in self._model.stateVarMap:
+                return self._model.state[self._model.stateVarMap[key]]
+            elif key == self._model.freeVariableName:
+                return self._model.freeVariable
+            else:
+                raise ProtocolError('Name', key, 'is not defined.')
+#             if key == 'leakage_current':
+#                 key = 'a'
+#             if key == 'membrane_voltage':
+#                 key = 'y'
+#             return getattr(self._model, key)
+        
         def __setitem__(self, key, value):
-            self._model.SetVariableNow(key, value)
+            if key in self._model.parameterMap:
+                self._model.parameters[self._model.parameterMap[key]] = value
+            elif key in self._model.stateVarMap:
+                self._model.state[self._model.stateVarMap[key]] = value
+            elif key == self._model.freeVariableName:
+                setattr(self._model, key, value)
+            else:
+                raise ProtocolError('Name', key, 'is not defined.')
+        
         def __contains__(self, key):
-            return key in ['a', 'y', 'leakage_current', 'membrane_voltage', 'time']
+            return key in self._model.env.DefinedNames()
     
     def __init__(self, model):
         super(ModelWrapperEnvironment, self).__init__(allowOverwrite=True)
         self.model = model
+        self.names = []
+        self.names.extend(self.model.stateVarMap.keys())
+        self.names.extend(self.model.parameterMap.keys())
+        self.names.append(self.model.freeVariableName)
         self.unwrappedBindings = self._UnwrappedBindingsDict(model)
         self.bindings = self._BindingsDict(self.unwrappedBindings)
             
     def DefineName(self, name, value):
         raise ProtocolError("Defining names in a model is not allowed.")
+    
+    def DefinedNames(self):
+        return self.names
     
 #     def LookUp(self, name):
 #         if name == 'leakage_current':

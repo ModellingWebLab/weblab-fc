@@ -41,65 +41,6 @@ class AbstractModel(object):
     """Base class for statements in the protocol language."""
     def Simulate(self):
         raise NotImplementedError    
-    
-class TestOdeModel(AbstractModel):
-    def __init__(self, a):
-        self.savedStates = {}
-        self.a = a
-        self.r = scipy.integrate.ode(self.f)
-        self.r.set_initial_value(0, 0)
-        self.y = self.r.y
-        self.modifiers = []
-        self.env = Env.ModelWrapperEnvironment(self)
-        self.time = 0
-        
-    def f(self, t, y):
-        return self.a
-    
-    def SaveState(self, when, name):
-        self.savedStates[name] = self.r.y
-        
-    def SetInitialTime(self, t):
-        self.time = t
-        self.r.set_initial_value(self.r.y, 0)
-        
-    def SetVariable(self, when, env, variableName, value):
-        if not hasattr(self, variableName):
-            raise ProtocolError("Type", type(self), "does not have a variable named", variableName)
-        if variableName == 'y':
-            self.r.y = np.array([value])
-        else:
-            setattr(self, variableName, value)
-    
-    def SetVariableNow(self, name, value):
-        setattr(self, name, value)
-        
-    def GetEnvironmentMap(self):
-#         self.env.OverwriteDefinition('membrane_voltage', V.Simple(self.r.y[0]))
-#         self.env.OverwriteDefinition('leakage_current', V.Simple(self.a))
-        #define self.env as an environment with the variables for the model in it
-        # membrane_voltage = self.y, leakage_current = self.a
-        return {'oxmeta': self.env}
-    
-    def ResetState(self, when, name):
-        if name is None:
-            self.r.set_initial_value(0, 0)   
-        else:
-            self.r.set_initial_value(self.savedStates[name], 0)
-        self.y = self.r.y
-                
-    def Simulate(self, endPoint):
-        self.y = self.r.integrate(endPoint)
-        self.time = endPoint
-        assert self.r.successful()
-    
-    def GetOutputs(self):
-        env = Env.Environment()
-        env.DefineName('a', V.Simple(self.a))
-        env.DefineName('y', V.Simple(self.r.y))
-        env.DefineName('leakage_current', V.Simple(self.a))
-        env.DefineName('membrane_voltage', V.Simple(self.r.y))
-        return env
 
 
 class AbstractOdeModel(AbstractModel):
@@ -140,6 +81,7 @@ class AbstractOdeModel(AbstractModel):
         self.solver = scipy.integrate.ode(self.EvaluateRhs)
         self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
         self.savedStates = {}
+        self.env = Env.ModelWrapperEnvironment(self)
 
     def EvaluateRhs(self, t, y):
         """Compute the derivatives of the model.  This method must be implemented by subclasses.
@@ -149,6 +91,9 @@ class AbstractOdeModel(AbstractModel):
         """
         raise NotImplementedError
 
+    def GetEnvironmentMap(self):
+        return {'oxmeta': self.env}
+    
     def GetOutputs(self):
         """Return an Environment containing the model outputs at its current state.
 
@@ -179,4 +124,47 @@ class AbstractOdeModel(AbstractModel):
         assert self.solver.successful()
         self.freeVariable = endPoint
 
-
+class TestOdeModel(AbstractOdeModel):
+    def __init__(self, a):        
+        self.initialState = np.array([0])
+        self.stateVarMap = {'membrane_voltage': 0, 'y': 0}
+        self.parameters = np.array([a])
+        self.parameterMap = {'leakage_current': 0, 'a': 0}
+        self.freeVariableName = 'time'
+        super(TestOdeModel, self).__init__()
+        
+    def EvaluateRhs(self, t, y):
+        return self.parameters[0]
+    
+#     def SaveState(self, when, name):
+#         self.savedStates[name] = self.r.y
+#         
+        
+#         if variableName == 'y':
+#             self.r.y = np.array([value])
+#         else:
+#             setattr(self, variableName, value)
+    
+#     def SetVariableNow(self, name, value):
+#         setattr(self, name, value)
+        
+    
+#     def ResetState(self, when, name):
+#         if name is None:
+#             self.r.set_initial_value(0, 0)   
+#         else:
+#             self.r.set_initial_value(self.savedStates[name], 0)
+#         self.y = self.r.y
+#                 
+#     def Simulate(self, endPoint):
+#         self.y = self.r.integrate(endPoint)
+#         self.time = endPoint
+#         assert self.r.successful()
+        
+    def GetOutputs(self):
+        env = Env.Environment()
+        env.DefineName('a', V.Simple(self.parameters[self.parameterMap['a']]))
+        env.DefineName('y', V.Simple(self.state[self.stateVarMap['y']]))
+        env.DefineName('leakage_current', V.Simple(self.parameters[self.parameterMap['leakage_current']]))
+        env.DefineName('membrane_voltage', V.Simple(self.state[self.stateVarMap['membrane_voltage']]))
+        return env
