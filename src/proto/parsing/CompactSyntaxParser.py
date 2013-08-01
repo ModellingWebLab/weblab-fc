@@ -1072,11 +1072,6 @@ class Actions(object):
         def _expr(self):
             if len(self.tokens) > 0:
                 return self.Delegate('StatementList', [self.tokens]).expr()
-#                 children, statements = [], []
-#                 for token in self.tokens:
-#                     children.append(self.Delegate('StatementList', [token]))  
-#                 return children
-
     
     class Output(BaseGroupAction):
         """Parse action for an output specification."""
@@ -1092,12 +1087,28 @@ class Actions(object):
                 if units[0] in Actions.units_map:
                     units[0] = Actions.units_map[units[0]]
             return elt(**self.TransferAttrs('name', 'ref', 'units', 'description'))
+        
+        def _expr(self):
+            output = {}
+            if 'units' in self.tokens:
+                output['units'] = self.tokens['units']
+            if 'name' in self.tokens:
+                output['name'] = self.tokens['name']
+            if 'ref' in self.tokens:
+                output['ref'] = self.tokens['ref']
+            if 'description' in self.tokens:
+                output['description'] = self.tokens['description']
+            return output
+            
     
     class Outputs(BaseGroupAction):
         """Parse action for the plots section."""
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.outputVariables(*self.GetChildrenXml())
+            
+        def _expr(self):
+            return self.GetChildrenExpr()
     
     class Plot(BaseGroupAction):
         """Parse action for simple plot specifications."""
@@ -1114,12 +1125,29 @@ class Actions(object):
             if key:
                 args.append(P.key(key))
             return P.plot(*args)
+        
+        def _expr(self):
+            curve = self.tokens[1]
+            key = curve.get('key', '')
+            if key:
+                curve = curve[:-1]
+            title = str(self.tokens[0])
+            y, x = map(str, curve)
+            plot = {'title': title, 'x': x, 'y': y}
+            if key:
+                plot['key'] = key
+            return plot    
+    
+    # { 'title': str(self.tokens[0]), 'key': name if present, 'x': name, 'y': name }
             
     class Plots(BaseGroupAction):
         """Parse action for the plots section."""
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.plots(*self.GetChildrenXml())
+            
+        def _expr(self):
+            return self.GetChildrenExpr()
     
     class Protocol(BaseAction):
         """Parse action for a full protocol."""
@@ -1152,6 +1180,10 @@ class Actions(object):
                     d['simulations'] = token.expr()
                 if isinstance(token, Actions.Inputs):
                     d['inputs'] = token.expr()
+                if isinstance(token, Actions.Outputs):
+                    d['outputs'] = token.expr()
+                if isinstance(token, Actions.Plots):
+                    d['plots'] = token.expr()
             return d
     
 

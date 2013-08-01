@@ -221,53 +221,30 @@ class TestModelSimulation(unittest.TestCase):
         predicted = np.arange(0, 100, 10)
         actual = results.LookUp('y').array
         np.testing.assert_array_almost_equal(predicted, actual)
-        
+                
     def TestPyCmlLuoRudy(self):
-        import tempfile, subprocess, sys, imp
-        import subprocess
-        dir = tempfile.mkdtemp()
-        test_while = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
-        xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', test_while, dir])
-        xml_file = xml_file.strip()
-        class_name = 'GeneratedModel'
-        code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' + xml_file, 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml', '-c', class_name, '-o', '-'])
-        module = imp.new_module(class_name)
-        exec code in module.__dict__
-        for name in module.__dict__.keys():
-            if name.startswith(class_name):
-                model = getattr(module, name)()
-        proto = Protocol.Protocol(test_while)
+        # shorter test after properly implementing set model into protocol
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
         proto.SetModel(model)
         proto.SetInput('num_iters', N(10))
         proto.Run()
         
-#     def TestPyCmlLuoRudyStringModel(self):
-#         # shorter test after properly implementing set model into protocol
-#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
-#         proto = Protocol.Protocol(proto_file)
-#         model = 'luo_rudy_1991.cellml'
-#         print 'proto', proto
-#         proto.SetModel(model)
-#         proto.SetInput('num_iters', N(10))
-#         proto.Run()
+    def TestPyCmlS1S2(self):
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = 'projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml'
+        proto.SetModel(model)
+        proto.SetInput('steady_state_beats', N(10))
+        proto.Run()
         
-        #courtemanche_ramirez_nattel_1998
-#     def TestPyCMLRealProto(self):
-#         import tempfile, subprocess, sys, imp
-#         import subprocess
-#         dir = tempfile.mkdtemp()
-#         test_while = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
-#         xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', test_while, dir])
-#         xml_file = xml_file.strip()
-#         class_name = 'GeneratedModel'
-#         code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu', '--protocol=' +xml_file, 'projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998', '-c', class_name, '-o', '-'])
-#         module = imp.new_module(class_name)
-#         exec code in module.__dict__
-#         for name in module.__dict__.keys():
-#             if name.startswith(class_name):
-#                 model = getattr(module, name)()
-#         proto = Protocol.Protocol(test_while)
+#     def TestPyCmlIcal(self):
+#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/ICaL.txt'
+#         proto = Protocol.Protocol(proto_file)
+#         model = 'projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml'
 #         proto.SetModel(model)
 #         proto.Run()
+#               
          
              

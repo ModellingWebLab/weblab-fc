@@ -718,6 +718,13 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.SetInput('num_iters', N(10))
         proto.Run()
         
+    def TestGraphTxt(self):   
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/GraphState.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = TestOdeModel(1)
+        proto.SetModel(model)
+        proto.Run()
+        
     def TestParsingInputs(self):
         parse_action = csp.inputs.parseString('inputs{X=1}', parseAll=True)
         expr = parse_action[0].expr()

@@ -77,6 +77,7 @@ class AbstractOdeModel(AbstractModel):
         super(AbstractOdeModel, self).__init__(*args, **kwargs)
         self.state = self.initialState.copy()
         self.solver = scipy.integrate.ode(self.EvaluateRhs)
+        self.solver.set_integrator('vode', atol=1e-7, rtol=1e-5, max_step=1.0, nsteps=2e7, method='bdf')
         self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
         self.savedStates = {}
         self.env = Env.ModelWrapperEnvironment(self)
@@ -138,6 +139,8 @@ class TestOdeModel(AbstractOdeModel):
         env = Env.Environment()
         env.DefineName('a', V.Simple(self.parameters[self.parameterMap['a']]))
         env.DefineName('y', V.Simple(self.state[self.stateVarMap['y']]))
+        env.DefineName('state_variable', V.Array(self.state))
+        env.DefineName('time', V.Simple(self.freeVariable))
         env.DefineName('leakage_current', V.Simple(self.parameters[self.parameterMap['leakage_current']]))
         env.DefineName('membrane_voltage', V.Simple(self.state[self.stateVarMap['membrane_voltage']]))
         return env
