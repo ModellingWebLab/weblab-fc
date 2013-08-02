@@ -97,7 +97,7 @@
                 <value>0</value>
                 <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
                     <ci>pacing_period</ci>
-                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><times/>
+                    <apply xmlns="http://www.w3.org/1998/Math/MathML"><minus/>
                         <ci>steady_state_beats</ci>
                         <cn>1</cn> <!-- We just run up to the last pace in one go, 
                                         then we examine that in more detail below. -->

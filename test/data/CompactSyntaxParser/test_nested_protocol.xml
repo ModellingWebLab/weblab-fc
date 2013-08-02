@@ -10,11 +10,11 @@
         </m:apply>
       </proto:vectorStepper>
       <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:22&#9;    simulation sim = nested {"/>
-      <proto:nestedProtocol source="../SteadyPacing.xml" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;../SteadyPacing.xml&quot; {">
-        <proto:setInput name="steady_state_beats" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;../SteadyPacing.xml&quot; {">
+      <proto:nestedProtocol source="SteadyPacing.txt" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
+        <proto:setInput name="steady_state_beats" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
           <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:11:34&#9;            steady_state_beats = 5">5</m:cn>
         </proto:setInput>
-        <proto:setInput name="pacing_period" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;../SteadyPacing.xml&quot; {">
+        <proto:setInput name="pacing_period" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
           <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:29&#9;            pacing_period = (iter * 100) + 900">
             <m:plus/>
             <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:30&#9;            pacing_period = (iter * 100) + 900">
@@ -25,8 +25,8 @@
             <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:44&#9;            pacing_period = (iter * 100) + 900">900</m:cn>
           </m:apply>
         </proto:setInput>
-        <proto:selectOutput name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;../SteadyPacing.xml&quot; {"/>
-        <proto:selectOutput name="apd" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;../SteadyPacing.xml&quot; {"/>
+        <proto:selectOutput name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {"/>
+        <proto:selectOutput name="apd" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {"/>
       </proto:nestedProtocol>
     </proto:nestedSimulation>
   </proto:simulations>

@@ -1,0 +1,77 @@
+# Run a model to 'steady state' (i.e. for a given number of beats),
+# and calculate APD and peak voltage for the last pace.
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    pacing_period = 1000
+    steady_state_beats = 1000
+    apd_percent = 90
+}
+
+import "../../../src/proto/library/BasicLibrary.txt"
+import "../../../src/proto/library/CardiacLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    input oxmeta:membrane_stimulus_current_offset units ms = 10
+    input oxmeta:membrane_stimulus_current_period units ms = 1000
+
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+
+    define oxmeta:membrane_stimulus_current = \
+        if (oxmeta:time >= oxmeta:membrane_stimulus_current_offset &&
+            ((oxmeta:time - oxmeta:membrane_stimulus_current_offset)
+             - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /
+                             oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)
+             <= oxmeta:membrane_stimulus_current_duration))
+        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude
+}
+
+tasks {
+    # Do a pre-run to get the model to steady-state with this pacing interval.
+    # We run all but the last pace here in one go, then examine the last pace in more detail in the next simulation.
+    simulation timecourse {
+        range time units ms vector [0, pacing_period * (steady_state_beats - 1)]
+        modifiers {
+            # Set pacing interval
+            at start set oxmeta:membrane_stimulus_current_period = pacing_period
+            at start set oxmeta:membrane_stimulus_current_offset = 1
+            at end save as initial_state
+        }
+    }
+    
+    # Now examine the last AP in fine detail
+    simulation sim = timecourse {
+        range time units ms uniform 0:0.1:pacing_period
+        modifiers {
+            at start reset to initial_state
+        }
+    }
+}
+
+post-processing {
+    # Test that expected outputs exist
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    
+    # Compute APD & peak voltage for the final pace
+    apd = Apd(sim:membrane_voltage, sim:time, apd_percent)[0]
+    peak_voltage = Max(sim:membrane_voltage)[0]
+}
+
+outputs {
+    membrane_voltage = sim:membrane_voltage "Transmembrane potential"
+    time = sim:time "Time"
+    peak_voltage units mV "Peak voltage during last pace"
+    apd units ms "Action potential duration"
+}
+
+plots {
+    plot "Steady State Action Potential" { membrane_voltage against time }
+}
