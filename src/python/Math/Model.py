@@ -205,8 +205,11 @@ class TestOdeModel(AbstractOdeModel):
         env.DefineName('membrane_voltage', V.Simple(self.state[self.stateVarMap['membrane_voltage']]))
         return env
     
-class NestedProtocol:
-    pass
+class NestedProtocol(AbstractModel):
+    def __init__(self, proto, inputExprs, outputNames):
+        self.proto = proto
+        self.inputExprs = inputExprs
+        self.outputNames = outputNames
     # setvariable can set inputs 
     # internal run will probably call initialise that so you can call run multiple times and it
     #restarts from beginning

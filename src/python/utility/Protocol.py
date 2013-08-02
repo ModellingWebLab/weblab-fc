@@ -107,6 +107,14 @@ class Protocol(object):
                     print output['name'], 'assigned as', output['description']
                 else:
                     plot_descriptions[output['name']] = output['name']
+        filename = 'output file'
+        h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
+        group = h5file.create_group('/', 'output', 'output parent')
+        for output in self.outputs:
+            if not 'description' in output:
+                output['description'] = output['name']
+            h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
+                                title=output['description'])
         x_data = []
         y_data = []
         for plot in self.plots:

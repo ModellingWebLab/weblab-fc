@@ -131,8 +131,20 @@ class Timecourse(AbstractSimulation):
             self.LoopBodyEndHook()
         self.LoopEndHook()
         
-class OneStep:
-    pass # like timecourse but takes one step instead of a few steps, simulates from current 
+class OneStep(AbstractSimulation):
+    def __init__(self, step, modifiers=[]):
+        self.step = step
+        self.modifiers = modifiers
+        self.range_ = Ranges.VectorRange('count', V.Array(np.array([1])))
+        self.ranges = [self.range_]
+        super(OneStep, self).__init__()
+        
+    def InternalRun(self):
+        self.LoopBodyStartHook()
+        self.AddIterationOutputs(self.model.GetOutputs())
+        self.LoopEndHook()
+
+# like timecourse but takes one step instead of a few steps, simulates from current 
 #time up to time + step
 # self.model.Simulate(t + step)
 # self.AddIterationOutputs
