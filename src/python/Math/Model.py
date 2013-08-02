@@ -35,12 +35,67 @@ import numpy as np
 from ErrorHandling import ProtocolError
 import scipy.integrate
 import Values as V
+from pysundials import cvode 
+import ctypes
 
 class AbstractModel(object):
     """Base class for models in the protocol language."""
     def Simulate(self):
         raise NotImplementedError    
 
+class ScipySolver(object):      
+    def ResetState(self, resetTo):
+        self.state = resetTo
+        self.solver.set_initial_value(self.state, self.model.freeVariable)
+    
+    def Simulate(self, endPoint):
+        self.state = self.solver.integrate(endPoint)
+        assert self.solver.successful()
+        
+    def AssociateWithModel(self, model):
+        self.model = model
+        self.state = self.model.initialState.copy()
+        self.solver = scipy.integrate.ode(self.model.EvaluateRhs)
+        self.solver.set_integrator('vode', atol=1e-7, rtol=1e-5, max_step=1.0, nsteps=2e7, method='bdf')
+        
+    def SetFreeVariable(self, t):
+        self.solver.set_initial_value(self.state, self.model.freeVariable)
+    
+class PySundialsSolver(object):
+    def AssociateWithModel(self, model):
+        self.model = model
+        self._state = cvode.NVector(self.model.initialState.copy())
+        self.cvode_mem = cvode.CVodeCreate(cvode.CV_BDF, cvode.CV_NEWTON)
+        abstol = cvode.realtype(1e-7)
+        reltol = cvode.realtype(1e-5)
+        cvode.CVodeInit(self.cvode_mem, self.RhsWrapper, 0.0, self._state)
+        cvode.CVodeSetTolerances(self.cvode_mem, cvode.CV_SS, reltol, abstol)
+        cvode.CVDense(self.cvode_mem, len(self.model.initialState))
+        cvode.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
+        cvode.CVodeSetMaxStep(self.cvode_mem, 1.0)
+    
+    @property
+    def state(self):
+        return self._state.asarray()
+        
+    def ResetState(self, resetTo):
+        self._state.asarray()[:] = resetTo
+        flag = cvode.CVodeReInit(self.cvode_mem, cvode.realtype(self.model.freeVariable), self._state)
+        
+    def RhsWrapper(self, t, y, ydot, f_data):
+        dy = self.model.EvaluateRhs(t, y.asarray())
+        ydot.asarray()[:] = dy
+        return 0
+        
+    def Simulate(self, endPoint):
+        t = cvode.realtype(0)
+        flag = cvode.CVode(self.cvode_mem, endPoint, self._state, ctypes.byref(t), cvode.CV_NORMAL)
+        assert t.value == endPoint
+        assert flag == cvode.CV_SUCCESS
+        
+    def SetFreeVariable(self, t):
+        cvode.CVodeReInit(self.cvode_mem, cvode.realtype(t), self._state)
+        
 class AbstractOdeModel(AbstractModel):
     """This is a base class for ODE system models converted from CellML by PyCml.
 
@@ -75,13 +130,17 @@ class AbstractOdeModel(AbstractModel):
         This method will initialise self.state to the initial model state, and set up the ODE solver.
         """
         super(AbstractOdeModel, self).__init__(*args, **kwargs)
-        self.state = self.initialState.copy()
-        self.solver = scipy.integrate.ode(self.EvaluateRhs)
-        self.solver.set_integrator('vode', atol=1e-7, rtol=1e-5, max_step=1.0, nsteps=2e7, method='bdf')
-        self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
         self.savedStates = {}
         self.env = Env.ModelWrapperEnvironment(self)
-
+        default_solver = ScipySolver()
+        self.SetSolver(default_solver) 
+    
+    def SetSolver(self, solver):
+        self.solver = solver
+        solver.AssociateWithModel(self)
+        self.state = self.solver.state
+        self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
+    
     def EvaluateRhs(self, t, y):
         """Compute the derivatives of the model.  This method must be implemented by subclasses.
 
@@ -103,7 +162,7 @@ class AbstractOdeModel(AbstractModel):
     def SetFreeVariable(self, t):
         """Set the value of the free variable (typically time), but retain the model's current state."""
         self.freeVariable = t
-        self.solver.set_initial_value(self.state, self.freeVariable)
+        self.solver.SetFreeVariable(t)
 
     def SaveState(self, name):
         """Save a copy of the current model state associated with the given name, to be restored using ResetState."""
@@ -112,16 +171,17 @@ class AbstractOdeModel(AbstractModel):
     def ResetState(self, name=None):
         """Reset the model to the given named saved state, or to initial conditions if no name given."""
         if name is None:
-            self.state = self.initialState.copy()
+            self.solver.ResetState(self.initialState.copy())
         else:
-            self.state = self.savedStates[name].copy()
-        self.solver.set_initial_value(self.state, self.freeVariable)
-
+            self.solver.ResetState(self.savedStates[name].copy())
+        self.state = self.solver.state
+        
     def Simulate(self, endPoint):
         """Simulate the model up to the given end point (value of the free variable)."""
-        self.state = self.solver.integrate(endPoint)
-        assert self.solver.successful()
+        self.solver.state[:] = self.state
+        self.solver.Simulate(endPoint)
         self.freeVariable = endPoint
+        self.state = self.solver.state
 
 class TestOdeModel(AbstractOdeModel):
     def __init__(self, a):        
@@ -144,3 +204,12 @@ class TestOdeModel(AbstractOdeModel):
         env.DefineName('leakage_current', V.Simple(self.parameters[self.parameterMap['leakage_current']]))
         env.DefineName('membrane_voltage', V.Simple(self.state[self.stateVarMap['membrane_voltage']]))
         return env
+    
+class NestedProtocol:
+    pass
+    # setvariable can set inputs 
+    # internal run will probably call initialise that so you can call run multiple times and it
+    #restarts from beginning
+    # inside internal run you'll call proto.setinputs, proto.run
+    # getoutputs looks at proto.outputEnv and creates an environment based on the outputs that 
+    #are specified in the nested protocol and defines those in it's own environment, return env

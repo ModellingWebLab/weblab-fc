@@ -1,2 +1,4 @@
 TestSpeed.py
 TestSpeedRealProto.py
+TestS1S2Proto.py
+TestIcalProto.py

@@ -5,6 +5,5 @@ TestFunctions.py
 TestLogicOperators.py
 TestNdArray.py
 TestRelations.py
-TestSpeedRealProto.py
 TestSyntaxInterface.py
 TestModelSimulations.py

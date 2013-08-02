@@ -130,6 +130,15 @@ class Timecourse(AbstractSimulation):
                 self.AddIterationOutputs(self.model.GetOutputs())
             self.LoopBodyEndHook()
         self.LoopEndHook()
+        
+class OneStep:
+    pass # like timecourse but takes one step instead of a few steps, simulates from current 
+#time up to time + step
+# self.model.Simulate(t + step)
+# self.AddIterationOutputs
+# startloopbodyhoook
+# range is vector range with zero in it
+# ends with loopendhook
     
 class Nested(AbstractSimulation):
     def __init__(self, nestedSim, range_, modifiers=[]):

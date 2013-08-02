@@ -40,6 +40,7 @@ import Environment as Env
 import Expressions as E
 import MathExpressions as M
 from Model import TestOdeModel
+import Model
 import Modifiers
 import numpy as np
 import Protocol
@@ -228,23 +229,10 @@ class TestModelSimulation(unittest.TestCase):
         proto = Protocol.Protocol(proto_file)
         model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
         proto.SetModel(model)
+        solver = Model.PySundialsSolver()
+        proto.model.SetSolver(solver)
         proto.SetInput('num_iters', N(10))
         proto.Run()
-        
-    def TestPyCmlS1S2(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
-        proto = Protocol.Protocol(proto_file)
-        model = 'projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml'
-        proto.SetModel(model)
-        proto.SetInput('steady_state_beats', N(10))
-        proto.Run()
-        
-#     def TestPyCmlIcal(self):
-#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/ICaL.txt'
-#         proto = Protocol.Protocol(proto_file)
-#         model = 'projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml'
-#         proto.SetModel(model)
-#         proto.Run()
-#               
+                
          
              

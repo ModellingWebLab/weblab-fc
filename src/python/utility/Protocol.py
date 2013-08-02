@@ -37,6 +37,7 @@ import os
 from ErrorHandling import ProtocolError
 import sys
 from tables import *
+import shutil
 
 csp = CSP.CompactSyntaxParser
 
@@ -82,87 +83,89 @@ class Protocol(object):
 
     def SetOutputFolder(self, path):
         if os.path.isdir(path) and path.startswith('/tmp'):
-            pass
-#             fileList = os.listdir(path)
-#             for fileName in fileList:
-#                 os.remove(path+"/"+fileName)
-        else:
-            os.mkdir(path)
+            shutil.rmtree(path)
+        os.mkdir(path)
+        self.outputPath = path
     
     def OutputsAndPlots(self):
-        print 'plots', self.plots
         print 'outputs', self.outputs
+        print 'plots', self.plots
+        plot_vars = []
+        plot_descriptions = {}
+        for plot in self.plots:
+            plot_vars.append(plot['x'])
+            plot_vars.append(plot['y'])
         for output in self.outputs:
             if 'ref' in output:
-                print 'ref', output['ref']
                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['ref']))
             else:
-                print 'name', output['name']
                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['name']))
-        class Output(IsDescription):
-            x = Float32Col()
-            y = Float32Col()
-        filename = 'temp file'
-        h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
-        group = h5file.create_group('/', 'detector', 'detector information')
-        table = h5file.create_table(group, 'readout', Output, "readout example")
-        output = table.row
-#         output['x'] = self.outputEnv.LookUp(self.plots[0]['x'])
-#         output['y'] = self.outputEnv.LookUp(self.plots[0]['y'])
-#        import h5py
-        import matplotlib.pyplot as plt
-        import matplotlib.animation as animation
-        import matplotlib.cm as cm
+            if output['name'] in plot_vars:
+                print 'plot des', output['name']
+                if output['description']:
+                    plot_descriptions[output['name']] = output['description']
+                    print output['name'], 'assigned as', output['description']
+                else:
+                    plot_descriptions[output['name']] = output['name']
+        x_data = []
+        y_data = []
+        for plot in self.plots:
+            x_data.append(self.outputEnv.LookUp(plot['x']))
+            y_data.append(self.outputEnv.LookUp(plot['y']))
+            
+            # Plot the data.
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            import pylab
+            fig, host = plt.subplots()
+            for i,x in enumerate(x_data):
+                if y_data[i].array.ndim > 1:
+                    for j in range(y_data[i].array.shape[0]):
+                        host.plot(x.array, y_data[i].array[j])
+                else:
+                    host.plot(x.array, y_data[i].array)
+                plt.title(plot['title'])
+                plt.xlabel(plot_descriptions[plot['x']])
+                plt.ylabel(plot_descriptions[plot['y']])  
+                plt.savefig(self.outputPath + '/' + plot['title'] + '.png')
         
-#         f = h5py.File('temp file','r')
-#         arr = f["x"][:,:,:]
-#         f.close()
-        # Create some data to plot
-        x_data = range(20)
-        y_data = range(20)
-        # Plot the data.
-        #plt.plot(x_data, y_data)
-        # Add some axis labels.
-        #plt.set_xlabel("x")
-        #plt.set_ylabel("y")
-        # Produce an image.
-        #fig.savefig("lineplot.png")    
-        #plt.show()
-        h5file.close()
-
-#    3 # Define a user record to characterize some kind of particles
-#    4 class Particle(IsDescription):
-#    5     name      = StringCol(16)   # 16-character String
-#    6     idnumber  = Int64Col()      # Signed 64-bit integer
-#    7     ADCcount  = UInt16Col()     # Unsigned short integer
-#    8     TDCcount  = UInt8Col()      # unsigned byte
-#    9     grid_i    = Int32Col()      # integer
-#   10     grid_j    = Int32Col()      # integer
-#   11     pressure  = Float32Col()    # float  (single-precision)
-#   12     energy    = FloatCol()      # double (double-precision)
-#   13 
-#   14 filename = "test.h5"
-#   15 # Open a file in "w"rite mode
-#   16 h5file = open_file(filename, mode = "w", title = "Test file")
-#   17 # Create a new group under "/" (root)
-#   18 group = h5file.create_group("/", 'detector', 'Detector information')
-#   19 # Create one table on it
-#   20 table = h5file.create_table(group, 'readout', Particle, "Readout example")
-#   21 # Fill the table with 10 particles
-#   22 particle = table.row
-#   23 for i in xrange(10):
-#   24     particle['name']  = 'Particle: %6d' % (i)
-#   25     particle['TDCcount'] = i % 256
-#   26     particle['ADCcount'] = (i * 256) % (1 << 16)
-#   27     particle['grid_i'] = i
-#   28     particle['grid_j'] = 10 - i
-#   29     particle['pressure'] = float(i*i)
-#   30     particle['energy'] = float(particle['pressure'] ** 4)
-#   31     particle['idnumber'] = i * (2 ** 34)
-#   32     # Insert a new particle record
-#   33     particle.append()
-#   34 # Close (and flush) the file
-#   35 h5file.close()
+#         for output in self.outputs:
+#             if 'ref' in output:
+#                 print 'ref', output['ref']
+#                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['ref']))
+#             else:
+#                 print 'name', output['name']
+#                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['name']))
+#         filename = 'output file'
+#         h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
+#         group = h5file.create_group('/', 'output', 'output parent')
+#         for output in self.outputs:
+#             if not 'description' in output:
+#                 output['description'] = output['name']
+#             h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
+#                                 title=output['description'])
+#          
+#         import matplotlib
+#         matplotlib.use('Agg')
+#         import matplotlib.pyplot as plt
+#         import pylab
+#         for plot in self.plots:
+#             x_data = h5file.get_node('/output/' + plot['x'])
+#             y_data = h5file.get_node('/output/' + plot['y'])
+#             # Plot the data.
+#             fig, host = plt.subplots()
+#             if y_data.ndim > 1:
+#                 for i in range(y_data.shape[0]):
+#                     host.plot(x_data, y_data[i])
+#             else:
+#                 host.plot(x_data, y_data)
+#             plt.title(plot['title'])
+#             plt.xlabel(h5file.get_node_attr('/output/' + plot['x'], 'TITLE'))
+#             plt.ylabel(h5file.get_node_attr('/output/' + plot['y'], 'TITLE'))  
+#             plt.savefig(self.outputPath + '/' + plot['title'] + '.png')
+#         
+#         h5file.close()
 
     def Run(self):
         try:
@@ -197,7 +200,7 @@ class Protocol(object):
         
     def SetModel(self, model):
         if isinstance(model, str):
-            import tempfile, subprocess, imp, shutil, sys
+            import tempfile, subprocess, imp, sys
             dir = tempfile.mkdtemp()
             xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', self.protoFile, dir])
             xml_file = xml_file.strip()
@@ -215,16 +218,14 @@ class Protocol(object):
                     model = getattr(module, name)()
                     model._module = module
                     model._code = code
-            for sim in self.simulations:
-                sim.SetModel(model)
 #             try:
 #                 shutil.rmtree(dir)  # delete directory
 #             except OSError as exc:
 #                 if exc.errno != 2:  # code 2 - no such file or directory
 #                     raise  # re-raise exception
-        else:
-            for sim in self.simulations:
-                sim.SetModel(model)
+        for sim in self.simulations:
+            sim.SetModel(model)
+        self.model = model
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)
