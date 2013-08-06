@@ -206,7 +206,7 @@ class Protocol(object):
         value = valueExpr.Evaluate(self.inputEnv)
         self.inputEnv.OverwriteDefinition(name, value)
         
-    def SetModel(self, model):
+    def SetModel(self, model, useNumba=True):
         if isinstance(model, str):
             import tempfile, subprocess, imp, sys
             dir = tempfile.mkdtemp()
@@ -214,18 +214,21 @@ class Protocol(object):
             xml_file = xml_file.strip()
             model_py_file = os.path.join(dir, 'model.py')
             class_name = 'GeneratedModel'
-            code = subprocess.check_output(['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu',
-                                            '--protocol=' + xml_file,
-                                            model, '-c', class_name, '-o', '-'])
-#             sys.path.insert(0, dir)
-#             import model as GeneratedModelModule
-            module = imp.new_module(class_name)
-            exec code in module.__dict__
+            code_gen_cmd = ['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu',
+                            '--protocol=' + xml_file,  model, '-c', class_name, '-o', model_py_file]
+            if not useNumba:
+                code_gen_cmd.append('--no-numba')
+            code = subprocess.check_output(code_gen_cmd)
+            sys.path.insert(0, dir)
+            import model as module
+#             module = imp.new_module(class_name)
+#             exec code in module.__dict__
             for name in module.__dict__.keys():
                 if name.startswith(class_name):
                     model = getattr(module, name)()
                     model._module = module
-                    model._code = code
+                    #model._code = code
+            del sys.modules['model']
 #             try:
 #                 shutil.rmtree(dir)  # delete directory
 #             except OSError as exc:
