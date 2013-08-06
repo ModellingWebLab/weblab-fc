@@ -141,7 +141,7 @@
   </proto:units>
   <proto:modelInterface proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:34:1&#9;model interface {">
     <proto:specifyInputVariable units="mV" name="oxmeta:membrane_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:35:5&#9;    input oxmeta:membrane_voltage units mV"/>
-    <proto:specifyInputVariable name="oxmeta:extracellular_calcium_concentration" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:36:5&#9;    input oxmeta:extracellular_calcium_concentration"/>
+    <proto:specifyInputVariable units="uM" name="oxmeta:extracellular_calcium_concentration" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:36:5&#9;    input oxmeta:extracellular_calcium_concentration units uM"/>
     <proto:specifyOutputVariable units="uA_per_cm2" name="oxmeta:membrane_L_type_calcium_current" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:38:5&#9;    output oxmeta:membrane_L_type_calcium_current units uA_per_cm2"/>
     <proto:specifyOutputVariable units="mV" name="oxmeta:membrane_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:39:5&#9;    output oxmeta:membrane_voltage units mV"/>
     <proto:specifyOutputVariable units="uM" name="oxmeta:extracellular_calcium_concentration" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:40:5&#9;    output oxmeta:extracellular_calcium_concentration units uM"/>
