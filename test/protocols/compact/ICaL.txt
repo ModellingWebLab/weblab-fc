@@ -33,7 +33,7 @@ units {
 
 model interface {
     input oxmeta:membrane_voltage units mV
-    input oxmeta:extracellular_calcium_concentration
+    input oxmeta:extracellular_calcium_concentration units uM
     
     output oxmeta:membrane_L_type_calcium_current units uA_per_cm2
     output oxmeta:membrane_voltage units mV
