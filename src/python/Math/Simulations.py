@@ -35,6 +35,7 @@ import Environment as Env
 import Expressions as E
 import scipy.integrate
 import MathExpressions as M
+import Model
 import numpy as np
 import Ranges
 import Values as V
@@ -50,9 +51,9 @@ class AbstractSimulation(object):
         self.model = None
         self.results = Env.Environment()
         self.env = Env.Environment()
-        self.env.DefineName(self.range_.name, self.range_)
     
     def Initialise(self):
+        self.env.DefineName(self.range_.name, self.range_)
         self.range_.Initialise(self.env)
         if isinstance(self.range_, Ranges.While) and self.prefix:
             self.viewEnv = Env.Environment(allowOverwrite=True)
@@ -89,8 +90,12 @@ class AbstractSimulation(object):
                     self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
     
     def SetModel(self, model):
-        self.model = model
+        if isinstance(self.model, Model.NestedProtocol):
+            self.model.proto.SetModel(model)
+        else:
+            self.model = model
         model_env = model.GetEnvironmentMap()
+        model.simEnv = self.env
         for prefix in model_env.keys():
             self.env.SetDelegateeEnv(model_env[prefix], prefix)
             self.results.SetDelegateeEnv(model_env[prefix], prefix)
@@ -141,7 +146,9 @@ class OneStep(AbstractSimulation):
         
     def InternalRun(self):
         self.LoopBodyStartHook()
-        self.AddIterationOutputs(self.model.GetOutputs())
+        for t in self.range_:
+            self.model.Simulate(t + self.step)
+            self.AddIterationOutputs(self.model.GetOutputs())
         self.LoopEndHook()
 
 # like timecourse but takes one step instead of a few steps, simulates from current 

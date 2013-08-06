@@ -82,6 +82,7 @@ else:
     import Statements as S
     import Ranges
     import Simulations
+    import Model
     import Modifiers
     from Locatable import Locatable
     import numpy as np
@@ -921,6 +922,25 @@ class Actions(object):
             result = P.nestedProtocol(*args, **attrs)
             if self.trace:
                 self.AddTrace(result)
+            return result
+        
+        def _expr(self):
+            args = []
+            proto_file = self.tokens[0]
+            import os
+            proto_file = os.path.join(os.path.dirname(Actions.source_file), proto_file)
+            args.append(proto_file)
+            inputs = {}
+            assert isinstance(self.tokens[1], Actions.StatementList)
+            for assignment in self.tokens[1]:
+                input_name = assignment.tokens[0].tokens
+                input_value = assignment.tokens[1].expr()
+                inputs[input_name] = input_value
+            args.append(inputs)
+            args.append(self.tokens[2:])
+            model = Model.NestedProtocol(*args)
+            result = Simulations.OneStep(0)
+            result.SetModel(model)
             return result
     
     class Simulation(BaseGroupAction):

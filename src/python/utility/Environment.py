@@ -138,6 +138,7 @@ class Environment(object):
     
     def Clear(self):
         self.bindings.clear()
+        self.unwrappedBindings.clear()
             
     def __len__(self):
         return len(self.bindings)

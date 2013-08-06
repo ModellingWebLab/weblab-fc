@@ -38,12 +38,14 @@ from ErrorHandling import ProtocolError
 import sys
 from tables import *
 import shutil
+from AbstractValue import AbstractValue
 
 csp = CSP.CompactSyntaxParser
 
 class Protocol(object):
     """Base class for protocols in the protocol language."""
     def __init__(self, protoFile):
+        self.outputPath = None
         self.protoFile = protoFile
         self.env = Env.Environment()
         self.inputEnv = Env.Environment(allowOverwrite=True)
@@ -81,6 +83,14 @@ class Protocol(object):
         self.outputs.extend(details.get('outputs', []))      
         self.plots.extend(details.get('plots', []))
 
+    def Initialise(self):
+        self.libraryEnv.Clear()
+        self.postProcessingEnv.Clear()
+        self.outputEnv.Clear()
+        for sim in self.simulations:
+            sim.env.Clear()
+            sim.results.Clear()
+        
     def SetOutputFolder(self, path):
         if os.path.isdir(path) and path.startswith('/tmp'):
             shutil.rmtree(path)
@@ -88,8 +98,6 @@ class Protocol(object):
         self.outputPath = path
     
     def OutputsAndPlots(self):
-        print 'outputs', self.outputs
-        print 'plots', self.plots
         plot_vars = []
         plot_descriptions = {}
         for plot in self.plots:
@@ -101,12 +109,13 @@ class Protocol(object):
             else:
                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['name']))
             if output['name'] in plot_vars:
-                print 'plot des', output['name']
                 if output['description']:
                     plot_descriptions[output['name']] = output['description']
-                    print output['name'], 'assigned as', output['description']
                 else:
                     plot_descriptions[output['name']] = output['name']
+        if not self.outputPath:
+            print >>sys.stderr, "Warning: protocol output folder not set, so not writing outputs to file"
+            return
         filename = 'output file'
         h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
         group = h5file.create_group('/', 'output', 'output parent')
@@ -115,17 +124,18 @@ class Protocol(object):
                 output['description'] = output['name']
             h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
                                 title=output['description'])
-        x_data = []
-        y_data = []
+        
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        import pylab
         for plot in self.plots:
+            x_data = []
+            y_data = []
             x_data.append(self.outputEnv.LookUp(plot['x']))
             y_data.append(self.outputEnv.LookUp(plot['y']))
             
             # Plot the data.
-            import matplotlib
-            matplotlib.use('Agg')
-            import matplotlib.pyplot as plt
-            import pylab
             fig, host = plt.subplots()
             for i,x in enumerate(x_data):
                 if y_data[i].array.ndim > 1:
@@ -136,7 +146,9 @@ class Protocol(object):
                 plt.title(plot['title'])
                 plt.xlabel(plot_descriptions[plot['x']])
                 plt.ylabel(plot_descriptions[plot['y']])  
-                plt.savefig(self.outputPath + '/' + plot['title'] + '.png')
+            plt.savefig(self.outputPath + '/' + plot['title'] + '.png')
+            plt.close()
+        h5file.close()
         
 #         for output in self.outputs:
 #             if 'ref' in output:
@@ -176,17 +188,21 @@ class Protocol(object):
 #         h5file.close()
 
     def Run(self):
+        self.Initialise()
         try:
-            self.libraryEnv.ExecuteStatements(self.library)
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
-                sim.Initialise()
                 if sim.prefix:
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
+            self.libraryEnv.ExecuteStatements(self.library)     
+            for sim in self.simulations:
+                sim.Initialise()   
                 results = sim.Run()
             self.postProcessingEnv.ExecuteStatements(self.postProcessing)
             if self.plots:
-                self.OutputsAndPlots();
+                self.OutputsAndPlots();            
+            
+
             # save outputs to disk as hdf5
             # plot, save png to disk within folder in setoutputfolder
         except ProtocolError:
@@ -203,7 +219,10 @@ class Protocol(object):
             raise
         
     def SetInput(self, name, valueExpr):
-        value = valueExpr.Evaluate(self.inputEnv)
+        if isinstance(valueExpr, AbstractValue):
+            value = valueExpr
+        else:
+            value = valueExpr.Evaluate(self.inputEnv)
         self.inputEnv.OverwriteDefinition(name, value)
         
     def SetModel(self, model, useNumba=True):

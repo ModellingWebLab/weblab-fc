@@ -174,14 +174,14 @@ class AbstractOdeModel(AbstractModel):
             self.solver.ResetState(self.initialState.copy())
         else:
             self.solver.ResetState(self.savedStates[name].copy())
-        self.state = self.solver.state
+        self.state = self.solver.state##
         
     def Simulate(self, endPoint):
         """Simulate the model up to the given end point (value of the free variable)."""
-        self.solver.state[:] = self.state
+        self.solver.state[:] = self.state##
         self.solver.Simulate(endPoint)
         self.freeVariable = endPoint
-        self.state = self.solver.state
+        self.state = self.solver.state##
 
 class TestOdeModel(AbstractOdeModel):
     def __init__(self, a):        
@@ -207,9 +207,29 @@ class TestOdeModel(AbstractOdeModel):
     
 class NestedProtocol(AbstractModel):
     def __init__(self, proto, inputExprs, outputNames):
-        self.proto = proto
+        import Protocol
+        self.proto = Protocol.Protocol(proto)
         self.inputExprs = inputExprs
         self.outputNames = outputNames
+                
+    def GetOutputs(self):
+        env = Env.Environment()
+        for name in self.outputNames:
+            env.DefineName(name, self.proto.outputEnv.LookUp(name))
+        return env
+    
+    def GetEnvironmentMap(self):
+        return {}
+    
+    def SetVariable(self, name, valueExpr):
+        self.proto.SetInput(name, valueExpr)
+    
+    def Simulate(self, endPoint):
+        for name in self.inputExprs.keys():
+           self.proto.SetInput(name, self.inputExprs[name].Evaluate(self.simEnv))
+        self.proto.Run()
+        print 'outputs', self.proto.outputEnv.DefinedNames()
+        
     # setvariable can set inputs 
     # internal run will probably call initialise that so you can call run multiple times and it
     #restarts from beginning

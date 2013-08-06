@@ -44,8 +44,10 @@ import CompactSyntaxParser as CSP
 import Environment as Env
 import Expressions as E
 import MathExpressions as M
+import Model
 import Modifiers
 import numpy as np
+import os
 import Protocol
 from ErrorHandling import ProtocolError
 import Ranges
@@ -727,13 +729,13 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestGraphTxt'))
         proto.Run()
         
-#     def TestNestedProtocols(self):
-#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt'
-#         proto = Protocol.Protocol(proto_file)
-#         Model.NestedProtocol(proto)
-#         model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
-#         proto.SetModel(model)
-#         proto.Run()
+    def TestNestedProtocols(self):
+        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt'
+        proto = Protocol.Protocol(proto_file)
+        model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
+        proto.SetModel(model)        
+        proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestNestedProtocols'))
+        proto.Run()
         
     def TestParsingInputs(self):
         parse_action = csp.inputs.parseString('inputs{X=1}', parseAll=True)
