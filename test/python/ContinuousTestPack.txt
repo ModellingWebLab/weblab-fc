@@ -4,6 +4,7 @@ TestEnvironment.py
 TestFunctions.py
 TestLogicOperators.py
 TestNdArray.py
+TestOutputFolder.py
 TestRelations.py
 TestSyntaxInterface.py
 TestModelSimulations.py
