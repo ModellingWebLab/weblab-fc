@@ -41,7 +41,14 @@ import ctypes
 class AbstractModel(object):
     """Base class for models in the protocol language."""
     def Simulate(self):
-        raise NotImplementedError    
+        raise NotImplementedError  
+    
+    def SetOutputFolder(self, path):
+        if os.path.isdir(path) and path.startswith('/tmp'):
+            shutil.rmtree(path)
+        os.mkdir(path)
+        self.outputPath = path
+    #def setoutputfolder will save the path to a folder to be used by nestedprotocol
 
 class ScipySolver(object):      
     def ResetState(self, resetTo):
@@ -227,8 +234,10 @@ class NestedProtocol(AbstractModel):
     def Simulate(self, endPoint):
         for name in self.inputExprs.keys():
            self.proto.SetInput(name, self.inputExprs[name].Evaluate(self.simEnv))
+#         self.proto.SetOutputfolder(self.outputPath)
         self.proto.Run()
-        print 'outputs', self.proto.outputEnv.DefinedNames()
+        
+        # sets proto's output folder before it runs so that the path 
         
     # setvariable can set inputs 
     # internal run will probably call initialise that so you can call run multiple times and it

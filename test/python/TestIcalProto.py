@@ -50,7 +50,8 @@ class TestIcalProto(unittest.TestCase):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/ICaL.txt'
         proto = Protocol.Protocol(proto_file)
         model = 'projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml'
-        proto.SetModel(model, useNumba=False)
+        proto.SetModel(model, useNumba=True)
+        # edit model.py and python model.py and if bug in numba, report it
         solver = Model.PySundialsSolver()
         proto.model.SetSolver(solver) 
         proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestIcalProto'))

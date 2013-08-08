@@ -13,7 +13,7 @@ tasks {
             select output peak_voltage
             select output apd
         }
-    }
+    }?
 }
 
 outputs {

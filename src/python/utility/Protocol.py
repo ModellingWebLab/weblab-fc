@@ -30,22 +30,25 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+from AbstractValue import AbstractValue
 import CompactSyntaxParser as CSP
 import Environment as Env
 from Locatable import Locatable
 import os
+from FileHandling import OutputFolder
 from ErrorHandling import ProtocolError
 import sys
 from tables import *
 import shutil
-from AbstractValue import AbstractValue
+import time
+
 
 csp = CSP.CompactSyntaxParser
 
 class Protocol(object):
     """Base class for protocols in the protocol language."""
     def __init__(self, protoFile):
-        self.outputPath = None
+        self.outputFolder = None
         self.protoFile = protoFile
         self.env = Env.Environment()
         self.inputEnv = Env.Environment(allowOverwrite=True)
@@ -92,10 +95,10 @@ class Protocol(object):
             sim.results.Clear()
         
     def SetOutputFolder(self, path):
-        if os.path.isdir(path) and path.startswith('/tmp'):
-            shutil.rmtree(path)
-        os.mkdir(path)
-        self.outputPath = path
+        if isinstance(path, OutputFolder):
+            self.outputFolder = path
+        else:
+            self.outputFolder = OutputFolder(path)
     
     def OutputsAndPlots(self):
         plot_vars = []
@@ -113,10 +116,12 @@ class Protocol(object):
                     plot_descriptions[output['name']] = output['description']
                 else:
                     plot_descriptions[output['name']] = output['name']
-        if not self.outputPath:
+        if not self.outputFolder:
             print >>sys.stderr, "Warning: protocol output folder not set, so not writing outputs to file"
             return
-        filename = 'output file'
+        print 'saving output data to h5 file...'
+        start = time.time()
+        filename = os.path.join(self.outputFolder.GetAbsolutePath(), 'output.h5')
         h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
         group = h5file.create_group('/', 'output', 'output parent')
         for output in self.outputs:
@@ -124,11 +129,13 @@ class Protocol(object):
                 output['description'] = output['name']
             h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
                                 title=output['description'])
-        
+        print 'writing output data to file took', '%.2f' %(time.time() - start), 'seconds.'
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         import pylab
+        print 'plotting', plot['title'], 'curve:', plot_descriptions[plot['x']], 'against', plot_descriptions[plot['y']]
+        start = time.time()
         for plot in self.plots:
             x_data = []
             y_data = []
@@ -136,19 +143,33 @@ class Protocol(object):
             y_data.append(self.outputEnv.LookUp(plot['y']))
             
             # Plot the data.
-            fig, host = plt.subplots()
+            fig = plt.figure()
             for i,x in enumerate(x_data):
                 if y_data[i].array.ndim > 1:
                     for j in range(y_data[i].array.shape[0]):
-                        host.plot(x.array, y_data[i].array[j])
+                        plt.plot(x.array, y_data[i].array[j])
                 else:
-                    host.plot(x.array, y_data[i].array)
+                    plt.plot(x.array, y_data[i].array)
                 plt.title(plot['title'])
                 plt.xlabel(plot_descriptions[plot['x']])
                 plt.ylabel(plot_descriptions[plot['y']])  
-            plt.savefig(self.outputPath + '/' + plot['title'] + '.png')
+            plt.savefig(self.outputFolder.GetAbsolutePath() + '/' + plot['title'] + '.png')
             plt.close()
+        print 'plots took', '%.2f' %(time.time() - start), 'seconds to complete.'
         h5file.close()
+#             fig, host = plt.subplots()
+#             for i,x in enumerate(x_data):
+#                 if y_data[i].array.ndim > 1:
+#                     for j in range(y_data[i].array.shape[0]):
+#                         host.plot(x.array, y_data[i].array[j])
+#                 else:
+#                     host.plot(x.array, y_data[i].array)
+#                 plt.title(plot['title'])
+#                 plt.xlabel(plot_descriptions[plot['x']])
+#                 plt.ylabel(plot_descriptions[plot['y']])  
+#             plt.savefig(self.outputFolder + '/' + plot['title'] + '.png')
+#             plt.close()
+#         h5file.close()
         
 #         for output in self.outputs:
 #             if 'ref' in output:
@@ -183,28 +204,33 @@ class Protocol(object):
 #             plt.title(plot['title'])
 #             plt.xlabel(h5file.get_node_attr('/output/' + plot['x'], 'TITLE'))
 #             plt.ylabel(h5file.get_node_attr('/output/' + plot['y'], 'TITLE'))  
-#             plt.savefig(self.outputPath + '/' + plot['title'] + '.png')
+#             plt.savefig(self.outputFolder + '/' + plot['title'] + '.png')
 #         
 #         h5file.close()
 
     def Run(self):
+        Locatable.outputFolder = self.outputFolder
         self.Initialise()
+        print 'running protocol...'
         try:
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
                 if sim.prefix:
+                    if self.outputFolder:
+                        sim.SetOutputFolder(self.outputFolder.CreateSubfolder('simulation_' + sim.prefix))
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
-            self.libraryEnv.ExecuteStatements(self.library)     
-            for sim in self.simulations:
-                sim.Initialise()   
-                results = sim.Run()
-            self.postProcessingEnv.ExecuteStatements(self.postProcessing)
+            start = time.time()
+            self.libraryEnv.ExecuteStatements(self.library)  
+            print 'library statements took', '%.2f' %(time.time() - start), 'seconds to execute.'   
+            start = time.time()
+            self.RunSimulations()
+            print 'simulations took', '%.2f' %(time.time() - start), 'seconds to run.'
+            start = time.time()
+            self.RunPostProcessing()
+            print 'post processing took', '%.2f' %(time.time() - start), 'seconds to run.'
             if self.plots:
-                self.OutputsAndPlots();            
-            
-
-            # save outputs to disk as hdf5
-            # plot, save png to disk within folder in setoutputfolder
+                self.OutputsAndPlots()
+                       
         except ProtocolError:
             locations = []
             current_trace = sys.exc_info()[2]               
@@ -217,7 +243,28 @@ class Protocol(object):
             for location in locations:
                 print location
             raise
-        
+#         for root, dirs, files in os.walk(top, topdown=False):
+#             for name in files:
+#                 if os.stat(name)[6]==0:
+#                     os.remove(os.path.join(root, name))
+#             for name in dirs:
+#                 try:
+#                     os.rmdir(os.path.join(root, name))
+#                 except OSError:
+#                         pass
+    
+    def RunSimulations(self):
+        for sim in self.simulations:
+            sim.Initialise() 
+            print 'running simulation', sim.prefix  
+            sim.Run()
+            # Reset trace folder in case a nested protocol changes it
+            Locatable.outputFolder = self.outputFolder
+                
+    def RunPostProcessing(self):
+        print 'running post processing...'
+        self.postProcessingEnv.ExecuteStatements(self.postProcessing)
+
     def SetInput(self, name, valueExpr):
         if isinstance(valueExpr, AbstractValue):
             value = valueExpr
@@ -229,10 +276,12 @@ class Protocol(object):
         if isinstance(model, str):
             import tempfile, subprocess, imp, sys
             dir = tempfile.mkdtemp()
+            
             xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', self.protoFile, dir])
             xml_file = xml_file.strip()
             model_py_file = os.path.join(dir, 'model.py')
             class_name = 'GeneratedModel'
+            print 'generating model code...'
             code_gen_cmd = ['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu',
                             '--protocol=' + xml_file,  model, '-c', class_name, '-o', model_py_file]
             if not useNumba:

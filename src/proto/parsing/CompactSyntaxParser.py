@@ -223,6 +223,11 @@ class Actions(object):
         def _xml(self):
             wrapped_xml = self.tokens[0].xml()
             return self.AddTrace(wrapped_xml)
+        
+        def _expr(self):
+            wrapped_expr = self.tokens[0].expr()
+            wrapped_expr.trace = True
+            return wrapped_expr
     
     ######################################################################
     # Post-processing language expressions

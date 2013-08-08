@@ -34,18 +34,21 @@ import ArrayExpressions as A
 import Environment as Env
 import Expressions as E
 import scipy.integrate
+from Locatable import Locatable
 import MathExpressions as M
 import Model
 import numpy as np
+import os
 import Ranges
 import Values as V
 
 def N(number):
     return M.Const(V.Simple(number))
 
-class AbstractSimulation(object):
+class AbstractSimulation(Locatable):
     """Base class for simulations in the protocol language."""
     def __init__(self, prefix=None):
+        super(AbstractSimulation, self).__init__()
         self.prefix = prefix
         self.ranges = [self.range_]
         self.model = None
@@ -60,9 +63,28 @@ class AbstractSimulation(object):
             self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
         
     def InternalRun(self):
-        raise NotImplementedError 
+        raise NotImplementedError
+    
+    def SetOutputFolder(self, folder):
+        self.outputFolder = folder
+        if self.trace:
+            self.model.SetOutputFolder(folder)
+        # called by protocol with subfolder of its output
+        # store and set on model
     
     def LoopBodyStartHook(self):
+        # if the simulations being traced and protocol has an output folder, 
+        #then set the model's output folder 
+        #to be a subfolder of this with a name unique to the particular iteration around the loop
+        # if any of the runs don't have files in them after the simulation,delete the empty folders
+        # if tracing, call setoutputfolder on the model
+        # tmp folder that has model.py and proto.xml (created in protocol.set model) 
+        #can also be in the same directory
+        #you can still use the mdtemp and a keyword to save this file to the right place
+        #within the test output folder for each test you have a folder called simulation_<prefix>
+        #and in that you have one for each run of the outer loop and in those one for each run of
+        #the inner loop
+                
         if isinstance(self.range_, Ranges.While) and self.range_.count > 1 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
             for name in self.results.DefinedNames():
                 self.results.LookUp(name).array.resize(self.range_.GetNumberOfOutputPoints(), refcheck=False)
@@ -125,7 +147,7 @@ class Timecourse(AbstractSimulation):
         self.modifiers = modifiers
         
     def InternalRun(self):
-        for t in self.range_:
+        for i,t in enumerate(self.range_):
             self.LoopBodyStartHook()
             if self.range_.count == 1:
                 self.model.SetFreeVariable(t)
@@ -173,11 +195,16 @@ class Nested(AbstractSimulation):
     def Initialise(self): 
         self.range_.Initialise(self.env)
         self.nestedSim.Initialise()
+        if self.trace:
+            self.nestedSim.trace = True
         super(Nested, self).Initialise()
         
     def InternalRun(self):
         for t in self.range_:
+            print 'nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')' 
             self.LoopBodyStartHook()
+            if self.outputFolder:
+                self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder('run_%d' %self.range_.GetCurrentOutputNumber()))
             self.nestedSim.Run()
             self.LoopBodyEndHook()
         self.LoopEndHook()

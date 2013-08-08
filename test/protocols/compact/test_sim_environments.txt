@@ -89,7 +89,7 @@ post-processing {
         return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
     }
     
-    assert Close(tc3:membrane_voltage, [i*3 for i in 0:11])
+    assert Close(tc3:membrane_voltage?, [i*3 for i in 0:11]?)
     assert Close(tc_follow:membrane_voltage, [30+i*6 for i in 0:11])
     assert Close(tc_sim:membrane_voltage, [i*30 for i in 0:11])
     assert Close(n1:membrane_voltage, [ [ j*i*multiplier for j in 0:11] for i in 0:2:5 ])

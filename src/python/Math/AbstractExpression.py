@@ -32,7 +32,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import Locatable
 import numexpr as ne
-import numpy
+import numpy as np
+import os
+import sys
 import Values as V
 
 class AbstractExpression(Locatable.Locatable):
@@ -79,5 +81,22 @@ class AbstractExpression(Locatable.Locatable):
         return result
     
     def Evaluate(self, env):
-        """We always default to using Interpret for evaluating standalone expressions."""
-        return self.Interpret(env)
+        """We always default to using Interpret for evaluating standalone expressions."""    
+        # if trace, print off the result of evaluate, otherwise just do below
+        result = self.Interpret(env)
+        if self.trace:
+            if isinstance(result, V.Array):
+                print result.array.shape
+            else:
+                print result
+    
+            if self.outputFolder:
+                trace_path = self.outputFolder.GetAbsolutePath() + '/trace.txt' # join outputfolder.getabspath and trace.txt
+                f = open(trace_path, 'a+')
+                if isinstance(result, V.Array):
+                    print >> f, result.array
+                    print >> f, 'location:', self.location
+                else:
+                    print >> f, result
+                f.close()
+        return result

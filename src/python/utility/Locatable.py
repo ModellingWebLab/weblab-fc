@@ -37,5 +37,9 @@ class Locatable(object):
     def __init__(self, location = str(inspect.getouterframes(inspect.currentframe())[2][1:5])):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         self.location = location
+        self.trace = False
+    
+    # Global that sets where to write trace, if enabled
+    outputFolder = None
     
     

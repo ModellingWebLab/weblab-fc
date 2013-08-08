@@ -702,10 +702,11 @@ class TestSyntaxInterface(unittest.TestCase):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
         proto = Protocol.Protocol(proto_file)
         model = TestOdeModel(1)
+        proto.SetOutputFolder('TestSimEnv')
         proto.SetModel(model)
         proto.Run()
      
-    def TestParallelNextedTxt(self):   
+    def TestParallelNestedTxt(self):   
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_parallel_nested.txt'
         proto = Protocol.Protocol(proto_file)
         model = TestOdeModel(1)
@@ -734,7 +735,7 @@ class TestSyntaxInterface(unittest.TestCase):
         proto = Protocol.Protocol(proto_file)
         model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
         proto.SetModel(model)        
-        proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestNestedProtocols'))
+        proto.SetOutputFolder('TestNestedProtocols')
         proto.Run()
         
     def TestParsingInputs(self):
