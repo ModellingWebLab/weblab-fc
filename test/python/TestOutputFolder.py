@@ -53,4 +53,5 @@ class TestOutputFolder(unittest.TestCase):
         """Check that we're prevented from deleting content we shouldn't be able to."""
         # Content that's not under CHASTE_TEST_OUTPUT
         # Content that doesn't contain the signature file (but is under CHASTE_TEST_OUTPUT)
+        # A relative path containing .., putting it outside CHASTE_TEST_OUTPUT
         pass
