@@ -90,8 +90,7 @@ class PySundialsSolver(object):
         flag = cvode.CVodeReInit(self.cvode_mem, cvode.realtype(self.model.freeVariable), self._state)
         
     def RhsWrapper(self, t, y, ydot, f_data):
-        dy = self.model.EvaluateRhs(t, y.asarray())
-        ydot.asarray()[:] = dy
+        self.model.EvaluateRhs(t, y.asarray(), ydot.asarray())
         return 0
         
     def Simulate(self, endPoint):
@@ -148,11 +147,13 @@ class AbstractOdeModel(AbstractModel):
         self.state = self.solver.state
         self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
     
-    def EvaluateRhs(self, t, y):
+    def EvaluateRhs(self, t, y, ydot=np.empty(0)):
         """Compute the derivatives of the model.  This method must be implemented by subclasses.
 
         :param t:  the free variable, typically time
         :param y:  the ODE system state vector, a numpy array
+        :param ydot:  if provided, a vector to be filled in with the derivatives.
+            Otherwise the derivatives should be returned by this method.
         """
         raise NotImplementedError
 

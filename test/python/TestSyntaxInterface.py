@@ -733,9 +733,11 @@ class TestSyntaxInterface(unittest.TestCase):
     def TestNestedProtocols(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt'
         proto = Protocol.Protocol(proto_file)
+        proto.SetOutputFolder('TestNestedProtocols')
         model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
         proto.SetModel(model)        
-        proto.SetOutputFolder('TestNestedProtocols')
+        solver = Model.PySundialsSolver()
+        proto.model.SetSolver(solver) 
         proto.Run()
         
     def TestParsingInputs(self):

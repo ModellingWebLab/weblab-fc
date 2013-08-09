@@ -157,56 +157,6 @@ class Protocol(object):
             plt.close()
         print 'plots took', '%.2f' %(time.time() - start), 'seconds to complete.'
         h5file.close()
-#             fig, host = plt.subplots()
-#             for i,x in enumerate(x_data):
-#                 if y_data[i].array.ndim > 1:
-#                     for j in range(y_data[i].array.shape[0]):
-#                         host.plot(x.array, y_data[i].array[j])
-#                 else:
-#                     host.plot(x.array, y_data[i].array)
-#                 plt.title(plot['title'])
-#                 plt.xlabel(plot_descriptions[plot['x']])
-#                 plt.ylabel(plot_descriptions[plot['y']])  
-#             plt.savefig(self.outputFolder + '/' + plot['title'] + '.png')
-#             plt.close()
-#         h5file.close()
-        
-#         for output in self.outputs:
-#             if 'ref' in output:
-#                 print 'ref', output['ref']
-#                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['ref']))
-#             else:
-#                 print 'name', output['name']
-#                 self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['name']))
-#         filename = 'output file'
-#         h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
-#         group = h5file.create_group('/', 'output', 'output parent')
-#         for output in self.outputs:
-#             if not 'description' in output:
-#                 output['description'] = output['name']
-#             h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
-#                                 title=output['description'])
-#          
-#         import matplotlib
-#         matplotlib.use('Agg')
-#         import matplotlib.pyplot as plt
-#         import pylab
-#         for plot in self.plots:
-#             x_data = h5file.get_node('/output/' + plot['x'])
-#             y_data = h5file.get_node('/output/' + plot['y'])
-#             # Plot the data.
-#             fig, host = plt.subplots()
-#             if y_data.ndim > 1:
-#                 for i in range(y_data.shape[0]):
-#                     host.plot(x_data, y_data[i])
-#             else:
-#                 host.plot(x_data, y_data)
-#             plt.title(plot['title'])
-#             plt.xlabel(h5file.get_node_attr('/output/' + plot['x'], 'TITLE'))
-#             plt.ylabel(h5file.get_node_attr('/output/' + plot['y'], 'TITLE'))  
-#             plt.savefig(self.outputFolder + '/' + plot['title'] + '.png')
-#         
-#         h5file.close()
 
     def Run(self):
         Locatable.outputFolder = self.outputFolder
@@ -273,15 +223,20 @@ class Protocol(object):
         self.inputEnv.OverwriteDefinition(name, value)
         
     def SetModel(self, model, useNumba=True):
+        start = time.time()
         if isinstance(model, str):
             import tempfile, subprocess, imp, sys
-            dir = tempfile.mkdtemp()
-            
+            if self.outputFolder:
+                dir = tempfile.mkdtemp(dir=self.outputFolder.path)
+                print 'set dir to outputfolder'
+            else:
+                dir = tempfile.mkdtemp()
             xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', self.protoFile, dir])
             xml_file = xml_file.strip()
             model_py_file = os.path.join(dir, 'model.py')
             class_name = 'GeneratedModel'
             print 'generating model code...'
+            
             code_gen_cmd = ['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu',
                             '--protocol=' + xml_file,  model, '-c', class_name, '-o', model_py_file]
             if not useNumba:
@@ -305,6 +260,7 @@ class Protocol(object):
         for sim in self.simulations:
             sim.SetModel(model)
         self.model = model
+        print 'generating code took', '%.2f' %(time.time() - start), 'seconds to run.'
         
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)

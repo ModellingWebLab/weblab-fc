@@ -57,9 +57,8 @@ class OutputFolder(object):
                 f = open(os.path.join(path, OutputFolder.SIG_FILE_NAME), 'w')
                 f.close()
         self.path = OutputFolder.CheckOutputPath(path)
-        self.cleanFolder = cleanFolder
         if os.path.exists(self.path):
-            if self.cleanFolder:
+            if cleanFolder:
                 self.RemoveOutputFolder(self.path)
         CreateFolder(self.path)                 
     
@@ -89,8 +88,6 @@ class OutputFolder(object):
             raise ProtocolError('The path for the subfolder must be a relative path.')
         return OutputFolder(os.path.join(self.path, path)) 
     
-    
-    
     @staticmethod
     def RemoveOutputFolder(path):
         """Remove an existing output folder.
@@ -104,6 +101,8 @@ class OutputFolder(object):
         abs_path = OutputFolder.CheckOutputPath(path)
         if os.path.isfile(abs_path + '/' + OutputFolder.SIG_FILE_NAME):
             shutil.rmtree(abs_path)
+        else:
+            raise ProtocolError("Folder cannot be removed because it was not created via the OutputFolder class.")
         
     
     @staticmethod

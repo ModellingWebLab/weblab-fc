@@ -91,7 +91,6 @@ class TestModelSimulation(unittest.TestCase):
         model = TestOdeModel(a)
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
-        time_sim.Initialise()       
         time_sim.SetModel(model)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
@@ -110,7 +109,6 @@ class TestModelSimulation(unittest.TestCase):
         modifier = Modifiers.ResetState(when)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_, modifiers=[modifier])
-        time_sim.Initialise()       
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
@@ -127,7 +125,6 @@ class TestModelSimulation(unittest.TestCase):
         modifier = Modifiers.ResetState(when)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
-        time_sim.Initialise()       
           
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_, modifiers=[modifier])
@@ -145,7 +142,6 @@ class TestModelSimulation(unittest.TestCase):
         reset_modifier = Modifiers.ResetState(AbstractModifier.EACH_LOOP, 'start')
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)     
-        time_sim.Initialise()         
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_, modifiers=[save_modifier, reset_modifier])
@@ -168,7 +164,6 @@ class TestModelSimulation(unittest.TestCase):
         
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         inner_time_sim = Simulations.Timecourse(range_)
-        inner_time_sim.Initialise()       
         range_ = Ranges.VectorRange('range', V.Array(np.array([1, 2, 3])))
         nested_sim = Simulations.Nested(inner_time_sim, range_, modifiers=[reset_modifier])
         nested_sim.Initialise() 
@@ -184,8 +179,7 @@ class TestModelSimulation(unittest.TestCase):
         modifier = Modifiers.SetVariable(AbstractModifier.START_ONLY, 'oxmeta:leakage_current', N(1))
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)       
-        time_sim.Initialise()       
-
+        
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_, modifiers=[modifier])
         nested_sim.Initialise() 
@@ -201,7 +195,6 @@ class TestModelSimulation(unittest.TestCase):
         reset_modifier = Modifiers.ResetState(AbstractModifier.START_ONLY)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3])))
         time_sim = Simulations.Timecourse(range_, modifiers=[set_modifier, reset_modifier])
-        time_sim.Initialise()       
 
         range_ = Ranges.VectorRange('count', V.Array(np.array([0, 1, 2, 3])))
         nested_sim = Simulations.Nested(time_sim, range_)
