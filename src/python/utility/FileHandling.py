@@ -72,7 +72,7 @@ class OutputFolder(object):
         root_folder = os.environ.get('CHASTE_TEST_OUTPUT', 'testoutput')
         if not os.path.isabs(root_folder):
             root_folder = os.path.join(os.getcwd(), root_folder)
-        return root_folder
+        return os.path.realpath(root_folder)
 
     def GetAbsolutePath(self):
         """Get the absolute path to this output folder."""

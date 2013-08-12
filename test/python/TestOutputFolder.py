@@ -58,7 +58,7 @@ class TestOutputFolder(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.join(single_folder_path, 'subfolder')))
         self.assertTrue(os.path.isfile(os.path.join(single_folder_path, 'subfolder', OutputFolder.SIG_FILE_NAME)))
         # Multiple levels at once
-        multiple_folder_root = os.path.join(CHASTE_TEST_OUTPUT, 'TestOutputFolder_TestMultiFolders')
+        multiple_folder_root = os.path.realpath(os.path.join(CHASTE_TEST_OUTPUT, 'TestOutputFolder_TestMultiFolders'))
         multiple_folder_path = os.path.join(multiple_folder_root, 'L1', 'L2', 'L3')
         if os.path.exists(multiple_folder_root):
             shutil.rmtree(multiple_folder_root)
