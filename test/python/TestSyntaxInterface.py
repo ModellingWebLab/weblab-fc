@@ -693,51 +693,46 @@ class TestSyntaxInterface(unittest.TestCase):
         proto = Protocol.Protocol(proto_file)
         proto.Run()
     
-    def TestCorePostProcTxt(self):    
+    def TestCorePostProcTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt'
         proto = Protocol.Protocol(proto_file)
         proto.Run()
     
-    def TestSimEnvTxt(self):    
+    def TestSimEnvTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
         proto = Protocol.Protocol(proto_file)
-        model = TestOdeModel(1)
-        proto.SetOutputFolder('TestSimEnv')
-        proto.SetModel(model)
+        proto.SetOutputFolder('TestSyntaxInterface_TestSimEnv')
+        proto.SetModel(TestOdeModel(1))
         proto.Run()
      
-    def TestParallelNestedTxt(self):   
+    def TestParallelNestedTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_parallel_nested.txt'
         proto = Protocol.Protocol(proto_file)
-        model = TestOdeModel(1)
-        proto.SetModel(model)
+        proto.SetOutputFolder('TestSyntaxInterface_TestParallelNestedTxt')
+        proto.SetModel(TestOdeModel(1))
         proto.Run()
     
-    def TestWhileLoopTxt(self):   
+    def TestWhileLoopTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
         proto = Protocol.Protocol(proto_file)
-        model = TestOdeModel(1)
-        proto.SetModel(model)
+        proto.SetOutputFolder('TestSyntaxInterface_TestWhileLoopTxt')
+        proto.SetModel(TestOdeModel(1))
         proto.SetInput('num_iters', N(10))
         proto.Run()
         
-    def TestGraphTxt(self):  
-        import os 
+    def TestGraphTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/GraphState.txt'
         proto = Protocol.Protocol(proto_file)
-        model = TestOdeModel(1)
-        proto.SetModel(model)
-        proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestGraphTxt'))
+        proto.SetOutputFolder('TestSyntaxInterface_TestGraphTxt')
+        proto.SetModel(TestOdeModel(1))
         proto.Run()
         
     def TestNestedProtocols(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt'
         proto = Protocol.Protocol(proto_file)
-        proto.SetOutputFolder('TestNestedProtocols')
-        model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
-        proto.SetModel(model)        
-        solver = Model.PySundialsSolver()
-        proto.model.SetSolver(solver) 
+        proto.SetOutputFolder('TestSyntaxInterface_TestNestedProtocols')
+        proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
+        proto.model.SetSolver(Model.PySundialsSolver())
         proto.Run()
         
     def TestParsingInputs(self):
