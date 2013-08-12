@@ -30,28 +30,26 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import os
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-    
+
 import Protocol
 import MathExpressions as M
 import Values as V
-import os
 import Model
 
-def N(number):
-    return M.Const(V.Simple(number))
+import TestSupport
 
 class TestS1S2Proto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
     def TestS1S2(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
-        proto = Protocol.Protocol(proto_file)
-        model = 'projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998.cellml'
-        proto.SetModel(model)
-        solver = Model.PySundialsSolver()
-        proto.model.SetSolver(solver)
-        proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestS1S2Proto'))
+        proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/S1S2.txt')
+        proto.SetOutputFolder('Py_TestS1S2Proto')
+        proto.SetModel('projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998.cellml')
+        proto.model.SetSolver(Model.PySundialsSolver())
         proto.Run()
+        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/S1S2'
+        TestSupport.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)

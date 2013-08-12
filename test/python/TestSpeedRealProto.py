@@ -45,6 +45,7 @@ import numpy as np
 import os
 import Protocol
 import time
+import TestSupport
 import Values as V
 
 csp = CSP.CompactSyntaxParser
@@ -60,8 +61,8 @@ class TestSpeedRealProto(unittest.TestCase):
         # Load the raw simulation data from file
         proto.simulations = []
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/S1S2'
-        membrane_voltage = self.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
-        time_1d = self.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
+        membrane_voltage = TestSupport.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
+        time_1d = TestSupport.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
         time_2d = A.NewArray(M.Const(time_1d),
                              E.TupleExpression(N(0), N(0), N(1), N(91), M.Const(V.String('_'))),
                              comprehension=True).Evaluate(proto.env)
@@ -72,7 +73,7 @@ class TestSpeedRealProto(unittest.TestCase):
         # Run the protocol
         self.Time(proto.Run)
         # Check the results
-        self.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
+        TestSupport.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
 
     def TestIcal(self):
         proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
@@ -80,11 +81,11 @@ class TestSpeedRealProto(unittest.TestCase):
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
         local_env = Env.Environment()
         local_env.DefineName('membrane_voltage',
-                             self.Load(os.path.join(data_folder, 'outputs_membrane_voltage.csv')))
+                             TestSupport.Load(os.path.join(data_folder, 'outputs_membrane_voltage.csv')))
         local_env.DefineName('membrane_L_type_calcium_current',
-                             self.Load(os.path.join(data_folder, 'outputs_membrane_L_type_calcium_current.csv')))
+                             TestSupport.Load(os.path.join(data_folder, 'outputs_membrane_L_type_calcium_current.csv')))
         local_env.DefineName('extracellular_calcium_concentration',
-                             self.Load(os.path.join(data_folder, 'outputs_extracellular_calcium_concentration.csv')))
+                             TestSupport.Load(os.path.join(data_folder, 'outputs_extracellular_calcium_concentration.csv')))
         oxmeta_env = Env.Environment()
         oxmeta_env.DefineName('extracellular_calcium_concentration',
                              V.Simple(local_env.LookUp('extracellular_calcium_concentration').array[1,0,0]))
@@ -96,57 +97,10 @@ class TestSpeedRealProto(unittest.TestCase):
         local_env.DefineName('time', time)
         self.Time(proto.Run)
         # Check the results
-        self.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
+        TestSupport.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
 
     def Time(self, func):
         start = time.time()
         func()
         end = time.time()
         print "Protocol execution took", (end - start), "seconds"
-
-    def CheckResults(self, proto, expectedSpec, dataFolder):
-        """Check protocol results against saved values.
-        expectedSpec is a dictionary mapping result name to number of dimensions, so we can use the correct Load* method.
-        """
-        for name, ndims in expectedSpec.iteritems():
-            data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
-            if ndims == 2:
-                method = self.Load2d
-            else:
-                method = self.Load
-            expected = method(data_file)
-            actual = proto.postProcessingEnv.LookUp(name)
-            np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
-    
-    def CheckFileCompression(self, filePath):
-        """Return (real_path, is_compressed) if a .gz compressed version of filePath exists."""
-        real_path = filePath
-        if filePath.endswith('.gz'):
-            is_compressed = True
-        else:
-            if os.path.exists(filePath):
-                is_compressed = False
-            elif os.path.exists(filePath + '.gz'):
-                real_path += '.gz'
-                is_compressed = True
-        return real_path, is_compressed
-
-    def Load2d(self, filePath):
-        real_path, is_compressed = self.CheckFileCompression(filePath)
-        array = np.loadtxt(real_path, dtype=float, delimiter=',', unpack=True) # unpack transposes the array
-        if array.ndim == 1:
-            array = array[:, np.newaxis]
-        return V.Array(array)
-
-    def Load(self, filePath):
-        real_path, is_compressed = self.CheckFileCompression(filePath)
-        if is_compressed:
-            import gzip
-            f = gzip.GzipFile(real_path, 'rb')
-        else:
-            f = open(real_path, 'r')
-        f.readline() # Strip comment line
-        dims = map(int, f.readline().split(','))[1:]
-        array = np.loadtxt(f, dtype=float)
-        f.close()
-        return V.Array(array.reshape(tuple(dims)))

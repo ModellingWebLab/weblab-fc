@@ -30,32 +30,26 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import os
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-    
+
 import Protocol
 import MathExpressions as M
 import Model
 import Values as V
-import os
 
-def N(number):
-    return M.Const(V.Simple(number))
+import TestSupport
 
 class TestIcalProto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
     def TestIcal(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/ICaL.txt'
-        proto = Protocol.Protocol(proto_file)
-        model = 'projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml'
-        proto.SetModel(model, useNumba=True)
-        # edit model.py and python model.py and if bug in numba, report it
-        solver = Model.PySundialsSolver()
-        proto.model.SetSolver(solver) 
-        proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'TestIcalProto'))
+        proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
+        proto.SetOutputFolder('Py_TestIcalProto')
+        proto.SetModel('projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml', useNumba=False)
+        proto.model.SetSolver(Model.PySundialsSolver())
         proto.Run()
-
-        
-        
+        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
+        TestSupport.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
