@@ -30,14 +30,13 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import unittest
-import Model
 import os
-import Protocol
 import shutil
-from ErrorHandling import ProtocolError
-from Model import TestOdeModel
-from FileHandling import OutputFolder
+import unittest
+
+from fc.utility.error_handling import ProtocolError
+from fc.utility.file_handling import OutputFolder
+
 
 class TestOutputFolder(unittest.TestCase):
     """Test the OutputFolder class."""

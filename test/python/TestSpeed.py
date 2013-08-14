@@ -30,44 +30,39 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
- 
-import unittest
- 
-# Import the module to test
-import ArrayExpressions as A
-import Environment as Env
-import Expressions as E
-import MathExpressions as M
-import numpy as np
-from ErrorHandling import ProtocolError
-import Statements as S
-import Values as V
 
-def N(number):
-    return M.Const(V.Simple(number))
- 
+import numpy as np
+import unittest
+
+import fc.language.expressions as E
+import fc.language.statements as S
+import fc.language.values as V
+import fc.utility.environment as Env
+
+N = E.N
+
 class TestSpeed(unittest.TestCase):
     """Test speed of python implementation using simple expressions involving very large arrays."""
     def TestAddingLargeArrays(self):
         # 1-d array
         env = Env.Environment()
         parameters = ['large_array1', 'large_array2']
-        body = [S.Return(M.Plus(E.NameLookUp('large_array1'), E.NameLookUp('large_array2')))]
+        body = [S.Return(E.Plus(E.NameLookUp('large_array1'), E.NameLookUp('large_array2')))]
         add = E.LambdaExpression(parameters, body)
-        large_array1 = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        large_array2 = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        result = A.Map(add, large_array1, large_array2)
+        large_array1 = E.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), E.Const(V.String("i"))), comprehension=True)
+        large_array2 = E.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), E.Const(V.String("i"))), comprehension=True)
+        result = E.Map(add, large_array1, large_array2)
         predicted = 2*np.arange(10000000)
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
     
     def TestMultipleOperationExpressionWithLargeArrays(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
-        body = [S.Return(M.Times(M.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]
+        body = [S.Return(E.Times(E.Plus(E.NameLookUp('a'), E.NameLookUp('b')), E.NameLookUp('c')))]
         add_times = E.LambdaExpression(parameters, body)
-        a = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        b = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        c = A.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), M.Const(V.String("i"))), comprehension=True)
-        result = A.Map(add_times, a, b, c)
+        a = E.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), E.Const(V.String("i"))), comprehension=True)
+        b = E.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), E.Const(V.String("i"))), comprehension=True)
+        c = E.NewArray(E.NameLookUp("i"), E.TupleExpression(N(0), N(0), N(1), N(10000000), E.Const(V.String("i"))), comprehension=True)
+        result = E.Map(add_times, a, b, c)
         predicted = np.arange(10000000)*(2*np.arange(10000000))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)

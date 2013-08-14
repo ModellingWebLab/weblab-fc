@@ -30,14 +30,13 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import unittest
-import sys
-
-# Import the module to test
-import Environment as Env
 import numpy as np
-from ErrorHandling import ProtocolError
-import Values as V
+import unittest
+
+import fc.language.values as V
+import fc.utility.environment as Env
+from fc.utility.error_handling import ProtocolError
+
 
 class TestEnvironment(unittest.TestCase):
     """Test environment and delegations and associated functions."""
@@ -151,6 +150,3 @@ class TestEnvironment(unittest.TestCase):
         # statement list
         stmt_str = 'z = lambda a: a+2\nassert z(2) == 4'
         env.EvaluateStatement(stmt_str, env) # assertion built into list, no extra test needed
-        
-        
-        

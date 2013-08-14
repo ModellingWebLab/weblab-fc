@@ -30,20 +30,20 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from AbstractExpression import AbstractExpression
-import Environment as Env
-import Expressions as E
-from operator import itemgetter, mul
+
 import itertools
-import MathExpressions as M
+import sys
+
 import numexpr as ne
 import numpy as np
-from ErrorHandling import ProtocolError
-import sys
-import Values as V
 
-def N(number):
-    return M.Const(V.Simple(number))
+from .abstract import AbstractExpression
+from .general import TupleExpression
+from .maths import Max, Min, Plus, Times
+from .. import values as V
+from ...utility import environment as Env
+from ...utility.error_handling import ProtocolError
+
 
 class NewArray(AbstractExpression):
     """Used to create new arrays, has keyword input comprehension."""
@@ -84,7 +84,7 @@ class NewArray(AbstractExpression):
         
         result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrappedBindings)
         return result
-            
+        
     def DevelopResultWithInterpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
         result = None
         for range_spec_indices in itertools.product(*range_dims):
@@ -120,13 +120,13 @@ class NewArray(AbstractExpression):
         if self.comprehension:
             iterator_vars = set()
             for child in self.children:
-                assert isinstance(child, E.TupleExpression)
+                assert isinstance(child, TupleExpression)
                 assert isinstance(child.children[-1].value, V.String)
                 iterator_vars |= set([child.children[-1].value.value])
-            result |= self.genExpr.GetUsedVariables()        
+            result |= self.genExpr.GetUsedVariables()
             result = result - set.intersection(result, iterator_vars)
         return result
-              
+        
     def _DoComprehension(self, env):
         range_specs = self.EvaluateChildren(env)
         ranges = []
@@ -214,7 +214,7 @@ class NewArray(AbstractExpression):
             compiled = False
         if compiled and num_gaps == 0 and len(ranges) <= 1:
             result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env) 
-        else:       
+        else:
             result = self.DevelopResultWithInterpret(range_dims, range_name, ranges, env, num_gaps, dims) 
         return V.Array(result)
         
@@ -225,8 +225,8 @@ class NewArray(AbstractExpression):
     
 class View(AbstractExpression):
     """Take a view of an already existing array."""
-    def __init__(self, array, *children):   
-        super(View, self).__init__()  
+    def __init__(self, array, *children):
+        super(View, self).__init__()
         self.arrayExpression = array
         self.children = children
         
@@ -237,7 +237,7 @@ class View(AbstractExpression):
             else:
                 return None
         if isinstance(arg, V.DefaultParameter):
-            return 'default'    
+            return 'default'
         else:
             return int(arg.value)
     
@@ -299,7 +299,7 @@ class View(AbstractExpression):
                     slices[int(dim)] = start
                 else:
                     slices[int(dim)] = slice(start, end, step)
-            else:               
+            else:
                 if step == 0:
                     if start != end:
                         raise ProtocolError("Step is zero and start does not equal end")
@@ -370,13 +370,13 @@ class Fold(AbstractExpression):
         elif len(self.children) == 3:
             function = operands[0]
             array = operands[1].array
-            initial = self.GetValue(operands[2])             
+            initial = self.GetValue(operands[2])
             dimension = int(array.ndim - 1)
         elif len(self.children) == 4:
             function = operands[0]
             array = operands[1].array
             initial = self.GetValue(operands[2])
-            dimension = self.GetValue(operands[3])      
+            dimension = self.GetValue(operands[3])
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension, 
                                      "because the array only has", array.ndim, "dimensions")
@@ -391,23 +391,23 @@ class Fold(AbstractExpression):
         # if the function is plus, then do sum...etc from numpy except sum and prod in numexpr
         if len(function.body[0].parameters) == 1:
             shape[dimension] = 1
-            if isinstance(function.body[0].parameters[0], M.Plus):   
+            if isinstance(function.body[0].parameters[0], Plus):
                 result = ne.evaluate('sum(array, axis=' + str(dimension) + ')')
                 if initial is not None:
                     result = ne.evaluate('result + initial')
                 return V.Array(np.array([result]).reshape(tuple(shape)))
-            if isinstance(function.body[0].parameters[0], M.Times):
+            if isinstance(function.body[0].parameters[0], Times):
                 result = ne.evaluate('prod(array, axis=' + str(dimension) + ')')
                 if initial is not None:
                     result = ne.evaluate('result * initial')
                 return V.Array(np.array([result]).reshape(tuple(shape)))
-            if isinstance(function.body[0].parameters[0], M.Max):
+            if isinstance(function.body[0].parameters[0], Max):
                 if initial is not None:
                     max_array = np.maximum(initial, array)
                 else:
                     max_array = array
                 return V.Array(np.amax(max_array, axis=dimension).reshape(tuple(shape)))
-            if isinstance(function.body[0].parameters[0], M.Min):
+            if isinstance(function.body[0].parameters[0], Min):
                 if initial is not None:
                     min_array = np.minimum(initial, array)
                 else:

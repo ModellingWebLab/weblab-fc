@@ -31,40 +31,36 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import unittest
-import sys
 
-# Import the module to test
-import MathExpressions as M
-import Values as V
+import fc.language.expressions as E
+import fc.language.values as V
 
 class TestRelations(unittest.TestCase):
     """Test relations (eq, neq, lt, gt, lte, gte) using simple values."""
     def TestEq(self):
-        self.assertFalse(M.Eq(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
-        self.assertTrue(M.Eq(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertFalse(E.Eq(E.Const(V.Simple(1)), E.Const(V.Simple(0))).Evaluate({}).value)
+        self.assertTrue(E.Eq(E.Const(V.Simple(1)), E.Const(V.Simple(1))).Evaluate({}).value)
         
     def TestNeq(self):
-        self.assertTrue(M.Neq(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
-        self.assertFalse(M.Neq(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertTrue(E.Neq(E.Const(V.Simple(1)), E.Const(V.Simple(0))).Evaluate({}).value)
+        self.assertFalse(E.Neq(E.Const(V.Simple(1)), E.Const(V.Simple(1))).Evaluate({}).value)
         
     def TestLt(self):
-        self.assertFalse(M.Lt(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
-        self.assertTrue(M.Lt(M.Const(V.Simple(0)), M.Const(V.Simple(1))).Evaluate({}).value)
-        self.assertFalse(M.Lt(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertFalse(E.Lt(E.Const(V.Simple(1)), E.Const(V.Simple(0))).Evaluate({}).value)
+        self.assertTrue(E.Lt(E.Const(V.Simple(0)), E.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertFalse(E.Lt(E.Const(V.Simple(1)), E.Const(V.Simple(1))).Evaluate({}).value)
         
     def TestGt(self):
-        self.assertTrue(M.Gt(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
-        self.assertFalse(M.Gt(M.Const(V.Simple(0)), M.Const(V.Simple(1))).Evaluate({}).value)
-        self.assertFalse(M.Gt(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertTrue(E.Gt(E.Const(V.Simple(1)), E.Const(V.Simple(0))).Evaluate({}).value)
+        self.assertFalse(E.Gt(E.Const(V.Simple(0)), E.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertFalse(E.Gt(E.Const(V.Simple(1)), E.Const(V.Simple(1))).Evaluate({}).value)
         
     def TestLeq(self):
-        self.assertFalse(M.Leq(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
-        self.assertTrue(M.Leq(M.Const(V.Simple(0)), M.Const(V.Simple(1))).Evaluate({}).value)
-        self.assertTrue(M.Leq(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertFalse(E.Leq(E.Const(V.Simple(1)), E.Const(V.Simple(0))).Evaluate({}).value)
+        self.assertTrue(E.Leq(E.Const(V.Simple(0)), E.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertTrue(E.Leq(E.Const(V.Simple(1)), E.Const(V.Simple(1))).Evaluate({}).value)
         
     def TestGeq(self):
-        self.assertTrue(M.Geq(M.Const(V.Simple(1)), M.Const(V.Simple(0))).Evaluate({}).value)
-        self.assertFalse(M.Geq(M.Const(V.Simple(0)), M.Const(V.Simple(1))).Evaluate({}).value)
-        self.assertTrue(M.Geq(M.Const(V.Simple(1)), M.Const(V.Simple(1))).Evaluate({}).value)
-        
-        
+        self.assertTrue(E.Geq(E.Const(V.Simple(1)), E.Const(V.Simple(0))).Evaluate({}).value)
+        self.assertFalse(E.Geq(E.Const(V.Simple(0)), E.Const(V.Simple(1))).Evaluate({}).value)
+        self.assertTrue(E.Geq(E.Const(V.Simple(1)), E.Const(V.Simple(1))).Evaluate({}).value)

@@ -30,23 +30,20 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import os
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
-import Protocol
-import MathExpressions as M
-import Values as V
-import Model
+import fc
+import fc.utility.test_support as TestSupport
+import fc.simulations.model as Model
 
-import TestSupport
 
 class TestS1S2Proto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
     def TestS1S2(self):
-        proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/S1S2.txt')
+        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')
         proto.SetModel('projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998.cellml')
         proto.model.SetSolver(Model.PySundialsSolver())

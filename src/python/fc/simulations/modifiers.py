@@ -30,23 +30,42 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
 
-import fc
-import fc.utility.test_support as TestSupport
-import fc.simulations.model as Model
+class AbstractModifier(object):
+    """Base class for modifiers in the protocol language."""
+
+    START_ONLY = 0
+    EACH_LOOP = 1
+    END_ONLY = 2
+
+    def Apply(self):
+        raise NotImplementedError
 
 
-class TestIcalProto(unittest.TestCase):
-    """Test models, simulations, ranges, and modifiers."""
-    def TestIcal(self):
-        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
-        proto.SetOutputFolder('Py_TestIcalProto')
-        proto.SetModel('projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml', useNumba=False)
-        proto.model.SetSolver(Model.PySundialsSolver())
-        proto.Run()
-        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
-        TestSupport.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
+class SetVariable(AbstractModifier):
+        def __init__(self, when, variableName, valueExpr):
+            self.when = when
+            self.variableName = variableName
+            self.valueExpr = valueExpr
+        
+        def Apply(self, simul):
+            value = self.valueExpr.Evaluate(simul.env)
+            simul.env.OverwriteDefinition(self.variableName, value)
+
+
+class SaveState(AbstractModifier):
+        def __init__(self, when, stateName):
+            self.when = when
+            self.stateName = stateName
+        
+        def Apply(self, simul):
+            simul.model.SaveState(self.stateName)
+
+
+class ResetState(AbstractModifier):
+        def __init__(self, when, stateName=None):
+            self.when = when
+            self.stateName = stateName
+            
+        def Apply(self, simul):
+            simul.model.ResetState(self.stateName)

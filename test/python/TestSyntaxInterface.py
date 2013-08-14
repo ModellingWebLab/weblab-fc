@@ -31,42 +31,33 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import numpy as np
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
-# Import the modules to test
+import fc
+import fc.language.expressions as E
+import fc.language.statements as S
+import fc.language.values as V
+import fc.simulations.model as Model
+import fc.simulations.modifiers as Modifiers
+import fc.simulations.ranges as Ranges
+import fc.simulations.simulations as Simulations
+import fc.utility.environment as Env
 
-from Modifiers import AbstractModifier
-import ArrayExpressions as A
 import CompactSyntaxParser as CSP
-import Environment as Env
-import Expressions as E
-import MathExpressions as M
-import Model
-import Modifiers
-import numpy as np
-import os
-import Protocol
-from ErrorHandling import ProtocolError
-import Ranges
-import Simulations
-import Statements as S
-from Model import TestOdeModel
-import Values as V
 
 csp = CSP.CompactSyntaxParser
-
-def N(number):
-    return M.Const(V.Simple(number))
+N = E.N
 
 class TestSyntaxInterface(unittest.TestCase):
     """Test expr methods of compact syntax parser."""
     def TestParsingNumber(self):
         parse_action = csp.expr.parseString('1.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Const)
+        self.assertIsInstance(expr, E.Const)
         env = Env.Environment()
         self.assertEqual(expr.Evaluate(env).value, 1.0)
         
@@ -82,138 +73,138 @@ class TestSyntaxInterface(unittest.TestCase):
         # plus
         parse_action = csp.expr.parseString('1.0 + 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Plus)
+        self.assertIsInstance(expr, E.Plus)
         env = Env.Environment()
         self.assertEqual(expr.Evaluate(env).value, 3.0)
   
         # minus
         parse_action = csp.expr.parseString('5.0 - 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Minus)
+        self.assertIsInstance(expr, E.Minus)
         self.assertEqual(expr.Evaluate(env).value, 3.0)
    
         # times
         parse_action = csp.expr.parseString('4.0 * 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Times)
+        self.assertIsInstance(expr, E.Times)
         self.assertEqual(expr.Evaluate(env).value, 8.0)
         
         # division and infinity
         parse_action = csp.expr.parseString('6.0 / 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Divide)
+        self.assertIsInstance(expr, E.Divide)
         self.assertEqual(expr.Evaluate(env).value, 3.0)
         
         parse_action = csp.expr.parseString('1/MathML:infinity', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Divide)
+        self.assertIsInstance(expr, E.Divide)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         # power
         parse_action = csp.expr.parseString('4.0 ^ 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Power)
+        self.assertIsInstance(expr, E.Power)
         self.assertEqual(expr.Evaluate(env).value, 16.0)
         
     def TestParsingLogicalOperations(self):
         # greater than
         parse_action = csp.expr.parseString('4.0 > 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Gt)
+        self.assertIsInstance(expr, E.Gt)
         env = Env.Environment()
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         parse_action = csp.expr.parseString('2.0 > 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Gt)
+        self.assertIsInstance(expr, E.Gt)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         # less than
         parse_action = csp.expr.parseString('4.0 < 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Lt)
+        self.assertIsInstance(expr, E.Lt)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         parse_action = csp.expr.parseString('2.0 < 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Lt)
+        self.assertIsInstance(expr, E.Lt)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         # less than or equal to
         parse_action = csp.expr.parseString('4.0 <= 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Leq)
+        self.assertIsInstance(expr, E.Leq)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         parse_action = csp.expr.parseString('2.0 <= 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Leq)
+        self.assertIsInstance(expr, E.Leq)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         parse_action = csp.expr.parseString('1.0 <= 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Leq)
+        self.assertIsInstance(expr, E.Leq)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         # equal to
         parse_action = csp.expr.parseString('2.0 == 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Eq)
+        self.assertIsInstance(expr, E.Eq)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         
         # not equal to and not a number
         parse_action = csp.expr.parseString('2.0 != 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Neq)
+        self.assertIsInstance(expr, E.Neq)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         parse_action = csp.expr.parseString('1.0 != 2.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Neq)
+        self.assertIsInstance(expr, E.Neq)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         parse_action = csp.expr.parseString('MathML:notanumber != MathML:notanumber', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Neq)
+        self.assertIsInstance(expr, E.Neq)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         # and
         parse_action = csp.expr.parseString('1.0 && 1.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.And)
+        self.assertIsInstance(expr, E.And)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         parse_action = csp.expr.parseString('0.0 && 1.0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.And)
+        self.assertIsInstance(expr, E.And)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         # or and true or false
         parse_action = csp.expr.parseString('MathML:true || MathML:true', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Or)
+        self.assertIsInstance(expr, E.Or)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         parse_action = csp.expr.parseString('MathML:false || MathML:true', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Or)
+        self.assertIsInstance(expr, E.Or)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         parse_action = csp.expr.parseString('MathML:false || MathML:false', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Or)
+        self.assertIsInstance(expr, E.Or)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         # not
         parse_action = csp.expr.parseString('not 1', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Not)
+        self.assertIsInstance(expr, E.Not)
         self.assertEqual(expr.Evaluate(env).value, 0)
         
         parse_action = csp.expr.parseString('not 0', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Not)
+        self.assertIsInstance(expr, E.Not)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
     def TestParsingComplicatedMath(self):
@@ -234,68 +225,68 @@ class TestSyntaxInterface(unittest.TestCase):
         # ceiling
         parse_action = csp.expr.parseString('MathML:ceiling(1.2)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Ceiling)
+        self.assertIsInstance(expr, E.Ceiling)
         env = Env.Environment()
         self.assertEqual(expr.Evaluate(env).value, 2.0)
         
         # floor
         parse_action = csp.expr.parseString('MathML:floor(1.8)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Floor)
+        self.assertIsInstance(expr, E.Floor)
         self.assertEqual(expr.Evaluate(env).value, 1.0)
         
         # ln and exponentiale value
         parse_action = csp.expr.parseString('MathML:ln(MathML:exponentiale)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Ln)
+        self.assertIsInstance(expr, E.Ln)
         self.assertAlmostEqual(expr.Evaluate(env).value, 1)
         
         # log
         parse_action = csp.expr.parseString('MathML:log(10)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Log)
+        self.assertIsInstance(expr, E.Log)
         self.assertEqual(expr.Evaluate(env).value, 1)
         
         # exp and infinity value
         parse_action = csp.expr.parseString('MathML:exp(MathML:ln(10))', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Exp)
+        self.assertIsInstance(expr, E.Exp)
         self.assertAlmostEqual(expr.Evaluate(env).value, 10)
         
         # abs
         parse_action = csp.expr.parseString('MathML:abs(-10)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Abs)
+        self.assertIsInstance(expr, E.Abs)
         self.assertAlmostEqual(expr.Evaluate(env).value, 10)
         
         # root
         parse_action = csp.expr.parseString('MathML:root(100)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Root)
+        self.assertIsInstance(expr, E.Root)
         self.assertAlmostEqual(expr.Evaluate(env).value, 10)
         
         # rem
         parse_action = csp.expr.parseString('MathML:rem(100, 97)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Rem)
+        self.assertIsInstance(expr, E.Rem)
         self.assertAlmostEqual(expr.Evaluate(env).value, 3.0)
         
         # max
         parse_action = csp.expr.parseString('MathML:max(100, 97, 105)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Max)
+        self.assertIsInstance(expr, E.Max)
         self.assertAlmostEqual(expr.Evaluate(env).value, 105)
         
         # min and pi value
         parse_action = csp.expr.parseString('MathML:min(100, 97, 105, MathML:pi)', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Min)
+        self.assertIsInstance(expr, E.Min)
         self.assertAlmostEqual(expr.Evaluate(env).value, 3.1415926535)
         
         # null
         parse_action = csp.expr.parseString('null', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, M.Const)
+        self.assertIsInstance(expr, E.Const)
         self.assertIsInstance(expr.value, V.Null)
         
     def TestParsingIf(self):
@@ -321,7 +312,7 @@ class TestSyntaxInterface(unittest.TestCase):
     def TestParsingArray(self):
         parse_action = csp.expr.parseString('[1, 2, 3]', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, A.NewArray)
+        self.assertIsInstance(expr, E.NewArray)
         env = Env.Environment()
         np.testing.assert_array_almost_equal(expr.Evaluate(env).array, np.array([1, 2, 3]))
         
@@ -470,28 +461,28 @@ class TestSyntaxInterface(unittest.TestCase):
          parse_action = csp.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
          expr = parse_action[0].expr()
          self.assertIsInstance(expr, E.LambdaExpression)
-         result = E.FunctionCall(expr, [M.Const(V.DefaultParameter())]).Evaluate(env)
+         result = E.FunctionCall(expr, [E.Const(V.DefaultParameter())]).Evaluate(env)
          self.assertEqual(result.value, 5)
          
     def TestArrayComprehensions(self):
         env = Env.Environment()
         parse_action = csp.array.parseString('[i for i in 0:10]', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, A.NewArray)
+        self.assertIsInstance(expr, E.NewArray)
         result = expr.Evaluate(env)
         predicted = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
         np.testing.assert_array_almost_equal(predicted, result.array)
 
         parse_action = csp.array.parseString('[i*2 for i in 0:2:4]', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, A.NewArray)
+        self.assertIsInstance(expr, E.NewArray)
         result = expr.Evaluate(env)
         predicted = np.array([0, 4])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
         parse_action = csp.array.parseString('[i+j*5 for i in 1:3 for j in 2:4]', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, A.NewArray)
+        self.assertIsInstance(expr, E.NewArray)
         result = expr.Evaluate(env)
         predicted = np.array([[11, 16], [12, 17]])
         np.testing.assert_array_almost_equal(predicted, result.array)
@@ -501,7 +492,7 @@ class TestSyntaxInterface(unittest.TestCase):
         env.DefineName('arr', arr)
         parse_action = csp.expr.parseString('arr[1:2:10]', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array([1, 3, 5, 7, 9])
         np.testing.assert_array_almost_equal(predicted, result.array)
@@ -512,21 +503,21 @@ class TestSyntaxInterface(unittest.TestCase):
         env.DefineName('view_arr', view_arr)
         view_parse_action = csp.expr.parseString('view_arr[4]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array(4)
         np.testing.assert_array_almost_equal(result.array, predicted)
         
         view_parse_action = csp.expr.parseString('view_arr[2:5]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array([2, 3, 4])
         np.testing.assert_array_almost_equal(result.array, predicted)
 
         view_parse_action = csp.expr.parseString('view_arr[1:2:10]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array([1, 3, 5, 7, 9])
         np.testing.assert_array_almost_equal(predicted, result.array)
@@ -536,28 +527,28 @@ class TestSyntaxInterface(unittest.TestCase):
         env.DefineName('view_arr', view_arr)
         view_parse_action = csp.expr.parseString('view_arr[1$2]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array([2, 12])
         np.testing.assert_array_almost_equal(result.array, predicted)
         
         view_parse_action = csp.expr.parseString('view_arr[1$(3):]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array([[3, 4], [3, 9]])
         np.testing.assert_array_almost_equal(result.array, predicted)
         
         view_parse_action = csp.expr.parseString('view_arr[*$1]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array(8)
         np.testing.assert_array_almost_equal(result.array, predicted)
         
         view_parse_action = csp.expr.parseString('view_arr[*$1][0]', parseAll=True)
         expr = view_parse_action[0].expr()
-        self.assertIsInstance(expr, A.View)
+        self.assertIsInstance(expr, E.View)
         result = expr.Evaluate(env)
         predicted = np.array(1)
         np.testing.assert_array_almost_equal(result.array, predicted)
@@ -568,7 +559,7 @@ class TestSyntaxInterface(unittest.TestCase):
         env.DefineName('arr', arr)
         find_parse_action = csp.expr.parseString('find(arr)', parseAll=True)
         expr = find_parse_action[0].expr()
-        self.assertIsInstance(expr, A.Find)
+        self.assertIsInstance(expr, E.Find)
         find_result = expr.Evaluate(env)
         predicted = np.array([[1], [2], [3]])
         np.testing.assert_array_almost_equal(find_result.array, predicted)
@@ -591,7 +582,7 @@ class TestSyntaxInterface(unittest.TestCase):
         env.DefineName('find_result', find_result)
         index_parse_action = csp.expr.parseString('arr{find_result}', parseAll=True)
         expr = index_parse_action[0].expr()
-        self.assertIsInstance(expr, A.Index)
+        self.assertIsInstance(expr, E.Index)
         result = expr.Interpret(env)
         predicted = np.array([1, 2, 3])
         np.testing.assert_array_almost_equal(predicted, result.array)
@@ -625,7 +616,7 @@ class TestSyntaxInterface(unittest.TestCase):
         env.DefineName('add_function', add_function.Interpret(env))
         map_parse_action = csp.expr.parseString('map(add_function, arr, arr2)', parseAll=True)
         expr = map_parse_action[0].expr()
-        self.assertIsInstance(expr, A.Map)
+        self.assertIsInstance(expr, E.Map)
         result = expr.Evaluate(env)
         predicted = np.array([4, 6, 8, 10])
         np.testing.assert_array_almost_equal(predicted, result.array)
@@ -633,7 +624,7 @@ class TestSyntaxInterface(unittest.TestCase):
         # test fold
         fold_parse_action = csp.expr.parseString('fold(add_function, arr, 2, 0)', parseAll=True)
         expr = fold_parse_action[0].expr()
-        self.assertIsInstance(expr, A.Fold)
+        self.assertIsInstance(expr, E.Fold)
         result = expr.Evaluate(env)
         predicted = np.array([8])
         np.testing.assert_array_almost_equal(predicted, result.array)
@@ -655,7 +646,7 @@ class TestSyntaxInterface(unittest.TestCase):
         
         parse_action = csp.lambdaExpr.parseString('lambda t: 0*t')
         expr = parse_action[0].expr()
-        result = E.FunctionCall(expr, [A.NewArray(A.NewArray(N(1), N(2), N(3)), A.NewArray(N(3), N(4), N(5)))]).Evaluate(env)
+        result = E.FunctionCall(expr, [E.NewArray(E.NewArray(N(1), N(2), N(3)), E.NewArray(N(3), N(4), N(5)))]).Evaluate(env)
         predicted = np.array([[0, 0, 0], [0, 0, 0]])
         np.testing.assert_array_almost_equal(predicted, result.array)
         
@@ -690,46 +681,46 @@ class TestSyntaxInterface(unittest.TestCase):
         
     def TestFindIndexTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_find_index.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.Run()
     
     def TestCorePostProcTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.Run()
     
     def TestSimEnvTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestSimEnv')
-        proto.SetModel(TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
      
     def TestParallelNestedTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_parallel_nested.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestParallelNestedTxt')
-        proto.SetModel(TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
     
     def TestWhileLoopTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestWhileLoopTxt')
-        proto.SetModel(TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.SetInput('num_iters', N(10))
         proto.Run()
         
     def TestGraphTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/GraphState.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestGraphTxt')
-        proto.SetModel(TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
         
     def TestNestedProtocols(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestNestedProtocols')
         proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
         proto.model.SetSolver(Model.PySundialsSolver())
@@ -742,10 +733,10 @@ class TestSyntaxInterface(unittest.TestCase):
             self.assertIsInstance(each, S.Assign)
         
         # test below is just to test that we get the correct output for a protocol error
-        # it's commented out because it causes a protocol error every time
+        # TODO - it's commented out because it causes a protocol error every time
 #     def TestProtocolError(self):
 #         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
-#         proto = Protocol.Protocol(proto_file)
+#         proto = fc.Protocol(proto_file)
 #         proto.Run()
         
     def TestParsingRanges(self):
@@ -766,7 +757,7 @@ class TestSyntaxInterface(unittest.TestCase):
         r = [1, 3, 4]
         for i,num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
-            
+        
         # test parsing while range
         parse_action = csp.range.parseString('range rpt units dimensionless while rpt < 5', parseAll=True)
         expr = parse_action[0].expr()
@@ -782,7 +773,7 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         expr.Initialise()
         a = 5
-        expr.SetModel(TestOdeModel(a))
+        expr.SetModel(Model.TestOdeModel(a))
         run_sim = expr.Run()
         np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5]*11))
         np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t*5 for t in range(11)]))   
@@ -799,15 +790,15 @@ class TestSyntaxInterface(unittest.TestCase):
     def TestParsingModifiers(self):
         parse_action = csp.modifierWhen.parseString('at start', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertEqual(expr, AbstractModifier.START_ONLY)
+        self.assertEqual(expr, Modifiers.AbstractModifier.START_ONLY)
         
         parse_action = csp.modifierWhen.parseString('at each loop', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertEqual(expr, AbstractModifier.EACH_LOOP)
+        self.assertEqual(expr, Modifiers.AbstractModifier.EACH_LOOP)
         
         parse_action = csp.modifierWhen.parseString('at end', parseAll=True)
         expr = parse_action[0].expr()
-        self.assertEqual(expr, AbstractModifier.END_ONLY)
+        self.assertEqual(expr, Modifiers.AbstractModifier.END_ONLY)
         
         parse_action = csp.modifier.parseString('at start set model:a = 5.0', parseAll=True)
         expr = parse_action[0].expr()

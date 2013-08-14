@@ -30,19 +30,17 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import AbstractExpression as AE
-import Locatable
-import MathExpressions as M
-from ErrorHandling import ProtocolError
-import Values as V
 
-AbstractExpression = AE.AbstractExpression
+from . import values as V
+from ..utility import locatable
+from ..utility.error_handling import ProtocolError
 
 
-class AbstractStatement(Locatable.Locatable):
+class AbstractStatement(locatable.Locatable):
     """Base class for statements in the protocol language."""
     def Evaluate(self, env):
         raise NotImplementedError
+
 
 class Assign(AbstractStatement):
     """Assign statements in the protocol language."""
@@ -50,7 +48,7 @@ class Assign(AbstractStatement):
         super(Assign, self).__init__()
         self.names = names
         self.rhs = rhs
-                
+
     def Evaluate(self, env):
         results = self.rhs.Evaluate(env)
         if len(self.names) > 1:
@@ -60,26 +58,28 @@ class Assign(AbstractStatement):
         else:
             env.DefineName(self.names[0], results)
         return V.Null()
-    
+
+
 class Assert(AbstractStatement):
     def __init__(self, expr):
         super(Assert, self).__init__()
         self.expr = expr
-        
+
     def Evaluate(self, env):
         result = self.expr.Evaluate(env)
-        if hasattr(result, 'value'):
+        try:
             if not result.value:
                 raise ProtocolError("Assertion failed.")
-        else:
+        except AttributeError:
             raise ProtocolError("Assertion did not yield a Simple value or 0-d Array.")
         return V.Null()
+
 
 class Return(AbstractStatement):
     def __init__(self, *parameters):
         super(Return, self).__init__()
         self.parameters = parameters
-                
+
     def Evaluate(self, env):
         results = [expr.Evaluate(env) for expr in self.parameters]
         if len(results) == 0:
@@ -88,10 +88,11 @@ class Return(AbstractStatement):
             return results[0]
         else:
             return V.Tuple(*results)
-    
+
     def Compile(self, env):
         if len(self.parameters) == 1:
-            if isinstance(self.parameters[0], M.Const):
+            from .expressions import Const
+            if isinstance(self.parameters[0], Const):
                 raise NotImplementedError
             expression = self.parameters[0].Compile()
         else:

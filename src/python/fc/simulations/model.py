@@ -29,28 +29,29 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Environment as Env
-import MathExpressions as M
-import numpy as np
-from ErrorHandling import ProtocolError
-import scipy.integrate
-import Values as V
-from pysundials import cvode 
+
 import ctypes
+import numpy as np
+import scipy.integrate
+from pysundials import cvode
+
+from ..utility import environment as Env
+from ..language import values as V
+
 
 class AbstractModel(object):
     """Base class for models in the protocol language."""
     def Simulate(self):
-        raise NotImplementedError  
+        raise NotImplementedError
     
     def SetOutputFolder(self, path):
         if os.path.isdir(path) and path.startswith('/tmp'):
             shutil.rmtree(path)
         os.mkdir(path)
         self.outputPath = path
-    #def setoutputfolder will save the path to a folder to be used by nestedprotocol
 
-class ScipySolver(object):      
+
+class ScipySolver(object):
     def ResetState(self, resetTo):
         self.state = resetTo
         self.solver.set_initial_value(self.state, self.model.freeVariable)
@@ -67,7 +68,8 @@ class ScipySolver(object):
         
     def SetFreeVariable(self, t):
         self.solver.set_initial_value(self.state, self.model.freeVariable)
-    
+
+
 class PySundialsSolver(object):
     def AssociateWithModel(self, model):
         self.model = model
@@ -101,7 +103,8 @@ class PySundialsSolver(object):
         
     def SetFreeVariable(self, t):
         cvode.CVodeReInit(self.cvode_mem, cvode.realtype(t), self._state)
-        
+
+
 class AbstractOdeModel(AbstractModel):
     """This is a base class for ODE system models converted from CellML by PyCml.
 
@@ -191,8 +194,35 @@ class AbstractOdeModel(AbstractModel):
         self.freeVariable = endPoint
         self.state = self.solver.state##
 
+
+class NestedProtocol(AbstractModel):
+    def __init__(self, proto, inputExprs, outputNames):
+        from ..utility.protocol import Protocol
+        self.proto = Protocol(proto)
+        self.inputExprs = inputExprs
+        self.outputNames = outputNames
+
+    def GetOutputs(self):
+        env = Env.Environment()
+        for name in self.outputNames:
+            env.DefineName(name, self.proto.outputEnv.LookUp(name))
+        return env
+    
+    def GetEnvironmentMap(self):
+        return {}
+    
+    def SetVariable(self, name, valueExpr):
+        self.proto.SetInput(name, valueExpr)
+    
+    def Simulate(self, endPoint):
+        for name in self.inputExprs.keys():
+           self.proto.SetInput(name, self.inputExprs[name].Evaluate(self.simEnv))
+#         self.proto.SetOutputfolder(self.outputPath)
+        self.proto.Run()
+
+
 class TestOdeModel(AbstractOdeModel):
-    def __init__(self, a):        
+    def __init__(self, a):
         self.initialState = np.array([0])
         self.stateVarMap = {'membrane_voltage': 0, 'y': 0}
         self.parameters = np.array([a])
@@ -212,37 +242,3 @@ class TestOdeModel(AbstractOdeModel):
         env.DefineName('leakage_current', V.Simple(self.parameters[self.parameterMap['leakage_current']]))
         env.DefineName('membrane_voltage', V.Simple(self.state[self.stateVarMap['membrane_voltage']]))
         return env
-    
-class NestedProtocol(AbstractModel):
-    def __init__(self, proto, inputExprs, outputNames):
-        import Protocol
-        self.proto = Protocol.Protocol(proto)
-        self.inputExprs = inputExprs
-        self.outputNames = outputNames
-                
-    def GetOutputs(self):
-        env = Env.Environment()
-        for name in self.outputNames:
-            env.DefineName(name, self.proto.outputEnv.LookUp(name))
-        return env
-    
-    def GetEnvironmentMap(self):
-        return {}
-    
-    def SetVariable(self, name, valueExpr):
-        self.proto.SetInput(name, valueExpr)
-    
-    def Simulate(self, endPoint):
-        for name in self.inputExprs.keys():
-           self.proto.SetInput(name, self.inputExprs[name].Evaluate(self.simEnv))
-#         self.proto.SetOutputfolder(self.outputPath)
-        self.proto.Run()
-        
-        # sets proto's output folder before it runs so that the path 
-        
-    # setvariable can set inputs 
-    # internal run will probably call initialise that so you can call run multiple times and it
-    #restarts from beginning
-    # inside internal run you'll call proto.setinputs, proto.run
-    # getoutputs looks at proto.outputEnv and creates an environment based on the outputs that 
-    #are specified in the nested protocol and defines those in it's own environment, return env

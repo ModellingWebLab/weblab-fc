@@ -1,3 +1,4 @@
+
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
@@ -29,43 +30,3 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Environment as Env
-import scipy.integrate
-import numpy as np
-import Values as V
-
-
-class AbstractModifier(object):
-    """Base class for modifiers in the protocol language."""
-    START_ONLY = 0
-    EACH_LOOP = 1
-    END_ONLY = 2
-    def Apply(self):
-        raise NotImplementedError
-    
-class SetVariable(AbstractModifier):
-        def __init__(self, when, variableName, valueExpr):
-            self.when = when
-            self.variableName = variableName
-            self.valueExpr = valueExpr
-        
-        def Apply(self, simul):
-            value = self.valueExpr.Evaluate(simul.env)
-            simul.env.allowOverwrite = True
-            simul.env.OverwriteDefinition(self.variableName, value)
-        
-class SaveState(AbstractModifier):
-        def __init__(self, when, stateName):
-            self.when = when
-            self.stateName = stateName
-        
-        def Apply(self, simul):
-            simul.model.SaveState(self.stateName)
-    
-class ResetState(AbstractModifier):
-        def __init__(self, when, stateName=None):
-            self.when = when
-            self.stateName = stateName
-            
-        def Apply(self, simul):
-            simul.model.ResetState(self.stateName)       

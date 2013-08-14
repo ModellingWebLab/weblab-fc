@@ -36,7 +36,8 @@ Routines of use in tests of Functional Curation.
 
 import os
 import numpy as np
-import Values as V
+
+from ..language import values as V
 
 def CheckResults(proto, expectedSpec, dataFolder):
     """Check protocol results against saved values.

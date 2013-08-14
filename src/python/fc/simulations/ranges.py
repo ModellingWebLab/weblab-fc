@@ -29,19 +29,25 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Environment as Env
-import scipy.integrate
-import Values as V
+
+from ..language import values as V
 
 class AbstractRange(V.Simple):
     """Base class for ranges in the protocol language."""
     def Initialise(self, env):
         pass
-    
+
     @property
     def value(self):
-        return self.current  
-    
+        return self.current
+
+    def GetCurrentOutputPoint(self):
+        return self.current
+
+    def GetCurrentOutputNumber(self):
+        return self.count - 1
+
+
 class UniformRange(AbstractRange):
     def __init__(self, name, startExpr, endExpr, stepExpr):
         self.name = name
@@ -74,13 +80,8 @@ class UniformRange(AbstractRange):
         
     def GetNumberOfOutputPoints(self):
         return (round(self.end-self.start)/self.step) + 1
-    
-    def GetCurrentOutputPoint(self):
-        return self.current
-    
-    def GetCurrentOutputNumber(self):
-        return self.count - 1
-    
+
+
 class VectorRange(AbstractRange):
     def __init__(self, name, arrOrExpr):
         self.name = name
@@ -107,7 +108,7 @@ class VectorRange(AbstractRange):
     def next(self):
         if self.count >= len(self.arrRange):
             self.count = 0
-            raise StopIteration     
+            raise StopIteration
         else:
             self.current = self.arrRange[self.count]
             self.env.unwrappedBindings[self.name] = self.current
@@ -116,20 +117,15 @@ class VectorRange(AbstractRange):
         
     def GetNumberOfOutputPoints(self):
         return len(self.arrRange)
-    
-    def GetCurrentOutputPoint(self):
-        return self.current
-    
-    def GetCurrentOutputNumber(self):
-        return self.count - 1
-    
+
+
 class While(AbstractRange):
     def __init__(self, name, condition):
         self.name = name
         self.condition = condition
         self.count = 0
         self.numberOfOutputs = 1000
-        
+
     @property
     def current(self):
         return self.count - 1
@@ -142,7 +138,7 @@ class While(AbstractRange):
         self.env = env
         self.env.bindings[self.name] = V.Simple(self.current)
         self.env.unwrappedBindings[self.name] = self.current
-        
+
     def next(self):
         self.count += 1
         self.env.bindings[self.name] = self
@@ -154,12 +150,6 @@ class While(AbstractRange):
             raise StopIteration
         else:
             return self.current
-        
+
     def GetNumberOfOutputPoints(self):
         return self.numberOfOutputs
-    
-    def GetCurrentOutputPoint(self):
-        return self.current
-    
-    def GetCurrentOutputNumber(self):
-        return self.count - 1

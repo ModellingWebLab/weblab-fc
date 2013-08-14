@@ -31,27 +31,23 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import unittest
-import sys
-
-# Import the module to test
-import ArrayExpressions as A
-import Environment as Env
-import Expressions as E
-import MathExpressions as M
 import numpy as np
-from ErrorHandling import ProtocolError
-import Values as V
+import unittest
 
-def N(number):
-    return M.Const(V.Simple(number))
+import fc.language.expressions as E
+import fc.language.statements as S
+import fc.language.values as V
+import fc.utility.environment as Env
+from fc.utility.error_handling import ProtocolError
+
+N = E.N
 
 class TestBasicExpressions(unittest.TestCase):
     """Test basic math expressions using simple, null, and default values.""" 
     def TestAddition(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate(env).value, 3)
-        self.assertAlmostEqual(M.Plus(M.Const(V.Simple(1)), M.Const(V.Simple(2)), M.Const(V.Simple(4))).Evaluate(env).value, 7)
+        self.assertAlmostEqual(E.Plus(E.Const(V.Simple(1)), E.Const(V.Simple(2))).Evaluate(env).value, 3)
+        self.assertAlmostEqual(E.Plus(E.Const(V.Simple(1)), E.Const(V.Simple(2)), E.Const(V.Simple(4))).Evaluate(env).value, 7)
     
     def TestWith0dArray(self):
         env = Env.Environment()
@@ -59,73 +55,73 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertEqual(one.value, 1)
         two = V.Array(np.array(2))
         four = V.Array(np.array(4))
-        self.assertAlmostEqual(M.Plus(M.Const(one), M.Const(two)).Evaluate(env).value, 3)
-        self.assertAlmostEqual(M.Plus(M.Const(one), M.Const(two), M.Const(four)).Evaluate(env).value, 7)
-        self.assertAlmostEqual(M.Minus(M.Const(one), M.Const(two)).Evaluate(env).value, -1)
-        self.assertAlmostEqual(M.Power(M.Const(two), M.Const(four)).Evaluate(env).value, 16)
-        self.assertAlmostEqual(M.Times(M.Const(four), M.Const(two)).Evaluate(env).value, 8)
-        self.assertAlmostEqual(M.Root(M.Const(four)).Evaluate(env).value, 2)
+        self.assertAlmostEqual(E.Plus(E.Const(one), E.Const(two)).Evaluate(env).value, 3)
+        self.assertAlmostEqual(E.Plus(E.Const(one), E.Const(two), E.Const(four)).Evaluate(env).value, 7)
+        self.assertAlmostEqual(E.Minus(E.Const(one), E.Const(two)).Evaluate(env).value, -1)
+        self.assertAlmostEqual(E.Power(E.Const(two), E.Const(four)).Evaluate(env).value, 16)
+        self.assertAlmostEqual(E.Times(E.Const(four), E.Const(two)).Evaluate(env).value, 8)
+        self.assertAlmostEqual(E.Root(E.Const(four)).Evaluate(env).value, 2)
                 
     def TestMinus(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Minus(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate(env).value, -1)
-        self.assertAlmostEqual(M.Minus(M.Const(V.Simple(4))).Evaluate(env).value, -4)
+        self.assertAlmostEqual(E.Minus(E.Const(V.Simple(1)), E.Const(V.Simple(2))).Evaluate(env).value, -1)
+        self.assertAlmostEqual(E.Minus(E.Const(V.Simple(4))).Evaluate(env).value, -4)
         
     def TestTimes(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Times(M.Const(V.Simple(6)), M.Const(V.Simple(2))).Evaluate(env).value, 12)
-        self.assertAlmostEqual(M.Times(M.Const(V.Simple(6)), M.Const(V.Simple(2)), M.Const(V.Simple(3))).Evaluate(env).value, 36)
+        self.assertAlmostEqual(E.Times(E.Const(V.Simple(6)), E.Const(V.Simple(2))).Evaluate(env).value, 12)
+        self.assertAlmostEqual(E.Times(E.Const(V.Simple(6)), E.Const(V.Simple(2)), E.Const(V.Simple(3))).Evaluate(env).value, 36)
         
     def TestDivide(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Divide(M.Const(V.Simple(1)), M.Const(V.Simple(2))).Evaluate(env).value, .5)
+        self.assertAlmostEqual(E.Divide(E.Const(V.Simple(1)), E.Const(V.Simple(2))).Evaluate(env).value, .5)
         
     def TestMax(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Max(M.Const(V.Simple(6)), M.Const(V.Simple(12)), M.Const(V.Simple(2))).Evaluate(env).value, 12)
+        self.assertAlmostEqual(E.Max(E.Const(V.Simple(6)), E.Const(V.Simple(12)), E.Const(V.Simple(2))).Evaluate(env).value, 12)
 
     def TestMin(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Min(M.Const(V.Simple(6)), M.Const(V.Simple(2)), M.Const(V.Simple(12))).Evaluate(env).value, 2)
+        self.assertAlmostEqual(E.Min(E.Const(V.Simple(6)), E.Const(V.Simple(2)), E.Const(V.Simple(12))).Evaluate(env).value, 2)
         
     def TestRem(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Rem(M.Const(V.Simple(6)), M.Const(V.Simple(4))).Evaluate(env).value, 2)
+        self.assertAlmostEqual(E.Rem(E.Const(V.Simple(6)), E.Const(V.Simple(4))).Evaluate(env).value, 2)
         
     def TestPower(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Power(M.Const(V.Simple(2)), M.Const(V.Simple(3))).Evaluate(env).value, 8)
+        self.assertAlmostEqual(E.Power(E.Const(V.Simple(2)), E.Const(V.Simple(3))).Evaluate(env).value, 8)
         
     def TestRoot(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Root(M.Const(V.Simple(16))).Evaluate(env).value, 4)
-        self.assertAlmostEqual(M.Root(M.Const(V.Simple(3)), M.Const(V.Simple(8))).Evaluate(env).value, 2)
+        self.assertAlmostEqual(E.Root(E.Const(V.Simple(16))).Evaluate(env).value, 4)
+        self.assertAlmostEqual(E.Root(E.Const(V.Simple(3)), E.Const(V.Simple(8))).Evaluate(env).value, 2)
         
     def TestAbs(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Abs(M.Const(V.Simple(-4))).Evaluate(env).value, 4)
-        self.assertAlmostEqual(M.Abs(M.Const(V.Simple(4))).Evaluate(env).value, 4)
+        self.assertAlmostEqual(E.Abs(E.Const(V.Simple(-4))).Evaluate(env).value, 4)
+        self.assertAlmostEqual(E.Abs(E.Const(V.Simple(4))).Evaluate(env).value, 4)
         
     def TestFloor(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Floor(M.Const(V.Simple(1.8))).Evaluate(env).value, 1)
+        self.assertAlmostEqual(E.Floor(E.Const(V.Simple(1.8))).Evaluate(env).value, 1)
         
     def TestCeiling(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Ceiling(M.Const(V.Simple(1.2))).Evaluate(env).value, 2)
+        self.assertAlmostEqual(E.Ceiling(E.Const(V.Simple(1.2))).Evaluate(env).value, 2)
     
     def TestExp(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Exp(M.Const(V.Simple(3))).Evaluate(env).value, 20.0855369231)
+        self.assertAlmostEqual(E.Exp(E.Const(V.Simple(3))).Evaluate(env).value, 20.0855369231)
     
     def TestLn(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Ln(M.Const(V.Simple(3))).Evaluate(env).value, 1.0986122886) 
+        self.assertAlmostEqual(E.Ln(E.Const(V.Simple(3))).Evaluate(env).value, 1.0986122886) 
         
     def TestLog(self):
         env = Env.Environment()
-        self.assertAlmostEqual(M.Log(M.Const(V.Simple(3))).Evaluate(env).value, 0.4771212547196)
-        self.assertAlmostEqual(M.Log(M.Const(V.Simple(4)), M.Const(V.Simple(3))).Evaluate(env).value, 0.79248125036)
+        self.assertAlmostEqual(E.Log(E.Const(V.Simple(3))).Evaluate(env).value, 0.4771212547196)
+        self.assertAlmostEqual(E.Log(E.Const(V.Simple(4)), E.Const(V.Simple(3))).Evaluate(env).value, 0.79248125036)
     
     def TestNameLookUp(self):
         env = Env.Environment()
@@ -138,11 +134,11 @@ class TestBasicExpressions(unittest.TestCase):
     def TestIf(self):
         # test is true
         env = Env.Environment()
-        result = E.If(N(1), M.Plus(N(1), N(2)), M.Minus(N(1), N(2))).Evaluate(env)
+        result = E.If(N(1), E.Plus(N(1), N(2)), E.Minus(N(1), N(2))).Evaluate(env)
         self.assertEqual(3, result.value)
         
         # test is false
-        result = E.If(N(0), M.Plus(N(1), N(2)), M.Minus(N(1), N(2))).Evaluate(env)
+        result = E.If(N(0), E.Plus(N(1), N(2)), E.Minus(N(1), N(2))).Evaluate(env)
         self.assertEqual(-1, result.value)
         
     def TestAccessor(self):
@@ -154,7 +150,7 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertEqual(1, result.value)
         
         # test array
-        array = A.NewArray(A.NewArray(N(1), N(2)), A.NewArray(N(3), N(4)))
+        array = E.NewArray(E.NewArray(N(1), N(2)), E.NewArray(N(3), N(4)))
         result = E.Accessor(array, E.Accessor.IS_ARRAY).Interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(array, E.Accessor.NUM_DIMS).Interpret(env)
@@ -165,14 +161,14 @@ class TestBasicExpressions(unittest.TestCase):
         np.testing.assert_array_almost_equal(result.array, np.array([2,2]))
 
         # test string
-        string_test = M.Const(V.String("hi"))
+        string_test = E.Const(V.String("hi"))
         result = E.Accessor(string_test, E.Accessor.IS_STRING).Interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(array, E.Accessor.IS_STRING).Interpret(env)
         self.assertEqual(0, result.value)
         
         # test function
-        function = E.LambdaExpression.Wrap(M.Plus, 3)
+        function = E.LambdaExpression.Wrap(E.Plus, 3)
         result = E.Accessor(function, E.Accessor.IS_FUNCTION).Interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(string_test, E.Accessor.IS_FUNCTION).Interpret(env)
@@ -184,12 +180,12 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertEqual(1, result.value)
         
         # test null
-        null_test = M.Const(V.Null())
+        null_test = E.Const(V.Null())
         result = E.Accessor(null_test, E.Accessor.IS_NULL).Interpret(env)
         self.assertEqual(1, result.value)
         
         # test default
-        default_test = M.Const(V.DefaultParameter())
+        default_test = E.Const(V.DefaultParameter())
         result = E.Accessor(default_test, E.Accessor.IS_DEFAULT).Interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(null_test, E.Accessor.IS_DEFAULT).Interpret(env)

@@ -31,40 +31,35 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
 
+import numpy as np
+import os
+import time
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
-import ArrayExpressions as A
-import CompactSyntaxParser as CSP
-import Environment as Env
-import Expressions as E
-import MathExpressions as M
-import numpy as np
-import os
-import Protocol
-import time
-import TestSupport
-import Values as V
+import fc
+import fc.language.expressions as E
+import fc.language.values as V
+import fc.utility.environment as Env
+import fc.utility.test_support as TestSupport
+import fc.simulations.model as Model
 
-csp = CSP.CompactSyntaxParser
-
-def N(v):
-    return M.Const(V.Simple(v))
+N = E.N
 
 class TestSpeedRealProto(unittest.TestCase):
     def TestS1S2(self):
         # Parse the protocol into a sequence of post-processing statements
         proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
-        proto = Protocol.Protocol(proto_file)
+        proto = fc.Protocol(proto_file)
         # Load the raw simulation data from file
         proto.simulations = []
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/S1S2'
         membrane_voltage = TestSupport.Load2d(os.path.join(data_folder, 'outputs_membrane_voltage.csv'))
         time_1d = TestSupport.Load(os.path.join(data_folder, 'outputs_time_1d.csv'))
-        time_2d = A.NewArray(M.Const(time_1d),
-                             E.TupleExpression(N(0), N(0), N(1), N(91), M.Const(V.String('_'))),
+        time_2d = E.NewArray(E.Const(time_1d),
+                             E.TupleExpression(N(0), N(0), N(1), N(91), E.Const(V.String('_'))),
                              comprehension=True).Evaluate(proto.env)
         local_env = Env.Environment()
         local_env.DefineName('time', time_2d)
@@ -76,7 +71,7 @@ class TestSpeedRealProto(unittest.TestCase):
         TestSupport.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
 
     def TestIcal(self):
-        proto = Protocol.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
+        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
         proto.simulations = []
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
         local_env = Env.Environment()

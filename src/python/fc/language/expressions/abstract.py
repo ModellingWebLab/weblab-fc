@@ -30,14 +30,13 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import Locatable
-import numexpr as ne
-import numpy as np
-import os
-import sys
-import Values as V
 
-class AbstractExpression(Locatable.Locatable):
+import os
+
+from ...utility import locatable
+from .. import values as V
+
+class AbstractExpression(locatable.Locatable):
     """Base class for expressions in the protocol language."""   
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
@@ -56,42 +55,40 @@ class AbstractExpression(Locatable.Locatable):
 
     def EvaluateChildren(self, env):
         """Evaluate our child expressions and return a list of their values."""
-        child_list = [child.Evaluate(env) for child in self.children]
-        return child_list
-    
+        return [child.Evaluate(env) for child in self.children]
+
     def Interpret(self, env):
         """Evaluate this expression by interpreting the expression tree.
         Must be implemented by subclasses.
         """
         raise NotImplementedError
-    
+
     def Compile(self):
         """Create a string representation of this expression for evaluation by numexpr or numpy.
-        
+
         Evaluation of the generated string is only guaranteed to give correct results (as defined
         by the Interpret method) in certain array contexts, for instance maps and array comprehensions.
         """
         raise NotImplementedError
-    
+
     def GetUsedVariables(self):
         """Get the set of (non-local) identifiers referenced within this expression."""
         result = set()
         for child in self.children:
             result |= child.GetUsedVariables()
         return result
-    
+
     def Evaluate(self, env):
         """We always default to using Interpret for evaluating standalone expressions."""    
-        # if trace, print off the result of evaluate, otherwise just do below
         result = self.Interpret(env)
         if self.trace:
             if isinstance(result, V.Array):
                 print result.array.shape
             else:
                 print result
-    
+
             if self.outputFolder:
-                trace_path = self.outputFolder.GetAbsolutePath() + '/trace.txt' # join outputfolder.getabspath and trace.txt
+                trace_path = os.path.join(self.outputFolder.path, 'trace.txt')
                 f = open(trace_path, 'a+')
                 if isinstance(result, V.Array):
                     print >> f, result.array
@@ -100,3 +97,4 @@ class AbstractExpression(Locatable.Locatable):
                     print >> f, result
                 f.close()
         return result
+

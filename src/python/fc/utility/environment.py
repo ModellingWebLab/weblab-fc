@@ -29,12 +29,12 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from AbstractValue import AbstractValue
-from Locatable import Locatable
+
 import numpy as np
-from ErrorHandling import ProtocolError
-import sys
-import Values as V
+
+from .error_handling import ProtocolError
+from ..language import values as V
+
 
 class Environment(object):
     """Base class for environments in the protocol language."""
@@ -45,6 +45,7 @@ class Environment(object):
         self.bindings = DelegatingDict()
         self.unwrappedBindings = DelegatingDict()
         self.unwrappedBindings['___np'] = np
+        self.delegatees = {}
         if delegatee is not None:
             self.SetDelegateeEnv(delegatee, "")
         
@@ -55,6 +56,7 @@ class Environment(object):
             raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
         else:
             self.bindings[name] = value
+            # TODO: Give values a .unwrapped property to handle this more neatly
             if isinstance(value, V.Array):
                 self.unwrappedBindings[name] = value.array
             elif isinstance(value, V.Simple):
@@ -82,18 +84,23 @@ class Environment(object):
         stmt_list = parse_action[0].expr()
         return env.ExecuteStatements(stmt_list)
 
-    def FreshIdent(self):
-        self.next_ident[0] += 1
-        return "___%d" % self.next_ident[0] 
+    @staticmethod
+    def FreshIdent():
+        Environment.next_ident[0] += 1
+        return "___%d" % Environment.next_ident[0]
 
     def LookUp(self, name):
         result = self.bindings[name]
         return result
-    
+
     def SetDelegateeEnv(self, delegatee, prefix=""):
+        # TODO
+#        if prefix in self.delegatees:
+#            raise ProtocolError("Tried to assign multiple delegatee environments to the same prefix:", prefix)
+        self.delegatees[prefix] = delegatee
         self.bindings.SetDelegatee(delegatee.bindings, prefix)
         self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
-        
+
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())
 
@@ -106,35 +113,33 @@ class Environment(object):
         del self.unwrappedBindings[name]
         
     def OverwriteDefinition(self, name, value):
-        if not self.allowOverwrite:
-            raise ProtocolError("This environment does not support overwriting mappings")
         if isinstance(value, V.Array):
-                unwrapped_val = value.array
+            unwrapped_val = value.array
         elif isinstance(value, V.Simple):
-                unwrapped_val = value.value
+            unwrapped_val = value.value
         elif isinstance(value, V.Null):
-                unwrapped_val = None  
-        defined = False       
-        if name in self.bindings:
-            defined = True
-            self.bindings[name] = value #can't use DefineName because error would be thrown for name already being in environment
-            self.unwrappedBindings[name] = unwrapped_val    
-        else:     
-            parts = name.split(":", 1)
+            unwrapped_val = None
+        else:
+            print 'Unexpected overwrite:', self, name, value
+        def find_definition(env, name):
+            if name in env.bindings:
+                if not env.allowOverwrite:
+                    raise ProtocolError("This environment does not support overwriting mappings")
+                env.bindings[name] = value
+                if unwrapped_val is not False:
+                    env.unwrappedBindings[name] = unwrapped_val
+                return True
+            else:
+                parts = name.split(':', 1)
             if len(parts) == 2:
-                prefix, name = parts
-                if prefix in self.bindings.delegatees:
-                    if name in self.bindings.delegatees[prefix]:
-                        defined = True
-                        self.bindings.delegatees[prefix][name] = value
-                        self.unwrappedBindings.delegatees[prefix][name] = unwrapped_val
-            if '' in self.bindings.delegatees:
-                if name in self.bindings.delegatees['']:
-                    defined = True
-                    self.bindings.delegatees[''][name] = value
-                    self.unwrappedBindings.delegatees[''][name] = unwrapped_val
-        if not defined:
-            raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")    
+                prefix, local_name = parts
+                if prefix in self.delegatees:
+                    return find_definition(self.delegatees[prefix], local_name)
+            if '' in self.delegatees:
+                return find_definition(self.delegatees[''], name)
+            return False
+        if not find_definition(self, name):
+            raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")
     
     def Clear(self):
         self.bindings.clear()
@@ -154,10 +159,11 @@ class Environment(object):
                 if returnAllowed == True:
                     break
                 else:
-                    raise ProtocolError("Return statement not allowed outside of function")           
+                    raise ProtocolError("Return statement not allowed outside of function")
         return result
-    
-class DelegatingDict(dict): 
+
+
+class DelegatingDict(dict):
     def __init__(self, *args, **kwargs):
         super(DelegatingDict, self).__init__(*args, **kwargs)
         self.delegatees = {}
@@ -174,7 +180,8 @@ class DelegatingDict(dict):
         
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee
-        
+
+
 class ModelWrapperEnvironment(Environment):
     class _BindingsDict(dict):
         def __init__(self, unwrapped):
@@ -235,4 +242,3 @@ class ModelWrapperEnvironment(Environment):
     
     def DefinedNames(self):
         return self.names
-        

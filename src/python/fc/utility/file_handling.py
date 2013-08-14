@@ -31,8 +31,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import os
-from ErrorHandling import ProtocolError
 import shutil
+
+from .error_handling import ProtocolError
 
 class OutputFolder(object):
     """
@@ -52,7 +53,7 @@ class OutputFolder(object):
         def CreateFolder(path):
             if not os.path.exists(path):
                 head, tail = os.path.split(path)
-                CreateFolder(head)          
+                CreateFolder(head)
                 os.mkdir(path)
                 f = open(os.path.join(path, OutputFolder.SIG_FILE_NAME), 'w')
                 f.close()
@@ -60,7 +61,7 @@ class OutputFolder(object):
         if os.path.exists(self.path):
             if cleanFolder:
                 self.RemoveOutputFolder(self.path)
-        CreateFolder(self.path)                 
+        CreateFolder(self.path)
     
     @staticmethod
     def GetRootOutputFolder():
@@ -77,7 +78,6 @@ class OutputFolder(object):
     def GetAbsolutePath(self):
         """Get the absolute path to this output folder."""
         return self.path
-        
     
     def CreateSubfolder(self, path):
         """Create a new OutputFolder inside this one.
@@ -103,7 +103,6 @@ class OutputFolder(object):
             shutil.rmtree(abs_path)
         else:
             raise ProtocolError("Folder cannot be removed because it was not created via the OutputFolder class.")
-        
     
     @staticmethod
     def CheckOutputPath(path):
@@ -117,4 +116,3 @@ class OutputFolder(object):
         if not abs_path.startswith(OutputFolder.GetRootOutputFolder()):
             raise ProtocolError('Cannot alter the directory or file in this path.')
         return abs_path
-    

@@ -75,27 +75,26 @@ def DoXmlImports():
 if __name__ == '__main__':
     DoXmlImports()
 else:
-    import Expressions as E
-    import MathExpressions as M
-    import ArrayExpressions as A
-    import Values as V
-    import Statements as S
-    import Ranges
-    import Simulations
-    import Model
-    import Modifiers
-    from Locatable import Locatable
-    import numpy as np
     import math
+    import numpy as np
 
-    OPERATORS = {'+': M.Plus, '-': M.Minus, '*': M.Times, '/': M.Divide, '^': M.Power, 
-                 '==': M.Eq, '!=': M.Neq, '<': M.Lt, '>': M.Gt, '<=': M.Leq, '>=':M.Geq,
-                 'not': M.Not, '&&': M.And, '||': M.Or}
-    MATHML = {'log': M.Log, 'ln': M.Ln, 'exp': M.Exp, 'abs': M.Abs, 'ceiling': M.Ceiling, 
-              'floor': M.Floor, 'max': M.Max, 'min': M.Min, 'rem': M.Rem, 'root': M.Root}
-    VALUES = {'true': M.Const(V.Simple(True)), 'false': M.Const(V.Simple(False)), 
-              'exponentiale': M.Const(V.Simple(math.e)), 'infinity': M.Const(V.Simple(float('inf'))),
-              'pi': M.Const(V.Simple(math.pi)), 'notanumber': M.Const(V.Simple(float('nan')))}
+    import fc.language.expressions as E
+    import fc.language.statements as S
+    import fc.language.values as V
+    import fc.simulations.model as Model
+    import fc.simulations.modifiers as Modifiers
+    import fc.simulations.ranges as Ranges
+    import fc.simulations.simulations as Simulations
+    from fc.utility.locatable import Locatable
+
+    OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power, 
+                 '==': E.Eq, '!=': E.Neq, '<': E.Lt, '>': E.Gt, '<=': E.Leq, '>=':E.Geq,
+                 'not': E.Not, '&&': E.And, '||': E.Or}
+    MATHML = {'log': E.Log, 'ln': E.Ln, 'exp': E.Exp, 'abs': E.Abs, 'ceiling': E.Ceiling, 
+              'floor': E.Floor, 'max': E.Max, 'min': E.Min, 'rem': E.Rem, 'root': E.Root}
+    VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)), 
+              'exponentiale': E.Const(V.Simple(math.e)), 'infinity': E.Const(V.Simple(float('inf'))),
+              'pi': E.Const(V.Simple(math.pi)), 'notanumber': E.Const(V.Simple(float('nan')))}
 
 
 class Actions(object):
@@ -250,7 +249,7 @@ class Actions(object):
             return elt
         
         def _expr(self):
-            return M.Const(V.Simple(self.tokens))
+            return E.Const(V.Simple(self.tokens))
     
     class Variable(BaseGroupAction):
         """Parse action for variable references (identifiers)."""
@@ -453,11 +452,11 @@ class Actions(object):
             args = map(lambda t: t.expr(), self.tokens[1])
             if hasattr(func, 'name'):
                 if func.name == 'map':
-                    result = A.Map(*args)
+                    result = E.Map(*args)
                 elif func.name == 'fold':
-                    result = A.Fold(*args)
+                    result = E.Fold(*args)
                 elif func.name == 'find':
-                    result = A.Find(*args)
+                    result = E.Find(*args)
                 else:
                     result = E.FunctionCall(func, args)
             elif not isinstance(func, E.NameLookUp):
@@ -480,11 +479,11 @@ class Actions(object):
         
         def _expr(self):
             if self.symbol == "null":
-                return M.Const(V.Null())
+                return E.Const(V.Null())
             elif self.symbol == "defaultParameter":
-                return M.Const(V.DefaultParameter())
+                return E.Const(V.DefaultParameter())
             if isinstance(self.tokens, str):
-                return M.Const(V.String(self.tokens))
+                return E.Const(V.String(self.tokens))
     
     @staticmethod
     def Symbol(symbol):
@@ -497,7 +496,7 @@ class Actions(object):
         """Parse action for accessors."""
         def _xml(self):
             if len(self.tokens) > 2:
-                # Chained accessors, e.g. A.SHAPE.IS_ARRAY
+                # Chained accessors, e.g. E.SHAPE.IS_ARRAY
                 return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).xml()
             assert len(self.tokens) == 2
             object = self.tokens[0].xml()
@@ -506,7 +505,7 @@ class Actions(object):
         
         def _expr(self):
             if len(self.tokens) > 2:
-                # Chained accessors, e.g. A.SHAPE.IS_ARRAY
+                # Chained accessors, e.g. E.SHAPE.IS_ARRAY
                 return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).expr()
             assert len(self.tokens) == 2
             object = self.tokens[0].expr()
@@ -556,9 +555,9 @@ class Actions(object):
             entries = self.GetChildrenExpr()
             if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
                 # Array comprehension
-                return A.NewArray(*entries, comprehension=True)
+                return E.NewArray(*entries, comprehension=True)
             else:
-                return A.NewArray(*entries)
+                return E.NewArray(*entries)
     
     class View(BaseGroupAction):
         """Parse action for array views."""
@@ -627,7 +626,7 @@ class Actions(object):
                     if token == '' or token == '*':
                         real_tuple_tokens[i] = null_token
                 args.append(self.Delegate('Tuple', [real_tuple_tokens]).expr())
-            return A.View(*args)
+            return E.View(*args)
     
     class Index(BaseGroupAction):
         """Parse action for index expressions."""
@@ -657,7 +656,7 @@ class Actions(object):
                 assert len(index_tokens['pad']) == 2
                 args.extend(index_tokens['pad']) # Pad direction & value
             args = [each.expr() for each in args]
-            return A.Index(*args)
+            return E.Index(*args)
     
     ######################################################################
     # Post-processing language statements
@@ -795,7 +794,7 @@ class Actions(object):
                 if len(tokens) == 3:
                     step = tokens[1].expr()
                 else:
-                    step = M.Const(V.Simple(1))
+                    step = E.Const(V.Simple(1))
                 range_ = Ranges.UniformRange(attrs['name'], start, stop, step)
             elif 'vector' in self.tokens:
                 expr = self.tokens['vector'][0].expr()

@@ -30,61 +30,74 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGEnv.
 """
 
-import AbstractValue
-import Environment as Env
 import numpy as np
-from ErrorHandling import ProtocolError
 
-class Simple(AbstractValue.AbstractValue):
+from ..utility.error_handling import ProtocolError
+
+
+class AbstractValue(object):
+    """Base class for values in the protocol language."""
+    def __init__(self, units=None):
+        self.units = units
+
+
+class Simple(AbstractValue):
     """Simple value class in the protocol language for numbers."""
     def __init__(self, value):
         self.value = float(value)
-    
+
     @property
     def array(self):
         return np.array(self.value)
-        
-class Array(AbstractValue.AbstractValue):
-    """Class in the protocol langugage for arrays."""
+
+
+class Array(AbstractValue):
+    """Class in the protocol language for arrays."""
     def __init__(self, array):
         assert isinstance(array, (np.ndarray, np.float))
         self.array = np.array(array, dtype=float, copy=False)
-    
+
     @property
     def value(self):
         if self.array.ndim == 0:
             return self.array[()]
         else:
             raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
-        
-class Tuple(AbstractValue.AbstractValue):
+
+
+class Tuple(AbstractValue):
     """Tuple class in the protocol language."""
     def __init__(self, *values):
         self.values = tuple(values)
-        
-class Null(AbstractValue.AbstractValue):
+
+
+class Null(AbstractValue):
     """Null class in the protocol language."""
     pass
 
-class String(AbstractValue.AbstractValue):
+
+class String(AbstractValue):
     """String class in the protocol language."""
     def __init__(self, value):
         self.value = value
-        
-class DefaultParameter(AbstractValue.AbstractValue):
+
+
+class DefaultParameter(AbstractValue):
     """Class in protocol language used for default values."""
     pass
-        
-class LambdaClosure(AbstractValue.AbstractValue):
-    """LambdaClosure class for functions in the protocol language."""
+
+
+class LambdaClosure(AbstractValue):
+    """Class for functions in the protocol language."""
     def __init__(self, definingEnv, formalParameters, body, defaultParameters):
         self.formalParameters = formalParameters
         self.body = body
         self.defaultParameters = defaultParameters
         self.definingEnv = definingEnv
-    
+
     def Compile(self, env, actualParameters):
-        local_env = Env.Environment(delegatee=self.definingEnv)
+        from ..utility.environment import Environment
+        local_env = Environment(delegatee=self.definingEnv)
         params = actualParameters[:]
         if len(params) < len(self.formalParameters):
             params.extend([DefaultParameter()] * (len(self.formalParameters) - len(params)))
@@ -99,10 +112,11 @@ class LambdaClosure(AbstractValue.AbstractValue):
                 raise ProtocolError("One of the parameters is not defined and has no default value")
         if len(self.body) == 1:
             expression = self.body[0].Compile(env)
-        return expression,local_env
-    
+        return expression, local_env
+
     def Evaluate(self, env, actualParameters):
-        local_env = Env.Environment(delegatee=self.definingEnv)
+        from ..utility.environment import Environment
+        local_env = Environment(delegatee=self.definingEnv)
         if len(actualParameters) < len(self.formalParameters):
             actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
         for i,param in enumerate(actualParameters):
@@ -114,6 +128,4 @@ class LambdaClosure(AbstractValue.AbstractValue):
                 raise ProtocolError("One of the parameters is not defined and has no default value")
         result = local_env.ExecuteStatements(self.body, returnAllowed=True)
         return result
-            
-        
-    
+

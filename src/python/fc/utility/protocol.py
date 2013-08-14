@@ -30,20 +30,22 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from AbstractValue import AbstractValue
-import CompactSyntaxParser as CSP
-import Environment as Env
-from Locatable import Locatable
+
 import os
-from FileHandling import OutputFolder
-from ErrorHandling import ProtocolError
-import sys
-from tables import *
 import shutil
+import sys
+import tables
 import time
 
+from . import environment as Env
+from .error_handling import ProtocolError
+from .file_handling import OutputFolder
+from .locatable import Locatable
+from ..language import values as V
 
+import CompactSyntaxParser as CSP
 csp = CSP.CompactSyntaxParser
+
 
 class Protocol(object):
     """Base class for protocols in the protocol language."""
@@ -58,11 +60,8 @@ class Protocol(object):
         self.library = []
         self.simulations = []
         self.postProcessing = []
-        self.outputs = [] #details.get outputs is going to be a list of dictionaries, if there's 
-        # a ref then look that up, otherwise just look up the name in the postprocessing env and
-        # define those names in outputenv as the value that you get from postprocessingenv
-        self.plots = [] #details.get plots returns a list of dictionaries too that map plot title
-        # to a list of curves, 
+        self.outputs = []
+        self.plots = []
         parser = csp()
         CSP.Actions.source_file = protoFile
         generator = parser._Try(csp.protocol.parseFile, protoFile, parseAll=True)[0]
@@ -71,7 +70,7 @@ class Protocol(object):
         assert isinstance(details, dict)
         for prefix, path in details.get('imports', []):
             imported_proto = Protocol(self.GetPath(protoFile, path))
-            if prefix == "":    
+            if prefix == "":
                 self.library.extend(imported_proto.library)
                 self.simulations.extend(imported_proto.simulations)
                 self.postProcessing.extend(imported_proto.postProcessing)
@@ -83,7 +82,7 @@ class Protocol(object):
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
         self.postProcessing.extend(details.get('postprocessing', []))
-        self.outputs.extend(details.get('outputs', []))      
+        self.outputs.extend(details.get('outputs', []))
         self.plots.extend(details.get('plots', []))
 
     def Initialise(self):
@@ -121,14 +120,15 @@ class Protocol(object):
             return
         print 'saving output data to h5 file...'
         start = time.time()
-        filename = os.path.join(self.outputFolder.GetAbsolutePath(), 'output.h5')
-        h5file = open_file(filename, mode='w', title=self.plots[0]['title'])
+        filename = os.path.join(self.outputFolder.path, 'output.h5')
+        h5file = tables.open_file(filename, mode='w', title=self.plots[0]['title'])
         group = h5file.create_group('/', 'output', 'output parent')
         for output in self.outputs:
             if not 'description' in output:
                 output['description'] = output['name']
             h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
                                 title=output['description'])
+        h5file.close()
         print 'writing output data to file took', '%.2f' %(time.time() - start), 'seconds.'
         import matplotlib
         matplotlib.use('Agg')
@@ -152,15 +152,15 @@ class Protocol(object):
                     plt.plot(x.array, y_data[i].array)
                 plt.title(plot['title'])
                 plt.xlabel(plot_descriptions[plot['x']])
-                plt.ylabel(plot_descriptions[plot['y']])  
-            plt.savefig(self.outputFolder.GetAbsolutePath() + '/' + plot['title'] + '.png')
+                plt.ylabel(plot_descriptions[plot['y']])
+            plt.savefig(os.path.join(self.outputFolder.path, plot['title'] + '.png'))
             plt.close()
         print 'plots took', '%.2f' %(time.time() - start), 'seconds to complete.'
-        h5file.close()
 
     def Run(self):
         Locatable.outputFolder = self.outputFolder
         self.Initialise()
+        # TODO: make status output optional; add timings to dictionary and summarise at end
         print 'running protocol...'
         try:
             for sim in self.simulations:
@@ -171,7 +171,7 @@ class Protocol(object):
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
             start = time.time()
             self.libraryEnv.ExecuteStatements(self.library)  
-            print 'library statements took', '%.2f' %(time.time() - start), 'seconds to execute.'   
+            print 'library statements took', '%.2f' %(time.time() - start), 'seconds to execute.'
             start = time.time()
             self.RunSimulations()
             print 'simulations took', '%.2f' %(time.time() - start), 'seconds to run.'
@@ -180,12 +180,12 @@ class Protocol(object):
             print 'post processing took', '%.2f' %(time.time() - start), 'seconds to run.'
             if self.plots:
                 self.OutputsAndPlots()
-                       
+
         except ProtocolError:
             locations = []
-            current_trace = sys.exc_info()[2]               
+            current_trace = sys.exc_info()[2]
             while current_trace is not None:
-                local_vars = current_trace.tb_frame.f_locals 
+                local_vars = current_trace.tb_frame.f_locals
                 if 'self' in local_vars:
                     if isinstance(local_vars['self'], Locatable) and (not locations or local_vars['self'].location != locations[-1]):
                         locations.append(local_vars['self'].location)
@@ -202,41 +202,39 @@ class Protocol(object):
 #                     os.rmdir(os.path.join(root, name))
 #                 except OSError:
 #                         pass
-    
+
     def RunSimulations(self):
         for sim in self.simulations:
             sim.Initialise() 
-            print 'running simulation', sim.prefix  
+            print 'running simulation', sim.prefix
             sim.Run()
             # Reset trace folder in case a nested protocol changes it
             Locatable.outputFolder = self.outputFolder
-                
+
     def RunPostProcessing(self):
         print 'running post processing...'
         self.postProcessingEnv.ExecuteStatements(self.postProcessing)
 
     def SetInput(self, name, valueExpr):
-        if isinstance(valueExpr, AbstractValue):
+        if isinstance(valueExpr, V.AbstractValue):
             value = valueExpr
         else:
             value = valueExpr.Evaluate(self.inputEnv)
         self.inputEnv.OverwriteDefinition(name, value)
-        
+
     def SetModel(self, model, useNumba=True):
         start = time.time()
         if isinstance(model, str):
+            print 'generating model code...'
             import tempfile, subprocess, imp, sys
             if self.outputFolder:
                 dir = tempfile.mkdtemp(dir=self.outputFolder.path)
-                print 'set dir to outputfolder'
             else:
                 dir = tempfile.mkdtemp()
             xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', self.protoFile, dir])
             xml_file = xml_file.strip()
             model_py_file = os.path.join(dir, 'model.py')
             class_name = 'GeneratedModel'
-            print 'generating model code...'
-            
             code_gen_cmd = ['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu',
                             '--protocol=' + xml_file,  model, '-c', class_name, '-o', model_py_file]
             if not useNumba:
@@ -244,23 +242,15 @@ class Protocol(object):
             code = subprocess.check_output(code_gen_cmd)
             sys.path.insert(0, dir)
             import model as module
-#             module = imp.new_module(class_name)
-#             exec code in module.__dict__
             for name in module.__dict__.keys():
                 if name.startswith(class_name):
                     model = getattr(module, name)()
                     model._module = module
-                    #model._code = code
             del sys.modules['model']
-#             try:
-#                 shutil.rmtree(dir)  # delete directory
-#             except OSError as exc:
-#                 if exc.errno != 2:  # code 2 - no such file or directory
-#                     raise  # re-raise exception
+            print 'generating code took', '%.2f' %(time.time() - start), 'seconds to run.'
+        self.model = model
         for sim in self.simulations:
             sim.SetModel(model)
-        self.model = model
-        print 'generating code took', '%.2f' %(time.time() - start), 'seconds to run.'
-        
+
     def GetPath(self, basePath, path):
         return os.path.join(os.path.dirname(basePath), path)

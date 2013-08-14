@@ -1,3 +1,4 @@
+
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
@@ -29,9 +30,3 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
-class AbstractValue(object):
-    """Base class for values in the protocol language."""
-    def __init__(self, units=None):
-        self.units = units
-        

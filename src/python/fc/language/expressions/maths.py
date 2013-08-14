@@ -30,63 +30,48 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from AbstractExpression import AbstractExpression
+
 import math
 import numexpr as ne
-from ErrorHandling import ProtocolError
-import Values as V
 
-class Const(AbstractExpression):
-    """Class for constant value as expression."""
-    def __init__(self, value):
-        super(Const, self).__init__()
-        self.value = value
-        
-    def Interpret(self, env):
-        return self.value    
-    
-    def Compile(self):
-        try:
-            return str(self.value.value)
-        except AttributeError:
-            raise NotImplementedError
-    
-    def GetUsedVariables(self):
-        return set()
-        
+from .abstract import AbstractExpression
+from ...utility.error_handling import ProtocolError
+from .. import values as V
+
+
 class Plus(AbstractExpression):
     """Addition."""
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if isinstance(operands[0], V.Array):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
-            arr_dict = {}           
+            arr_dict = {}
             for i,operand in enumerate(operands):
                 arr_dict[arr_names[i]] = operand.array
-            expression = ' + '.join(arr_names)   
+            expression = ' + '.join(arr_names)
             result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
-            
-        else:  
+
+        else:
             try:
                 result = V.Simple(sum([v.value for v in operands]))
             except AttributeError:
                 raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers;", v, "does not.")
         return result
-    
+
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
-        expression = ' + '.join(operands)  
-        return expression 
-    
+        expression = ' + '.join(operands)
+        return expression
+
 class Minus(AbstractExpression):
     """Subtraction."""
     def __init__(self, *children):
         super(Minus, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
             raise ProtocolError("Operator 'minus' requires one or two operands, not", len(self.children))
-        
+
     def Interpret(self, env):
-        operands = self.EvaluateChildren(env)      
+        operands = self.EvaluateChildren(env)
         try:
             if len(self.children) == 1:
                 result = -operands[0].value
@@ -95,7 +80,7 @@ class Minus(AbstractExpression):
         except AttributeError:
             raise ProtocolError("Operator 'minus' requires all operands to evaluate numbers")
         return V.Simple(result)
-    
+
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         if len(operands) == 1:
@@ -110,13 +95,13 @@ class Times(AbstractExpression):
         operands = self.EvaluateChildren(env)
         if any(isinstance(operand, V.Array) for operand in operands):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
-            arr_dict = {}            
+            arr_dict = {}
             for i,operand in enumerate(operands):
                 try:
                     arr_dict[arr_names[i]] = operand.array
                 except AttributeError:
                     arr_dict[arr_names[i]] = operand.value
-            expression = ' * '.join(arr_names)   
+            expression = ' * '.join(arr_names)
             result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
         else:
             try:

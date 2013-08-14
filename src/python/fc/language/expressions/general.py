@@ -30,12 +30,32 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from AbstractExpression import AbstractExpression
-from ErrorHandling import ProtocolError
-import numexpr as ne
+
 import numpy as np
-import Statements as S
-import Values as V
+
+from .abstract import AbstractExpression
+from ...utility.error_handling import ProtocolError
+from .. import values as V
+
+
+class Const(AbstractExpression):
+    """Class for constant value as expression."""
+    def __init__(self, value):
+        super(Const, self).__init__()
+        self.value = value
+
+    def Interpret(self, env):
+        return self.value
+
+    def Compile(self):
+        try:
+            return str(self.value.value)
+        except AttributeError:
+            raise NotImplementedError
+
+    def GetUsedVariables(self):
+        return set()
+
 
 class FunctionCall(AbstractExpression):
     """Used to call a function in the protocol language."""
@@ -46,14 +66,15 @@ class FunctionCall(AbstractExpression):
         else:
             self.function = functionOrName
         self.children = children
-        
+
     def Interpret(self, env):
         actual_params = self.EvaluateChildren(env)
         function = self.function.Evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError(function, "is not a function")
         return function.Evaluate(env, actual_params)
-    
+
+
 class If(AbstractExpression):
     """If, then, else statement in protocol language."""
     def __init__(self, testExpr, thenExpr, elseExpr):
@@ -61,7 +82,7 @@ class If(AbstractExpression):
         self.testExpr = testExpr
         self.thenExpr = thenExpr
         self.elseExpr = elseExpr
-    
+
     def Interpret(self, env):
         test = self.testExpr.Evaluate(env)
         if not hasattr(test, 'value'):
@@ -83,7 +104,8 @@ class If(AbstractExpression):
         then = self.thenExpr.Compile()
         else_ = self.elseExpr.Compile()
         return '___np.where(%s,%s,%s)' % (test, then, else_)
-        
+
+
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
     def __init__(self, name):
@@ -98,7 +120,8 @@ class NameLookUp(AbstractExpression):
     
     def GetUsedVariables(self):
         return set([self.name])
-    
+
+
 class TupleExpression(AbstractExpression):
     """Expression that returns a protocol language tuple when evaluated."""
     def __init__(self, *children):
@@ -108,7 +131,8 @@ class TupleExpression(AbstractExpression):
         
     def Interpret(self, env):
         return V.Tuple(*self.EvaluateChildren(env))
-        
+
+
 class LambdaExpression(AbstractExpression):
     """Expression for function in protocol language."""
     def __init__(self, formalParameters, body, defaultParameters=None):
@@ -118,18 +142,20 @@ class LambdaExpression(AbstractExpression):
         self.defaultParameters = defaultParameters
         
     def Interpret(self, env):
-        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters) 
+        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)
     
     @staticmethod
-    def Wrap(operator, numParams): 
+    def Wrap(operator, numParams):
         parameters = []
         look_up_list = []
         for i in range(numParams):
             parameters.append("___" + str(i))
-            look_up_list.append(NameLookUp("___" + str(i))) 
-        body = [S.Return(operator(*look_up_list))]
+            look_up_list.append(NameLookUp("___" + str(i)))
+        from ..statements import Return
+        body = [Return(operator(*look_up_list))]
         function = LambdaExpression(parameters, body)
         return function
+
 
 class Accessor(AbstractExpression):
     """Expression that reports type of protocol language value."""
