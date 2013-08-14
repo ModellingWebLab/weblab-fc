@@ -43,9 +43,6 @@ from .file_handling import OutputFolder
 from .locatable import Locatable
 from ..language import values as V
 
-import CompactSyntaxParser as CSP
-csp = CSP.CompactSyntaxParser
-
 
 class Protocol(object):
     """Base class for protocols in the protocol language."""
@@ -62,9 +59,11 @@ class Protocol(object):
         self.postProcessing = []
         self.outputs = []
         self.plots = []
-        parser = csp()
+        
+        import CompactSyntaxParser as CSP
+        parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
-        generator = parser._Try(csp.protocol.parseFile, protoFile, parseAll=True)[0]
+        generator = parser._Try(CSP.CompactSyntaxParser.protocol.parseFile, protoFile, parseAll=True)[0]
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
