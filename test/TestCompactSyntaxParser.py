@@ -325,6 +325,11 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.newVariable, 'var varname = 0')
         self.failIfParses(csp.newVariable, 'var varname')
         
+        self.assertParses(csp.clampVariable, 'clamp p:v', [['p:v']],
+                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:p:v', 'ci:p:v'])]))
+        self.assertParses(csp.clampVariable, 'clamp p:v to 0 :: U', [['p:v', '0']],
+                          ('addOrReplaceEquation', [('apply', ['eq', 'ci:p:v', WithUnits('cn:0', 'U')])]))
+        
         self.assertParses(csp.modelEquation, 'define local_var = 1::U + model:var',
                           [['local_var', ['1', '+', 'model:var']]],
                           ('addOrReplaceEquation', [('apply', ['eq', 'ci:local_var',

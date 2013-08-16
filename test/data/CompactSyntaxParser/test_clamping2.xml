@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='ASCII'?>
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:1:1&#9;# Test clamping state variables to their initial value" xml:base="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt">
+  <proto:import source="../../../src/proto/library/BasicLibrary.txt" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:5:1&#9;import std = &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
+  <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:7:1&#9;units {">
+    <cellml:units xmlns:cellml="http://www.cellml.org/cellml/1.0#" name="mV" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:8:5&#9;    mV = milli volt">
+      <cellml:unit units="volt" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:8:10&#9;    mV = milli volt"/>
+    </cellml:units>
+    <cellml:units xmlns:cellml="http://www.cellml.org/cellml/1.0#" name="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:9:5&#9;    ms = milli second">
+      <cellml:unit units="second" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:9:10&#9;    ms = milli second"/>
+    </cellml:units>
+  </proto:units>
+  <proto:modelInterface proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:12:1&#9;model interface {">
+    <proto:specifyOutputVariable units="mV" name="oxmeta:membrane_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:13:5&#9;    output oxmeta:membrane_voltage units mV"/>
+    <proto:specifyOutputVariable units="ms" name="oxmeta:time" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:14:5&#9;    output oxmeta:time units ms # Needed to stop solver falling over"/>
+    <proto:addOrReplaceEquation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:16:5&#9;    clamp oxmeta:membrane_voltage to 0 :: mV">
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:16:5&#9;    clamp oxmeta:membrane_voltage to 0 :: mV">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:16:11&#9;    clamp oxmeta:membrane_voltage to 0 :: mV">oxmeta:membrane_voltage</m:ci>
+        <m:cn xmlns:ns1="http://www.cellml.org/cellml/1.0#" ns1:units="mV" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:16:38&#9;    clamp oxmeta:membrane_voltage to 0 :: mV">0</m:cn>
+      </m:apply>
+    </proto:addOrReplaceEquation>
+  </proto:modelInterface>
+  <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:19:1&#9;tasks {">
+    <proto:timecourseSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:20:5&#9;    simulation sim = timecourse {" prefix="sim">
+      <proto:uniformStepper units="ms" name="t" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:21:9&#9;        range t units ms uniform 0:5">
+        <proto:start>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:21:34&#9;        range t units ms uniform 0:5">0</m:cn>
+        </proto:start>
+        <proto:stop>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:21:36&#9;        range t units ms uniform 0:5">5</m:cn>
+        </proto:stop>
+        <proto:step>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:21:9&#9;        range t units ms uniform 0:5">1</m:cn>
+        </proto:step>
+      </proto:uniformStepper>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:20:22&#9;    simulation sim = timecourse {"/>
+    </proto:timecourseSimulation>
+  </proto:simulations>
+  <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:25:1&#9;post-processing {">
+    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:25:1&#9;post-processing {">
+      <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:25:1&#9;post-processing {"/>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:5&#9;    def Close(a1, a2, tol=1e-6) {">
+        <m:eq/>
+        <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:9&#9;    def Close(a1, a2, tol=1e-6) {">Close</m:ci>
+        <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:5&#9;    def Close(a1, a2, tol=1e-6) {">
+          <m:bvar>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:15&#9;    def Close(a1, a2, tol=1e-6) {">a1</m:ci>
+          </m:bvar>
+          <m:bvar>
+            <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:19&#9;    def Close(a1, a2, tol=1e-6) {">a2</m:ci>
+          </m:bvar>
+          <m:semantics>
+            <m:bvar>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:23&#9;    def Close(a1, a2, tol=1e-6) {">tol</m:ci>
+            </m:bvar>
+            <m:annotation-xml>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:26:27&#9;    def Close(a1, a2, tol=1e-6) {">1e-6</m:cn>
+            </m:annotation-xml>
+          </m:semantics>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:9&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:9&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)"/>
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:9&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+              <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/return" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:9&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)"/>
+              <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:16&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+                <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:16&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">std:MultiFold</m:ci>
+                <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/wrap/2" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:30&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">and</m:csymbol>
+                <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:37&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+                  <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:37&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)"/>
+                  <m:lambda proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:41&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+                    <m:bvar>
+                      <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:48&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">x1</m:ci>
+                    </m:bvar>
+                    <m:bvar>
+                      <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:52&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">x2</m:ci>
+                    </m:bvar>
+                    <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:56&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+                      <m:lt/>
+                      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:56&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+                        <m:abs/>
+                        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:67&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">
+                          <m:minus/>
+                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:67&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">x1</m:ci>
+                          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:70&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">x2</m:ci>
+                        </m:apply>
+                      </m:apply>
+                      <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:74&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">tol</m:ci>
+                    </m:apply>
+                  </m:lambda>
+                  <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:79&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">a1</m:ci>
+                  <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:83&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">a2</m:ci>
+                </m:apply>
+                <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:27:88&#9;        return std:MultiFold(@2:&amp;&amp;, map(lambda x1, x2: MathML:abs(x1-x2)&lt;tol, a1, a2), 1)">1</m:cn>
+              </m:apply>
+            </m:apply>
+          </m:apply>
+        </m:lambda>
+      </m:apply>
+      <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:5&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">
+        <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/assert" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:5&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])"/>
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:12&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:12&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">Close</m:ci>
+          <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:18&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">sim:membrane_voltage</m:ci>
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:40&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">
+            <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:41&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:44&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:47&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:50&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:53&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">0</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:29:56&#9;    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])">0</m:cn>
+          </m:apply>
+        </m:apply>
+      </m:apply>
+    </m:apply>
+  </proto:post-processing>
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:32:1&#9;outputs {">
+    <proto:raw ref="sim:membrane_voltage" name="V" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_clamping2.txt:33:5&#9;    V = sim:membrane_voltage"/>
+  </proto:outputVariables>
+</proto:protocol>
