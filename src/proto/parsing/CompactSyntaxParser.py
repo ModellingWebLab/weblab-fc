@@ -737,6 +737,16 @@ class Actions(object):
         def _xml(self):
             return P.declareNewVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
     
+    class ClampVariable(BaseGroupAction):
+        def _xml(self):
+            assert 1 <= len(self.tokens) <= 2
+            name = self.tokens[0]
+            if len(self.tokens) == 1:
+                value = name
+            else:
+                value = self.tokens[1]
+            return self.Delegate('ModelEquation', [[name, value]]).xml()
+    
     class ModelEquation(BaseGroupAction):
         def _xml(self):
             assert len(self.tokens) == 2
@@ -1512,6 +1522,8 @@ class CompactSyntaxParser(object):
     newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
                           ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
     # Adding or replacing equations in the model
+    clampVariable = p.Group(MakeKw('clamp') - identAsVar + Optional(MakeKw('to') - expr)
+                            ).setName('ClampVariable').setParseAction(Actions.ClampVariable)
     modelEquation = p.Group(MakeKw('define')
                             - (p.Group(MakeKw('diff') + Adjacent(oparen) - identAsVar + p.Suppress(';') + identAsVar + cparen)
                                | identAsVar) + eq + expr).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
@@ -1525,6 +1537,7 @@ class CompactSyntaxParser(object):
                                                  (inputVariable, True),
                                                  (outputVariable, True),
                                                  (newVariable, True),
+                                                 (clampVariable, True),
                                                  (modelEquation, True),
                                                  (unitsConversion, True)], nl)
                              + cbrace).setName('ModelInterface').setParseAction(Actions.ModelInterface)

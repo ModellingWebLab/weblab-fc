@@ -1,4 +1,5 @@
 TestAccessingStateVector.hpp
+TestClamping.hpp
 TestCombinedSimulation.hpp
 TestCompactSyntaxParser.py
 TestCoreProtocolLanguage.hpp

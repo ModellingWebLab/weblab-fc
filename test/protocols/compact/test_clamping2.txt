@@ -1,0 +1,34 @@
+# Test clamping state variables to their initial value
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "../../../src/proto/library/BasicLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms # Needed to stop solver falling over
+
+    clamp oxmeta:membrane_voltage to 0 :: mV
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:5
+    }
+}
+
+post-processing {
+    def Close(a1, a2, tol=1e-6) {
+        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    }
+    assert Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])
+}
+
+outputs {
+    V = sim:membrane_voltage
+}
