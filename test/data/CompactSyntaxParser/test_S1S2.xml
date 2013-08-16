@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:1:1&#9;# Compact version of the test_S1S2 protocol">
+<proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:1:1&#9;# Compact version of the test_S1S2 protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt">
   <proto:import source="S1S2.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:5:1&#9;import &quot;S1S2.txt&quot; {">
     <proto:setInput name="steady_state_beats">
       <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_S1S2.txt:6:26&#9;    steady_state_beats = 10">10</m:cn>

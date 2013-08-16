@@ -44,7 +44,7 @@
                 <ci>default_Cao</ci>
                 <ci>sim:oxmeta:extracellular_calcium_concentration</ci>
             </apply>
-        </apply>    
+        </apply>
     </library>
     
     <units>
@@ -79,6 +79,12 @@
         <specifyOutputVariable name="oxmeta:extracellular_calcium_concentration"/>
         <specifyOutputVariable name="oxmeta:time" units="ms"/>
         <declareNewVariable name="chaste_membrane_capacitance" units="uF_per_cm2" initial_value="1"/>
+        <addOrReplaceEquation>
+            <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
+                <ci>oxmeta:membrane_voltage</ci>
+                <cn cellml:units="mV">0</cn>
+            </apply>
+        </addOrReplaceEquation>
         <unitsConversionRule desiredDimensions="uA_per_cm2" actualDimensions="A_per_F">
             <lambda xmlns="http://www.w3.org/1998/Math/MathML">
                 <bvar><ci>rhs</ci></bvar>

@@ -1,7 +1,5 @@
 # Compact syntax version of the ICaL protocol
 
-namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
-namespace cellml = "http://www.cellml.org/cellml/1.0#"
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 inputs {
@@ -41,6 +39,9 @@ model interface {
     output oxmeta:time units ms
     
     var chaste_membrane_capacitance units uF_per_cm2 = 1
+    
+    # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
+    define oxmeta:membrane_voltage = 0 :: mV
     
     convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
     convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance

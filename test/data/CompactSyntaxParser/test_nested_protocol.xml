@@ -1,37 +1,37 @@
 <?xml version='1.0' encoding='ASCII'?>
-<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:1:1&#9;# Compact syntax version of the test_nested_protocol protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt">
-  <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:7:1&#9;tasks {">
-    <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:5&#9;    simulation sim = nested {" prefix="sim" proto:trace="1">
-      <proto:vectorStepper units="dimensionless" name="iter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:9:9&#9;        range iter units dimensionless vector [0, 1]">
-        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:9:47&#9;        range iter units dimensionless vector [0, 1]">
+<proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:1:1&#9;# Compact syntax version of the test_nested_protocol protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt">
+  <proto:simulations proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:5:1&#9;tasks {">
+    <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:6:5&#9;    simulation sim = nested {" prefix="sim" proto:trace="1">
+      <proto:vectorStepper units="dimensionless" name="iter" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:7:9&#9;        range iter units dimensionless vector [0, 1]">
+        <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:7:47&#9;        range iter units dimensionless vector [0, 1]">
           <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/newArray"/>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:9:48&#9;        range iter units dimensionless vector [0, 1]">0</m:cn>
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:9:51&#9;        range iter units dimensionless vector [0, 1]">1</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:7:48&#9;        range iter units dimensionless vector [0, 1]">0</m:cn>
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:7:51&#9;        range iter units dimensionless vector [0, 1]">1</m:cn>
         </m:apply>
       </proto:vectorStepper>
-      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:22&#9;    simulation sim = nested {"/>
-      <proto:nestedProtocol source="SteadyPacing.txt" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
-        <proto:setInput name="steady_state_beats" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
-          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:11:34&#9;            steady_state_beats = 5">5</m:cn>
+      <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:6:22&#9;    simulation sim = nested {"/>
+      <proto:nestedProtocol source="SteadyPacing.txt" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
+        <proto:setInput name="steady_state_beats" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
+          <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:9:34&#9;            steady_state_beats = 5">5</m:cn>
         </proto:setInput>
-        <proto:setInput name="pacing_period" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
-          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:29&#9;            pacing_period = (iter * 100) + 900">
+        <proto:setInput name="pacing_period" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {">
+          <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:29&#9;            pacing_period = (iter * 100) + 900">
             <m:plus/>
-            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:30&#9;            pacing_period = (iter * 100) + 900">
+            <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:30&#9;            pacing_period = (iter * 100) + 900">
               <m:times/>
-              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:30&#9;            pacing_period = (iter * 100) + 900">iter</m:ci>
-              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:37&#9;            pacing_period = (iter * 100) + 900">100</m:cn>
+              <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:30&#9;            pacing_period = (iter * 100) + 900">iter</m:ci>
+              <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:37&#9;            pacing_period = (iter * 100) + 900">100</m:cn>
             </m:apply>
-            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:12:44&#9;            pacing_period = (iter * 100) + 900">900</m:cn>
+            <m:cn proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:44&#9;            pacing_period = (iter * 100) + 900">900</m:cn>
           </m:apply>
         </proto:setInput>
-        <proto:selectOutput name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {"/>
-        <proto:selectOutput name="apd" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:10:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {"/>
+        <proto:selectOutput name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {"/>
+        <proto:selectOutput name="apd" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:8:15&#9;        nests protocol &quot;SteadyPacing.txt&quot; {"/>
       </proto:nestedProtocol>
     </proto:nestedSimulation>
   </proto:simulations>
-  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:19:1&#9;outputs {">
-    <proto:raw ref="sim:peak_voltage" name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:20:5&#9;    peak_voltage = sim:peak_voltage"/>
-    <proto:raw ref="sim:apd" name="apd90" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:21:5&#9;    apd90 = sim:apd"/>
+  <proto:outputVariables proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:17:1&#9;outputs {">
+    <proto:raw ref="sim:peak_voltage" name="peak_voltage" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:18:5&#9;    peak_voltage = sim:peak_voltage"/>
+    <proto:raw ref="sim:apd" name="apd90" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt:19:5&#9;    apd90 = sim:apd"/>
   </proto:outputVariables>
 </proto:protocol>

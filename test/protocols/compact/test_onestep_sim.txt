@@ -1,9 +1,8 @@
 # Compact syntax version of the test_onestep_sim protocol
 
-namespace cellml = "http://www.cellml.org/cellml/1.0#"
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
-import std = "../../../src/proto/library/BasicLibrary.xml"
+import std = "../../../src/proto/library/BasicLibrary.txt"
 
 units {
     ms = milli second
@@ -14,8 +13,11 @@ units {
 # Turn the input model, whatever it is, into dV/dt=1
 model interface {
     independent var units ms
-    input oxmeta:membrane_voltage = 0.0
+    # Set the initial condition for V and allow us to change it
+    input oxmeta:membrane_voltage units mV = 0.0
+    # Also let us read it out from simulations
     output oxmeta:membrane_voltage units mV
+    # Replace the defining equation by our own ODE
     define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms
 }
 
