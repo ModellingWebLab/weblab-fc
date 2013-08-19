@@ -19,7 +19,7 @@
         </cellml:units>
     </units>
     
-    <!-- Turn the input model, whatever it is, into dV/dt=1 -->
+    <!-- Turn the input model, whatever it is, into dV/dt=1, V(0)=0 -->
     <modelInterface>
         <setIndependentVariableUnits units="ms"/>
         <specifyInputVariable name="oxmeta:membrane_voltage" units="mV" initial_value="0.0"/>

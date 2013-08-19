@@ -20,6 +20,7 @@
     <!-- Turn the input model, whatever it is, into dV/dt=1 -->
     <modelInterface>
         <setIndependentVariableUnits units="ms"/>
+        <specifyInputVariable name="oxmeta:membrane_voltage"/>
         <specifyOutputVariable name="oxmeta:membrane_voltage" units="mV"/>
         <addOrReplaceEquation>
             <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
