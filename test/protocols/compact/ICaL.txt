@@ -38,9 +38,13 @@ model interface {
     output oxmeta:extracellular_calcium_concentration units uM
     output oxmeta:time units ms
     
-    var chaste_membrane_capacitance units uF_per_cm2 = 1
+    var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
     
+    # Clamp extracellular calcium to whatever value it has in the model
+    # This is a convenience shorthand for 'define var = var'
+    clamp oxmeta:extracellular_calcium_concentration
     # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
+    # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
     define oxmeta:membrane_voltage = 0 :: mV
     
     convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance

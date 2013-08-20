@@ -85,6 +85,11 @@
                 <cn cellml:units="mV">0</cn>
             </apply>
         </addOrReplaceEquation>
+        <addOrReplaceEquation>
+            <apply xmlns="http://www.w3.org/1998/Math/MathML"><eq/>
+                <ci>oxmeta:extracellular_calcium_concentration</ci><ci>oxmeta:extracellular_calcium_concentration</ci>
+            </apply>
+        </addOrReplaceEquation>
         <unitsConversionRule desiredDimensions="uA_per_cm2" actualDimensions="A_per_F">
             <lambda xmlns="http://www.w3.org/1998/Math/MathML">
                 <bvar><ci>rhs</ci></bvar>
@@ -253,6 +258,11 @@
             </apply>
             
             <!-- Only examine the "tail currents" after t=0 -->
+            <!--
+                Note that a more efficient approach (used by the compact syntax version) is:
+                first_index = find(map(lambda t: t > 0, sim:time[0][0]))[0][0]
+                membrane_L_type_calcium_tail_current = sim:membrane_L_type_calcium_current[2$first_index:]
+            -->
             <apply><eq/>
                 <ci>membrane_L_type_calcium_tail_current</ci>
                 <apply><ci>std:After</ci>
