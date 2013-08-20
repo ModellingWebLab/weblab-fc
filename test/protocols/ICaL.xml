@@ -264,12 +264,63 @@
                 membrane_L_type_calcium_tail_current = sim:membrane_L_type_calcium_current[2$first_index:]
             -->
             <apply><eq/>
+                <ci>first_index</ci>
+                <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                    <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/find"/>
+                        <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/map"/>
+                            <lambda>
+                                <bvar><ci>t</ci></bvar>
+                                <apply><gt/><ci>t</ci><cn>0</cn></apply>
+                            </lambda>
+                            <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
+                                <ci>sim:time</ci>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <cn>2</cn>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    <cn>1</cn>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                </apply>
+                                <apply>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                                    <cn>0</cn><cn>0</cn><cn>0</cn>
+                                </apply>
+                            </apply>
+                        </apply>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>2</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>0</cn><cn>0</cn><cn>0</cn>
+                    </apply>
+                </apply>
+            </apply>
+            <apply><eq/>
                 <ci>membrane_L_type_calcium_tail_current</ci>
-                <apply><ci>std:After</ci>
+                <apply><csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/view"/>
                     <ci>sim:membrane_L_type_calcium_current</ci>
-                    <ci>sim:time</ci>
-                    <cn>0</cn>
-                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <cn>2</cn>
+                        <ci>first_index</ci>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>
+                    <apply>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/tuple"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                        <cn>1</cn>
+                        <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
+                    </apply>
                 </apply>
             </apply>
             
@@ -306,7 +357,7 @@
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
                         <cn>1</cn>
                         <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/null"/>
-                    </apply>                    
+                    </apply>
                 </apply>
             </apply>
         </apply>
