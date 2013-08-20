@@ -83,9 +83,9 @@ class AbstractExpression(locatable.Locatable):
         result = self.Interpret(env)
         if self.trace:
             if isinstance(result, V.Array):
-                print result.array.shape
+                print 'Traced array shape', result.array.shape
             else:
-                print result
+                print 'Traced', result
 
             if self.outputFolder:
                 trace_path = os.path.join(self.outputFolder.path, 'trace.txt')
