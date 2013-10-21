@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <proto:protocol xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:1:1&#9;# Compact syntax version of the test_onestep_sim protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt">
-  <proto:import source="../../../src/proto/library/BasicLibrary.txt" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:5:1&#9;import std = &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
+  <proto:import source="BasicLibrary.txt" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:5:1&#9;import std = &quot;BasicLibrary.txt&quot;"/>
   <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:7:1&#9;units {">
     <cellml:units xmlns:cellml="http://www.cellml.org/cellml/1.0#" name="ms" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:8:5&#9;    ms = milli second">
       <cellml:unit units="second" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_onestep_sim.txt:8:10&#9;    ms = milli second"/>

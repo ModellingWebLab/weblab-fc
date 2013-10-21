@@ -118,8 +118,8 @@
       </m:apply>
     </m:apply>
   </proto:inputs>
-  <proto:import source="../../../src/proto/library/BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:20:1&#9;import &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
-  <proto:import source="../../../src/proto/library/CardiacLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:21:1&#9;import &quot;../../../src/proto/library/CardiacLibrary.txt&quot;"/>
+  <proto:import source="BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:20:1&#9;import &quot;BasicLibrary.txt&quot;"/>
+  <proto:import source="CardiacLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:21:1&#9;import &quot;CardiacLibrary.txt&quot;"/>
   <proto:units proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:23:1&#9;units {">
     <cellml:units xmlns:cellml="http://www.cellml.org/cellml/1.0#" name="mV" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:24:5&#9;    mV = milli volt">
       <cellml:unit units="volt" prefix="milli" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:24:10&#9;    mV = milli volt"/>

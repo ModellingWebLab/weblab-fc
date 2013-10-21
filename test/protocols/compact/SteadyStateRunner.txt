@@ -7,7 +7,7 @@ inputs {
     norm_threshold = 1e-6 # Applied to p1 norm of state variable differences
 }
 
-import std = "../../../src/proto/library/BasicLibrary.txt"
+import std = "BasicLibrary.txt"
 
 library {
     max_inner_runs = MathML:ceiling(max_paces / num_inner_paces)

@@ -9,8 +9,8 @@ inputs {
     apd_percent = 90
 }
 
-import "../../../src/proto/library/BasicLibrary.txt"
-import "../../../src/proto/library/CardiacLibrary.txt"
+import "BasicLibrary.txt"
+import "CardiacLibrary.txt"
 
 units {
     mV = milli volt

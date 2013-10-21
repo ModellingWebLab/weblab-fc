@@ -1,6 +1,6 @@
 # Compact version of the test_find_index protocol
 
-import "../../../src/proto/library/BasicLibrary.txt"
+import "BasicLibrary.txt"
 
 post-processing {
     # Create 3x5 input array

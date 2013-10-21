@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <proto:protocol xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:proto="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:1:1&#9;# Compact version of the test_find_index protocol" xml:base="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt">
-  <proto:import source="../../../src/proto/library/BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:3:1&#9;import &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
+  <proto:import source="BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:3:1&#9;import &quot;BasicLibrary.txt&quot;"/>
   <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {">
     <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {">
       <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_find_index.txt:5:1&#9;post-processing {"/>

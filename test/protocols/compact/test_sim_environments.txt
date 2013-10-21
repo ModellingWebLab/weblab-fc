@@ -3,7 +3,7 @@
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
-import std = "../../../src/proto/library/BasicLibrary.txt"
+import std = "BasicLibrary.txt"
 
 library {
     loop_array = [i*3 for i in 1:5]

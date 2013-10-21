@@ -78,7 +78,7 @@
       </m:apply>
     </m:apply>
   </proto:inputs>
-  <proto:import source="../../../src/proto/library/BasicLibrary.txt" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:15:1&#9;import std = &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
+  <proto:import source="BasicLibrary.txt" prefix="std" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:15:1&#9;import std = &quot;BasicLibrary.txt&quot;"/>
   <proto:library proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:17:1&#9;library {">
     <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:18:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration">
       <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:18:5&#9;    default_Cao = sim:oxmeta:extracellular_calcium_concentration"/>

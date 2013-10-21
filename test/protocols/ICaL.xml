@@ -35,7 +35,7 @@
         </apply>
     </inputs>
     
-    <import source="../../src/proto/library/BasicLibrary.xml" prefix="std"/>
+    <import source="BasicLibrary.xml" prefix="std"/>
     
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">

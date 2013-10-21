@@ -4,7 +4,7 @@ inputs {
     example_input = 0
 }
 
-import "../../../src/proto/library/BasicLibrary.txt"
+import "BasicLibrary.txt"
 
 post-processing {
     def sum(a, dim=default) {

@@ -1654,6 +1654,9 @@ class CompactSyntaxParser(object):
             # We'll need to convert.  Figure out the full path to the referent.
             if not os.path.isabs(source_path):
                 source_path = os.path.join(os.path.dirname(referringProtoPath), source_path)
+            if not os.path.exists(source_path):
+                library = os.path.join(os.path.dirname(__file__), os.pardir, 'library')
+                source_path = os.path.join(library, referringElt.attrib['source'])
             new_path = self.ConvertProtocol(source_path, outputDir)
             referringElt.attrib['source'] = new_path
     

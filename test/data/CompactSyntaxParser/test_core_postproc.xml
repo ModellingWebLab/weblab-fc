@@ -10,7 +10,7 @@
       </m:apply>
     </m:apply>
   </proto:inputs>
-  <proto:import source="../../../src/proto/library/BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:7:1&#9;import &quot;../../../src/proto/library/BasicLibrary.txt&quot;"/>
+  <proto:import source="BasicLibrary.txt" mergeDefinitions="true" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:7:1&#9;import &quot;BasicLibrary.txt&quot;"/>
   <proto:post-processing proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:9:1&#9;post-processing {">
     <m:apply proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:9:1&#9;post-processing {">
       <m:csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/statementList" proto:loc="projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt:9:1&#9;post-processing {"/>
