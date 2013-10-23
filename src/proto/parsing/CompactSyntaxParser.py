@@ -1434,14 +1434,33 @@ class CompactSyntaxParser(object):
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
+    
+    # Simpler expressions containing no arrays, functions, etc.
+    simpleExpr = p.Forward().setName('SimpleExpression')
+    simpleIfExpr = p.Group(MakeKw('if') - simpleExpr + MakeKw('then') - simpleExpr +
+                           MakeKw('else') - simpleExpr).setName('SimpleIfThenElse').setParseAction(Actions.Piecewise)
+    simpleArgList = p.Group(OptionalDelimitedList(simpleExpr, comma))
+    simpleFunctionCall = p.Group(identAsVar + Adjacent(oparen) - simpleArgList + cparen).setName('SimpleFnCall').setParseAction(Actions.FunctionCall)
+    simpleExpr << p.operatorPrecedence(number.copy().setParseAction(Actions.Number) | simpleIfExpr | simpleFunctionCall | identAsVar,
+                                       [('^', 2, p.opAssoc.LEFT, Actions.Operator),
+                                        ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                        (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                        (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
+                                       ])
 
     # Newlines in expressions may be escaped with a backslash
     expr.ignore('\\' + p.LineEnd())
+    simpleExpr.ignore('\\' + p.LineEnd())
     # Bare newlines are OK provided we started with a bracket.
     # However, it's quite hard to enforce that restriction.
     expr.ignore(p.Literal('\n'))
+    simpleExpr.ignore(p.Literal('\n'))
     # Embedded comments are also OK
     expr.ignore(comment)
+    simpleExpr.ignore(comment)
     # Avoid mayhem
     UnIgnore(nl)
     
@@ -1522,11 +1541,11 @@ class CompactSyntaxParser(object):
     newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
                           ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
     # Adding or replacing equations in the model
-    clampVariable = p.Group(MakeKw('clamp') - identAsVar + Optional(MakeKw('to') - expr)
+    clampVariable = p.Group(MakeKw('clamp') - identAsVar + Optional(MakeKw('to') - simpleExpr)
                             ).setName('ClampVariable').setParseAction(Actions.ClampVariable)
     modelEquation = p.Group(MakeKw('define')
                             - (p.Group(MakeKw('diff') + Adjacent(oparen) - identAsVar + p.Suppress(';') + identAsVar + cparen)
-                               | identAsVar) + eq + expr).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
+                               | identAsVar) + eq + simpleExpr).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
     unitsConversion = p.Group(MakeKw('convert') - ncIdent("actualDimensions") + MakeKw('to') + ncIdent("desiredDimensions") +
                               MakeKw('by') - lambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
