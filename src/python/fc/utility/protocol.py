@@ -37,16 +37,32 @@ import sys
 import tables
 import time
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import pylab
+
 from . import environment as Env
 from .error_handling import ProtocolError
 from .file_handling import OutputFolder
 from .locatable import Locatable
 from ..language import values as V
 
+# NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
+# Only import it within methods that use it.
+
 
 class Protocol(object):
-    """Base class for protocols in the protocol language."""
+    """This class represents a protocol in the functional curation 'virtual experiment' language.
+    
+    It gives the central interface to functional curation, handling parsing a protocol description
+    from file and running it on a given model.
+    """
     def __init__(self, protoFile):
+        """Construct a new protocol by parsing the description in the given file.
+        
+        The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
+        """
         self.outputFolder = None
         self.protoFile = protoFile
         self.env = Env.Environment()
@@ -59,7 +75,9 @@ class Protocol(object):
         self.postProcessing = []
         self.outputs = []
         self.plots = []
+        self.timings = {}
         
+        start = time.time()
         import CompactSyntaxParser as CSP
         parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
@@ -83,8 +101,10 @@ class Protocol(object):
         self.postProcessing.extend(details.get('postprocessing', []))
         self.outputs.extend(details.get('outputs', []))
         self.plots.extend(details.get('plots', []))
+        self.timings['parsing'] = time.time() - start
 
     def Initialise(self):
+        """(Re-)Initialise this protocol, ready to be run on a model."""
         self.libraryEnv.Clear()
         self.postProcessingEnv.Clear()
         self.outputEnv.Clear()
@@ -93,12 +113,16 @@ class Protocol(object):
             sim.results.Clear()
         
     def SetOutputFolder(self, path):
+        """Specify where the outputs from this protocol will be written to disk."""
         if isinstance(path, OutputFolder):
             self.outputFolder = path
         else:
             self.outputFolder = OutputFolder(path)
     
     def OutputsAndPlots(self):
+        """Save the protocol outputs to disk, and generate the requested plots."""
+        # Copy protocol outputs into the self.outputs environment,
+        # and capture output descriptions needed by plots in the process.
         plot_vars = []
         plot_descriptions = {}
         for plot in self.plots:
@@ -117,10 +141,11 @@ class Protocol(object):
         if not self.outputFolder:
             print >>sys.stderr, "Warning: protocol output folder not set, so not writing outputs to file"
             return
+        
         print 'saving output data to h5 file...'
         start = time.time()
         filename = os.path.join(self.outputFolder.path, 'output.h5')
-        h5file = tables.open_file(filename, mode='w', title=self.plots[0]['title'])
+        h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
         group = h5file.create_group('/', 'output', 'output parent')
         for output in self.outputs:
             if not 'description' in output:
@@ -128,22 +153,20 @@ class Protocol(object):
             h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
                                 title=output['description'])
         h5file.close()
-        print 'writing output data to file took', '%.2f' %(time.time() - start), 'seconds.'
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
-        import pylab
-        print 'plotting', plot['title'], 'curve:', plot_descriptions[plot['x']], 'against', plot_descriptions[plot['y']]
+        self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
+        
+        # Plots
         start = time.time()
         for plot in self.plots:
+            print 'plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']]
             x_data = []
             y_data = []
             x_data.append(self.outputEnv.LookUp(plot['x']))
             y_data.append(self.outputEnv.LookUp(plot['y']))
             
-            # Plot the data.
+            # Plot the data
             fig = plt.figure()
-            for i,x in enumerate(x_data):
+            for i, x in enumerate(x_data):
                 if y_data[i].array.ndim > 1:
                     for j in range(y_data[i].array.shape[0]):
                         plt.plot(x.array, y_data[i].array[j])
@@ -154,9 +177,10 @@ class Protocol(object):
                 plt.ylabel(plot_descriptions[plot['y']])
             plt.savefig(os.path.join(self.outputFolder.path, plot['title'] + '.png'))
             plt.close()
-        print 'plots took', '%.2f' %(time.time() - start), 'seconds to complete.'
+        self.timings['create plots'] = self.timings.get('plot', 0.0) + (time.time() - start)
 
     def Run(self):
+        """Run this protocol on the model already specified using SetModel."""
         Locatable.outputFolder = self.outputFolder
         self.Initialise()
         # TODO: make status output optional; add timings to dictionary and summarise at end
@@ -169,17 +193,15 @@ class Protocol(object):
                         sim.SetOutputFolder(self.outputFolder.CreateSubfolder('simulation_' + sim.prefix))
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
             start = time.time()
-            self.libraryEnv.ExecuteStatements(self.library)  
-            print 'library statements took', '%.2f' %(time.time() - start), 'seconds to execute.'
+            self.libraryEnv.ExecuteStatements(self.library)
+            self.timings['run library'] = self.timings.get('library', 0.0) + (time.time() - start)
             start = time.time()
             self.RunSimulations()
-            print 'simulations took', '%.2f' %(time.time() - start), 'seconds to run.'
+            self.timings['simulations'] = self.timings.get('simulations', 0.0) + (time.time() - start)
             start = time.time()
             self.RunPostProcessing()
-            print 'post processing took', '%.2f' %(time.time() - start), 'seconds to run.'
-            if self.plots:
-                self.OutputsAndPlots()
-
+            self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
+            self.OutputsAndPlots()
         except ProtocolError:
             locations = []
             current_trace = sys.exc_info()[2]
@@ -192,17 +214,14 @@ class Protocol(object):
             for location in locations:
                 print location
             raise
-#         for root, dirs, files in os.walk(top, topdown=False):
-#             for name in files:
-#                 if os.stat(name)[6]==0:
-#                     os.remove(os.path.join(root, name))
-#             for name in dirs:
-#                 try:
-#                     os.rmdir(os.path.join(root, name))
-#                 except OSError:
-#                         pass
+        # Summarise time spent in each protocol section
+        print 'Time spent running protocol (s): %.6f' % sum(self.timings.values())
+        max_len = max(len(section) for section in self.timings)
+        for section, duration in self.timings.iteritems():
+            print '   ', section, ' ' * (max_len - len(section)), '%.6f' % duration
 
     def RunSimulations(self):
+        """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
             sim.Initialise() 
             print 'running simulation', sim.prefix
@@ -211,10 +230,16 @@ class Protocol(object):
             Locatable.outputFolder = self.outputFolder
 
     def RunPostProcessing(self):
+        """Run the post-processing section of this protocol."""
         print 'running post processing...'
         self.postProcessingEnv.ExecuteStatements(self.postProcessing)
 
     def SetInput(self, name, valueExpr):
+        """Overwrite the value of a protocol input.
+        
+        The value may be given either as an actual value, or as an expression which will be evaluated in
+        the context of the existing inputs.
+        """
         if isinstance(valueExpr, V.AbstractValue):
             value = valueExpr
         else:
@@ -222,6 +247,7 @@ class Protocol(object):
         self.inputEnv.OverwriteDefinition(name, value)
 
     def SetModel(self, model, useNumba=True):
+        """Specify the model this protocol is to be run on."""
         start = time.time()
         if isinstance(model, str):
             print 'generating model code...'
@@ -245,13 +271,18 @@ class Protocol(object):
                 if name.startswith(class_name):
                     model = getattr(module, name)()
                     model._module = module
-            del sys.modules['model']
-            print 'generating code took', '%.2f' %(time.time() - start), 'seconds to run.'
+            del sys.modules['load model']
         self.model = model
         for sim in self.simulations:
             sim.SetModel(model)
+        self.timings['model'] = self.timings.get('model', 0.0) + (time.time() - start)
 
     def GetPath(self, basePath, path):
+        """Determine the full path of an imported protocol file.
+        
+        Relative paths are resolved relative to basePath (the path to this protocol) by default.
+        If this does not yield an existing file, they are resolved relative to the built-in library folder instead.
+        """
         new_path = os.path.join(os.path.dirname(basePath), path)
         if not os.path.isabs(path) and not os.path.exists(new_path):
             # Search in the library folder instead
