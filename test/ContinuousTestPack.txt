@@ -1,4 +1,5 @@
 TestAccessingStateVector.hpp
+TestArrayFileReader.hpp
 TestClamping.hpp
 TestCombinedSimulation.hpp
 TestCompactSyntaxParser.py
