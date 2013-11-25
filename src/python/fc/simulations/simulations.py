@@ -132,6 +132,7 @@ class Timecourse(AbstractSimulation):
         for i,t in enumerate(self.range_):
             self.LoopBodyStartHook()
             if self.range_.count == 1:
+                # Record initial conditions
                 self.model.SetFreeVariable(t)
                 self.AddIterationOutputs(self.model.GetOutputs())
             else:

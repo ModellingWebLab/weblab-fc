@@ -43,7 +43,7 @@ class AbstractModel(object):
     """Base class for models in the protocol language."""
     def Simulate(self):
         raise NotImplementedError
-    
+
     def SetOutputFolder(self, path):
         if os.path.isdir(path) and path.startswith('/tmp'):
             shutil.rmtree(path)
@@ -52,17 +52,23 @@ class AbstractModel(object):
 
 
 class ScipySolver(object):
+    """Solver for simulating models using SciPy's builtin ODE solvers.  NB: slow!"""
     def ResetState(self, resetTo):
-        self.state = resetTo
+        self.state[:] = resetTo
         self.solver.set_initial_value(self.state, self.model.freeVariable)
     
     def Simulate(self, endPoint):
-        self.state = self.solver.integrate(endPoint)
+        if self.model.dirty:
+            # A model variable has changed, so reset the solver
+            self.solver.set_initial_value(self.state, self.model.freeVariable)
+            self.model.dirty = False
+        self.state[:] = self.solver.integrate(endPoint)
         assert self.solver.successful()
         
     def AssociateWithModel(self, model):
         self.model = model
         self.state = self.model.initialState.copy()
+        assert self.state.dtype == float
         self.solver = scipy.integrate.ode(self.model.EvaluateRhs)
         self.solver.set_integrator('vode', atol=1e-7, rtol=1e-5, max_step=1.0, nsteps=2e7, method='bdf')
         
@@ -71,6 +77,7 @@ class ScipySolver(object):
 
 
 class PySundialsSolver(object):
+    """Solver for simulating models using http://pysundials.sourceforge.net/"""
     def AssociateWithModel(self, model):
         self.model = model
         self._state = cvode.NVector(self.model.initialState.copy())
@@ -89,13 +96,17 @@ class PySundialsSolver(object):
         
     def ResetState(self, resetTo):
         self._state.asarray()[:] = resetTo
-        flag = cvode.CVodeReInit(self.cvode_mem, cvode.realtype(self.model.freeVariable), self._state)
+        cvode.CVodeReInit(self.cvode_mem, cvode.realtype(self.model.freeVariable), self._state)
         
     def RhsWrapper(self, t, y, ydot, f_data):
         self.model.EvaluateRhs(t, y.asarray(), ydot.asarray())
         return 0
         
     def Simulate(self, endPoint):
+        if self.model.dirty:
+            # A model variable has changed, so reset the solver
+            cvode.CVodeReInit(self.cvode_mem, cvode.realtype(self.model.freeVariable), self._state)
+            self.model.dirty = False
         t = cvode.realtype(0)
         flag = cvode.CVode(self.cvode_mem, endPoint, self._state, ctypes.byref(t), cvode.CV_NORMAL)
         assert t.value == endPoint
@@ -103,6 +114,10 @@ class PySundialsSolver(object):
         
     def SetFreeVariable(self, t):
         cvode.CVodeReInit(self.cvode_mem, cvode.realtype(t), self._state)
+
+
+# Which type of ODE solver to use by default
+DefaultSolver = ScipySolver
 
 
 class AbstractOdeModel(AbstractModel):
@@ -122,9 +137,6 @@ class AbstractOdeModel(AbstractModel):
     TODO: Variable names set up by subclass constructors are just simple strings in the C++, assumed
     to always live in the oxmeta namespace.  This constraint is still imposed by PyCml at present, but
     we should move to use full URIs eventually.
-
-    TODO: Consider whether the ODE solver needs resetting (and how?) when a protocol changes the value
-    of a model parameter or state variable.
     """
     def __init__(self, *args, **kwargs):
         """Construct a new ODE system model.
@@ -141,13 +153,13 @@ class AbstractOdeModel(AbstractModel):
         super(AbstractOdeModel, self).__init__(*args, **kwargs)
         self.savedStates = {}
         self.env = Env.ModelWrapperEnvironment(self)
-        default_solver = ScipySolver()
-        self.SetSolver(default_solver) 
+        self.dirty = False # whether the solver will need to be reset due to a model change before the next solve
+        self.SetSolver(DefaultSolver())
     
     def SetSolver(self, solver):
         self.solver = solver
         solver.AssociateWithModel(self)
-        self.state = self.solver.state
+        self.state = self.solver.state # This is backwards, but required by PySundials!
         self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
     
     def EvaluateRhs(self, t, y, ydot=np.empty(0)):
@@ -184,15 +196,13 @@ class AbstractOdeModel(AbstractModel):
         if name is None:
             self.solver.ResetState(self.initialState.copy())
         else:
+            # TOOD: Raise a nice ProtocolError if state not defined
             self.solver.ResetState(self.savedStates[name].copy())
-        self.state = self.solver.state##
-        
+
     def Simulate(self, endPoint):
         """Simulate the model up to the given end point (value of the free variable)."""
-        self.solver.state[:] = self.state##
         self.solver.Simulate(endPoint)
         self.freeVariable = endPoint
-        self.state = self.solver.state##
 
 
 class NestedProtocol(AbstractModel):
@@ -223,16 +233,16 @@ class NestedProtocol(AbstractModel):
 
 class TestOdeModel(AbstractOdeModel):
     def __init__(self, a):
-        self.initialState = np.array([0])
+        self.initialState = np.array([0.])
         self.stateVarMap = {'membrane_voltage': 0, 'y': 0}
         self.parameters = np.array([a])
         self.parameterMap = {'leakage_current': 0, 'a': 0}
         self.freeVariableName = 'time'
         super(TestOdeModel, self).__init__()
-        
+
     def EvaluateRhs(self, t, y):
         return self.parameters[0]
-        
+
     def GetOutputs(self):
         env = Env.Environment()
         env.DefineName('a', V.Simple(self.parameters[self.parameterMap['a']]))

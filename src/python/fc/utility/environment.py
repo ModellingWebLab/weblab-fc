@@ -183,27 +183,38 @@ class DelegatingDict(dict):
 
 
 class ModelWrapperEnvironment(Environment):
+    """This environment subclass provides access to a model's variables using the Environment interface.
+
+    It supports variable lookups and the information methods, but doesn't allow defining new names.
+    OverwriteDefinition must be used to change an existing variable's value.
+    """
+
     class _BindingsDict(dict):
+        """A dictionary subclass wrapping the protocol language versions of a model's variables."""
         def __init__(self, unwrapped):
             self._unwrapped = unwrapped
-            
+
         def __getitem__(self, key):
             val = self._unwrapped[key]
             if isinstance(val, np.ndarray):
                 return V.Array(val)
             else:
                 return V.Simple(val)
-            
+
         def __setitem__(self, key, value):
             pass
 
         def __contains__(self, key):
             return key in self._unwrapped
-    
+
     class _UnwrappedBindingsDict(dict):
+        """A dictionary subclass wrapping the Python versions of a model's variables.
+
+        TODO: look at the efficiency of get/set methods, and whether these matter for overall performance.
+        """
         def __init__(self, model):
             self._model = model
-            
+
         def __getitem__(self, key):
             if key in self._model.parameterMap:
                 return self._model.parameters[self._model.parameterMap[key]]
@@ -213,8 +224,10 @@ class ModelWrapperEnvironment(Environment):
                 return self._model.freeVariable
             else:
                 raise ProtocolError('Name', key, 'is not defined.')
-        
+
         def __setitem__(self, key, value):
+            if self[key] != value:
+                self._model.dirty = True
             if key in self._model.parameterMap:
                 self._model.parameters[self._model.parameterMap[key]] = value
             elif key in self._model.stateVarMap:
@@ -223,10 +236,10 @@ class ModelWrapperEnvironment(Environment):
                 setattr(self._model, key, value)
             else:
                 raise ProtocolError('Name', key, 'is not defined.')
-        
+
         def __contains__(self, key):
             return key in self._model.env.DefinedNames()
-    
+
     def __init__(self, model):
         super(ModelWrapperEnvironment, self).__init__(allowOverwrite=True)
         self.model = model
@@ -236,9 +249,12 @@ class ModelWrapperEnvironment(Environment):
         self.names.append(self.model.freeVariableName)
         self.unwrappedBindings = self._UnwrappedBindingsDict(model)
         self.bindings = self._BindingsDict(self.unwrappedBindings)
-            
+
     def DefineName(self, name, value):
         raise ProtocolError("Defining names in a model is not allowed.")
-    
+
+    def Remove(self, name):
+        raise ProtocolError("Removing names from a model is not allowed.")
+
     def DefinedNames(self):
         return self.names
