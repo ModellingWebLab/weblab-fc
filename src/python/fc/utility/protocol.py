@@ -271,11 +271,11 @@ class Protocol(object):
                 if name.startswith(class_name):
                     model = getattr(module, name)()
                     model._module = module
-            del sys.modules['load model']
+            del sys.modules['model']
         self.model = model
         for sim in self.simulations:
             sim.SetModel(model)
-        self.timings['model'] = self.timings.get('model', 0.0) + (time.time() - start)
+        self.timings['load model'] = self.timings.get('load model', 0.0) + (time.time() - start)
 
     def GetPath(self, basePath, path):
         """Determine the full path of an imported protocol file.
