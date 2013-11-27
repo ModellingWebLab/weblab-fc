@@ -38,6 +38,7 @@ except ImportError:
 import fc
 import fc.utility.test_support as TestSupport
 import fc.simulations.model as Model
+from fc.simulations.solvers import CvodeSolver
 
 
 class TestS1S2Proto(unittest.TestCase):
@@ -46,7 +47,7 @@ class TestS1S2Proto(unittest.TestCase):
         proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')
         proto.SetModel('projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998.cellml')
-        proto.model.SetSolver(Model.PySundialsSolver())
+        proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/S1S2'
         TestSupport.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)

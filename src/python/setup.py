@@ -1,3 +1,4 @@
+
 """Copyright (c) 2005-2013, University of Oxford.
 All rights reserved.
 
@@ -30,24 +31,36 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+"""
+Test distutils setup file for the Python implementation of Functional Curation.
 
-import fc
-import fc.utility.test_support as TestSupport
-import fc.simulations.model as Model
-from fc.simulations.solvers import CvodeSolver
+At present, this just exists to allow us to build our Cython SUNDIALS wrapper.
+If SUNDIALS is installed in a non-standard location, it requires environment variables to have been set up before running.
+"""
 
 
-class TestIcalProto(unittest.TestCase):
-    """Test models, simulations, ranges, and modifiers."""
-    def TestIcal(self):
-        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
-        proto.SetOutputFolder('Py_TestIcalProto')
-        proto.SetModel('projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml', useNumba=False)
-        proto.model.SetSolver(CvodeSolver())
-        proto.Run()
-        data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
-        TestSupport.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+import numpy
+
+ext_modules = [
+    Extension('fc.sundials.sundials',
+              sources=['fc/sundials/sundials.pxd'],
+              include_dirs=['.', numpy.get_include()],
+              libraries=['sundials_cvode', 'sundials_nvecserial']),
+    Extension('fc.sundials.solver',
+              sources=['fc/sundials/solver.pyx'],
+              include_dirs=['.', numpy.get_include()],
+              libraries=['sundials_cvode', 'sundials_nvecserial'])
+]
+
+setup(
+    name = 'fc',
+    description = 'Functional Curation',
+    packages = ['fc', 'fc.language', 'fc.simulations', 'fc.sundials', 'fc.utility'],
+    license = 'BSD',
+    platforms = ['any'],
+    cmdclass = {'build_ext': build_ext},
+    ext_modules = ext_modules
+)

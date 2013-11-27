@@ -44,6 +44,7 @@ import fc.simulations.model as Model
 import fc.simulations.modifiers as Modifiers
 import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
+import fc.simulations.solvers as Solvers
 
 N = E.N
 
@@ -215,7 +216,7 @@ class TestModelSimulation(unittest.TestCase):
         proto = fc.Protocol(proto_file)
         model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
         proto.SetModel(model)
-        solver = Model.PySundialsSolver()
+        solver = Solvers.CvodeSolver()
         proto.model.SetSolver(solver)
         proto.SetInput('num_iters', N(10))
         proto.Run()

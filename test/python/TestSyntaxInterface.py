@@ -46,6 +46,7 @@ import fc.simulations.modifiers as Modifiers
 import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
 import fc.utility.environment as Env
+from fc.simulations.solvers import CvodeSolver
 
 import CompactSyntaxParser as CSP
 
@@ -723,7 +724,7 @@ class TestSyntaxInterface(unittest.TestCase):
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestNestedProtocols')
         proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
-        proto.model.SetSolver(Model.PySundialsSolver())
+        proto.model.SetSolver(CvodeSolver())
         proto.Run()
         
     def TestParsingInputs(self):
