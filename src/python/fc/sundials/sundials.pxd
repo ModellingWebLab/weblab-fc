@@ -106,7 +106,7 @@ cdef extern from "cvode/cvode.h":
     int CVodeSStolerances(void *cvode_mem, realtype reltol, realtype abstol)
     int CVodeRootInit(void *cvode_mem, int nrtfn, CVRootFn g)
 
-    int CVodeStep "CVode"(void *cvode_mem, realtype tout, N_Vector yout, realtype *tret, int itask) nogil
+#     int CVodeStep "CVode"(void *cvode_mem, realtype tout, N_Vector yout, realtype *tret, int itask) nogil
     int CVode(void *cvode_mem, realtype tout, N_Vector yout, realtype *tret, int itask)
 
 #     int CVodeSetMaxOrd(void *cvode_mem, int maxord)

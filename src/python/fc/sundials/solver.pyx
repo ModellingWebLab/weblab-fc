@@ -36,18 +36,14 @@ import numpy as np
 
 # NB: Relative cimport isn't yet implemented in Cython (although relative import should be)
 cimport fc.sundials.sundials as _lib
-
-# Save typing
-ctypedef _lib.N_Vector N_Vector
+from fc.utility.error_handling import ProtocolError
 
 # Data type for numpy arrays
 np_dtype = np.float64
-ctypedef np.float64_t realtype
 assert sizeof(np.float64_t) == sizeof(_lib.realtype) # paranoia
 
 cdef extern from "Python.h":
     object PyBuffer_FromReadWriteMemory(void *ptr, Py_ssize_t size)
-
 
 # # Debugging!
 # import sys
@@ -81,12 +77,6 @@ cdef int _RhsWrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data):
 cdef class CvodeSolver:
     """Solver for simulating models using CVODE wrapped by Cython."""
 
-    cdef void* cvode_mem # CVODE solver 'object'
-    cdef N_Vector _state  # The state vector of the model being simulated
-    
-    cdef public object state # Numpy view of the state vector
-    cdef public object model # The model being simulated
-
     def __cinit__(self):
         """Initialise C data attributes on object creation."""
         self.cvode_mem = NULL
@@ -119,32 +109,51 @@ cdef class CvodeSolver:
         self._state = _lib.N_VMake_Serial(len(model.state), <realtype*>(<np.ndarray>self.state).data)
         # Initialise CVODE
         self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF, _lib.CV_NEWTON)
-        if hasattr(model, 'GetRhsWrapper'):
-            raise NotImplementedError
-#             _lib.CVodeInit(self.cvode_mem, <_lib.CVRhsFn>(model.GetRhsWrapper()), 0.0, self._state)
+        if hasattr(self, 'SetRhsWrapper'):
+            # A subclass will take care of the RHS function
+            self.SetRhsWrapper()
         else:
-            _lib.CVodeInit(self.cvode_mem, _RhsWrapper, 0.0, self._state)
-            _lib.CVodeSetUserData(self.cvode_mem, <void*>(self.model))
+            flag = _lib.CVodeInit(self.cvode_mem, _RhsWrapper, 0.0, self._state)
+            self.CheckFlag(flag, 'CVodeInit')
+        flag = _lib.CVodeSetUserData(self.cvode_mem, <void*>(self.model))
+        self.CheckFlag(flag, 'CVodeSetUserData')
         abstol = 1e-7
         reltol = 1e-5
-        _lib.CVodeSStolerances(self.cvode_mem, reltol, abstol)
-        _lib.CVDense(self.cvode_mem, len(self.state))
+        flag = _lib.CVodeSStolerances(self.cvode_mem, reltol, abstol)
+        self.CheckFlag(flag, 'CVodeSStolerances')
+        flag = _lib.CVDense(self.cvode_mem, len(self.state))
+        self.CheckFlag(flag, 'CVDense')
         _lib.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
         _lib.CVodeSetMaxStep(self.cvode_mem, 1.0)
+        _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15);
 
-    cpdef ResetState(self, np.ndarray resetTo):
+    cpdef ResetSolver(self, np.ndarray resetTo):
         self.state[:] = resetTo
-        _lib.CVodeReInit(self.cvode_mem, self.model.freeVariable, self._state)
+        self.ReInit(self.model.freeVariable)
 
     cpdef SetFreeVariable(self, realtype t):
-        _lib.CVodeReInit(self.cvode_mem, t, self._state)
+        self.ReInit(t)
 
     cpdef Simulate(self, realtype endPoint):
         if self.model.dirty:
             # A model variable has changed, so reset the solver
-            _lib.CVodeReInit(self.cvode_mem, self.model.freeVariable, self._state)
-            self.model.dirty = False
+            self.ReInit(self.model.freeVariable)
         cdef realtype t = 0
         flag = _lib.CVode(self.cvode_mem, endPoint, self._state, &t, _lib.CV_NORMAL)
-        assert t == endPoint
-        assert flag == _lib.CV_SUCCESS
+        if flag != _lib.CV_SUCCESS:
+            flag_name = _lib.CVodeGetReturnFlagName(flag)
+            raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
+        else:
+            assert t == endPoint
+    
+    cdef ReInit(self, realtype t):
+        """Reset CVODE's state because the RHS function has changed (e.g. parameter or state var change)."""
+        _lib.CVodeReInit(self.cvode_mem, t, self._state)
+        _lib.CVDense(self.cvode_mem, len(self.state))  # TODO: why is this needed for Cython models???
+        self.model.dirty = False
+    
+    cdef CheckFlag(self, int flag, char* called):
+        """Check for a successful call to a CVODE routine, and report the error if not."""
+        if flag != _lib.CV_SUCCESS:
+            flag_name = _lib.CVodeGetReturnFlagName(flag)
+            raise ProtocolError("Error calling CVODE routine %s: %s" % (called, flag_name))

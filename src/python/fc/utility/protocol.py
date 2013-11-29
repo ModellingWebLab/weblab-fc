@@ -246,26 +246,41 @@ class Protocol(object):
             value = valueExpr.Evaluate(self.inputEnv)
         self.inputEnv.OverwriteDefinition(name, value)
 
-    def SetModel(self, model, useNumba=True):
+    def GetConversionCommand(self, model, xmlFile, className, tempDir,
+                             useCython=True, useNumba=False):
+        """Return the command to translate a modified CellML model to Python code, optionally optimised with numba or Cython."""
+        if useCython:
+            model_py_file = os.path.join(tempDir, 'model.pyx')
+            target = 'Cython'
+        else:
+            model_py_file = os.path.join(tempDir, 'model.py')
+            target = 'Python'
+        code_gen_cmd = ['./python/pycml/translate.py', '-t', target, '-p', '--Wu',
+                        '--protocol=' + xmlFile,  model, '-c', className, '-o', model_py_file]
+        if not useCython and not useNumba:
+            code_gen_cmd.append('--no-numba')
+        return code_gen_cmd
+
+    def SetModel(self, model, useNumba=True, useCython=True):
         """Specify the model this protocol is to be run on."""
         start = time.time()
         if isinstance(model, str):
             print 'generating model code...'
             import tempfile, subprocess, imp, sys
             if self.outputFolder:
-                dir = tempfile.mkdtemp(dir=self.outputFolder.path)
+                temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
             else:
-                dir = tempfile.mkdtemp()
-            xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py', self.protoFile, dir])
+                temp_dir = tempfile.mkdtemp()
+            xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py',
+                                                self.protoFile, temp_dir])
             xml_file = xml_file.strip()
-            model_py_file = os.path.join(dir, 'model.py')
             class_name = 'GeneratedModel'
-            code_gen_cmd = ['./python/pycml/translate.py', '-t', 'Python', '-p', '--Wu',
-                            '--protocol=' + xml_file,  model, '-c', class_name, '-o', model_py_file]
-            if not useNumba:
-                code_gen_cmd.append('--no-numba')
-            code = subprocess.check_output(code_gen_cmd)
-            sys.path.insert(0, dir)
+            code_gen_cmd = self.GetConversionCommand(model, xml_file, class_name, temp_dir, useCython=useCython, useNumba=useNumba)
+            subprocess.check_call(code_gen_cmd)
+            if useCython:
+                # Compile the extension module
+                subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir)
+            sys.path.insert(0, temp_dir)
             import model as module
             for name in module.__dict__.keys():
                 if name.startswith(class_name):

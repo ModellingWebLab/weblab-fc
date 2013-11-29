@@ -38,7 +38,7 @@ import scipy.integrate
 
 class ScipySolver(object):
     """Solver for simulating models using SciPy's builtin ODE solvers.  NB: slow!"""
-    def ResetState(self, resetTo):
+    def ResetSolver(self, resetTo):
         self.state[:] = resetTo
         self.solver.set_initial_value(self.state, self.model.freeVariable)
     
@@ -86,7 +86,7 @@ if cvode:
         def state(self):
             return self._state.asarray()
 
-        def ResetState(self, resetTo):
+        def ResetSolver(self, resetTo):
             self._state.asarray()[:] = resetTo
             cvode.CVodeReInit(self.cvode_mem, cvode.realtype(self.model.freeVariable), self._state)
 

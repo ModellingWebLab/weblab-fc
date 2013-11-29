@@ -43,6 +43,7 @@ class AbstractModel(object):
         raise NotImplementedError
 
     def SetOutputFolder(self, path):
+        # TODO: Use file_handling instead?
         if os.path.isdir(path) and path.startswith('/tmp'):
             shutil.rmtree(path)
         os.mkdir(path)
@@ -124,10 +125,10 @@ class AbstractOdeModel(AbstractModel):
     def ResetState(self, name=None):
         """Reset the model to the given named saved state, or to initial conditions if no name given."""
         if name is None:
-            self.solver.ResetState(self.initialState.copy())
+            self.solver.ResetSolver(self.initialState.copy())
         else:
             # TOOD: Raise a nice ProtocolError if state not defined
-            self.solver.ResetState(self.savedStates[name].copy())
+            self.solver.ResetSolver(self.savedStates[name].copy())
 
     def Simulate(self, endPoint):
         """Simulate the model up to the given end point (value of the free variable)."""

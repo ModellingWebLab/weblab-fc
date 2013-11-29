@@ -98,7 +98,7 @@ class AbstractSimulation(locatable.Locatable):
         else:
             self.model = model
         model_env = model.GetEnvironmentMap()
-        model.simEnv = self.env
+        model.simEnv = self.env # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
         for prefix in model_env.keys():
             self.env.SetDelegateeEnv(model_env[prefix], prefix)
             self.results.SetDelegateeEnv(model_env[prefix], prefix)

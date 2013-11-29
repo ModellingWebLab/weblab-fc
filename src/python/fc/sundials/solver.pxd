@@ -31,37 +31,28 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-"""
-Test distutils setup file for the Python implementation of Functional Curation.
+cimport numpy as np
+cimport fc.sundials.sundials as _lib
 
-At present, this just exists to allow us to build our Cython SUNDIALS wrapper.
-If SUNDIALS is installed in a non-standard location, it requires environment variables (CFLAGS and LDFLAGS)
-to have been set up before running.
-"""
+# Save typing
+ctypedef _lib.N_Vector N_Vector
+ctypedef np.float64_t realtype
 
+#cdef object NumpyView(N_Vector v)
 
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
-import numpy
+#cdef int _RhsWrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data)
 
-ext_modules = [
-    Extension('fc.sundials.sundials',
-              sources=['fc/sundials/sundials.pxd'],
-              include_dirs=['.', numpy.get_include()],
-              libraries=['sundials_cvode', 'sundials_nvecserial']),
-    Extension('fc.sundials.solver',
-              sources=['fc/sundials/solver.pyx'],
-              include_dirs=['.', numpy.get_include()],
-              libraries=['sundials_cvode', 'sundials_nvecserial'])
-]
+cdef class CvodeSolver:
+    cdef void* cvode_mem # CVODE solver 'object'
+    cdef N_Vector _state  # The state vector of the model being simulated
+    
+    cdef public object state # Numpy view of the state vector
+    cdef public object model # The model being simulated
 
-setup(
-    name = 'fc',
-    description = 'Functional Curation',
-    packages = ['fc', 'fc.language', 'fc.language.expressions', 'fc.simulations', 'fc.sundials', 'fc.utility'],
-    license = 'BSD',
-    platforms = ['any'],
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = ext_modules
-)
+    cpdef AssociateWithModel(self, model)
+    cpdef ResetSolver(self, np.ndarray resetTo)
+    cpdef SetFreeVariable(self, realtype t)
+    cpdef Simulate(self, realtype endPoint)
+    
+    cdef ReInit(self, realtype t)
+    cdef CheckFlag(self, int flag, char* called)
