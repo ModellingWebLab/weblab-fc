@@ -31,6 +31,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# cython: profile=True
+
 cimport numpy as np
 import numpy as np
 
@@ -145,13 +147,12 @@ cdef class CvodeSolver:
             raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
         else:
             assert t == endPoint
-    
+
     cdef ReInit(self, realtype t):
         """Reset CVODE's state because the RHS function has changed (e.g. parameter or state var change)."""
         _lib.CVodeReInit(self.cvode_mem, t, self._state)
-        _lib.CVDense(self.cvode_mem, len(self.state))  # TODO: why is this needed for Cython models???
         self.model.dirty = False
-    
+
     cdef CheckFlag(self, int flag, char* called):
         """Check for a successful call to a CVODE routine, and report the error if not."""
         if flag != _lib.CV_SUCCESS:
