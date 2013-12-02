@@ -1,2 +1,2 @@
-Plot title,File name,Data file name,First variable id,Optional second variable id
+Plot title,File name,Data file name,First variable id,Optional second variable id,Optional key variable id
 "State variables",State_variables.eps,outputs_State_variables_gnuplot_data.csv,"time","state"
