@@ -1,5 +1,14 @@
 # Compact syntax version of the S1S2 protocol
 
+documentation {
+This protocol implements S1-S2 restitution for cardiac electrophysiology cell models.
+
+It requires models to provide variables with the annotations:
+ * oxmeta:membrane_stimulus_current
+ * oxmeta:membrane_voltage units
+ * oxmeta:time
+}
+
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 inputs {

@@ -1233,6 +1233,9 @@ class Actions(object):
                     d['outputs'] = token.expr()
                 if isinstance(token, Actions.Plots):
                     d['plots'] = token.expr()
+            if 'dox' in self.tokens:
+                d['dox'] = self.tokens['dox'][0]
+                print d['dox']
             return d
     
 
@@ -1506,6 +1509,9 @@ class CompactSyntaxParser(object):
     # Miscellaneous constructs making up protocols
     ##############################################
     
+    # Documentation (Markdown)
+    documentation = p.Group(MakeKw('documentation') + obrace - p.Regex("[^}]*") + cbrace)("dox")
+    
     # Namespace declarations
     nsDecl = p.Group(MakeKw('namespace') - ncIdent("prefix") + eq + quotedUri("uri")).setName('NamespaceDecl')
     nsDecls = OptionalDelimitedList(nsDecl("namespace*"), nl)
@@ -1642,7 +1648,7 @@ class CompactSyntaxParser(object):
     # Parsing a full protocol
     #########################
     
-    protocol = p.And(map(Optional, [nl, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
+    protocol = p.And(map(Optional, [nl, documentation, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
                                     tasks, postProcessing, outputs, plots])).setName('Protocol').setParseAction(Actions.Protocol)
     
     def __init__(self):
