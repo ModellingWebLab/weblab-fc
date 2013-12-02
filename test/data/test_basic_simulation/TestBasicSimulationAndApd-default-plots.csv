@@ -1,3 +1,0 @@
-Plot title,File name,First variable,Optional second variable
-"Pretend S1-S2 curve",Pretend_S1-S2_curve.eps,"di","apd90"
-"Transmembrane potential traces",Transmembrane_potential_traces.eps,"membrane_voltage"

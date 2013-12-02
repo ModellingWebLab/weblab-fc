@@ -1,4 +1,0 @@
-Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
-"membrane_voltage","membrane_voltage","millivolt",2,TestBasicSimulationAndApd_membrane_voltage.csv,Raw,5,1201
-"apd90","apd90","ms",2,TestBasicSimulationAndApd_apd90.csv,Post-processed,5,2
-"di","Diastolic interval","ms",2,TestBasicSimulationAndApd_di.csv,Post-processed,5,1
