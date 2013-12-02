@@ -337,11 +337,13 @@
             <title>S1-S2 curve</title>
             <x>DI</x>
             <y>APD90</y>
+            <using>points</using>
         </plot>
         <plot>
             <title>Action potential traces</title>
             <x>time_1d</x>
             <y>membrane_voltage</y>
+            <using>lines</using>
         </plot>
     </plots>
 </protocol>

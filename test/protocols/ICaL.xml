@@ -382,6 +382,7 @@
             <title>IV curve</title>
             <x>final_membrane_voltage</x>
             <y>min_LCC</y>
+            <using>linespoints</using>
         </plot>
     </plots>
 </protocol>

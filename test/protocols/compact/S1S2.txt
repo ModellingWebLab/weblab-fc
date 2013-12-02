@@ -108,6 +108,6 @@ outputs {
 }
 
 plots {
-    plot "S1-S2 curve" { APD90 against DI }
-    plot "Action potential traces" { membrane_voltage against time_1d }
+    plot "S1-S2 curve" using points { APD90 against DI }
+    plot "Action potential traces" using lines { membrane_voltage against time_1d }
 }

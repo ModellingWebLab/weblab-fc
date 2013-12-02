@@ -493,11 +493,12 @@
     <proto:postprocessed units="{/Symbol m}M" name="step_calcium_values" description="[Ca]_o" proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:117:5&#9;    step_calcium_values units uM &quot;[Ca]_o&quot;"/>
   </proto:outputVariables>
   <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:120:1&#9;plots {">
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:121:5&#9;    plot &quot;IV curve&quot; { min_LCC against final_membrane_voltage key step_calcium_values }">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/ICaL.txt:121:5&#9;    plot &quot;IV curve&quot; using linespoints { min_LCC against final_membrane_voltage key step_calcium_values }">
       <proto:title>IV curve</proto:title>
       <proto:x>final_membrane_voltage</proto:x>
       <proto:y>min_LCC</proto:y>
       <proto:key>step_calcium_values</proto:key>
+      <proto:using>linespoints</proto:using>
     </proto:plot>
   </proto:plots>
 </proto:protocol>

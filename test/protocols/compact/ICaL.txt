@@ -118,5 +118,5 @@ outputs {
 }
 
 plots {
-    plot "IV curve" { min_LCC against final_membrane_voltage key step_calcium_values }
+    plot "IV curve" using linespoints { min_LCC against final_membrane_voltage key step_calcium_values }
 }

@@ -124,7 +124,8 @@ proto.plot = element proto:plot {
       )
     | element proto:data { ident }
     ),
-    element proto:key { ident }?
+    element proto:key { ident }?,
+    element proto:using { "points" | "lines" | "linespoints" }?
     }
 
 # A timecourse simulation just needs the stepper to loop over, and any modifiers to apply.

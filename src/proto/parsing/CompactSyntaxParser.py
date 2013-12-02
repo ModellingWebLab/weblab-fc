@@ -1133,7 +1133,6 @@ class Actions(object):
             if 'description' in self.tokens:
                 output['description'] = self.tokens['description']
             return output
-            
     
     class Outputs(BaseGroupAction):
         """Parse action for the plots section."""
@@ -1147,8 +1146,13 @@ class Actions(object):
     class Plot(BaseGroupAction):
         """Parse action for simple plot specifications."""
         def _xml(self):
-            assert len(self.tokens) == 2, "Only a single plot curve is currently supported in XML"
-            curve = self.tokens[1]
+            using = self.tokens.get('using', '')
+            if using:
+                expected_num_tokens = 3
+            else:
+                expected_num_tokens = 2
+            assert len(self.tokens) == expected_num_tokens, "Only a single plot curve is currently supported in XML"
+            curve = self.tokens[-1]
             key = curve.get('key', '')
             if key:
                 curve = curve[:-1]
@@ -1158,22 +1162,33 @@ class Actions(object):
             args = [P.title(title), P.x(x), P.y(y)]
             if key:
                 args.append(P.key(key))
+            if using:
+                args.append(P.using(using[0]))
             return P.plot(*args)
         
         def _expr(self):
-            curve = self.tokens[1]
+            using = self.tokens.get('using', '')
+            if using:
+                expected_num_tokens = 3
+            else:
+                expected_num_tokens = 2
+            assert len(self.tokens) == expected_num_tokens, "Only a single plot curve is currently supported"
+            curve = self.tokens[-1]
             key = curve.get('key', '')
             if key:
                 curve = curve[:-1]
+            assert len(curve) == 2, "Only a single y variable is currently supported"
             title = str(self.tokens[0])
             y, x = map(str, curve)
             plot = {'title': title, 'x': x, 'y': y}
             if key:
                 plot['key'] = key
-            return plot    
+            if using:
+                plot['using'] = using[0]
+            return plot
     
     # { 'title': str(self.tokens[0]), 'key': name if present, 'x': name, 'y': name }
-            
+    
     class Plots(BaseGroupAction):
         """Parse action for the plots section."""
         def _xml(self):
@@ -1607,7 +1622,8 @@ class CompactSyntaxParser(object):
     
     outputDesc = Optional(quotedString)("description")
     outputSpec = p.Group(ncIdent("name") + ((unitsRef("units") + outputDesc) |
-                                    (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))).setName('Output').setParseAction(Actions.Output)
+                                            (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))
+                         ).setName('Output').setParseAction(Actions.Output)
     outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(useImports | outputSpec, nl) + cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
     # Plot specifications
@@ -1616,7 +1632,10 @@ class CompactSyntaxParser(object):
     plotCurve = p.Group(p.delimitedList(ncIdent, ',')
                         + MakeKw('against') - ncIdent
                         + Optional(MakeKw('key') - ncIdent("key"))).setName('Curve')
-    plotSpec = p.Group(MakeKw('plot') - quotedString + obrace +
+    plotUsing = (MakeKw('using') - (MakeKw('lines', suppress=False)
+                                    | MakeKw('points', suppress=False)
+                                    | MakeKw('linespoints', suppress=False)))("using")
+    plotSpec = p.Group(MakeKw('plot') - quotedString + Optional(plotUsing) - obrace +
                        plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
     plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(useImports | plotSpec) + cbrace).setName('Plots').setParseAction(Actions.Plots)
     
