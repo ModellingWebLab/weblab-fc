@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<?xml-model href="../../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
+<?xml-model href="../../src/proto/parsing/protocol.rnc" type="application/relax-ng-compact-syntax"?>
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
@@ -214,7 +214,7 @@
                         <ci>Sum</ci>
                         <ci>difference_in_state_variables</ci>
                     </apply>
-                </apply>            
+                </apply>
             </apply>
             
         </apply>
@@ -222,8 +222,8 @@
     
     <outputVariables>
         <raw ref="sim:membrane_voltage" name="membrane_voltage" description="Transmembrane potential"/>
-        <raw ref="sim:time" name="time" description="Time"/>       
-        <raw ref="sim:state_variable" name="state_variables" description="All of the state variables"/>     
+        <raw ref="sim:time" name="time" description="Time"/>
+        <raw ref="sim:state_variable" name="state_variables" description="All of the state variables"/>
         
         <postprocessed name="norm_of_differences" units="mixed"/>
         <postprocessed name="difference_in_state_variables" units="mixed"/>
@@ -237,6 +237,7 @@
             <title>Steady State Action Potential</title>
             <x>time</x>
             <y>membrane_voltage</y>
+            <using>lines</using>
         </plot>
     </plots>
 </protocol>

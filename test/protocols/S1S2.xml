@@ -337,7 +337,7 @@
             <title>S1-S2 curve</title>
             <x>DI</x>
             <y>APD90</y>
-            <using>points</using>
+            <using>linespoints</using>
         </plot>
         <plot>
             <title>Action potential traces</title>

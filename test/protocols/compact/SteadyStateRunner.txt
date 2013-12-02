@@ -57,7 +57,7 @@ outputs {
 }
 
 plots {
-    plot "All state variables"           { pace_final_state_variables against pace_count    }
-    plot "Progress towards steady state" { norm_of_differences        against pace_count    }
-    plot "Final `pace' - voltage"        { detailed_voltage           against detailed_time }
+    plot "All state variables" using lines    { pace_final_state_variables against pace_count    }
+    plot "Progress towards steady state"      { norm_of_differences        against pace_count    }
+    plot "Final `pace' - voltage" using lines { detailed_voltage           against detailed_time }
 }

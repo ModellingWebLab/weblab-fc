@@ -134,6 +134,7 @@
             <title>State variables</title>
             <x>time</x>
             <y>state</y>
+            <using>lines</using>
         </plot>
     </plots>
     

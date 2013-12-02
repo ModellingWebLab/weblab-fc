@@ -36,5 +36,5 @@ outputs {
 }
 
 plots {
-    plot "State variables" { state against time }
+    plot "State variables" using lines { state against time }
 }

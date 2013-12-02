@@ -421,11 +421,11 @@
     <proto:postprocessed units="dimensionless" name="max_S1S2_slope" description="Maximum gradient of S1-S2 curve" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:107:5&#9;    max_S1S2_slope units dimensionless &quot;Maximum gradient of S1-S2 curve&quot;"/>
   </proto:outputVariables>
   <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:110:1&#9;plots {">
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:111:5&#9;    plot &quot;S1-S2 curve&quot; using points { APD90 against DI }">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:111:5&#9;    plot &quot;S1-S2 curve&quot; using linespoints { APD90 against DI }">
       <proto:title>S1-S2 curve</proto:title>
       <proto:x>DI</proto:x>
       <proto:y>APD90</proto:y>
-      <proto:using>points</proto:using>
+      <proto:using>linespoints</proto:using>
     </proto:plot>
     <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:112:5&#9;    plot &quot;Action potential traces&quot; using lines { membrane_voltage against time_1d }">
       <proto:title>Action potential traces</proto:title>

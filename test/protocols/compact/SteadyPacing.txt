@@ -73,5 +73,5 @@ outputs {
 }
 
 plots {
-    plot "Steady State Action Potential" { membrane_voltage against time }
+    plot "Steady State Action Potential" using lines { membrane_voltage against time }
 }

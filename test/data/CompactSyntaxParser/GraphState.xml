@@ -156,10 +156,11 @@
     <proto:raw ref="sim:time" name="time" description="Time" proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:35:5&#9;    time = sim:time &quot;Time&quot;"/>
   </proto:outputVariables>
   <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:38:1&#9;plots {">
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:39:5&#9;    plot &quot;State variables&quot; { state against time }">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/GraphState.txt:39:5&#9;    plot &quot;State variables&quot; using lines { state against time }">
       <proto:title>State variables</proto:title>
       <proto:x>time</proto:x>
       <proto:y>state</proto:y>
+      <proto:using>lines</proto:using>
     </proto:plot>
   </proto:plots>
 </proto:protocol>

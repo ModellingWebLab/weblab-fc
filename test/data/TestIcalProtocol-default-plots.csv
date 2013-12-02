@@ -1,0 +1,2 @@
+Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
+"IV curve",IV_curve.eps,outputs_IV_curve_gnuplot_data.csv,linespoints,"final_membrane_voltage","min_LCC","step_calcium_values"

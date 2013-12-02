@@ -72,5 +72,5 @@ outputs {
 }
 
 plots {
-    plot "Initial and final potentials" { membrane_voltage against time }
+    plot "Initial and final potentials" using points { membrane_voltage against time }
 }

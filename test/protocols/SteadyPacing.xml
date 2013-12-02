@@ -204,6 +204,7 @@
             <title>Steady State Action Potential</title>
             <x>time</x>
             <y>membrane_voltage</y>
+            <using>lines</using>
         </plot>
     </plots>
 </protocol>
