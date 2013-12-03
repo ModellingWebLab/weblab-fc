@@ -12,7 +12,7 @@ Parameters:
 
 It requires models to provide variables with the annotations:
  * oxmeta:membrane_stimulus_current
- * oxmeta:membrane_voltage units
+ * oxmeta:membrane_voltage
  * oxmeta:time
 }
 

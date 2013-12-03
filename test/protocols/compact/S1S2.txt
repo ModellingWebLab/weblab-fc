@@ -19,7 +19,7 @@ Parameters:
 
 It requires models to provide variables with the annotations:
  * oxmeta:membrane_stimulus_current
- * oxmeta:membrane_voltage units
+ * oxmeta:membrane_voltage
  * oxmeta:time
 }
 
@@ -100,7 +100,7 @@ post-processing {
     # Get out a single 1D array for time (for plotting)
     time_1d = RemoveDim(sim:time, 0)
     
-    # Compute APD90
+    # Compute APD90 - this method is from the CardiacLibrary.txt
     raw_APD90, raw_DI = ApdAndDi(sim:membrane_voltage, sim:time, 90, default, default, default)
 
     # Just consider the first DI and the second AP to be of interest

@@ -1,0 +1,160 @@
+# Protocol for I_Kr current:
+
+documentation {
+This protocol implements a protocol to record the IKr Peak Current I-V relationship
+for cardiac electrophysiology cell models.
+
+By clamping intra/extra-cellular potassium, and intra-cellular sodium, we can throw away most of 
+the equations of the models to leave just the IKr components to study.
+
+Parameters:
+ * holding_potential  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
+ * final_potential  The potential to which the cell is stepped after the test potentials (mV).
+ * steady_state_time  The amount of time to leave the current at holding potential before applying steps (ms).
+ * test_potentials  A list of voltages (steps) to clamp the cell to before recording IKr (mV).
+
+It requires models to provide variables with the annotations:
+ * oxmeta:membrane_voltage
+ * oxmeta:extracellular_potassium_concentration
+ * oxmeta:cytosolic_potassium_concentration
+ * oxmeta:cytosolic_sodium_concentration 
+ * oxmeta:time
+}
+
+# Load the metadata tags for use with CellML models
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+# List inputs 
+inputs {
+
+	# Voltage stepping
+	holding_potential = -80.01
+	final_potential = -60.01
+	steady_state_time = 10000
+	test_potentials = [-40.01,-30.01,-20.01,-15.01,  
+                       -10.01, -7.51, -5.01, -2.51, 
+                         0.01,  2.51,  5.01,  7.51, 10.01, 
+                        12.51, 15.01, 17.51, 20.01, 
+                        22.51, 25.01, 27.51, 30.01, 
+                        32.51, 35.01, 37.51, 40.01, 
+                        42.51, 45.01, 47.51, 50.01, 
+                        55.01, 60.01 ]	
+}
+
+# Import some useful functions
+import std = "BasicLibrary.txt"
+
+# Define units
+units {
+    mV = milli volt
+    ms = milli second
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
+    uF_per_cm2 = micro farad . centi metre^-2
+    microamps = micro ampere
+    A_per_F = ampere . farad^-1
+    mM = milli mole . litre^-1 "{/Symbol m}M"
+}
+
+# List inputs and outputs of model with units
+model interface {
+    input oxmeta:membrane_voltage units mV
+    input oxmeta:extracellular_potassium_concentration units mM
+	input oxmeta:cytosolic_potassium_concentration units mM
+	input oxmeta:cytosolic_sodium_concentration units mM
+      
+	output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units A_per_F
+	output oxmeta:extracellular_potassium_concentration units mM
+	output oxmeta:cytosolic_potassium_concentration units mM
+	output oxmeta:cytosolic_sodium_concentration units mM
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+    
+    var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
+    
+    # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
+    # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
+    define oxmeta:membrane_voltage = 0 :: mV
+    
+    # Clamp extracellular concs to whatever value they have in the model
+    # This is a convenience shorthand for 'define var = var'
+    clamp oxmeta:extracellular_potassium_concentration    
+    clamp oxmeta:cytosolic_potassium_concentration    
+    # Clamping this removes dependence on NaK exchanger
+    clamp oxmeta:cytosolic_sodium_concentration
+        
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
+}
+
+# Perform simulations
+tasks {
+
+	# Task 1: run simulation until steady state is reached 
+    simulation timecourse {
+        range time units ms vector [0, steady_state_time]
+        modifiers {
+        	at start set oxmeta:membrane_voltage = holding_potential
+            at end save as holding_state
+        }
+    }
+
+	# Task 2: starting from holding_state
+	simulation sim = nested {
+	    range step_voltage units mV vector test_potentials
+        modifiers {
+			at each loop reset to holding_state
+        	at each loop set oxmeta:membrane_voltage = holding_potential
+        }
+        nests simulation timecourse {
+        	range time units ms uniform -1:0.01:1050
+        	modifiers {
+            	at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-6 then step_voltage else 
+                            if MathML:abs(time - 50) < 1e-6 final_potential else oxmeta:membrane_voltage
+                }
+            }
+	}
+	
+}
+
+# Do any calculations/modifications of data before plotting
+post-processing {
+
+	# Check validity of outputs
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY        
+    
+    # Locate start of voltage-step section of protocol in results
+    first_index = find(map(lambda t: t > 0, sim:time[0]))[0]
+    membrane_Kr_tail_current = sim:membrane_rapid_delayed_rectifier_potassium_current[1$first_index[0]:]
+      
+    # Max amplitude
+    membrane_rapid_delayed_rectifier_potassium_current_tail = sim:membrane_rapid_delayed_rectifier_potassium_current[1$first_index[0]:]
+	Kr_tail_squared = map(lambda Kr1, Kr2: Kr1 * Kr2, membrane_rapid_delayed_rectifier_potassium_current_tail, membrane_rapid_delayed_rectifier_potassium_current_tail)
+	peak_Kr_squared_tail = std:RemoveDim(std:Max(Kr_tail_squared, default), 1)
+
+	peak_fast_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current[1$-1][0$:]
+    
+    # Get list of voltage-step values (can't access version defined above)
+    final_membrane_voltage = sim:membrane_voltage[1$-1][0$:]  
+}
+
+# List any outputs from model which need to be carried forward to plotting
+outputs {
+
+    I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
+    time = sim:time units ms "Time"
+    final_membrane_voltage units mV "Test potential"
+	peak_fast_Kr units A_per_F
+}
+
+# Create plots
+plots {
+	plot "I_{Kr} peak current I-V curve" using linespoints { peak_fast_Kr against final_membrane_voltage }
+	plot "I_{Kr} currents over time" using lines { I_Kr against time key final_membrane_voltage }
+}
