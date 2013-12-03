@@ -1235,7 +1235,6 @@ class Actions(object):
                     d['plots'] = token.expr()
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
-                print d['dox']
             return d
     
 
