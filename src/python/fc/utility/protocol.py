@@ -279,7 +279,7 @@ class Protocol(object):
             subprocess.check_call(code_gen_cmd)
             if useCython:
                 # Compile the extension module
-                subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir)
+                subprocess.check_call(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir)
             sys.path.insert(0, temp_dir)
             import model as module
             for name in module.__dict__.keys():

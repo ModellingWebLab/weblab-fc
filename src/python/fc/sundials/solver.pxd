@@ -46,13 +46,13 @@ cdef class CvodeSolver:
     cdef void* cvode_mem # CVODE solver 'object'
     cdef N_Vector _state  # The state vector of the model being simulated
     
-    cdef public object state # Numpy view of the state vector
+    cdef public np.ndarray state # Numpy view of the state vector
     cdef public object model # The model being simulated
 
     cpdef AssociateWithModel(self, model)
-    cpdef ResetSolver(self, np.ndarray resetTo)
+    cpdef ResetSolver(self, np.ndarray[realtype, ndim=1] resetTo)
     cpdef SetFreeVariable(self, realtype t)
     cpdef Simulate(self, realtype endPoint)
     
-    cdef ReInit(self, realtype t)
+    cdef ReInit(self)
     cdef CheckFlag(self, int flag, char* called)

@@ -129,28 +129,30 @@ cdef class CvodeSolver:
         _lib.CVodeSetMaxStep(self.cvode_mem, 1.0)
         _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15);
 
-    cpdef ResetSolver(self, np.ndarray resetTo):
+    cpdef ResetSolver(self, np.ndarray[realtype, ndim=1] resetTo):
         self.state[:] = resetTo
-        self.ReInit(self.model.freeVariable)
+        self.ReInit()
 
     cpdef SetFreeVariable(self, realtype t):
-        self.ReInit(t)
+        self.model.freeVariable = t
+        self.ReInit()
 
     cpdef Simulate(self, realtype endPoint):
         if self.model.dirty:
             # A model variable has changed, so reset the solver
-            self.ReInit(self.model.freeVariable)
+            self.ReInit()
         cdef realtype t = 0
         flag = _lib.CVode(self.cvode_mem, endPoint, self._state, &t, _lib.CV_NORMAL)
+        self.model.freeVariable = t
         if flag != _lib.CV_SUCCESS:
             flag_name = _lib.CVodeGetReturnFlagName(flag)
             raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
         else:
             assert t == endPoint
 
-    cdef ReInit(self, realtype t):
-        """Reset CVODE's state because the RHS function has changed (e.g. parameter or state var change)."""
-        _lib.CVodeReInit(self.cvode_mem, t, self._state)
+    cdef ReInit(self):
+        """Reset CVODE's state because time or the RHS function has changed (e.g. parameter or state var change)."""
+        _lib.CVodeReInit(self.cvode_mem, self.model.freeVariable, self._state)
         self.model.dirty = False
 
     cdef CheckFlag(self, int flag, char* called):
