@@ -49,6 +49,12 @@ class AbstractSimulation(locatable.Locatable):
         self.model = None
         self.results = Env.Environment()
         self.env = Env.Environment()
+        
+        try:
+            line_profile.add_function(self.AddIterationOutputs)
+            line_profile.add_function(self.LoopBodyStartHook)
+        except NameError:
+            pass
 
     def Initialise(self):
         self.env.DefineName(self.range_.name, self.range_)
@@ -109,16 +115,17 @@ class AbstractSimulation(locatable.Locatable):
 
     def AddIterationOutputs(self, env):
         if self.results is not None and not self.results:
-            range_dims = tuple([r.GetNumberOfOutputPoints() for r in self.ranges])
+            # First iteration - create empty output arrays of the correct shape
+            range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
             for name in env.DefinedNames():
                 output = env.LookUp(name)
                 results = np.empty(range_dims + output.array.shape)
                 self.results.DefineName(name, V.Array(results))
         if self.results:
-            range_indices = tuple([r.GetCurrentOutputNumber() for r in self.ranges])
-            for name in env.DefinedNames():
-                result = self.results.LookUp(name).array
-                result[range_indices] = env.LookUp(name).array
+            range_indices = tuple(r.GetCurrentOutputNumber() for r in self.ranges) ## ~47% of time
+            for name in env.DefinedNames():  ## ~15% of time
+                result = self.results.unwrappedBindings[name]  ## ~12% of time
+                result[range_indices] = env.unwrappedBindings[name]  ## ~14% of time
 
 
 class Timecourse(AbstractSimulation):
@@ -128,17 +135,27 @@ class Timecourse(AbstractSimulation):
         self.ranges = [self.range_]
         self.modifiers = modifiers
 
+        try:
+            line_profile.add_function(self.InternalRun)
+        except NameError:
+            pass
+
     def InternalRun(self):
-        for i,t in enumerate(self.range_):
-            self.LoopBodyStartHook()
-            if self.range_.count == 1:
+        r = self.range_
+        m = self.model
+        start_hook, end_hook = self.LoopBodyStartHook, self.LoopBodyEndHook
+        add_outputs, get_outputs = self.AddIterationOutputs, m.GetOutputs
+        set_time, simulate = m.SetFreeVariable, m.Simulate
+        for i, t in enumerate(r):
+            start_hook() ## ~ 50% of time
+            if r.count == 1:
                 # Record initial conditions
-                self.model.SetFreeVariable(t)
-                self.AddIterationOutputs(self.model.GetOutputs())
+                set_time(t)
+                add_outputs(get_outputs())
             else:
-                self.model.Simulate(t)
-                self.AddIterationOutputs(self.model.GetOutputs())
-            self.LoopBodyEndHook()
+                simulate(t)
+                add_outputs(get_outputs())  ## ~45% of time
+            end_hook()
         self.LoopEndHook()
 
 

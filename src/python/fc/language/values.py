@@ -40,6 +40,11 @@ class AbstractValue(object):
     def __init__(self, units=None):
         self.units = units
 
+    @property
+    def unwrapped(self):
+        """Return the underlying Python value."""
+        return None
+
 
 class Simple(AbstractValue):
     """Simple value class in the protocol language for numbers."""
@@ -49,6 +54,10 @@ class Simple(AbstractValue):
     @property
     def array(self):
         return np.array(self.value)
+    
+    @property
+    def unwrapped(self):
+        return self.value
 
 
 class Array(AbstractValue):
@@ -63,12 +72,20 @@ class Array(AbstractValue):
             return self.array[()]
         else:
             raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
+    
+    @property
+    def unwrapped(self):
+        return self.array
 
 
 class Tuple(AbstractValue):
     """Tuple class in the protocol language."""
     def __init__(self, *values):
         self.values = tuple(values)
+
+    @property
+    def unwrapped(self):
+        return self.values
 
 
 class Null(AbstractValue):
@@ -80,6 +97,10 @@ class String(AbstractValue):
     """String class in the protocol language."""
     def __init__(self, value):
         self.value = value
+
+    @property
+    def unwrapped(self):
+        return self.value
 
 
 class DefaultParameter(AbstractValue):

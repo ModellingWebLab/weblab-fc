@@ -56,23 +56,18 @@ class NewArray(AbstractExpression):
         else:
             self.children = children
 
-        try:
-            line_profile.add_function(self.DevelopResultWithInterpret)
-        except NameError:
-            pass
-        
     def GetValue(self, arg):
         if isinstance(arg, V.Null):
             return None
         else:
             return int(arg.value)
-            
+
     def Interpret(self, env):
         if self.comprehension:
             return self._DoComprehension(env)
         else:
             return self._DoListMembers(env)
-        
+
     def DevelopResultWithCompile(self, range_name, ranges, compiled_gen_expr, env):
         local_dict = {}
         defined_ranges = 0

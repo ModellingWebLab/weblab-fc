@@ -48,7 +48,13 @@ class Environment(object):
         self.delegatees = {}
         if delegatee is not None:
             self.SetDelegateeEnv(delegatee, "")
-        
+
+        try:
+            line_profile.add_function(self.DefineName)
+            line_profile.add_function(self.OverwriteDefinition)
+        except NameError:
+            pass
+
     def DefineName(self, name, value):
         if ':' in name:
             raise ProtocolError('Names such as', name, 'with a colon are not allowed.')
@@ -56,14 +62,8 @@ class Environment(object):
             raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
         else:
             self.bindings[name] = value
-            # TODO: Give values a .unwrapped property to handle this more neatly
-            if isinstance(value, V.Array):
-                self.unwrappedBindings[name] = value.array
-            elif isinstance(value, V.Simple):
-                self.unwrappedBindings[name] = value.value
-            elif isinstance(value, V.Null):
-                self.unwrappedBindings[name] = None
-    
+            self.unwrappedBindings[name] = value.unwrapped
+
     def DefineNames(self, names, values):
         for i, name in enumerate(names):
             self.DefineName(name, values[i])
@@ -113,24 +113,14 @@ class Environment(object):
         del self.unwrappedBindings[name]
         
     def OverwriteDefinition(self, name, value):
-        if isinstance(value, V.Array):
-            unwrapped_val = value.array
-        elif isinstance(value, V.Simple):
-            unwrapped_val = value.value
-        elif isinstance(value, V.Null):
-            unwrapped_val = None
-        else:
-            print 'Unexpected overwrite:', self, name, value
         def find_definition(env, name):
-            if name in env.bindings:
+            if name in env.bindings: ## This line is a hotspot - 25% of function time
                 if not env.allowOverwrite:
                     raise ProtocolError("This environment does not support overwriting mappings")
-                env.bindings[name] = value
-                if unwrapped_val is not False:
-                    env.unwrappedBindings[name] = unwrapped_val
+                env.bindings[name] = value ## 8% of time
+                env.unwrappedBindings[name] = value.unwrapped ## This line is a hotspot - 35% of function time
                 return True
-            else:
-                parts = name.split(':', 1)
+            parts = name.split(':', 1)
             if len(parts) == 2:
                 prefix, local_name = parts
                 if prefix in self.delegatees:
@@ -138,6 +128,10 @@ class Environment(object):
             if '' in self.delegatees:
                 return find_definition(self.delegatees[''], name)
             return False
+        try:
+            line_profile.add_function(find_definition)
+        except NameError:
+            pass
         if not find_definition(self, name):
             raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")
     
@@ -193,6 +187,12 @@ class ModelWrapperEnvironment(Environment):
         """A dictionary subclass wrapping the protocol language versions of a model's variables."""
         def __init__(self, unwrapped):
             self._unwrapped = unwrapped
+            try:
+                line_profile.add_function(self.__getitem__)
+                line_profile.add_function(self.__setitem__)
+                line_profile.add_function(self.__contains__)
+            except NameError:
+                pass
 
         def __getitem__(self, key):
             val = self._unwrapped[key]
@@ -214,6 +214,12 @@ class ModelWrapperEnvironment(Environment):
         """
         def __init__(self, model):
             self._model = model
+            try:
+                line_profile.add_function(self.__getitem__)
+                line_profile.add_function(self.__setitem__)
+                line_profile.add_function(self.__contains__)
+            except NameError:
+                pass
 
         def __getitem__(self, key):
             if key in self._model.parameterMap:
