@@ -1,0 +1,129 @@
+# Protocol for I_Kr current:
+
+documentation {
+This protocol implements a time dependent voltage clamp protocol to record the IKr current
+for cardiac electrophysiology cell models.
+
+By clamping intra/extra-cellular potassium, and intra-cellular sodium, we can throw away most of 
+the equations of the models to leave just the IKr components to study.
+
+Parameters:
+ * holding_potential  The potential at which the cell rests before voltage clamp is applied at t=0 (mV). 
+ * steady_state_time  The amount of time to leave the current at holding potential before applying steps (ms).
+
+It requires models to provide variables with the annotations:
+ * oxmeta:membrane_voltage
+ * oxmeta:extracellular_potassium_concentration
+ * oxmeta:cytosolic_potassium_concentration
+ * oxmeta:cytosolic_sodium_concentration 
+ * oxmeta:time
+}
+
+# Load the metadata tags for use with CellML models
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+# List inputs 
+inputs {
+	# Holding potential to apply before simulating the voltage clamp.
+	holding_potential = -80
+	steady_state_time = 10000   # 10 seconds
+	
+	# Voltage trace over time
+    voltage_trace = [-80, -80]
+    time_trace = [0, 1]
+}
+
+# Import some useful functions
+import std = "BasicLibrary.txt"
+
+# Define units
+units {
+    mV = milli volt
+    ms = milli second
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
+    uF_per_cm2 = micro farad . centi metre^-2
+    microamps = micro ampere
+    A_per_F = ampere . farad^-1
+    mM = milli mole . litre^-1 "{/Symbol m}M"
+}
+
+# List inputs and outputs of model with units
+model interface {
+
+    input oxmeta:membrane_voltage units mV
+    input oxmeta:extracellular_potassium_concentration units mM
+	input oxmeta:cytosolic_potassium_concentration units mM
+	input oxmeta:cytosolic_sodium_concentration units mM
+      
+	output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
+	output oxmeta:extracellular_potassium_concentration units mM
+	output oxmeta:cytosolic_potassium_concentration units mM
+	output oxmeta:cytosolic_sodium_concentration units mM
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+    
+    var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
+    
+    # Clamp extracellular concs to whatever value they have in the model
+    # This is a convenience shorthand for 'define var = var'
+    clamp oxmeta:extracellular_potassium_concentration    
+    clamp oxmeta:cytosolic_potassium_concentration    
+    # Clamping this removes dependence on NaK exchanger
+    clamp oxmeta:cytosolic_sodium_concentration
+    
+    # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
+    # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
+    define oxmeta:membrane_voltage = 0 :: mV
+        
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
+}
+
+# Perform simulations
+tasks {
+
+	# Task 1: run simulation to steady state for holding potential (-ve time)
+    simulation timecourse {
+        range time units ms vector [-steady_state_time, 0]
+        modifiers {
+        	at start set oxmeta:membrane_voltage = holding_potential
+        }
+    }
+    
+    # Task 2: Apply the inputted voltage time-series as a voltage clamp (+ve time).
+    simulation timecourse {
+        range time units ms vector time_trace
+        modifiers {
+            at each loop set oxmeta:membrane_voltage = voltage_trace{std::find(std::map(lambda t == time, time_trace))}[0]
+        }
+    }
+	
+}
+
+# Do any calculations/modifications of data before plotting
+post-processing {
+
+	# Check validity of outputs
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY        
+    
+}
+
+# List any outputs from model which need to be carried forward to plotting
+outputs {
+
+    I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
+    time = sim:time units ms "Time"
+    voltage_traces = sim:membrane_voltage units mV "Applied potential"	
+}
+
+# Create plots
+plots {
+    plot "Voltage Clamp" using lines { voltage_traces against time}
+	plot "I_{Kr} currents over time" using lines { I_Kr against time }	
+}
