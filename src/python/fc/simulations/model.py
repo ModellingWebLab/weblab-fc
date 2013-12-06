@@ -34,12 +34,25 @@ import numpy as np
 
 from .solvers import DefaultSolver
 from ..utility import environment as Env
-from ..language import values as V
 
 
 class AbstractModel(object):
     """Base class for models in the protocol language."""
-    def Simulate(self):
+    def Simulate(self, endPoint):
+        """Simulate the model up to the given end point (value of the free variable).
+
+        This method must be implemented by subclasses.
+        """
+        raise NotImplementedError
+
+    def GetOutputs(self):
+        """Return a dictionary containing the model outputs at its current state.
+
+        NB: this returns a Python dictionary containing the model outputs as numpy arrays,
+        not subclasses of V.AbstractValue.
+
+        This method must be implemented by subclasses.
+        """
         raise NotImplementedError
 
     def SetOutputFolder(self, path):
@@ -82,17 +95,17 @@ class AbstractOdeModel(AbstractModel):
         """
         super(AbstractOdeModel, self).__init__(*args, **kwargs)
         self.savedStates = {}
-        self.env = Env.ModelWrapperEnvironment(self)
         self.state = self.initialState.copy()
         self.dirty = False # whether the solver will need to be reset due to a model change before the next solve
         self.SetSolver(DefaultSolver())
-    
+        self.env = Env.ModelWrapperEnvironment(self)
+
     def SetSolver(self, solver):
         self.solver = solver
         solver.AssociateWithModel(self)
         self.state = self.solver.state # This is backwards, but required by PySundials!
         self.SetFreeVariable(0) # A reasonable initial assumption; can be overridden by simulations
-    
+
     def EvaluateRhs(self, t, y, ydot=np.empty(0)):
         """Compute the derivatives of the model.  This method must be implemented by subclasses.
 
@@ -105,13 +118,6 @@ class AbstractOdeModel(AbstractModel):
 
     def GetEnvironmentMap(self):
         return {'oxmeta': self.env}
-    
-    def GetOutputs(self):
-        """Return an Environment containing the model outputs at its current state.
-
-        This method must be implemented by subclasses.
-        """
-        raise NotImplementedError
 
     def SetFreeVariable(self, t):
         """Set the value of the free variable (typically time), but retain the model's current state."""
@@ -144,17 +150,17 @@ class NestedProtocol(AbstractModel):
         self.outputNames = outputNames
 
     def GetOutputs(self):
-        env = Env.Environment()
+        outputs = {}
         for name in self.outputNames:
-            env.DefineName(name, self.proto.outputEnv.LookUp(name))
-        return env
-    
+            outputs[name] = self.proto.outputEnv.LookUp(name).unwrapped
+        return outputs
+
     def GetEnvironmentMap(self):
         return {}
-    
+
     def SetVariable(self, name, valueExpr):
         self.proto.SetInput(name, valueExpr)
-    
+
     def Simulate(self, endPoint):
         for name in self.inputExprs.keys():
            self.proto.SetInput(name, self.inputExprs[name].Evaluate(self.simEnv))
@@ -178,11 +184,11 @@ class TestOdeModel(AbstractOdeModel):
             ydot[0] = self.parameters[0]
 
     def GetOutputs(self):
-        env = Env.Environment()
-        env.DefineName('a', V.Simple(self.parameters[self.parameterMap['a']]))
-        env.DefineName('y', V.Simple(self.state[self.stateVarMap['y']]))
-        env.DefineName('state_variable', V.Array(self.state))
-        env.DefineName('time', V.Simple(self.freeVariable))
-        env.DefineName('leakage_current', V.Simple(self.parameters[self.parameterMap['leakage_current']]))
-        env.DefineName('membrane_voltage', V.Simple(self.state[self.stateVarMap['membrane_voltage']]))
-        return env
+        outputs = {}
+        outputs['a'] = np.array(self.parameters[self.parameterMap['a']])
+        outputs['y'] = np.array(self.state[self.stateVarMap['y']])
+        outputs['state_variable'] = self.state
+        outputs['time'] = np.array(self.freeVariable)
+        outputs['leakage_current'] = np.array(self.parameters[self.parameterMap['leakage_current']])
+        outputs['membrane_voltage'] = np.array(self.state[self.stateVarMap['membrane_voltage']])
+        return outputs

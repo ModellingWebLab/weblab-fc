@@ -78,7 +78,7 @@ class Minus(AbstractExpression):
             else:
                 result = operands[0].value - operands[1].value
         except AttributeError:
-            raise ProtocolError("Operator 'minus' requires all operands to evaluate numbers")
+            raise ProtocolError("Operator 'minus' requires all operands to evaluate to numbers")
         return V.Simple(result)
 
     def Compile(self):

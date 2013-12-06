@@ -39,7 +39,7 @@ from ..language import values as V
 class Environment(object):
     """Base class for environments in the protocol language."""
     next_ident = [0]
-    
+
     def __init__(self, allowOverwrite=False, delegatee=None):
         self.allowOverwrite = allowOverwrite
         self.bindings = DelegatingDict()
@@ -51,7 +51,6 @@ class Environment(object):
 
         try:
             line_profile.add_function(self.DefineName)
-            line_profile.add_function(self.OverwriteDefinition)
         except NameError:
             pass
 
@@ -90,8 +89,7 @@ class Environment(object):
         return "___%d" % Environment.next_ident[0]
 
     def LookUp(self, name):
-        result = self.bindings[name]
-        return result
+        return self.bindings[name]
 
     def SetDelegateeEnv(self, delegatee, prefix=""):
         # TODO
@@ -111,14 +109,14 @@ class Environment(object):
             raise ProtocolError(name, "is not defined in this environment and thus cannot be removed")
         del self.bindings[name]
         del self.unwrappedBindings[name]
-        
+
     def OverwriteDefinition(self, name, value):
         def find_definition(env, name):
-            if name in env.bindings: ## This line is a hotspot - 25% of function time
+            if name in env.bindings: ## ~15% of function time
                 if not env.allowOverwrite:
                     raise ProtocolError("This environment does not support overwriting mappings")
-                env.bindings[name] = value ## 8% of time
-                env.unwrappedBindings[name] = value.unwrapped ## This line is a hotspot - 35% of function time
+                env.bindings[name] = value ## ~8% of time
+                env.unwrappedBindings[name] = value.unwrapped ## ~45% of function time
                 return True
             parts = name.split(':', 1)
             if len(parts) == 2:
@@ -128,23 +126,20 @@ class Environment(object):
             if '' in self.delegatees:
                 return find_definition(self.delegatees[''], name)
             return False
-        try:
-            line_profile.add_function(find_definition)
-        except NameError:
-            pass
+#         try:
+#             line_profile.add_function(find_definition)
+#         except NameError:
+#             pass
         if not find_definition(self, name):
             raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")
-    
+
     def Clear(self):
         self.bindings.clear()
         self.unwrappedBindings.clear()
-            
-    def __len__(self):
-        return len(self.bindings)
-    
+
     def DefinedNames(self):
         return self.bindings.keys()
-    
+
     def ExecuteStatements(self, statements, returnAllowed=False):
         result = V.Null()
         for statement in statements:
@@ -156,12 +151,27 @@ class Environment(object):
                     raise ProtocolError("Return statement not allowed outside of function")
         return result
 
+    # Methods to make an Environment behave a little like a (read-only) dictionary
+
+    def __len__(self):
+        return len(self.bindings)
+
+    def __getitem__(self, key):
+        return self.LookUp(key)
+
+    def __contains__(self, key):
+        return key in self.bindings
+
+    def __iter__(self):
+        """Return an iterator over the names defined in the environment."""
+        return iter(self.bindings)
+
 
 class DelegatingDict(dict):
     def __init__(self, *args, **kwargs):
         super(DelegatingDict, self).__init__(*args, **kwargs)
         self.delegatees = {}
-        
+
     def __missing__(self, key):
         parts = key.split(":", 1)
         if len(parts) == 2:
@@ -171,7 +181,7 @@ class DelegatingDict(dict):
         if '' in self.delegatees:
             return self.delegatees[''][key]
         raise ProtocolError("Name", key, "is not defined in env or any delegatee env")
-        
+
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee
 
@@ -189,17 +199,15 @@ class ModelWrapperEnvironment(Environment):
             self._unwrapped = unwrapped
             try:
                 line_profile.add_function(self.__getitem__)
-                line_profile.add_function(self.__setitem__)
-                line_profile.add_function(self.__contains__)
             except NameError:
                 pass
 
         def __getitem__(self, key):
-            val = self._unwrapped[key]
+            val = self._unwrapped[key] ## ~61%
             if isinstance(val, np.ndarray):
                 return V.Array(val)
             else:
-                return V.Simple(val)
+                return V.Simple(val) ## ~21%
 
         def __setitem__(self, key, value):
             pass
@@ -210,51 +218,51 @@ class ModelWrapperEnvironment(Environment):
     class _UnwrappedBindingsDict(dict):
         """A dictionary subclass wrapping the Python versions of a model's variables.
 
-        TODO: look at the efficiency of get/set methods, and whether these matter for overall performance.
+        TODO: look at the efficiency of get/set methods, and whether these matter for overall performance (c.f. #2459).
         """
+        class _FreeVarList(list):
+            """A single element list for wrapping the model's free variable."""
+            def __init__(self, model):
+                self._model = model
+            def __getitem__(self, key):
+                return self._model.freeVariable
+            def __setitem__(self, key, value):
+                setattr(self._model, key, value)
+
         def __init__(self, model):
             self._model = model
+            # Make the underlying dict store a map from name to (vector, index) for fast lookup
+            self._freeVars = self._FreeVarList(model)
+            for key in model.parameterMap:
+                dict.__setitem__(self, key, (model.parameters, model.parameterMap[key]))
+            for key in model.stateVarMap:
+                dict.__setitem__(self, key, (model.state, model.stateVarMap[key]))
+            dict.__setitem__(self, model.freeVariableName, (self._freeVars, 0))
+
             try:
                 line_profile.add_function(self.__getitem__)
                 line_profile.add_function(self.__setitem__)
-                line_profile.add_function(self.__contains__)
             except NameError:
                 pass
 
         def __getitem__(self, key):
-            if key in self._model.parameterMap:
-                return self._model.parameters[self._model.parameterMap[key]]
-            elif key in self._model.stateVarMap:
-                return self._model.state[self._model.stateVarMap[key]]
-            elif key == self._model.freeVariableName:
-                return self._model.freeVariable
-            else:
-                raise ProtocolError('Name', key, 'is not defined.')
+            # TODO: Catch KeyError?
+            vector, index = dict.__getitem__(self, key)
+            return vector[index]
 
         def __setitem__(self, key, value):
-            if self[key] != value:
+            # TODO: Catch KeyError?
+            vector, index = dict.__getitem__(self, key)
+            if vector[index] != value:
                 self._model.dirty = True
-            if key in self._model.parameterMap:
-                self._model.parameters[self._model.parameterMap[key]] = value
-            elif key in self._model.stateVarMap:
-                self._model.state[self._model.stateVarMap[key]] = value
-            elif key == self._model.freeVariableName:
-                setattr(self._model, key, value)
-            else:
-                raise ProtocolError('Name', key, 'is not defined.')
-
-        def __contains__(self, key):
-            return key in self._model.env.DefinedNames()
+                vector[index] = value
 
     def __init__(self, model):
         super(ModelWrapperEnvironment, self).__init__(allowOverwrite=True)
         self.model = model
-        self.names = []
-        self.names.extend(self.model.stateVarMap.keys())
-        self.names.extend(self.model.parameterMap.keys())
-        self.names.append(self.model.freeVariableName)
         self.unwrappedBindings = self._UnwrappedBindingsDict(model)
         self.bindings = self._BindingsDict(self.unwrappedBindings)
+        self.names = self.unwrappedBindings.keys()
 
     def DefineName(self, name, value):
         raise ProtocolError("Defining names in a model is not allowed.")

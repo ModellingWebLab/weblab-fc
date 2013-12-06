@@ -57,8 +57,8 @@ class TestModelSimulation(unittest.TestCase):
         for t in range(10):
             if t > 0:
                 model.Simulate(t)
-            self.assertEqual(model.GetOutputs().LookUp('a').value, a)
-            self.assertAlmostEqual(model.GetOutputs().LookUp('y').value, t*a)
+            self.assertEqual(model.GetOutputs()['a'], a)
+            self.assertAlmostEqual(model.GetOutputs()['y'], t*a)
         
     def TestUniformRange(self): 
         a = 5

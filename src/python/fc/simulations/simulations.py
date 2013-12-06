@@ -73,17 +73,17 @@ class AbstractSimulation(locatable.Locatable):
 
     def LoopBodyStartHook(self):
         if isinstance(self.range_, R.While) and self.range_.count > 1 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
-            for name in self.results.DefinedNames():
+            for name in self.results:
                 self.results.LookUp(name).array.resize(self.range_.GetNumberOfOutputPoints(), refcheck=False)
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 1:
                 modifier.Apply(self)
             elif modifier.when == AbstractModifier.EACH_LOOP:
-                modifier.Apply(self)
+                modifier.Apply(self) ## ~96% of time
 
     def LoopEndHook(self):
         if isinstance(self.range_, R.While):
-            for name in self.results.DefinedNames():
+            for name in self.results:
                 result = self.results.LookUp(name)
                 result.array = result.array[0:self.range_.GetNumberOfOutputPoints()] #resize function doesn't work with references
         for modifier in self.modifiers:
@@ -92,8 +92,8 @@ class AbstractSimulation(locatable.Locatable):
 
     def LoopBodyEndHook(self):
         if isinstance(self.range_, R.While) and self.prefix:
-            for result in self.results.DefinedNames():
-                if result not in self.viewEnv.DefinedNames():
+            for result in self.results:
+                if result not in self.viewEnv:
                     self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
                 else:
                     self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
@@ -114,18 +114,20 @@ class AbstractSimulation(locatable.Locatable):
         return self.results
 
     def AddIterationOutputs(self, env):
-        if self.results is not None and not self.results:
+        self_results = self.results
+        if self_results is not None and not self_results:
             # First iteration - create empty output arrays of the correct shape
             range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
-            for name in env.DefinedNames():
-                output = env.LookUp(name)
-                results = np.empty(range_dims + output.array.shape)
-                self.results.DefineName(name, V.Array(results))
-        if self.results:
-            range_indices = tuple(r.GetCurrentOutputNumber() for r in self.ranges) ## ~47% of time
-            for name in env.DefinedNames():  ## ~15% of time
-                result = self.results.unwrappedBindings[name]  ## ~12% of time
-                result[range_indices] = env.unwrappedBindings[name]  ## ~14% of time
+            for name in env:
+                output = env[name]
+                results = np.empty(range_dims + output.shape)
+                self_results.DefineName(name, V.Array(results))
+        if self_results:
+            unwrapped_results = self_results.unwrappedBindings
+            range_indices = tuple(r.GetCurrentOutputNumber() for r in self.ranges) ## ~30% of time; tuple conversion is minimal
+            for name in env:
+                result = unwrapped_results[name]
+                result[range_indices] = env[name]
 
 
 class Timecourse(AbstractSimulation):

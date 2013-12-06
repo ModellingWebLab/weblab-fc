@@ -668,8 +668,8 @@ class TestSyntaxInterface(unittest.TestCase):
         used_vars = expr.GetUsedVariables()
         self.assertEqual(used_vars, set(['i']))
         
-        env.DefineName('a', N(1))
-        env.DefineName('b', N(2))
+        env.DefineName('a', V.Simple(1))
+        env.DefineName('b', V.Simple(2))
         parse_action = csp.expr.parseString('a + b', parseAll=True)
         expr = parse_action[0].expr()
         used_vars = expr.GetUsedVariables()
