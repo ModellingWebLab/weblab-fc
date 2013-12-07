@@ -26,11 +26,11 @@ namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 # List inputs 
 inputs {
-	# Holding potential to apply before simulating the voltage clamp.
-	holding_potential = -80
-	steady_state_time = 10000   # 10 seconds
-	
-	# Voltage trace over time
+    # Holding potential to apply before simulating the voltage clamp.
+    holding_potential = -80
+    steady_state_time = 10000   # 10 seconds
+    
+    # Voltage trace over time
     voltage_trace = [-80, -80]
     time_trace = [0, 1]
 }
@@ -54,13 +54,13 @@ model interface {
 
     input oxmeta:membrane_voltage units mV
     input oxmeta:extracellular_potassium_concentration units mM
-	input oxmeta:cytosolic_potassium_concentration units mM
-	input oxmeta:cytosolic_sodium_concentration units mM
+    input oxmeta:cytosolic_potassium_concentration units mM
+    input oxmeta:cytosolic_sodium_concentration units mM
       
-	output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
-	output oxmeta:extracellular_potassium_concentration units mM
-	output oxmeta:cytosolic_potassium_concentration units mM
-	output oxmeta:cytosolic_sodium_concentration units mM
+    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
+    output oxmeta:extracellular_potassium_concentration units mM
+    output oxmeta:cytosolic_potassium_concentration units mM
+    output oxmeta:cytosolic_sodium_concentration units mM
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
     
@@ -86,11 +86,11 @@ model interface {
 # Perform simulations
 tasks {
 
-	# Task 1: run simulation to steady state for holding potential (-ve time)
+    # Task 1: run simulation to steady state for holding potential (-ve time)
     simulation timecourse {
         range time units ms vector [-steady_state_time, 0]
         modifiers {
-        	at start set oxmeta:membrane_voltage = holding_potential
+            at start set oxmeta:membrane_voltage = holding_potential
         }
     }
     
@@ -98,19 +98,18 @@ tasks {
     simulation timecourse {
         range time units ms vector time_trace
         modifiers {
-            at each loop set oxmeta:membrane_voltage = voltage_trace{std::find(std::map(lambda t == time, time_trace))}[0]
+            at each loop set oxmeta:membrane_voltage = (voltage_trace{find(map(lambda t: t == time, time_trace)), 0})[0]
         }
     }
-	
+    
 }
 
 # Do any calculations/modifications of data before plotting
 post-processing {
-
-	# Check validity of outputs
+    # Check validity of outputs
     assert sim:time.IS_ARRAY
     assert sim:membrane_voltage.IS_ARRAY
-    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY        
+    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY
     
 }
 
@@ -119,11 +118,11 @@ outputs {
 
     I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
     time = sim:time units ms "Time"
-    voltage_traces = sim:membrane_voltage units mV "Applied potential"	
+    voltage_traces = sim:membrane_voltage units mV "Applied potential"
 }
 
 # Create plots
 plots {
     plot "Voltage Clamp" using lines { voltage_traces against time}
-	plot "I_{Kr} currents over time" using lines { I_Kr against time }	
+    plot "I_{Kr} currents over time" using lines { I_Kr against time }
 }
