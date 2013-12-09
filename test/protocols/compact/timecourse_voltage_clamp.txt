@@ -95,7 +95,7 @@ tasks {
     }
     
     # Task 2: Apply the inputted voltage time-series as a voltage clamp (+ve time).
-    simulation timecourse {
+    simulation sim = timecourse {
         range time units ms vector time_trace
         modifiers {
             at each loop set oxmeta:membrane_voltage = (voltage_trace{find(map(lambda t: t == time, time_trace)), 0})[0]
@@ -110,12 +110,10 @@ post-processing {
     assert sim:time.IS_ARRAY
     assert sim:membrane_voltage.IS_ARRAY
     assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY
-    
 }
 
 # List any outputs from model which need to be carried forward to plotting
 outputs {
-
     I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
     time = sim:time units ms "Time"
     voltage_traces = sim:membrane_voltage units mV "Applied potential"
