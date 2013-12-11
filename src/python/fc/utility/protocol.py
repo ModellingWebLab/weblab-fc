@@ -76,12 +76,12 @@ class Protocol(object):
         self.outputs = []
         self.plots = []
         self.timings = {}
-        
+    
         start = time.time()
         import CompactSyntaxParser as CSP
-        parser = CSP.CompactSyntaxParser()
+        parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
-        generator = parser._Try(CSP.CompactSyntaxParser.protocol.parseFile, protoFile, parseAll=True)[0]
+        generator = self.parsedProtocol = parser._Try(CSP.CompactSyntaxParser.protocol.parseFile, protoFile, parseAll=True)[0]
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
@@ -271,15 +271,18 @@ class Protocol(object):
                 temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
             else:
                 temp_dir = tempfile.mkdtemp()
-            xml_file = subprocess.check_output(['python', 'projects/FunctionalCuration/src/proto/parsing/CompactSyntaxParser.py',
-                                                self.protoFile, temp_dir])
-            xml_file = xml_file.strip()
+            # Create an XML syntax version of the protocol, for PyCml's sake :(
+            import CompactSyntaxParser as CSP
+            CSP.DoXmlImports()
+            xml_file = self.parser.ConvertProtocol(self.protoFile, temp_dir, xmlGenerator=self.parsedProtocol)
+            # Generate the (protocol-modified) model code
             class_name = 'GeneratedModel'
             code_gen_cmd = self.GetConversionCommand(model, xml_file, class_name, temp_dir, useCython=useCython, useNumba=useNumba)
             subprocess.check_call(code_gen_cmd)
             if useCython:
                 # Compile the extension module
                 subprocess.check_call(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir)
+            # Create an instance of the model
             sys.path.insert(0, temp_dir)
             import model as module
             for name in module.__dict__.keys():

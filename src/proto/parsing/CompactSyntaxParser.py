@@ -1681,12 +1681,13 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
     
-    def ParseFile(self, filename):
+    def ParseFile(self, filename, xmlGenerator=None):
         """Main entry point for parsing a complete protocol file; returns an ElementTree."""
         Actions.source_file = filename
         Actions.units_map = {}
-        xml_generator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
-        xml = xml_generator.xml()
+        if xmlGenerator is None:
+            xmlGenerator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
+        xml = xmlGenerator.xml()
         xml.base = filename
         return ET.ElementTree(xml)
     
@@ -1703,13 +1704,13 @@ class CompactSyntaxParser(object):
             new_path = self.ConvertProtocol(source_path, outputDir)
             referringElt.attrib['source'] = new_path
     
-    def ConvertProtocol(self, sourcePath, outputDir):
+    def ConvertProtocol(self, sourcePath, outputDir, xmlGenerator=None):
         """Convert a protocol from textual syntax to XML in a temporary file.
         
         Recursively converts imported/nested textual protocols too.
         """
         import tempfile
-        xml = self.ParseFile(sourcePath)
+        xml = self.ParseFile(sourcePath, xmlGenerator)
         # Find imported/nested textual protocols, and convert them first, updating our references to them
         subst = {'ns': '{%s}' % PROTO_NS}
         for import_elt in xml.iterfind('%(ns)simport' % subst):
