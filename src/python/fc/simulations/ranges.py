@@ -33,123 +33,137 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from ..language import values as V
 
 class AbstractRange(V.Simple):
-    """Base class for ranges in the protocol language."""
+    """Base class for ranges in the protocol language.
+
+    Handles enforcing the update of the range's value in the simulation environment's Python bindings dictionary.
+    """
+    def __init__(self, name):
+        """Initialise the common range properties."""
+        self.name = name
+        self.count = 0
+        self._value = float('nan')
+        self.numberOfOutputs = 0
+        self.env = None
+
     def Initialise(self, env):
-        pass
+        """Called by the associated simulation when its environment is initialised.
+
+        This method should evaluate any expressions used to define the range.
+        """
+        self.env = env
 
     @property
     def value(self):
-        return self.current
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+        if self.env is not None:
+            self.env.unwrappedBindings[self.name] = value
+
+    @property
+    def unwrapped(self):
+        return self.value
+
+    @property
+    def current(self):
+        return self.value
 
     def GetCurrentOutputPoint(self):
-        return self.current
+        return self.value
 
     def GetCurrentOutputNumber(self):
         return self.count - 1
 
+    def GetNumberOfOutputPoints(self):
+        return self.numberOfOutputs
+
 
 class UniformRange(AbstractRange):
     def __init__(self, name, startExpr, endExpr, stepExpr):
-        self.name = name
+        super(UniformRange, self).__init__(name)
         self.startExpr = startExpr
         self.endExpr = endExpr
         self.stepExpr = stepExpr
-        self.current = float('nan')
-        self.count = 0
-        
+
     def __iter__(self):
         self.count = 0
-        self.current = self.start
+        self.value = self.start
         return self
-    
+
     def next(self):
-        if self.current >= self.end:
+        if self.value >= self.end:
             self.count = 0
             raise StopIteration
         else:
+            self.value = self.start + self.step * self.count
             self.count += 1
-            self.current = self.start + self.step * (self.count - 1)
-            return self.current
-        
+            return self.value
+
     def Initialise(self, env):
-        self.env = env
+        super(UniformRange, self).Initialise(env)
         self.start = self.startExpr.Evaluate(self.env).value
         self.step = self.stepExpr.Evaluate(self.env).value
         self.end = self.endExpr.Evaluate(self.env).value
-        self.current = self.start
-        
-    def GetNumberOfOutputPoints(self):
-        return (round(self.end-self.start)/self.step) + 1
+        self.value = self.start
+        self.numberOfOutputs = (round(self.end-self.start)/self.step) + 1
 
 
 class VectorRange(AbstractRange):
     def __init__(self, name, arrOrExpr):
-        self.name = name
+        super(VectorRange, self).__init__(name)
         if isinstance(arrOrExpr, V.Array):
             self.expr = None
             self.arrRange = arrOrExpr.array
-            self.current = self.arrRange[0]
+            self.value = self.arrRange[0]
+            self.numberOfOutputs = len(self.arrRange)
         else:
             self.expr = arrOrExpr
-            self.current = float('nan')
+            self.value = float('nan')
         self.count = 0
-    
+
     def Initialise(self, env):
-        self.env = env
+        super(VectorRange, self).Initialise(env)
         if self.expr:
             self.arrRange = self.expr.Evaluate(env).array
-            self.current = self.arrRange[0]
-        
+            self.value = self.arrRange[0]
+            self.numberOfOutputs = len(self.arrRange)
+
     def __iter__(self):
         self.count = 0
-        self.current = 0
+        self.value = 0
         return self
-    
+
     def next(self):
         if self.count >= len(self.arrRange):
             self.count = 0
             raise StopIteration
         else:
-            self.current = self.arrRange[self.count]
-            self.env.unwrappedBindings[self.name] = self.current
+            self.value = self.arrRange[self.count]
             self.count += 1
             return self.current
-        
-    def GetNumberOfOutputPoints(self):
-        return len(self.arrRange)
 
 
 class While(AbstractRange):
     def __init__(self, name, condition):
-        self.name = name
+        super(While, self).__init__(name)
         self.condition = condition
         self.count = 0
+        self.value = 0
         self.numberOfOutputs = 1000
 
-    @property
-    def current(self):
-        return self.count - 1
-    
     def __iter__(self):
         self.count = 0
         return self
-    
-    def Initialise(self, env):
-        self.env = env
-        self.env.bindings[self.name] = V.Simple(self.current)
-        self.env.unwrappedBindings[self.name] = self.current
 
     def next(self):
         self.count += 1
-        self.env.bindings[self.name] = self
-        self.env.unwrappedBindings[self.name] = self.current
+        self.value += 1
         if self.count >= self.numberOfOutputs:
             self.numberOfOutputs += 1000
         if self.count > 1 and not self.condition.Evaluate(self.env).value:
             self.numberOfOutputs = self.count - 1
             raise StopIteration
         else:
-            return self.current
-
-    def GetNumberOfOutputPoints(self):
-        return self.numberOfOutputs
+            return self.value
