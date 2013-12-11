@@ -42,16 +42,18 @@ class AbstractExpression(locatable.Locatable):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         super(AbstractExpression, self).__init__()
         self.children = children
-
-    @property
-    def compiled(self):
-        """Compile this expression and cache the result."""
+        
         try:
-            return self._compiled
-        except AttributeError:
-            # We haven't called Compile yet; cache the result
-            c = self._compiled = self.Compile()
-            return c
+            line_profile.add_function(self.EvaluateWithCython)
+        except NameError:
+            pass
+
+    def GetUsedVariables(self):
+        """Get the set of (non-local) identifiers referenced within this expression."""
+        result = set()
+        for child in self.children:
+            result |= child.GetUsedVariables()
+        return result
 
     def EvaluateChildren(self, env):
         """Evaluate our child expressions and return a list of their values."""
@@ -68,15 +70,10 @@ class AbstractExpression(locatable.Locatable):
 
         Evaluation of the generated string is only guaranteed to give correct results (as defined
         by the Interpret method) in certain array contexts, for instance maps and array comprehensions.
+        
+        TODO: Always stop compilation succeeding if an expression or subexpression is traced.
         """
         raise NotImplementedError
-
-    def GetUsedVariables(self):
-        """Get the set of (non-local) identifiers referenced within this expression."""
-        result = set()
-        for child in self.children:
-            result |= child.GetUsedVariables()
-        return result
 
     def Evaluate(self, env):
         """We always default to using Interpret for evaluating standalone expressions."""    
@@ -98,3 +95,101 @@ class AbstractExpression(locatable.Locatable):
                 f.close()
         return result
 
+    def EvaluateCompiled(self, env):
+        """Try to evaluate the compiled version of this expression, returning an unwrapped Python value.
+
+        This method only gets used on the first call.  If compilation fails, this method's name will be rebound
+        to the normal Evaluate method (or rather, a lambda which unwraps the result).  If compilation succeeds,
+        the RealEvaluateCompiled method will be used.
+        """
+        try:
+            value = self.RealEvaluateCompiled(env)
+        except NotImplementedError:
+            self.EvaluateCompiled = lambda env: self.Evaluate(env).value
+            value = self.EvaluateCompiled(env)
+        else:
+            self.EvaluateCompiled = self.RealEvaluateCompiled
+        return value
+
+    @property
+    def compiled(self):
+        """Compile this expression and cache the result."""
+        try:
+            return self._compiled
+        except AttributeError:
+            # We haven't called Compile yet; cache the result
+            c = self._compiled = self.Compile()
+            return c
+
+    @property
+    def evalGlobals(self):
+        try:
+            return self._evalGlobals
+        except AttributeError:
+            d = self._evalGlobals = {}
+            d['abs'] = abs
+            import math
+            for name in ['log', 'log10', 'exp']:
+                d[name] = getattr(math, name)
+            import numpy
+            d['___np'] = numpy
+            return d
+
+    def RealEvaluateCompiled(self, env):
+        """Evaluate the compiled form of this expression using eval().
+
+        This is suitable for use only in non-array contexts, such as by the SetVariable modifier.
+        """
+        func = self.compiledFunction
+        arg_envs = self.GetDefiningEnvironments(env)
+        assert env is self._rootDefiningEnv, "Internal implementation assumption violated"
+        args = [arg_envs[name].unwrappedBindings[name] for name in self._usedVarLocalNames]
+        return func(*args)
+
+    def GetDefiningEnvironments(self, env):
+        """Cache which environment each variable used in this expression is actually defined in.
+
+        Stores each environment indexed by the local name of the variable within that environment.
+        """
+        try:
+            return self._definingEnvs
+        except AttributeError:
+            self._rootDefiningEnv = env  # For paranoia checking that the cache is valid
+            d = self._definingEnvs = {}
+            l = self._usedVarLocalNames = []
+            for name in self.usedVariableList:
+                local_name = name[name.rfind(':')+1:]
+                l.append(local_name)
+                d[local_name] = env.FindDefiningEnvironment(name)
+            return d
+
+    @property
+    def compiledFunction(self):
+        """A version of self.compiled that has been converted to a Python function by eval()."""
+        try:
+            return self._compiledFunction
+        except AttributeError:
+            from .general import NameLookUp
+            arg_defs = ', '.join(NameLookUp.PythonizeName(name) for name in self.usedVariableList)
+            f = self._compiledFunction = eval('lambda ' + arg_defs + ': ' + self.compiled, self.evalGlobals)
+            return f
+
+    @property
+    def usedVariableList(self):
+        """Cached property version of self.usedVariables that's in a predictable order."""
+        try:
+            return self._usedVarList
+        except AttributeError:
+            l = self._usedVarList = list(self.usedVariables)
+            l.sort()
+            return l
+
+    @property
+    def usedVariables(self):
+        """Cached property version of self.GetUsedVariables()."""
+        try:
+            return self._usedVars
+        except AttributeError:
+            # Create the cache
+            u = self._usedVars = self.GetUsedVariables()
+            return u

@@ -51,6 +51,7 @@ class Environment(object):
 
         try:
             line_profile.add_function(self.DefineName)
+            line_profile.add_function(self.FindDefiningEnvironment)
         except NameError:
             pass
 
@@ -110,28 +111,33 @@ class Environment(object):
         del self.bindings[name]
         del self.unwrappedBindings[name]
 
+    def FindDefiningEnvironment(self, name):
+        """Find which environment the given name is defined in, whether this or one of its delegatees.
+
+        Returns None if the name isn't defined anywhere.
+        """
+        if name in self.bindings:
+            return self
+        parts = name.split(':', 1)
+        if len(parts) == 2:
+            prefix, local_name = parts
+        else:
+            prefix, local_name = '', name
+        try:
+            delegatee = self.delegatees[prefix]
+        except KeyError:
+            return None
+        return delegatee.FindDefiningEnvironment(local_name)
+
     def OverwriteDefinition(self, name, value):
-        def find_definition(env, name):
-            if name in env.bindings: ## ~15% of function time
-                if not env.allowOverwrite:
-                    raise ProtocolError("This environment does not support overwriting mappings")
-                env.bindings[name] = value ## ~8% of time
-                env.unwrappedBindings[name] = value.unwrapped ## ~45% of function time
-                return True
-            parts = name.split(':', 1)
-            if len(parts) == 2:
-                prefix, local_name = parts
-                if prefix in self.delegatees:
-                    return find_definition(self.delegatees[prefix], local_name)
-            if '' in self.delegatees:
-                return find_definition(self.delegatees[''], name)
-            return False
-#         try:
-#             line_profile.add_function(find_definition)
-#         except NameError:
-#             pass
-        if not find_definition(self, name):
+        """Change the binding of name to value, if this is permitting by the defining environment."""
+        defining_env = self.FindDefiningEnvironment(name)
+        if defining_env is None:
             raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")
+        if not defining_env.allowOverwrite:
+            raise ProtocolError("This environment does not support overwriting mappings")
+        defining_env.bindings[name] = value
+        defining_env.unwrappedBindings[name] = value.unwrapped
 
     def Clear(self):
         self.bindings.clear()
@@ -190,6 +196,16 @@ class DelegatingDict(dict):
 
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee
+
+    def Flatten(self):
+        """Return a normal dictionary containing all the definitions in this and its delegatees."""
+        result = dict(self)
+        for prefix, delegatee in self.delegatees.iteritems():
+            for key, value in delegatee.Flatten().iteritems():
+                full_key = prefix + ':' + key if prefix else key
+                if not full_key in result:
+                    result[full_key] = value
+        return result
 
 
 class ModelWrapperEnvironment(Environment):
@@ -262,6 +278,10 @@ class ModelWrapperEnvironment(Environment):
             if vector[index] != value:
                 self._model.dirty = True
                 vector[index] = value
+
+        def Flatten(self):
+            """Return a normal dictionary containing all the definitions in this and its delegatees."""
+            return dict((key, self[key]) for key in self)
 
     def __init__(self, model):
         super(ModelWrapperEnvironment, self).__init__(allowOverwrite=True)
