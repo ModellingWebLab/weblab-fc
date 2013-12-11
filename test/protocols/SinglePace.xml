@@ -3,6 +3,7 @@
 <protocol xmlns="https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#">
+    
     <!-- Declare protocol inputs with default values -->
     <inputs>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
@@ -18,8 +19,8 @@
         </apply>    
     </inputs>
     
-    <import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
-    <import source="../../../src/proto/library/CardiacLibrary.xml" mergeDefinitions="true"/>
+    <import source="BasicLibrary.xml" mergeDefinitions="true"/>
+    <import source="CardiacLibrary.xml" mergeDefinitions="true"/>
      
     <units>
         <cellml:units name="mV">
@@ -240,4 +241,7 @@
             <using>lines</using>
         </plot>
     </plots>
+    
 </protocol>
+
+

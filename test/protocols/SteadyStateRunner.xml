@@ -30,7 +30,7 @@
         </apply>    
     </inputs>          
 
-    <import source="../../../src/proto/library/BasicLibrary.xml" mergeDefinitions="true"/>
+    <import source="BasicLibrary.xml" mergeDefinitions="true"/>
     
     <library>
         <apply xmlns="http://www.w3.org/1998/Math/MathML">
