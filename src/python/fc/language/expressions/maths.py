@@ -559,4 +559,4 @@ class Geq(AbstractExpression):
     def Compile(self):
         operands = [ "(" + child.Compile() + ")" for child in self.children]
         expression = ' >= '.join(operands)  
-        return expression  
+        return expression

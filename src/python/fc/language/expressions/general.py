@@ -108,16 +108,27 @@ class If(AbstractExpression):
 
 class NameLookUp(AbstractExpression):
     """Used to look up a name for a given environment"""
+
+    # This is used to replace colons when turning a name into a valid Python identifier
+    PREFIXED_NAME = '__PPM__'
+
+    @staticmethod
+    def PythonizeName(name):
+        if ':' in name:
+            return NameLookUp.PREFIXED_NAME + name.replace(':', NameLookUp.PREFIXED_NAME)
+        return name
+
     def __init__(self, name):
+        assert self.PREFIXED_NAME not in name, "Choice of variable name breaks an implementation assumption"
         super(NameLookUp, self).__init__()
         self.name = name
-        
+
     def Interpret(self, env):
         return env.LookUp(self.name)
-    
+
     def Compile(self):
-        return self.name
-    
+        return self.PythonizeName(self.name)
+
     def GetUsedVariables(self):
         return set([self.name])
 
@@ -210,5 +221,3 @@ class Accessor(AbstractExpression):
             return result
         else:
             return V.Simple(result)
-
-    

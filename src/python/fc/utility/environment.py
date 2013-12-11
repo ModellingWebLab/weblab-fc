@@ -171,16 +171,22 @@ class DelegatingDict(dict):
     def __init__(self, *args, **kwargs):
         super(DelegatingDict, self).__init__(*args, **kwargs)
         self.delegatees = {}
+        from ..language.expressions import NameLookUp
+        self._marker = NameLookUp.PREFIXED_NAME
+        self._marker_len = len(self._marker)
 
     def __missing__(self, key):
-        parts = key.split(":", 1)
+        if key.startswith(self._marker):
+            parts = key[self._marker_len:].split(self._marker, 1)
+        else:
+            parts = key.split(':', 1)
         if len(parts) == 2:
             prefix, name = parts
             if prefix in self.delegatees:
                 return self.delegatees[prefix][name]
         if '' in self.delegatees:
             return self.delegatees[''][key]
-        raise ProtocolError("Name", key, "is not defined in env or any delegatee env")
+        raise KeyError("Name", key, "is not defined in env or any delegatee env")
 
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee
