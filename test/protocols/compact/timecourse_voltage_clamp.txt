@@ -122,5 +122,5 @@ outputs {
 # Create plots
 plots {
     plot "Voltage Clamp" using lines { voltage_traces against time}
-    plot "I_{Kr} currents over time" using lines { I_Kr against time }
+    plot "I_{Kr} current" using lines { I_Kr against time }
 }
