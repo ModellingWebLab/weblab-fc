@@ -1,24 +1,27 @@
 # Protocol for I_Kr current:
 
 documentation {
+# IKr Peak Current I-V Curve
 This protocol implements a protocol to record the IKr Peak Current I-V relationship
 for cardiac electrophysiology cell models.
 
 By clamping intra/extra-cellular potassium, and intra-cellular sodium, we can throw away most of 
 the equations of the models to leave just the IKr components to study.
 
-Parameters:
- * holding_potential  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
- * final_potential  The potential to which the cell is stepped after the test potentials (mV).
- * steady_state_time  The amount of time to leave the current at holding potential before applying steps (ms).
- * test_potentials  A list of voltages (steps) to clamp the cell to before recording IKr (mV).
+## Parameters
+
+* holding\_potential  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
+* final\_potential  The potential to which the cell is stepped after the test potentials (mV).
+* steady\_state\_time  The amount of time to leave the current at holding potential before applying steps (ms).
+* test\_potentials  A list of voltages (steps) to clamp the cell to before recording IKr (mV).
 
 It requires models to provide variables with the annotations:
- * oxmeta:membrane_voltage
- * oxmeta:extracellular_potassium_concentration
- * oxmeta:cytosolic_potassium_concentration
- * oxmeta:cytosolic_sodium_concentration 
- * oxmeta:time
+
+* oxmeta:membrane\_voltage
+* oxmeta:extracellular\_potassium\_concentration
+* oxmeta:cytosolic\_potassium\_concentration
+* oxmeta:cytosolic\_sodium\_concentration 
+* oxmeta:time
 }
 
 # Load the metadata tags for use with CellML models

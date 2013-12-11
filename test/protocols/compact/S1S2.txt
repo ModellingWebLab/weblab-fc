@@ -1,9 +1,12 @@
 # Compact syntax version of the S1S2 protocol
 
+# Documentation is in Markdown, a good 'sandbox' for this is at http://markdownlivepreview.com/
 documentation {
+# S1-S2 Protocol
+
 This protocol implements S1-S2 restitution for cardiac electrophysiology cell models.
 
-A cell is paced for a while (defined by steady_state_beats) at the S1 interval to get the 
+A cell is paced for a while (defined by steady\_state\_beats) at the S1 interval to get the 
 CellML initial conditions to approximately steady state for the S1 pacing frequency.
 A new pacing regime is entered where we do two or more paces at a new cycle length (S2).
 
@@ -11,16 +14,18 @@ The first recorded action potential duration after the change in pacing frequenc
 against the diastolic interval - that is the length of time between repolarization and 
 subsequent depolarization before the calculated action potential duration.  
 
-Parameters:
- * s1_interval (in milliseconds)
- * steady_state_beats (number of paces to do at S1 pacing interval)
- * timecourse_duration (in milliseconds, length of time over which to apply s2 pacing)
- * s2_intervals (a list of different s2 pacing cycle lengths to apply)  
+##Parameters:
+
+* s1_interval (in milliseconds)
+* steady\_state\_beats (number of paces to do at S1 pacing interval)
+* timecourse\_duration (in milliseconds, length of time over which to apply s2 pacing)
+* s2\_intervals (a list of different s2 pacing cycle lengths to apply)  
 
 It requires models to provide variables with the annotations:
- * oxmeta:membrane_stimulus_current
- * oxmeta:membrane_voltage
- * oxmeta:time
+
+* oxmeta:membrane\_stimulus\_current
+* oxmeta:membrane\_voltage
+* oxmeta:time
 }
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
@@ -49,7 +54,7 @@ units {
 }
 
 model interface {
-    input oxmeta:membrane_stimulus_current_end units ms = 100000000000
+    input oxmeta:membrane_stimulus_current_end units ms = 100000000000 # This will be modified in the nested loop below.
     input oxmeta:membrane_stimulus_current_offset units ms = 10
     input oxmeta:membrane_stimulus_current_period units ms = 1000
     
