@@ -44,7 +44,7 @@ class AbstractExpression(locatable.Locatable):
         self.children = children
         
         try:
-            line_profile.add_function(self.EvaluateWithCython)
+            line_profile.add_function(self.RealEvaluateCompiled)
         except NameError:
             pass
 
