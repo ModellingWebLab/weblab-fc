@@ -43,14 +43,19 @@ class AbstractRange(V.Simple):
         self.count = 0
         self._value = float('nan')
         self.numberOfOutputs = 0
-        self.env = None
+        # Set an initial empty environment so calls to set our value in constructors don't fail
+        # (since Initialise hasn't been called by our simulation yet)
+        from ..utility.environment import Environment
+        AbstractRange.Initialise(self, Environment())
 
     def Initialise(self, env):
         """Called by the associated simulation when its environment is initialised.
 
-        This method should evaluate any expressions used to define the range.
+        Here we define the range variable within the environment.
+        Subclasses should also evaluate any expressions used to define the range.
         """
         self.env = env
+        env.DefineName(self.name, self)
 
     @property
     def value(self):
@@ -59,19 +64,18 @@ class AbstractRange(V.Simple):
     @value.setter
     def value(self, value):
         self._value = value
-        if self.env is not None:
-            self.env.unwrappedBindings[self.name] = value
+        self.env.unwrappedBindings[self.name] = value
 
     @property
     def unwrapped(self):
-        return self.value
+        return self._value
 
     @property
     def current(self):
-        return self.value
+        return self._value
 
     def GetCurrentOutputPoint(self):
-        return self.value
+        return self._value
 
     def GetCurrentOutputNumber(self):
         return self.count - 1
@@ -150,11 +154,12 @@ class While(AbstractRange):
         super(While, self).__init__(name)
         self.condition = condition
         self.count = 0
-        self.value = 0
+        self.value = -1
         self.numberOfOutputs = 1000
 
     def __iter__(self):
         self.count = 0
+        self.value = -1
         return self
 
     def next(self):

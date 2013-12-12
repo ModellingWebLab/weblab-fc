@@ -56,9 +56,9 @@ class AbstractSimulation(locatable.Locatable):
         except NameError:
             pass
 
-    def Initialise(self):
-        self.env.DefineName(self.range_.name, self.range_)
-        self.range_.Initialise(self.env)
+    def Initialise(self, initialiseRange=True):
+        if initialiseRange:
+            self.range_.Initialise(self.env)
         if isinstance(self.range_, R.While) and self.prefix:
             self.viewEnv = Env.Environment(allowOverwrite=True)
             self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
@@ -193,7 +193,7 @@ class Nested(AbstractSimulation):
         self.nestedSim.Initialise()
         if self.trace:
             self.nestedSim.trace = True
-        super(Nested, self).Initialise()
+        super(Nested, self).Initialise(initialiseRange=False)
 
     def InternalRun(self):
         for t in self.range_:
