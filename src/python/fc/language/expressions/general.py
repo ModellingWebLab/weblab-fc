@@ -47,7 +47,8 @@ class Const(AbstractExpression):
     def Interpret(self, env):
         return self.value
 
-    def Compile(self):
+    def Compile(self, arrayContext=True):
+        """If this is a simple value, return a string containing the value."""
         try:
             return str(self.value.value)
         except AttributeError:
@@ -92,18 +93,21 @@ class If(AbstractExpression):
         else:
             result = self.elseExpr.Evaluate(env)
         return result
-    
+
     def GetUsedVariables(self):
         result = self.testExpr.GetUsedVariables()
         result |= self.thenExpr.GetUsedVariables()
         result |= self.elseExpr.GetUsedVariables()
         return result
 
-    def Compile(self):
+    def Compile(self, arrayContext=True):
         test = self.testExpr.Compile()
         then = self.thenExpr.Compile()
         else_ = self.elseExpr.Compile()
-        return '___np.where(%s,%s,%s)' % (test, then, else_)
+        if arrayContext:
+            return '___np.where(%s,%s,%s)' % (test, then, else_)
+        else:
+            return '(%s if %s else %s)' % (then, test, else_)
 
 
 class NameLookUp(AbstractExpression):
@@ -126,7 +130,7 @@ class NameLookUp(AbstractExpression):
     def Interpret(self, env):
         return env.LookUp(self.name)
 
-    def Compile(self):
+    def Compile(self, arrayContext=True):
         return self.PythonizeName(self.name)
 
     def GetUsedVariables(self):

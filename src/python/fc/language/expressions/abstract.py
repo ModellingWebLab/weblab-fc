@@ -65,13 +65,18 @@ class AbstractExpression(locatable.Locatable):
         """
         raise NotImplementedError
 
-    def Compile(self):
+    def Compile(self, arrayContext=True):
         """Create a string representation of this expression for evaluation by numexpr or numpy.
 
-        Evaluation of the generated string is only guaranteed to give correct results (as defined
+        By default, evaluation of the generated string is only guaranteed to give correct results (as defined
         by the Interpret method) in certain array contexts, for instance maps and array comprehensions.
-        
+        If arrayContext is set to False, the generated string will instead only evaluate correctly when
+        considered as a standalone expression operating on simple values (useful in the SetVariable modifier,
+        for instance).
+
         TODO: Always stop compilation succeeding if an expression or subexpression is traced.
+        (Make trace on the base class a property, which when set replaces the Compile method with one
+        that always fails.)
         """
         raise NotImplementedError
 
@@ -118,7 +123,7 @@ class AbstractExpression(locatable.Locatable):
             return self._compiled
         except AttributeError:
             # We haven't called Compile yet; cache the result
-            c = self._compiled = self.Compile()
+            c = self._compiled = self.Compile(arrayContext=False)
             return c
 
     @property

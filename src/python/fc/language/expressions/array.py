@@ -224,7 +224,12 @@ class View(AbstractExpression):
         super(View, self).__init__()
         self.arrayExpression = array
         self.children = children
-        
+
+        try:
+            line_profile.add_function(self.Interpret)
+        except NameError:
+            pass
+
     def GetValue(self, arg, arg_name='not dim'):
         if isinstance(arg, V.Null):
             if arg_name == 'dim':
