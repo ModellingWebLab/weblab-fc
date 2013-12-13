@@ -1,0 +1,81 @@
+# Compact syntax version of the S1S2 protocol
+
+documentation {
+# Steady State Restitution
+This protocol implements steady state restitution for cardiac electrophysiology cell models.
+
+A cell is paced to either steady state or **max\_steady\_state\_beats**, whichever is reached first.
+
+The recorded action potential duration at steady state for this pacing frequency is plotted
+against the diastolic interval - that is the length of time between repolarization and 
+subsequent depolarization.  
+
+##Parameters
+
+* **max\_steady\_state\_beats** (max number of paces to do, defaults to 10000)
+* **pacing\_intervals** a list of different pacing cycle lengths to apply (sensible defaults provided!)
+* **apd\_percentage**  The threshold of APD calculation (e.g. APD50, APD80, APD90 - default).
+
+It requires models to provide variables with the annotations:
+
+* **oxmeta:membrane_stimulus_current**
+* **oxmeta:membrane_voltage**
+* **oxmeta:time**
+}
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+
+    max_steady_state_beats = 1000
+    pacing_intervals = [2000, 1500, 1000, 800, 600, 500, 400, 300, 250, 200]
+    apd_percentage = 90
+}
+
+import "BasicLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+tasks {
+    # Now do the nested steady state pacing
+    simulation sim = nested {
+        range s2_interval units ms vector pacing_intervals        
+        nests protocol "SteadyStateRunnerForRestitution.txt" {
+            apd_percentage = apd_percentage
+            max_paces = max_steady_state_beats
+            pacing_period = s2_interval
+            select output APD
+            select output DI
+        }
+    }
+}
+
+post-processing {
+    # Test that expected model outputs exist
+    assert sim:APD.IS_ARRAY
+    assert sim:DI.IS_ARRAY
+    
+    # Remove entries for zero/negative DIs from both the DI and APD arrays.
+    # This removes entries where the stimulus was applied before repolarisation
+    min_DI = 1
+    DI = After(sim:DI, sim:DI, min_DI, default)
+    APD = After(sim:APD, sim:DI, min_DI, default)
+
+    # Calculate slope information
+    restitution_slope = Grad(DI, APD, default)
+    max_restitution_slope = Max(restitution_slope, default)
+}
+
+outputs {
+    APD units ms "Action Potential Duration"
+    DI units ms "Diastolic Interval"
+    restitution_slope units dimensionless "Steady State Restitution curve gradient"
+    max_restitution_slope units dimensionless "Maximum gradient of Steady State Restitution curve"
+}
+
+plots {
+    plot "Steady-state restitution curve" using linespoints { APD against DI }
+}
