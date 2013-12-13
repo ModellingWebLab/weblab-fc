@@ -232,7 +232,7 @@
       </proto:modifiers>
     </proto:timecourseSimulation>
     <proto:nestedSimulation proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:57:5&#9;    simulation sim = nested {" prefix="sim">
-      <proto:vectorStepper units="dimensionless" name="s2_interval" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:58:9&#9;        range s2_interval units dimensionless vector s2_intervals">
+      <proto:vectorStepper units="ms" name="s2_interval" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:58:9&#9;        range s2_interval units dimensionless vector s2_intervals">
         <m:ci proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:58:54&#9;        range s2_interval units dimensionless vector s2_intervals">s2_intervals</m:ci>
       </proto:vectorStepper>
       <proto:modifiers proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:59:9&#9;        modifiers {">

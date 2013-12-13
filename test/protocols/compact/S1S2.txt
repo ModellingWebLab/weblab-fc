@@ -83,7 +83,7 @@ tasks {
     }
     # Now do the S1-S2 part, i.e. two stimuli
     simulation sim = nested {
-        range s2_interval units dimensionless vector s2_intervals
+        range s2_interval units ms vector s2_intervals
         modifiers {
             at each loop reset to initial_state
             # Set the gap between stimuli to the S2 interval
