@@ -1,0 +1,297 @@
+# Protocol for I_Na current:
+
+documentation {
+# INa Current I-V Curves
+This protocol implements a protocol to record the INa Peak Current I-V relationship,
+as well as inactivation and inactivation curves for cardiac electrophysiology cell models.
+
+By clamping and intra-cellular sodium and intra/extra-cellular potassium and calcium, 
+we can throw away most of the equations of the models to leave just the INa components to study.
+
+## Parameters
+
+* holding\_potential  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
+* steady\_state\_time  The amount of time to leave the current at holding potential before applying steps (ms).
+* test\_potentials  A list of voltages (steps) to clamp the cell to before recording INa (mV).
+
+It requires models to provide variables with the annotations:
+
+* oxmeta:membrane\_voltage
+* oxmeta:extracellular\_sodium\_concentration
+* oxmeta:cytosolic\_sodium\_concentration
+* oxmeta:cytosolic\_potassium\_concentration
+* oxmeta:cytosolic\_calcium\_concentration 
+* oxmeta:time
+}
+
+# Load the metadata tags for use with CellML models
+namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
+namespace cellml = "http://www.cellml.org/cellml/1.0#"
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+# List inputs 
+inputs {
+
+	# Voltage stepping
+	holding_potential = -80
+	steady_state_time = 10000
+	
+	peak_test_potentials = [ -80.01, -75.01, -70.01, -65.01, -62.51, -60.01, 
+	                         -57.51, -55.01, -52.01, -50.01, -47.51, -45.01, 
+	                         -42.51, -40.01, -37.51, -35.01,
+	                         -32.51, -30.01, -27.51, -25.01, -22.51, -20.01, 
+	                         -17.51, -15.01, -12.51, -10.01, -5.01, 
+						      0.01, 5.01, 10.01, 20.01, 30.01, 40.01, 50.01, 60.01 ]
+	
+	inactivation_holding_potential = -120.01
+	inactivation_test_potentials = [-150.01, -140.01, -130.01, -120.01, -110.01, -105.01,
+	                                -100.01, -95.01, -90.01, -85.01, -80.01, -75.01, 
+	                                -70.01, -65.01, -60.01, -55.01, -50.01, -40.01, 
+	                                -30.01]
+	inactivation_depolarise_potential = -20.01
+	
+	activation_holding_potential = -150.01
+	activation_test_potentials = [-90.01, -80.01, -70.01, -60.01, -50.01, -40.01,
+	                              -30.01, -20.01, -10.01, 0.01, 10.01, 20.01,
+	                              30.01, 40.01, 50.01, 60.01]
+    
+}
+
+# Import some useful functions
+import std = "BasicLibrary.txt"
+
+# Define new quantities (can be based on CellML model, if required)
+library {
+    peak_sample_times = std:Join(std:Join([i*0.5 for i in -2:1:0], [i*0.005 for i in 0:1:1000]), [i for i in 5:1:40])
+    inactivation_sample_times = std:Join(std:Join([i for i in -1:1:1000],[i*0.01 for i in 100000:1:100500]), [i*0.1 for i in 10050:10240])
+    #activation_sample_times = std:Join()
+}
+
+# Define units
+units {
+    mV = milli volt
+    ms = milli second
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
+    uF_per_cm2 = micro farad . centi metre^-2
+    microamps = micro ampere
+    A_per_F = ampere . farad^-1
+    mM = milli mole . litre^-1 "{/Symbol m}M"
+}
+
+# List inputs and outputs of model with units
+model interface {
+
+    input oxmeta:membrane_voltage units mV
+    input oxmeta:extracellular_sodium_concentration units mM
+    input oxmeta:cytosolic_sodium_concentration units mM
+    input oxmeta:cytosolic_potassium_concentration units mM
+    input oxmeta:cytosolic_calcium_concentration units mM
+      
+    output oxmeta:membrane_fast_sodium_current units uA_per_cm2
+    output oxmeta:extracellular_sodium_concentration units mM
+    output oxmeta:cytosolic_potassium_concentration units mM
+    output oxmeta:cytosolic_sodium_concentration units mM
+    output oxmeta:cytosolic_calcium_concentration units mM
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+    
+    var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
+    
+    # Clamp extracellular concs to whatever value they have in the model
+    # This is a convenience shorthand for 'define var = var'
+    clamp oxmeta:extracellular_sodium_concentration    
+    clamp oxmeta:cytosolic_sodium_concentration
+    
+    # Clamping this removes dependence on NaK exchanger
+    clamp oxmeta:cytosolic_potassium_concentration
+    # Clamping this removes dependence on NCX exchanger
+    clamp oxmeta:cytosolic_calcium_concentration
+    
+    # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
+    # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
+    define oxmeta:membrane_voltage = 0 :: mV
+        
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance    
+}
+
+# Perform simulations
+tasks {
+
+	# Task 1: run simulation until steady state is reached 
+    simulation timecourse {
+        range time units ms vector [0, steady_state_time]
+        modifiers {
+        	at start set oxmeta:membrane_voltage = holding_potential
+            at end save as holding_state
+        }
+    }
+
+	# Task 1: peak current protocol from holding state
+	simulation sim1 = nested {
+	    range step_voltage units mV vector peak_test_potentials
+        modifiers {
+			at each loop reset to holding_state
+        	at each loop set oxmeta:membrane_voltage = holding_potential
+        }
+        nests simulation timecourse {
+        	range time units ms vector peak_sample_times
+        	modifiers {
+            	at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-4 then step_voltage else oxmeta:membrane_voltage
+            }
+        }
+	}
+	
+	# Task 2: run simulation until steady state for inactivation_holding_potential is reached 
+    simulation timecourse {
+        range time units ms vector [0, steady_state_time]
+        modifiers {
+            at start set oxmeta:membrane_voltage = inactivation_holding_potential
+            at end save as holding_state
+        }
+    }
+	
+	# Task 2: inactivation protocol from inactivation_holding_potential state
+	simulation sim2 = nested {
+	    range step_voltage units mV vector inactivation_test_potentials
+	    modifiers {
+	       at each loop reset to holding_state
+	       at each loop set oxmeta:membrane_voltage = inactivation_holding_potential
+	    }
+	    nests simulation timecourse {
+	        range time units ms vector inactivation_sample_times
+            modifiers {
+                at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-6 then step_voltage else 
+                            if MathML:abs(time - 1000) < 1e-6 then inactivation_depolarise_potential else 
+                                if MathML:abs(time - 1024) < 1e-6 then inactivation_holding_potential else oxmeta:membrane_voltage
+            }
+	    }
+	}
+	
+	# Task 3 - activation IV curve
+	simulation timecourse {
+        range time units ms vector [0, steady_state_time]
+        modifiers {
+            at start set oxmeta:membrane_voltage = activation_holding_potential
+            at end save as holding_state
+        }
+    }
+    
+    # Task 3: activation protocol from activation_holding_potential state
+    simulation sim3 = nested {
+        range step_voltage units mV vector activation_test_potentials
+        modifiers {
+           at each loop reset to holding_state
+           at each loop set oxmeta:membrane_voltage = activation_holding_potential
+        }
+        nests simulation timecourse {
+            range time units ms uniform -1:0.01:40
+            modifiers {
+                at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-6 then step_voltage else 
+                            if MathML:abs(time - 24) < 1e-6 then activation_holding_potential else oxmeta:membrane_voltage
+            }
+        }
+    }
+}
+
+# Do any calculations/modifications of data before plotting
+post-processing {
+	# Check validity of outputs
+    assert sim1:time.IS_ARRAY
+    assert sim1:membrane_voltage.IS_ARRAY
+    assert sim1:membrane_fast_sodium_current.IS_ARRAY        
+    
+    # Locate start of voltage-step section of protocol in results
+    first_index = find(map(lambda t: t >= 0, sim1:time[0]))[0]    
+    sodium_current_tail = sim1:membrane_fast_sodium_current[1$first_index[0]:]
+    
+    # Look at where the maximum absolute current is recorded, and calculate its index.
+    absolute_tail_current = map(lambda INa: MathML:abs(INa), sodium_current_tail)
+    peak_abs_sodium = std:RemoveDim(std:Max(absolute_tail_current, default), 1)    
+    stretched_peak_sodium_tail = std:Stretch(std:AddDim(peak_abs_sodium, 1), sodium_current_tail.SHAPE, 1)
+    peak_indices_tail = find(map(lambda sodium, max: sodium==max, absolute_tail_current, stretched_peak_sodium_tail))
+    peak_fast_sodium = std:Transpose(sodium_current_tail{peak_indices_tail, 1, shrink:1})
+    
+    # Check validity of outputs
+    assert sim2:time.IS_ARRAY
+    assert sim2:membrane_voltage.IS_ARRAY
+    assert sim2:membrane_fast_sodium_current.IS_ARRAY        
+    
+    # Locate start of voltage-step section of protocol in results
+    first_index_inact = find(map(lambda t: t >= 1000, sim2:time[0]))[0]
+    inactivation_tail_current = sim2:membrane_fast_sodium_current[1$first_index_inact[0]:]
+    inactivation_tail_times = sim2:time[1$first_index_inact[0]:]
+
+    # Find max absolute current and normalise to this.
+    absolute_tail_current2 = map(lambda INa: MathML:abs(INa), inactivation_tail_current)
+    peak_inactivation_currents = std:RemoveDim(std:Max(absolute_tail_current2, default), 1)
+    max_peak_inactivation_current = std:RemoveDim(std:Max(peak_inactivation_currents, default), 1)    
+    normalised_peak_currents = map(lambda INa: INa/max_peak_inactivation_current[0], peak_inactivation_currents)
+   
+    # Check validity of outputs
+    assert sim3:time.IS_ARRAY
+    assert sim3:membrane_voltage.IS_ARRAY
+    assert sim3:membrane_fast_sodium_current.IS_ARRAY 
+    
+    # Work out the Nernst potential
+    R = 8314.472 # J/MolK
+    T = 310 # K
+    F = 96485.3415 # C/mMol
+    sodium_reversal_potential = (R*T/F)*MathML:ln(sim3:oxmeta:extracellular_sodium_concentration/sim3:oxmeta:cytosolic_sodium_concentration)
+    driving_potential = map(lambda V: V - sodium_reversal_potential, sim3:membrane_voltage)
+    
+    # We want conductances, which are given by G_max * Open_prob
+    # We have measured total current
+    # I = G_max * O * driving_potential
+    # So divide by driving potential to get G_max * Open_prob.
+    conductances = map(lambda I,drive_pot: I/drive_pot, sim3:membrane_fast_sodium_current, driving_potential)
+
+}
+
+# List any outputs from model which need to be carried forward to plotting
+outputs {
+    # Peak protocol
+    INa_peak_protocol = sim1:membrane_fast_sodium_current "I_{Na} for peak current protocol"
+    time_peak = sim1:time units ms "Time"
+    peak_test_potentials units mV "Peak current test potential"
+	peak_fast_sodium units A_per_F "Peak Current"   
+
+    # Inactivation
+    inactivation_tail_current units A_per_F "I_{Na} for inactivation protocol"
+    inactivation_tail_times units ms "Time"
+    inactivation_test_potentials units mV "Inactivation test potential"
+    max_peak_inactivation_current units A_per_F "Max recorded current"
+    normalised_peak_currents units dimensionless "Normalised Peak Current"
+    
+    # Activation
+    time_activation = sim3:time units ms "Time"
+    current_activation = sim3:membrane_fast_sodium_current units A_per_F "I_{Na} Current"
+    driving_potential units mV "Driving potential"
+    #max_conductances units dimensionless "Max conductances"
+    activation_test_potentials units mV "Activation test potential"
+    sodium_reversal_potential units mV "reversal potential"
+}
+
+# Create plots
+plots {
+    # IV Curves
+    plot "Peak Current IV curve" using linespoints { peak_fast_sodium against peak_test_potentials }
+    plot "Inactivation IV curve" using linespoints {normalised_peak_currents against inactivation_test_potentials}
+    
+    # NOT RIGHT YET!
+    #plot "Activation IV curve" using linespoints {max_conductances against activation_test_potentials}
+    
+    # Peak Current trace
+	plot "I_{Na} for Peak IV protocol" using lines { INa_peak_protocol against time_peak key peak_test_potentials }
+	
+	# Inactivation curve traces
+	plot "I_{Na} for inactivation protocol" using lines {inactivation_tail_current against inactivation_tail_times key inactivation_test_potentials }
+	
+	# Activation curve traces
+	plot "I_{Na} for activation protocol" using lines {current_activation against time_activation}
+}
