@@ -5,23 +5,24 @@ documentation {
 This protocol implements a protocol to record the INa Peak Current I-V relationship,
 as well as inactivation and inactivation curves for cardiac electrophysiology cell models.
 
-By clamping and intra-cellular sodium and intra/extra-cellular potassium and calcium, 
+By clamping and intra/extra-cellular sodium and intra-cellular potassium and calcium, 
 we can throw away most of the equations of the models to leave just the INa components to study.
 
 ## Parameters
 
-* holding\_potential  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
-* steady\_state\_time  The amount of time to leave the current at holding potential before applying steps (ms).
-* test\_potentials  A list of voltages (steps) to clamp the cell to before recording INa (mV).
+* **holding\_potential**  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
+* **steady\_state\_time**  The amount of time to leave the current at holding potential before applying steps (ms).
+* **test\_potentials**  A list of voltages (steps) to clamp the cell to before recording INa (mV).
 
 It requires models to provide variables with the annotations:
 
-* oxmeta:membrane\_voltage
-* oxmeta:extracellular\_sodium\_concentration
-* oxmeta:cytosolic\_sodium\_concentration
-* oxmeta:cytosolic\_potassium\_concentration
-* oxmeta:cytosolic\_calcium\_concentration 
-* oxmeta:time
+* **oxmeta:membrane\_voltage**
+* **oxmeta:membrane\_fast\_sodium\_current**
+* **oxmeta:extracellular\_sodium\_concentration**
+* **oxmeta:cytosolic\_sodium\_concentration**
+* **oxmeta:cytosolic\_potassium\_concentration**
+* **oxmeta:cytosolic\_calcium\_concentration** 
+* **oxmeta:time**
 }
 
 # Load the metadata tags for use with CellML models
