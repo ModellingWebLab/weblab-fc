@@ -50,6 +50,11 @@ inputs {
 # Import some useful functions
 import std = "BasicLibrary.txt"
 
+# Define new quantities (can be based on CellML model, if required)
+library {
+    sample_times = std:Join(std:Join([i for i in -1:1:49], [i*0.01 for i in 5000:1:10000], [i for i in 101:1:1050])
+}
+
 # Define units
 units {
     mV = milli volt
@@ -115,13 +120,13 @@ tasks {
         	at each loop set oxmeta:membrane_voltage = holding_potential
         }
         nests simulation timecourse {
-        	range time units ms uniform -1:0.1:1050
+        	range time units ms vector sample_times
         	modifiers {
             	at each loop set oxmeta:membrane_voltage = \
                         if MathML:abs(time - 0) < 1e-6 then step_voltage else 
                             if MathML:abs(time - 50) < 1e-6 then final_potential else oxmeta:membrane_voltage
-                }
             }
+        }
 	}
 	
 }
@@ -139,10 +144,7 @@ post-processing {
     Kr_tail_current = sim:membrane_rapid_delayed_rectifier_potassium_current[1$first_index[0]:]
       
     # Max amplitude
-	peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)
-    
-    # Get list of voltage-step values (can't access version defined above)
-    test_voltages = sim:membrane_voltage[1$(first_index[0]-2)][0$:]  # Fix to just before tail current, every loop.
+	peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)    
 }
 
 # List any outputs from model which need to be carried forward to plotting
@@ -150,15 +152,15 @@ outputs {
 
     I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
     time = sim:time units ms "Time"
-    test_voltages units mV "Test potential"
+    test_potentials units mV "Test potential"
 	peak_Kr_tail units uA_per_cm2 "Peak Tail Current"
-	
+	voltages = sim:membrane_voltage units mV "Voltage"
 }
 
 # Create plots
 plots {
 
-	plot "I_{Kr} I-V curve" using linespoints { peak_Kr_tail against test_voltages }
-	plot "I_{Kr} currents over time" using lines { I_Kr against time key test_voltages }
-	
+	plot "I_{Kr} I-V curve" using linespoints { peak_Kr_tail against test_potentials }
+	plot "I_{Kr} currents over time" using lines { I_Kr against time key test_potentials }
+	plot "Voltage clamps" using lines { voltages against time key test_potentials }
 }
