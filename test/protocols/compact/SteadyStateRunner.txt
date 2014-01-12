@@ -6,16 +6,16 @@ the action potential at this steady state.
 
 ##Parameters:
 
-* pacing\_period  The pacing period in milliseconds (1000/frequency in Hz).
-* num\_inner\_paces  The number of paces over which to look for steady state (defaults to 1), can be useful to set it to 2 to detect steady alternans.
-* max\_paces  The maximum number of paces to stimulate the system with (some models never get to steady state!).
-* norm\_threshold  The threshold for defining steady state as achieved, the norm of the change in state variables between two paces.
+* **pacing\_period**  The pacing period in milliseconds (1000/frequency in Hz).
+* **num\_inner\_paces**  The number of paces over which to look for steady state (defaults to 1), can be useful to set it to 2 to detect steady alternans.
+* **max\_paces**  The maximum number of paces to stimulate the system with (some models never get to steady state!).
+* **norm\_threshold**  The threshold for defining steady state as achieved, the norm of the change in state variables between two paces.
 
 It requires models to provide variables with the annotations:
 
-* oxmeta:membrane\_stimulus\_current
-* oxmeta:membrane\_voltage
-* oxmeta:time
+* **oxmeta:membrane\_stimulus\_current**
+* **oxmeta:membrane\_voltage**
+* **oxmeta:time**
 }
 
 inputs {

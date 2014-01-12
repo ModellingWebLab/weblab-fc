@@ -47,7 +47,7 @@ tasks {
         }
     }
 
-    # Run a two paces in detail, to get the APD and DI out.
+    # Run two paces in detail, to get the APD and DI out.
     simulation detail = timecourse {
         range time units ms uniform 0:0.1:(pacing_period * 2.0 * num_inner_paces)
     }

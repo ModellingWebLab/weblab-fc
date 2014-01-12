@@ -273,6 +273,7 @@ outputs {
     time_activation = sim3:time units ms "Time"
     current_activation = sim3:membrane_fast_sodium_current units A_per_F "I_{Na} Current"
     driving_potential units mV "Driving potential"
+    conductances units dimensionless "Max conductances"
     #max_conductances units dimensionless "Max conductances"
     activation_test_potentials units mV "Activation test potential"
     sodium_reversal_potential units mV "reversal potential"
