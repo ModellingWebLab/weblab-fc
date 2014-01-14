@@ -2,19 +2,22 @@
 
 documentation {
 # Steady State Restitution
-This protocol implements steady state restitution for cardiac electrophysiology cell models.
+This protocol implements steady-state restitution for cardiac electrophysiology cell models.
 
-A cell is paced to either steady state or **max\_steady\_state\_beats**, whichever is reached first.
+A cell is paced to either steady-state or **max\_steady\_state\_beats**, whichever is reached first.
 
 The recorded action potential duration at steady state for this pacing frequency is plotted
 against the diastolic interval - that is the length of time between repolarization and 
-subsequent depolarization.  
+subsequent depolarization.
+
+Some attempt is made to handle alternans, in that two subsequent action potentials are 
+calculated and plotted against the relevant pacing cycle length.
 
 ##Parameters
 
 * **max\_steady\_state\_beats** (max number of paces to do, defaults to 10000)
 * **pacing\_intervals** a list of different pacing cycle lengths to apply (sensible defaults provided!)
-* **apd\_percentage**  The threshold of APD calculation (e.g. APD50, APD80, APD90 - default).
+* **apd\_percentage**  The threshold of APD calculation (e.g. APD50, APD80, APD90 - default 90).
 
 It requires models to provide variables with the annotations:
 
@@ -26,9 +29,8 @@ It requires models to provide variables with the annotations:
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 inputs {
-
-    max_steady_state_beats = 1000
-    pacing_intervals = [2000, 1500, 1000, 800, 600, 500, 400, 300, 250, 200]
+    max_steady_state_beats = 10000
+    pacing_intervals = [2000, 1750, 1500, 1250, 1000, 900, 800, 700, 600, 550, 500, 450, 400, 350, 300]
     apd_percentage = 90
 }
 
@@ -59,23 +61,33 @@ post-processing {
     assert sim:DI.IS_ARRAY
     
     # Remove entries for zero/negative DIs from both the DI and APD arrays.
-    # This removes entries where the stimulus was applied before repolarisation
-    min_DI = 1
+    # This removes entries where the stimulus was applied before repolarisation.
+    min_DI = 1 # millisecond
+    
+    # Find the entry of DI where it first reaches min_DI and throw away the rest
     DI = After(sim:DI, sim:DI, min_DI, default)
-    APD = After(sim:APD, sim:DI, min_DI, default)
+    output_pacing_intervals = After(pacing_intervals, sim:DI, min_DI, default)
+    
+    # Use the same rules for APD, on both the first and second pace APDs.
+    APD1 = After(sim:APD[1$0][*$:], sim:DI, min_DI, default)
+    APD2 = After(sim:APD[1$1][*$:], sim:DI, min_DI, default)
+    
+    # Put the matrix back together (there might be a better way of doing this!)
+    APD = [APD1, APD2]
 
-    # Calculate slope information
-    restitution_slope = Grad(DI, APD, default)
+    # Calculate slope information, just using APD1 for now.
+    restitution_slope = Grad(DI, APD1, default)
     max_restitution_slope = Max(restitution_slope, default)
 }
 
-outputs {
+outputs {    
     APD units ms "Action Potential Duration"
     DI units ms "Diastolic Interval"
+    output_pacing_intervals units ms "Pacing Cycle Length"
     restitution_slope units dimensionless "Steady State Restitution curve gradient"
     max_restitution_slope units dimensionless "Maximum gradient of Steady State Restitution curve"
 }
 
 plots {
-    plot "Steady-state restitution curve" using linespoints { APD against DI }
+    plot "Steady-state restitution curve" using linespoints { APD against output_pacing_intervals }
 }

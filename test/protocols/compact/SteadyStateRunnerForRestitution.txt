@@ -8,7 +8,6 @@ the DI and APD at this steady state, for use by the SteadyStateRestitution proto
 ##Parameters
 
 * **pacing\_period**  The pacing period in milliseconds (1000/frequency in Hz).
-* **num\_inner\_paces**  The number of paces over which to look for steady state (defaults to 1), can be useful to set it to 2 to detect steady alternans. 
 * **max\_paces**  The maximum number of paces to stimulate the system with (some models never get to steady state!).
 * **norm\_threshold**  The threshold for defining steady state as achieved, the norm of the change in state variables between two paces.
 * **apd\_percentage**  The threshold of APD calculation (e.g. APD50, APD80, APD90 - default).
@@ -22,7 +21,6 @@ It requires models to provide variables with the annotations:
 
 inputs {
     pacing_period = 1000  # ms
-    num_inner_paces = 1   # How many paces to run between comparing state variables
     max_paces = 10000     # Give up at this point
     norm_threshold = 1e-6 # Applied to p1 norm of state variable differences
     apd_percentage = 90
@@ -32,7 +30,7 @@ import std = "BasicLibrary.txt"
 import "CardiacLibrary.txt"
 
 library {
-    max_inner_runs = MathML:ceiling(max_paces / num_inner_paces)
+    max_inner_runs = MathML:ceiling(max_paces / 2.0)
 }
 
 tasks {
@@ -40,7 +38,7 @@ tasks {
     simulation outer = nested {
         range paces units dimensionless while outer:norm_of_differences[-1] > norm_threshold && paces < max_inner_runs
         nests protocol "SinglePace.txt" {
-            num_paces = num_inner_paces
+            num_paces = 2
             pacing_period = pacing_period
             select output norm_of_differences
             select output final_state_variables
@@ -49,13 +47,13 @@ tasks {
 
     # Run two paces in detail, to get the APD and DI out.
     simulation detail = timecourse {
-        range time units ms uniform 0:0.1:(pacing_period * 2.0 * num_inner_paces)
+        range time units ms uniform 0:0.1:(pacing_period * 2.0)
     }
 }
 
 post-processing {
     num_nested_runs = outer:norm_of_differences.SHAPE[0]
-    num_paces = num_nested_runs * num_inner_paces
+    num_paces = num_nested_runs * 2.0
     pace_count = [count for count in 0:num_nested_runs] # Used for plotting
     found_steady_state = num_paces < max_paces
     steady_state_variables = outer:final_state_variables[-1]
@@ -67,10 +65,9 @@ post-processing {
     assert detail:membrane_voltage.IS_ARRAY
     
     # Compute APD90 - this method is from the CardiacLibrary.txt
-    raw_APD90, raw_DI = ApdAndDi(detail:membrane_voltage, detail:time, apd_percentage, 0, default, default)
+    APD, raw_DI = ApdAndDi(detail:membrane_voltage, detail:time, apd_percentage, 0, default, default)
 
-    # Just consider the first DI and the second AP to be of interest
-    APD = raw_APD90[1]
+    # Just consider the first DI but both APs to be of interest
     DI = raw_DI[0]
 }
 
@@ -79,7 +76,6 @@ outputs {
     steady_state_variables     units mixed         "The state variables at an approximately steady state"
     found_steady_state         units boolean       "Whether we found a pseudo-steady-state, or gave up"
     pace_final_state_variables units mixed         "State variables at the end of each pace"
-    num_inner_paces            units dimensionless "The number of paces per check of state variables"
     pace_count                 units dimensionless "Paces"
 
     norm_of_differences = outer:norm_of_differences "Norm of the change in state variables over each `pace'"
