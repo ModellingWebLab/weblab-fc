@@ -301,6 +301,15 @@
                     <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
                 </apply>
             </apply>
+            <apply><eq/>
+                <ci>PCLs</ci>
+                <apply><ci>After</ci>
+                    <ci>s2_intervals</ci>
+                    <ci>first_raw_DI</ci>
+                    <ci>min_DI</ci>
+                    <csymbol definitionURL="https://chaste.cs.ox.ac.uk/nss/protocol/defaultParameter"/>
+                </apply>
+            </apply>
 
             <!-- Calculate slope information -->
             <apply><eq/>
@@ -326,6 +335,7 @@
         <postprocessed name="time_1d" description="Time" units="ms"/>
         <postprocessed name="raw_APD90" units="ms"/>
         <postprocessed name="raw_DI" units="ms"/>
+        <postprocessed name="PCLs" units="ms" description="Pacing Cycle Length"/>
         <postprocessed name="APD90" units="ms" description="Action Potential Duration 90%"/>
         <postprocessed name="DI" units="ms" description="Diastolic Interval"/>
         <postprocessed name="S1S2_slope" units="dimensionless" description="S1-S2 curve gradient"/>
@@ -336,6 +346,12 @@
         <plot>
             <title>S1-S2 curve</title>
             <x>DI</x>
+            <y>APD90</y>
+            <using>linespoints</using>
+        </plot>
+        <plot>
+            <title>restitution curve</title>
+            <x>PCLs</x>
             <y>APD90</y>
             <using>linespoints</using>
         </plot>
