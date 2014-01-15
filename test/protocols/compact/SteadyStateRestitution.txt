@@ -1,4 +1,4 @@
-# Compact syntax version of the S1S2 protocol
+# Compact syntax version of the Steady state restitution protocol
 
 documentation {
 # Steady State Restitution
@@ -89,5 +89,5 @@ outputs {
 }
 
 plots {
-    plot "Steady-state restitution curve" using linespoints { APD against output_pacing_intervals }
+    plot "restitution curve" using linespoints { APD against output_pacing_intervals }
 }
