@@ -93,9 +93,8 @@ class Environment(object):
         return self.bindings[name]
 
     def SetDelegateeEnv(self, delegatee, prefix=""):
-        # TODO
-#        if prefix in self.delegatees:
-#            raise ProtocolError("Tried to assign multiple delegatee environments to the same prefix:", prefix)
+        if prefix in self.delegatees and self.delegatees[prefix] is not delegatee:
+            raise ProtocolError("The name prefix '", prefix, "' has already been used in this context. Check your simulations, imports, etc.")
         self.delegatees[prefix] = delegatee
         self.bindings.SetDelegatee(delegatee.bindings, prefix)
         self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)

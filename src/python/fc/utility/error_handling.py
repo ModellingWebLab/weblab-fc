@@ -31,4 +31,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 class ProtocolError(Exception):
-    pass
+    """Main class for errors raised by the functional curation framework that are intended for user viewing."""
+    def __init__(self, *msgParts):
+        msg = ''.join(map(str, msgParts))
+        super(ProtocolError, self).__init__(msg)

@@ -65,18 +65,22 @@ class Protocol(object):
         """
         self.outputFolder = None
         self.protoFile = protoFile
+        self.timings = {}
+        # Main environments used when running the protocol
         self.env = Env.Environment()
         self.inputEnv = Env.Environment(allowOverwrite=True)
         self.libraryEnv = Env.Environment()
         self.outputEnv = Env.Environment()
         self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv)
+        # The elements making up this protocol's definition
+        self.imports = {}
         self.library = []
         self.simulations = []
         self.postProcessing = []
         self.outputs = []
         self.plots = []
-        self.timings = {}
-    
+
+        # Parse the protocol file and fill in the structures declared above
         start = time.time()
         import CompactSyntaxParser as CSP
         parser = self.parser = CSP.CompactSyntaxParser()
@@ -87,13 +91,19 @@ class Protocol(object):
         assert isinstance(details, dict)
         for prefix, path in details.get('imports', []):
             imported_proto = Protocol(self.GetPath(protoFile, path))
+            # TODO: setting inputs for imported protocols!
             if prefix == "":
+                # Make any prefixed imports of that protocol into our prefixed imports
+                for imported_prefix, imported_import in imported_proto.imports.iteritems():
+                    self.AddImportedProtocol(imported_import, imported_prefix)
+                # Merge the other elements of its definition with our own
                 self.library.extend(imported_proto.library)
                 self.simulations.extend(imported_proto.simulations)
                 self.postProcessing.extend(imported_proto.postProcessing)
+                self.outputs.extend(imported_proto.outputs)
+                self.plots.extend(imported_proto.plots)
             else:
-                self.libraryEnv.SetDelegateeEnv(imported_proto.libraryEnv, prefix)
-                imported_proto.libraryEnv.ExecuteStatements(imported_proto.library)
+                self.AddImportedProtocol(imported_proto, prefix)
         self.inputEnv.ExecuteStatements(details.get('inputs', []))
         self.libraryEnv.SetDelegateeEnv(self.inputEnv)
         self.library.extend(details.get('library', []))
@@ -103,6 +113,16 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
         self.timings['parsing'] = time.time() - start
 
+    def AddImportedProtocol(self, proto, prefix):
+        """Add a protocol imported with a prefix to our collection.
+
+        This also makes that protocol's library (if any) available as a delegatee of our own.
+        """
+        if prefix in self.imports:
+            raise ProtocolError("The prefix '", prefix, "' has already been used for an imported protocol.")
+        self.imports[prefix] = proto
+        self.libraryEnv.SetDelegateeEnv(proto.libraryEnv, prefix)
+
     def Initialise(self):
         """(Re-)Initialise this protocol, ready to be run on a model."""
         self.libraryEnv.Clear()
@@ -111,7 +131,9 @@ class Protocol(object):
         for sim in self.simulations:
             sim.env.Clear()
             sim.results.Clear()
-        
+        for imported_proto in self.imports.values():
+            imported_proto.Initialise()
+
     def SetOutputFolder(self, path):
         """Specify where the outputs from this protocol will be written to disk."""
         if isinstance(path, OutputFolder):
@@ -183,7 +205,7 @@ class Protocol(object):
         """Run this protocol on the model already specified using SetModel."""
         Locatable.outputFolder = self.outputFolder
         self.Initialise()
-        # TODO: make status output optional; add timings to dictionary and summarise at end
+        # TODO: make status output optional
         print 'running protocol...'
         try:
             for sim in self.simulations:
@@ -193,6 +215,8 @@ class Protocol(object):
                         sim.SetOutputFolder(self.outputFolder.CreateSubfolder('simulation_' + sim.prefix))
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
             start = time.time()
+            for imported_proto in self.imports.values():
+                imported_proto.libraryEnv.ExecuteStatements(imported_proto.library)
             self.libraryEnv.ExecuteStatements(self.library)
             self.timings['run library'] = self.timings.get('library', 0.0) + (time.time() - start)
             start = time.time()
@@ -211,6 +235,7 @@ class Protocol(object):
                     if isinstance(local_vars['self'], Locatable) and (not locations or local_vars['self'].location != locations[-1]):
                         locations.append(local_vars['self'].location)
                 current_trace = current_trace.tb_next
+            # TODO: Add locations to the original error's message, so they appear after the raw stack trace (but before the actual error message)
             for location in locations:
                 print location
             raise
@@ -223,7 +248,7 @@ class Protocol(object):
     def RunSimulations(self):
         """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
-            sim.Initialise() 
+            sim.Initialise()
             print 'running simulation', sim.prefix
             sim.Run()
             # Reset trace folder in case a nested protocol changes it
