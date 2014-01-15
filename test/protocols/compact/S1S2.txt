@@ -118,6 +118,7 @@ post-processing {
     min_DI = 19
     DI = After(first_raw_DI, first_raw_DI, min_DI, default)
     APD90 = After(second_raw_APD, first_raw_DI, min_DI, default)
+    PCLs = After(s2_intervals, first_raw_DI, min_DI, default)
     
     # Calculate slope information
     S1S2_slope = Grad(DI, APD90, default)
@@ -129,6 +130,7 @@ outputs {
     time_1d units ms "Time"
     raw_APD90 units ms
     raw_DI units ms
+    PCLs units ms "Pacing Cycle Length"
     APD90 units ms "Action Potential Duration 90%"
     DI units ms "Diastolic Interval"
     S1S2_slope units dimensionless "S1-S2 curve gradient"
@@ -136,6 +138,7 @@ outputs {
 }
 
 plots {
-    plot "restitution curve" using linespoints { APD90 against DI }
+    plot "S1-S2 restitution curve" using linespoints { APD90 against DI }
+    plot "restitution curve" using linespoints { APD90 against PCLs }
     plot "Action potential traces" using lines { membrane_voltage against time_1d }
 }
