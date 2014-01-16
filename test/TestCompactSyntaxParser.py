@@ -296,9 +296,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           ('import', {'source': 'file.txt', 'mergeDefinitions': 'true'}))
         self.failIfParses(csp.importStmt, 'import "file.txt" { } \n')
 
-    def TestParsingUseImports(self):
-        self.assertParses(csp.useImports, 'use imports import_prefix', [['import_prefix']], ('useImports', {'prefix': 'import_prefix'}))
-
     def TestParsingModelInterface(self):
         self.assertParses(csp.setTimeUnits, 'independent var units u', [['u']],
                           ('setIndependentVariableUnits', {'units': 'u'}))
@@ -350,7 +347,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
                            [('lambda', [('bvar', ['ci:u']), ('apply', ['divide', 'ci:u', 'ci:model:var'])])]))
 
         self.assertParses(csp.modelInterface, """model interface {  # Comments can go here
-    use imports ident
     independent var units t
     
     input test:v1 = 0  # a comment
@@ -361,11 +357,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
     convert u1 to u2 by lambda u: u * test:v3
-}""", [[['ident'], ['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
+}""", [[['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
         ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]],
-                          ('modelInterface', [('useImports', {'prefix': 'ident'}),
-                                              ('setIndependentVariableUnits', {'units': 't'}),
+                          ('modelInterface', [('setIndependentVariableUnits', {'units': 't'}),
                                               ('specifyInputVariable', {'name': 'test:v1', 'initial_value': '0'}),
                                               ('specifyInputVariable', {'name': 'test:v2', 'units': 'u'}),
                                               ('specifyOutputVariable', {'name': 'test:time'}),
@@ -561,14 +556,12 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         
         self.assertParses(csp.outputs, """outputs #cccc
 { #cdc
-        use imports proto_prefix
         n1 = n2 units u1
         n3 = p:m 'd1'
         n4 units u2 "d2"
 } #cpc
-""", [[['proto_prefix'], ['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2']]],
-     ('outputVariables', [('useImports', {'prefix': 'proto_prefix'}),
-                          ('postprocessed', {'name': 'n1', 'ref': 'n2', 'units': 'u1'}),
+""", [[['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2']]],
+     ('outputVariables', [('postprocessed', {'name': 'n1', 'ref': 'n2', 'units': 'u1'}),
                           ('raw', {'name': 'n3', 'ref': 'p:m', 'description': 'd1'}),
                           ('postprocessed', {'name': 'n4', 'units': 'u2', 'description': 'd2'})]))
         self.assertParses(csp.outputs, "outputs {}", [[]])
@@ -588,8 +581,7 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         
         self.assertParses(csp.plots, """plots { plot "t1" { v1 against v2 key vk }
         plot "t1" { v3, v4 against v5 }
-        use imports plots_lib
-}""", [[['t1', ['v1', 'v2', 'vk']], ['t1', ['v3', 'v4', 'v5']], ['plots_lib']]])
+}""", [[['t1', ['v1', 'v2', 'vk']], ['t1', ['v3', 'v4', 'v5']]]])
         self.assertParses(csp.plots, 'plots {}', [[]])
     
     def TestParsingFunctionCalls(self):
@@ -896,7 +888,6 @@ return c
         self.assertParses(csp.units, "units {}", [[]])
         self.assertParses(csp.units, """units
 {
-use imports ulib
 # nM = nanomolar
 nM = nano mole . litre^-1
 hour = 3600 second
@@ -905,14 +896,12 @@ flux = nM . hour ^ -1
 rate_const = hour^-1           # First order
 rate_const_2 = nM^-1 . hour^-1 # Second order
 }
-""", [[['ulib'],
-       ['nM', ['nano', 'mole'], ['litre', '-1']],
+""", [[['nM', ['nano', 'mole'], ['litre', '-1']],
        ['hour', ['3600', 'second']],
        ['flux', ['nM'], ['hour', '-1']],
        ['rate_const', ['hour', '-1']],
        ['rate_const_2', ['nM', '-1'], ['hour', '-1']]]],
-                          ('units', [('useImports', {'prefix': 'ulib'}),
-                                     ('units', {'name': 'nM'}, [('unit', {'units': 'mole', 'prefix': 'nano'}), 'unit']),
+                          ('units', [('units', {'name': 'nM'}, [('unit', {'units': 'mole', 'prefix': 'nano'}), 'unit']),
                                      ('units', {'name': 'hour'}, [('unit', {'units': 'second', 'multiplier': '3600'})]),
                                      ('units', {'name': 'flux'}, [('unit', {'units': 'nM'}), ('unit', {'units': 'hour', 'exponent': '-1'})]),
                                      ('units', {'name': 'rate_const'}, [('unit', {'units': 'hour', 'exponent': '-1'})]),
@@ -995,15 +984,12 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
     def TestParsingPostProcessing(self):
         self.assertParses(csp.postProcessing, """post-processing
 {
-    use imports ppp
     a = check(sim:result)
     assert a > 5
 }
-""", [[['ppp'],
-       [['a'], [['check', ['sim:result']]]],
+""", [[[['a'], [['check', ['sim:result']]]],
        [['a', '>', '5']]]],
-                          ('post-processing', [('useImports', {'prefix': 'ppp'}),
-                                               ('apply', ['csymbol-statementList',
+                          ('post-processing', [('apply', ['csymbol-statementList',
                                                           ('apply', ['eq', 'ci:a', ('apply', ['ci:check', 'ci:sim:result'])]),
                                                           ('apply', ['csymbol-assert', ('apply', ['gt', 'ci:a', 'cn:5'])])])]))
     

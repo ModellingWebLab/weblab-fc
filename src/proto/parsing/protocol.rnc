@@ -35,11 +35,6 @@ proto.imports = element proto:import {
     proto.setInput*
     } +
 
-# Accessing imported protocol components by prefix
-proto.useImports = element proto:useImports {
-    attribute prefix { nc_ident }
-    }
-
 # Inputs of imported protocols can be set by expressions computed from our inputs.
 proto.setInput = element proto:setInput {
     attribute name { nc_ident },
@@ -51,11 +46,10 @@ proto.library = element proto:library { StatementList }
 
 # Units declarations; unspecified, but uses CellML at present
 any-non-local = element * - (mathml:* | proto:*) { any-non-local* } | attribute * { text } | text
-proto.units = element proto:units { any-non-local* & proto.useImports* }
+proto.units = element proto:units { any-non-local* }
 
 # Better XML definition of model interfacing
 proto.modelInterface = element proto:modelInterface {
-    proto.useImports?,
     proto.setIndependentVariableUnits?,
     proto.specifyInputVariable*,
     proto.specifyOutputVariable*,
@@ -81,19 +75,19 @@ initialValue = attribute initial_value { xsd:double }
 nameAttr = attribute name { nc_ident }
         
 # The simulations to run on the model.
-proto.simulations = element proto:simulations { (Simulation | proto.useImports)+ }
+proto.simulations = element proto:simulations { Simulation+ }
 
 # Several kinds of simulation are now supported.
 Simulation = ( proto.timecourseSimulation | proto.nestedSimulation | proto.combinedSimulation
                | proto.nestedProtocol | proto.oneStepSimulation )
 
 # Post-processing consists of a list of statements in the augmented MathML language.
-proto.post-processing = element proto:post-processing { ( StatementList | proto.useImports )+ }
+proto.post-processing = element proto:post-processing { StatementList+ }
 
 # This element specifies the variables (either from the model or post-processing)
 # which should be considered as the protocol output, and will be saved to file.
 proto.outputVariables = element proto:outputVariables {
-    ( proto.raw | proto.postprocessed | proto.useImports )+
+    ( proto.raw | proto.postprocessed )+
     }
 
 # Specifies a model output as a protocol output.
@@ -113,7 +107,7 @@ OutputVariableDefinition =
 
 # Specify what to plot by default for this protocol.
 # The first plot listed should be considered as the primary output of interest.
-proto.plots = element proto:plots { ( proto.plot | proto.useImports )+ }
+proto.plots = element proto:plots { proto.plot+ }
 # Each plot must have a title, and can either plot two variables against each
 # other, or plot a single variable against the relevant stepper values.  If the
 # y or data variable have multiple dimensions, you get multiple traces.

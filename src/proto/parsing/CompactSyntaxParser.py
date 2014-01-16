@@ -1018,13 +1018,7 @@ class Actions(object):
         def _expr(self):
             assert len(self.tokens) >= 2
             return self.tokens[0], self.tokens[1]
-            
-    
-    class UseImports(BaseGroupAction):
-        """Parse action for 'use imports' constructs."""
-        def _xml(self):
-            return P.useImports(prefix=self.tokens[0])
-    
+
     class UnitRef(BaseGroupAction):
         """Parse action for unit references within units definitions."""
         def GetValue(self, token, negate=False):
@@ -1089,19 +1083,7 @@ class Actions(object):
         """Parse action for the post-processing section."""
         def _xml(self):
             if len(self.tokens) > 0:
-                # We need to group non useImports elements into statement lists, but useImports may occur anywhere
-                children, statements = [], []
-                for token in self.tokens:
-                    if isinstance(token, Actions.UseImports):
-                        if statements:
-                            children.append(self.Delegate('StatementList', [statements]).xml())
-                            statements = []
-                        children.append(self.Delegate('UseImports', [token]).xml())
-                    else:
-                        statements.append(token)
-                if statements:
-                    children.append(self.Delegate('StatementList', [statements]).xml())
-                return getattr(P, 'post-processing')(*children)
+                return getattr(P, 'post-processing')(self.Delegate('StatementList', [self.tokens]).xml())
             
         def _expr(self):
             if len(self.tokens) > 0:
@@ -1522,7 +1504,6 @@ class CompactSyntaxParser(object):
     importStmt = p.Group(MakeKw('import') - Optional(ncIdent + eq, default='') + quotedUri +
                          Optional(obrace - simpleAssignList + embedded_cbrace)).setName('Import').setParseAction(Actions.Import)
     imports = OptionalDelimitedList(importStmt, nl).setName('Imports')
-    useImports = p.Group(MakeKw('use') + MakeKw('imports') - ncIdent).setName('UseImports').setParseAction(Actions.UseImports)
     
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
@@ -1530,7 +1511,7 @@ class CompactSyntaxParser(object):
     
     # Post-processing
     postProcessing = (MakeKw('post-processing') + obrace - 
-                      OptionalDelimitedList(useImports | assertStmt | returnStmt | functionDefn | assignStmt, nl) +
+                      OptionalDelimitedList(assertStmt | returnStmt | functionDefn | assignStmt, nl) +
                       cbrace).setName('PostProc').setParseAction(Actions.PostProcessing)
     
     # Units definitions
@@ -1542,7 +1523,7 @@ class CompactSyntaxParser(object):
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
     unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")
                        ).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
-    units = (MakeKw('units') + obrace - OptionalDelimitedList(useImports | unitsDef, nl) + cbrace
+    units = (MakeKw('units') + obrace - OptionalDelimitedList(unitsDef, nl) + cbrace
              ).setName('Units').setParseAction(Actions.Units)
     
     # Model interface section
@@ -1571,8 +1552,7 @@ class CompactSyntaxParser(object):
                               MakeKw('by') - lambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
     
     modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace -
-                             DelimitedMultiList([(useImports, True),
-                                                 (setTimeUnits, False),
+                             DelimitedMultiList([(setTimeUnits, False),
                                                  (inputVariable, True),
                                                  (outputVariable, True),
                                                  (newVariable, True),
@@ -1629,7 +1609,7 @@ class CompactSyntaxParser(object):
     outputSpec = p.Group(ncIdent("name") + ((unitsRef("units") + outputDesc) |
                                             (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))
                          ).setName('Output').setParseAction(Actions.Output)
-    outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(useImports | outputSpec, nl) + cbrace).setName('Outputs').setParseAction(Actions.Outputs)
+    outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(outputSpec, nl) + cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
     # Plot specifications
     #####################
@@ -1642,7 +1622,7 @@ class CompactSyntaxParser(object):
                                     | MakeKw('linespoints', suppress=False)))("using")
     plotSpec = p.Group(MakeKw('plot') - quotedString + Optional(plotUsing) - obrace +
                        plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
-    plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(useImports | plotSpec) + cbrace).setName('Plots').setParseAction(Actions.Plots)
+    plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(plotSpec) + cbrace).setName('Plots').setParseAction(Actions.Plots)
     
     # Parsing a full protocol
     #########################
