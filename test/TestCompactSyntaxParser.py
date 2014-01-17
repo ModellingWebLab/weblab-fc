@@ -308,11 +308,17 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           ('specifyInputVariable', {'name': 'test:var', 'initial_value': '-1e2'}))
         self.assertParses(csp.inputVariable, 'input test:var', [['test:var']],
                           ('specifyInputVariable', {'name': 'test:var'}))
+        self.failIfParses(csp.inputVariable, 'input no_prefix')
         
         self.assertParses(csp.outputVariable, 'output test:var', [['test:var']],
                           ('specifyOutputVariable', {'name': 'test:var'}))
         self.assertParses(csp.outputVariable, 'output test:var units uname', [['test:var', 'uname']],
                           ('specifyOutputVariable', {'name': 'test:var', 'units': 'uname'}))
+        self.failIfParses(csp.outputVariable, 'output no_prefix')
+        
+        self.assertParses(csp.optionalVariable, 'optional prefix:name', [['prefix:name']],
+                          ('specifyOptionalVariable', {'name': 'prefix:name'}))
+        self.failIfParses(csp.optionalVariable, 'optional no_prefix')
         
         self.assertParses(csp.newVariable, 'var varname units uname = 0', [['varname', 'uname', '0']],
                           ('declareNewVariable', {'name': 'varname', 'units': 'uname', 'initial_value': '0'}))
@@ -354,10 +360,13 @@ class TestCompactSyntaxParser(unittest.TestCase):
     output test:time
     # comments are always ignored
     output test:v3 units u
+    
+    optional test:opt
+    
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
     convert u1 to u2 by lambda u: u * test:v3
-}""", [[['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
+}""", [[['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'], ['test:opt'],
         ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
         ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]],
                           ('modelInterface', [('setIndependentVariableUnits', {'units': 't'}),
@@ -365,6 +374,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
                                               ('specifyInputVariable', {'name': 'test:v2', 'units': 'u'}),
                                               ('specifyOutputVariable', {'name': 'test:time'}),
                                               ('specifyOutputVariable', {'name': 'test:v3', 'units': 'u'}),
+                                              ('specifyOptionalVariable', {'name': 'test:opt'}),
                                               ('declareNewVariable', {'name': 'local', 'units': 'dimensionless', 'initial_value': '5'}),
                                               ('addOrReplaceEquation', [('apply', ['eq', 'ci:test:v3', ('apply', ['times', 'ci:test:v2', 'ci:local'])])]),
                                               ('unitsConversionRule', {'desiredDimensions': 'u2', 'actualDimensions': 'u1'},

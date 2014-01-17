@@ -425,9 +425,7 @@ class Actions(object):
                 lambda_params.append([S.Return(body)])
             else:
                 lambda_params.append(body)
-            #defaults = {"defaultParameters" : default_params}
-            #return E.LambdaExpression(*children, **defaults)
-            
+
             if default_params is not None:
                 return E.LambdaExpression(*lambda_params, defaultParameters=default_params)
             else:
@@ -705,7 +703,6 @@ class Actions(object):
             lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
             assign = self.Delegate('Assignment', [[self.tokens[0], lambda_]])
             return assign.expr()
-        # def f(a, b=1): return a+b
 
     class StatementList(BaseGroupAction):
         """Parse action for lists of post-processing language statements."""
@@ -716,7 +713,7 @@ class Actions(object):
         def _expr(self):
             statements = self.GetChildrenExpr()
             return statements
-    # just put in a python list
+
     ######################################################################
     # Model interface section
     ######################################################################
@@ -732,6 +729,10 @@ class Actions(object):
     class OutputVariable(BaseGroupAction):
         def _xml(self):
             return P.specifyOutputVariable(**self.TransferAttrs('name', 'units'))
+    
+    class OptionalVariable(BaseGroupAction):
+        def _xml(self):
+            return P.specifyOptionalVariable(**self.TransferAttrs('name'))
     
     class DeclareVariable(BaseGroupAction):
         def _xml(self):
@@ -1169,8 +1170,6 @@ class Actions(object):
                 plot['using'] = using[0]
             return plot
     
-    # { 'title': str(self.tokens[0]), 'key': name if present, 'x': name, 'y': name }
-    
     class Plots(BaseGroupAction):
         """Parse action for the plots section."""
         def _xml(self):
@@ -1218,7 +1217,7 @@ class Actions(object):
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
             return d
-    
+
 
 ################################################################################
 # Helper methods for defining parsers
@@ -1335,6 +1334,7 @@ class CompactSyntaxParser(object):
     
     # Identifiers
     ncIdent = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*').setName('ncIdent')
+    cIdent = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*:[_a-zA-Z][_0-9a-zA-Z]*').setName('cIdent')
     ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('Ident')
     ncIdentAsVar = ncIdent.copy().setParseAction(Actions.Variable)
     identAsVar = ident.copy().setParseAction(Actions.Variable)
@@ -1533,11 +1533,13 @@ class CompactSyntaxParser(object):
     # Setting the units for the independent variable
     setTimeUnits = (MakeKw('independent') + MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
-    inputVariable = p.Group(MakeKw('input') - ident("name") + Optional(unitsRef)("units")
+    inputVariable = p.Group(MakeKw('input') - cIdent("name") + Optional(unitsRef)("units")
                             + Optional(eq + number)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
     # Model outputs of interest, with optional units
-    outputVariable = p.Group(MakeKw('output') - ident("name") + Optional(unitsRef)("units")
+    outputVariable = p.Group(MakeKw('output') - cIdent("name") + Optional(unitsRef)("units")
                              ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
+    # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
+    optionalVariable = p.Group(MakeKw('optional') - cIdent("name")).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
     # New variables added to the model, with optional initial value
     newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
                           ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
@@ -1555,6 +1557,7 @@ class CompactSyntaxParser(object):
                              DelimitedMultiList([(setTimeUnits, False),
                                                  (inputVariable, True),
                                                  (outputVariable, True),
+                                                 (optionalVariable, True),
                                                  (newVariable, True),
                                                  (clampVariable, True),
                                                  (modelEquation, True),

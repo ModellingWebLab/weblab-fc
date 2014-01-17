@@ -5,7 +5,7 @@ documentation {
 This protocol implements a protocol to record the IKr Peak Current I-V relationship
 for cardiac electrophysiology cell models.
 
-By clamping intra/extra-cellular potassium, and intra-cellular sodium, we can throw away most of 
+By clamping intra/extra-cellular potassium, and intra-cellular sodium, we can throw away most of
 the equations of the models to leave just the IKr components to study.
 
 ## Parameters
@@ -20,7 +20,7 @@ It requires models to provide variables with the annotations:
 * oxmeta:membrane\_voltage
 * oxmeta:extracellular\_potassium\_concentration
 * oxmeta:cytosolic\_potassium\_concentration
-* oxmeta:cytosolic\_sodium\_concentration 
+* oxmeta:cytosolic\_sodium\_concentration
 * oxmeta:time
 }
 
@@ -29,22 +29,22 @@ namespace proto = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
 namespace cellml = "http://www.cellml.org/cellml/1.0#"
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
-# List inputs 
+# List inputs
 inputs {
 
-	# Voltage stepping
-	holding_potential = -80.01
-	final_potential = -60.01
-	steady_state_time = 100000
-	test_potentials = [-60.01, -50.01, -40.01,-35.01, -30.01, -25.01,
-	                   -20.01,-15.01,  
-                       -10.01, -7.51, -5.01, -2.51, 
-                         0.01,  2.51,  5.01,  7.51, 10.01, 
-                        12.51, 15.01, 17.51, 20.01, 
-                        22.51, 25.01, 27.51, 30.01, 
-                        32.51, 35.01, 37.51, 40.01, 
-                        42.51, 45.01, 47.51, 50.01, 
-                        55.01, 60.01, 65.01, 70.01 ]	
+    # Voltage stepping
+    holding_potential = -80.01
+    final_potential = -60.01
+    steady_state_time = 100000
+    test_potentials = [-60.01, -50.01, -40.01,-35.01, -30.01, -25.01,
+                       -20.01,-15.01,
+                       -10.01, -7.51, -5.01, -2.51,
+                         0.01,  2.51,  5.01,  7.51, 10.01,
+                        12.51, 15.01, 17.51, 20.01,
+                        22.51, 25.01, 27.51, 30.01,
+                        32.51, 35.01, 37.51, 40.01,
+                        42.51, 45.01, 47.51, 50.01,
+                        55.01, 60.01, 65.01, 70.01 ]
 }
 
 # Import some useful functions
@@ -68,32 +68,40 @@ units {
 
 # List inputs and outputs of model with units
 model interface {
-
     input oxmeta:membrane_voltage units mV
     input oxmeta:extracellular_potassium_concentration units mM
-	input oxmeta:cytosolic_potassium_concentration units mM
-	input oxmeta:cytosolic_sodium_concentration units mM
-      
-	output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
-	output oxmeta:extracellular_potassium_concentration units mM
-	output oxmeta:cytosolic_potassium_concentration units mM
-	output oxmeta:cytosolic_sodium_concentration units mM
+    input oxmeta:cytosolic_potassium_concentration units mM
+    input oxmeta:cytosolic_sodium_concentration units mM
+
+    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
+    output oxmeta:extracellular_potassium_concentration units mM
+    output oxmeta:cytosolic_potassium_concentration units mM
+    output oxmeta:cytosolic_sodium_concentration units mM
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
-    
+
+    # Declare some variables as optional: if they do not appear in the model, any clamps or equations below involving
+    # them will be ignored, rather than causing the protocol to fail.  A warning will be emitted if optional variables
+    # are not found, however.
+    # Note that this 'optional-ness' only applies to uses within this section of the protocol - if a simulation or
+    # post-processing tries to access an optional variable that doesn't exist, this is still an error.
+    optional oxmeta:extracellular_potassium_concentration
+    optional oxmeta:cytosolic_potassium_concentration
+    optional oxmeta:cytosolic_sodium_concentration
+
     var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
-    
-    # Clamp extracellular concs to whatever value they have in the model
+
+    # Clamp extracellular concentrations to whatever value they have in the model
     # This is a convenience shorthand for 'define var = var'
-    clamp oxmeta:extracellular_potassium_concentration    
-    clamp oxmeta:cytosolic_potassium_concentration    
+    clamp oxmeta:extracellular_potassium_concentration
+    clamp oxmeta:cytosolic_potassium_concentration
     # Clamping this removes dependence on NaK exchanger
     clamp oxmeta:cytosolic_sodium_concentration
-    
+
     # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
     # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
     define oxmeta:membrane_voltage = 0 :: mV
-        
+
     convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
     convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
     convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
@@ -103,48 +111,48 @@ model interface {
 # Perform simulations
 tasks {
 
-	# Task 1: run simulation until steady state is reached 
+    # Task 1: run simulation until steady state is reached
     simulation timecourse {
         range time units ms vector [0, steady_state_time]
         modifiers {
-        	at start set oxmeta:membrane_voltage = holding_potential
+            at start set oxmeta:membrane_voltage = holding_potential
             at end save as holding_state
         }
     }
 
-	# Task 2: starting from holding_state
-	simulation sim = nested {
-	    range step_voltage units mV vector test_potentials
+    # Task 2: starting from holding_state
+    simulation sim = nested {
+        range step_voltage units mV vector test_potentials
         modifiers {
-			at each loop reset to holding_state
-        	at each loop set oxmeta:membrane_voltage = holding_potential
+            at each loop reset to holding_state
+            at each loop set oxmeta:membrane_voltage = holding_potential
         }
         nests simulation timecourse {
-        	range time units ms vector sample_times
-        	modifiers {
-            	at each loop set oxmeta:membrane_voltage = \
-                        if MathML:abs(time - 0) < 1e-6 then step_voltage else 
+            range time units ms vector sample_times
+            modifiers {
+                at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-6 then step_voltage else
                             if MathML:abs(time - 50) < 1e-6 then final_potential else oxmeta:membrane_voltage
             }
         }
-	}
-	
+    }
+
 }
 
 # Do any calculations/modifications of data before plotting
 post-processing {
 
-	# Check validity of outputs
+    # Check validity of outputs
     assert sim:time.IS_ARRAY
     assert sim:membrane_voltage.IS_ARRAY
-    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY        
-    
+    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY
+
     # Locate start of voltage-step section of protocol in results
     first_index = find(map(lambda t: t > 50, sim:time[0]))[0]
     Kr_tail_current = sim:membrane_rapid_delayed_rectifier_potassium_current[1$first_index[0]:]
-      
+
     # Max amplitude
-	peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)    
+    peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)
 }
 
 # List any outputs from model which need to be carried forward to plotting
@@ -153,14 +161,14 @@ outputs {
     I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
     time = sim:time units ms "Time"
     test_potentials units mV "Test potential"
-	peak_Kr_tail units uA_per_cm2 "Peak Tail Current"
-	voltages = sim:membrane_voltage units mV "Voltage"
+    peak_Kr_tail units uA_per_cm2 "Peak Tail Current"
+    voltages = sim:membrane_voltage units mV "Voltage"
 }
 
 # Create plots
 plots {
 
-	plot "I_{Kr} I-V curve" using linespoints { peak_Kr_tail against test_potentials }
-	plot "I_{Kr} currents over time" using lines { I_Kr against time key test_potentials }
-	plot "Voltage clamps" using lines { voltages against time key test_potentials }
+    plot "I_{Kr} I-V curve" using linespoints { peak_Kr_tail against test_potentials }
+    plot "I_{Kr} currents over time" using lines { I_Kr against time key test_potentials }
+    plot "Voltage clamps" using lines { voltages against time key test_potentials }
 }

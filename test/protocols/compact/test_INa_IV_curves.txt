@@ -1,4 +1,4 @@
-# Protocol for I_Na current:
+# This is a cut-down version of INa_IV_curves.txt which should apply to Beeler-Reuter'97 and exercise optional variables.
 
 documentation {
 # INa Current I-V Curves
@@ -18,11 +18,14 @@ It requires models to provide variables with the annotations:
 
 * **oxmeta:membrane\_voltage**
 * **oxmeta:membrane\_fast\_sodium\_current**
+* **oxmeta:time**
+
+Optional variables:
+
 * **oxmeta:extracellular\_sodium\_concentration**
 * **oxmeta:cytosolic\_sodium\_concentration**
 * **oxmeta:cytosolic\_potassium\_concentration**
 * **oxmeta:cytosolic\_calcium\_concentration**
-* **oxmeta:time**
 }
 
 # Load the metadata tags for use with CellML models
@@ -89,10 +92,6 @@ model interface {
     input oxmeta:cytosolic_calcium_concentration units mM
 
     output oxmeta:membrane_fast_sodium_current units uA_per_cm2
-    output oxmeta:extracellular_sodium_concentration units mM
-    output oxmeta:cytosolic_potassium_concentration units mM
-    output oxmeta:cytosolic_sodium_concentration units mM
-    output oxmeta:cytosolic_calcium_concentration units mM
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
 
@@ -243,20 +242,6 @@ post-processing {
     assert sim3:time.IS_ARRAY
     assert sim3:membrane_voltage.IS_ARRAY
     assert sim3:membrane_fast_sodium_current.IS_ARRAY
-
-    # Work out the Nernst potential
-    R = 8314.472 # J/MolK
-    T = 310 # K
-    F = 96485.3415 # C/mMol
-    sodium_reversal_potential = (R*T/F)*MathML:ln(sim3:oxmeta:extracellular_sodium_concentration/sim3:oxmeta:cytosolic_sodium_concentration)
-    driving_potential = map(lambda V: V - sodium_reversal_potential, sim3:membrane_voltage)
-
-    # We want conductances, which are given by G_max * Open_prob
-    # We have measured total current
-    # I = G_max * O * driving_potential
-    # So divide by driving potential to get G_max * Open_prob.
-    conductances = map(lambda I,drive_pot: I/drive_pot, sim3:membrane_fast_sodium_current, driving_potential)
-
 }
 
 # List any outputs from model which need to be carried forward to plotting
@@ -277,11 +262,6 @@ outputs {
     # Activation
     time_activation = sim3:time units ms "Time"
     current_activation = sim3:membrane_fast_sodium_current units A_per_F "I_{Na} Current"
-    driving_potential units mV "Driving potential"
-    conductances units dimensionless "Max conductances"
-    #max_conductances units dimensionless "Max conductances"
-    activation_test_potentials units mV "Activation test potential"
-    sodium_reversal_potential units mV "reversal potential"
 }
 
 # Create plots
@@ -290,15 +270,9 @@ plots {
     plot "Peak Current IV curve" using linespoints { peak_fast_sodium against peak_test_potentials }
     plot "Inactivation IV curve" using linespoints {normalised_peak_currents against inactivation_test_potentials}
 
-    # NOT RIGHT YET!
-    #plot "Activation IV curve" using linespoints {max_conductances against activation_test_potentials}
-
     # Peak Current trace
     plot "I_{Na} for Peak IV protocol" using lines { INa_peak_protocol against time_peak key peak_test_potentials }
 
     # Inactivation curve traces
     plot "I_{Na} for inactivation protocol" using lines {inactivation_tail_current against inactivation_tail_times key inactivation_test_potentials }
-
-    # Activation curve traces
-    plot "I_{Na} for activation protocol" using lines {current_activation against time_activation}
 }

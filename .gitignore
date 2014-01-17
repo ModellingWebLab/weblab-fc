@@ -1,6 +1,7 @@
 # Ignore patterns for git
 
 *~
+~*
 
 # Compiled files
 *.[oa]
