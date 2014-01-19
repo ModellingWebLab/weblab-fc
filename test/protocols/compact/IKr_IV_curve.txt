@@ -151,21 +151,25 @@ post-processing {
 
     # Max amplitude
     peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)
+    
+    # Normalise for better comparison between models.
+    max_peak_current = std:RemoveDim(std:Max(peak_Kr_tail, default), 1)
+    normalised_peak_Kr_tail = map(lambda IKr: IKr/max_peak_current[0], peak_Kr_tail)    
 }
 
 # List any outputs from model which need to be carried forward to plotting
 outputs {
-
     I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
     time = sim:time units ms "Time"
     test_potentials units mV "Test potential"
     peak_Kr_tail units uA_per_cm2 "Peak Tail Current"
+    normalised_peak_Kr_tail units dimensionless "Normalised peak current"
     voltages = sim:membrane_voltage units mV "Voltage"
 }
 
 # Create plots
 plots {
-
+    plot "I_{Kr} normalised I-V curve" using linespoints { normalised_peak_Kr_tail against test_potentials }
     plot "I_{Kr} I-V curve" using linespoints { peak_Kr_tail against test_potentials }
     plot "I_{Kr} currents over time" using lines { I_Kr against time key test_potentials }
     plot "Voltage clamps" using lines { voltages against time key test_potentials }
