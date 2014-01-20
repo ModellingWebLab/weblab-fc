@@ -1357,7 +1357,7 @@ class CompactSyntaxParser(object):
     stmtList = p.Forward().setName('StatementList')
     
     # A vector written like 1:2:5 or 1:5 or A:B:C
-    numericRange = p.Group(expr + colon + expr + Optional(colon + expr))
+    numericRange = p.Group(expr + colon - expr + Optional(colon - expr))
 
     # Creating arrays
     dimSpec = Optional(expr + Adjacent(dollar)) + ncIdent
@@ -1467,7 +1467,7 @@ class CompactSyntaxParser(object):
     ################################################
     
     # Simple assignment (i.e. not to a tuple)
-    simpleAssign = p.Group(ncIdentAsVar + eq + expr).setParseAction(Actions.Assignment)
+    simpleAssign = p.Group(ncIdentAsVar + eq - expr).setName('SimpleAssign').setParseAction(Actions.Assignment)
     simpleAssignList = p.Group(OptionalDelimitedList(simpleAssign, nl)).setParseAction(Actions.StatementList)
     
     # Assertions and function returns
@@ -1475,13 +1475,13 @@ class CompactSyntaxParser(object):
     returnStmt = p.Group(MakeKw('return') - p.delimitedList(expr)).setName('ReturnStmt').setParseAction(Actions.Return)
     
     # Full assignment, to a tuple of names or single name
-    assignStmt = p.Group(p.Group(p.delimitedList(ncIdentAsVar)).setParseAction(Actions.MaybeTuple) + eq +
+    assignStmt = p.Group(p.Group(p.delimitedList(ncIdentAsVar)).setParseAction(Actions.MaybeTuple) + eq -
                          p.Group(p.delimitedList(expr)).setParseAction(Actions.MaybeTuple))   \
                  .setName('AssignStmt').setParseAction(Actions.Assignment)
     
     # Function definition
-    functionDefn = p.Group(MakeKw('def') - ncIdentAsVar + oparen + paramList + cparen +
-                           ((colon + expr) | (obrace + stmtList + Optional(nl) + p.Suppress('}')))
+    functionDefn = p.Group(MakeKw('def') - ncIdentAsVar + oparen + paramList + cparen -
+                           ((colon - expr) | (obrace - stmtList + Optional(nl) + p.Suppress('}')))
                            ).setName('FunctionDef').setParseAction(Actions.FunctionDef)
     
     stmtList << p.Group(p.delimitedList(assertStmt | returnStmt | functionDefn | assignStmt, nl))
@@ -1491,14 +1491,14 @@ class CompactSyntaxParser(object):
     ##############################################
     
     # Documentation (Markdown)
-    documentation = p.Group(MakeKw('documentation') + obrace - p.Regex("[^}]*") + cbrace)("dox")
+    documentation = p.Group(MakeKw('documentation') - obrace - p.Regex("[^}]*") + cbrace)("dox")
     
     # Namespace declarations
     nsDecl = p.Group(MakeKw('namespace') - ncIdent("prefix") + eq + quotedUri("uri")).setName('NamespaceDecl')
     nsDecls = OptionalDelimitedList(nsDecl("namespace*"), nl)
     
     # Protocol input declarations, with default values
-    inputs = (MakeKw('inputs') + obrace - simpleAssignList + cbrace).setName('Inputs').setParseAction(Actions.Inputs)
+    inputs = (MakeKw('inputs') - obrace - simpleAssignList + cbrace).setName('Inputs').setParseAction(Actions.Inputs)
 
     # Import statements & use-imports
     importStmt = p.Group(MakeKw('import') - Optional(ncIdent + eq, default='') + quotedUri +
@@ -1507,7 +1507,7 @@ class CompactSyntaxParser(object):
     
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
-    library = (MakeKw('library') + obrace - Optional(stmtList) + cbrace).setName('Library').setParseAction(Actions.Library)
+    library = (MakeKw('library') - obrace - Optional(stmtList) + cbrace).setName('Library').setParseAction(Actions.Library)
     
     # Post-processing
     postProcessing = (MakeKw('post-processing') + obrace - 
@@ -1523,7 +1523,7 @@ class CompactSyntaxParser(object):
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
     unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")
                        ).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
-    units = (MakeKw('units') + obrace - OptionalDelimitedList(unitsDef, nl) + cbrace
+    units = (MakeKw('units') - obrace - OptionalDelimitedList(unitsDef, nl) + cbrace
              ).setName('Units').setParseAction(Actions.Units)
     
     # Model interface section
@@ -1531,7 +1531,7 @@ class CompactSyntaxParser(object):
     unitsRef = MakeKw('units') + ncIdent
     
     # Setting the units for the independent variable
-    setTimeUnits = (MakeKw('independent') + MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
+    setTimeUnits = (MakeKw('independent') - MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
     inputVariable = p.Group(MakeKw('input') - cIdent("name") + Optional(unitsRef)("units")
                             + Optional(eq + number)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
@@ -1572,10 +1572,10 @@ class CompactSyntaxParser(object):
     
     # Modifiers
     modifierWhen = MakeKw('at') - (MakeKw('start', False) |
-                                   (MakeKw('each', False) + MakeKw('loop')) |
+                                   (MakeKw('each', False) - MakeKw('loop')) |
                                    MakeKw('end', False)).setParseAction(Actions.ModifierWhen)
     setVariable = MakeKw('set') - ident + eq + expr
-    saveState = MakeKw('save') + MakeKw('as') - ncIdent
+    saveState = MakeKw('save') - MakeKw('as') - ncIdent
     resetState = MakeKw('reset') - Optional(MakeKw('to') + ncIdent)
     modifier = p.Group(modifierWhen + p.Group(setVariable("set") | saveState("save") | resetState("reset"))
                        ).setName('Modifier').setParseAction(Actions.Modifier)
@@ -1584,13 +1584,13 @@ class CompactSyntaxParser(object):
     
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
-    _selectOutput = (MakeKw('select') + MakeKw('output') - ncIdent).setName('SelectOutput')
+    _selectOutput = (MakeKw('select') - MakeKw('output') - ncIdent).setName('SelectOutput')
     nestedProtocol = p.Group(MakeKw('protocol') - quotedUri + obrace +
                              simpleAssignList + Optional(nl) + OptionalDelimitedList(_selectOutput, nl) +
                              cbrace + Optional('?')).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
-    timecourseSim = p.Group(MakeKw('timecourse') + obrace - range + Optional(nl + modifiers) + cbrace
+    timecourseSim = p.Group(MakeKw('timecourse') - obrace - range + Optional(nl + modifiers) + cbrace
                             ).setName('TimecourseSim').setParseAction(Actions.TimecourseSimulation)
-    nestedSim = p.Group(MakeKw('nested') + obrace - range + nl + Optional(modifiers)
+    nestedSim = p.Group(MakeKw('nested') - obrace - range + nl + Optional(modifiers)
                         + p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident))
                         + cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
     oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))("step")
