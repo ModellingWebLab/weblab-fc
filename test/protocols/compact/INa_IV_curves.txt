@@ -77,7 +77,10 @@ units {
     uF_per_cm2 = micro farad . centi metre^-2
     microamps = micro ampere
     A_per_F = ampere . farad^-1
-    mM = milli mole . litre^-1 "{/Symbol m}M"
+    mM = milli mole . litre^-1 "mM"
+    J_per_Mol_K = joule . mole^-1 . kelvin^-1
+    C_per_mMol = coulomb . mM^-1
+    K = kelvin
 }
 
 # List inputs and outputs of model with units
@@ -90,19 +93,21 @@ model interface {
     input oxmeta:cytosolic_calcium_concentration units mM
 
     output oxmeta:membrane_fast_sodium_current units uA_per_cm2
-    output oxmeta:extracellular_sodium_concentration units mM
-    output oxmeta:cytosolic_potassium_concentration units mM
-    output oxmeta:cytosolic_sodium_concentration units mM
-    output oxmeta:cytosolic_calcium_concentration units mM
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
 
-#    optional oxmeta:extracellular_sodium_concentration
-#    optional oxmeta:cytosolic_sodium_concentration
+    # If the reversal potential isn't present, we can compute it from the intra- and extra-cellular potentials
+    var R units J_per_Mol_K = 8314.472
+    var F units C_per_mMol = 96485.3415
+    optional oxmeta:temperature default 310 :: K
+    optional oxmeta:sodium_reversal_potential default (R*oxmeta:temperature/F) * MathML:ln(oxmeta:extracellular_sodium_concentration / oxmeta:cytosolic_sodium_concentration)
+    output oxmeta:sodium_reversal_potential units mV
+
+    # The following concentrations are optional, and will be clamped if they are present
+    optional oxmeta:extracellular_sodium_concentration
+    optional oxmeta:cytosolic_sodium_concentration
     optional oxmeta:cytosolic_potassium_concentration
     optional oxmeta:cytosolic_calcium_concentration
-
-    var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
 
     # Clamp extracellular concs to whatever value they have in the model
     # This is a convenience shorthand for 'define var = var'
@@ -118,6 +123,8 @@ model interface {
     # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
     define oxmeta:membrane_voltage = 0 :: mV
 
+    # Units conversion rules for membrane currents
+    var chaste_membrane_capacitance units uF_per_cm2 = 1
     convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
     convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
     convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
@@ -246,18 +253,13 @@ post-processing {
     assert sim3:membrane_fast_sodium_current.IS_ARRAY
 
     # Work out the Nernst potential
-    R = 8314.472 # J/MolK
-    T = 310 # K
-    F = 96485.3415 # C/mMol
-    sodium_reversal_potential = (R*T/F)*MathML:ln(sim3:oxmeta:extracellular_sodium_concentration/sim3:oxmeta:cytosolic_sodium_concentration)
-    driving_potential = map(lambda V: V - sodium_reversal_potential, sim3:membrane_voltage)
+    driving_potential = map(lambda V: V - sim3:oxmeta:sodium_reversal_potential, sim3:membrane_voltage)
 
     # We want conductances, which are given by G_max * Open_prob
     # We have measured total current
     # I = G_max * O * driving_potential
     # So divide by driving potential to get G_max * Open_prob.
     conductances = map(lambda I,drive_pot: I/drive_pot, sim3:membrane_fast_sodium_current, driving_potential)
-
 }
 
 # List any outputs from model which need to be carried forward to plotting
@@ -282,7 +284,7 @@ outputs {
     conductances units dimensionless "Max conductances"
     #max_conductances units dimensionless "Max conductances"
     activation_test_potentials units mV "Activation test potential"
-    sodium_reversal_potential units mV "reversal potential"
+    sodium_reversal_potential = sim3:oxmeta:sodium_reversal_potential "Reversal potential"
 }
 
 # Create plots

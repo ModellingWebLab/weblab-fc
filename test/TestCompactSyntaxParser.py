@@ -318,6 +318,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
         
         self.assertParses(csp.optionalVariable, 'optional prefix:name', [['prefix:name']],
                           ('specifyOptionalVariable', {'name': 'prefix:name'}))
+        self.assertParses(csp.optionalVariable, 'optional p:n default p:v + local * 2 :: u',
+                          [['p:n', ['p:v', '+', ['local', '*', '2']]]],
+                          ('specifyOptionalVariable', {'name': 'p:n'},
+                           [('apply', ['plus', 'ci:p:v', ('apply', ['times', 'ci:local', WithUnits('cn:2', 'u')])])]))
         self.failIfParses(csp.optionalVariable, 'optional no_prefix')
         
         self.assertParses(csp.newVariable, 'var varname units uname = 0', [['varname', 'uname', '0']],

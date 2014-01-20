@@ -72,9 +72,6 @@ model interface {
     input oxmeta:cytosolic_sodium_concentration units mM
 
     output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
-    output oxmeta:extracellular_potassium_concentration units mM
-    output oxmeta:cytosolic_potassium_concentration units mM
-    output oxmeta:cytosolic_sodium_concentration units mM
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
 

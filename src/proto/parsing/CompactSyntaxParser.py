@@ -732,7 +732,10 @@ class Actions(object):
     
     class OptionalVariable(BaseGroupAction):
         def _xml(self):
-            return P.specifyOptionalVariable(**self.TransferAttrs('name'))
+            children = []
+            if 'default' in self.tokens:
+                children.append(self.tokens['default'].xml())
+            return P.specifyOptionalVariable(*children, **self.TransferAttrs('name'))
     
     class DeclareVariable(BaseGroupAction):
         def _xml(self):
@@ -1528,7 +1531,8 @@ class CompactSyntaxParser(object):
     
     # Model interface section
     #########################
-    unitsRef = MakeKw('units') + ncIdent
+    unitsRef = MakeKw('units') - ncIdent
+    varDefault = MakeKw('default') - simpleExpr("default")
     
     # Setting the units for the independent variable
     setTimeUnits = (MakeKw('independent') - MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
@@ -1536,10 +1540,11 @@ class CompactSyntaxParser(object):
     inputVariable = p.Group(MakeKw('input') - cIdent("name") + Optional(unitsRef)("units")
                             + Optional(eq + number)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
     # Model outputs of interest, with optional units
-    outputVariable = p.Group(MakeKw('output') - cIdent("name") + Optional(unitsRef)("units")
+    outputVariable = p.Group(MakeKw('output') - cIdent("name") + Optional(unitsRef("units"))
                              ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
     # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
-    optionalVariable = p.Group(MakeKw('optional') - cIdent("name")).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
+    optionalVariable = p.Group(MakeKw('optional') - cIdent("name") + Optional(varDefault)
+                               ).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
     # New variables added to the model, with optional initial value
     newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
                           ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
