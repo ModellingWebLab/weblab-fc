@@ -1452,6 +1452,8 @@ class CompactSyntaxParser(object):
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
+    simpleParamList = p.Group(OptionalDelimitedList(p.Group(ncIdentAsVar), comma))
+    simpleLambdaExpr = p.Group(MakeKw('lambda') - simpleParamList + colon - expr).setName('SimpleLambda').setParseAction(Actions.Lambda)
 
     # Newlines in expressions may be escaped with a backslash
     expr.ignore('\\' + p.LineEnd())
@@ -1556,7 +1558,7 @@ class CompactSyntaxParser(object):
                                | identAsVar) + eq + simpleExpr).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
     unitsConversion = p.Group(MakeKw('convert') - ncIdent("actualDimensions") + MakeKw('to') + ncIdent("desiredDimensions") +
-                              MakeKw('by') - lambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
+                              MakeKw('by') - simpleLambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
     
     modelInterface = p.Group(MakeKw('model') - MakeKw('interface') - obrace
                              - Optional(setTimeUnits - nl)
