@@ -356,6 +356,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
     independent var units t
     
     input test:v1 = 0  # a comment
+    var early_local units u = 12.34 # order of elements doesn't matter
     input test:v2 units u
     output test:time
     # comments are always ignored
@@ -366,11 +367,12 @@ class TestCompactSyntaxParser(unittest.TestCase):
     var local units dimensionless = 5
     define test:v3 = test:v2 * local
     convert u1 to u2 by lambda u: u * test:v3
-}""", [[['t'], ['test:v1', '0'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'], ['test:opt'],
-        ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
+}""", [[['t'], ['test:v1', '0'], ['early_local', 'u', '12.34'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
+        ['test:opt'], ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
         ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]],
                           ('modelInterface', [('setIndependentVariableUnits', {'units': 't'}),
                                               ('specifyInputVariable', {'name': 'test:v1', 'initial_value': '0'}),
+                                              ('declareNewVariable', {'name': 'early_local', 'units': 'u', 'initial_value': '12.34'}),
                                               ('specifyInputVariable', {'name': 'test:v2', 'units': 'u'}),
                                               ('specifyOutputVariable', {'name': 'test:time'}),
                                               ('specifyOutputVariable', {'name': 'test:v3', 'units': 'u'}),

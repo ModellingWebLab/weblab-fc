@@ -1553,15 +1553,10 @@ class CompactSyntaxParser(object):
     unitsConversion = p.Group(MakeKw('convert') - ncIdent("actualDimensions") + MakeKw('to') + ncIdent("desiredDimensions") +
                               MakeKw('by') - lambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
     
-    modelInterface = p.Group(MakeKw('model') + MakeKw('interface') + obrace -
-                             DelimitedMultiList([(setTimeUnits, False),
-                                                 (inputVariable, True),
-                                                 (outputVariable, True),
-                                                 (optionalVariable, True),
-                                                 (newVariable, True),
-                                                 (clampVariable, True),
-                                                 (modelEquation, True),
-                                                 (unitsConversion, True)], nl)
+    modelInterface = p.Group(MakeKw('model') - MakeKw('interface') - obrace
+                             - Optional(setTimeUnits - nl)
+                             + OptionalDelimitedList((inputVariable | outputVariable | optionalVariable | newVariable
+                                                      | clampVariable | modelEquation | unitsConversion), nl)
                              + cbrace).setName('ModelInterface').setParseAction(Actions.ModelInterface)
     
     # Simulation definitions

@@ -50,12 +50,12 @@ proto.units = element proto:units { any-non-local* }
 
 # Better XML definition of model interfacing
 proto.modelInterface = element proto:modelInterface {
-    proto.setIndependentVariableUnits?,
-    proto.specifyInputVariable*,
-    proto.specifyOutputVariable*,
-    proto.specifyOptionalVariable*,
-    proto.declareNewVariable*,
-    proto.addOrReplaceEquation*,
+    proto.setIndependentVariableUnits? &
+    proto.specifyInputVariable* &
+    proto.specifyOutputVariable* &
+    proto.specifyOptionalVariable* &
+    proto.declareNewVariable* &
+    proto.addOrReplaceEquation* &
     proto.unitsConversionRule*
     }
 
