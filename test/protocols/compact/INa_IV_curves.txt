@@ -78,8 +78,8 @@ units {
     microamps = micro ampere
     A_per_F = ampere . farad^-1
     mM = milli mole . litre^-1 "mM"
-    J_per_Mol_K = joule . mole^-1 . kelvin^-1
-    C_per_mMol = coulomb . mM^-1
+    mJ_per_Mol_K = milli joule . mole^-1 . kelvin^-1
+    C_per_Mol = coulomb . mole^-1
     K = kelvin
 }
 
@@ -97,8 +97,8 @@ model interface {
     output oxmeta:time units ms
 
     # If the reversal potential isn't present, we can compute it from the intra- and extra-cellular potentials
-    var R units J_per_Mol_K = 8314.472
-    var F units C_per_mMol = 96485.3415
+    var R units mJ_per_Mol_K = 8314.4621
+    var F units C_per_Mol = 96485.3365
     optional oxmeta:temperature default 310 :: K
     optional oxmeta:sodium_reversal_potential default (R*oxmeta:temperature/F) * MathML:ln(oxmeta:extracellular_sodium_concentration / oxmeta:cytosolic_sodium_concentration)
     output oxmeta:sodium_reversal_potential units mV
