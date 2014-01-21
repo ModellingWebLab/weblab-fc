@@ -39,11 +39,6 @@ inputs {
 
 import std = "BasicLibrary.txt"
 
-library {
-    default_Cao = sim:oxmeta:extracellular_calcium_concentration
-    step_calcium_values = map(lambda multiple: default_Cao * multiple, [0.5, 1.0, 1.5])
-}
-
 units {
     mV = milli volt
     ms = milli second
