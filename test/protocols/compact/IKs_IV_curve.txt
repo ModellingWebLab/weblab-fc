@@ -1,8 +1,8 @@
-# Protocol for I_Kr current:
+# Protocol for I_Ks current:
 
 documentation {
-# IKr Peak Current I-V Curve
-This protocol implements a protocol to record the IKr Peak Current I-V relationship
+# IKs Peak Current I-V Curve
+This protocol implements a protocol to record the IKs Peak Current I-V relationship
 for cardiac electrophysiology cell models.
 
 By clamping intra/extra-cellular potassium, we can throw away most of
@@ -12,13 +12,14 @@ the equations of the models to leave just the IKr components to study.
 
 * **holding\_potential**  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
 * **final\_potential**  The potential to which the cell is stepped after the test potentials (mV).
-* **steady\_state\_time**  The amount of time to leave the current at holding potential before applying steps (ms).
-* **test\_potentials**  A list of voltages (steps) to clamp the cell to before recording IKr (mV).
+* **steady\_state\_time** The amount of time to leave the current at holding potential before applying steps (ms).
+* **test\_pulse\_time** The length of the applied test voltage pulse (ms).
+* **test\_potentials**  A list of voltages (steps) to clamp the cell to before recording IKs (mV).
 
 It requires models to provide variables with the annotations:
 
 * **oxmeta:membrane\_voltage**
-* **oxmeta:membrane\_rapid\_delayed\_rectifier\_potassium\_current**
+* **oxmeta:membrane\_slow\_delayed\_rectifier\_potassium\_current**
 * **oxmeta:extracellular\_potassium\_concentration**
 * **oxmeta:cytosolic\_potassium\_concentration**
 * **oxmeta:time**
@@ -32,17 +33,18 @@ inputs {
 
     # Voltage stepping
     holding_potential = -80.01
-    final_potential = -60.01
+    final_potential = -40.01
     steady_state_time = 100000
-    test_potentials = [-60.01, -50.01, -40.01,-35.01, -30.01, -25.01,
+    test_pulse_time = 2000
+    test_potentials = [-70.01, -60.01, -50.01, -40.01,-35.01, -30.01, -25.01,
                        -20.01,-15.01,
                        -10.01, -7.51, -5.01, -2.51,
                          0.01,  2.51,  5.01,  7.51, 10.01,
                         12.51, 15.01, 17.51, 20.01,
                         22.51, 25.01, 27.51, 30.01,
                         32.51, 35.01, 37.51, 40.01,
-                        42.51, 45.01, 47.51, 50.01,
-                        55.01, 60.01, 65.01, 70.01 ]
+                        42.51, 45.01, 47.51, 50.01, 
+                        52.51, 55.01, 57.51, 60.01 ]
 }
 
 # Import some useful functions
@@ -50,7 +52,7 @@ import std = "BasicLibrary.txt"
 
 # Define new quantities (can be based on CellML model, if required)
 library {
-    sample_times = std:Join(std:Join([i for i in -1:1:50], [i*0.01 for i in 5000:1:10000]), [i for i in 100:1:1051])
+    sample_times = std:Join(std:Join([i for i in -1:1:test_pulse_time], [i*0.01 for i in 100*test_pulse_time:1:100*(test_pulse_time+50)]), [i for i in (test_pulse_time+50):1:(test_pulse_time+151)])
 }
 
 # Define units
@@ -70,7 +72,7 @@ model interface {
     input oxmeta:extracellular_potassium_concentration units mM
     input oxmeta:cytosolic_potassium_concentration units mM
 
-    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
+    output oxmeta:membrane_slow_delayed_rectifier_potassium_current units uA_per_cm2
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
 
@@ -123,7 +125,7 @@ tasks {
             modifiers {
                 at each loop set oxmeta:membrane_voltage = \
                         if MathML:abs(time - 0) < 1e-6 then step_voltage else
-                            if MathML:abs(time - 50) < 1e-6 then final_potential else oxmeta:membrane_voltage
+                            if MathML:abs(time - test_pulse_time) < 1e-6 then final_potential else oxmeta:membrane_voltage
             }
         }
     }
@@ -136,34 +138,34 @@ post-processing {
     # Check validity of outputs
     assert sim:time.IS_ARRAY
     assert sim:membrane_voltage.IS_ARRAY
-    assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY
+    assert sim:membrane_slow_delayed_rectifier_potassium_current.IS_ARRAY
 
     # Locate start of voltage-step section of protocol in results
-    first_index = find(map(lambda t: t > 50, sim:time[0]))[0]
-    Kr_tail_current = sim:membrane_rapid_delayed_rectifier_potassium_current[1$first_index[0]:]
+    first_index = find(map(lambda t: t > test_pulse_time, sim:time[0]))[0]
+    Ks_tail_current = sim:membrane_slow_delayed_rectifier_potassium_current[1$first_index[0]:]
 
     # Max amplitude
-    peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)
+    peak_Ks_tail = std:RemoveDim(std:Max(Ks_tail_current, default), 1)
     
     # Normalise for better comparison between models.
-    max_peak_current = std:RemoveDim(std:Max(peak_Kr_tail, default), 1)
-    normalised_peak_Kr_tail = map(lambda IKr: IKr/max_peak_current[0], peak_Kr_tail)    
+    max_peak_current = std:RemoveDim(std:Max(peak_Ks_tail, default), 1)
+    normalised_peak_Ks_tail = map(lambda IKs: IKs/max_peak_current[0], peak_Ks_tail)    
 }
 
 # List any outputs from model which need to be carried forward to plotting
 outputs {
-    I_Kr = sim:membrane_rapid_delayed_rectifier_potassium_current "I_{Kr}"
+    I_Ks = sim:membrane_slow_delayed_rectifier_potassium_current "I_{Kr}"
     time = sim:time units ms "Time"
     test_potentials units mV "Test potential"
-    peak_Kr_tail units uA_per_cm2 "Peak Tail Current"
-    normalised_peak_Kr_tail units dimensionless "Normalised peak current"
+    peak_Ks_tail units uA_per_cm2 "Peak Tail Current"
+    normalised_peak_Ks_tail units dimensionless "Normalised peak current"
     voltages = sim:membrane_voltage units mV "Voltage"
 }
 
 # Create plots
 plots {
-    plot "I_{Kr} normalised I-V curve" using linespoints { normalised_peak_Kr_tail against test_potentials }
-    plot "I_{Kr} I-V curve" using linespoints { peak_Kr_tail against test_potentials }
-    plot "I_{Kr} currents over time" using lines { I_Kr against time key test_potentials }
+    plot "I_{Ks} normalised I-V curve" using linespoints { normalised_peak_Ks_tail against test_potentials }
+    plot "I_{Ks} I-V curve" using linespoints { peak_Ks_tail against test_potentials }
+    plot "I_{Ks} currents over time" using lines { I_Ks against time key test_potentials }
     plot "Voltage clamps" using lines { voltages against time key test_potentials }
 }

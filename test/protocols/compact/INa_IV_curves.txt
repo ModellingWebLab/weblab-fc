@@ -18,14 +18,17 @@ It requires models to provide variables with the annotations:
 
 * **oxmeta:membrane\_voltage**
 * **oxmeta:membrane\_fast\_sodium\_current**
-* **oxmeta:extracellular\_sodium\_concentration**
-* **oxmeta:cytosolic\_sodium\_concentration**
 * **oxmeta:time**
 
-The following concentrations will be clamped if present, but the protocol will still run if they are missing:
+The following concentrations will be clamped if present, but the protocol will still run if they are missing (very early models):
+* **oxmeta:extracellular\_sodium\_concentration**
+* **oxmeta:cytosolic\_sodium\_concentration**
 
+These should also be clamped as certain models (e.g. DiFrancesco-Noble) have an INa dependence on these quantities:
 * **oxmeta:cytosolic\_potassium\_concentration**
+* **oxmeta:extracellular\_potassium\_concentration**
 * **oxmeta:cytosolic\_calcium\_concentration**
+
 }
 
 # Load the metadata tags for use with CellML models
@@ -90,7 +93,9 @@ model interface {
     input oxmeta:extracellular_sodium_concentration units mM
     input oxmeta:cytosolic_sodium_concentration units mM
     input oxmeta:cytosolic_potassium_concentration units mM
+    input oxmeta:extracellular_potassium_concentration units mM
     input oxmeta:cytosolic_calcium_concentration units mM
+    input oxmeta:extracellular_calcium_concentration units mM
 
     output oxmeta:membrane_fast_sodium_current units uA_per_cm2
     output oxmeta:membrane_voltage units mV
@@ -107,17 +112,18 @@ model interface {
     optional oxmeta:extracellular_sodium_concentration
     optional oxmeta:cytosolic_sodium_concentration
     optional oxmeta:cytosolic_potassium_concentration
+    optional oxmeta:extracellular_potassium_concentration
     optional oxmeta:cytosolic_calcium_concentration
+    optional oxmeta:extracellular_calcium_concentration
 
     # Clamp extracellular concs to whatever value they have in the model
     # This is a convenience shorthand for 'define var = var'
     clamp oxmeta:extracellular_sodium_concentration
     clamp oxmeta:cytosolic_sodium_concentration
-
-    # Clamping this removes dependence on NaK exchanger
     clamp oxmeta:cytosolic_potassium_concentration
-    # Clamping this removes dependence on NCX exchanger
     clamp oxmeta:cytosolic_calcium_concentration
+    clamp oxmeta:extracellular_calcium_concentration
+    clamp oxmeta:extracellular_potassium_concentration
 
     # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
     # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
