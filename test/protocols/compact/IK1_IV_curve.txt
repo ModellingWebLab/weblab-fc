@@ -1,0 +1,159 @@
+# Protocol for I_K1 current:
+
+documentation {
+# IK1 Steady Current I-V Curve
+This protocol implements a protocol to record the IK1 Steady Current I-V relationship
+for cardiac electrophysiology cell models.
+
+By clamping intra/extra-cellular potassium, we can throw away most of
+the equations of the models to leave just the IK1 components to study.
+
+## Parameters
+
+* **holding\_potential**  The potential at which the cell rests before voltage steps are applied at t=0 (mV).
+* **steady\_state\_time** The amount of time to leave the current at holding potential before applying steps (ms).
+* **test\_pulse\_time** The length of the applied test voltage pulse (ms).
+* **test\_potentials**  A list of voltages (steps) to clamp the cell to before recording IKs (mV).
+
+It requires models to provide variables with the annotations:
+
+* **oxmeta:membrane\_voltage**
+* **oxmeta:membrane\_inward\_rectifier\_potassium\_current**
+* **oxmeta:extracellular\_potassium\_concentration**
+* **oxmeta:cytosolic\_potassium\_concentration**
+* **oxmeta:time**
+}
+
+# Load the metadata tags for use with CellML models
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+# List inputs
+inputs {
+
+    # Voltage stepping
+    holding_potential = -50.01
+    steady_state_time = 100000
+    test_pulse_time = 500
+    test_potentials = [0.01 + i for i in -120:5:45 ]
+}
+
+# Import some useful functions
+import std = "BasicLibrary.txt"
+
+# Define units
+units {
+    mV = milli volt
+    ms = milli second
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
+    uF_per_cm2 = micro farad . centi metre^-2
+    microamps = micro ampere
+    A_per_F = ampere . farad^-1
+    mM = milli mole . litre^-1 "{/Symbol m}M"
+}
+
+# List inputs and outputs of model with units
+model interface {
+    input oxmeta:membrane_voltage units mV
+    input oxmeta:extracellular_potassium_concentration units mM
+    input oxmeta:cytosolic_potassium_concentration units mM
+
+    output oxmeta:membrane_inward_rectifier_potassium_current units uA_per_cm2
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+
+    # Declare some variables as optional: if they do not appear in the model, any clamps or equations below involving
+    # them will be ignored, rather than causing the protocol to fail.  A warning will be emitted if optional variables
+    # are not found, however.
+    # Note that this 'optional-ness' only applies to uses within this section of the protocol - if a simulation or
+    # post-processing tries to access an optional variable that doesn't exist, this is still an error.
+    optional oxmeta:extracellular_potassium_concentration
+    optional oxmeta:cytosolic_potassium_concentration
+
+    var chaste_membrane_capacitance units uF_per_cm2 = 1 # For units conversion rules
+
+    # Clamp extracellular concentrations to whatever value they have in the model
+    # This is a convenience shorthand for 'define var = var'
+    clamp oxmeta:extracellular_potassium_concentration
+    clamp oxmeta:cytosolic_potassium_concentration
+
+    # Replace the ODE for voltage by a fixed value (the actual value used will be set when running)
+    # We could also have used the form 'clamp oxmeta:membrane_voltage to 0 :: mV'
+    define oxmeta:membrane_voltage = 0 :: mV
+
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
+}
+
+# Perform simulations
+tasks {
+
+    # Task 1: run simulation until steady state is reached
+    simulation timecourse {
+        range time units ms vector [0, steady_state_time]
+        modifiers {
+            at start set oxmeta:membrane_voltage = holding_potential
+            at end save as holding_state
+        }
+    }
+
+    # Task 2: starting from holding_state
+    simulation sim = nested {
+        range step_voltage units mV vector test_potentials
+        modifiers {
+            at each loop reset to holding_state
+            at each loop set oxmeta:membrane_voltage = holding_potential
+        }
+        nests simulation timecourse {
+            range time units ms vector [1 + i for i in -2:1:test_pulse_time]
+            modifiers {
+                at each loop set oxmeta:membrane_voltage = \
+                        if MathML:abs(time - 0) < 1e-6 then step_voltage else oxmeta:membrane_voltage
+            }
+        }
+    }
+
+}
+
+# Do any calculations/modifications of data before plotting
+post-processing {
+
+    # Check validity of outputs
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    assert sim:membrane_inward_rectifier_potassium_current.IS_ARRAY
+
+    # Locate end of voltage-step section of protocol in results
+    last_index = find(map(lambda t: t < test_pulse_time, sim:time[0]))[-1]
+    K1_tail_current = sim:membrane_inward_rectifier_potassium_current[1$0:last_index[0]]
+
+    # Max amplitude
+    steady_K1 = K1_tail_current[1$-1]
+    
+    # Normalise for better comparison between models.
+    max_steady_current = std:RemoveDim(std:Max(steady_K1, default), 1)
+    min_steady_current = std:RemoveDim(std:Min(steady_K1, default), 1)
+    normalised_high_K1 = map(lambda IK1: IK1/max_steady_current[0], steady_K1)
+    normalised_low_K1 = map(lambda IK1: -IK1/min_steady_current[0], steady_K1)
+}
+
+# List any outputs from model which need to be carried forward to plotting
+outputs {
+    I_K1 = sim:membrane_inward_rectifier_potassium_current "I_{K1}"
+    time = sim:time units ms "Time"
+    test_potentials units mV "Test potential"
+    steady_K1 units uA_per_cm2 "Steady current"
+    normalised_high_K1 units dimensionless "Steady current (normalised outward)"
+    normalised_low_K1 units dimensionless "Steady current (normalised inward)"
+    voltages = sim:membrane_voltage units mV "Voltage"
+}
+
+# Create plots
+plots {
+    plot "I_{K1} inward normalised I-V curve" using linespoints { normalised_low_K1 against test_potentials }
+    plot "I_{K1} outward normalised I-V curve" using linespoints { normalised_high_K1 against test_potentials }
+    plot "I_{K1} I-V curve" using linespoints { steady_K1 against test_potentials }
+    plot "I_{K1} currents over time" using lines { I_K1 against time key test_potentials }
+    plot "Voltage clamps" using lines { voltages against time key test_potentials }
+}
