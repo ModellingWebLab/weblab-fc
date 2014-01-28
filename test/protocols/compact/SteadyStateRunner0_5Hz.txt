@@ -1,0 +1,18 @@
+# Finds cell model steady state at 0.5Hz pacing.
+
+documentation {
+# Steady State action potential evaluation
+
+This protocol implements steady pacing for cardiac electrophysiology cell models, and produces
+the action potential at 0.5Hz. Note that it is a really simple (3 line) protocol definition, that 
+just imports SteadyStateRunner.txt and changes one of its inputs.
+
+##Parameters:
+
+* **pacing\_period**  The pacing period in milliseconds overridden to evaluate at 2000ms instead of the default of 1000ms.
+
+}
+
+import "SteadyStateRunner.txt" {
+    pacing_period = 2000  # ms    
+}
