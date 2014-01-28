@@ -1,6 +1,8 @@
 # Run a cell model until it reaches steady state
 
 documentation {
+# Steady State action potential evaluation
+
 This protocol implements steady pacing for cardiac electrophysiology cell models, and produces
 the action potential at this steady state.
 
@@ -70,12 +72,12 @@ outputs {
     norm_of_differences = outer:norm_of_differences "Norm of the change in state variables over each `pace'"
 
     detailed_time    = detail:time             "Time"
-    detailed_state     units mixed             "The state variables over the final `pace'"
-    detailed_voltage = detail:membrane_voltage "The transmembrane potential over the final `pace'"
+    detailed_state     units mixed             "State variables over the final `pace'"
+    detailed_voltage = detail:membrane_voltage "Transmembrane potential"
 }
 
 plots {
-    plot "Final `pace' - voltage" using lines           { detailed_voltage           against detailed_time }
+    plot "Final pace voltage" using lines               { detailed_voltage           against detailed_time }
     plot "Progress towards steady state"                { norm_of_differences        against pace_count    }
     plot "State variables at each pace end" using lines { pace_final_state_variables against pace_count    }
 }
