@@ -69,14 +69,14 @@ tasks {
 }
 
 post-processing {
+    # Plot against percent block, rather than scaling factor.
+    degree_of_block = map(lambda x: 100*(1-x), block_levels) 
+    
     APD90 = cardiac:Apd(sim:detailed_voltage, sim:detailed_time)[1$0]
     
     # We want to see the change relative to control APD90
     control_APD90 = APD90[0$-1]
     scaled_APD90 = map(lambda x: 100*x/control_APD90[0], APD90)
-    
-    # And plot against percent block, rather than scaling factor.
-    degree_of_block = map(lambda x: 100*(1-x), block_levels) 
 }
 
 outputs {

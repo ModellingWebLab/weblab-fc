@@ -70,11 +70,12 @@ tasks {
 }
 
 post-processing {
+    degree_of_block = map(lambda x: 100*(1-x), block_levels) 
+    
     APD90 = cardiac:Apd(sim:detailed_voltage, sim:detailed_time)[1$0]    
         
     control_APD90 = APD90[0$-1]
     scaled_APD90 = map(lambda x: 100*x/control_APD90[0], APD90)
-    degree_of_block = map(lambda x: 100*(1-x), block_levels) 
 }
 
 outputs {
