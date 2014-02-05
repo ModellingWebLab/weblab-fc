@@ -1,0 +1,94 @@
+# Run a cell model until it reaches steady state, with RyR block levels
+
+documentation {
+# RyR block protocol
+
+This protocol implements steady pacing for cardiac electrophysiology cell models, and produces
+the action potential at this steady state, for varying degrees of ion channel block.
+
+##Parameters:
+
+* **block_levels**  The degree of RyR (SR release channel) block to apply vector of [0, 1] values.
+* **pacing\_period**  The pacing period in milliseconds (1000/frequency in Hz).
+* **max\_paces**  The maximum number of paces to stimulate the system with (some models never get to steady state!).
+
+It requires models to provide variables with the annotations:
+
+* **oxmeta:membrane\_stimulus\_current**
+* **oxmeta:membrane\_voltage**
+* **oxmeta:SR\_release\_current\_max**
+* **oxmeta:time**
+}
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    block_levels = [i*0.1 for i in 0:2:11] # dimensionless
+    pacing_period = 1000  # ms
+    num_inner_paces = 1   # How many paces to run between comparing state variables
+    max_paces = 10000     # Give up at this point
+    norm_threshold = 1e-6 # Applied to p1 norm of state variable differences
+}
+
+import std = "BasicLibrary.txt"
+import cardiac = "CardiacLibrary.txt"
+
+library {
+    default_SR_release_max = sim:oxmeta:SR_release_current_max
+    block_level_values = map(lambda multiple: default_SR_release_max * multiple, block_levels)
+}
+
+
+units {
+    percent = dimensionless "%"
+}
+
+model interface {
+    input oxmeta:SR_release_current_max
+}
+
+tasks {
+
+    simulation sim = nested {
+        range block_level units dimensionless vector block_level_values
+        modifiers {
+            # There's nothing to reset here! But this tells it this nesting could be parallelised.
+            at each loop reset
+            # Set the scaling factor
+            at each loop set oxmeta:SR_release_current_max = block_level
+        }
+        # Get the model to steady-state (if possible)
+        nests protocol "SteadyStateRunner.txt" {
+            num_inner_paces = num_inner_paces
+            pacing_period = pacing_period
+            max_paces = max_paces
+            norm_threshold = norm_threshold
+            select output detailed_time
+            select output detailed_voltage
+        }
+    }
+}
+
+post-processing {
+    APD90 = cardiac:Apd(sim:detailed_voltage, sim:detailed_time)[1$0]    
+        
+    control_APD90 = APD90[0$-1]
+    scaled_APD90 = map(lambda x: 100*x/control_APD90[0], APD90)
+    degree_of_block = map(lambda x: 100*(1-x), block_levels) 
+}
+
+outputs {
+    block_levels units dimensionless "Proportion of blocked RyR channels"
+    APD90 units ms "APD90"
+    scaled_APD90 units percent "APD90"
+    degree_of_block units percent "RyR Channel Block"
+    
+    detailed_time    = sim:detailed_time    "Time"
+    detailed_voltage = sim:detailed_voltage "Transmembrane potential"
+}
+
+plots {
+    plot "Relative APD90" using linespoints { scaled_APD90 against degree_of_block} 
+    plot "Final pace voltage" using lines { detailed_voltage against detailed_time key degree_of_block}
+    plot "APD90" using linespoints { APD90 against degree_of_block }
+}
