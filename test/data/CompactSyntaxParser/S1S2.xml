@@ -429,26 +429,28 @@
     <proto:postprocessed units="ms" name="PCLs" description="Pacing Cycle Length" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:133:5&#9;    PCLs units ms &quot;Pacing Cycle Length&quot;"/>
     <proto:postprocessed units="ms" name="APD90" description="Action Potential Duration 90%" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:134:5&#9;    APD90 units ms &quot;Action Potential Duration 90%&quot;"/>
     <proto:postprocessed units="ms" name="DI" description="Diastolic Interval" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:135:5&#9;    DI units ms &quot;Diastolic Interval&quot;"/>
-    <proto:postprocessed units="dimensionless" name="S1S2_slope" description="S1-S2 curve gradient" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:136:5&#9;    S1S2_slope units dimensionless &quot;S1-S2 curve gradient&quot;"/>
-    <proto:postprocessed units="dimensionless" name="max_S1S2_slope" description="Maximum gradient of S1-S2 curve" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:137:5&#9;    max_S1S2_slope units dimensionless &quot;Maximum gradient of S1-S2 curve&quot;"/>
+    <proto:postprocessed units="ms" name="s2_intervals" description="S2 interval" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:136:5&#9;    s2_intervals units ms &quot;S2 interval&quot;"/>
+    <proto:postprocessed units="dimensionless" name="S1S2_slope" description="S1-S2 curve gradient" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:137:5&#9;    S1S2_slope units dimensionless &quot;S1-S2 curve gradient&quot;"/>
+    <proto:postprocessed units="dimensionless" name="max_S1S2_slope" description="Maximum gradient of S1-S2 curve" proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:138:5&#9;    max_S1S2_slope units dimensionless &quot;Maximum gradient of S1-S2 curve&quot;"/>
   </proto:outputVariables>
-  <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:140:1&#9;plots {">
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:141:5&#9;    plot &quot;S1-S2 curve&quot; using linespoints { APD90 against DI }">
+  <proto:plots proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:141:1&#9;plots {">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:142:5&#9;    plot &quot;S1-S2 curve&quot; using linespoints { APD90 against DI }">
       <proto:title>S1-S2 curve</proto:title>
       <proto:x>DI</proto:x>
       <proto:y>APD90</proto:y>
       <proto:using>linespoints</proto:using>
     </proto:plot>
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:142:5&#9;    plot &quot;restitution curve&quot; using linespoints { APD90 against PCLs }">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:143:5&#9;    plot &quot;restitution curve&quot; using linespoints { APD90 against PCLs }">
       <proto:title>restitution curve</proto:title>
       <proto:x>PCLs</proto:x>
       <proto:y>APD90</proto:y>
       <proto:using>linespoints</proto:using>
     </proto:plot>
-    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:143:5&#9;    plot &quot;Action potential traces&quot; using lines { membrane_voltage against time_1d }">
+    <proto:plot proto:loc="projects/FunctionalCuration/test/protocols/compact/S1S2.txt:144:5&#9;    plot &quot;Action potential traces&quot; using lines { membrane_voltage against time_1d key s2_intervals}">
       <proto:title>Action potential traces</proto:title>
       <proto:x>time_1d</proto:x>
       <proto:y>membrane_voltage</proto:y>
+      <proto:key>s2_intervals</proto:key>
       <proto:using>lines</proto:using>
     </proto:plot>
   </proto:plots>
