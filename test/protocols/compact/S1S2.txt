@@ -133,6 +133,7 @@ outputs {
     PCLs units ms "Pacing Cycle Length"
     APD90 units ms "Action Potential Duration 90%"
     DI units ms "Diastolic Interval"
+    s2_intervals units ms "S2 interval"
     S1S2_slope units dimensionless "S1-S2 curve gradient"
     max_S1S2_slope units dimensionless "Maximum gradient of S1-S2 curve"
 }
@@ -140,5 +141,5 @@ outputs {
 plots {
     plot "S1-S2 curve" using linespoints { APD90 against DI }
     plot "restitution curve" using linespoints { APD90 against PCLs }
-    plot "Action potential traces" using lines { membrane_voltage against time_1d }
+    plot "Action potential traces" using lines { membrane_voltage against time_1d key s2_intervals}
 }
