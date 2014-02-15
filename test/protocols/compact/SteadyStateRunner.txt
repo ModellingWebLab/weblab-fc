@@ -47,7 +47,7 @@ tasks {
 
     # Run a single pace in detail, to see what it looks like at steady-state
     simulation detail = timecourse {
-        range time units ms uniform 0:(pacing_period * num_inner_paces)
+        range time units ms uniform -10:(pacing_period * num_inner_paces)-10
     }
 }
 

@@ -18,7 +18,7 @@ units {
 }
 
 model interface {
-    input oxmeta:membrane_stimulus_current_offset units ms = 10
+    input oxmeta:membrane_stimulus_current_offset units ms = 0
     input oxmeta:membrane_stimulus_current_period units ms = 1000
 
     output oxmeta:membrane_voltage units mV
@@ -37,18 +37,18 @@ tasks {
     # Do a pre-run to get the model to steady-state with this pacing interval.
     # We run all but the last pace here in one go, then examine the last pace in more detail in the next simulation.
     simulation timecourse {
-        range time units ms vector [0, pacing_period * (steady_state_beats - 1)]
+        range time units ms vector [-10, pacing_period * (steady_state_beats - 1) -10]
         modifiers {
             # Set pacing interval
             at start set oxmeta:membrane_stimulus_current_period = pacing_period
-            at start set oxmeta:membrane_stimulus_current_offset = 1
+            at start set oxmeta:membrane_stimulus_current_offset = 0
             at end save as initial_state
         }
     }
     
     # Now examine the last AP in fine detail
     simulation sim = timecourse {
-        range time units ms uniform 0:0.1:pacing_period
+        range time units ms uniform -10:0.1:pacing_period-10
         modifiers {
             at start reset to initial_state
         }

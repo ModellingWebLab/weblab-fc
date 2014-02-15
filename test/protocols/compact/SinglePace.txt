@@ -15,7 +15,7 @@ units {
 }
 
 model interface {
-    input oxmeta:membrane_stimulus_current_offset units ms = 10
+    input oxmeta:membrane_stimulus_current_offset units ms = 0
     input oxmeta:membrane_stimulus_current_period units ms = 1000
 
     output oxmeta:membrane_voltage units mV
@@ -34,11 +34,11 @@ model interface {
 tasks {
     # Run the desired number of paces, recording start & end states only
     simulation sim = timecourse {
-        range time units ms vector [0, pacing_period * num_paces]
+        range time units ms vector [-10, pacing_period * num_paces -10]
         modifiers {
-            # Set stimulus period to pacing interval, offset 10ms
+            # Set stimulus period to pacing interval, offset 0ms
             at start set oxmeta:membrane_stimulus_current_period = pacing_period # ms
-            at start set oxmeta:membrane_stimulus_current_offset = 10            # ms
+            at start set oxmeta:membrane_stimulus_current_offset = 0            # ms
         }
     }
 }
