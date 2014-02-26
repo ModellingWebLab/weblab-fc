@@ -154,7 +154,7 @@ post-processing {
 
 # List any outputs from model which need to be carried forward to plotting
 outputs {
-    I_Ks = sim:membrane_slow_delayed_rectifier_potassium_current "I_{Kr}"
+    I_Ks = sim:membrane_slow_delayed_rectifier_potassium_current "I_{Ks}"
     time = sim:time units ms "Time"
     test_potentials units mV "Test potential"
     peak_Ks_tail units uA_per_cm2 "Peak Tail Current"
