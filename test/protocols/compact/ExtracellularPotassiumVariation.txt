@@ -24,7 +24,7 @@ It requires models to provide variables with the annotations:
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 inputs {
-    extra_potassium_test_concentrations = [i for i in 2:1:10] # microMolar
+    extra_potassium_test_concentrations = [i for i in 2:1:10] # milliMolar
     pacing_period = 1000  # ms
     num_inner_paces = 1   # How many paces to run between comparing state variables
     max_paces = 10000     # Give up at this point
