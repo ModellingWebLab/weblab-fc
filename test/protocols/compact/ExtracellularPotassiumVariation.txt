@@ -41,21 +41,28 @@ library {
 
 units {
     percent = dimensionless "%"
+    mM = milli mole . litre^-1 "mM"
+    # Note that we also import units definitions from the nested protocols referenced in our simulation tasks.
+    # This is really an implementation quirk rather than the ideal scenario!
 }
 
 model interface {
-    input oxmeta:extracellular_potassium_concentration
+    input oxmeta:extracellular_potassium_concentration units mM
+    
+    # Clamp initially to whatever value is given in the model.
+    # Later within the simulation tasks the value will be varied.
+    clamp oxmeta:extracellular_potassium_concentration
 }
 
 tasks {
     simulation sim = nested {
-        range Ko_concentrations units milliMolar vector potassium_test_concentrations
+        range Ko_concentration units mM vector potassium_test_concentrations
         modifiers {
-            # There's nothing to reset here! 
+            # There's nothing to reset here!
             # But this tells it this nesting could be parallelised.
             at each loop reset
             # Set the scaling factor
-            at each loop set oxmeta:extracellular_potassium_concentration = Ko_concentrations
+            at each loop set oxmeta:extracellular_potassium_concentration = Ko_concentration
         }
         # Get the model to steady-state (if possible)
         nests protocol "SteadyStateRunner.txt" {
@@ -69,7 +76,7 @@ tasks {
     }
 }
 
-post-processing {  
+post-processing {
     APD90 = cardiac:Apd(sim:detailed_voltage, sim:detailed_time)[1$0]
     RestingPotential = std:Min(sim:detailed_voltage)[1$0]
     
