@@ -681,31 +681,31 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(used_vars, set(['a', 'b']))
         
     def TestFindIndexTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_find_index.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_find_index.txt'
         proto = fc.Protocol(proto_file)
         proto.Run()
     
     def TestCorePostProcTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_core_postproc.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_core_postproc.txt'
         proto = fc.Protocol(proto_file)
         proto.Run()
     
     def TestSimEnvTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_sim_environments.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_sim_environments.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestSimEnv')
         proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
      
     def TestParallelNestedTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_parallel_nested.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_parallel_nested.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestParallelNestedTxt')
         proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
     
     def TestWhileLoopTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_while_loop.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestWhileLoopTxt')
         proto.SetModel(Model.TestOdeModel(1))
@@ -713,14 +713,14 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.Run()
         
     def TestGraphTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/GraphState.txt'
+        proto_file = 'projects/FunctionalCuration/protocols/GraphState.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestGraphTxt')
         proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
         
     def TestNestedProtocols(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_nested_protocol.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestNestedProtocols')
         proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
@@ -736,7 +736,7 @@ class TestSyntaxInterface(unittest.TestCase):
         # test below is just to test that we get the correct output for a protocol error
         # TODO - it's commented out because it causes a protocol error every time
 #     def TestProtocolError(self):
-#         proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_error_msg.txt'
+#         proto_file = 'projects/FunctionalCuration/test/protocols/test_error_msg.txt'
 #         proto = fc.Protocol(proto_file)
 #         proto.Run()
         

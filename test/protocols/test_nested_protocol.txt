@@ -5,7 +5,7 @@ namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 tasks {
     simulation sim = nested {
         range iter units dimensionless vector [0, 1]
-        nests protocol "SteadyPacing.txt" {
+        nests protocol "../../protocols/SteadyPacing.txt" {
             steady_state_beats = 5
             pacing_period = (iter * 100) + 900
             select output peak_voltage

@@ -44,7 +44,7 @@ from fc.simulations.solvers import CvodeSolver
 class TestIcalProto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
     def TestIcal(self):
-        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
+        proto = fc.Protocol('projects/FunctionalCuration/protocols/ICaL.txt')
         proto.SetOutputFolder('Py_TestIcalProto')
         proto.SetModel('projects/FunctionalCuration/cellml/aslanidi_Purkinje_model_2009.cellml', useNumba=False)
         proto.model.SetSolver(CvodeSolver())

@@ -44,7 +44,7 @@ from fc.simulations.solvers import CvodeSolver
 class TestS1S2Proto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
     def TestS1S2(self):
-        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/S1S2.txt')
+        proto = fc.Protocol('projects/FunctionalCuration/protocols/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')
         proto.SetModel('projects/FunctionalCuration/cellml/courtemanche_ramirez_nattel_1998.cellml')
         proto.model.SetSolver(CvodeSolver())

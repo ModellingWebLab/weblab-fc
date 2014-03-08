@@ -212,7 +212,7 @@ class TestModelSimulation(unittest.TestCase):
         
     def TestPyCmlLuoRudy(self):
         # shorter test after properly implementing set model into protocol
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/test_while_loop.txt'
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_while_loop.txt'
         proto = fc.Protocol(proto_file)
         model = 'projects/FunctionalCuration/cellml/luo_rudy_1991.cellml'
         proto.SetModel(model)

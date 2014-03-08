@@ -51,7 +51,7 @@ N = E.N
 class TestSpeedRealProto(unittest.TestCase):
     def TestS1S2(self):
         # Parse the protocol into a sequence of post-processing statements
-        proto_file = 'projects/FunctionalCuration/test/protocols/compact/S1S2.txt'
+        proto_file = 'projects/FunctionalCuration/protocols/S1S2.txt'
         proto = fc.Protocol(proto_file)
         # Load the raw simulation data from file
         proto.simulations = []
@@ -71,7 +71,7 @@ class TestSpeedRealProto(unittest.TestCase):
         TestSupport.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
 
     def TestIcal(self):
-        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/compact/ICaL.txt')
+        proto = fc.Protocol('projects/FunctionalCuration/protocols/ICaL.txt')
         proto.simulations = []
         data_folder = 'projects/FunctionalCuration/test/data/TestSpeedRealProto/ICaL'
         local_env = Env.Environment()
