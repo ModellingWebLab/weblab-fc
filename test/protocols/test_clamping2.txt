@@ -1,4 +1,4 @@
-# Test clamping state variables to their initial value
+# Test clamping state variables to a fixed value
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 

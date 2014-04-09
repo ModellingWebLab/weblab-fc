@@ -1,3 +1,4 @@
+TestAlgebraicModels.py
 TestArrayExpressions.py
 TestBasicExpressions.py
 TestEnvironment.py

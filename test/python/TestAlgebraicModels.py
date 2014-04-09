@@ -1,5 +1,5 @@
 
-"""Copyright (c) 2005-2013, University of Oxford.
+"""Copyright (c) 2005-2014, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -31,29 +31,22 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-cimport numpy as np
-cimport fc.sundials.sundials as _lib
+import unittest
 
-# Save typing
-ctypedef _lib.N_Vector N_Vector
-ctypedef np.float64_t realtype
+import fc
 
-#cdef object NumpyView(N_Vector v)
+class TestAlgebraicModels(unittest.TestCase):
+    """Test behaviour on models with no ODEs; equivalent to TestClamping.hpp"""
+    def TestClampingToInitialValue(self):
+        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_clamping1.txt')
+        proto.SetOutputFolder('Py_TestAlgebraicModels_TestClampingToInitialValue')
+        proto.SetModel('projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml')
+        proto.Run()
+        # Test assertions are within the protocol itself
 
-#cdef int _RhsWrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data)
-
-cdef class CvodeSolver:
-    cdef void* cvode_mem # CVODE solver 'object'
-    cdef N_Vector _state # The state vector of the model being simulated
-    cdef int _state_size # The number of state variables / length of the state vector
-    
-    cdef public np.ndarray state # Numpy view of the state vector
-    cdef public object model # The model being simulated
-
-    cpdef AssociateWithModel(self, model)
-    cpdef ResetSolver(self, np.ndarray[realtype, ndim=1] resetTo)
-    cpdef SetFreeVariable(self, realtype t)
-    cpdef Simulate(self, realtype endPoint)
-    
-    cdef ReInit(self)
-    cdef CheckFlag(self, int flag, char* called)
+    def TestClampingToFixedValue(self):
+        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_clamping2.txt')
+        proto.SetOutputFolder('Py_TestAlgebraicModels_TestClampingToInitialValue')
+        proto.SetModel('projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml')
+        proto.Run()
+        # Test assertions are within the protocol itself

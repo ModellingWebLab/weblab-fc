@@ -161,10 +161,10 @@ class Protocol(object):
                 else:
                     plot_descriptions[output['name']] = output['name']
         if not self.outputFolder:
-            print >>sys.stderr, "Warning: protocol output folder not set, so not writing outputs to file"
+            self.LogWarning("Warning: protocol output folder not set, so not writing outputs to file")
             return
         
-        print 'saving output data to h5 file...'
+        self.LogProgress('saving output data to h5 file...')
         start = time.time()
         filename = os.path.join(self.outputFolder.path, 'output.h5')
         h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
@@ -180,7 +180,7 @@ class Protocol(object):
         # Plots
         start = time.time()
         for plot in self.plots:
-            print 'plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']]
+            self.LogProgress('plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
             x_data = []
             y_data = []
             x_data.append(self.outputEnv.LookUp(plot['x']))
@@ -206,7 +206,7 @@ class Protocol(object):
         Locatable.outputFolder = self.outputFolder
         self.Initialise()
         # TODO: make status output optional
-        print 'running protocol...'
+        self.LogProgress('running protocol...')
         try:
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
@@ -249,14 +249,14 @@ class Protocol(object):
         """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
             sim.Initialise()
-            print 'running simulation', sim.prefix
+            self.LogProgress('running simulation', sim.prefix)
             sim.Run()
             # Reset trace folder in case a nested protocol changes it
             Locatable.outputFolder = self.outputFolder
 
     def RunPostProcessing(self):
         """Run the post-processing section of this protocol."""
-        print 'running post processing...'
+        self.LogProgress('running post processing...')
         self.postProcessingEnv.ExecuteStatements(self.postProcessing)
 
     def SetInput(self, name, valueExpr):
@@ -290,7 +290,7 @@ class Protocol(object):
         """Specify the model this protocol is to be run on."""
         start = time.time()
         if isinstance(model, str):
-            print 'generating model code...'
+            self.LogProgress('generating model code...')
             import tempfile, subprocess, imp, sys
             if self.outputFolder:
                 temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
@@ -333,3 +333,19 @@ class Protocol(object):
                                    'proto', 'library')
             new_path = os.path.join(library, path)
         return new_path
+    
+    def LogProgress(self, *args):
+        """Print a progress line showing how far through the protocol we are.
+        
+        Arguments are converted to strings and space separated, as for the print builtin.
+        """
+        print ' '.join(map(str, args))
+        sys.stdout.flush()
+
+    def LogWarning(self, *args):
+        """Print a warning message.
+        
+        Arguments are converted to strings and space separated, as for the print builtin.
+        """
+        print >>sys.stderr, ' '.join(map(str, args))
+        sys.stderr.flush()

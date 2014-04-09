@@ -83,6 +83,7 @@ cdef class CvodeSolver:
         """Initialise C data attributes on object creation."""
         self.cvode_mem = NULL
         self._state = NULL
+        self._state_size = 0
 
     def __dealloc__(self):
         """Free solver memory if allocated."""
@@ -108,7 +109,8 @@ cdef class CvodeSolver:
         # by the pysundials solver, since that can only wrap an N_Vector with an ndarray, not v.v.
         assert isinstance(model.state, np.ndarray)
         self.state = model.state
-        self._state = _lib.N_VMake_Serial(len(model.state), <realtype*>(<np.ndarray>self.state).data)
+        self._state_size = len(model.state)
+        self._state = _lib.N_VMake_Serial(self._state_size, <realtype*>(<np.ndarray>self.state).data)
         # Initialise CVODE
         self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF, _lib.CV_NEWTON)
         if hasattr(self, 'SetRhsWrapper'):
@@ -123,8 +125,9 @@ cdef class CvodeSolver:
         reltol = 1e-5
         flag = _lib.CVodeSStolerances(self.cvode_mem, reltol, abstol)
         self.CheckFlag(flag, 'CVodeSStolerances')
-        flag = _lib.CVDense(self.cvode_mem, len(self.state))
-        self.CheckFlag(flag, 'CVDense')
+        if self._state_size > 0:
+            flag = _lib.CVDense(self.cvode_mem, self._state_size)
+            self.CheckFlag(flag, 'CVDense')
         _lib.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
         _lib.CVodeSetMaxStep(self.cvode_mem, 1.0)
         _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15);
@@ -138,17 +141,18 @@ cdef class CvodeSolver:
         self.ReInit()
 
     cpdef Simulate(self, realtype endPoint):
-        if self.model.dirty:
-            # A model variable has changed, so reset the solver
-            self.ReInit()
         cdef realtype t = 0
-        flag = _lib.CVode(self.cvode_mem, endPoint, self._state, &t, _lib.CV_NORMAL)
+        if self._state_size > 0:
+            if self.model.dirty:
+                # A model variable has changed, so reset the solver
+                self.ReInit()
+            flag = _lib.CVode(self.cvode_mem, endPoint, self._state, &t, _lib.CV_NORMAL)
+            if flag != _lib.CV_SUCCESS:
+                flag_name = _lib.CVodeGetReturnFlagName(flag)
+                raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
+            else:
+                assert t == endPoint
         self.model.freeVariable = t
-        if flag != _lib.CV_SUCCESS:
-            flag_name = _lib.CVodeGetReturnFlagName(flag)
-            raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
-        else:
-            assert t == endPoint
 
     cdef ReInit(self):
         """Reset CVODE's state because time or the RHS function has changed (e.g. parameter or state var change)."""
