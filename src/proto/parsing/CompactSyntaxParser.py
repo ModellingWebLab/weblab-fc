@@ -425,11 +425,8 @@ class Actions(object):
                 lambda_params.append([S.Return(body)])
             else:
                 lambda_params.append(body)
-
-            if default_params is not None:
-                return E.LambdaExpression(*lambda_params, defaultParameters=default_params)
-            else:
-                return E.LambdaExpression(*lambda_params)
+            lambda_params.append(default_params)
+            return E.LambdaExpression(*lambda_params)
     
     class FunctionCall(BaseGroupAction):
         """Parse action for function calls."""
@@ -1505,7 +1502,7 @@ class CompactSyntaxParser(object):
     # Protocol input declarations, with default values
     inputs = (MakeKw('inputs') - obrace - simpleAssignList + cbrace).setName('Inputs').setParseAction(Actions.Inputs)
 
-    # Import statements & use-imports
+    # Import statements
     importStmt = p.Group(MakeKw('import') - Optional(ncIdent + eq, default='') + quotedUri +
                          Optional(obrace - simpleAssignList + embedded_cbrace)).setName('Import').setParseAction(Actions.Import)
     imports = OptionalDelimitedList(importStmt, nl).setName('Imports')
@@ -1667,7 +1664,7 @@ class CompactSyntaxParser(object):
         return r
     
     def ParseFile(self, filename, xmlGenerator=None):
-        """Main entry point for parsing a complete protocol file; returns an ElementTree."""
+        """Main entry point for parsing a single protocol file; returns an ElementTree."""
         Actions.source_file = filename
         Actions.units_map = {}
         if xmlGenerator is None:
