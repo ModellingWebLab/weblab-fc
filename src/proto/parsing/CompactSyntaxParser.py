@@ -72,7 +72,7 @@ def DoXmlImports():
     for name in local_defs:
         globals()[name] = local_defs[name]
 
-if __name__ == '__main__':
+if __name__ == '__main__' or getattr(sys, '_fc_csp_no_pyimpl', False):
     DoXmlImports()
 else:
     import math

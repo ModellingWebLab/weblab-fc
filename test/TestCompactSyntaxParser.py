@@ -41,8 +41,11 @@ import sys
 import time
 
 # Import the module to test
+# The default for this module now is to assume the Python implementation,
+# so we have to override that!
+sys._fc_csp_no_pyimpl = True
 import CompactSyntaxParser as CSP
-CSP.DoXmlImports() # The default for this module now is to assume the Python implementation
+CSP.DoXmlImports()
 
 csp = CSP.CompactSyntaxParser
 # An end-of-string match that doesn't allow trailing whitespace
