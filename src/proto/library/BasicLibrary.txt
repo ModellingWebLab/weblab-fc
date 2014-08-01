@@ -232,4 +232,14 @@ def SortBy(array, key, dim=default) {
     return Permute(array, permutation, dim)
 }
 
+
+# Make an array of the given shape containing the same value everywhere
+def MakeArray(value, shape, dim=0) {
+    assert dim <= shape.NUM_ELEMENTS
+    return if dim == shape.NUM_ELEMENTS
+               then value  # Base case
+               else        # Recursive case
+                   MakeArray([ value for dim$i in 0:shape[dim] ], shape, dim+1)
+}
+
 }
