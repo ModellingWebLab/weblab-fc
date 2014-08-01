@@ -3,11 +3,17 @@ import fromBasicLib = "BasicLibrary.txt"
 library
 {
 
+
+# Compute action potential durations along timeseries.
+# Returns an array of APD values, whose extent along the last dimension is the minimum number of APs.
 def Apd(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
     t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
     return map(@2:-, t_ap_ends, t_ap_starts)
 }
 
+
+# Compute action potential durations and diastolic intervals along timeseries.
+# Returns a tuple (apds, dis).
 def ApdAndDi(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
     t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
     num_dims = V.NUM_DIMS
@@ -17,8 +23,12 @@ def ApdAndDi(V, t, percent=default, dim_=default, dvdtThreshold=default, windowS
     return (apds, dis)
 }
 
+
+# Utility function doing the bulk of the calculation for Apd and ApdAndDi.
+# Determines the start and end times for each action potential.
 def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize=50) {
     dim = fromBasicLib:DefaultDim(V, dim_)
+    assert dim == V.NUM_DIMS-1  # Otherwise the extended arrays below break. TODO: fix this!
     assert fromBasicLib:ShapeEq(V, t)
     input_shape = V.SHAPE
     num_dims = V.NUM_DIMS
@@ -27,28 +37,42 @@ def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize
     assert dvdtThreshold.IS_SIMPLE_VALUE
     assert windowSize.IS_SIMPLE_VALUE
     
+    # Find the maximum upstroke velocity location, checking that the velocity crosses a threshold
     dVdt = fromBasicLib:Grad(t, V, dim)
     assert fromBasicLib:MultiFold(@2:MathML:min, dVdt) < dvdtThreshold && fromBasicLib:MultiFold(@2:MathML:max, dVdt) > dvdtThreshold
     max_upstroke_idxs = find(map(lambda slope, max_slope: slope == max_slope && slope > dvdtThreshold,
                                  dVdt, fromBasicLib:Localise(fromBasicLib:Max, dVdt, windowSize, dim)))
+
+    # If one trace has fewer APs, we need to extend it.  To do so, we need to fake extra APs for this trace.
+    # We do so by 'copying' the first AP of the first trace; it should generally work OK.
     fake_upstroke_time = (t{max_upstroke_idxs, dim, shrink:1})[*$0]
     times_nonextended = t{max_upstroke_idxs, dim, pad:1=fake_upstroke_time}
+
+    # Get the max upstroke times as an extended array 'N'xAxT, where N is #runs, A is max #APs, T is #time steps.
+    # But N may represent multiple dimensions, if num_dims > 2, or none if num_dims==1.
     extended_shape = [ if i == num_dims then input_shape[i-1] else
                        if i == num_dims-1 then times_nonextended.SHAPE[num_dims-1] else input_shape[i]
                        for i in 0:num_dims+1 ]
     max_upstroke_times = fromBasicLib:Stretch(fromBasicLib:AddDim(times_nonextended, num_dims), extended_shape, num_dims)
+
+    # Find the peaks of these APs: V == local_Vmax && t > t_up
     local_Vmax = fromBasicLib:Stretch(fromBasicLib:AddDim(fromBasicLib:Localise(fromBasicLib:Max, V, 1, dim), num_dims-1), extended_shape, num_dims-1)
     extended_V = fromBasicLib:Stretch(fromBasicLib:AddDim(V, num_dims-1), extended_shape, num_dims-1)
     extended_time = fromBasicLib:Stretch(fromBasicLib:AddDim(t, num_dims-1), extended_shape, num_dims-1)
     peak_idxs = find(map(lambda V, Vmax, t, t_up: V == Vmax && t > t_up,
                          extended_V, local_Vmax, extended_time, max_upstroke_times))
+
+    # Take the first such t & V
     t_peak = (extended_time{peak_idxs, num_dims, shrink:1})[num_dims$0:1]
     V_peak = (extended_V{peak_idxs, num_dims, shrink:1})[num_dims$0:1]
+
+    # Assume resting potential is global minimum, and calculate relaxation potential
     V_rest = fromBasicLib:Min(extended_V, num_dims)
     V_relax = map(lambda V_peak, V_rest: V_rest + (1-percent/100)*(V_peak-V_rest), V_peak, V_rest)
     t_ap_starts = fromBasicLib:RemoveDim(fromBasicLib:Interp(extended_time, extended_V, V_relax, t_peak, 0, num_dims), num_dims)
     t_ap_ends = fromBasicLib:RemoveDim(fromBasicLib:Interp(extended_time, extended_V, V_relax, t_peak, 1, num_dims), num_dims)
     return t_ap_starts, t_ap_ends
 }
+
 
 }

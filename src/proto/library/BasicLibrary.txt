@@ -9,6 +9,9 @@ def Sum(a, dim=default): fold(@2:+, a, 0, dim)
 
 def Product(a, dim=default): fold(@2:*, a, 1, dim)
 
+# Utility function for determining the default dimension to operate on for many library functions.
+# The dimension defaults to the last dimension of the input array.
+# This function also checks that a supplied dimension value is valid for the given array.
 def DefaultDim(a, dim_=default) {
     assert a.IS_ARRAY
     dim = if dim_.IS_DEFAULT then a.NUM_DIMS-1 else dim_
@@ -31,11 +34,18 @@ def Diff(a, dim_=default) {
 
 def Grad(x, y, dim=default): map(@2:/, Diff(y, dim), Diff(x, dim))
 
+
+# Concatenate two arrays along the given dimension
 def Join(a1, a2, dim_=default) {
     dim = DefaultDim(a1, dim_)
+    # The array comprehension will check implicitly that a1.NUM_DIMS == a2.NUM_DIMS, and that the shapes match up
     return [if i < 0 then a1[dim$i] else a2[dim$i] for dim$i in -a1.SHAPE[dim] : a2.SHAPE[dim] ]
 }
 
+
+# Stretch dimension dim (of length 1) in the input array to the given length.
+# The lengthSpec can either be a number giving the length, or a shape array the relevant entry of which will be read.
+# We do not (yet) check that the other dimensions match the input array shape!
 def Stretch(a, lengthSpec, dim_=default) {
     dim = DefaultDim(a, dim_)
     assert a.SHAPE[dim] == 1
@@ -44,6 +54,10 @@ def Stretch(a, lengthSpec, dim_=default) {
     return [ a[dim$0] for dim$i in 0:length ]
 }
 
+
+# Shift an array a given distance along a particular dimension.
+# Shifts right if distance is positive; left otherwise.
+# Fills with the initial/final value so that the result is the same shape as the input.
 def Shift(a, distance, dim_=default) {
     dim = DefaultDim(a, dim_)
     return if distance == 0 then a else
@@ -51,49 +65,74 @@ def Shift(a, distance, dim_=default) {
                             else Join(a[dim$-distance:], Stretch(a[dim$-1:], -distance, dim), dim)
 }
 
+
+# A useful utility for applying a function locally on an array (see Localise).
+# Creates an extended version of the input which, along the new dimension, has the values of the input either side of each point.
 def Window(a, size, dim=default) {
     assert a.IS_ARRAY
     return [ Shift(a, i, dim) for i in (-size):(size+1) ]
 }
 
+
+# A generalised fold function which folds along all dimensions recursively.
 def MultiFold(op, a, init=default): if a.NUM_DIMS == 0 then a else MultiFold(op, fold(op, a, init, 0)[0], init)
 
+
+# Test two arrays for equality.
 def ArrayEq(a1, a2): MultiFold(@2:&&, map(@2:==, a1, a2), 1)
 
+
+# Test that two arrays have the same shape.
 def ShapeEq(a1, a2) {
     assert a1.IS_ARRAY
     assert a2.IS_ARRAY
     return ArrayEq(a1.SHAPE, a2.SHAPE)
 }
 
+
+# Linear interpolation finding target y values either before or after a given starting point in the "x" (dim_) direction.
+# The result has extent 1 for the specified dimension, and the same shape as the input elsewhere.
 def Interp(xs, ys, targets, starts, afterStarts=1, dim_=default) {
     dim = DefaultDim(xs, dim_)
     input_shape = xs.SHAPE
     result_shape = [if i == dim then 1 else input_shape[i] for i in 0:xs.NUM_DIMS]
     assert ArrayEq(result_shape, starts.SHAPE)
     assert ArrayEq(result_shape, targets.SHAPE)
-    
+
+    # We want to find indexes i into ys such that xs[i] >= stretched_starts[i], and
+    #   if ys[start] > targets, ys[i] <= stretched_targets[i]
+    #   if ys[start] < targets, ys[i] >= stretched_targets[i]
     stretched_starts = Stretch(starts, input_shape, dim)
     stretched_targets = Stretch(targets, input_shape, dim)
     y_starts = ys{find(map(@2:==, xs, stretched_starts)), dim}
     increasing = map(@2:<, y_starts, targets)
     y_matches = map(lambda inc, y, t: if inc then y>=t else y<=t, Stretch(increasing, input_shape, dim), ys, stretched_targets)
+    # We filter here so we only find matches before/after the start points
     idxs = find(map(if afterStarts then lambda match, x, start: match && x >= start
                                    else lambda match, x, start: match && x <= start,
                     y_matches, xs, stretched_starts))
+
+    # Compute "(xs[i]-xs[i-1]) / (ys[i]-ys[i-1])" (but don't index it yet)
     gradient = Grad(ys, xs, dim)
+    # Add a zero on the front to make it match xs etc. in size, and handle the i=0 case
     zero_array = map(lambda t: 0*t, targets)
     gradient_extended = Join(if afterStarts then zero_array else gradient,
                              if afterStarts then gradient else zero_array,
                              dim)
+    # Compute "(y - ys[i-1])" or "(y - ys[i])"
     shift_dir = if afterStarts then 1 else 0
     target_minus_ys = Shift(map(@2:-, stretched_targets, ys), shift_dir, dim)
     shifted_xs = Shift(xs, shift_dir, dim)
+    # Compute the "total" result. This will fail if the target values are not found at any point.
     result = map(lambda shifted_x, t_minus_y, x_over_y: shifted_x + t_minus_y*x_over_y,
                  shifted_xs, target_minus_ys, gradient_extended){idxs, dim, shrink:if afterStarts then 1 else -1}
+    # Finally, take the first/last match (along the desired dimension).
     return result[dim$(if afterStarts then 0 else -1):(if afterStarts then 1 else null)]
 }
 
+
+# Return that portion of an input array that occurs strictly after a specified time
+# (although the comparison array does not necessarily have to be time).
 def After(a, index, testValue, dim_=default) {
     dim = DefaultDim(a, dim_)
     assert index.IS_ARRAY
@@ -101,24 +140,40 @@ def After(a, index, testValue, dim_=default) {
     return a{find(map(lambda idx_value: idx_value > testValue, index)), dim}
 }
 
+
+# Remove the given dimension from an array, taking a slice at the 0th entry.
 def RemoveDim(a, dim): a[dim$0]
 
+
+# Add a new dimension to an array, of extent 1.
 def AddDim(a, dim): [a for dim$_ in 0:1]
 
+
+# Perform a function locally within a given window size, for example to compute the local maxima of an array centered at each entry.
+# The function must take two arguments: an array, and dimension.
 def Localise(fn, a, windowSize, dim=default) {
     return RemoveDim(fn(Window(a, windowSize, dim), 0), 0)
 }
 
+
+# Transpose a 2d array.
 def Transpose(matrix) {
     assert matrix.IS_ARRAY
     assert matrix.NUM_DIMS == 2
     return [ matrix[dim1][dim0] for dim0 in 0:matrix.SHAPE[1] for dim1 in 0:matrix.SHAPE[0] ]
 }
 
+
+# Count the number of elements within array that satisfy the predicate.
 def Count(a, predicate): find(map(predicate, a)).SHAPE[0]
 
+
+# Return the last sub-array/value along a particular dimension.
 def Last(a, dim_=default): a[DefaultDim(a, dim_):-1]
 
+
+# Re-order elements in the array according to the permutation vector.
+# The i-th entry in the vector gives the index within array dimension dim of the i-th entry of the result array.
 def Permute(a, permutation, dim_=default) {
     dim = DefaultDim(a, dim_)
     assert permutation.NUM_DIMS == 1
@@ -127,23 +182,33 @@ def Permute(a, permutation, dim_=default) {
     return [ a[dim$permutation[i]] for dim$i in 0:len ]
 }
 
+
+# Return only those elements of the array matching the predicate.
+# The optional arguments are passed to index, and specify how to deal with an irregular result.
 def Filter(a, predicate, dim=default, shrink=default, pad=default, padValue=default): a{find(map(predicate, a)), dim, shrink:shrink, pad:pad=padValue}
 
+
+# Get the permutation vector (see Permute) required to sort the given vector into ascending order.
+# Uses the quicksort algorithm.
 def GetSortPermutation(vector, orig_indices_=default) {
     assert vector.NUM_DIMS == 1
     len = vector.SHAPE[0]
+    # Create a default indices vector if not supplied
     orig_indices = if orig_indices_.IS_DEFAULT then [i for i in 0:len] else orig_indices_
     recursive_case = lambda {
+        # Nested scope so we can sequence statements for the recursive case
         curr_pivot_idx = MathML:floor(len / 2)
         pivot = vector[curr_pivot_idx]
         orig_pivot_idx = orig_indices[curr_pivot_idx]
         num_below = Count(vector, lambda elt: elt <= pivot) - 1
         num_above = len - (num_below + 1)
-        all_idxs_below = find(map(lambda elt: elt <= pivot, vector))
+        all_idxs_below = find(map(lambda elt: elt <= pivot, vector))  # Includes pivot; removed in next line
         idxs_below = if num_below > 0 then Filter(all_idxs_below, lambda idx: idx != curr_pivot_idx, 0, 1) else null
         idxs_above = if num_above > 0 then find(map(lambda elt: elt > pivot, vector)) else null
+        # Recursively sort each non-empty sub-vector
         result_below = if num_below > 0 then GetSortPermutation(vector{idxs_below}, orig_indices{idxs_below}) else null
         result_above = if num_above > 0 then GetSortPermutation(vector{idxs_above}, orig_indices{idxs_above}) else null
+        # Merge the sub-permutations
         return if result_below.IS_NULL then Join([orig_pivot_idx], result_above) else
                if result_above.IS_NULL then Join(result_below, [orig_pivot_idx]) else
                                             Join(result_below, Join([orig_pivot_idx], result_above))
@@ -151,11 +216,17 @@ def GetSortPermutation(vector, orig_indices_=default) {
     return (if len == 1 then orig_indices else recursive_case())
 }
 
+
+# Sort a vector into ascending order (using quicksort).
 def Sort(vector) {
     permutation = GetSortPermutation(vector)
     return Permute(vector, permutation)
 }
 
+
+# Sort an array using a "key" vector.
+# The result array will be re-ordered along the given dimension in such a way
+# that the same re-ordering would put the key vector in ascending order.
 def SortBy(array, key, dim=default) {
     permutation = GetSortPermutation(key)
     return Permute(array, permutation, dim)
