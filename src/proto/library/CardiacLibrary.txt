@@ -69,8 +69,16 @@ def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize
     # Assume resting potential is global minimum, and calculate relaxation potential
     V_rest = fromBasicLib:Min(extended_V, num_dims)
     V_relax = map(lambda V_peak, V_rest: V_rest + (1-percent/100)*(V_peak-V_rest), V_peak, V_rest)
-    t_ap_starts = fromBasicLib:RemoveDim(fromBasicLib:Interp(extended_time, extended_V, V_relax, t_peak, 0, num_dims), num_dims)
-    t_ap_ends = fromBasicLib:RemoveDim(fromBasicLib:Interp(extended_time, extended_V, V_relax, t_peak, 1, num_dims), num_dims)
+
+    # Extend the t & V arrays by one extra value in each direction, to ensure that interpolation will succeed!
+    ext_i = lambda i: if i == -1 then 0 else if i == input_shape[dim] then input_shape[dim]-1 else i
+    ext_time = [ extended_time[num_dims$ext_i(i)] for num_dims$i in -1:input_shape[dim]+1 ]
+    ext_V = [ if i == -1 || i == input_shape[dim] then V_relax[num_dims$0]
+                                                  else extended_V[num_dims$i] for num_dims$i in -1:input_shape[dim]+1 ]
+
+    # Find (with interpolation) the first time before/after each peak where the relaxation potential is crossed
+    t_ap_starts = fromBasicLib:RemoveDim(fromBasicLib:Interp(ext_time, ext_V, V_relax, t_peak, 0, num_dims), num_dims)
+    t_ap_ends = fromBasicLib:RemoveDim(fromBasicLib:Interp(ext_time, ext_V, V_relax, t_peak, 1, num_dims), num_dims)
     return t_ap_starts, t_ap_ends
 }
 
