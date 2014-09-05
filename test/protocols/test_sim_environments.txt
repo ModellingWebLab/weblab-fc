@@ -20,10 +20,12 @@ units {
 # Turn the model into dV/dt = a, V(0) = 0, a = 1
 model interface {
     independent var units ms
-    input oxmeta:leakage_current units mV_per_ms = 1
+    # This is a current that shouldn't feature in the model (This protocol tested with LR91), 
+    # and so it is created and assigned the value 1.
+    input oxmeta:SR_leak_current units mV_per_ms = 1
     input oxmeta:membrane_voltage units mV = 0.0
     output oxmeta:membrane_voltage units mV
-    define diff(oxmeta:membrane_voltage; oxmeta:time) = oxmeta:leakage_current
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = oxmeta:SR_leak_current
 }
 
 tasks {
@@ -31,7 +33,7 @@ tasks {
     simulation tc3 = timecourse {
         range t units ms uniform 0:10
         modifiers {
-            at start set oxmeta:leakage_current = parameter
+            at start set oxmeta:SR_leak_current = parameter
         }
     }
     
@@ -39,7 +41,7 @@ tasks {
     simulation tc_follow = timecourse {
         range t units ms uniform 0:10
         modifiers {
-            at start set oxmeta:leakage_current = oxmeta:leakage_current * 2
+            at start set oxmeta:SR_leak_current = oxmeta:SR_leak_current * 2
         }
     }
     
@@ -48,7 +50,7 @@ tasks {
         range t units ms uniform 0:10
         modifiers {
             at start reset
-            at start set oxmeta:leakage_current = tc3:membrane_voltage[-1] # = 30
+            at start set oxmeta:SR_leak_current = tc3:membrane_voltage[-1] # = 30
         }
     }
 
@@ -61,7 +63,7 @@ tasks {
         nests simulation timecourse {
             range t units ms uniform 0:10
             modifiers {
-                at start set oxmeta:leakage_current = c * multiplier
+                at start set oxmeta:SR_leak_current = c * multiplier
             }
         }
     }
@@ -70,7 +72,7 @@ tasks {
     simulation n2 = nested {
         range c units dimensionless vector loop_array
         modifiers {
-            at each loop set oxmeta:leakage_current = c
+            at each loop set oxmeta:SR_leak_current = c
         }
         nests simulation timecourse {
             range t units ms uniform 0:10

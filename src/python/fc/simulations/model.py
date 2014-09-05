@@ -173,7 +173,7 @@ class TestOdeModel(AbstractOdeModel):
         self.initialState = np.array([0.])
         self.stateVarMap = {'membrane_voltage': 0, 'y': 0}
         self.parameters = np.array([a])
-        self.parameterMap = {'leakage_current': 0, 'a': 0}
+        self.parameterMap = {'SR_leak_current': 0, 'leakage_current': 0, 'a': 0}
         self.freeVariableName = 'time'
         super(TestOdeModel, self).__init__()
 
@@ -190,5 +190,6 @@ class TestOdeModel(AbstractOdeModel):
         outputs['state_variable'] = self.state
         outputs['time'] = np.array(self.freeVariable)
         outputs['leakage_current'] = np.array(self.parameters[self.parameterMap['leakage_current']])
+        outputs['SR_leak_current'] = np.array(self.parameters[self.parameterMap['SR_leak_current']])
         outputs['membrane_voltage'] = np.array(self.state[self.stateVarMap['membrane_voltage']])
         return outputs
