@@ -1,0 +1,62 @@
+# Test that we can annotate variables with terms from ontologies other than oxmeta
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace test = "urn:fc:test#"
+
+import std = "BasicLibrary.txt"
+
+library {
+    initial_V = sim1:test:V
+    initial_param = sim2:test:input
+}
+
+units {
+    mV = milli volt
+    ms = milli second
+    mV_per_ms = mV . ms^-1
+}
+
+model interface {
+    input test:input units mV_per_ms = 0
+    input test:V units mV = 0
+
+    output test:V units mV
+    output oxmeta:time units ms
+
+    define diff(test:V; oxmeta:time) = test:input
+}
+
+tasks {
+    simulation sim1 = timecourse {
+        range t units ms uniform 0:5
+    }
+
+    simulation sim2 = timecourse {
+        range t units ms uniform 0:5
+        modifiers {
+            at start set test:input = 1
+        }
+    }
+}
+
+post-processing {
+    # Check initial model state
+    assert initial_V == 0
+    assert initial_param == 0
+    
+    # Check simulation outputs
+    def Close(a1, a2, tol=1e-6) {
+        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    }
+    assert Close(sim1:V, [0, 0, 0, 0, 0, 0])
+    assert Close(sim2:V, [0, 1, 2, 3, 4, 5])
+    
+    # Check final model state
+    assert sim1:test:V == 5
+    assert sim2:test:input == 1
+}
+
+outputs {
+    V1 = sim1:V
+    V2 = sim2:V
+}
