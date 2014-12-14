@@ -4,8 +4,9 @@ TestBasicExpressions.py
 TestEnvironment.py
 TestFunctions.py
 TestLogicOperators.py
+TestModelSimulations.py
 TestNdArray.py
 TestOutputFolder.py
 TestRelations.py
 TestSyntaxInterface.py
-TestModelSimulations.py
+TestVariousProtocols.py
