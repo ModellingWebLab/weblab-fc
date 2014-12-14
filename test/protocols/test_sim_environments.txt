@@ -9,6 +9,8 @@ library {
     loop_array = [i*3 for i in 1:5]
     parameter = 3
     multiplier = -1.5
+    default_parameter = tc3:oxmeta:SR_leak_current
+    default_state_var = tc_sim:oxmeta:membrane_voltage
 }
 
 units {
@@ -20,7 +22,7 @@ units {
 # Turn the model into dV/dt = a, V(0) = 0, a = 1
 model interface {
     independent var units ms
-    # This is a current that shouldn't feature in the model (This protocol tested with LR91), 
+    # This is a current that shouldn't feature in the model (this protocol tested with LR91), 
     # and so it is created and assigned the value 1.
     input oxmeta:SR_leak_current units mV_per_ms = 1
     input oxmeta:membrane_voltage units mV = 0.0
@@ -80,10 +82,13 @@ tasks {
                 at start reset
             }
         }
-    }    
+    }
 }
 
 post-processing {
+    # Check initial model state
+    assert default_parameter == 1
+    assert default_state_var == 0
 
     # Check outputs of the simulations are as expected
     def Close(a1, a2, tol=1e-6) {
@@ -95,6 +100,10 @@ post-processing {
     assert Close(tc_sim:membrane_voltage, [i*30 for i in 0:11])
     assert Close(n1:membrane_voltage, [ [ j*i*multiplier for j in 0:11] for i in 0:2:5 ])
     assert Close(n2:membrane_voltage, [ [ j*i*3 for j in 0:11 ] for i in 1:5 ])
+    
+    # Check final model state
+    assert n2:oxmeta:SR_leak_current == loop_array[-1]
+    assert n2:oxmeta:membrane_voltage == n2:membrane_voltage[-1][-1]
 }
 
 outputs {
