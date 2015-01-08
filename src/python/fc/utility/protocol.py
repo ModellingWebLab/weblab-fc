@@ -141,7 +141,7 @@ class Protocol(object):
         else:
             self.outputFolder = OutputFolder(path)
     
-    def OutputsAndPlots(self):
+    def OutputsAndPlots(self,verbose=True,writeOut=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
         # Copy protocol outputs into the self.outputs environment,
         # and capture output descriptions needed by plots in the process.
@@ -164,23 +164,29 @@ class Protocol(object):
             self.LogWarning("Warning: protocol output folder not set, so not writing outputs to file")
             return
         
-        self.LogProgress('saving output data to h5 file...')
+        if verbose:
+            self.LogProgress('saving output data to h5 file...')
         start = time.time()
-        filename = os.path.join(self.outputFolder.path, 'output.h5')
-        h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
-        group = h5file.create_group('/', 'output', 'output parent')
-        for output in self.outputs:
-            if not 'description' in output:
-                output['description'] = output['name']
-            h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']],
-                                title=output['description'])
-        h5file.close()
+        if writeOut:
+            filename = os.path.join(self.outputFolder.path, 'output.h5')
+            h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
+            #h5file = tables.openFile(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
+            group = h5file.create_group('/', 'output', 'output parent')
+            #group = h5file.createGroup('/', 'output', 'output parent')
+            for output in self.outputs:
+                if not 'description' in output:
+                    output['description'] = output['name']
+                h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']], title=output['description'])
+                #h5file.createArray(group, output['name'], self.outputEnv.unwrappedBindings[output['name']], title=output['description'])
+
+            h5file.close()
         self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
         
         # Plots
         start = time.time()
         for plot in self.plots:
-            self.LogProgress('plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
+            if verbose:
+                self.LogProgress('plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
             x_data = []
             y_data = []
             x_data.append(self.outputEnv.LookUp(plot['x']))
@@ -201,12 +207,13 @@ class Protocol(object):
             plt.close()
         self.timings['create plots'] = self.timings.get('plot', 0.0) + (time.time() - start)
 
-    def Run(self):
+    def Run(self,verbose=True,writeOut=True):
         """Run this protocol on the model already specified using SetModel."""
         Locatable.outputFolder = self.outputFolder
         self.Initialise()
         # TODO: make status output optional
-        self.LogProgress('running protocol...')
+        if verbose:
+            self.LogProgress('running protocol...')
         try:
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
@@ -220,12 +227,12 @@ class Protocol(object):
             self.libraryEnv.ExecuteStatements(self.library)
             self.timings['run library'] = self.timings.get('library', 0.0) + (time.time() - start)
             start = time.time()
-            self.RunSimulations()
+            self.RunSimulations(verbose)
             self.timings['simulations'] = self.timings.get('simulations', 0.0) + (time.time() - start)
             start = time.time()
-            self.RunPostProcessing()
+            self.RunPostProcessing(verbose)
             self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
-            self.OutputsAndPlots()
+            self.OutputsAndPlots(verbose,writeOut)
         except ProtocolError:
             locations = []
             current_trace = sys.exc_info()[2]
@@ -240,23 +247,26 @@ class Protocol(object):
                 print location
             raise
         # Summarise time spent in each protocol section
-        print 'Time spent running protocol (s): %.6f' % sum(self.timings.values())
-        max_len = max(len(section) for section in self.timings)
-        for section, duration in self.timings.iteritems():
-            print '   ', section, ' ' * (max_len - len(section)), '%.6f' % duration
+        if verbose:
+            print 'Time spent running protocol (s): %.6f' % sum(self.timings.values())
+            max_len = max(len(section) for section in self.timings)
+            for section, duration in self.timings.iteritems():
+                print '   ', section, ' ' * (max_len - len(section)), '%.6f' % duration
 
-    def RunSimulations(self):
+    def RunSimulations(self,verbose=True):
         """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
             sim.Initialise()
-            self.LogProgress('running simulation', sim.prefix)
+            if verbose:
+                self.LogProgress('running simulation', sim.prefix)
             sim.Run()
             # Reset trace folder in case a nested protocol changes it
             Locatable.outputFolder = self.outputFolder
 
-    def RunPostProcessing(self):
+    def RunPostProcessing(self,verbose=True):
         """Run the post-processing section of this protocol."""
-        self.LogProgress('running post processing...')
+        if verbose:
+            self.LogProgress('running post processing...')
         self.postProcessingEnv.ExecuteStatements(self.postProcessing)
 
     def SetInput(self, name, valueExpr):
