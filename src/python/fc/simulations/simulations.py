@@ -63,6 +63,10 @@ class AbstractSimulation(locatable.Locatable):
             self.viewEnv = Env.Environment(allowOverwrite=True)
             self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
 
+    def Clear(self):
+        self.env.Clear()
+        self.results.Clear()
+
     def InternalRun(self):
         raise NotImplementedError
 
@@ -194,6 +198,12 @@ class Nested(AbstractSimulation):
         if self.trace:
             self.nestedSim.trace = True
         super(Nested, self).Initialise(initialiseRange=False)
+
+    # Overridden to properly clear nested simulation for sequential execution
+    def Clear(self):
+        self.nestedSim.Clear()
+        self.env.Clear()
+        self.results.Clear()
 
     def InternalRun(self):
         for t in self.range_:

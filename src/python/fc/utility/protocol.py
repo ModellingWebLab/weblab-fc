@@ -129,8 +129,7 @@ class Protocol(object):
         self.postProcessingEnv.Clear()
         self.outputEnv.Clear()
         for sim in self.simulations:
-            sim.env.Clear()
-            sim.results.Clear()
+            sim.Clear()
         for imported_proto in self.imports.values():
             imported_proto.Initialise()
 

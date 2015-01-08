@@ -703,6 +703,8 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.SetOutputFolder('TestSyntaxInterface_TestParallelNestedTxt')
         proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
+        proto.model.ResetState()
+        proto.Run()
     
     def TestWhileLoopTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_while_loop.txt'
