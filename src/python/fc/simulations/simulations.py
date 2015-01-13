@@ -124,14 +124,15 @@ class AbstractSimulation(locatable.Locatable):
             range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
             for name in env:
                 output = env[name]
+                # DeprecationWarning in next line: using a non-integer number instead of an integer will result in an error in the future
                 results = np.empty(range_dims + output.shape)
                 self_results.DefineName(name, V.Array(results))
         if self_results:
             unwrapped_results = self_results.unwrappedBindings
             range_indices = tuple(r.GetCurrentOutputNumber() for r in self.ranges) ## ~30% of time; tuple conversion is minimal
-            for name in env:
+            for name, result_part in env.iteritems():
                 result = unwrapped_results[name]
-                result[range_indices] = env[name]
+                result[range_indices] = result_part
 
 
 class Timecourse(AbstractSimulation):
