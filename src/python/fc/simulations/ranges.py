@@ -97,7 +97,7 @@ class UniformRange(AbstractRange):
         return self
 
     def next(self):
-        if self.value >= self.end:
+        if self.count >= self.numberOfOutputs:
             self.count = 0
             raise StopIteration
         else:
