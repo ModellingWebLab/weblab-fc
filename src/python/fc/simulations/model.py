@@ -46,10 +46,10 @@ class AbstractModel(object):
         raise NotImplementedError
 
     def GetOutputs(self):
-        """Return a dictionary containing the model outputs at its current state.
+        """Return a list of the model's outputs at its current state.
 
-        NB: this returns a Python dictionary containing the model outputs as numpy arrays,
-        not subclasses of V.AbstractValue.
+        NB: this returns a Python list containing the model outputs as numpy arrays, not subclasses of V.AbstractValue.
+        The order of outputs in this list must match self.outputNames, a list of the output names, which must be set by subclass constructors.
 
         This method must be implemented by subclasses.
         """
@@ -70,16 +70,12 @@ class AbstractOdeModel(AbstractModel):
     See their documentation here for details.
       __init__: sets up self.stateVarMap, self.initialState, self.parameterMap and self.parameters
       EvaluateRhs(self, t, y): returns a numpy array containing the derivatives at the given state
-      GetOutputs(self): returns an Environment
+      GetOutputs(self): returns a list of model outputs
 
     TODO: Figure out the neatest way for protocols to be able to access the current value of a model
     output that isn't a state variable, parameter, or free variable.  (This is allowed in the C++ code.)
     Given that a protocol is only able to do this at a state for which it can also obtain outputs, we
     should probably cache the result of GetOutputs() for use in the ModelWrapperEnvironment.
-
-    TODO: Variable names set up by subclass constructors are just simple strings in the C++, assumed
-    to always live in the oxmeta namespace.  This constraint is still imposed by PyCml at present, but
-    we should move to use full URIs eventually.
     """
     def __init__(self, *args, **kwargs):
         """Construct a new ODE system model.
@@ -90,6 +86,7 @@ class AbstractOdeModel(AbstractModel):
          * parameters: a numpy array containing model parameter values
          * parameterMap: a mapping from parameter name to index within the parameters vector, for use in our ModelWrapperEnvironment
          * freeVariableName: the name of the free variable, for use in our ModelWrapperEnvironment
+         * outputNames: ordered list of the names of the model outputs, as they will be returned by GetOutputs
 
         This method will initialise self.state to the initial model state, and set up the ODE solver.
         """
@@ -99,8 +96,10 @@ class AbstractOdeModel(AbstractModel):
         self.dirty = False # whether the solver will need to be reset due to a model change before the next solve
         self.SetSolver(DefaultSolver())
         self.env = Env.ModelWrapperEnvironment(self)
+        assert hasattr(self, 'outputNames')
 
     def SetSolver(self, solver):
+        """Specify the ODE solver to use for this model."""
         self.solver = solver
         solver.AssociateWithModel(self)
         self.state = self.solver.state # This is backwards, but required by PySundials!
@@ -117,6 +116,7 @@ class AbstractOdeModel(AbstractModel):
         raise NotImplementedError
 
     def GetEnvironmentMap(self):
+        """Get a map from ontology prefix to the environment containing model variables annotated with that ontology."""
         return {'oxmeta': self.env}
 
     def SetFreeVariable(self, t):
@@ -143,6 +143,7 @@ class AbstractOdeModel(AbstractModel):
 
 
 class NestedProtocol(AbstractModel):
+    """This type of model wraps the execution of an entire protocol."""
     def __init__(self, proto, inputExprs, outputNames):
         from ..utility.protocol import Protocol
         self.proto = Protocol(proto)
@@ -150,9 +151,7 @@ class NestedProtocol(AbstractModel):
         self.outputNames = outputNames
 
     def GetOutputs(self):
-        outputs = {}
-        for name in self.outputNames:
-            outputs[name] = self.proto.outputEnv.LookUp(name).unwrapped
+        outputs = [self.proto.outputEnv.LookUp(name).unwrapped for name in self.outputNames]
         return outputs
 
     def GetEnvironmentMap(self):
@@ -169,12 +168,14 @@ class NestedProtocol(AbstractModel):
 
 
 class TestOdeModel(AbstractOdeModel):
+    """A very simple model for use in tests: dy/dt = a."""
     def __init__(self, a):
         self.initialState = np.array([0.])
         self.stateVarMap = {'membrane_voltage': 0, 'y': 0}
         self.parameters = np.array([a])
         self.parameterMap = {'SR_leak_current': 0, 'leakage_current': 0, 'a': 0}
         self.freeVariableName = 'time'
+        self.outputNames = ['a', 'y', 'state_variable', 'time', 'leakage_current', 'SR_leak_current', 'membrane_voltage']
         super(TestOdeModel, self).__init__()
 
     def EvaluateRhs(self, t, y, ydot=np.empty(0)):
@@ -184,12 +185,11 @@ class TestOdeModel(AbstractOdeModel):
             ydot[0] = self.parameters[0]
 
     def GetOutputs(self):
-        outputs = {}
-        outputs['a'] = np.array(self.parameters[self.parameterMap['a']])
-        outputs['y'] = np.array(self.state[self.stateVarMap['y']])
-        outputs['state_variable'] = self.state
-        outputs['time'] = np.array(self.freeVariable)
-        outputs['leakage_current'] = np.array(self.parameters[self.parameterMap['leakage_current']])
-        outputs['SR_leak_current'] = np.array(self.parameters[self.parameterMap['SR_leak_current']])
-        outputs['membrane_voltage'] = np.array(self.state[self.stateVarMap['membrane_voltage']])
+        outputs = [np.array(self.parameters[self.parameterMap['a']]),
+                   np.array(self.state[self.stateVarMap['y']]),
+                   self.state,
+                   np.array(self.freeVariable),
+                   np.array(self.parameters[self.parameterMap['leakage_current']]),
+                   np.array(self.parameters[self.parameterMap['SR_leak_current']]),
+                   np.array(self.state[self.stateVarMap['membrane_voltage']])]
         return outputs

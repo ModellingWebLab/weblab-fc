@@ -30,6 +30,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import itertools
 import numpy as np
 
 from . import ranges as R
@@ -48,6 +49,7 @@ class AbstractSimulation(locatable.Locatable):
         self.ranges = [self.range_]
         self.model = None
         self.results = Env.Environment()
+        self.resultsList = [] # An ordered view on the unwrapped versions of simulation results
         self.env = Env.Environment()
         
         try:
@@ -66,6 +68,7 @@ class AbstractSimulation(locatable.Locatable):
     def Clear(self):
         self.env.Clear()
         self.results.Clear()
+        self.resultsList[:] = []
 
     def InternalRun(self):
         raise NotImplementedError
@@ -117,22 +120,21 @@ class AbstractSimulation(locatable.Locatable):
         self.InternalRun()
         return self.results
 
-    def AddIterationOutputs(self, env):
-        self_results = self.results
+    def AddIterationOutputs(self, outputsList):
+        """Copy model outputs from one simulation step into the overall output arrays for the (possibly nested) simulation."""
+        self_results, results_list = self.results, self.resultsList
         if self_results is not None and not self_results:
             # First iteration - create empty output arrays of the correct shape
             range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
-            for name in env:
-                output = env[name]
+            for name, output in itertools.izip(self.model.outputNames, outputsList):
                 # DeprecationWarning in next line: using a non-integer number instead of an integer will result in an error in the future
-                results = np.empty(range_dims + output.shape)
-                self_results.DefineName(name, V.Array(results))
-        if self_results:
-            unwrapped_results = self_results.unwrappedBindings
+                result = V.Array(np.empty(range_dims + output.shape))
+                self_results.DefineName(name, result)
+                results_list.append(result.unwrapped)
+        if results_list:
             range_indices = tuple(r.GetCurrentOutputNumber() for r in self.ranges) ## ~30% of time; tuple conversion is minimal
-            for name, result_part in env.iteritems():
-                result = unwrapped_results[name]
-                result[range_indices] = result_part
+            for output, result in itertools.izip(outputsList, results_list):
+                result[range_indices] = output
 
 
 class Timecourse(AbstractSimulation):
@@ -200,11 +202,9 @@ class Nested(AbstractSimulation):
             self.nestedSim.trace = True
         super(Nested, self).Initialise(initialiseRange=False)
 
-    # Overridden to properly clear nested simulation for sequential execution
     def Clear(self):
         self.nestedSim.Clear()
-        self.env.Clear()
-        self.results.Clear()
+        super(Nested, self).Clear()
 
     def InternalRun(self):
         for t in self.range_:

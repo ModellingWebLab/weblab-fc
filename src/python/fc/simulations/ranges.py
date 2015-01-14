@@ -40,7 +40,7 @@ class AbstractRange(V.Simple):
     def __init__(self, name):
         """Initialise the common range properties."""
         self.name = name
-        self.count = 0
+        self.count = 0 # TODO: Change this to -1 (etc) so GetCurrentOutputNumber() is just self.count
         self._value = float('nan')
         self.numberOfOutputs = 0
         # Set an initial empty environment so calls to set our value in constructors don't fail
@@ -90,6 +90,11 @@ class UniformRange(AbstractRange):
         self.startExpr = startExpr
         self.endExpr = endExpr
         self.stepExpr = stepExpr
+
+        try:
+            line_profile.add_function(self.next)
+        except NameError:
+            pass
 
     def __iter__(self):
         self.count = 0
