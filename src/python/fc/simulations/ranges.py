@@ -40,7 +40,7 @@ class AbstractRange(V.Simple):
     def __init__(self, name):
         """Initialise the common range properties."""
         self.name = name
-        self.count = 0 # TODO: Change this to -1 (etc) so GetCurrentOutputNumber() is just self.count
+        self.count = -1
         self._value = float('nan')
         self.numberOfOutputs = 0
         # Set an initial empty environment so calls to set our value in constructors don't fail
@@ -78,7 +78,7 @@ class AbstractRange(V.Simple):
         return self._value
 
     def GetCurrentOutputNumber(self):
-        return self.count - 1
+        return self.count
 
     def GetNumberOfOutputPoints(self):
         return self.numberOfOutputs
@@ -97,17 +97,17 @@ class UniformRange(AbstractRange):
             pass
 
     def __iter__(self):
-        self.count = 0
+        self.count = -1
         self.value = self.start
         return self
 
     def next(self):
+        self.count += 1
         if self.count >= self.numberOfOutputs:
-            self.count = 0
+            self.count = -1
             raise StopIteration
         else:
             self.value = self.start + self.step * self.count
-            self.count += 1
             return self.value
 
     def Initialise(self, env):
@@ -130,7 +130,7 @@ class VectorRange(AbstractRange):
         else:
             self.expr = arrOrExpr
             self.value = float('nan')
-        self.count = 0
+        self.count = -1
 
     def Initialise(self, env):
         super(VectorRange, self).Initialise(env)
@@ -140,17 +140,17 @@ class VectorRange(AbstractRange):
             self.numberOfOutputs = len(self.arrRange)
 
     def __iter__(self):
-        self.count = 0
+        self.count = -1
         self.value = 0
         return self
 
     def next(self):
-        if self.count >= len(self.arrRange):
-            self.count = 0
+        self.count += 1
+        if self.count >= self.numberOfOutputs:
+            self.count = -1
             raise StopIteration
         else:
             self.value = self.arrRange[self.count]
-            self.count += 1
             return self.current
 
 
@@ -158,12 +158,12 @@ class While(AbstractRange):
     def __init__(self, name, condition):
         super(While, self).__init__(name)
         self.condition = condition
-        self.count = 0
+        self.count = -1
         self.value = -1
         self.numberOfOutputs = 1000
 
     def __iter__(self):
-        self.count = 0
+        self.count = -1
         self.value = -1
         return self
 
@@ -172,8 +172,8 @@ class While(AbstractRange):
         self.value += 1
         if self.count >= self.numberOfOutputs:
             self.numberOfOutputs += 1000
-        if self.count > 1 and not self.condition.Evaluate(self.env).value:
-            self.numberOfOutputs = self.count - 1
+        if self.count > 0 and not self.condition.Evaluate(self.env).value:
+            self.numberOfOutputs = self.count
             raise StopIteration
         else:
             return self.value

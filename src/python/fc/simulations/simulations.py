@@ -31,7 +31,11 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import itertools
+import operator
 import numpy as np
+
+from itertools import izip
+from operator import attrgetter
 
 from . import ranges as R
 from .model import NestedProtocol
@@ -79,11 +83,11 @@ class AbstractSimulation(locatable.Locatable):
             self.model.SetOutputFolder(folder)
 
     def LoopBodyStartHook(self):
-        if isinstance(self.range_, R.While) and self.range_.count > 1 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
+        if isinstance(self.range_, R.While) and self.range_.count > 0 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
             for name in self.results:
                 self.results.LookUp(name).array.resize(self.range_.GetNumberOfOutputPoints(), refcheck=False)
         for modifier in self.modifiers:
-            if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 1:
+            if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 0:
                 modifier.Apply(self)
             elif modifier.when == AbstractModifier.EACH_LOOP:
                 modifier.Apply(self) ## ~96% of time
@@ -101,9 +105,9 @@ class AbstractSimulation(locatable.Locatable):
         if isinstance(self.range_, R.While) and self.prefix:
             for result in self.results:
                 if result not in self.viewEnv:
-                    self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
+                    self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:1+self.range_.count]))
                 else:
-                    self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:self.range_.count]))
+                    self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:1+self.range_.count]))
 
     def SetModel(self, model):
         if isinstance(self.model, NestedProtocol):
@@ -132,8 +136,9 @@ class AbstractSimulation(locatable.Locatable):
                 self_results.DefineName(name, result)
                 results_list.append(result.unwrapped)
         if results_list:
-            range_indices = tuple(r.GetCurrentOutputNumber() for r in self.ranges) ## ~30% of time; tuple conversion is minimal
-            for output, result in itertools.izip(outputsList, results_list):
+            # Note that the tuple conversion in the next line is very quick
+            range_indices = tuple(map(attrgetter('count'), self.ranges))  # tuple(r.count for r in self.ranges)
+            for output, result in izip(outputsList, results_list):
                 result[range_indices] = output
 
 
@@ -157,7 +162,7 @@ class Timecourse(AbstractSimulation):
         set_time, simulate = m.SetFreeVariable, m.Simulate
         for i, t in enumerate(r):
             start_hook() ## ~ 50% of time
-            if r.count == 1:
+            if r.count == 0:
                 # Record initial conditions
                 set_time(t)
                 add_outputs(get_outputs())
