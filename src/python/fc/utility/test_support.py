@@ -39,10 +39,29 @@ import numpy as np
 
 from ..language import values as V
 
-def CheckResults(proto, expectedSpec, dataFolder):
-    """Check protocol results against saved values.
-    expectedSpec is a dictionary mapping result name to number of dimensions, so we can use the correct Load* method.
+def GetProcessNumber():
+    """Get the number of the current process within a process pool.
+    
+    Numbering starts from 1.  If this process is not one started by the multiprocessing module, 0 is returned.
     """
+    import multiprocessing
+    name = multiprocessing.current_process().name
+    try:
+        num = int(name.split('-')[-1])
+    except:
+        num = 0
+    return num
+
+def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
+    """Check protocol results against saved values.
+    
+    :param proto: an instance of fc.Protocol that has results available to check
+    :param expectedSpec: a dictionary mapping result name to number of dimensions, so we can use the correct Load* method
+    :param rtol: relative tolerance
+    :param atol: absolute tolerance
+    :param messages: if provided, should be a list to which failure reports will be appended.  Otherwise any failure will raise AssertionError.
+    """
+    results_ok = True
     for name, ndims in expectedSpec.iteritems():
         data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
         if ndims == 2:
@@ -51,7 +70,14 @@ def CheckResults(proto, expectedSpec, dataFolder):
             method = Load
         expected = method(data_file)
         actual = proto.outputEnv.LookUp(name)
-        np.testing.assert_allclose(actual.array, expected.array, rtol=0.01)
+        if messages is None:
+            np.testing.assert_allclose(actual.array, expected.array, rtol=rtol, atol=atol)
+        else:
+            close = np.allclose(actual.array, expected.array, rtol=rtol, atol=atol)
+            if not close:
+                messages.append("Output %s was not within tolerances (rel=%g, abs=%g)" % (name, rtol, atol))
+                results_ok = False
+    return results_ok
 
 def CheckFileCompression(filePath):
     """Return (real_path, is_compressed) if a .gz compressed version of filePath exists."""

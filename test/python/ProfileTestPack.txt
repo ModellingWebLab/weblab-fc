@@ -1,4 +1,3 @@
-TestSpeed.py
-TestSpeedRealProto.py
+TestPythonReproducibility.py
 TestS1S2Proto.py
 TestIcalProto.py
