@@ -232,18 +232,7 @@ class Protocol(object):
             self.RunPostProcessing(verbose)
             self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
             self.OutputsAndPlots(verbose,writeOut)
-        except ProtocolError:
-            locations = []
-            current_trace = sys.exc_info()[2]
-            while current_trace is not None:
-                local_vars = current_trace.tb_frame.f_locals
-                if 'self' in local_vars:
-                    if isinstance(local_vars['self'], Locatable) and (not locations or local_vars['self'].location != locations[-1]):
-                        locations.append(local_vars['self'].location)
-                current_trace = current_trace.tb_next
-            # TODO: Add locations to the original error's message, so they appear after the raw stack trace (but before the actual error message)
-            for location in locations:
-                print location
+        except ProtocolError, e:
             raise
         # Summarise time spent in each protocol section
         if verbose:

@@ -30,8 +30,26 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import inspect
+
 class ProtocolError(Exception):
     """Main class for errors raised by the functional curation framework that are intended for user viewing."""
     def __init__(self, *msgParts):
+        """Create a protocol error message.
+        
+        The arguments are joined to create the message string as for the print: converted to strings and space separated.
+        In addition, when the exception is created the stack will be examined to determine what lines in the currently
+        running protocol were responsible, if any, and these details added to the Python stack trace reported.
+        """
+        # Figure out where in the protocol this error arose
+        locations = self.locations = []
+        for frame in reversed(inspect.stack()):
+            local_vars = frame[0].f_locals
+            obj = local_vars.get('self', None)
+            if obj and hasattr(obj, 'location') and (not locations or obj.location != locations[-1]):
+                    locations.append(obj.location)
+        # Construct the full error message
         msg = ' '.join(map(str, msgParts))
+        if locations:
+            msg = msg + '\nProtocol stack trace (most recent call last):\n' + '\n'.join(locations)
         super(ProtocolError, self).__init__(msg)
