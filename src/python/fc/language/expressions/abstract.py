@@ -81,23 +81,10 @@ class AbstractExpression(locatable.Locatable):
         raise NotImplementedError
 
     def Evaluate(self, env):
-        """We always default to using Interpret for evaluating standalone expressions."""    
+        """We always default to using Interpret for evaluating standalone expressions."""
         result = self.Interpret(env)
         if self.trace:
-            if isinstance(result, V.Array):
-                print 'Traced array shape', result.array.shape
-            else:
-                print 'Traced', result
-
-            if self.outputFolder:
-                trace_path = os.path.join(self.outputFolder.path, 'trace.txt')
-                f = open(trace_path, 'a+')
-                if isinstance(result, V.Array):
-                    print >> f, result.array
-                    print >> f, 'location:', self.location
-                else:
-                    print >> f, result
-                f.close()
+            self.Trace(result)
         return result
 
     def EvaluateCompiled(self, env):

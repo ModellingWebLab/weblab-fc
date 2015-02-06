@@ -44,6 +44,10 @@ class AbstractValue(object):
     def unwrapped(self):
         """Return the underlying Python value."""
         return None
+    
+    def __str__(self):
+        """Return the string representation of the underlying Python value."""
+        return repr(self.unwrapped)
 
 
 class Simple(AbstractValue):
@@ -90,7 +94,8 @@ class Tuple(AbstractValue):
 
 class Null(AbstractValue):
     """Null class in the protocol language."""
-    pass
+    def __str__(self):
+        return "null"
 
 
 class String(AbstractValue):
@@ -105,7 +110,8 @@ class String(AbstractValue):
 
 class DefaultParameter(AbstractValue):
     """Class in protocol language used for default values."""
-    pass
+    def __str__(self):
+        return "default"
 
 
 class LambdaClosure(AbstractValue):
@@ -115,6 +121,10 @@ class LambdaClosure(AbstractValue):
         self.body = body
         self.defaultParameters = defaultParameters
         self.definingEnv = definingEnv
+
+    def __str__(self):
+        """Return a string representation of this function."""
+        return "function" + str(tuple(self.formalParameters))
 
     def Compile(self, env, actualParameters):
         from ..utility.environment import Environment
