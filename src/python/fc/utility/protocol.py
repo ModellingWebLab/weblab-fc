@@ -43,7 +43,7 @@ import matplotlib.pyplot as plt
 import pylab
 
 from . import environment as Env
-from .error_handling import ProtocolError
+from .error_handling import ProtocolError, ErrorRecorder
 from .file_handling import OutputFolder
 from .locatable import Locatable
 from ..language import values as V
@@ -65,7 +65,9 @@ class Protocol(object):
         """
         self.outputFolder = None
         self.protoFile = protoFile
+        self.protoName = os.path.basename(self.protoFile)
         self.timings = {}
+        self.LogProgress('Constructing', self.protoName)
         # Main environments used when running the protocol
         self.env = Env.Environment()
         self.inputEnv = Env.Environment(allowOverwrite=True)
@@ -90,6 +92,7 @@ class Protocol(object):
         details = generator.expr()
         assert isinstance(details, dict)
         for prefix, path in details.get('imports', []):
+            self.LogProgress('Importing', path, 'as', prefix, 'in', self.protoName)
             imported_proto = Protocol(self.GetPath(protoFile, path))
             # TODO: setting inputs for imported protocols!
             if prefix == "":
@@ -125,6 +128,7 @@ class Protocol(object):
 
     def Initialise(self):
         """(Re-)Initialise this protocol, ready to be run on a model."""
+        self.LogProgress('Initialising', self.protoName)
         self.libraryEnv.Clear()
         self.postProcessingEnv.Clear()
         self.outputEnv.Clear()
@@ -140,7 +144,7 @@ class Protocol(object):
         else:
             self.outputFolder = OutputFolder(path)
     
-    def OutputsAndPlots(self,verbose=True,writeOut=True):
+    def OutputsAndPlots(self, errors, verbose=True, writeOut=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
         # Copy protocol outputs into the self.outputs environment,
         # and capture output descriptions needed by plots in the process.
@@ -149,71 +153,76 @@ class Protocol(object):
         for plot in self.plots:
             plot_vars.append(plot['x'])
             plot_vars.append(plot['y'])
-        for output in self.outputs:
-            if 'ref' in output:
-                self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['ref']))
-            else:
-                self.outputEnv.DefineName(output['name'], self.postProcessingEnv.LookUp(output['name']))
-            if output['name'] in plot_vars:
-                if output['description']:
-                    plot_descriptions[output['name']] = output['description']
-                else:
-                    plot_descriptions[output['name']] = output['name']
+        outputs_defined = []
+        for output_spec in self.outputs:
+            with errors:
+                output_var = output_spec.get('ref', output_spec['name'])
+                output = self.postProcessingEnv.LookUp(output_var)
+                self.outputEnv.DefineName(output_spec['name'], output)
+                outputs_defined.append(output_spec)
+                if not 'description' in output_spec:
+                    output_spec['description'] = output_spec['name']
+                if output_spec['name'] in plot_vars:
+                    plot_descriptions[output_spec['name']] = output_spec['description']
         if not self.outputFolder:
             self.LogWarning("Warning: protocol output folder not set, so not writing outputs to file")
             return
-        
+
         if verbose:
             self.LogProgress('saving output data to h5 file...')
         start = time.time()
         if writeOut:
-            filename = os.path.join(self.outputFolder.path, 'output.h5')
-            h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
-            #h5file = tables.openFile(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
-            group = h5file.create_group('/', 'output', 'output parent')
-            #group = h5file.createGroup('/', 'output', 'output parent')
-            for output in self.outputs:
-                if not 'description' in output:
-                    output['description'] = output['name']
-                h5file.create_array(group, output['name'], self.outputEnv.unwrappedBindings[output['name']], title=output['description'])
-                #h5file.createArray(group, output['name'], self.outputEnv.unwrappedBindings[output['name']], title=output['description'])
-
-            h5file.close()
+            with errors:
+                filename = os.path.join(self.outputFolder.path, 'output.h5')
+                h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
+                group = h5file.create_group('/', 'output', 'output parent')
+                for output_spec in outputs_defined:
+                    h5file.create_array(group, output_spec['name'], self.outputEnv.unwrappedBindings[output_spec['name']], title=output_spec['description'])
+                h5file.close()
         self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
-        
+
         # Plots
         start = time.time()
         for plot in self.plots:
-            if verbose:
-                self.LogProgress('plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
-            x_data = []
-            y_data = []
-            x_data.append(self.outputEnv.LookUp(plot['x']))
-            y_data.append(self.outputEnv.LookUp(plot['y']))
-            
-            # Plot the data
-            fig = plt.figure()
-            for i, x in enumerate(x_data):
-                if y_data[i].array.ndim > 1:
-                    for j in range(y_data[i].array.shape[0]):
-                        plt.plot(x.array, y_data[i].array[j])
-                else:
-                    plt.plot(x.array, y_data[i].array)
-                plt.title(plot['title'])
-                plt.xlabel(plot_descriptions[plot['x']])
-                plt.ylabel(plot_descriptions[plot['y']])
-            plt.savefig(os.path.join(self.outputFolder.path, plot['title'] + '.png'))
-            plt.close()
+            with errors:
+                if verbose:
+                    self.LogProgress('plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
+                x_data = []
+                y_data = []
+                x_data.append(self.outputEnv.LookUp(plot['x']))
+                y_data.append(self.outputEnv.LookUp(plot['y']))
+                # Plot the data
+                fig = plt.figure()
+                for i, x in enumerate(x_data):
+                    if y_data[i].array.ndim > 1:
+                        for j in range(y_data[i].array.shape[0]):
+                            plt.plot(x.array, y_data[i].array[j])
+                    else:
+                        plt.plot(x.array, y_data[i].array)
+                    plt.title(plot['title'])
+                    plt.xlabel(plot_descriptions[plot['x']])
+                    plt.ylabel(plot_descriptions[plot['y']])
+                plt.savefig(os.path.join(self.outputFolder.path, plot['title'] + '.png'))
+                plt.close()
         self.timings['create plots'] = self.timings.get('plot', 0.0) + (time.time() - start)
+    
+    def ExecuteLibrary(self):
+        """Run the statements in our library to build up the library environment.
+        
+        The libraries of any imported protocols will be executed first.
+        """
+        for imported_proto in self.imports.values():
+            imported_proto.ExecuteLibrary()
+        self.libraryEnv.ExecuteStatements(self.library)
 
-    def Run(self,verbose=True,writeOut=True):
+    def Run(self, verbose=True, writeOut=True):
         """Run this protocol on the model already specified using SetModel."""
         Locatable.outputFolder = self.outputFolder
         self.Initialise()
-        # TODO: make status output optional
         if verbose:
-            self.LogProgress('running protocol...')
-        try:
+            self.LogProgress('running protocol', self.protoName, '...')
+        errors = ErrorRecorder()
+        with errors:
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)
                 if sim.prefix:
@@ -221,25 +230,26 @@ class Protocol(object):
                         sim.SetOutputFolder(self.outputFolder.CreateSubfolder('simulation_' + sim.prefix))
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
             start = time.time()
-            for imported_proto in self.imports.values():
-                imported_proto.libraryEnv.ExecuteStatements(imported_proto.library)
-            self.libraryEnv.ExecuteStatements(self.library)
+            self.ExecuteLibrary()
             self.timings['run library'] = self.timings.get('library', 0.0) + (time.time() - start)
+        with errors:
             start = time.time()
             self.RunSimulations(verbose)
             self.timings['simulations'] = self.timings.get('simulations', 0.0) + (time.time() - start)
+        with errors:
             start = time.time()
             self.RunPostProcessing(verbose)
             self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
-            self.OutputsAndPlots(verbose,writeOut)
-        except ProtocolError, e:
-            raise
+        self.OutputsAndPlots(errors, verbose, writeOut)
         # Summarise time spent in each protocol section
         if verbose:
             print 'Time spent running protocol (s): %.6f' % sum(self.timings.values())
             max_len = max(len(section) for section in self.timings)
             for section, duration in self.timings.iteritems():
                 print '   ', section, ' ' * (max_len - len(section)), '%.6f' % duration
+        if errors:
+            # Report any errors that occurred
+            raise errors
 
     def RunSimulations(self,verbose=True):
         """Run the model simulations specified in this protocol."""
@@ -254,7 +264,7 @@ class Protocol(object):
     def RunPostProcessing(self,verbose=True):
         """Run the post-processing section of this protocol."""
         if verbose:
-            self.LogProgress('running post processing...')
+            self.LogProgress('running post processing for', self.protoName, '...')
         self.postProcessingEnv.ExecuteStatements(self.postProcessing)
 
     def SetInput(self, name, valueExpr):

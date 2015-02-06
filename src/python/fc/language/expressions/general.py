@@ -87,7 +87,7 @@ class If(AbstractExpression):
     def Interpret(self, env):
         test = self.testExpr.Evaluate(env)
         if not hasattr(test, 'value'):
-            raise ProtocolError("The test in an if expression must be a Simple value or 0-d array.")
+            raise ProtocolError("The test in an if expression must be a simple value or 0-d array, not", test)
         if test.value:
             result = self.thenExpr.Evaluate(env)
         else:
@@ -210,17 +210,17 @@ class Accessor(AbstractExpression):
             try:
                 result = variable.array.ndim
             except AttributeError:
-                raise ProtocolError("Cannot get number of dimensions of type", type(variable))
+                raise ProtocolError("Cannot get number of dimensions of non-array", variable)
         elif self.attribute == 8:
             try:
                 result = variable.array.size
             except AttributeError:
-                raise ProtocolError("Cannot get number of elements of type", type(variable))
+                raise ProtocolError("Cannot get number of elements of non-array", variable)
         elif self.attribute == 9:
             try:
                 result = V.Array(np.array(variable.array.shape))
             except AttributeError:
-                raise ProtocolError("Cannot get shape of type", type(variable))
+                raise ProtocolError("Cannot get shape of non-array", variable)
         if isinstance(result, V.Array):
             return result
         else:

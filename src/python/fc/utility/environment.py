@@ -191,7 +191,7 @@ class DelegatingDict(dict):
                 return self.delegatees[prefix][name]
         if '' in self.delegatees:
             return self.delegatees[''][key]
-        raise KeyError("Name", key, "is not defined in env or any delegatee env")
+        raise KeyError("Name " + key + " is not defined in env or any delegatee env")
 
     def SetDelegatee(self, delegatee, prefix):
         self.delegatees[prefix] = delegatee

@@ -75,7 +75,7 @@ class Array(AbstractValue):
         if self.array.ndim == 0:
             return self.array[()]
         else:
-            raise AttributeError("An array with more than 0 dimensions cannot be treated as a single value.")
+            raise AttributeError("An array with", self.array.ndim, "dimensions cannot be treated as a single value.")
     
     @property
     def unwrapped(self):
