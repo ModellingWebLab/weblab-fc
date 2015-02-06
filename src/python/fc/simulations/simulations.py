@@ -131,7 +131,6 @@ class AbstractSimulation(locatable.Locatable):
             # First iteration - create empty output arrays of the correct shape
             range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
             for name, output in itertools.izip(self.model.outputNames, outputsList):
-                # DeprecationWarning in next line: using a non-integer number instead of an integer will result in an error in the future
                 result = V.Array(np.empty(range_dims + output.shape))
                 self_results.DefineName(name, result)
                 results_list.append(result.unwrapped)

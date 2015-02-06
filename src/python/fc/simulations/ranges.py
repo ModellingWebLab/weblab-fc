@@ -116,7 +116,7 @@ class UniformRange(AbstractRange):
         self.step = self.stepExpr.Evaluate(self.env).value
         self.end = self.endExpr.Evaluate(self.env).value
         self.value = self.start
-        self.numberOfOutputs = (round(self.end-self.start)/self.step) + 1
+        self.numberOfOutputs = int((round(self.end-self.start)/self.step)) + 1
 
 
 class VectorRange(AbstractRange):
