@@ -158,9 +158,17 @@ class While(AbstractRange):
     def __init__(self, name, condition):
         super(While, self).__init__(name)
         self.condition = condition
+        self._Init()
+    
+    def _Init(self):
+        """(Re-)Initialise the range loop."""
         self.count = -1
         self.value = -1
         self.numberOfOutputs = 1000
+    
+    def Initialise(self, env):
+        super(While, self).Initialise(env)
+        self._Init()
 
     def __iter__(self):
         self.count = -1

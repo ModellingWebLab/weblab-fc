@@ -6,6 +6,8 @@ inputs {
     num_iters = 5
 }
 
+import std = "BasicLibrary.txt"
+
 units {
     ms = milli second
     mV = milli volt
@@ -72,6 +74,15 @@ tasks {
         range t units ms while 0 # Always fails
         modifiers { at start set oxmeta:membrane_voltage = 0 }
     }
+    
+    # Check interaction of while loops and nested simulations
+    simulation nested = nested {
+        range loop units dimensionless while nested:membrane_voltage[-1][-1] < 15
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+        }
+    }
 }
 
 post-processing {
@@ -89,6 +100,12 @@ post-processing {
     assert Check(sim5:membrane_voltage, 10)
     assert Check(sim_long:membrane_voltage, 3001)
     assert Check(not_empty:membrane_voltage, 1)
+    
+    # Nested case requires special checking
+    def Close(a1, a2, tol=1e-6) {
+        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    }
+    assert Close(nested:membrane_voltage, [ i*9+j for i in 0:2 for j in 0:10 ])
 }
 
 outputs {
@@ -100,4 +117,5 @@ outputs {
     V5 = sim5:membrane_voltage
     V_3001 = sim_long:membrane_voltage
     V_empty = not_empty:membrane_voltage
+    V_nested = nested:membrane_voltage
 }

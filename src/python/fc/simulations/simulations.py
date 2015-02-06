@@ -55,6 +55,11 @@ class AbstractSimulation(locatable.Locatable):
         self.results = Env.Environment()
         self.resultsList = [] # An ordered view on the unwrapped versions of simulation results
         self.env = Env.Environment()
+        if isinstance(self.range_, R.While) and self.prefix:
+            self.viewEnv = Env.Environment(allowOverwrite=True)
+            self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
+        else:
+            self.viewEnv = None
         
         try:
             line_profile.add_function(self.AddIterationOutputs)
@@ -65,14 +70,13 @@ class AbstractSimulation(locatable.Locatable):
     def Initialise(self, initialiseRange=True):
         if initialiseRange:
             self.range_.Initialise(self.env)
-        if isinstance(self.range_, R.While) and self.prefix:
-            self.viewEnv = Env.Environment(allowOverwrite=True)
-            self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
 
     def Clear(self):
         self.env.Clear()
         self.results.Clear()
         self.resultsList[:] = []
+        if self.viewEnv:
+            self.viewEnv.Clear()
 
     def InternalRun(self):
         raise NotImplementedError
@@ -102,7 +106,7 @@ class AbstractSimulation(locatable.Locatable):
                 modifier.Apply(self)
 
     def LoopBodyEndHook(self):
-        if isinstance(self.range_, R.While) and self.prefix:
+        if self.viewEnv is not None:
             for result in self.results:
                 if result not in self.viewEnv:
                     self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:1+self.range_.count]))
