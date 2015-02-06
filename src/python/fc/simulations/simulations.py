@@ -177,18 +177,21 @@ class Timecourse(AbstractSimulation):
 
 
 class OneStep(AbstractSimulation):
+    
+    class NullRange(R.AbstractRange):
+        pass
+    
     def __init__(self, step, modifiers=[]):
         self.step = step
         self.modifiers = modifiers
-        self.range_ = R.VectorRange('count', V.Array(np.array([1])))
-        self.ranges = [self.range_]
+        self.range_ = self.NullRange('_')
         super(OneStep, self).__init__()
+        self.ranges = []
 
     def InternalRun(self):
         self.LoopBodyStartHook()
-        for t in self.range_:
-            self.model.Simulate(t + self.step)
-            self.AddIterationOutputs(self.model.GetOutputs())
+        self.model.Simulate(self.step)
+        self.AddIterationOutputs(self.model.GetOutputs())
         self.LoopEndHook()
 
 
