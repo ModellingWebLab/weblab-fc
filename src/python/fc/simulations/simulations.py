@@ -146,6 +146,7 @@ class AbstractSimulation(locatable.Locatable):
 
 
 class Timecourse(AbstractSimulation):
+    """Simulate a simple loop over time."""
     def __init__(self, range_, modifiers=[]):
         self.range_ = range_
         super(Timecourse, self).__init__()
@@ -163,20 +164,21 @@ class Timecourse(AbstractSimulation):
         start_hook, end_hook = self.LoopBodyStartHook, self.LoopBodyEndHook
         add_outputs, get_outputs = self.AddIterationOutputs, m.GetOutputs
         set_time, simulate = m.SetFreeVariable, m.Simulate
-        for i, t in enumerate(r):
-            start_hook() ## ~ 50% of time
+        for t in r:
+            start_hook()
             if r.count == 0:
                 # Record initial conditions
                 set_time(t)
                 add_outputs(get_outputs())
             else:
                 simulate(t)
-                add_outputs(get_outputs())  ## ~45% of time
+                add_outputs(get_outputs())
             end_hook()
         self.LoopEndHook()
 
 
 class OneStep(AbstractSimulation):
+    """Simulate one logical execution of a model."""
     
     class NullRange(R.AbstractRange):
         pass
@@ -196,6 +198,7 @@ class OneStep(AbstractSimulation):
 
 
 class Nested(AbstractSimulation):
+    """The main nested loop simulation construct."""
     def __init__(self, nestedSim, range_, modifiers=[]):
         self.range_ = range_
         super(Nested, self).__init__()

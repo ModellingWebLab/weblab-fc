@@ -57,6 +57,7 @@ class Simple(AbstractValue):
 
     @property
     def array(self):
+        """View this number as a 0-d array."""
         return np.array(self.value)
     
     @property

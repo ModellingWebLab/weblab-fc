@@ -50,6 +50,8 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     :param modelName: name of model to run, i.e. no path or extension
     :param protoName: name of protocol to run, i.e. no path or extension
     :param expectedOutputs: dictionary of outputs to check against reference data, mapping output name to number of dimensions
+    
+    TODO: give a success status if the protocol fails but is expected to, i.e. there are no results on disk!
     """
     messages = []
     result = True

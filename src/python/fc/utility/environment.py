@@ -43,6 +43,7 @@ class Environment(object):
     def __init__(self, allowOverwrite=False, delegatee=None):
         self.allowOverwrite = allowOverwrite
         self.bindings = DelegatingDict()
+#         self.bindings._env = self
         self.unwrappedBindings = DelegatingDict()
         self.unwrappedBindings['___np'] = np
         self.delegatees = {}
@@ -91,11 +92,31 @@ class Environment(object):
 
     def LookUp(self, name):
         return self.bindings[name]
+#         try:
+#             return self.bindings[name]
+#         except KeyError:
+#             print 'Key error looking up', name, 'in', self
+#             import sys
+#             tb = sys.exc_info()[2]
+#             while tb:
+#                 local_vars = tb.tb_frame.f_locals
+#                 obj = local_vars.get('self', None)
+#                 if obj and isinstance(obj, DelegatingDict):
+#                     print 'Looked for', local_vars['key'], 'in', obj._env
+#                 tb = tb.tb_next
+#             self.DebugDelegatees()
+#             raise
+    
+    def DebugDelegatees(self):
+        print 'Delegatees in', self, '(', len(self), '):', self.delegatees
+        for env in self.delegatees.values():
+            env.DebugDelegatees()
 
     def SetDelegateeEnv(self, delegatee, prefix=""):
         if prefix in self.delegatees and self.delegatees[prefix] is not delegatee:
-            raise ProtocolError("The name prefix '", prefix, "' has already been used in this context. Check your simulations, imports, etc.")
+            raise ProtocolError("The name prefix '" + prefix + "' has already been used in this context. Check your simulations, imports, etc.")
         self.delegatees[prefix] = delegatee
+#         print 'Delegating to', delegatee, 'for', prefix, 'in', self
         self.bindings.SetDelegatee(delegatee.bindings, prefix)
         self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
 
@@ -123,10 +144,12 @@ class Environment(object):
         else:
             prefix, local_name = '', name
         try:
-            delegatee = self.delegatees[prefix]
+            return self.delegatees[prefix].FindDefiningEnvironment(local_name)
         except KeyError:
-            return None
-        return delegatee.FindDefiningEnvironment(local_name)
+            try:
+                return self.delegatees[''].FindDefiningEnvironment(name)
+            except KeyError:
+                return None
 
     def OverwriteDefinition(self, name, value):
         """Change the binding of name to value, if this is permitting by the defining environment."""

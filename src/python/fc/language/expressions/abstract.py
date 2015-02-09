@@ -142,6 +142,8 @@ class AbstractExpression(locatable.Locatable):
         """Cache which environment each variable used in this expression is actually defined in.
 
         Stores each environment indexed by the local name of the variable within that environment.
+        
+        TODO: Handle local name conflicts!
         """
         try:
             return self._definingEnvs
