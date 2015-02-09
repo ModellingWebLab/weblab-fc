@@ -55,11 +55,7 @@ class AbstractSimulation(locatable.Locatable):
         self.results = Env.Environment()
         self.resultsList = [] # An ordered view on the unwrapped versions of simulation results
         self.env = Env.Environment()
-        if isinstance(self.range_, R.While) and self.prefix:
-            self.viewEnv = Env.Environment(allowOverwrite=True)
-            self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
-        else:
-            self.viewEnv = None
+        self.viewEnv = None
         
         try:
             line_profile.add_function(self.AddIterationOutputs)
@@ -70,6 +66,10 @@ class AbstractSimulation(locatable.Locatable):
     def Initialise(self, initialiseRange=True):
         if initialiseRange:
             self.range_.Initialise(self.env)
+        if self.viewEnv is None and isinstance(self.range_, R.While) and self.prefix:
+            # NB: We can't do this in the constructor as self.prefix may not be set until later
+            self.viewEnv = Env.Environment(allowOverwrite=True)
+            self.env.SetDelegateeEnv(self.viewEnv, self.prefix)
 
     def Clear(self):
         self.env.Clear()

@@ -251,17 +251,17 @@ class Protocol(object):
             # Report any errors that occurred
             raise errors
 
-    def RunSimulations(self,verbose=True):
+    def RunSimulations(self, verbose=True):
         """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
-            sim.Initialise()
             if verbose:
                 self.LogProgress('running simulation', sim.prefix)
+            sim.Initialise()
             sim.Run()
             # Reset trace folder in case a nested protocol changes it
             Locatable.outputFolder = self.outputFolder
 
-    def RunPostProcessing(self,verbose=True):
+    def RunPostProcessing(self, verbose=True):
         """Run the post-processing section of this protocol."""
         if verbose:
             self.LogProgress('running post processing for', self.protoName, '...')

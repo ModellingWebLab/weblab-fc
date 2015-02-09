@@ -49,15 +49,16 @@ class TestVariousProtocols(unittest.TestCase):
         proto.SetOutputFolder('TestVariousProtocols_TestNestedProtocols')
         proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
         proto.Run()
-
+ 
     def TestAnnotatingWithOtherOntologies(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_other_ontologies.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestAnnotatingWithOtherOntologies')
         proto.SetModel('projects/FunctionalCuration/test/data/test_lr91.cellml')
         proto.Run()
-
+ 
     def TestParallelNestedTxt(self):
+        # NB: In the current Python implementation this doesn't actually parallelise!
         proto_file = 'projects/FunctionalCuration/test/protocols/test_parallel_nested.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestParallelNestedTxt')
@@ -65,7 +66,7 @@ class TestVariousProtocols(unittest.TestCase):
         proto.Run()
         proto.model.ResetState()
         proto.Run()
-
+ 
     def TestSimEnvTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_sim_environments.txt'
         proto = fc.Protocol(proto_file)
