@@ -40,9 +40,29 @@ import multiprocessing
 import os
 import sys
 import traceback
+from cStringIO import StringIO
 
 import fc
 import fc.utility.test_support as TestSupport
+
+class RedirectStdStreams(object):
+    """Context manager to redirect standard streams, from http://stackoverflow.com/a/6796752/2639299.
+    
+    TODO: Consider if we can redirect for child processes (model compilation) too.  It's trickier as they write to os-level file handles.
+    """
+    def __init__(self, stdout=None, stderr=None):
+        self._stdout = stdout or sys.stdout
+        self._stderr = stderr or sys.stderr
+
+    def __enter__(self):
+        self.old_stdout, self.old_stderr = sys.stdout, sys.stderr
+        self.old_stdout.flush(); self.old_stderr.flush()
+        sys.stdout, sys.stderr = self._stdout, self._stderr
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._stdout.flush(); self._stderr.flush()
+        sys.stdout = self.old_stdout
+        sys.stderr = self.old_stderr
 
 def RunExperiment(modelName, protoName, expectedOutputs):
     """Worker function to run a single experiment, i.e. application of a protocol to a model.
@@ -50,26 +70,34 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     :param modelName: name of model to run, i.e. no path or extension
     :param protoName: name of protocol to run, i.e. no path or extension
     :param expectedOutputs: dictionary of outputs to check against reference data, mapping output name to number of dimensions
-    
-    TODO: give a success status if the protocol fails but is expected to, i.e. there are no results on disk!
+    :returns: a tuple (modelName, protoName, boolean result, output text, error/warning messages)
     """
     messages = []
     result = True
-    try:
-        print "Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS
-        proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
-        proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
-        # TODO: Allow setting a line prefix for verbose output, so we can prefix with worker id
-        proto.SetModel('projects/FunctionalCuration/cellml/%s.cellml' % modelName)
-        proto.Run()
+    output = StringIO()
+    with RedirectStdStreams(output, output):
+        try:
+            print "Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS
+            proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
+            proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
+            proto.SetModel('projects/FunctionalCuration/cellml/%s.cellml' % modelName)
+            proto.Run()
+        except:
+            result = False
+            messages.append(traceback.format_exc())
         if expectedOutputs:
-            result = TestSupport.CheckResults(proto, expectedOutputs,
-                                              'projects/FunctionalCuration/test/data/historic/%s/%s' % (modelName, protoName),
-                                              rtol=0.005, atol=1e-4, messages=messages)
-    except:
-        result = False
-        messages.append(traceback.format_exc())
-    return (modelName, protoName, result, messages)
+            outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
+                                                     'projects/FunctionalCuration/test/data/historic/%s/%s' % (modelName, protoName),
+                                                     rtol=0.005, atol=1e-4, messages=messages)
+            if outputs_match is None:
+                if result:
+                    messages.append("Experiment succeeded but produced no results, and this was expected!")
+                else:
+                    messages.append("Note: experiment was expected to fail - no reference results stored.")
+                    result = True
+            else:
+                result = result and outputs_match
+    return (modelName, protoName, result, output.getvalue(), messages)
 
 class Defaults(object):
     """Simple encapsulation of default settings for the test suite below."""
@@ -143,12 +171,13 @@ class TestPythonReproducibility(unittest.TestCase):
     """
     def TestExperimentReproducibility(self):
         # Get the first result, when available
-        model, protocol, resultCode, messages = self.results.pop().get()
+        model, protocol, resultCode, output, messages = self.results.pop().get()
+        print output,
         print "Applied", protocol, "to", model
         for i, message in enumerate(messages):
-            print i, message
+            print "%d) %s" % (i+1, message)
         self.assert_(resultCode, "Experiment %s / %s failed" % (model, protocol))
-        
+
     @classmethod
     def setUpClass(cls):
         """Set up a pool of workers for executing experiments, and submit all experiments to the pool."""

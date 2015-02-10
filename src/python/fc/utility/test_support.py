@@ -55,21 +55,40 @@ def GetProcessNumber():
 def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
     """Check protocol results against saved values.
     
-    :param proto: an instance of fc.Protocol that has results available to check
+    Note that if the protocol is missing expected results, this is only an error if reference results are actually present
+    on disk.  If no reference results are available for an 'expected' output, this indicates that the protocol is expected
+    to fail (or at least, not produce this output).  Similarly, it is not an error if the protocol produces results but no
+    reference results are available, although we do add a warning to messages (if supplied) in this case.
+    
+    :param proto: an instance of fc.Protocol that (hopefully) has results available to check
     :param expectedSpec: a dictionary mapping result name to number of dimensions, so we can use the correct Load* method
     :param rtol: relative tolerance
     :param atol: absolute tolerance
     :param messages: if provided, should be a list to which failure reports will be appended.  Otherwise any failure will raise AssertionError.
+    :returns: a boolean indicating whether the results matched to within tolerances, or None if failure was expected.
     """
     results_ok = True
     for name, ndims in expectedSpec.iteritems():
         data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
+        try:
+            actual = proto.outputEnv.LookUp(name)
+        except KeyError:
+            if os.path.exists(data_file):
+                results_ok = False
+                if messages is not None:
+                    messages.append("Output %s not produced but reference result exists" % name)
+            elif results_ok:
+                results_ok = None # Indicate expected failure
+            continue # Can't compare in this case
+        if not os.path.exists(data_file):
+            if messages is not None:
+                messages.append("Output %s produced but no reference result available - please save for future comparison" % name)
+            continue # Can't compare in this case
         if ndims == 2:
             method = Load2d
         else:
             method = Load
         expected = method(data_file)
-        actual = proto.outputEnv.LookUp(name)
         if messages is None:
             np.testing.assert_allclose(actual.array, expected.array, rtol=rtol, atol=atol)
         else:
