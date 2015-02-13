@@ -75,6 +75,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     messages = []
     result = True
     output = StringIO()
+    proto = None
     with RedirectStdStreams(output, output):
         try:
             print "Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS
@@ -90,7 +91,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
         except:
             result = False
             messages.append(traceback.format_exc())
-        if expectedOutputs:
+        if expectedOutputs and proto:
             outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
                                                      'projects/FunctionalCuration/test/data/historic/%s/%s' % (modelName, protoName),
                                                      rtol=0.005, atol=1e-4, messages=messages)
