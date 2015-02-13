@@ -83,6 +83,15 @@ tasks {
             range t units ms uniform 0:9
         }
     }
+    
+    # Check nested while loop with extension
+    simulation long_nested = nested {
+        range loop units dimensionless while long_nested:membrane_voltage[-1][-1] < 3001*9
+        modifiers { at start set oxmeta:membrane_voltage = 0 }
+        nests simulation timecourse {
+            range t units ms uniform 0:9
+        }
+    }
 }
 
 post-processing {
@@ -106,6 +115,7 @@ post-processing {
         return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
     }
     assert Close(nested:membrane_voltage, [ i*9+j for i in 0:2 for j in 0:10 ])
+    assert Close(long_nested:membrane_voltage, [ i*9+j for i in 0:3001 for j in 0:10 ])
 }
 
 outputs {

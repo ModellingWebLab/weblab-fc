@@ -87,9 +87,13 @@ class AbstractSimulation(locatable.Locatable):
             self.model.SetOutputFolder(folder)
 
     def LoopBodyStartHook(self):
-        if isinstance(self.range_, R.While) and self.range_.count > 0 and self.range_.GetNumberOfOutputPoints() > self.results.LookUp(self.results.DefinedNames()[0]).array.shape[0]:
-            for name in self.results:
-                self.results.LookUp(name).array.resize(self.range_.GetNumberOfOutputPoints(), refcheck=False)
+        if isinstance(self.range_, R.While) and self.range_.count > 0 and self.resultsList and self.range_.GetNumberOfOutputPoints() > self.resultsList[0].shape[0]:
+                for i, result in enumerate(self.resultsList):
+                    shape = list(result.shape)
+                    shape[0] = self.range_.GetNumberOfOutputPoints()
+                    result.resize(tuple(shape), refcheck=False)
+                    # TODO: Check if the next line is needed?
+                    self.viewEnv.OverwriteDefinition(self.model.outputNames[i], V.Array(result[0:1+self.range_.count]))
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 0:
                 modifier.Apply(self)
@@ -207,6 +211,7 @@ class Nested(AbstractSimulation):
         self.ranges = self.nestedSim.ranges
         self.ranges.insert(0, self.range_)
         self.results = self.nestedSim.results
+        self.resultsList = self.nestedSim.resultsList
         nestedSim.env.SetDelegateeEnv(self.env)
 
     def Initialise(self):
