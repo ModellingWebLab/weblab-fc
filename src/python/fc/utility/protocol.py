@@ -221,7 +221,7 @@ class Protocol(object):
         self.Initialise()
         if verbose:
             self.LogProgress('running protocol', self.protoName, '...')
-        errors = ErrorRecorder()
+        errors = ErrorRecorder(self.protoName)
         with errors:
             for sim in self.simulations:
                 sim.env.SetDelegateeEnv(self.libraryEnv)

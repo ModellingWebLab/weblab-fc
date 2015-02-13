@@ -96,10 +96,10 @@ class ErrorRecorder(ProtocolError):
     
     TODO: Add the ability to suppress Python traceback for some errors?
     """
-    def __init__(self):
+    def __init__(self, protoName):
         """Create a new recorder."""
         self.errors = []
-        super(ErrorRecorder, self).__init__("Errors occurred during execution:")
+        super(ErrorRecorder, self).__init__("Errors occurred during execution of %s:" % protoName)
     
     def __enter__(self):
         """Start a managed block of code."""
@@ -109,7 +109,7 @@ class ErrorRecorder(ProtocolError):
         """Finish a managed block of code, perhaps because an exception was raised."""
         if exc_value is not None:
             self.errors.append(exc_value)
-            message = "%d. %s" % (len(self.errors), str(exc_value))
+            message = "%d. %s: %s" % (len(self.errors), exc_type.__name__, str(exc_value))
             if hasattr(exc_value, 'shortMessage'):
                 self.shortMessage += "\n" + exc_value.shortMessage
             else:
