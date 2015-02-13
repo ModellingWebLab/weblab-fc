@@ -14,5 +14,5 @@ just imports SteadyStateRunner.txt and changes one of its inputs.
 }
 
 import "SteadyStateRunner.txt" {
-    pacing_period = 250  # ms    
+    pacing_period = 250  # ms
 }

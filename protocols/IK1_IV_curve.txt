@@ -132,10 +132,10 @@ post-processing {
     steady_K1 = K1_tail_current[1$-1]
     
     # Normalise for better comparison between models.
-    max_steady_current = std:RemoveDim(std:Max(steady_K1, default), 1)
-    min_steady_current = std:RemoveDim(std:Min(steady_K1, default), 1)
-    normalised_high_K1 = map(lambda IK1: IK1/max_steady_current[0], steady_K1)
-    normalised_low_K1 = map(lambda IK1: -IK1/min_steady_current[0], steady_K1)
+    max_steady_current = std:Max(steady_K1, default)[0]
+    min_steady_current = std:Min(steady_K1, default)[0]
+    normalised_high_K1 = map(lambda IK1: IK1/max_steady_current, steady_K1)
+    normalised_low_K1 = map(lambda IK1: -IK1/min_steady_current, steady_K1)
 }
 
 # List any outputs from model which need to be carried forward to plotting

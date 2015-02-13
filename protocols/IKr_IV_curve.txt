@@ -146,8 +146,8 @@ post-processing {
     peak_Kr_tail = std:RemoveDim(std:Max(Kr_tail_current, default), 1)
     
     # Normalise for better comparison between models.
-    max_peak_current = std:RemoveDim(std:Max(peak_Kr_tail, default), 1)
-    normalised_peak_Kr_tail = map(lambda IKr: IKr/max_peak_current[0], peak_Kr_tail)    
+    max_peak_current = std:Max(peak_Kr_tail, default)[0]
+    normalised_peak_Kr_tail = map(lambda IKr: IKr/max_peak_current, peak_Kr_tail)    
 }
 
 # List any outputs from model which need to be carried forward to plotting

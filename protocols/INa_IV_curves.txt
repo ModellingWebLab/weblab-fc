@@ -250,8 +250,8 @@ post-processing {
     # Find max absolute current and normalise to this.
     absolute_tail_current2 = map(lambda INa: MathML:abs(INa), inactivation_tail_current)
     peak_inactivation_currents = std:RemoveDim(std:Max(absolute_tail_current2, default), 1)
-    max_peak_inactivation_current = std:RemoveDim(std:Max(peak_inactivation_currents, default), 1)
-    normalised_peak_currents = map(lambda INa: INa/max_peak_inactivation_current[0], peak_inactivation_currents)
+    max_peak_inactivation_current = std:Max(peak_inactivation_currents, default)[0]
+    normalised_peak_currents = map(lambda INa: INa/max_peak_inactivation_current, peak_inactivation_currents)
 
     # Check validity of outputs
     assert sim3:time.IS_ARRAY
