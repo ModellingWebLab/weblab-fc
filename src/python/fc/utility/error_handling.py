@@ -71,7 +71,7 @@ class ProtocolError(Exception):
     def __init__(self, *msgParts):
         """Create a protocol error message.
         
-        The arguments are joined to create the message string as for the print: converted to strings and space separated.
+        The arguments are joined to create the message string as for print: converted to strings and space separated.
         In addition, when the exception is created the stack will be examined to determine what lines in the currently
         running protocol were responsible, if any, and these details added to the Python stack trace reported. (The list
         of locations will also be stored as self.locations.) Since this can make the error message rather long, we also
