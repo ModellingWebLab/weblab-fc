@@ -311,10 +311,10 @@ class Protocol(object):
             # Generate the (protocol-modified) model code
             class_name = 'GeneratedModel'
             code_gen_cmd = self.GetConversionCommand(model, xml_file, class_name, temp_dir, useCython=useCython, useNumba=useNumba)
-            subprocess.check_call(code_gen_cmd)
+            print subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT)
             if useCython:
                 # Compile the extension module
-                subprocess.check_call(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir)
+                print subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir, stderr=subprocess.STDOUT)
             # Create an instance of the model
             sys.path.insert(0, temp_dir)
             import model as module
