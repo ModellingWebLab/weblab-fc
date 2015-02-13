@@ -98,7 +98,7 @@ class AbstractSimulation(locatable.Locatable):
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 0:
                 modifier.Apply(self)
             elif modifier.when == AbstractModifier.EACH_LOOP:
-                modifier.Apply(self) ## ~96% of time
+                modifier.Apply(self)
 
     def LoopEndHook(self):
         if isinstance(self.range_, R.While):
@@ -111,11 +111,11 @@ class AbstractSimulation(locatable.Locatable):
 
     def LoopBodyEndHook(self):
         if self.viewEnv is not None:
-            for result in self.results:
-                if result not in self.viewEnv:
-                    self.viewEnv.DefineName(result, V.Array(self.results.LookUp(result).array[0:1+self.range_.count]))
+            for name in self.results:
+                if name not in self.viewEnv:
+                    self.viewEnv.DefineName(name, V.Array(self.results.LookUp(name).array[0:1+self.range_.count]))
                 else:
-                    self.viewEnv.OverwriteDefinition(result, V.Array(self.results.LookUp(result).array[0:1+self.range_.count]))
+                    self.viewEnv.OverwriteDefinition(name, V.Array(self.results.LookUp(name).array[0:1+self.range_.count]))
 
     def SetModel(self, model):
         if isinstance(self.model, NestedProtocol):
