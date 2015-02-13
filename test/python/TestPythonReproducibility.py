@@ -81,6 +81,11 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
             proto.SetModel('projects/FunctionalCuration/cellml/%s.cellml' % modelName)
+            for input in ['num_paces', 'max_steady_state_beats']:
+                try:
+                    proto.SetInput(input, fc.language.values.Simple(1000))
+                except:
+                    pass # Input doesn't exist
             proto.Run()
         except:
             result = False
