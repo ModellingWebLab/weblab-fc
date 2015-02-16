@@ -88,12 +88,13 @@ class AbstractSimulation(locatable.Locatable):
 
     def LoopBodyStartHook(self):
         if isinstance(self.range_, R.While) and self.range_.count > 0 and self.resultsList and self.range_.GetNumberOfOutputPoints() > self.resultsList[0].shape[0]:
-                for i, result in enumerate(self.resultsList):
-                    shape = list(result.shape)
-                    shape[0] = self.range_.GetNumberOfOutputPoints()
-                    result.resize(tuple(shape), refcheck=False)
-                    # TODO: Check if the next line is needed?
-                    self.viewEnv.OverwriteDefinition(self.model.outputNames[i], V.Array(result[0:1+self.range_.count]))
+            for name in self.results:
+                result = self.results.LookUp(name).array
+                shape = list(result.shape)
+                shape[0] = self.range_.GetNumberOfOutputPoints()
+                result.resize(tuple(shape), refcheck=False)
+                # TODO: Check if the next line is needed?
+                self.viewEnv.OverwriteDefinition(name, V.Array(result[0:1+self.range_.count]))
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 0:
                 modifier.Apply(self)
