@@ -35,6 +35,11 @@ try:
 except ImportError:
     import unittest
 
+try:
+    from setproctitle import setproctitle
+except ImportError:
+    setproctitle = lambda t: None
+
 import argparse
 import multiprocessing
 import os
@@ -64,6 +69,13 @@ class RedirectStdStreams(object):
         sys.stdout = self.old_stdout
         sys.stderr = self.old_stderr
 
+def WorkerInit():
+    """Function run on initialization of a Pool worker process.
+    
+    If the setproctitle module is installed, this will adjust the process title (shown by ps) to be more informative.
+    """
+    setproctitle('python worker %d' % TestSupport.GetProcessNumber())
+
 def RunExperiment(modelName, protoName, expectedOutputs):
     """Worker function to run a single experiment, i.e. application of a protocol to a model.
 
@@ -79,6 +91,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     with RedirectStdStreams(output, output):
         try:
             print "Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS
+            setproctitle('python worker %d running %s on %s' % (TestSupport.GetProcessNumber(), protoName, modelName))
             proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
             proto.SetModel('projects/FunctionalCuration/cellml/%s.cellml' % modelName)
@@ -188,7 +201,7 @@ class TestPythonReproducibility(unittest.TestCase):
     def setUpClass(cls):
         """Set up a pool of workers for executing experiments, and submit all experiments to the pool."""
         # Set up parallel execution if available (if not, we have just one worker)
-        cls.pool = multiprocessing.Pool(processes=CHASTE_NUM_PROCS)
+        cls.pool = multiprocessing.Pool(processes=CHASTE_NUM_PROCS, initializer=WorkerInit)
         if CHASTE_NUM_PROCS > 1:
             # If we're parallelising at this level, don't parallelise internally
             import numexpr
