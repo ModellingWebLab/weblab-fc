@@ -44,7 +44,7 @@ units {
 tasks {
     # Now do the nested steady state pacing
     simulation sim = nested {
-        range s2_interval units ms vector pacing_intervals        
+        range s2_interval units ms vector pacing_intervals
         nests protocol "SteadyStateRunnerForRestitution.txt" {
             apd_percentage = apd_percentage
             max_paces = max_steady_state_beats

@@ -84,7 +84,7 @@ class Minus(AbstractExpression):
     def Compile(self, arrayContext=True):
         operands = [ "(" + child.Compile(arrayContext) + ")" for child in self.children]
         if len(operands) == 1:
-            expression = -operands[0]
+            expression = '-' + operands[0]
         else:
             expression = ' - '.join(operands) 
         return expression

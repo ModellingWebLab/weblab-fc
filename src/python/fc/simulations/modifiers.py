@@ -30,6 +30,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+from ..utility.error_handling import ProtocolError
 
 class AbstractModifier(object):
     """Base class for modifiers in the protocol language."""
