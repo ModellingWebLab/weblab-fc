@@ -92,11 +92,20 @@ class Protocol(object):
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
-        for prefix, path in details.get('imports', []):
+        self.inputEnv.ExecuteStatements(details.get('inputs', []))
+        for prefix, path, set_inputs in details.get('imports', []):
             self.LogProgress('Importing', path, 'as', prefix, 'in', self.protoName)
             imported_proto = Protocol(self.GetPath(protoFile, path))
-            # TODO: setting inputs for imported protocols!
             if prefix == "":
+                # TODO: Ensure all environment delegatees are correct!
+                # Merge inputs of the imported protocol into our own (duplicate names are an error here).
+                # Override any values specified in the import statement itself.
+                for name in imported_proto.inputEnv:
+                    if name in set_inputs:
+                        value = set_inputs[name].Evaluate(self.inputEnv)
+                    else:
+                        value = imported_proto.inputEnv.LookUp(name)
+                    self.inputEnv.DefineName(name, value)
                 # Make any prefixed imports of that protocol into our prefixed imports
                 for imported_prefix, imported_import in imported_proto.imports.iteritems():
                     self.AddImportedProtocol(imported_import, imported_prefix)
@@ -108,7 +117,6 @@ class Protocol(object):
                 self.plots.extend(imported_proto.plots)
             else:
                 self.AddImportedProtocol(imported_proto, prefix)
-        self.inputEnv.ExecuteStatements(details.get('inputs', []))
         self.libraryEnv.SetDelegateeEnv(self.inputEnv)
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
@@ -122,6 +130,7 @@ class Protocol(object):
 
         This also makes that protocol's library (if any) available as a delegatee of our own.
         """
+        assert prefix
         if prefix in self.imports:
             raise ProtocolError("The prefix '", prefix, "' has already been used for an imported protocol.")
         self.imports[prefix] = proto

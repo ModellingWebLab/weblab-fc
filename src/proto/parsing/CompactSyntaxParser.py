@@ -1018,7 +1018,13 @@ class Actions(object):
         
         def _expr(self):
             assert len(self.tokens) >= 2
-            return self.tokens[0], self.tokens[1]
+            set_inputs = {}
+            if len(self.tokens) == 3:
+                for set_input in self.tokens[2].tokens:
+                    name = set_input.tokens[0].tokens
+                    value_expr = set_input.tokens[1].expr()
+                    set_inputs[name] = value_expr
+            return self.tokens[0], self.tokens[1], set_inputs
 
     class UnitRef(BaseGroupAction):
         """Parse action for unit references within units definitions."""
