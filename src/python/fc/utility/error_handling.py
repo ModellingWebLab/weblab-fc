@@ -112,13 +112,12 @@ class ErrorRecorder(ProtocolError):
             message = "%d. %s: %s" % (len(self.errors), exc_type.__name__, str(exc_value))
             if hasattr(exc_value, 'shortMessage'):
                 self.shortMessage += "\n" + exc_value.shortMessage
-            else:
-                message += "\nTraceback (most recent call last):\n" + ''.join(traceback.format_tb(exc_traceback))
-                frames = []
-                while exc_traceback:
-                    frames.append(exc_traceback.tb_frame)
-                    exc_traceback = exc_traceback.tb_next
-                message += _ExtractProtocolInfoFromStack(frames)[1]
+            message += "\nTraceback (most recent call last):\n" + ''.join(traceback.format_tb(exc_traceback))
+            frames = []
+            while exc_traceback:
+                frames.append(exc_traceback.tb_frame)
+                exc_traceback = exc_traceback.tb_next
+            message += _ExtractProtocolInfoFromStack(frames)[1]
             args = list(self.args)
             args[0] += "\n" + message
             self.args = tuple(args)
