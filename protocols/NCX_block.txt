@@ -54,7 +54,7 @@ tasks {
             # But this tells it this nesting could be parallelised.
             at each loop reset
             # Set the scaling factor
-            at each loop set sim:oxmeta:membrane_sodium_calcium_exchanger_current_conductance = block_level
+            at each loop set oxmeta:membrane_sodium_calcium_exchanger_current_conductance = block_level
         }
         # Get the model to steady-state (if possible)
         nests protocol "SteadyStateRunner.txt" {
