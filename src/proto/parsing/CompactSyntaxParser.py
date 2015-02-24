@@ -422,10 +422,10 @@ class Actions(object):
                     children.append(param_bvar)
             lambda_params = [[var for each in children for var in each]]
             if not isinstance(body, list):
-                lambda_params.append([S.Return(body)])
-            else:
-                lambda_params.append(body)
-            lambda_params.append(default_params)
+                ret = S.Return(body)
+                ret.location = body.location
+                body = [ret]
+            lambda_params.extend([body, default_params])
             return E.LambdaExpression(*lambda_params)
     
     class FunctionCall(BaseGroupAction):

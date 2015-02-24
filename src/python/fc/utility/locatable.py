@@ -43,12 +43,14 @@ class Locatable(object):
     file when evaluated.  The class variable outputFolder records where trace should be written,
     if enabled, and the Trace method can be used to trace a value.
     """
-    def __init__(self, location = str(inspect.getouterframes(inspect.currentframe())[2][1:5])):
+    def __init__(self, location=None):
         """Create a new construct with optional location information.
         
         If no location is given, a string representation of the Python stack of the caller will be used.
         This is not ideal, but better than nothing!
         """
+        if location is None:
+            location = str(inspect.stack()[2][1:5])
         self.location = location
         self.trace = False
         
