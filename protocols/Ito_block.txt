@@ -80,14 +80,14 @@ post-processing {
     
     # And also resting potential relative to control
     control_resting_potential = RestingPotential[0$-1]
-    scaled_resting_potential = map(lambda x: -100*x/control_resting_potential[0], RestingPotential)
+    scaled_resting_potential = map(lambda x: -100*x/control_resting_potential, RestingPotential)
     
     # APD
     APD90 = cardiac:Apd(sim:detailed_voltage, sim:detailed_time)[1$0]
     
     # We want to see the change relative to control APD90
     control_APD90 = APD90[0$-1]
-    scaled_APD90 = map(lambda x: 100*x/control_APD90[0], APD90)
+    scaled_APD90 = map(lambda x: 100*x/control_APD90, APD90)
 }
 
 outputs {

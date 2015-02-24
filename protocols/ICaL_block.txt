@@ -76,7 +76,7 @@ post-processing {
     
     # We want to see the change relative to control APD90
     control_APD90 = APD90[0$-1]
-    scaled_APD90 = map(lambda x: 100*x/control_APD90[0], APD90)
+    scaled_APD90 = map(lambda x: 100*x/control_APD90, APD90)
 }
 
 outputs {

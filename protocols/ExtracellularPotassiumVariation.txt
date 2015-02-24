@@ -84,11 +84,11 @@ post-processing {
     control_index = find(map(lambda t: t == default_K_o, potassium_test_concentrations))[0][0]
     
     control_APD90 = APD90[0$control_index]
-    scaled_APD90 = map(lambda x: 100*x/control_APD90[0], APD90)
+    scaled_APD90 = map(lambda x: 100*x/control_APD90, APD90)
     
     # And also resting potential relative to control
     control_resting_potential = RestingPotential[0$control_index]
-    scaled_resting_potential = map(lambda x: -100*x/control_resting_potential[0], RestingPotential)
+    scaled_resting_potential = map(lambda x: -100*x/control_resting_potential, RestingPotential)
 }
 
 outputs {
