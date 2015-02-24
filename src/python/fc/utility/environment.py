@@ -104,13 +104,13 @@ class Environment(object):
 #                 if obj and isinstance(obj, DelegatingDict):
 #                     print 'Looked for', local_vars['key'], 'in', obj._env
 #                 tb = tb.tb_next
-#             self.DebugDelegatees()
+#             self.DebugDelegatees('root')
 #             raise
-    
-    def DebugDelegatees(self):
-        print 'Delegatees in', self, '(', len(self), '):', self.delegatees
-        for env in self.delegatees.values():
-            env.DebugDelegatees()
+
+    def DebugDelegatees(self, prefix):
+        print 'Delegatees in', prefix, '(', len(self), '):', self.delegatees
+        for p, env in self.delegatees.iteritems():
+            env.DebugDelegatees(p)
 
     def SetDelegateeEnv(self, delegatee, prefix=""):
         if prefix in self.delegatees and self.delegatees[prefix] is not delegatee:
@@ -180,6 +180,9 @@ class Environment(object):
         return result
 
     # Methods to make an Environment behave a little like a (read-only) dictionary
+
+    def __str__(self):
+        return str(self.bindings)
 
     def __len__(self):
         return len(self.bindings)
@@ -268,15 +271,28 @@ class ModelWrapperEnvironment(Environment):
             """A single element list for wrapping the model's free variable."""
             def __init__(self, model):
                 self._model = model
-            def __getitem__(self, key):
+            def __getitem__(self, index):
                 return self._model.freeVariable
-            def __setitem__(self, key, value):
-                setattr(self._model, key, value)
+            def __setitem__(self, index, value):
+                raise ProtocolError("Cannot set model free variable directly, only via simulation")
+        
+        class _OutputsList(list):
+            """A pseudo-list for wrapping the model's output values."""
+            def __init__(self, model):
+                self._model = model
+            def __getitem__(self, index):
+                return self._model.GetOutputs()[index]
+            def __setitem__(self, index, value):
+                raise ProtocolError("Cannot set model variable '" + self._model.outputNames[index] + "': it is a model output")
 
         def __init__(self, model):
             self._model = model
             # Make the underlying dict store a map from name to (vector, index) for fast lookup
             self._freeVars = self._FreeVarList(model)
+            self._outputVars = self._OutputsList(model)
+            # Note: we process outputs first so that if a variable is both an output and something else, we prefer direct access
+            for key in model.outputNames:
+                dict.__setitem__(self, key, (self._outputVars, model.outputNames.index(key)))
             for key in model.parameterMap:
                 dict.__setitem__(self, key, (model.parameters, model.parameterMap[key]))
             for key in model.stateVarMap:
@@ -293,6 +309,13 @@ class ModelWrapperEnvironment(Environment):
             # TODO: Catch KeyError?
             vector, index = dict.__getitem__(self, key)
             return vector[index]
+#             try:
+#                 vector, index = dict.__getitem__(self, key)
+#                 return vector[index]
+#             except KeyError:
+#                 print 'Missing model var', key
+#                 print 'Model has:', self._model.stateVarMap.keys(), self._model.parameterMap.keys(), self._model.outputNames
+#                 raise
 
         def __setitem__(self, key, value):
             # TODO: Catch KeyError?
