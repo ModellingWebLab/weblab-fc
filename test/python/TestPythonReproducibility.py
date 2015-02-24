@@ -104,18 +104,22 @@ def RunExperiment(modelName, protoName, expectedOutputs):
         except:
             result = False
             messages.append(traceback.format_exc())
-        if expectedOutputs and proto:
-            outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
-                                                     'projects/FunctionalCuration/test/data/historic/%s/%s' % (modelName, protoName),
-                                                     rtol=0.005, atol=1e-4, messages=messages)
-            if outputs_match is None:
-                if result:
-                    messages.append("Experiment succeeded but produced no results, and this was expected!")
+        try:
+            if expectedOutputs and proto:
+                outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
+                                                         'projects/FunctionalCuration/test/data/historic/%s/%s' % (modelName, protoName),
+                                                         rtol=0.005, atol=1e-4, messages=messages)
+                if outputs_match is None:
+                    if result:
+                        messages.append("Experiment succeeded but produced no results, and this was expected!")
+                    else:
+                        messages.append("Note: experiment was expected to fail - no reference results stored.")
+                        result = True
                 else:
-                    messages.append("Note: experiment was expected to fail - no reference results stored.")
-                    result = True
-            else:
-                result = result and outputs_match
+                    result = result and outputs_match
+        except:
+            result = False
+            messages.append(traceback.format_exc())
     return (modelName, protoName, result, output.getvalue(), messages)
 
 class Defaults(object):
@@ -194,8 +198,8 @@ class TestPythonReproducibility(unittest.TestCase):
     def TestExperimentReproducibility(self):
         # Get the first result, when available
         model, protocol, resultCode, output, messages = self.results.pop().get()
-        if resultCode and len(output) > 200:
-            print output[:80] + "\n...\n" + output[-80:],
+        if resultCode and len(output) > 450:
+            print output[:100] + "\n...\n" + output[-300:],
         else:
             print output,
         print "Applied", protocol, "to", model
