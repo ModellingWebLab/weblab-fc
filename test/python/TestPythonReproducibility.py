@@ -188,13 +188,21 @@ class TestPythonReproducibility(unittest.TestCase):
     This module also demonstrates how to handle optional run-time flags passed to a Python test,
     and test execution in parallel.
     """
+    # We keep a record of all failures to summarise at the end
+    failures = []
+
     def TestExperimentReproducibility(self):
         # Get the first result, when available
         model, protocol, resultCode, output, messages = self.results.pop().get()
-        print output,
+        if resultCode and len(output) > 200:
+            print output[:80] + "\n...\n" + output[-80:],
+        else:
+            print output,
         print "Applied", protocol, "to", model
         for i, message in enumerate(messages):
             print "%d) %s" % (i+1, message)
+        if not resultCode:
+            self.failures.append(model + " / " + protocol)
         self.assert_(resultCode, "Experiment %s / %s failed" % (model, protocol))
 
     @classmethod
@@ -219,11 +227,15 @@ class TestPythonReproducibility(unittest.TestCase):
 
         # Disallow further job submission to the pool
         cls.pool.close()
-    
+
     @classmethod
     def tearDownClass(cls):
-        """Wait for all workers to exit."""
+        """Wait for all workers to exit, and summarise failures."""
         cls.pool.join()
+        if cls.failures:
+            print "\nThe following model/protocol combinations failed unexpectedly:"
+            for failure in sorted(cls.failures):
+                print "  ", failure
 
 def MakeTestSuite():
     """Build a suite where each test checks one experiment.
