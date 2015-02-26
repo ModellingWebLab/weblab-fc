@@ -52,6 +52,43 @@ def GetProcessNumber():
         num = 0
     return num
 
+# The following utility methods for comparing floating point numbers are based on boost/test/floating_point_comparison.hpp
+
+def WithinRelativeTolerance(arr1, arr2, tol):
+    """Determine if two arrays are element-wise close within the given relative tolerance.
+    
+    :returns: a boolean array
+    """
+    with np.errstate(all='ignore'):
+        difference = np.fabs(arr1 - arr2)
+        d1 = np.nan_to_num(difference / np.fabs(arr1))
+        d2 = np.nan_to_num(difference / np.fabs(arr2))
+    return np.logical_and(d1 <= tol, d2 <= tol)
+
+def WithinAbsoluteTolerance(arr1, arr2, tol):
+    """Determine if two arrays are element-wise close within the given absolute tolerance.
+    
+    A difference of exactly the tolerance is considered to be OK.
+    
+    :returns: a boolean array
+    """
+    return np.fabs(arr1 - arr2) <= tol
+
+def WithinAnyTolerance(arr1, arr2, relTol=None, absTol=None):
+    """Determine if two arrays are element-wise close within the given tolerances.
+    
+    If either the relative OR absolute tolerance is satisfied for a given pair of values, the result is true.
+    
+    :param relTol: relative tolerance. If omitted, machine epsilon is used to effect a comparison only under absolute tolerance.
+    :param absTol: absolute tolerance. If omitted, machine epsilon is used to effect a comparison only under relative tolerance.
+    :returns: a boolean array
+    """
+    if relTol is None:
+        relTol = np.finfo(np.float).eps
+    if absTol is None:
+        absTol = np.finfo(np.float).eps
+    return np.logical_or(WithinAbsoluteTolerance(arr1, arr2, absTol), WithinRelativeTolerance(arr1, arr2, relTol))
+
 def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
     """Check protocol results against saved values.
     
@@ -92,10 +129,19 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
         if messages is None:
             np.testing.assert_allclose(actual.array, expected.array, rtol=rtol, atol=atol)
         else:
-            close = np.allclose(actual.array, expected.array, rtol=rtol, atol=atol)
-            if not close:
-                messages.append("Output %s was not within tolerances (rel=%g, abs=%g)" % (name, rtol, atol))
+            if actual.array.shape != expected.array.shape:
+                messages.append("Output %s shape %s does not match expected shape %s" % (name, actual.array.shape, expected.array.shape))
                 results_ok = False
+            else:
+                close_entries = WithinAnyTolerance(actual.array, expected.array, relTol=rtol, absTol=atol)
+                if not close_entries.all():
+                    bad_entries = np.logical_not(close_entries)
+                    bad = actual.array[bad_entries]
+                    first_bad = bad.flat[:10]
+                    first_expected = expected.array[bad_entries].flat[:10]
+                    messages.append("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations.\nFirst <=10 mismatches: %s != %s" %
+                                    (name, rtol, atol, bad.size, actual.array.size, first_bad, first_expected))
+                    results_ok = False
     return results_ok
 
 def CheckFileCompression(filePath):
