@@ -136,9 +136,10 @@ class Protocol(object):
         self.imports[prefix] = proto
         self.libraryEnv.SetDelegateeEnv(proto.libraryEnv, prefix)
 
-    def Initialise(self):
+    def Initialise(self,verbose=True):
         """(Re-)Initialise this protocol, ready to be run on a model."""
-        self.LogProgress('Initialising', self.protoName)
+        if verbose:
+            self.LogProgress('Initialising', self.protoName)
         self.libraryEnv.Clear()
         self.postProcessingEnv.Clear()
         self.outputEnv.Clear()
@@ -249,7 +250,7 @@ class Protocol(object):
     def Run(self, verbose=True, writeOut=True):
         """Run this protocol on the model already specified using SetModel."""
         Locatable.outputFolder = self.outputFolder
-        self.Initialise()
+        self.Initialise(verbose)
         if verbose:
             self.LogProgress('running protocol', self.protoName, '...')
         errors = ErrorRecorder(self.protoName)
