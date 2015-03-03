@@ -129,8 +129,8 @@ class AbstractSimulation(locatable.Locatable):
             self.env.SetDelegateeEnv(model_env[prefix], prefix)
             self.results.SetDelegateeEnv(model_env[prefix], prefix)
 
-    def Run(self):
-        self.InternalRun()
+    def Run(self,verbose=True):
+        self.InternalRun(verbose)
         return self.results
 
     def AddIterationOutputs(self, outputsList):
@@ -163,7 +163,7 @@ class Timecourse(AbstractSimulation):
         except NameError:
             pass
 
-    def InternalRun(self):
+    def InternalRun(self,verbose=True):
         r = self.range_
         m = self.model
         start_hook, end_hook = self.LoopBodyStartHook, self.LoopBodyEndHook
@@ -195,7 +195,7 @@ class OneStep(AbstractSimulation):
         super(OneStep, self).__init__()
         self.ranges = []
 
-    def InternalRun(self):
+    def InternalRun(self,verbose=True):
         self.LoopBodyStartHook()
         self.model.Simulate(self.step)
         self.AddIterationOutputs(self.model.GetOutputs())
@@ -226,9 +226,10 @@ class Nested(AbstractSimulation):
         self.nestedSim.Clear()
         super(Nested, self).Clear()
 
-    def InternalRun(self):
+    def InternalRun(self,verbose=True):
         for t in self.range_:
-            print 'nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')' 
+            if verbose:
+                print 'nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')' 
             self.LoopBodyStartHook()
             if self.outputFolder:
                 self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder('run_%d' %self.range_.GetCurrentOutputNumber()))

@@ -288,7 +288,7 @@ class Protocol(object):
             if verbose:
                 self.LogProgress('running simulation', sim.prefix)
             sim.Initialise()
-            sim.Run()
+            sim.Run(verbose)
             # Reset trace folder in case a nested protocol changes it
             Locatable.outputFolder = self.outputFolder
 
