@@ -130,7 +130,7 @@ class Defaults(object):
               "beeler_reuter_model_1977",
               #"benson_epicardial_2008",
               #"bernus_wilders_zemlin_verschelde_panfilov_2002",
-              "bondarenko_szigeti_bett_kim_rasmusson_2004_apical",
+              #"bondarenko_szigeti_bett_kim_rasmusson_2004_apical",
               "carro_2011_epi",
               #"clancy_rudy_2002",
               #"courtemanche_ramirez_nattel_1998",
@@ -139,7 +139,7 @@ class Defaults(object):
               #"earm_noble_model_1990",
               "fink_noble_giles_model_2008",
               "grandi_pasqualini_bers_2010_ss",
-              "iyer_2004",
+              #"iyer_2004",
               #"iyer_model_2007",
               "li_mouse_2010",
               "luo_rudy_1991",
@@ -149,12 +149,13 @@ class Defaults(object):
               #"noble_model_1991",
               #"noble_model_1998",
               "ohara_rudy_2011_epi",
-              "priebe_beuckelmann_1998",
+              #"priebe_beuckelmann_1998",
               #"sachse_moreno_abildskov_2008_b",
               "shannon_wang_puglisi_weber_bers_2004",
               #"ten_tusscher_model_2004_endo",
-              "ten_tusscher_model_2006_epi",
-              #"winslow_model_1999"
+              "ten_tusscher_model_2006_epi"
+              #"winslow_model_1999",
+              #"zhang_SAN_model_2000_0D_capable"
               ]
 
     # Map from protocol name to expected outputs (names & dimensions)
