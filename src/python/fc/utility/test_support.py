@@ -74,6 +74,19 @@ def WithinAbsoluteTolerance(arr1, arr2, tol):
     """
     return np.fabs(arr1 - arr2) <= tol
 
+def GetMaxErrors(arr1, arr2):
+    """Compute the maximum relative and absolute pairwise errors between two arrays.
+    
+    :returns: (max relative error, max absolute error)
+    """
+    with np.errstate(all='ignore'):
+        difference = np.fabs(arr1 - arr2)
+        d1 = np.nan_to_num(difference / np.fabs(arr1))
+        d2 = np.nan_to_num(difference / np.fabs(arr2))
+    max_rel_err = np.amax(np.maximum(d1, d2))
+    max_abs_err = np.amax(np.fabs(arr1 - arr2))
+    return (max_rel_err, max_abs_err)
+
 def WithinAnyTolerance(arr1, arr2, relTol=None, absTol=None):
     """Determine if two arrays are element-wise close within the given tolerances.
     
@@ -135,12 +148,13 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
             else:
                 close_entries = WithinAnyTolerance(actual.array, expected.array, relTol=rtol, absTol=atol)
                 if not close_entries.all():
+                    max_rel_err, max_abs_err = GetMaxErrors(actual.array, expected.array)
                     bad_entries = np.logical_not(close_entries)
                     bad = actual.array[bad_entries]
                     first_bad = bad.flat[:10]
                     first_expected = expected.array[bad_entries].flat[:10]
-                    messages.append("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations.\nFirst <=10 mismatches: %s != %s" %
-                                    (name, rtol, atol, bad.size, actual.array.size, first_bad, first_expected))
+                    messages.append("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations. Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s" %
+                                    (name, rtol, atol, bad.size, actual.array.size, max_rel_err, max_abs_err, first_bad, first_expected))
                     results_ok = False
     return results_ok
 
