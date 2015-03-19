@@ -130,7 +130,7 @@ cdef class CvodeSolver:
             self.CheckFlag(flag, 'CVDense')
         _lib.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
         _lib.CVodeSetMaxStep(self.cvode_mem, 1.0)
-        _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15);
+        _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15)
 
     cpdef ResetSolver(self, np.ndarray[realtype, ndim=1] resetTo):
         self.state[:] = resetTo

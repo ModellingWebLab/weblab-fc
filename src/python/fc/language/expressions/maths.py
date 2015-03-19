@@ -147,7 +147,7 @@ class Max(AbstractExpression):
 
     def Compile(self, arrayContext=True):
         operands = [ "(" + child.Compile(arrayContext) + ")" for child in self.children]
-        expression = "___np.maximum(" + ','.join(operands) + ")"  
+        expression = "___np.maximum(" + ','.join(operands) + ")"
         return expression 
 
 class Min(AbstractExpression):
