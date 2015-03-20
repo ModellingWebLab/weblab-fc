@@ -108,7 +108,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             if expectedOutputs and proto:
                 outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
                                                          'projects/FunctionalCuration/test/data/historic/%s/%s' % (modelName, protoName),
-                                                         rtol=0.005, atol=1e-4, messages=messages)
+                                                         rtol=0.005, atol=2.5e-4, messages=messages)
                 if outputs_match is None:
                     if result:
                         messages.append("Experiment succeeded but produced no results, and this was expected!")
