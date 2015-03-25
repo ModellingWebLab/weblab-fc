@@ -32,6 +32,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import itertools
 import operator
+import sys
 import numpy as np
 
 from itertools import izip
@@ -56,6 +57,7 @@ class AbstractSimulation(locatable.Locatable):
         self.resultsList = [] # An ordered view on the unwrapped versions of simulation results
         self.env = Env.Environment()
         self.viewEnv = None
+        self.indentLevel = 0
         
         try:
             line_profile.add_function(self.AddIterationOutputs)
@@ -77,6 +79,20 @@ class AbstractSimulation(locatable.Locatable):
         self.resultsList[:] = []
         if self.viewEnv:
             self.viewEnv.Clear()
+    
+    def SetIndentLevel(self, indentLevel):
+        """Set the level of indentation to use for progress output."""
+        self.indentLevel = indentLevel
+        if self.model:
+            self.model.SetIndentLevel(indentLevel)
+
+    def LogProgress(self, *args):
+        """Print a progress line showing how far through the simulation we are.
+        
+        Arguments are converted to strings and space separated, as for the print builtin.
+        """
+        print '  ' * self.indentLevel + ' '.join(map(str, args))
+        sys.stdout.flush()
 
     def InternalRun(self):
         raise NotImplementedError
@@ -123,6 +139,7 @@ class AbstractSimulation(locatable.Locatable):
             self.model.proto.SetModel(model)
         else:
             self.model = model
+        self.model.SetIndentLevel(self.indentLevel)
         model_env = model.GetEnvironmentMap()
         model.simEnv = self.env # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
         for prefix in model_env.keys():
@@ -225,11 +242,15 @@ class Nested(AbstractSimulation):
     def Clear(self):
         self.nestedSim.Clear()
         super(Nested, self).Clear()
+    
+    def SetIndentLevel(self, indentLevel):
+        super(Nested, self).SetIndentLevel(indentLevel)
+        self.nestedSim.SetIndentLevel(indentLevel + 1)
 
-    def InternalRun(self,verbose=True):
+    def InternalRun(self, verbose=True):
         for t in self.range_:
             if verbose:
-                print 'nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')' 
+                self.LogProgress('nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')')
             self.LoopBodyStartHook()
             if self.outputFolder:
                 self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder('run_%d' %self.range_.GetCurrentOutputNumber()))

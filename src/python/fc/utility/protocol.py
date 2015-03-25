@@ -59,11 +59,12 @@ class Protocol(object):
     It gives the central interface to functional curation, handling parsing a protocol description
     from file and running it on a given model.
     """
-    def __init__(self, protoFile):
+    def __init__(self, protoFile, indentLevel=0):
         """Construct a new protocol by parsing the description in the given file.
         
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
+        self.indentLevel = indentLevel
         self.outputFolder = None
         self.protoFile = protoFile
         self.protoName = os.path.basename(self.protoFile)
@@ -145,6 +146,7 @@ class Protocol(object):
         self.outputEnv.Clear()
         for sim in self.simulations:
             sim.Clear()
+            sim.SetIndentLevel(self.indentLevel + 1)
         for imported_proto in self.imports.values():
             imported_proto.Initialise()
 
@@ -273,8 +275,8 @@ class Protocol(object):
             self.RunPostProcessing(verbose)
             self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
         self.OutputsAndPlots(errors, verbose, writeOut)
-        # Summarise time spent in each protocol section
-        if verbose:
+        # Summarise time spent in each protocol section (if we're the main protocol)
+        if verbose and self.indentLevel == 0:
             print 'Time spent running protocol (s): %.6f' % sum(self.timings.values())
             max_len = max(len(section) for section in self.timings)
             for section, duration in self.timings.iteritems():
@@ -378,12 +380,16 @@ class Protocol(object):
             new_path = os.path.join(library, path)
         return new_path
     
+    def SetIndentLevel(self, indentLevel):
+        """Set the level of indentation to use for progress output."""
+        self.indentLevel = indentLevel
+
     def LogProgress(self, *args):
         """Print a progress line showing how far through the protocol we are.
         
         Arguments are converted to strings and space separated, as for the print builtin.
         """
-        print ' '.join(map(str, args))
+        print '  ' * self.indentLevel + ' '.join(map(str, args))
         sys.stdout.flush()
 
     def LogWarning(self, *args):
@@ -391,5 +397,5 @@ class Protocol(object):
         
         Arguments are converted to strings and space separated, as for the print builtin.
         """
-        print >>sys.stderr, ' '.join(map(str, args))
+        print >>sys.stderr, '  ' * self.indentLevel + ' '.join(map(str, args))
         sys.stderr.flush()

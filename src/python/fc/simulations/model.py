@@ -37,7 +37,15 @@ from ..utility import environment as Env
 
 
 class AbstractModel(object):
-    """Base class for models in the protocol language."""
+    """Base class for models in the protocol language.
+
+    Note that generated models using Cython don't actually inherit from this class, but expose the same interface.
+    This is due to Cython limitations that prevent an extension type using multiple inheritance and inheriting from
+    a Python class.  Thus if you make changes here you must also change the code generation in translators.py.
+    """
+    def __init__(self):
+        self.indentLevel = 0
+
     def Simulate(self, endPoint):
         """Simulate the model up to the given end point (value of the free variable).
 
@@ -62,6 +70,10 @@ class AbstractModel(object):
         os.mkdir(path)
         self.outputPath = path
 
+    def SetIndentLevel(self, indentLevel):
+        """Set the level of indentation to use for progress output."""
+        self.indentLevel = indentLevel
+
 
 class AbstractOdeModel(AbstractModel):
     """This is a base class for ODE system models converted from CellML by PyCml.
@@ -71,11 +83,10 @@ class AbstractOdeModel(AbstractModel):
       __init__: sets up self.stateVarMap, self.initialState, self.parameterMap and self.parameters
       EvaluateRhs(self, t, y): returns a numpy array containing the derivatives at the given state
       GetOutputs(self): returns a list of model outputs
-
-    TODO: Figure out the neatest way for protocols to be able to access the current value of a model
-    output that isn't a state variable, parameter, or free variable.  (This is allowed in the C++ code.)
-    Given that a protocol is only able to do this at a state for which it can also obtain outputs, we
-    should probably cache the result of GetOutputs() for use in the ModelWrapperEnvironment.
+    
+    Note that generated models using Cython don't actually inherit from this class, but expose the same interface.
+    This is due to Cython limitations that prevent an extension type using multiple inheritance and inheriting from
+    a Python class.  Thus if you make changes here you must also change the code generation in translators.py.
     """
     def __init__(self, *args, **kwargs):
         """Construct a new ODE system model.
@@ -133,7 +144,7 @@ class AbstractOdeModel(AbstractModel):
         if name is None:
             self.solver.ResetSolver(self.initialState.copy())
         else:
-            # TOOD: Raise a nice ProtocolError if state not defined
+            # TODO: Raise a nice ProtocolError if state not defined
             self.solver.ResetSolver(self.savedStates[name].copy())
 
     def Simulate(self, endPoint):
@@ -149,6 +160,11 @@ class NestedProtocol(AbstractModel):
         self.proto = Protocol(proto)
         self.inputExprs = inputExprs
         self.outputNames = outputNames
+
+    def SetIndentLevel(self, indentLevel):
+        """Set the level of indentation to use for progress output."""
+        super(NestedProtocol, self).SetIndentLevel(indentLevel)
+        self.proto.SetIndentLevel(indentLevel)
 
     def GetOutputs(self):
         outputs = [self.proto.outputEnv.LookUp(name).unwrapped for name in self.outputNames]
