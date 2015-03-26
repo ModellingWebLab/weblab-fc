@@ -116,7 +116,7 @@ cdef extern from "cvode/cvode.h":
 #     int CVodeSetInitStep(void *cvode_mem, realtype hin)
 #     int CVodeSetMinStep(void *cvode_mem, realtype hmin)
     int CVodeSetMaxStep(void *cvode_mem, realtype hmax)
-#     int CVodeSetStopTime(void *cvode_mem, realtype tstop)
+    int CVodeSetStopTime(void *cvode_mem, realtype tstop)
     int CVodeSetMaxErrTestFails(void *cvode_mem, int maxnef)
 #     int CVodeSetMaxNonlinIters(void *cvode_mem, int maxcor)
 #     int CVodeSetMaxConvFails(void *cvode_mem, int maxncf)

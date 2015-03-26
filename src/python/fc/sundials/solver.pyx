@@ -121,15 +121,15 @@ cdef class CvodeSolver:
             self.CheckFlag(flag, 'CVodeInit')
         flag = _lib.CVodeSetUserData(self.cvode_mem, <void*>(self.model))
         self.CheckFlag(flag, 'CVodeSetUserData')
-        abstol = 1e-7
-        reltol = 1e-5
+        abstol = 1e-8
+        reltol = 1e-6
         flag = _lib.CVodeSStolerances(self.cvode_mem, reltol, abstol)
         self.CheckFlag(flag, 'CVodeSStolerances')
         if self._state_size > 0:
             flag = _lib.CVDense(self.cvode_mem, self._state_size)
             self.CheckFlag(flag, 'CVDense')
         _lib.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
-        _lib.CVodeSetMaxStep(self.cvode_mem, 1.0)
+        _lib.CVodeSetMaxStep(self.cvode_mem, 0.5)
         _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15)
 
     cpdef ResetSolver(self, np.ndarray[realtype, ndim=1] resetTo):
@@ -146,8 +146,12 @@ cdef class CvodeSolver:
             if self.model.dirty:
                 # A model variable has changed, so reset the solver
                 self.ReInit()
+            # Stop CVODE going past the end of where we wanted and interpolating back
+            flag = _lib.CVodeSetStopTime(self.cvode_mem, endPoint)
+            assert flag == _lib.CV_SUCCESS
+            # Do the solve
             flag = _lib.CVode(self.cvode_mem, endPoint, self._state, &t, _lib.CV_NORMAL)
-            if flag != _lib.CV_SUCCESS:
+            if flag < 0:
                 flag_name = _lib.CVodeGetReturnFlagName(flag)
                 raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
             else:
