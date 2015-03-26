@@ -174,9 +174,8 @@ def CheckFileCompression(filePath):
 def Load2d(filePath):
     """Load the legacy data format for 2d arrays."""
     real_path, is_compressed = CheckFileCompression(filePath)
-    array = np.loadtxt(real_path, dtype=float, delimiter=',', unpack=True) # unpack transposes the array
-    if array.ndim == 1:
-        array = array[:, np.newaxis]
+    array = np.loadtxt(real_path, dtype=float, delimiter=',', ndmin=2, unpack=True) # unpack transposes the array
+    assert array.ndim == 2
     return V.Array(array)
 
 def Load(filePath):
