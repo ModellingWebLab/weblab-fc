@@ -1427,10 +1427,10 @@ class CompactSyntaxParser(object):
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
     atom = (array | wrap | number.copy().setParseAction(Actions.Number) |
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
-    expr << p.operatorPrecedence(atom, [(trace, 1, p.opAssoc.LEFT, Actions.Trace),
-                                        (accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
+    expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                         (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
                                         (index, 1, p.opAssoc.LEFT, Actions.Index),
+                                        (trace, 1, p.opAssoc.LEFT, Actions.Trace),
                                         ('^', 2, p.opAssoc.LEFT, Actions.Operator),
                                         ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
