@@ -148,13 +148,14 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
             else:
                 close_entries = WithinAnyTolerance(actual.array, expected.array, relTol=rtol, absTol=atol)
                 if not close_entries.all():
-                    max_rel_err, max_abs_err = GetMaxErrors(actual.array, expected.array)
                     bad_entries = np.logical_not(close_entries)
                     bad = actual.array[bad_entries]
+                    ref = expected.array[bad_entries]
+                    max_rel_err, max_abs_err = GetMaxErrors(bad, ref)
                     first_bad = bad.flat[:10]
-                    first_expected = expected.array[bad_entries].flat[:10]
-                    messages.append("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations. Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s" %
-                                    (name, rtol, atol, bad.size, actual.array.size, max_rel_err, max_abs_err, first_bad, first_expected))
+                    first_expected = ref.flat[:10]
+                    messages.append("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations. Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s\nMismatch locations: %s" %
+                                    (name, rtol, atol, bad.size, actual.array.size, max_rel_err, max_abs_err, first_bad, first_expected, bad_entries.nonzero()[:10]))
                     results_ok = False
     return results_ok
 
