@@ -187,14 +187,17 @@ class Timecourse(AbstractSimulation):
         add_outputs, get_outputs = self.AddIterationOutputs, m.GetOutputs
         set_time, simulate = m.SetFreeVariable, m.Simulate
         for t in r:
-            start_hook()
             if r.count == 0:
                 # Record initial conditions
+                start_hook()
                 set_time(t)
-                add_outputs(get_outputs())
             else:
+                # Loop through remaining time points.
+                # Note that the start_hook is called *after* simulate in order to match the C++ implementation:
+                # in effect it is the hook for the *next* iteration of the loop.
                 simulate(t)
-                add_outputs(get_outputs())
+                start_hook()
+            add_outputs(get_outputs())
             end_hook()
         self.LoopEndHook()
 
