@@ -12,6 +12,7 @@ the action potential at this steady state.
 * **num\_inner\_paces**  The number of paces over which to look for steady state (defaults to 1), can be useful to set it to 2 to detect steady alternans.
 * **max\_paces**  The maximum number of paces to stimulate the system with (some models never get to steady state!).
 * **norm\_threshold**  The threshold for defining steady state as achieved, the norm of the change in state variables between two paces.
+* **detail\_duration**  How long to simulate for when producing a plot of the behaviour at steady state.  Defaults to show the number of paces defined above.
 
 It requires models to provide variables with the annotations:
 
@@ -25,6 +26,7 @@ inputs {
     num_inner_paces = 1   # How many paces to run between comparing state variables
     max_paces = 10000     # Give up at this point
     norm_threshold = 1e-6 # Applied to p1 norm of state variable differences
+    detail_duration = pacing_period * num_inner_paces # How long to simulate for a plot at steady state
 }
 
 import std = "BasicLibrary.txt"
@@ -45,9 +47,10 @@ tasks {
         }
     }
 
-    # Run a single pace in detail, to see what it looks like at steady-state
+    # Run one pace (or a few paces) in detail, to see what it looks like at steady-state.
+    # We start just before the stimulus is applied, to make the graph look nicer.
     simulation detail = timecourse {
-        range time units ms uniform -10:(pacing_period * num_inner_paces)-10
+        range time units ms uniform -10:detail_duration-10
     }
 }
 
