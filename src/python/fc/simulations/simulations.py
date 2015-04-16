@@ -94,7 +94,7 @@ class AbstractSimulation(locatable.Locatable):
         print '  ' * self.indentLevel + ' '.join(map(str, args))
         sys.stdout.flush()
 
-    def InternalRun(self):
+    def InternalRun(self, verbose=True):
         raise NotImplementedError
 
     def SetOutputFolder(self, folder):
@@ -142,11 +142,11 @@ class AbstractSimulation(locatable.Locatable):
         self.model.SetIndentLevel(self.indentLevel)
         model_env = model.GetEnvironmentMap()
         model.simEnv = self.env # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
-        for prefix in model_env.keys():
-            self.env.SetDelegateeEnv(model_env[prefix], prefix)
-            self.results.SetDelegateeEnv(model_env[prefix], prefix)
+        for prefix, env in model_env.iteritems():
+            self.env.SetDelegateeEnv(env, prefix)
+            self.results.SetDelegateeEnv(env, prefix)
 
-    def Run(self,verbose=True):
+    def Run(self, verbose=True):
         self.InternalRun(verbose)
         return self.results
 
@@ -180,7 +180,7 @@ class Timecourse(AbstractSimulation):
         except NameError:
             pass
 
-    def InternalRun(self,verbose=True):
+    def InternalRun(self, verbose=True):
         r = self.range_
         m = self.model
         start_hook, end_hook = self.LoopBodyStartHook, self.LoopBodyEndHook
@@ -215,7 +215,7 @@ class OneStep(AbstractSimulation):
         super(OneStep, self).__init__()
         self.ranges = []
 
-    def InternalRun(self,verbose=True):
+    def InternalRun(self, verbose=True):
         self.LoopBodyStartHook()
         self.model.Simulate(self.step)
         self.AddIterationOutputs(self.model.GetOutputs())
