@@ -314,7 +314,7 @@ class Protocol(object):
         self.inputEnv.OverwriteDefinition(name, value)
 
     def GetConversionCommand(self, model, xmlFile, className, tempDir,
-                             useCython=True, useNumba=False, exposeAnnotatedVariables=False):
+                             useCython=True, useNumba=False, exposeNamedParameters=False):
         """Return the command to translate a modified CellML model to Python code, optionally optimised with numba or Cython."""
         if useCython:
             model_py_file = os.path.join(tempDir, 'model.pyx')
@@ -324,14 +324,14 @@ class Protocol(object):
             target = 'Python'
         code_gen_cmd = ['./python/pycml/translate.py', '-t', target, '-p', '--Wu',
                         '--protocol=' + xmlFile,  model, '-c', className, '-o', model_py_file]
-        if exposeAnnotatedVariables:
+        if exposeNamedParameters:
             # Allow the parameter fitting code to adjust the value of any annotated constant variable
-            code_gen_cmd.append('--expose-annotated-variables')
+            code_gen_cmd.append('--expose-named-parameters')
         if not useCython and not useNumba:
             code_gen_cmd.append('--no-numba')
         return code_gen_cmd
 
-    def SetModel(self, model, useNumba=False, useCython=True, exposeAnnotatedVariables=False):
+    def SetModel(self, model, useNumba=False, useCython=True, exposeNamedParameters=False):
         """Specify the model this protocol is to be run on."""
         start = time.time()
         if isinstance(model, str):
@@ -348,7 +348,7 @@ class Protocol(object):
             # Generate the (protocol-modified) model code
             class_name = 'GeneratedModel'
             code_gen_cmd = self.GetConversionCommand(model, xml_file, class_name, temp_dir,
-                                                     useCython=useCython, useNumba=useNumba, exposeAnnotatedVariables=exposeAnnotatedVariables)
+                                                     useCython=useCython, useNumba=useNumba, exposeNamedParameters=exposeNamedParameters)
             print subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT)
             if useCython:
                 # Compile the extension module
