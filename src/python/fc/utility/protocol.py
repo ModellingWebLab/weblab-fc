@@ -48,6 +48,7 @@ from .error_handling import ProtocolError, ErrorRecorder
 from .file_handling import OutputFolder
 from .locatable import Locatable
 from ..language import values as V
+from ..language.statements import Assign
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -77,6 +78,7 @@ class Protocol(object):
         self.outputEnv = Env.Environment()
         self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv)
         # The elements making up this protocol's definition
+        self.inputs = []
         self.imports = {}
         self.library = []
         self.simulations = []
@@ -93,7 +95,8 @@ class Protocol(object):
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
-        self.inputEnv.ExecuteStatements(details.get('inputs', []))
+        self.inputs = details.get('inputs', [])
+        self.inputEnv.ExecuteStatements(self.inputs)
         for prefix, path, set_inputs in details.get('imports', []):
             self.LogProgress('Importing', path, 'as', prefix, 'in', self.protoName)
             imported_proto = Protocol(self.GetPath(protoFile, path))
@@ -101,12 +104,11 @@ class Protocol(object):
                 # TODO: Ensure all environment delegatees are correct!
                 # Merge inputs of the imported protocol into our own (duplicate names are an error here).
                 # Override any values specified in the import statement itself.
-                for name in imported_proto.inputEnv:
+                for stmt in imported_proto.inputs:
+                    name = stmt.names[0]
                     if name in set_inputs:
-                        value = set_inputs[name].Evaluate(self.inputEnv)
-                    else:
-                        value = imported_proto.inputEnv.LookUp(name)
-                    self.inputEnv.DefineName(name, value)
+                        stmt = Assign([name], set_inputs[name])
+                    self.inputEnv.ExecuteStatements([stmt])
                 # Make any prefixed imports of that protocol into our prefixed imports
                 for imported_prefix, imported_import in imported_proto.imports.iteritems():
                     self.AddImportedProtocol(imported_import, imported_prefix)
