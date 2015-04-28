@@ -175,7 +175,7 @@ class Defaults(object):
                        #"Ito_block": {"scaled_resting_potential": 1, "scaled_APD90": 1, "detailed_voltage": 2},
                        "NCX_block": {"scaled_resting_potential": 1, "scaled_APD90": 1, "detailed_voltage": 2},
                        "RyR_block": {"scaled_APD90": 1, "detailed_voltage": 2},
-                       "S1S2": {"APD90": 1},
+                       "S1S2": {"S1S2_slope": 1}, 
                        "SteadyStateRestitution": {"APD": 2, "restitution_slope": 1},
                        "SteadyStateRunner": {"num_paces": 0, "detailed_voltage": 1},
                        "SteadyStateRunner0_5Hz": {"num_paces": 0, "detailed_voltage": 1},
