@@ -179,7 +179,7 @@ class Protocol(object):
                     output_spec['description'] = output_spec['name']
                 if output_spec['name'] in plot_vars:
                     plot_descriptions[output_spec['name']] = output_spec['description']
-        if not self.outputFolder:
+        if not self.outputFolder and verbose and writeOut:
             self.LogWarning("Warning: protocol output folder not set, so not writing outputs to file")
             return
 
