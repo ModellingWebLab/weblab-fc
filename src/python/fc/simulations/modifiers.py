@@ -59,14 +59,32 @@ class SetVariable(AbstractModifier):
             raise ProtocolError("A SetVariable modifier must set a model variable")
         self.varPrefix, self.varLocalName = parts
 
+        # Save a reference so when an instance is unpickled it can revert to Apply
+        self._calledOnce = False
+
+    # Override Object serialization methods to allow pickling with the dill module
+    def __getstate__(self):
+        odict = self.__dict__.copy()
+        # For pickling, simulation modifiers can't save references to model environment
+        if '_evaluate' in odict:
+            del odict['_evaluate']
+            del odict['_bindings']
+        return odict
+    def __setstate__(self,dict):
+        self.__dict__.update(dict)
+        self._calledOnce = False
+
     def Apply(self, simul):
+        if self._calledOnce:
+            return self.FastApply(simul)
         # Cache some attribute lookups locally in the class, and re-bind to use a faster method
         self._evaluate = self.valueExpr.EvaluateCompiled
         # Find the unwrapped bindings dictionary for the model prefix, in order to write there directly
         # Old slow version: simul.env.OverwriteDefinition(self.variableName, value)
         self._bindings = simul.env.unwrappedBindings.delegatees[self.varPrefix]
-        self.Apply = self.FastApply
-        return self.Apply(simul)
+        self._calledOnce = True
+        #self.Apply = self.FastApply
+        return self.FastApply(simul)
 
     def FastApply(self, simul):
         """Optimised version of Apply that gets used after the first call.

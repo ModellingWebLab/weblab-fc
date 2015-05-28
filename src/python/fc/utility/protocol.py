@@ -50,6 +50,8 @@ from .locatable import Locatable
 from ..language import values as V
 from ..language.statements import Assign
 
+from ..simulations import simulations
+
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
 
@@ -127,6 +129,46 @@ class Protocol(object):
         self.outputs.extend(details.get('outputs', []))
         self.plots.extend(details.get('plots', []))
         self.timings['parsing'] = time.time() - start
+
+
+    # Override Object serialization methods to allow pickling with the dill module
+    def __getstate__(self):
+        # Must remove Model class and regenerate during unpickling
+        # (Pickling errors from nested class structure of ModelWrapperEnvironment)
+        for sim in self.simulations:
+            # Undo Simulation.SetModel()
+            modelenv = sim.model.GetEnvironmentMap()
+            for prefix,env in modelenv.iteritems():
+                sim.env.ClearDelegateeEnv(prefix)
+                sim.results.ClearDelegateeEnv(prefix)
+            # If the protocol has been run, remove references to model environment
+            # in the simulations
+            if "" in sim.env.delegatees:
+                sim.env.ClearDelegateeEnv("")
+            if sim.prefix and sim.prefix in self.libraryEnv.delegatees:
+                self.libraryEnv.ClearDelegateeEnv(sim.prefix)
+            sim.model = None
+        odict = self.__dict__.copy()
+        # Remove Model and CSP from Protocol
+        if 'model' in odict:
+            del odict['model']
+        del odict['parser']
+        del odict['parsedProtocol']
+        return odict
+    def __setstate__(self,dict):
+        self.__dict__.update(dict)
+        # Re-import Model from temporary Python file
+        sys.path.insert(0, self.modelPath)
+        import model as module
+        for name in module.__dict__.keys():
+            if name.startswith('GeneratedModel'):
+                model = getattr(module, name)()
+                model._module = module
+        del sys.modules['model']
+        self.model = model
+        for sim in self.simulations:
+            sim.SetModel(model)
+
 
     def AddImportedProtocol(self, proto, prefix):
         """Add a protocol imported with a prefix to our collection.
@@ -356,6 +398,7 @@ class Protocol(object):
                 # Compile the extension module
                 print subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir, stderr=subprocess.STDOUT)
             # Create an instance of the model
+            self.modelPath = temp_dir
             sys.path.insert(0, temp_dir)
             import model as module
             for name in module.__dict__.keys():

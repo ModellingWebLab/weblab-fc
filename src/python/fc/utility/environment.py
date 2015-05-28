@@ -36,6 +36,7 @@ from .error_handling import ProtocolError
 from ..language import values as V
 
 
+
 class Environment(object):
     """Base class for environments in the protocol language."""
     next_ident = [0]
@@ -55,6 +56,22 @@ class Environment(object):
             line_profile.add_function(self.FindDefiningEnvironment)
         except NameError:
             pass
+
+    # Override Object serialization methods to allow pickling with the dill module
+    def __getstate__(self):
+        odict = self.__dict__.copy()
+        # unwrappedBindings contains the numpy module which causes pickling problems.
+        # Simply removing the module from the dictionary doesn't seem to work (why?)
+        del odict['unwrappedBindings']
+        return odict
+    def __setstate__(self,dict):
+        self.__dict__.update(dict)
+        self.unwrappedBindings = DelegatingDict()
+        self.unwrappedBindings['___np'] = np
+        for prefix,delegatee in self.delegatees.iteritems():
+            self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
+        for name,value in self.bindings.iteritems():
+            self.unwrappedBindings[name] = value.unwrapped
 
     def DefineName(self, name, value):
         if ':' in name:
@@ -119,6 +136,11 @@ class Environment(object):
 #         print 'Delegating to', delegatee, 'for', prefix, 'in', self
         self.bindings.SetDelegatee(delegatee.bindings, prefix)
         self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
+
+    def ClearDelegateeEnv(self, prefix):
+        del self.delegatees[prefix]
+        del self.bindings.delegatees[prefix]
+        del self.unwrappedBindings.delegatees[prefix]
 
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())

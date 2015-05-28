@@ -48,6 +48,17 @@ class AbstractExpression(locatable.Locatable):
         except NameError:
             pass
 
+    # Override Object serialization methods to allow pickling with the dill module
+    def __getstate__(self):
+        odict = self.__dict__.copy()
+        # These properties cause namespace errors during pickling, and will be 
+        # automatically regenerated on first reference after unpickling.
+        if '_compiledFunction' in odict:
+            del odict['_compiledFunction']
+        if '_evalGlobals' in odict:
+            del odict['_evalGlobals']
+        return odict
+
     def GetUsedVariables(self):
         """Get the set of (non-local) identifiers referenced within this expression."""
         result = set()
