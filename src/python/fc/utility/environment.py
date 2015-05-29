@@ -62,7 +62,8 @@ class Environment(object):
         odict = self.__dict__.copy()
         # unwrappedBindings contains the numpy module which causes pickling problems.
         # Simply removing the module from the dictionary doesn't seem to work (why?)
-        del odict['unwrappedBindings']
+        if 'unwrappedBindings' in odict:
+            del odict['unwrappedBindings']
         return odict
     def __setstate__(self,dict):
         self.__dict__.update(dict)

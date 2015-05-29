@@ -55,7 +55,6 @@ from ..simulations import simulations
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
 
-
 class Protocol(object):
     """This class represents a protocol in the functional curation 'virtual experiment' language.
     
@@ -133,27 +132,34 @@ class Protocol(object):
 
     # Override Object serialization methods to allow pickling with the dill module
     def __getstate__(self):
+        # TODO: Original object unusable after serialization.
+        # Should either maintain object state (i.e., remove reference to simulations
+        # in copied dict and re-initialize in __setstate__) or dynamically restore
+        # simulation model state at runtime.
+
         # Must remove Model class and regenerate during unpickling
         # (Pickling errors from nested class structure of ModelWrapperEnvironment)
         for sim in self.simulations:
             # Undo Simulation.SetModel()
-            modelenv = sim.model.GetEnvironmentMap()
-            for prefix,env in modelenv.iteritems():
-                sim.env.ClearDelegateeEnv(prefix)
-                sim.results.ClearDelegateeEnv(prefix)
-            # If the protocol has been run, remove references to model environment
-            # in the simulations
-            if "" in sim.env.delegatees:
-                sim.env.ClearDelegateeEnv("")
-            if sim.prefix and sim.prefix in self.libraryEnv.delegatees:
-                self.libraryEnv.ClearDelegateeEnv(sim.prefix)
-            sim.model = None
+            if sim.model is not None:
+                modelenv = sim.model.GetEnvironmentMap()
+                for prefix,env in modelenv.iteritems():
+                    sim.env.ClearDelegateeEnv(prefix)
+                    sim.results.ClearDelegateeEnv(prefix)
+                # If the protocol has been run, remove references to model environment
+                # in the simulations
+                if "" in sim.env.delegatees:
+                    sim.env.ClearDelegateeEnv("")
+                if sim.prefix and sim.prefix in self.libraryEnv.delegatees:
+                    self.libraryEnv.ClearDelegateeEnv(sim.prefix)
+                sim.model = None
         odict = self.__dict__.copy()
         # Remove Model and CSP from Protocol
         if 'model' in odict:
             del odict['model']
-        del odict['parser']
-        del odict['parsedProtocol']
+        if 'parser' in odict:
+            del odict['parser']
+            del odict['parsedProtocol']
         return odict
     def __setstate__(self,dict):
         self.__dict__.update(dict)
