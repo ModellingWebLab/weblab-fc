@@ -29,6 +29,9 @@ Having installed (and ideally tested!) the Chaste source tree, unpack this proje
 as <Chaste>/projects/FunctionalCuration.  It is crucial to match the folder name
 and location, or the project will not work.
 
+The python implementation of Functional Curation needs a few extra dependencies:
+sudo apt-get install python-numpy python-scipy python-tables python-matplotlib cython
+
 == Usage ==
 
 Source code for the project is contained in the `src` folder, and tests of its
