@@ -144,6 +144,11 @@ class Protocol(object):
             if sim.model is not None:
                 modelenv = sim.model.GetEnvironmentMap()
                 for prefix,env in modelenv.iteritems():
+                    # Must clear references to model environment from nestedSim as well
+                    if isinstance(sim,simulations.Nested):
+                        sim.nestedSim.env.ClearDelegateeEnv(prefix)
+                        # No need to clear the nestedSim.results, as the nesting simulation maintains
+                        # a reference to it which is cleared two lines below this comment
                     sim.env.ClearDelegateeEnv(prefix)
                     sim.results.ClearDelegateeEnv(prefix)
                 # If the protocol has been run, remove references to model environment
@@ -153,6 +158,13 @@ class Protocol(object):
                 if sim.prefix and sim.prefix in self.libraryEnv.delegatees:
                     self.libraryEnv.ClearDelegateeEnv(sim.prefix)
                 sim.model = None
+                # ...and their nested simulations, if applicable
+                if isinstance(sim,simulations.Nested):
+                    if "" in sim.nestedSim.env.delegatees:
+                        sim.nestedSim.env.ClearDelegateeEnv("")
+                    if sim.nestedSim.prefix and sim.nestedSim.prefix in self.libraryEnv.delegatees:
+                        self.libraryEnv.ClearDelegateeEnv(sim.nestedSim.prefix)
+                    sim.nestedSim.model = None
         odict = self.__dict__.copy()
         # Remove Model and CSP from Protocol
         if 'model' in odict:
