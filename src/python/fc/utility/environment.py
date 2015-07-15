@@ -57,22 +57,15 @@ class Environment(object):
         except NameError:
             pass
 
-    # Override Object serialization methods to allow pickling with the dill module
+    # Python requires __setstate__ (which restores the numpy module untracked by
+    # DelegatingDict.__getstate()) to be paired with a (dummy) __getstate__() method
     def __getstate__(self):
-        odict = self.__dict__.copy()
-        # unwrappedBindings contains the numpy module which causes pickling problems.
-        # Simply removing the module from the dictionary doesn't seem to work (why?)
-        if 'unwrappedBindings' in odict:
-            del odict['unwrappedBindings']
+        odict = self.__dict__#.copy()
         return odict
     def __setstate__(self,dict):
         self.__dict__.update(dict)
-        self.unwrappedBindings = DelegatingDict()
         self.unwrappedBindings['___np'] = np
-        for prefix,delegatee in self.delegatees.iteritems():
-            self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
-        for name,value in self.bindings.iteritems():
-            self.unwrappedBindings[name] = value.unwrapped
+
 
     def DefineName(self, name, value):
         if ':' in name:
@@ -139,9 +132,10 @@ class Environment(object):
         self.unwrappedBindings.SetDelegatee(delegatee.unwrappedBindings, prefix)
 
     def ClearDelegateeEnv(self, prefix):
-        del self.delegatees[prefix]
-        del self.bindings.delegatees[prefix]
-        del self.unwrappedBindings.delegatees[prefix]
+        if prefix in self.delegatees:
+            del self.delegatees[prefix]
+            del self.bindings.delegatees[prefix]
+            del self.unwrappedBindings.delegatees[prefix]
 
     def Merge(self, env):
         self.DefineNames(env.bindings.keys(), env.bindings.values())
@@ -228,6 +222,24 @@ class DelegatingDict(dict):
         from ..language.expressions import NameLookUp
         self._marker = NameLookUp.PREFIXED_NAME
         self._marker_len = len(self._marker)
+
+    # Have to delete references to modules (numpy) from the dictionary while maintaining
+    # subclassing elements.
+    # Pickling with extended dicts is hard...
+    def __getstate__(self):
+        odict = self.copy()
+        if '___np' in odict:
+            del odict['___np']
+        return (self.__dict__, odict)
+
+    # Separately update the state of dict (superclass) and DelegatingDict (subclass) components
+    def __setstate__(self, state):
+        self.__dict__.update(state[0])
+        self.update(state[1])
+
+    # IMPORTANT: Informs compiler of changes to pickling state enforced above
+    def __reduce__(self):
+        return (DelegatingDict, (), self.__getstate__())
 
     def __missing__(self, key):
         if key.startswith(self._marker):
