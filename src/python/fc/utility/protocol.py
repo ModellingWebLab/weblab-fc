@@ -100,9 +100,8 @@ class Protocol(object):
         self.inputEnv.ExecuteStatements(self.inputs)
         for prefix, path, set_inputs in details.get('imports', []):
             self.LogProgress('Importing', path, 'as', prefix, 'in', self.protoName)
-            imported_proto = Protocol(self.GetPath(protoFile, path))
+            imported_proto = Protocol(self.GetPath(protoFile, path), self.indentLevel + 1)
             if prefix == "":
-                # TODO: Ensure all environment delegatees are correct!
                 # Merge inputs of the imported protocol into our own (duplicate names are an error here).
                 # Override any values specified in the import statement itself.
                 for stmt in imported_proto.inputs:
