@@ -61,8 +61,8 @@ post-processing {
     assert sim:membrane_voltage.IS_ARRAY
     
     # Compute APD & peak voltage for the final pace
-    apd = Apd(sim:membrane_voltage, sim:time, apd_percent)[0]
     peak_voltage = Max(sim:membrane_voltage)[0]
+    apd = Apd(sim:membrane_voltage, sim:time, apd_percent)[0]
 }
 
 outputs {
