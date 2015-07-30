@@ -44,13 +44,19 @@ class AbstractStatement(locatable.Locatable):
 
 class Assign(AbstractStatement):
     """Assign statements in the protocol language."""
-    def __init__(self, names, rhs):
+    def __init__(self, names, rhs, optional=False):
         super(Assign, self).__init__()
         self.names = names
         self.rhs = rhs
+        self.optional = optional
 
     def Evaluate(self, env):
-        results = self.rhs.Evaluate(env)
+        try:
+            results = self.rhs.Evaluate(env)
+        except:
+            if not self.optional:
+                raise
+            return V.Null()
         if len(self.names) > 1:
             if not isinstance(results, V.Tuple):
                 raise ProtocolError("When assigning multiple names the value to assign must be a tuple.")

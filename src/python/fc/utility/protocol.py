@@ -215,7 +215,14 @@ class Protocol(object):
         for output_spec in self.outputs:
             with errors:
                 output_var = output_spec.get('ref', output_spec['name'])
-                output = self.postProcessingEnv.LookUp(output_var)
+                try:
+                    output = self.postProcessingEnv.LookUp(output_var)
+                except KeyError:
+                    if output_spec['optional']:
+                        self.LogWarning("Ignoring missing optional output", output_spec['name'])
+                        continue
+                    else:
+                        raise
                 self.outputEnv.DefineName(output_spec['name'], output)
                 outputs_defined.append(output_spec)
                 if not 'description' in output_spec:

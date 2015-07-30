@@ -155,11 +155,19 @@ class AbstractOdeModel(AbstractModel):
 
 class NestedProtocol(AbstractModel):
     """This type of model wraps the execution of an entire protocol."""
-    def __init__(self, proto, inputExprs, outputNames):
+    def __init__(self, proto, inputExprs, outputNames, optionalFlags):
+        """Create a new nested protocol.
+        
+        :param proto: the full path to the protocol description to nest
+        :param inputExprs: a map from input name to defining expression, for setting inputs of the nested protocol
+        :param outputNames: list of the names of the protocol outputs to keep as our outputs
+        :param optionalFlags: list matching outputNames specifying whether each output is optional (i.e. may be missing)
+        """
         from ..utility.protocol import Protocol
         self.proto = Protocol(proto)
         self.inputExprs = inputExprs
         self.outputNames = outputNames
+        self.optionalFlags = optionalFlags
 
     def SetIndentLevel(self, indentLevel):
         """Set the level of indentation to use for progress output."""
@@ -167,7 +175,22 @@ class NestedProtocol(AbstractModel):
         self.proto.SetIndentLevel(indentLevel)
 
     def GetOutputs(self):
-        outputs = [self.proto.outputEnv.LookUp(name).unwrapped for name in self.outputNames]
+        outputs = []
+        missing = []
+        for i, name in enumerate(self.outputNames[:]):
+            try:
+                value = self.proto.outputEnv.LookUp(name).unwrapped
+            except:
+                if self.optionalFlags[i]:
+                    value = None
+                    missing.append(i)
+                else:
+                    raise
+            outputs.append(value)
+        for i in reversed(missing):
+            del outputs[i]
+            del self.outputNames[i]
+            del self.optionalFlags[i]
         return outputs
 
     def GetEnvironmentMap(self):

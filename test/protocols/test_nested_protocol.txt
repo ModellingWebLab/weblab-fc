@@ -2,19 +2,37 @@
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
+import std = "BasicLibrary.txt"
+
 tasks {
     simulation sim = nested {
-        range iter units dimensionless vector [0, 1]
-        nests protocol "../../protocols/SteadyPacing.txt" {
-            steady_state_beats = 5
-            pacing_period = (iter * 100) + 900
-            select output peak_voltage
-            select output apd
+        range iter units dimensionless vector [0, 1, 2, 3]
+        nests protocol "test_nested_protocol_inner.txt" {
+            initial_value = iter
+            select output V
+            select optional output always_missing
+            select optional output some_missing
         }
     }?
 }
 
+post-processing {
+    first_missing =? sim:always_missing[0]
+    # TODO: The partial simulation output shouldn't be returned
+    first_present =? sim:some_missing[0]
+    assert first_present == 0
+
+    # Check simulation did what was expected
+    def Close(a1, a2, tol=1e-6) {
+        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    }
+    assert Close(sim:V, [ i+j for i in 0:4 for j in 0:10 ])
+}
+
 outputs {
-    peak_voltage = sim:peak_voltage
-    apd90 = sim:apd
+    V = sim:V
+    optional always_missing = sim:always_missing
+    optional some_missing = sim:some_missing
+    optional first_missing units dimensionless "First missing value"
+    optional first_present units dimensionless "First present value?"
 }

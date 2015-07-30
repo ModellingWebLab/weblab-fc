@@ -534,7 +534,7 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         input = iter
         select output oname
     }
-}""", [['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], 'oname']]]]],
+}""", [['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], ['oname']]]]]],
                           ('nestedSimulation', {}, [('vectorStepper',),
                                                     'modifiers',
                                                     ('nestedProtocol', {'source': 'proto.txt'},

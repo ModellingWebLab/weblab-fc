@@ -1,0 +1,47 @@
+# Compact syntax version of the test_nested_protocol protocol
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+inputs {
+    initial_value = 0
+}
+
+import "BasicLibrary.txt"
+
+units {
+    ms = milli second
+    mV = milli volt
+    mV_per_ms = milli volt . milli second^-1
+}
+
+model interface {
+    # Turn the model into dV/dt = 1
+    independent var units ms
+    input oxmeta:membrane_voltage
+    output oxmeta:membrane_voltage units mV
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:9
+        modifiers { at start set oxmeta:membrane_voltage = initial_value }
+    }
+}
+
+post-processing {
+    # This is a statement that will always fail
+    always_missing =? [0, 1][2]
+
+    # This is a statement that will fail for some protocol inputs
+    some_missing =? [0, 1][initial_value]
+
+    # TODO #2697: Consider the alternative 'optional some_missing = blah' syntax;
+    # include low-level tests in TestCompactSyntaxParser to ensure 'optional = blah' is parsed OK.
+}
+
+outputs {
+    V = sim:membrane_voltage
+    optional always_missing units dimensionless "Value never present"
+    optional some_missing   units dimensionless "Value sometimes present"
+}

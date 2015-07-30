@@ -660,16 +660,32 @@ class Actions(object):
     class Assignment(BaseGroupAction):
         """Parse action for both simple and tuple assignments."""
         def _xml(self):
+            if len(self.tokens) == 3:
+                optional = True
+                self.tokens = self.tokens[0::2]
+            else:
+                optional = False
             assignee, value = self.GetChildrenXml()
-            return M.apply(M.eq, assignee, value)
-        
+            elt = M.apply(M.eq, assignee, value)
+            if optional:
+                elt.set('{%s}optional' % PROTO_NS, 'true')
+            return elt
+
         def _expr(self):
+            if len(self.tokens) == 3:
+                optional = True
+                self.tokens = self.tokens[0::2]
+            else:
+                optional = False
             assignee, value = self.GetChildrenExpr()
             if isinstance(assignee, E.NameLookUp):
                 var_list = [assignee.name]
             elif isinstance(assignee, E.TupleExpression):
                 var_list = [child.name for child in assignee.children]
-            return S.Assign(var_list, value)
+            args = [var_list, value]
+            if optional:
+                args.append(True)
+            return S.Assign(*args)
     
     class Return(BaseGroupAction):
         """Parse action for return statements."""
@@ -933,12 +949,15 @@ class Actions(object):
                 input_value = assignment.tokens[1].xml()
                 args.append(self.AddLoc(P.setInput(input_value, name=input_name)))
             for output in self.tokens[2:]:
-                args.append(self.AddLoc(P.selectOutput(name=output)))
+                output_attrs = {'name': output[-1]}
+                if len(output) == 2:
+                    output_attrs['optional'] = 'true'
+                args.append(self.AddLoc(P.selectOutput(**output_attrs)))
             result = P.nestedProtocol(*args, **attrs)
             if self.trace:
                 self.AddTrace(result)
             return result
-        
+
         def _expr(self):
             args = []
             proto_file = self.tokens[0]
@@ -952,7 +971,11 @@ class Actions(object):
                 input_value = assignment.tokens[1].expr()
                 inputs[input_name] = input_value
             args.append(inputs)
-            args.append(self.tokens[2:])
+            output_names, optional_flags = [], []
+            for output in self.tokens[2:]:
+                output_names.append(output[-1])
+                optional_flags.append(len(output) == 2)
+            args.extend([output_names, optional_flags])
             model = Model.NestedProtocol(*args)
             result = Simulations.OneStep(0)
             result.SetModel(model)
@@ -1109,8 +1132,11 @@ class Actions(object):
                 units = self.tokens['units']
                 if units[0] in Actions.units_map:
                     units[0] = Actions.units_map[units[0]]
-            return elt(**self.TransferAttrs('name', 'ref', 'units', 'description'))
-        
+            attrs = self.TransferAttrs('name', 'ref', 'units', 'description')
+            if 'optional' in self.tokens:
+                attrs['optional'] = 'true'
+            return elt(**attrs)
+
         def _expr(self):
             output = {}
             if 'units' in self.tokens:
@@ -1121,10 +1147,11 @@ class Actions(object):
                 output['ref'] = self.tokens['ref']
             if 'description' in self.tokens:
                 output['description'] = self.tokens['description']
+            output['optional'] = 'optional' in self.tokens
             return output
     
     class Outputs(BaseGroupAction):
-        """Parse action for the plots section."""
+        """Parse action for the outputs section."""
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.outputVariables(*self.GetChildrenXml())
@@ -1484,6 +1511,7 @@ class CompactSyntaxParser(object):
     
     # Full assignment, to a tuple of names or single name
     assignStmt = p.Group(p.Group(p.delimitedList(ncIdentAsVar)).setParseAction(Actions.MaybeTuple) + eq -
+                         Optional(Adjacent(p.Keyword('?')))("optional") -
                          p.Group(p.delimitedList(expr)).setParseAction(Actions.MaybeTuple))   \
                  .setName('AssignStmt').setParseAction(Actions.Assignment)
     
@@ -1594,7 +1622,7 @@ class CompactSyntaxParser(object):
     
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
-    _selectOutput = (MakeKw('select') - MakeKw('output') - ncIdent).setName('SelectOutput')
+    _selectOutput = p.Group(MakeKw('select') - Optional(MakeKw('optional', suppress=False)) - MakeKw('output') - ncIdent).setName('SelectOutput')
     nestedProtocol = p.Group(MakeKw('protocol') - quotedUri + obrace +
                              simpleAssignList + Optional(nl) + OptionalDelimitedList(_selectOutput, nl) +
                              cbrace + Optional('?')).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
@@ -1614,8 +1642,8 @@ class CompactSyntaxParser(object):
     #######################
     
     outputDesc = Optional(quotedString)("description")
-    outputSpec = p.Group(ncIdent("name") + ((unitsRef("units") + outputDesc) |
-                                            (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))
+    outputSpec = p.Group(Optional(MakeKw('optional', suppress=False))("optional") + ncIdent("name")
+                         + ((unitsRef("units") + outputDesc) | (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))
                          ).setName('Output').setParseAction(Actions.Output)
     outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(outputSpec, nl) + cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
