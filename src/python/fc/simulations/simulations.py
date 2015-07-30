@@ -173,13 +173,25 @@ class AbstractSimulation(locatable.Locatable):
     def AddIterationOutputs(self, outputsList):
         """Copy model outputs from one simulation step into the overall output arrays for the (possibly nested) simulation."""
         self_results, results_list = self.results, self.resultsList
-        if self_results is not None and not self_results:
-            # First iteration - create empty output arrays of the correct shape
-            range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
-            for name, output in itertools.izip(self.model.outputNames, outputsList):
-                result = V.Array(np.empty(range_dims + output.shape))
-                self_results.DefineName(name, result)
-                results_list.append(result.unwrapped)
+        if self_results is not None:
+            if isinstance(outputsList, tuple):
+                # Some simulation outputs were missing
+                outputsList, missing_outputs = outputsList
+            else:
+                missing_outputs = []
+            if not self_results:
+                # First iteration - create empty output arrays of the correct shape
+                range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
+                for name, output in itertools.izip(self.model.outputNames, outputsList):
+                    result = V.Array(np.empty(range_dims + output.shape))
+                    self_results.DefineName(name, result)
+                    results_list.append(result.unwrapped)
+            elif missing_outputs:
+                for i, name in missing_outputs:
+                    del results_list[i]
+                    self_results.allowOverwrite = True
+                    self_results.Remove(name)
+                    self_results.allowOverwrite = False
         if results_list:
             # Note that the tuple conversion in the next line is very quick
             range_indices = tuple(map(attrgetter('count'), self.ranges))  # tuple(r.count for r in self.ranges)

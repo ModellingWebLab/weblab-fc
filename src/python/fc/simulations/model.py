@@ -175,6 +175,7 @@ class NestedProtocol(AbstractModel):
         self.proto.SetIndentLevel(indentLevel)
 
     def GetOutputs(self):
+        """Return selected outputs from the nested protocol."""
         outputs = []
         missing = []
         for i, name in enumerate(self.outputNames[:]):
@@ -183,14 +184,16 @@ class NestedProtocol(AbstractModel):
             except:
                 if self.optionalFlags[i]:
                     value = None
-                    missing.append(i)
+                    missing.append((i, name))
                 else:
                     raise
             outputs.append(value)
-        for i in reversed(missing):
+        for i, name in reversed(missing):
             del outputs[i]
             del self.outputNames[i]
             del self.optionalFlags[i]
+        if missing:
+            return outputs, reversed(missing)
         return outputs
 
     def GetEnvironmentMap(self):

@@ -49,6 +49,10 @@ class TestVariousProtocols(unittest.TestCase):
         proto.SetOutputFolder('TestVariousProtocols_TestNestedProtocols')
         proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
         proto.Run()
+        self.assertNotIn('always_missing', proto.outputEnv)
+        self.assertNotIn('first_missing', proto.outputEnv)
+        self.assertNotIn('some_missing', proto.outputEnv)
+        self.assertNotIn('first_present', proto.outputEnv)
  
     def TestAnnotatingWithOtherOntologies(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_other_ontologies.txt'
