@@ -659,31 +659,30 @@ class Actions(object):
     
     class Assignment(BaseGroupAction):
         """Parse action for both simple and tuple assignments."""
-        def _xml(self):
+        def __init__(self, s, loc, tokens):
+            super(Actions.Assignment, self).__init__(s, loc, tokens)
             if len(self.tokens) == 3:
-                optional = True
-                self.tokens = self.tokens[0::2]
+                # This is an optional assignment
+                self._optional = True
+                self.tokens = self.tokens[1:]
             else:
-                optional = False
+                self._optional = False
+
+        def _xml(self):
             assignee, value = self.GetChildrenXml()
             elt = M.apply(M.eq, assignee, value)
-            if optional:
+            if self._optional:
                 elt.set('{%s}optional' % PROTO_NS, 'true')
             return elt
 
         def _expr(self):
-            if len(self.tokens) == 3:
-                optional = True
-                self.tokens = self.tokens[0::2]
-            else:
-                optional = False
             assignee, value = self.GetChildrenExpr()
             if isinstance(assignee, E.NameLookUp):
                 var_list = [assignee.name]
             elif isinstance(assignee, E.TupleExpression):
                 var_list = [child.name for child in assignee.children]
             args = [var_list, value]
-            if optional:
+            if self._optional:
                 args.append(True)
             return S.Assign(*args)
     
@@ -1510,8 +1509,8 @@ class CompactSyntaxParser(object):
     returnStmt = p.Group(MakeKw('return') - p.delimitedList(expr)).setName('ReturnStmt').setParseAction(Actions.Return)
     
     # Full assignment, to a tuple of names or single name
-    assignStmt = p.Group(p.Group(p.delimitedList(ncIdentAsVar)).setParseAction(Actions.MaybeTuple) + eq -
-                         Optional(Adjacent(p.Keyword('?')))("optional") -
+    _idents = p.Group(p.delimitedList(ncIdentAsVar)).setParseAction(Actions.MaybeTuple)
+    assignStmt = p.Group(((MakeKw('optional', suppress=False)("optional") + _idents) | _idents) + eq -
                          p.Group(p.delimitedList(expr)).setParseAction(Actions.MaybeTuple))   \
                  .setName('AssignStmt').setParseAction(Actions.Assignment)
     

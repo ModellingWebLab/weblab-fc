@@ -31,13 +31,10 @@ tasks {
 
 post-processing {
     # This is a statement that will always fail
-    always_missing =? [0, 1][2]
+    optional always_missing = [0, 1][2]
 
     # This is a statement that will fail for some protocol inputs
-    some_missing =? [0, 1][initial_value]
-
-    # TODO #2697: Consider the alternative 'optional some_missing = blah' syntax;
-    # include low-level tests in TestCompactSyntaxParser to ensure 'optional = blah' is parsed OK.
+    optional some_missing = [0, 1][initial_value]
 }
 
 outputs {

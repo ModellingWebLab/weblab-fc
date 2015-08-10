@@ -533,13 +533,15 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
     nests protocol "proto.txt" {
         input = iter
         select output oname
+        select optional output opt
     }
-}""", [['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], ['oname']]]]]],
+}""", [['', [['iter', 'D', ['0', '1']], [['proto.txt', [['input', 'iter']], ['oname'], ['optional', 'opt']]]]]],
                           ('nestedSimulation', {}, [('vectorStepper',),
                                                     'modifiers',
                                                     ('nestedProtocol', {'source': 'proto.txt'},
                                                      [('setInput', {'name': 'input'}, ['ci:iter']),
-                                                      ('selectOutput', {'name': 'oname'}, [])])]))
+                                                      ('selectOutput', {'name': 'oname'}, []),
+                                                      ('selectOutput', {'name': 'opt', 'optional': 'true'})])]))
         # Tracing a nested protocol
         self.assertParses(csp.simulation, 'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { }? }',
                           [['', [['iter', 'D', ['0', '1']], [['P', []]]]]],
@@ -571,6 +573,10 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
                           ('postprocessed', {'name': 'varname', 'units': 'UU'}))
         self.assertParses(csp.outputSpec, 'varname units UU "desc"', [['varname', 'UU', 'desc']],
                           ('postprocessed', {'name': 'varname', 'units': 'UU', 'description': 'desc'}))
+        self.assertParses(csp.outputSpec, 'optional varname units UU', [['optional', 'varname', 'UU']],
+                          ('postprocessed', {'name': 'varname', 'units': 'UU', 'optional': 'true'}))
+        self.assertParses(csp.outputSpec, 'optional varname = ref:var', [['optional', 'varname', 'ref:var']],
+                          ('raw', {'name': 'varname', 'ref': 'ref:var', 'optional': 'true'}))
         self.failIfParses(csp.outputSpec, 'varname_no_units')
         
         self.assertParses(csp.outputs, """outputs #cccc
@@ -578,11 +584,13 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         n1 = n2 units u1
         n3 = p:m 'd1'
         n4 units u2 "d2"
+        optional n5 units u3
 } #cpc
-""", [[['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2']]],
+""", [[['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2'], ['optional', 'n5', 'u3']]],
      ('outputVariables', [('postprocessed', {'name': 'n1', 'ref': 'n2', 'units': 'u1'}),
                           ('raw', {'name': 'n3', 'ref': 'p:m', 'description': 'd1'}),
-                          ('postprocessed', {'name': 'n4', 'units': 'u2', 'description': 'd2'})]))
+                          ('postprocessed', {'name': 'n4', 'units': 'u2', 'description': 'd2'}),
+                          ('postprocessed', {'name': 'n5', 'units': 'u3', 'optional': 'true'})]))
         self.assertParses(csp.outputs, "outputs {}", [[]])
     
     def TestParsingPlotSpecifications(self):
@@ -644,6 +652,13 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.failIfParses(csp.assignStmt, 'p:a, p:b = e')
         self.failIfParses(csp.assignStmt, '')
     
+    def TestParsingOptionalAssignments(self):
+        opt = {'{%s}optional' % CSP.PROTO_NS: 'true'}
+        self.assertParses(csp.assignStmt, 'optional var = value', [[['var'], ['value']]],
+                          ('apply', opt, ['eq', 'ci:var', 'ci:value']))
+        # The following should parse as a non-optional assignment!
+        self.assertParses(csp.assignStmt, 'optional = expr', [[['optional'], ['expr']]], ('apply', {}, ['eq', 'ci:optional', 'ci:expr']))
+
     def TestParsingReturnStatements(self):
         self.assertParses(csp.returnStmt, 'return 2 * a', [[['2', '*', 'a']]],
                           ('apply', ['csymbol-return', ('apply', ['times', 'cn', 'ci'])]))

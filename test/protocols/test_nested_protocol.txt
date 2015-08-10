@@ -17,9 +17,9 @@ tasks {
 }
 
 post-processing {
-    first_missing =? sim:always_missing[0]
+    optional first_missing = sim:always_missing[0]
     # Note that we expect this to fail since the partial simulation output shouldn't be returned
-    first_present =? sim:some_missing[0]
+    optional first_present = sim:some_missing[0]
 
     # Check simulation did what was expected
     def Close(a1, a2, tol=1e-6) {
