@@ -1337,8 +1337,14 @@ def MonkeyPatch():
             self.ignoreExprs.append( p.Suppress( other.copy() ) )
         return self
 
+    def err_str( self ):
+        """Extended exception reporting that also prints the offending line with an error marker underneath."""
+        return "%s (at char %d), (line:%d, col:%d):\n%s\n%s" % (self.msg, self.loc, self.lineno, self.column, self.line,
+                                                                ' '*(self.column - 1) + '^')
+
     import new
     setattr(p.ParserElement, 'ignore', new.instancemethod(locals()['ignore'], None, p.ParserElement))
+    setattr(p.ParseException, '__str__', new.instancemethod(locals()['err_str'], None, p.ParseException))
 
 MonkeyPatch()
 
@@ -1672,11 +1678,11 @@ class CompactSyntaxParser(object):
         # basis that if one expression needs to, several are likely to.
         self._stack_depth_factor = 1
         self._original_stack_limit = sys.getrecursionlimit()
-        
+
     def __del__(self):
         """Reset the stack limit if it changed."""
         sys.setrecursionlimit(self._original_stack_limit)
-    
+
     def _Try(self, callable, *args, **kwargs):
         """Try calling the given parse command, increasing the stack depth limit if needed."""
         r = None # Result
@@ -1695,7 +1701,7 @@ class CompactSyntaxParser(object):
             raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
-    
+
     def ParseFile(self, filename, xmlGenerator=None):
         """Main entry point for parsing a single protocol file; returns an ElementTree."""
         Actions.source_file = filename
@@ -1705,8 +1711,8 @@ class CompactSyntaxParser(object):
         xml = xmlGenerator.xml()
         xml.base = filename
         return ET.ElementTree(xml)
-    
-    def _ConvertSource(self, referringElt, referringProtoPath, outputDir):
+
+    def _ConvertSource(self, referringElt, referringProtoPath, outputDir, dryRun=False):
         """Possibly convert a protocol referred to by another."""
         source_path = referringElt.attrib['source']
         if source_path.endswith('.txt'):
@@ -1716,12 +1722,13 @@ class CompactSyntaxParser(object):
             if not os.path.exists(source_path):
                 library = os.path.join(os.path.dirname(__file__), os.pardir, 'library')
                 source_path = os.path.join(library, referringElt.attrib['source'])
-            new_path = self.ConvertProtocol(source_path, outputDir)
-            referringElt.attrib['source'] = new_path
-    
-    def ConvertProtocol(self, sourcePath, outputDir, xmlGenerator=None):
+            new_path = self.ConvertProtocol(source_path, outputDir, dryRun=dryRun)
+            if not dryRun:
+                referringElt.attrib['source'] = new_path
+
+    def ConvertProtocol(self, sourcePath, outputDir, xmlGenerator=None, dryRun=False):
         """Convert a protocol from textual syntax to XML in a temporary file.
-        
+
         Recursively converts imported/nested textual protocols too.
         """
         import tempfile
@@ -1729,15 +1736,16 @@ class CompactSyntaxParser(object):
         # Find imported/nested textual protocols, and convert them first, updating our references to them
         subst = {'ns': '{%s}' % PROTO_NS}
         for import_elt in xml.iterfind('%(ns)simport' % subst):
-            self._ConvertSource(import_elt, sourcePath, outputDir)
+            self._ConvertSource(import_elt, sourcePath, outputDir, dryRun=dryRun)
         for nested_proto in xml.iterfind('%(ns)ssimulations//%(ns)snestedProtocol' % subst):
-            self._ConvertSource(nested_proto, sourcePath, outputDir)
-        # Write this protocol to file
-        handle, output_path = tempfile.mkstemp(dir=outputDir, text=True, suffix='.xml')
-        output_file = os.fdopen(handle, 'w')
-        xml.write(output_file, pretty_print=True, xml_declaration=True)
-        output_file.close()
-        return output_path
+            self._ConvertSource(nested_proto, sourcePath, outputDir, dryRun=dryRun)
+        if not dryRun:
+            # Write this protocol to file
+            handle, output_path = tempfile.mkstemp(dir=outputDir, text=True, suffix='.xml')
+            output_file = os.fdopen(handle, 'w')
+            xml.write(output_file, pretty_print=True, xml_declaration=True)
+            output_file.close()
+            return output_path
 
 
 ################################################################################
@@ -1791,9 +1799,10 @@ if __name__ == '__main__':
     assert len(sys.argv) >= 3
     source_path = sys.argv[1]
     output_dir = sys.argv[2]
+    dry_run = output_dir == '--dry-run'
     try:
         parser = CompactSyntaxParser()
-        output_path = parser.ConvertProtocol(source_path, output_dir)
+        output_path = parser.ConvertProtocol(source_path, output_dir, dryRun=dry_run)
         print output_path
     except:
         if len(sys.argv) == 3:
