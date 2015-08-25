@@ -11,7 +11,7 @@ post-processing {
         return fold(@2:+, a, 0, dim)
     }
     max = lambda a, dim: fold(@2:MathML:max, a, default, dim)
-    
+
     input = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
     input_sum = sum(input)
     assert input_sum[0] == 55
@@ -87,21 +87,62 @@ post-processing {
     
     # Test Count function
     assert Count(input, lambda elt: elt < 5) == 4
-    
+    assert Count([1,2,3,4], lambda e: e > 2) == 2
+    assert Count([[1,2,3],[4,5,6],[7,8,9]], lambda e: MathML:rem(e,2)==1) == 5
+
     # Simple test of Filter function
     assert ArrayEq(Filter(input, lambda elt: elt < 5), [1,2,3,4])
-    
+
     # More tests of functions from the basic library
-    
+
+    assert ArrayEq(Join([1,2,3], [4,5,6]), [1,2,3,4,5,6])
+    assert ArrayEq(Join([[1,2,3],[4,5,6]], [[7,8,9]], 0), [[1,2,3], [4,5,6], [7,8,9]])
+    assert ArrayEq(Join([[1,2,3],[4,5,6]], [[7],[8]], 1), [[1,2,3,7], [4,5,6,8]])
+
+    assert ArrayEq(Stretch([[1], [2], [3]], 3, 1), [[1,1,1], [2,2,2], [3,3,3]])
+    assert ArrayEq(Stretch([[1,2]], [3,2], 0), [[1,2], [1,2], [1,2]])
+
+    assert ArrayEq(Shift([1,2,3,4,5,6], 2), [1,1,1,2,3,4])
+    assert ArrayEq(Shift([1,2,3,4,5,6], -2), [3,4,5,6,6,6])
+    assert ArrayEq(Shift([[1,2,3], [4,5,6], [7,8,9]], 1, 0), [[1,2,3], [1,2,3], [4,5,6]])
+    assert ArrayEq(Shift([[1,2,3], [4,5,6], [7,8,9]], -1), [[2,3,3], [5,6,6], [8,9,9]])
+
+    assert ArrayEq(Window([1,2,3,4,5], 1), [ [2,3,4,5,5], [1,2,3,4,5], [1,1,2,3,4] ])
+
+    def Close(a1, a2, tol=1e-6): MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+    assert Close(Localise(Mean, [1,2,3,4,5,6], 1), [4/3,2,3,4,5,17/3])
+    assert ArrayEq(Localise(Product, [[1,2,3],[4,5,6],[7,8,9]], 1, 0), [[4,20,54],[28,80,162], [196,320,486]])
+    assert ArrayEq(Localise(Product, [[1,2,3],[4,5,6],[7,8,9]], 1, 1), [[2,6,18], [80,120,180],[392,504,648]])
+
+    assert Close(Interp([1,2,3,4], [2,4,6,8], [5], [1], 1), [2.5])
+    assert Close(Interp([1,2,3,4], [2,4,6,8], [6], [1], 1), [3])
+    assert Close(Interp([1,2,3,4], [2,4,6,8], [5], [3], 0), [2.5])
+    assert Close(Interp([1,2,3,4], [7,6,5,4], [6.8], [1], 1), [1.2])
+    assert Close(Interp([[1,2,3,4],[5,6,7,8],[9,10,11,12]],   # xs
+                        [[2,4,6,8],[8,6,4,2],[6,8,5,2]],      # ys
+                        [[5],[7],[4]], [[2],[5],[10]], 1, 1), # targets, starts, afterStarts, dim
+                 [[2.5], [5.5], [11 + 1/3]])
+
+    assert ArrayEq(After([2,4,6,8], [1,2,3,4], 2), [6,8])
+    assert ArrayEq(After([[1,2,3],[4,5,6],[7,8,9]], [[1,1,1],[2,2,2],[3,3,3]], 1, 0), [[4,5,6],[7,8,9]])
+
+    assert ArrayEq(AddDim([1,2,3], 0), [[1,2,3]])
+    assert ArrayEq(AddDim([1,2,3], 1), [[1],[2],[3]])
+
+    assert ArrayEq(Transpose([[1,2,3],[4,5,6]]), [[1,4],[2,5],[3,6]])
+    assert ArrayEq(Transpose([[1,4],[2,5],[3,6]]), [[1,2,3],[4,5,6]])
+
     assert ArrayEq(Permute(input, [9,8,7,6,5,4,3,2,1,0]), input[:-1:])
     assert ArrayEq(Permute(input2d, [1,2,0]), [[3,5,1], [4,2,6]])
-    
+    assert ArrayEq(Permute(input2d, [1,0], 0), [[6,4,2], [1,3,5]])
+
     assert ArrayEq(Sort([3,7,5,2,9]), [2,3,5,7,9])
     assert ArrayEq(Sort([3,7,11,2,9]), [2,3,7,9,11])
     assert ArrayEq(Sort(input), input)
-    
+
     assert ArrayEq(SortBy(input2d, [3,1,2]), [ [3,5,1], [4,2,6] ])
-    
+    assert ArrayEq(SortBy(input2d, [7,2], 0), [[6,4,2], [1,3,5]])
+
     assert ArrayEq(MakeArray(1, [2]), [1,1])
     assert ArrayEq(MakeArray(1, [2, 3]), [ [1,1,1], [1,1,1] ])
     assert ArrayEq(MakeArray(1, [1, 2, 3]), [[ [1,1,1], [1,1,1] ]])

@@ -1,19 +1,29 @@
+# This protocol defines a library of post-processing operations useful primarily for cardiac electrophysiology,
+# specially to compute action potential properties.  The content of the protocol thus occurs within the library
+# block below.  We do however make use of many of the BasicLibrary functions, so import that protocol too.
+#
+# Note that we use a named import with a lengthy prefix here to avoid potential conflicts if this protocol
+# and the BasicLibrary are imported directly into the same protocol.  This would especially be the case if
+# both were imported without prefix, but due to an implementation quirk it can also cause problems when
+# using prefixed imports if the prefixes happen to clash.
+
 import fromBasicLib = "BasicLibrary.txt"
 
 library
 {
 
-
-# Compute action potential durations along timeseries.
-# Returns an array of APD values, whose extent along the last dimension is the minimum number of APs.
+# Compute action potential durations along time series.
+# Returns an array of APD values, whose extent along the last dimension is the minimum number of APs found in any of the time series.
+# The function arguments are passed to ApStartAndEnd; see its documentation for details.
 def Apd(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
     t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
     return map(@2:-, t_ap_ends, t_ap_starts)
 }
 
 
-# Compute action potential durations and diastolic intervals along timeseries.
+# Compute action potential durations and diastolic intervals along time series.
 # Returns a tuple (apds, dis).
+# The function arguments are passed to ApStartAndEnd; see its documentation for details.
 def ApdAndDi(V, t, percent=default, dim_=default, dvdtThreshold=default, windowSize=default) {
     t_ap_starts, t_ap_ends = ApStartAndEnd(V, t, percent, dim_, dvdtThreshold, windowSize)
     num_dims = V.NUM_DIMS
@@ -25,7 +35,25 @@ def ApdAndDi(V, t, percent=default, dim_=default, dvdtThreshold=default, windowS
 
 
 # Utility function doing the bulk of the calculation for Apd and ApdAndDi.
-# Determines the start and end times for each action potential.
+# Determines the start and end times for each action potential, returning a tuple (start_times, end_times).
+# These two arrays will have the same number of dimensions as the voltage input (V); the difference is that the last dimension will vary
+# over AP number rather than over time, and so will have length equal to the number of complete action potentials found.  The calculation
+# only succeeds if each time series contains the same number of action potentials, and all are complete.
+#
+# Function arguments:
+#   V - array of transmembrane potential data.  It may have one or more dimensions, representing one or more separate time series which
+#       will be analysed simultaneously.  A V array of shape (d_1, d_2, ..., d_n, T) represents N = d_1 * d_2 * ... * d_n time series
+#       each with T data points.
+#   t - array of time data, matching V in shape.
+#   percent - the percentage of repolarization to calculate for; defaults to 90%.
+#   dim_ - indicates which dimension of the V and t arrays varies with time.  Defaults to the last dimension, and in fact the function
+#          only works at present if this is the case (this invariant is checked with an assertion).
+#   dvdtThreshold - threshold velocity for recognising an upstroke.  The rate of change in V must exceed this in order to be considered
+#                   a potential upstroke.  The default value is usually appropriate when V is in mV and t is in ms.
+#   windowSize - how many data points to consider when looking for an upstroke.  In order to ensure we don't try to analyse the same AP
+#                twice, we only retain one location where dVdt exceeds the threshold within a window containing this many values.  Note
+#                that it gives the number of data points, not measured in time units, so if the time resolution is very fine this
+#                parameter may need to be increased from its default value.
 def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize=50) {
     dim = fromBasicLib:DefaultDim(V, dim_)
     assert dim == V.NUM_DIMS-1  # Otherwise the extended arrays below break. TODO: fix this!
@@ -36,7 +64,7 @@ def ApStartAndEnd(V, t, percent=90, dim_=default, dvdtThreshold=10.0, windowSize
     assert percent <= 100 && percent >= 0
     assert dvdtThreshold.IS_SIMPLE_VALUE
     assert windowSize.IS_SIMPLE_VALUE
-    
+
     # Find the maximum upstroke velocity location, checking that the velocity crosses a threshold
     dVdt = fromBasicLib:Grad(t, V, dim)
     assert fromBasicLib:MultiFold(@2:MathML:min, dVdt) < dvdtThreshold && fromBasicLib:MultiFold(@2:MathML:max, dVdt) > dvdtThreshold
