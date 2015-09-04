@@ -319,10 +319,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           ('specifyOutputVariable', {'name': 'test:var', 'units': 'uname'}))
         self.failIfParses(csp.outputVariable, 'output no_prefix')
         
-        self.assertParses(csp.optionalVariable, 'optional prefix:name', [['prefix:name']],
+        self.assertParses(csp.optionalVariable, 'optional prefix:name', [['prefix:name', 20]],
                           ('specifyOptionalVariable', {'name': 'prefix:name'}))
         self.assertParses(csp.optionalVariable, 'optional p:n default p:v + local * 2 :: u',
-                          [['p:n', ['p:v', '+', ['local', '*', '2']]]],
+                          [['p:n', 12, ['p:v', '+', ['local', '*', '2']], 41]],
                           ('specifyOptionalVariable', {'name': 'p:n'},
                            [('apply', ['plus', 'ci:p:v', ('apply', ['times', 'ci:local', WithUnits('cn:2', 'u')])])]))
         self.failIfParses(csp.optionalVariable, 'optional no_prefix')
@@ -375,7 +375,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
     define test:v3 = test:v2 * local
     convert u1 to u2 by lambda u: u * test:v3
 }""", [[['t'], ['test:v1', '0'], ['early_local', 'u', '12.34'], ['test:v2', 'u'], ['test:time'], ['test:v3', 'u'],
-        ['test:opt'], ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
+        ['test:opt', 315], ['local', 'dimensionless', '5'], ['test:v3', ['test:v2', '*', 'local']],
         ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]]],
                           ('modelInterface', [('setIndependentVariableUnits', {'units': 't'}),
                                               ('specifyInputVariable', {'name': 'test:v1', 'initial_value': '0'}),
