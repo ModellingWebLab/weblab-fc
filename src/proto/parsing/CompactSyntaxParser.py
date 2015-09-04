@@ -743,6 +743,14 @@ class Actions(object):
             return P.specifyOutputVariable(**self.TransferAttrs('name', 'units'))
     
     class OptionalVariable(BaseGroupAction):
+        def __init__(self, s, loc, tokens):
+            super(Actions.OptionalVariable, self).__init__(s, loc, tokens)
+            if 'default' in self.tokens:
+                # Record the actual string making up the default expression
+                self.default_expr = s[self.tokens['default_start']:self.tokens['default_end']]
+            else:
+                self.default_expr = ''
+
         def _xml(self):
             children = []
             if 'default' in self.tokens:
@@ -1570,8 +1578,7 @@ class CompactSyntaxParser(object):
     # Model interface section
     #########################
     unitsRef = MakeKw('units') - ncIdent
-    varDefault = MakeKw('default') - simpleExpr("default")
-    
+
     # Setting the units for the independent variable
     setTimeUnits = (MakeKw('independent') - MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
@@ -1581,7 +1588,9 @@ class CompactSyntaxParser(object):
     outputVariable = p.Group(MakeKw('output') - cIdent("name") + Optional(unitsRef("units"))
                              ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
     # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
-    optionalVariable = p.Group(MakeKw('optional') - cIdent("name") + Optional(varDefault)
+    locator = p.Empty().leaveWhitespace().setParseAction(lambda s,l,t: l)
+    varDefault = MakeKw('default') - locator("default_start") + simpleExpr("default")
+    optionalVariable = p.Group(MakeKw('optional') - cIdent("name") + Optional(varDefault) + locator("default_end")
                                ).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
     # New variables added to the model, with optional initial value
     newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
