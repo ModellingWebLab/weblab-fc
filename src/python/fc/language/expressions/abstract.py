@@ -57,6 +57,8 @@ class AbstractExpression(locatable.Locatable):
             del odict['_compiledFunction']
         if '_evalGlobals' in odict:
             del odict['_evalGlobals']
+        if '_definingEnvs' in odict:
+            del odict['_definingEnvs']
         return odict
 
     def GetUsedVariables(self):
