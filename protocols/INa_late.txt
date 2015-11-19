@@ -1,0 +1,355 @@
+# This is a comment.  Comments in a protocol file start with a hash character "#" and continue
+# until the end of a line.
+
+# Most of a protocol file is comprised of blocks, which start with the name of the block, then
+# an opening curly brace "{", and end at the matching closing curly brace "}".
+
+# The order in which blocks appear matters; it is intended to reflect the natural flow of both
+# writing and executing a protocol.  Each block is optional, and may be omitted if not needed
+# for your protocol.
+
+# The first block that may appear is for documenting the protocol.  The documentation block for
+# this protocol is below.
+# The documentation is written using Markdown, and rendered nicely when viewing a protocol
+# description on the Web Lab.  You can find a reference manual for Markdown's syntax at
+# http://daringfireball.net/projects/markdown/syntax and a live editor for trying it out at
+# http://markdownlivepreview.com/
+
+documentation {
+# Late Sodium Current protocol
+
+This file describes a protocol to record the late INa current for cardiac electrophysiology cell models.
+
+By clamping intra/extra-cellular sodium, potassium and calcium,
+we can throw away most of the equations of the models to leave just the INa components to study.
+
+## Parameters
+
+* **steady\_state\_time**  The amount of time to leave the current at holding potential before applying steps (ms).
+* For peak current analysis (activation curves):
+    * **holding\_potential**      The potential at which the cell rests before voltage steps are applied at t=0 (mV).
+    * **peak\_test\_potentials**  A list of voltages (steps) to clamp the cell to before recording INa (mV).
+* For inactivation curves:
+    * **inactivation\_holding\_potential**     The potential at which the cell rests before and after voltage steps are applied (mV).
+    * **inactivation\_test\_potentials**       A list of voltages (steps) to clamp the cell to at time 0 (mV).
+    * **inactivation\_depolarise\_potential**  The potential to clamp the cell to after 1 second (mV).
+
+The protocol requires models to provide variables with the annotations:
+
+* **oxmeta:membrane\_fast\_sodium\_current**
+* **oxmeta:membrane\_voltage**
+* **oxmeta:time**
+
+The following concentrations will be clamped if present, but the protocol will still run if they are missing
+(as is the case in very early models):
+
+* **oxmeta:extracellular\_sodium\_concentration**
+* **oxmeta:cytosolic\_sodium\_concentration**
+
+These will also be clamped if present as certain models (e.g. DiFrancesco-Noble) have an INa dependence on these quantities:
+
+* **oxmeta:cytosolic\_potassium\_concentration**
+* **oxmeta:extracellular\_potassium\_concentration**
+* **oxmeta:cytosolic\_calcium\_concentration**
+* **oxmeta:extracellular\_calcium\_concentration**
+}
+
+# The model annotations used by this protocol to interface to models all live in the 'oxford-metadata' ontology
+# defined by the Web Lab team.  By convention we associate the full URI for this ontology with the 'oxmeta' prefix.
+# Terms from the ontology can then be accessed using the shorthand oxmeta:term syntax, as illustrated in the
+# documentation above.
+# The available terms can be seen in the model annotation tool in the Web Lab (available when viewing a model you
+# have uploaded yourself) or at https://chaste.cs.ox.ac.uk/trac/browser/trunk/python/pycml/oxford-metadata.ttl .
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace ours = "urn:temp-names#"
+
+# Protocol inputs are the third potential section of a protocol.  Here we define eight, as detailed in the
+# protocol description above. These may be overridden by protocols which import this one.
+
+inputs {
+    # Default values for all inputs must be given.  Inputs are often single values, as for these two.
+    steady_state_time = 10000
+    holding_potential = -80.01
+    
+    prepulse_duration = 2000    # ms, must be an integer for definition of sample_times below
+    prepulse_potential = -120.01
+    
+    pulse_duration = 2000       # ms, must be an integer for definition of sample_times below
+    pulse_potential = -30.01
+}
+
+# In the fourth section of a protocol we may import other protocols in order to reuse functionality defined elsewhere.
+# Here we see a protocol imported using the labelled form, where we bind it to a name prefix ('std').  This lets us
+# use only particular parts of the protocol explicitly, rather than merging the entire protocol into this one.  This
+# form of import is generally useful for importing libraries of functions for use in post-processing.  The library
+# imported here is built-in to the Web Lab software, and may be viewed at
+# https://chaste.cs.ox.ac.uk/trac/browser/projects/FunctionalCuration/src/proto/library/BasicLibrary.txt
+
+import std = "BasicLibrary.txt"
+
+# The library is the fifth section that may appear in a protocol.  It can define variables or functions for use later in
+# the protocol.  Here we define variables for use in the tasks section below which represent the time points at which
+# to sample the fast sodium current.
+#
+# There is quite a lot going on in the expressions defining these variables.  At the outer level, we make use of the
+# Join function defined in the standard library (and hence referenced as std:Join because of the import above) to
+# concatenate two arrays together.  Since we wish to concatenate three arrays, and the function only takes two arguments,
+# we need to call it twice.
+#
+# The individual arrays to be joined are defined using array comprehensions, rather than listing their elements explicitly.
+# Comprehensions consist of an expression defining a single element of the array followed by one or more 'for <var> in <range>'
+# constructs defining looping variables.  Let us take the first instance, [i*0.5 for i in -2:1:0], as an illustrative example.
+# The expression defining each element is 'i*0.5', the looping variable is i, and it ranges from -2 to 0 in steps of size 1.
+# Note that these ranges operate like Python and omit the end value, thus defining half-open intervals.  So i takes the values
+# -2 and -1 only, and the resulting array is [-1, -0.5].
+
+library {
+    # If you mess with the sample times for the main pulse, then tau calculations will need updating.
+    sample_times = std:Join(std:Join([i for i in 0:1:prepulse_duration], [prepulse_duration+i*0.005 for i in 0:1:1000]), [prepulse_duration+i for i in 5:1:(pulse_duration+1)])
+}
+
+# The sixth potential section of a protocol defines physical units.  These definitions can then be referred to in various
+# places below, notably the model interface, simulation ranges, and output definitions.  The SI units defined by CellML
+# are built-in and always available; other units must be defined before use.
+
+units {
+    mV = milli volt
+    ms = milli second
+
+    # The next units are perhaps the most important in this protocol, as they are the desired units for ionic currents.
+    # We also specify how to display these units to the user, using the mu symbol.  If no display is given then the name
+    # of the units is used instead.
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2"
+
+    uF_per_cm2 = micro farad . centi metre^-2
+    microamps = micro ampere
+    A_per_F = ampere . farad^-1
+    mM = milli mole . litre^-1 "mM"
+    mJ_per_Mol_K = milli joule . mole^-1 . kelvin^-1
+    C_per_Mol = coulomb . mole^-1
+    K = kelvin
+}
+
+# A key part of this protocol is the model interface section.  This defines how the protocol can modify and probe the models
+# to which it is applied.
+# (Note that it doesn't matter which order statements appear within the model interface section; authors can choose whatever
+# ordering makes sense to them, and the software will ensure a sensible result if at all possible.)
+
+# Crucially, note that all references to model variables in this section use terms from the ontology declared above (with the
+# oxmeta prefix), rather than whatever variable names are used in the model.  Protocols can only access variables that are
+# annotated with terms from a declared ontology (typically the 'oxmeta' ontology for cardiac electrophysiology, although this
+# is not required by the tools).
+
+model interface {
+
+    # Here we start by defining the model inputs.  These are variables that can be changed by the protocol during simulations
+    # (see the discussion of modifiers in the tasks section below).  We can also define what units these variables have
+    # as far as the protocol is concerned; if the model uses different units, values will be units-converted when passed
+    # between model and protocol (if this is not possible, the protocol does not run).
+
+    input oxmeta:membrane_voltage units mV
+    input oxmeta:cytosolic_sodium_concentration units mM
+    input oxmeta:extracellular_sodium_concentration units mM
+    input oxmeta:cytosolic_potassium_concentration units mM
+    input oxmeta:extracellular_potassium_concentration units mM
+    input oxmeta:cytosolic_calcium_concentration units mM
+    input oxmeta:extracellular_calcium_concentration units mM
+
+    # Since we do not specify an initial value for any of the inputs above, they must appear in the model unless explicitly
+    # marked as optional.  For the various concentrations we want to clamp them if present, and it doesn't matter if they're
+    # not, so we declare them all to be optional in the following lines.
+
+    optional oxmeta:cytosolic_sodium_concentration
+    optional oxmeta:extracellular_sodium_concentration
+    optional oxmeta:cytosolic_potassium_concentration
+    optional oxmeta:extracellular_potassium_concentration
+    optional oxmeta:cytosolic_calcium_concentration
+    optional oxmeta:extracellular_calcium_concentration
+
+    # Next we specify the clamping.  For the sodium concentrations we clamp to specific values in order to give better
+    # comparisons between models.
+
+    clamp oxmeta:cytosolic_sodium_concentration to 11.6 :: mM
+    clamp oxmeta:extracellular_sodium_concentration to 140 :: mM
+
+    # For the other concentrations it doesn't matter so much what specific values they take, provided they do not change, so
+    # we just clamp to whatever value they have in the model.
+
+    clamp oxmeta:cytosolic_potassium_concentration
+    clamp oxmeta:extracellular_potassium_concentration
+    clamp oxmeta:cytosolic_calcium_concentration
+    clamp oxmeta:extracellular_calcium_concentration
+
+    # Next the model outputs are specified.  These are the variables that will be recorded and made available as raw simulation
+    # results.  Again we can specify desired units to perform conversions where necessary.  This helps ensure consistent
+    # comparisons between models.
+
+    output ours:membrane_total_sodium_current units uA_per_cm2
+    optional ours:membrane_total_sodium_current default oxmeta:membrane_fast_sodium_current + oxmeta:membrane_persistent_sodium_current
+    optional oxmeta:membrane_fast_sodium_current default 0 :: uA_per_cm2
+    optional oxmeta:membrane_persistent_sodium_current default 0 :: uA_per_cm2
+
+    output oxmeta:membrane_fast_sodium_current units uA_per_cm2
+    output oxmeta:membrane_persistent_sodium_current units uA_per_cm2
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+
+    # We also want to record the sodium reversal potential.  Not all models have this given as a variable, but we can compute it
+    # from the intra- and extra-cellular potentials.  We therefore define R and F as new constants in the model (just in case
+    # they're not present; the system is clever enough to avoid name conflicts if they are), and assume a default temperature of
+    # 310K if it is not annotated, using a 'default' clause on the optional statement.
+
+    var R units mJ_per_Mol_K = 8314.4621
+    var F units C_per_Mol = 96485.3365
+    optional oxmeta:temperature default 310 :: K
+
+    # Default clauses can also be defined by equations, that will be added to the model if necessary.  We use this feature to
+    # provide a default reversal potential, and then mark the variable as an output.
+
+    optional oxmeta:sodium_reversal_potential default (R*oxmeta:temperature/F) * MathML:ln(oxmeta:extracellular_sodium_concentration / oxmeta:cytosolic_sodium_concentration)
+    output oxmeta:sodium_reversal_potential units mV
+
+    # Next we replace the ODE for voltage by our own definition using the 'define' construct.  This allows the definition of
+    # any variable to be replaced by an arbitrary equation, so is very flexible.  In this case we simply define V as a fixed
+    # value (the actual value used will be altered during simulations by the protocol; see below) so we could also have used
+    # the form 'clamp oxmeta:membrane_voltage to 0 :: mV' - the clamp statement is just a shorthand for this special case.
+    define oxmeta:membrane_voltage = 0 :: mV
+
+    # Finally, we specify units conversion rules for membrane currents.  Where model variables have units of the same dimension
+    # as those expected by the protocol, conversions are straightforward, being simple scalings.  To convert quantities between
+    # different dimensions requires some understanding of the biology, encoded in an equation performing the conversion.  This
+    # equation is a unary function for converting a value from its actual units to the desired units (or at least, to the right
+    # dimension; normal scaling will handle the rest).
+
+    # The first pair of rules convert between currents normalised by membrane capacitance and currents normalised by membrane
+    # surface area (the latter being used by this protocol).  To do so we define a scaling factor of membrane capacitance per
+    # unit area.  This is less than ideal (models could implicitly assume a different value) but seems to work reasonably well.
+    var chaste_membrane_capacitance units uF_per_cm2 = 1
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+
+    # The next pair of rules convert between raw and normalised currents, using the model's definition of total membrane
+    # capacitance and our scaling factor.  If the model does not define membrane capacitance these rules cannot be applied; a
+    # warning to that effect will be printed, and if units conversion later fails as a result this is treated as an error.
+    convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to microamps by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
+}
+
+# The next section defines the simulation tasks to perform.  Here there are two pairs of simulations,
+# examining peak current/activation, and inactivation behaviour in turn.
+
+tasks {
+
+    # Tasks part 1.
+    # We start with simulations for the peak current I-V curve, or activation protocol.
+    # The first simulation in the pair gets the model to steady state at the holding potential.
+
+    simulation timecourse {
+
+        # Every simulation needs a range specification, which names the loop variable ('time'), gives its units ('ms') and
+        # details how many times it iterates.  In this case we iterate over a fixed vector of values, sampling the model
+        # outputs just at time 0 and after steady_state_time milliseconds.  Note that the underlying ODE solver (CVODE)
+        # simulating the model will take as many internal time steps as it needs to simulate this duration.  Solver
+        # parameters such as maximum time step and error tolerances are currently hardcoded within the software.
+
+        range time units ms vector [0, steady_state_time]
+
+        modifiers {
+            # Simulations may optionally define modifiers. The first one here shows how to alter model variables while a
+            # simulation is in progress.  It is applied just at the start of the simulation, and sets the membrane voltage
+            # to the holding potential defined as a protocol input.
+            at start set oxmeta:membrane_voltage = holding_potential
+
+            # The second "modifier" doesn't change the model state, but records it at the end of the simulation, with a name
+            # so that we can reset the model to this steady state later.
+            at end save as holding_state
+        }
+    }
+
+        # Each time around the outer loop we run a timecourse simulation, which samples the model outputs at the time points
+        # defined in our library section above (variable peak_sample_times).
+
+    simulation sim = timecourse {
+        range time units ms vector sample_times
+        modifiers {
+            at start reset to holding_state # Redundant; for clarity
+            at start set oxmeta:membrane_voltage = prepulse_potential
+
+            # The modifier in this simulation is more complex, and is responsible for stepping the membrane voltage input
+            # at a particular time point.  Since the modifier is applied at each iteration of the simulation loop we need
+            # to keep this input constant on most occasions, only changing it 'exactly at' time 0.  We therefore use an
+            # if-then-else expression for the value, setting the voltage to step_voltage (the outer loop range variable)
+            # at time 0 (allowing for floating point inaccuracies), and keeping it unchanged at other times.  Note that
+            # this means it will remain at step_voltage from time 0 until the end of the simulation.
+
+            at each loop set oxmeta:membrane_voltage = \
+                    if MathML:abs(time - prepulse_duration) < 1e-4 then pulse_potential else oxmeta:membrane_voltage
+        }
+    }
+}
+
+# The ninth potential section in a protocol performs post-processing of the raw simulation results to compute the quantities
+# desired as outputs.
+# It consists mainly of a sequence of assignments defining new variables, with some assertions to sanity-check results.
+
+post-processing {
+    # These assertions check that we have the outputs we expect from the first pair of simulations above.  The assert
+    # statement checks whether the supplied expression evaluates to a non-zero value, and triggers an error (stopping
+    # further post-processing) if not.  In this case the expression checks whether the 'IS_ARRAY' property of the
+    # 'sim1:time' variable is true, i.e. the variable exists and is an array.  The sim1:time name refers to the 'time'
+    # output from the simulation named 'sim1', and illustrates the pervasive use of colon-separated naming within protocols.
+
+    assert sim:time.IS_ARRAY
+    assert sim:membrane_voltage.IS_ARRAY
+    assert sim:membrane_fast_sodium_current.IS_ARRAY
+    assert sim:membrane_persistent_sodium_current.IS_ARRAY
+    assert sim:membrane_total_sodium_current.IS_ARRAY
+
+    # We can also check other properties of variables, such as their shape if they are arrays.
+
+    assert sim:time.NUM_DIMS == 1
+    assert sim:time.SHAPE[0] == sample_times.NUM_ELEMENTS
+
+    # Figure out the time constant...
+    t1 = prepulse_duration + 250
+    t1_idx = find(map(lambda t: t == t1, sim:time))[0][0]
+    t2_idx = t1_idx + (pulse_duration-250)/2
+    t3_idx = t1_idx + pulse_duration - 250
+    I1 = sim:membrane_total_sodium_current[t1_idx]
+    I2 = sim:membrane_total_sodium_current[t2_idx]
+    I3 = sim:membrane_total_sodium_current[t3_idx]
+    C = (I2*I2 - I1*I3) / (2*I2 - I1 - I3)
+    tau = (t1_idx - t2_idx) / (MathML:ln(C-I2) - MathML:ln(C-I1))
+    #tau_alt = (t2_idx - t3_idx) / (MathML:ln(C-I3) - MathML:ln(C-I2)) # uses second half of decay
+}
+
+# The tenth potential section in a protocol defines what the outputs of a protocol are, and hence what is stored by the
+# Web Lab (or available to nesting protocols).  Each output needs to include physical units and a human-readable
+# description (given in quotes).  Where raw simulation results are output, the units can be retrieved from the model
+# and so need not be specified here (although they can be to enforce consistent labelling - models may use different
+# names for the same units).
+
+outputs {
+    total_sodium_trace = sim:membrane_total_sodium_current      "Total I_{Na}"
+    fast_sodium_trace  = sim:membrane_fast_sodium_current       "Fast I_{Na}"
+    late_sodium_trace  = sim:membrane_persistent_sodium_current "Late I_{Na}"
+    time               = sim:time             units ms          "Time"
+    voltage            = sim:membrane_voltage units mV          "Voltage clamp"
+    
+    late_sodium = I1 units uA_per_cm2  "Late sodium at 250ms"
+    tau units ms "Time constant of late sodium decay"
+    C units uA_per_cm2 "Late sodium decay target"
+}
+
+# The final protocol section defines what plots should be produced from the protocol outputs.  Each plot has a name given in quotes,
+# and may also specify whether it should be drawn as continuous lines, lines with markers at each point (the default), or as
+# isolated points.  What to plot is then given in curly braces.
+
+plots {
+    plot "Total Sodium Current" using lines   { total_sodium_trace against time }
+    plot "Fast Sodium Current"  using lines   { fast_sodium_trace  against time }
+    plot "Late Sodium Current"  using lines   { late_sodium_trace  against time }
+    # Voltage traces showing the applied potentials
+    plot "Voltage clamp"        using lines   { voltage      against time }
+}
