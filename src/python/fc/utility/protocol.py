@@ -193,7 +193,7 @@ class Protocol(object):
             sim.Clear()
             sim.SetIndentLevel(self.indentLevel + 1)
         for imported_proto in self.imports.values():
-            imported_proto.Initialise()
+            imported_proto.Initialise(verbose)
 
     def SetOutputFolder(self, path):
         """Specify where the outputs from this protocol will be written to disk."""
