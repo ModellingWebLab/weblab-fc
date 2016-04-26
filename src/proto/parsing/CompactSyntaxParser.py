@@ -1147,13 +1147,13 @@ class Actions(object):
         def _expr(self):
             output = {}
             if 'units' in self.tokens:
-                output['units'] = self.tokens['units']
+                output['units'] = str(self.tokens['units'])
             if 'name' in self.tokens:
-                output['name'] = self.tokens['name']
+                output['name'] = str(self.tokens['name'])
             if 'ref' in self.tokens:
-                output['ref'] = self.tokens['ref']
+                output['ref'] = str(self.tokens['ref'])
             if 'description' in self.tokens:
-                output['description'] = self.tokens['description']
+                output['description'] = str(self.tokens['description'])
             output['optional'] = 'optional' in self.tokens
             return output
     
