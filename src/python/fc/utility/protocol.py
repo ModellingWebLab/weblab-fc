@@ -158,17 +158,18 @@ class Protocol(object):
         return odict
     def __setstate__(self,dict):
         self.__dict__.update(dict)
-        # Re-import Model from temporary Python file
-        sys.path.insert(0, self.modelPath)
-        import model as module
-        for name in module.__dict__.keys():
-            if name.startswith('GeneratedModel'):
-                model = getattr(module, name)()
-                model._module = module
-        del sys.modules['model']
-        self.model = model
-        for sim in self.simulations:
-            sim.SetModel(model)
+        # Re-import Model from temporary Python file (if provided)
+        if hasattr(self,'modelPath'):
+            sys.path.insert(0, self.modelPath)
+            import model as module
+            for name in module.__dict__.keys():
+                if name.startswith('GeneratedModel'):
+                    model = getattr(module, name)()
+                    model._module = module
+            del sys.modules['model']
+            self.model = model
+            for sim in self.simulations:
+                sim.SetModel(model)
 
 
     def AddImportedProtocol(self, proto, prefix):
