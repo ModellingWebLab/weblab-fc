@@ -69,7 +69,7 @@ post-processing {
 outputs {
     raw_state = sim:state_variable        "State variables (raw)"
     state     = state_trans units various "State variables"
-    voltage   = sim:membrane_potential    "Transmembrane voltage"
+    voltage   = sim:membrane_voltage      "Transmembrane voltage"
     time      = sim:time                  "Time"
 }
 

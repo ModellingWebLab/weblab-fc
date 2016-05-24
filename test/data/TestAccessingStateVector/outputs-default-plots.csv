@@ -1,2 +1,3 @@
 Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
-"State variables",State_variables.eps,outputs_State_variables_gnuplot_data.csv,lines,"time","state"
+"All state variables",All_state_variables.eps,outputs_All_state_variables_gnuplot_data.csv,lines,"time","state"
+"Transmembrane voltage",Transmembrane_voltage.eps,outputs_Transmembrane_voltage_gnuplot_data.csv,lines,"time","voltage"
