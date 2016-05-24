@@ -1,40 +1,82 @@
-# Compact syntax version of the GraphState protocol
+documentation {
+# Graph state variables over a single pace
+
+This tiny protocol simply simulates the model for 1 second from its initial conditions,
+and plots all the state variables over this time interval in a single graph.
+}
+
+
+# The model annotations used by this protocol to interface to models all live in the 'oxford-metadata' ontology
+# defined by the Web Lab team.  By convention we associate the full URI for this ontology with the 'oxmeta' prefix.
+# Terms from the ontology can then be accessed using the shorthand oxmeta:term syntax, as illustrated in the
+# documentation above.
+# The available terms can be seen in the model annotation tool in the Web Lab (available when viewing a model you
+# have uploaded yourself).
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
-import "BasicLibrary.txt"
+# The standard library of post-processing operations is imported and associated with the 'std' prefix.
+
+import std = "BasicLibrary.txt"
+
+# Next we define the physical units used later.
 
 units {
+    mV = milli volt
     ms = milli second
 }
 
+# The model interface section defines how the protocol can modify and probe the models to which it is applied.
+# Crucially, note that all references to model variables in this section use terms from the ontology declared above (with the
+# oxmeta prefix), rather than whatever variable names are used in the model.  Protocols can only access variables that are
+# annotated with terms from a declared ontology (typically the 'oxmeta' ontology for cardiac electrophysiology, although this
+# is not required by the tools).
+
 model interface {
+    # We specify the units this protocol uses for the independent variable in the system.
     independent var units ms
+
+    # We also select which model variables are read by the protocol.
     output oxmeta:time
+    output oxmeta:membrane_voltage units mV
+
+    # This final output selects all state variables in the model, as a single vector.
     output oxmeta:state_variable
 }
 
 tasks {
+    # This single simulation task samples model outputs every millisecond for 1 second.
     simulation sim = timecourse {
         range time units ms uniform 0:1:1000
     }
 }
 
 post-processing {
-    state_trans = Transpose(sim:state_variable)
+    # The only post-processing performed is to transpose the 'state variable' output,
+    # so that the last dimension varies with time (rather than the first) for plotting
+    # against the simulation time below.
+    state_trans = std:Transpose(sim:state_variable)
     
-    # Check the transpose function
+    # Sanity-check the transpose function
     assert sim:state_variable.NUM_DIMS == state_trans.NUM_DIMS
     assert sim:state_variable.SHAPE[0] == state_trans.SHAPE[1]
     assert sim:state_variable.SHAPE[1] == state_trans.SHAPE[0]
 }
 
+# The outputs section defines what quantities (raw simulation results or post-processed values)
+# are considered outputs of the experiment and stored.
+
 outputs {
-    raw_state = sim:state_variable "State variables (raw)"
-    state = state_trans units various "State variables"
-    time = sim:time "Time"
+    raw_state = sim:state_variable        "State variables (raw)"
+    state     = state_trans units various "State variables"
+    voltage   = sim:membrane_potential    "Transmembrane voltage"
+    time      = sim:time                  "Time"
 }
 
+# Finally we specify the graphs to produce.
+# The first one is the default displayed by the Web Lab.
+
 plots {
-    plot "State variables" using lines { state against time }
+    plot "All state variables"   using lines { state against time }
+    plot "Transmembrane voltage" using lines { voltage against time }
 }
