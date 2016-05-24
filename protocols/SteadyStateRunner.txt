@@ -247,7 +247,7 @@ plots {
     plot "Calcium transient over final pace" using lines { detailed_calcium           against detailed_time }
     plot "State variables at each pace end" using lines  { pace_final_state_variables against pace_count    }
     plot "State variables over final pace" using lines   { detailed_state             against detailed_time }
-    plot "Calcium-voltage loop" using lines              { detailed_voltage           against detailed_calcium }
+    plot "Calcium/voltage loop" using lines              { detailed_voltage           against detailed_calcium }
 }
 
 # Note that we did not need to specify the calcium transient plot as optional in the above: plots are only ever attempted when all
