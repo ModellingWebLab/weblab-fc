@@ -158,6 +158,12 @@ def ShapeEq(a1, a2) {
 }
 
 
+# Test whether two arrays are almost equal, to some absolute tolerance, returning true (1) or false (0) accordingly.
+def Close(a1, a2, tol=1e-6) {
+    return MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
+}
+
+
 # Linear interpolation finding target y values either before or after a given starting point in the "x" (dim_) direction.
 # The result has extent 1 for the specified dimension, and the same shape as the (xs & ys) inputs elsewhere.
 #

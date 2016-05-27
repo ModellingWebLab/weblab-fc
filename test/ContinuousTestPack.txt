@@ -1,4 +1,5 @@
 TestAccessingStateVector.hpp
+TestAdvancedModelInterface.hpp
 TestArrayFileReader.hpp
 TestClamping.hpp
 TestCombinedSimulation.hpp
