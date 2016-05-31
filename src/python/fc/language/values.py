@@ -161,3 +161,38 @@ class LambdaClosure(AbstractValue):
         result = local_env.ExecuteStatements(self.body, returnAllowed=True)
         return result
 
+class LoadFunction(LambdaClosure):
+    """A built-in function for loading data files from disk.
+
+    This gets inserted into the inputs environment under the name 'load'.
+    """
+    def __init__(self, basePath):
+        """Initialise an instance of the load() built-in.
+
+        @param basePath: path with respect to which to resolve relative data file paths.
+        """
+        self.basePath = basePath
+
+    def __str__(self):
+        """Return a string representation of this function."""
+        return "load()"
+
+    def Compile(self, env, actualParameters):
+        raise NotImplementedError
+
+    def Evaluate(self, env, actualParameters):
+        """Evaluate a load() function call.
+        
+        @param env: the environment within which to evaluate this call
+        @param actualParameters: the values of the parameters to the call; should be a single
+            string value containing the path of the file to load
+        @return an Array containing the file's data, if successful
+        """
+        if len(actualParameters) != 1:
+            raise ProtocolError("A load() call takes a single parameter, not %d." % len(actualParameters))
+        if not isinstance(actualParameters[0], String):
+            raise ProtocolError("A load() call takes a string parameter with the file path to load.")
+        import os
+        file_path = os.path.join(self.basePath, actualParameters[0].value)
+        from ..utility.test_support import Load2d
+        return Load2d(file_path)

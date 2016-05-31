@@ -162,14 +162,12 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
 def CheckFileCompression(filePath):
     """Return (real_path, is_compressed) if a .gz compressed version of filePath exists."""
     real_path = filePath
+    is_compressed = False
     if filePath.endswith('.gz'):
         is_compressed = True
-    else:
-        if os.path.exists(filePath):
-            is_compressed = False
-        elif os.path.exists(filePath + '.gz'):
-            real_path += '.gz'
-            is_compressed = True
+    elif os.path.exists(filePath + '.gz'):
+        real_path += '.gz'
+        is_compressed = True
     return real_path, is_compressed
 
 def Load2d(filePath):

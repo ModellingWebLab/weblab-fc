@@ -75,6 +75,7 @@ class Protocol(object):
         # Main environments used when running the protocol
         self.env = Env.Environment()
         self.inputEnv = Env.Environment(allowOverwrite=True)
+        self.inputEnv.DefineName("load", V.LoadFunction(os.path.dirname(self.protoFile)))
         self.libraryEnv = Env.Environment()
         self.outputEnv = Env.Environment()
         self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv)
@@ -240,7 +241,7 @@ class Protocol(object):
         if writeOut:
             with errors:
                 filename = os.path.join(self.outputFolder.path, 'output.h5')
-                h5file = tables.open_file(filename, mode='w', title=os.path.splitext(os.path.basename(self.protoFile))[0])
+                h5file = tables.open_file(filename, mode='w', title=os.path.splitext(self.protoName)[0])
                 group = h5file.create_group('/', 'output', 'output parent')
                 for output_spec in outputs_defined:
                     h5file.create_array(group, output_spec['name'], self.outputEnv.unwrappedBindings[output_spec['name']], title=output_spec['description'])

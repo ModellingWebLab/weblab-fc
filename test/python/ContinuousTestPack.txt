@@ -1,6 +1,7 @@
 TestAlgebraicModels.py
 TestArrayExpressions.py
 TestBasicExpressions.py
+TestClamping.py
 TestEnvironment.py
 TestFunctions.py
 TestLogicOperators.py
