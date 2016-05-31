@@ -30,8 +30,8 @@ inputs {
 
     # Voltage trace over time
     clamp_data = load("../test/data/reference_traces/one_pace_voltage.csv")
-    voltage_trace = clamp_data[1$1]
-    time_trace = clamp_data[1$0]
+    voltage_trace = clamp_data[1]
+    time_trace = clamp_data[0]
 }
 
 # Import some useful functions
@@ -41,7 +41,7 @@ import std = "BasicLibrary.txt"
 library {
     assert clamp_data.IS_ARRAY
     assert clamp_data.NUM_DIMS == 2
-    assert clamp_data.SHAPE[1] == 2
+    assert clamp_data.SHAPE[0] == 2
     assert voltage_trace.NUM_ELEMENTS == time_trace.NUM_ELEMENTS
 }
 
@@ -119,7 +119,7 @@ post-processing {
     assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY
 
     # Check IKr is as expected
-    ref_data = load("../test/data/reference_traces/one_pace_I_Kr.csv")[1$0]
+    ref_data = load("../test/data/reference_traces/one_pace_I_Kr.csv")[0]
     assert std:Close(ref_data, sim:membrane_rapid_delayed_rectifier_potassium_current, 1e-6)
 }
 
