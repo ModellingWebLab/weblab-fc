@@ -27,14 +27,23 @@ inputs {
     # Holding potential to apply before simulating the voltage clamp.
     holding_potential = -80
     steady_state_time = 10000   # 10 seconds
-    
+
     # Voltage trace over time
-    voltage_trace = [-80, -80]
-    time_trace = [0, 1]
+    clamp_data = load("../test/data/reference_traces/one_pace_voltage.csv")
+    voltage_trace = clamp_data[1$1]
+    time_trace = clamp_data[1$0]
 }
 
 # Import some useful functions
 import std = "BasicLibrary.txt"
+
+# Check the data file was loaded successfully
+library {
+    assert clamp_data.IS_ARRAY
+    assert clamp_data.NUM_DIMS == 2
+    assert clamp_data.SHAPE[1] == 2
+    assert voltage_trace.NUM_ELEMENTS == time_trace.NUM_ELEMENTS
+}
 
 # Define units
 units {
@@ -91,7 +100,7 @@ tasks {
             at start set oxmeta:membrane_voltage = holding_potential
         }
     }
-    
+
     # Task 2: Apply the inputted voltage time-series as a voltage clamp (+ve time).
     simulation sim = timecourse {
         range time units ms vector time_trace
@@ -99,7 +108,7 @@ tasks {
             at each loop set oxmeta:membrane_voltage = (voltage_trace{find(map(lambda t: t == time, time_trace)), 0})[0]
         }
     }
-    
+
 }
 
 # Do any calculations/modifications of data before plotting
@@ -108,6 +117,10 @@ post-processing {
     assert sim:time.IS_ARRAY
     assert sim:membrane_voltage.IS_ARRAY
     assert sim:membrane_rapid_delayed_rectifier_potassium_current.IS_ARRAY
+
+    # Check IKr is as expected
+    ref_data = load("../test/data/reference_traces/one_pace_I_Kr.csv")[1$0]
+    assert std:Close(ref_data, sim:membrane_rapid_delayed_rectifier_potassium_current, 1e-6)
 }
 
 # List any outputs from model which need to be carried forward to plotting

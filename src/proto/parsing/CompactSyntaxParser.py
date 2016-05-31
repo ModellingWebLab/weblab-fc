@@ -1448,6 +1448,7 @@ class CompactSyntaxParser(object):
     # Special values
     nullValue = p.Group(MakeKw('null')).setName('Null').setParseAction(Actions.Symbol('null'))
     defaultValue = p.Group(MakeKw('default')).setName('Default').setParseAction(Actions.Symbol('defaultParameter'))
+    stringValue = quotedString.copy().setName('String').setParseAction(Actions.Symbol('string'))
     
     # Recognised MathML operators
     mathmlOperators = set('''quotient rem max min root xor abs floor ceiling exp ln log
@@ -1465,7 +1466,7 @@ class CompactSyntaxParser(object):
     trace = Adjacent(p.Suppress('?'))
     
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = (array | wrap | number.copy().setParseAction(Actions.Number) |
+    atom = (array | wrap | number.copy().setParseAction(Actions.Number) | stringValue |
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
     expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                         (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
@@ -1480,7 +1481,7 @@ class CompactSyntaxParser(object):
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
     
-    # Simpler expressions containing no arrays, functions, etc.
+    # Simpler expressions containing no arrays, functions, etc. Used in the model interface.
     simpleExpr = p.Forward().setName('SimpleExpression')
     simpleIfExpr = p.Group(MakeKw('if') - simpleExpr + MakeKw('then') - simpleExpr +
                            MakeKw('else') - simpleExpr).setName('SimpleIfThenElse').setParseAction(Actions.Piecewise)
