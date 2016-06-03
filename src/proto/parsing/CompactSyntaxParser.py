@@ -459,19 +459,19 @@ class Actions(object):
             else:
                 result = E.FunctionCall(func, args)
             return result
-    
+
     class _Symbol(BaseGroupAction):
         """Parse action for csymbols."""
         def __init__(self, s, loc, tokens, symbol):
             super(Actions._Symbol, self).__init__(s, loc, tokens)
-            self.symbol = symbol # check if null or default or string and return m.const of it
-            
+            self.symbol = symbol
+
         def _xml(self):
             if isinstance(self.tokens, str):
                 return M.csymbol(self.tokens, definitionURL=PROTO_CSYM_BASE+self.symbol)
             else:
                 return M.csymbol(definitionURL=PROTO_CSYM_BASE+self.symbol)
-        
+
         def _expr(self):
             if self.symbol == "null":
                 return E.Const(V.Null())
@@ -479,7 +479,7 @@ class Actions(object):
                 return E.Const(V.DefaultParameter())
             if isinstance(self.tokens, str):
                 return E.Const(V.String(self.tokens))
-    
+
     @staticmethod
     def Symbol(symbol):
         """Wrapper around the _Symbol class."""
@@ -783,6 +783,19 @@ class Actions(object):
                 lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
             rhs = self.tokens[1].xml()
             return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
+    
+    class Interpolate(BaseGroupAction):
+        def _xml(self):
+            assert len(self.tokens) == 4
+            assert isinstance(self.tokens[0], str)
+            file_path = self.DelegateSymbol('string', self.tokens[0]).xml()
+            assert isinstance(self.tokens[1], Actions.Variable)
+            indep_var = self.tokens[1].xml()
+            units = []
+            for i in [2, 3]:
+                assert isinstance(self.tokens[i], str)
+                units.append(M.ci(self.tokens[i]))
+            return M.apply(self.DelegateSymbol('interpolate').xml(), file_path, indep_var, *units)
     
     class UnitsConversion(BaseGroupAction):
         def _xml(self):
@@ -1599,9 +1612,12 @@ class CompactSyntaxParser(object):
     # Adding or replacing equations in the model
     clampVariable = p.Group(MakeKw('clamp') - identAsVar + Optional(MakeKw('to') - simpleExpr)
                             ).setName('ClampVariable').setParseAction(Actions.ClampVariable)
+    interpolate = p.Group(MakeKw('interpolate') - oparen - quotedString - comma - identAsVar - comma - ncIdent - comma - ncIdent - cparen
+                          ).setName('Interpolate').setParseAction(Actions.Interpolate)
     modelEquation = p.Group(MakeKw('define')
                             - (p.Group(MakeKw('diff') + Adjacent(oparen) - identAsVar + p.Suppress(';') + identAsVar + cparen)
-                               | identAsVar) + eq + simpleExpr).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
+                               | identAsVar) + eq
+                            + (interpolate | simpleExpr)).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
     unitsConversion = p.Group(MakeKw('convert') - ncIdent("actualDimensions") + MakeKw('to') + ncIdent("desiredDimensions") +
                               MakeKw('by') - simpleLambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)

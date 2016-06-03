@@ -1,0 +1,43 @@
+# Test doing a data clamp by linearly interpolating a data file within the model itself.
+#
+# This protocol can be applied to any model, and throws away everything except for a voltage
+# trace defined by linearly interpolating a data file.
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+
+    define oxmeta:membrane_voltage = interpolate("../data/interpolation_test.csv", oxmeta:time, second, mV)
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:12
+    }
+}
+
+post-processing {
+    # Check the input signal is what we expected
+    input = load("../data/interpolation_test.csv")
+    assert input.NUM_DIMS == 2
+    assert input.SHAPE[0] == 2
+    assert input.SHAPE[1] == 6
+    assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012], [0, 3, 9, 6, 6, 6.9] ])
+
+    # Check the output is as it should be
+    expected = [0, 1, 2, 3, 5, 7, 9, 7, 6, 6, 6.3, 6.6, 6.9]
+    assert std:Close(sim:membrane_voltage, expected, 1e-12)
+}
+
+outputs {
+    V = sim:membrane_voltage
+}
