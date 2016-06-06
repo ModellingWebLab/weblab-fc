@@ -11,7 +11,7 @@ units {
 
 model interface {
     output oxmeta:membrane_voltage units mV
-    output oxmeta:time units ms # Needed to stop solver falling over
+    output oxmeta:time units ms
 
     clamp oxmeta:membrane_voltage
 }
@@ -23,10 +23,8 @@ tasks {
 }
 
 post-processing {
-    def Close(a1, a2, tol=1e-6) {
-        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
-    }
-    assert Close(sim:membrane_voltage, [-85.0 for i in 0:6], 5.0)
+    assert std:Close(sim:membrane_voltage, [-85.0 for i in 0:6], 5.0)
+    assert std:Close(sim:time, [i for i in 0:6])
 }
 
 outputs {

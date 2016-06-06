@@ -156,7 +156,7 @@ cdef class CvodeSolver:
                 raise ProtocolError("Failed to solve model ODE system at time %g: %s" % (t, flag_name))
             else:
                 assert t == endPoint
-        self.model.freeVariable = t
+        self.model.freeVariable = endPoint
 
     cdef ReInit(self):
         """Reset CVODE's state because time or the RHS function has changed (e.g. parameter or state var change)."""

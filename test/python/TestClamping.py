@@ -53,3 +53,12 @@ class TestClamping(unittest.TestCase):
         proto.Run()
         # Test assertions are within the protocol itself
         self.assert_(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
+
+    def TestInterpolationClamp(self):
+        proto_file = 'projects/FunctionalCuration/test/protocols/test_model_interpolation.txt'
+        proto = fc.Protocol(proto_file)
+        proto.SetOutputFolder('Py_TestClamping_TestInterpolationClamp')
+        proto.SetModel('projects/FunctionalCuration/test/data/simple_ode.cellml')
+        proto.Run()
+        # Test assertions are within the protocol itself
+        self.assert_(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
