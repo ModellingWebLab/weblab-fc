@@ -133,6 +133,7 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
         if not os.path.exists(data_file):
             if messages is not None:
                 messages.append("Output %s produced but no reference result available - please save for future comparison" % name)
+            results_ok = None
             continue # Can't compare in this case
         if ndims == 2:
             method = Load2d

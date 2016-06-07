@@ -167,7 +167,15 @@ class AbstractSimulation(locatable.Locatable):
             self.results.SetDelegateeEnv(env, prefix)
 
     def Run(self, verbose=True):
-        self.InternalRun(verbose)
+        try:
+            self.InternalRun(verbose)
+        except:
+            # Shrink result arrays to reflect the number of iterations actually managed!
+            if self.results is not None:
+                for name in self.results:
+                    result = self.results.LookUp(name)
+                    result.array = result.array[0:self.range_.count]
+            raise
         return self.results
 
     def AddIterationOutputs(self, outputsList):
