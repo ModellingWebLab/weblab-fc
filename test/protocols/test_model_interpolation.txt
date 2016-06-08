@@ -21,7 +21,7 @@ model interface {
 
 tasks {
     simulation sim = timecourse {
-        range t units ms uniform 0:12
+        range t units ms uniform 0:14
     }
 }
 
@@ -30,12 +30,12 @@ post-processing {
     input = load("../data/interpolation_test.csv")
     assert input.NUM_DIMS == 2
     assert input.SHAPE[0] == 2
-    assert input.SHAPE[1] == 6
-    assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012], [0, 3, 9, 6, 6, 6.9] ])
+    assert input.SHAPE[1] == 8
+    assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012, 0.012, 0.014], [0, 3, 9, 6, 6, 6.9, 12, 14] ])
 
     # Check the output is as it should be
-    assert std:Close(sim:time, [i for i in 0:13], 1e-12)
-    expected = [0, 1, 2, 3, 5, 7, 9, 7, 6, 6, 6.3, 6.6, 6.9]
+    assert std:Close(sim:time, [i for i in 0:15], 1e-12)
+    expected = [0, 1, 2, 3, 5, 7, 9, 7, 6, 6, 6.3, 6.6, 6.9, 13, 14]
     assert std:Close(sim:membrane_voltage, expected, 1e-12)
 }
 
