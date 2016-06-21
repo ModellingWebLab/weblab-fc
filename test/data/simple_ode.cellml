@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- A CellML version of dV/dt = a; a = 1 -->
+<!-- A CellML version of dV/dt = a; a = 1
+  With a few extra bits to support different tests, including d[Na]/dt = n; n=1
+-->
 <model xmlns="http://www.cellml.org/cellml/1.0#"
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:cmeta="http://www.cellml.org/metadata/1.0#"
@@ -17,12 +19,24 @@
         <unit units="mV"/>
         <unit units="ms" exponent="-1"/>
     </units>
+
+    <units name="mM">
+        <unit prefix="milli" units="mole"/>
+        <unit units="litre" exponent="-1"/>
+    </units>
+    
+    <units name="mM_per_ms">
+        <unit units="mM"/>
+        <unit units="ms" exponent="-1"/>
+    </units>
     
     <component name="main">
         <variable name="time" units="ms" cmeta:id="time"/>
         <variable name="V" units="mV" cmeta:id="V" initial_value="0"/>
         <variable name="a" units="mV_per_ms" initial_value="1" cmeta:id="a"/>
         <variable name="b" units="mV_per_ms" cmeta:id="b"/>
+        <variable name="Na" units="mM" cmeta:id="Na" initial_value="0"/>
+        <variable name="n" units="mM_per_ms" initial_value="1" cmeta:id="n"/>
         <math xmlns="http://www.w3.org/1998/Math/MathML"> 
             <apply><eq/> 
                 <apply><diff/> 
@@ -35,6 +49,14 @@
             <apply><eq/>
                 <ci>b</ci>
                 <cn cellml:units="mV_per_ms">-1</cn>
+            </apply>
+            <!-- A second ODE, only used in some tests -->
+            <apply><eq/> 
+                <apply><diff/> 
+                    <bvar><ci>time</ci></bvar> 
+                    <ci>Na</ci> 
+                </apply>
+                <ci>n</ci>
             </apply>
         </math>
     </component>
@@ -52,6 +74,12 @@
         </rdf:Description>
         <rdf:Description rdf:about="#b">
             <bqbiol:is rdf:resource="urn:test-ns#parameter_b"/>
+        </rdf:Description>
+        <rdf:Description rdf:about="#Na">
+            <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
+        </rdf:Description>
+        <rdf:Description rdf:about="#n">
+            <bqbiol:is rdf:resource="urn:test-ns#parameter_n"/>
         </rdf:Description>
     </rdf:RDF>
     

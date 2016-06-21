@@ -10,14 +10,19 @@ import std = "BasicLibrary.txt"
 units {
     mV = milli volt
     uV = micro volt
+    mM = milli mole . litre^-1
+    M = mole . litre^-1
     ms = milli second
+    usec = micro second
 }
 
 model interface {
-    output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:cytosolic_sodium_concentration units mM
 
     define oxmeta:membrane_voltage = interpolate("../data/interpolation_test.csv", oxmeta:time, second, uV)
+    define oxmeta:cytosolic_sodium_concentration = interpolate("../data/interpolation_test_regular.csv", oxmeta:time, usec, M)
 }
 
 tasks {
@@ -39,9 +44,11 @@ post-processing {
     assert std:Close(sim:time, [i for i in 0:15], 1e-12)
     expected = [0, 1, 2, 3, 5, 7, 9, 7, 6, 6, 6.3, 6.6, 6.9, 13, 14]
     assert std:Close(sim:membrane_voltage, expected, 1e-12)
+    assert std:Close(sim:cytosolic_sodium_concentration, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18], 1e-6)
 }
 
 outputs {
     V = sim:membrane_voltage
+    Na = sim:cytosolic_sodium_concentration
     t = sim:time
 }
