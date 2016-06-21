@@ -9,6 +9,7 @@ import std = "BasicLibrary.txt"
 
 units {
     mV = milli volt
+    uV = micro volt
     ms = milli second
 }
 
@@ -16,7 +17,7 @@ model interface {
     output oxmeta:membrane_voltage units mV
     output oxmeta:time units ms
 
-    define oxmeta:membrane_voltage = interpolate("../data/interpolation_test.csv", oxmeta:time, second, mV)
+    define oxmeta:membrane_voltage = interpolate("../data/interpolation_test.csv", oxmeta:time, second, uV)
 }
 
 tasks {
@@ -31,7 +32,8 @@ post-processing {
     assert input.NUM_DIMS == 2
     assert input.SHAPE[0] == 2
     assert input.SHAPE[1] == 8
-    assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012, 0.012, 0.014], [0, 3, 9, 6, 6, 6.9, 12, 14] ])
+    assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012, 0.012, 0.014],
+                                [0, 3000, 9000, 6000, 6000, 6900, 12000, 14000] ])
 
     # Check the output is as it should be
     assert std:Close(sim:time, [i for i in 0:15], 1e-12)
