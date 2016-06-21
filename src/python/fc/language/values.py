@@ -169,7 +169,7 @@ class LoadFunction(LambdaClosure):
     def __init__(self, basePath):
         """Initialise an instance of the load() built-in.
 
-        @param basePath: path with respect to which to resolve relative data file paths.
+        :param basePath: path with respect to which to resolve relative data file paths.
         """
         self.basePath = basePath
 
@@ -183,10 +183,10 @@ class LoadFunction(LambdaClosure):
     def Evaluate(self, env, actualParameters):
         """Evaluate a load() function call.
         
-        @param env: the environment within which to evaluate this call
-        @param actualParameters: the values of the parameters to the call; should be a single
+        :param env: the environment within which to evaluate this call
+        :param actualParameters: the values of the parameters to the call; should be a single
             string value containing the path of the file to load
-        @return an Array containing the file's data, if successful
+        :returns: an Array containing the file's data, if successful
         """
         if len(actualParameters) != 1:
             raise ProtocolError("A load() call takes a single parameter, not %d." % len(actualParameters))
