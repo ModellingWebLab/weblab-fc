@@ -1,3 +1,5 @@
+# Header lines are allowed by the file format.
+# We can have as many initial lines starting with a # as we like.
 0.85	0.833337	6.56741	
 1.39167	1.67203	8.24354	
 1.41667	2.49868	0.751622	

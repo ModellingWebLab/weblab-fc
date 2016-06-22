@@ -1,3 +1,5 @@
+# Header lines starting with a # character should be ignored.
+# Files loadable by the load() built-in or for linear interpolation in a model interface have two columns, here t (s) & V (uV)
 0.000, 0
 0.003, 3000
 0.006, 9000
