@@ -1,4 +1,5 @@
-# Test that we can annotate variables with terms from ontologies other than oxmeta
+# Test that we can annotate variables with terms from ontologies other than oxmeta.
+# Also test that using a category term for a model output selects multiple variables. 
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 namespace test = "urn:fc:test#"
@@ -8,6 +9,9 @@ import std = "BasicLibrary.txt"
 library {
     initial_V = sim1:test:V
     initial_param = sim2:test:input
+
+    # The following line works in the Python implementation, but not (yet?) in C++
+    optional initial_concs = sim1:oxmeta:ExtracellularConcentration
 }
 
 units {
@@ -22,6 +26,9 @@ model interface {
 
     output test:V units mV
     output oxmeta:time units ms
+
+    # Output matching multiple variables
+    output oxmeta:ExtracellularConcentration
 
     define diff(test:V; oxmeta:time) = test:input
 }
@@ -43,17 +50,17 @@ post-processing {
     # Check initial model state
     assert initial_V == 0
     assert initial_param == 0
-    
+    #assert std:Close(initial_concs, [5.4, 140])
+
     # Check simulation outputs
-    def Close(a1, a2, tol=1e-6) {
-        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
-    }
-    assert Close(sim1:V, [0, 0, 0, 0, 0, 0])
-    assert Close(sim2:V, [0, 1, 2, 3, 4, 5])
-    
+    assert std:Close(sim1:V, [0, 0, 0, 0, 0, 0])
+    assert std:Close(sim2:V, [0, 1, 2, 3, 4, 5])
+    assert std:Close(sim1:ExtracellularConcentration, [ [5.4,140], [5.4,140], [5.4,140], [5.4,140], [5.4,140] , [5.4,140] ])
+
     # Check final model state
     assert sim1:test:V == 5
     assert sim2:test:input == 1
+    #assert std:Close(sim2:oxmeta:ExtracellularConcentration, [5.4, 140])
 }
 
 outputs {
