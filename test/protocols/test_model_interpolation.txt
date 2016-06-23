@@ -4,6 +4,7 @@
 # trace defined by linearly interpolating a data file.
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace test = "urn:fc:test#"
 
 import std = "BasicLibrary.txt"
 
@@ -21,8 +22,32 @@ model interface {
     output oxmeta:membrane_voltage units mV
     output oxmeta:cytosolic_sodium_concentration units mM
 
+    # The first interpolation exercises advanced implementation details:
+    # - a regular table indexed by a variable that is itself calculated from a table
+    # - where that table appears later in this section
+    # - where the dependent variable appears as an intermediate term in a nested piecewise expression (after partial evaluation)
+    var intermediate units ms
+    define intermediate = interpolate("../data/interpolation_test_derived.csv", test:derived2, second, usec)
+    define test:derived = if test:derived2 < 6.9 :: ms && test:derived2 > 0 :: ms then 0 :: ms else
+                            if test:derived2 > 9 :: ms || test:derived2 <= 0 :: ms then 1 :: ms else intermediate
+    output test:derived units ms
+
+    # This is the 'typical' use case.
     define oxmeta:membrane_voltage = interpolate("../data/interpolation_test.csv", oxmeta:time, second, uV)
+
+    # This case tests the special case for a regularly spaced independent variable.
     define oxmeta:cytosolic_sodium_concentration = interpolate("../data/interpolation_test_regular.csv", oxmeta:time, usec, M)
+
+    # This case tests interpolation appearing in a 'then' branch and using a computed variable as the independent.
+    # It also checks bounds checks more robustly by including a case where the independent variable is outside the bounds,
+    # but the table is not accessed in this case.
+    define test:table_key = oxmeta:membrane_voltage + 5 :: mV
+    output test:table_key units mV
+    var interp units ms
+    define interp = interpolate("../data/interpolation_test_derived.csv", test:table_key, volt, usec)
+    define test:derived2 = if test:table_key > 14 :: mV then -1 :: ms else
+                             if test:table_key < 11 :: mV then interp else -2 :: ms
+    output test:derived2 units ms
 }
 
 tasks {
@@ -32,23 +57,37 @@ tasks {
 }
 
 post-processing {
-    # Check the input signal is what we expected
+    # Check the input signals are what we expected
     input = load("../data/interpolation_test.csv")
     assert input.NUM_DIMS == 2
     assert input.SHAPE[0] == 2
     assert input.SHAPE[1] == 8
     assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012, 0.012, 0.014],
-                                [0, 3000, 9000, 6000, 6000, 6900, 12000, 14000] ])
+                                [0,     3000,  9000,  6000,   6000,  6900,  12000, 14000] ])
+
+    input2 = load("../data/interpolation_test_derived.csv")
+    assert std:ArrayEq(input2, [ [0.000, 0.003, 0.006, 0.009, 0.012, 0.015],
+                                 [0,     3000,  9000,  6000,  6900,  6000] ])
 
     # Check the output is as it should be
     assert std:Close(sim:time, [i for i in 0:15], 1e-12)
-    expected = [0, 1, 2, 3, 5, 7, 9, 7, 6, 6, 6.3, 6.6, 6.9, 13, 14]
-    assert std:Close(sim:membrane_voltage, expected, 1e-12)
+
+    expected_V = [0, 1, 2, 3, 5, 7, 9, 7, 6, 6, 6.3, 6.6, 6.9, 13, 14]
+    assert std:Close(sim:membrane_voltage, expected_V, 1e-12)
+
     assert std:Close(sim:cytosolic_sodium_concentration, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18], 1e-6)
+
+    assert std:Close(sim:derived,   [8, 6, 7, 8, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+    assert std:Close(sim:table_key, [5, 6, 7, 8, 10,  12, 14, 12, 11, 11, 11.3, 11.6, 11.9, 18, 19])
+    assert std:Close(sim:derived2,  [7, 9, 8, 7, 6.3, -2, -2, -2, -2, -2, -2,   -2,   -2,   -1, -1])
 }
 
 outputs {
     V = sim:membrane_voltage
     Na = sim:cytosolic_sodium_concentration
     t = sim:time
+    derived = sim:derived
+    table_key = sim:table_key
+    derived2 = sim:derived2
 }
