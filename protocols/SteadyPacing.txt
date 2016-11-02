@@ -30,7 +30,7 @@ model interface {
              - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /
                              oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)
              <= oxmeta:membrane_stimulus_current_duration))
-        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude
+        then oxmeta:membrane_stimulus_current_amplitude else 0 :: units_of(oxmeta:membrane_stimulus_current_amplitude)
 }
 
 tasks {

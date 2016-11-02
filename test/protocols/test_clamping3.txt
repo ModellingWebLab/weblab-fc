@@ -1,0 +1,32 @@
+# Test clamping state variables to a fixed value, with units taken from another model variable
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:time units ms
+
+    clamp oxmeta:membrane_voltage to 0 :: units_of(oxmeta:membrane_voltage)
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:5
+    }
+}
+
+post-processing {
+    assert std:Close(sim:membrane_voltage, [0, 0, 0, 0, 0, 0])
+    assert std:Close(sim:time, [i for i in 0:6])
+}
+
+outputs {
+    V = sim:membrane_voltage
+}

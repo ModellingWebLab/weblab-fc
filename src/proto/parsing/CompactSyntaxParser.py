@@ -238,14 +238,14 @@ class Actions(object):
             super(Actions.Number, self).__init__(s, loc, tokens)
             if len(tokens) == 2:
                 # We have a units annotation
-                self._units = tokens[1]
+                self._units = str(tokens[1])
             else:
                 self._units = None
 
         def _xml(self):
             elt = M.cn(self.tokens)
-            if self._units:
-                elt.set('{%s}units' % CELLML_NS, str(self._units))
+            if self._units is not None:
+                elt.set('{%s}units' % CELLML_NS, self._units)
             return elt
         
         def _expr(self):
@@ -1397,11 +1397,13 @@ class CompactSyntaxParser(object):
     ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('Ident')
     ncIdentAsVar = ncIdent.copy().setParseAction(Actions.Variable)
     identAsVar = ident.copy().setParseAction(Actions.Variable)
-    
+
     # Numbers can be given in scientific notation, with an optional leading minus sign.
-    # They may optionally have units specified.
-    unitsAnnotation = p.Suppress('::') - ncIdent("units")
-    number = (p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?') + Optional(unitsAnnotation)).setName('Number')
+    # Within expressions they may also have units specified, e.g. in the model interface.
+    unitsIdent = p.originalTextFor(p.Literal('units_of(') - Adjacent(ident) + Adjacent(p.Literal(')'))) | ncIdent
+    unitsAnnotation = p.Suppress('::') - unitsIdent("units")
+    plainNumber = p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?').setName('Number')
+    number = (plainNumber + Optional(unitsAnnotation)).setName('Number')
 
     # Used for descriptive text
     quotedString = (p.QuotedString('"', escChar="\\") | p.QuotedString("'", escChar="\\")).setName('QuotedString')
@@ -1580,9 +1582,9 @@ class CompactSyntaxParser(object):
     # Units definitions
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
                        'deci centi milli micro nano pico femto atto zepto yocto')
-    _num_or_expr = p.originalTextFor(number | (oparen + expr + cparen))
+    _num_or_expr = p.originalTextFor(plainNumber | (oparen + expr + cparen))
     unitRef = p.Group(Optional(_num_or_expr)("multiplier") + Optional(siPrefix)("prefix") + ncIdent("units")
-                      + Optional(p.Suppress('^') + number)("exponent")
+                      + Optional(p.Suppress('^') + plainNumber)("exponent")
                       + Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
     unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")
                        ).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
@@ -1597,7 +1599,7 @@ class CompactSyntaxParser(object):
     setTimeUnits = (MakeKw('independent') - MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
     inputVariable = p.Group(MakeKw('input') - cIdent("name") + Optional(unitsRef)("units")
-                            + Optional(eq + number)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
+                            + Optional(eq + plainNumber)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
     # Model outputs of interest, with optional units
     outputVariable = p.Group(MakeKw('output') - cIdent("name") + Optional(unitsRef("units"))
                              ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
@@ -1607,7 +1609,7 @@ class CompactSyntaxParser(object):
     optionalVariable = p.Group(MakeKw('optional') - cIdent("name") + Optional(varDefault) + locator("default_end")
                                ).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
     # New variables added to the model, with optional initial value
-    newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + number)("initial_value")
+    newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + plainNumber)("initial_value")
                           ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
     # Adding or replacing equations in the model
     clampVariable = p.Group(MakeKw('clamp') - identAsVar + Optional(MakeKw('to') - simpleExpr)

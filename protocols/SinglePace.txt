@@ -115,9 +115,8 @@ model interface {
              - (MathML:floor((oxmeta:time - oxmeta:membrane_stimulus_current_offset) /
                              oxmeta:membrane_stimulus_current_period) * oxmeta:membrane_stimulus_current_period)
              <= oxmeta:membrane_stimulus_current_duration))
-        then oxmeta:membrane_stimulus_current_amplitude else 0 :: dimensionless * oxmeta:membrane_stimulus_current_amplitude
-        # The unusual form of the 'else' clause in the line above is a means to obtain a zero in the correct units, without
-        # knowing what units the model uses for currents.
+        then oxmeta:membrane_stimulus_current_amplitude else 0 :: units_of(oxmeta:membrane_stimulus_current_amplitude)
+        # The special 'units_of(prefix:variable)' syntax lets us ensure the zero has the correct units.
 }
 
 tasks {
