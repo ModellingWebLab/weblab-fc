@@ -41,25 +41,25 @@ model interface {
     output local:root units d
     define local:root = MathML:root(local:input)
     output local:power_half units d
-    define local:power_half = MathML:power(local:input, 0.5)
+    define local:power_half = MathML:power(local:input, 0.5 :: d)
     output local:power2 units d
-    define local:power2 = MathML:power(local:input, 2)
+    define local:power2 = MathML:power(local:input, 2 :: d)
     output local:power3 units d
-    define local:power3 = MathML:power(local:input, 3)
+    define local:power3 = MathML:power(local:input, 3 :: d)
     output local:power4 units d
-    define local:power4 = MathML:power(local:input, 4)
+    define local:power4 = MathML:power(local:input, 4 :: d)
 
     # Exponentials & logs
     output local:exp units d
     define local:exp = MathML:exp(local:input)
     output local:expm1 units d
-    define local:expm1 = MathML:exp(local:input) - 1
+    define local:expm1 = MathML:exp(local:input) - 1 :: d
     output local:ln units d
     define local:ln = MathML:ln(local:input)
     output local:log10 units d
     define local:log10 = MathML:log(local:input)
     output local:log1p units d
-    define local:log1p = 1 + MathML:ln(local:input)
+    define local:log1p = 1 :: d + MathML:ln(local:input)
 
     # Floor & ceiling
     output local:abs units d
