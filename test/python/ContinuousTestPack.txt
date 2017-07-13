@@ -5,6 +5,7 @@ TestClamping.py
 TestEnvironment.py
 TestFunctions.py
 TestLogicOperators.py
+TestMathmlEvaluation.py
 TestModelSimulations.py
 TestNdArray.py
 TestOutputFolder.py

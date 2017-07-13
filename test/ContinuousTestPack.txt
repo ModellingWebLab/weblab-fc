@@ -9,6 +9,7 @@ TestDealingWithVoltageClamps.hpp
 TestEnvironment.hpp
 TestExceptionSet.hpp
 TestIcalProtocol.hpp
+TestMathmlEvaluation.hpp
 TestModelStateCollection.hpp
 TestNestedProtocols.hpp
 TestNdArray.hpp
