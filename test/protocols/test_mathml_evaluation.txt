@@ -17,93 +17,93 @@ import std = "BasicLibrary.txt"
 
 units {
     # Define an alias to save typing below
-    d = dimensionless
+    ms = milli second
 }
 
 model interface {
-    independent var units second
-    input local:input units d = 0
+    output oxmeta:time units ms  # Avoid bug?
+    input local:input units dimensionless = 0
 
     # Basic arithmetic
 
-    output local:plus units d
+    output local:plus units dimensionless
     define local:plus = local:input + local:input
-    output local:minus units d
-    define local:minus = local:input - 10.01 :: d
-    output local:uminus units d
+    output local:minus units dimensionless
+    define local:minus = local:input - 10.01 :: dimensionless
+    output local:uminus units dimensionless
     define local:uminus = -local:input
-    output local:times units d
+    output local:times units dimensionless
     define local:times = local:input * local:input
-    output local:divide units d
-    define local:divide = local:input / 10.01 :: d
+    output local:divide units dimensionless
+    define local:divide = local:input / 10.01 :: dimensionless
 
     # Roots & power
-    output local:root units d
+    output local:root units dimensionless
     define local:root = MathML:root(local:input)
-    output local:power_half units d
-    define local:power_half = MathML:power(local:input, 0.5 :: d)
-    output local:power2 units d
-    define local:power2 = MathML:power(local:input, 2 :: d)
-    output local:power3 units d
-    define local:power3 = MathML:power(local:input, 3 :: d)
-    output local:power4 units d
-    define local:power4 = MathML:power(local:input, 4 :: d)
+    output local:power_half units dimensionless
+    define local:power_half = MathML:power(local:input, 0.5 :: dimensionless)
+    output local:power2 units dimensionless
+    define local:power2 = MathML:power(local:input, 2 :: dimensionless)
+    output local:power3 units dimensionless
+    define local:power3 = MathML:power(local:input, 3 :: dimensionless)
+    output local:power4 units dimensionless
+    define local:power4 = MathML:power(local:input, 4 :: dimensionless)
 
     # Exponentials & logs
-    output local:exp units d
+    output local:exp units dimensionless
     define local:exp = MathML:exp(local:input)
-    output local:expm1 units d
-    define local:expm1 = MathML:exp(local:input) - 1 :: d
-    output local:ln units d
+    output local:expm1 units dimensionless
+    define local:expm1 = MathML:exp(local:input) - 1 :: dimensionless
+    output local:ln units dimensionless
     define local:ln = MathML:ln(local:input)
-    output local:log10 units d
-    define local:log10 = MathML:log(local:input)
-    output local:log1p units d
-    define local:log1p = 1 :: d + MathML:ln(local:input)
+    output local:log units dimensionless
+    define local:log = MathML:log(local:input)
+    output local:log1p units dimensionless
+    define local:log1p = 1 :: dimensionless + MathML:ln(local:input)
 
     # Floor & ceiling
-    output local:abs units d
+    output local:abs units dimensionless
     define local:abs = MathML:abs(local:input)
-    output local:floor units d
-    define local:floor = MathML:floor(local:input)
-    output local:ceiling units d
-    define local:ceiling = MathML:ceiling(local:input)
+#    output local:floor units dimensionless
+#    define local:floor = MathML:floor(local:input)
+#    output local:ceiling units dimensionless
+#    define local:ceiling = MathML:ceiling(local:input)
 
     # Trig
-    output local:sin units d
-    define local:sin = MathML:sin(local:input)
-    output local:cos units d
-    define local:cos = MathML:cos(local:input)
-    output local:tan units d
-    define local:tan = MathML:tan(local:input)
+#    output local:sin units dimensionless
+#    define local:sin = MathML:sin(local:input)
+#    output local:cos units dimensionless
+#    define local:cos = MathML:cos(local:input)
+#    output local:tan units dimensionless
+#    define local:tan = MathML:tan(local:input)
 
-    output local:sec units d
-    define local:sec = MathML:sec(local:input)
-    output local:csc units d
-    define local:csc = MathML:csc(local:input)
-    output local:cot units d
-    define local:cot = MathML:cot(local:input)
+#    output local:sec units dimensionless
+#    define local:sec = MathML:sec(local:input)
+#    output local:csc units dimensionless
+#    define local:csc = MathML:csc(local:input)
+#    output local:cot units dimensionless
+#    define local:cot = MathML:cot(local:input)
 
-    output local:sinh units d
-    define local:sinh = MathML:sinh(local:input)
-    output local:cosh units d
-    define local:cosh = MathML:cosh(local:input)
-    output local:tanh units d
-    define local:tanh = MathML:tanh(local:input)
+#    output local:sinh units dimensionless
+#    define local:sinh = MathML:sinh(local:input)
+#    output local:cosh units dimensionless
+#    define local:cosh = MathML:cosh(local:input)
+#    output local:tanh units dimensionless
+#    define local:tanh = MathML:tanh(local:input)
 
-    output local:sech units d
-    define local:sech = MathML:sech(local:input)
-    output local:csch units d
-    define local:csch = MathML:csch(local:input)
-    output local:coth units d
-    define local:coth = MathML:coth(local:input)
+#    output local:sech units dimensionless
+#    define local:sech = MathML:sech(local:input)
+#    output local:csch units dimensionless
+#    define local:csch = MathML:csch(local:input)
+#    output local:coth units dimensionless
+#    define local:coth = MathML:coth(local:input)
 
-    output local:arcsin units d
-    define local:arcsin = MathML:arcsin(local:sin)
-    output local:arccos units d
-    define local:arccos = MathML:arccos(local:cos)
-    output local:arctan units d
-    define local:arctan = MathML:arctan(local:tan)
+#    output local:arcsin units dimensionless
+#    define local:arcsin = MathML:arcsin(local:sin)
+#    output local:arccos units dimensionless
+#    define local:arccos = MathML:arccos(local:cos)
+#    output local:arctan units dimensionless
+#    define local:arctan = MathML:arctan(local:tan)
 
 # arccosh, arccot, arccoth,
 # arccsc, arccsch, arcsec, arcsech, arcsinh, arctanh
@@ -112,13 +112,13 @@ model interface {
 
 tasks {
     simulation pos = timecourse {
-        range i units d uniform -300:25:300
+        range i units dimensionless uniform -300:25:300
         modifiers {
             at each loop set local:input = 1.23456789 * MathML:power(10, i)
         }
     }
     simulation neg = timecourse {
-        range i units d uniform -300:25:300
+        range i units dimensionless uniform -300:25:300
         modifiers {
             at each loop set local:input = -1.23456789 * MathML:power(10, i)
         }
@@ -126,9 +126,30 @@ tasks {
 }
 
 post-processing {
+    combined_pos = [
+        pos:plus, pos:minus, pos:uminus, pos:times, pos:divide,
+        pos:root, pos:power_half, pos:power2, pos:power3, pos:power4,
+        pos:exp, pos:expm1, pos:ln, pos:log, pos:log1p,
+        pos:abs
+    ]
+    combined_neg = [
+        neg:plus, neg:minus, neg:uminus, neg:times, neg:divide,
+        neg:root, neg:power_half, neg:power2, neg:power3, neg:power4,
+        neg:exp, neg:expm1, neg:ln, neg:log, neg:log1p,
+        neg:abs
+    ]
+
+    # Check against reference data
+    ref_pos = load("../data/mathml_evaluation/outputs_combined_pos.csv")
+    assert std:Close(ref_pos, combined_pos, 1e-6)
+    ref_neg = load("../data/mathml_evaluation/outputs_combined_neg.csv")
+    assert std:Close(ref_neg, combined_neg, 1e-6)
 }
 
 outputs {
+    combined_pos units dimensionless "All outputs for positive inputs"
+    combined_neg units dimensionless "All outputs for negative inputs"
+
     pos_plus = pos:plus
     pos_minus = pos:minus
     pos_uminus = pos:uminus
@@ -145,23 +166,23 @@ outputs {
     pos_log = pos:log
     pos_log1p = pos:log1p
     pos_abs = pos:abs
-    pos_floor = pos:floor
-    pos_ceiling = pos:ceiling
-    pos_sin = pos:sin
-    pos_cos = pos:cos
-    pos_tan = pos:tan
-    pos_sec = pos:sec
-    pos_csc = pos:csc
-    pos_cot = pos:cot
-    pos_sinh = pos:sinh
-    pos_cosh = pos:cosh
-    pos_tanh = pos:tanh
-    pos_sech = pos:sech
-    pos_csch = pos:csch
-    pos_coth = pos:coth
-    pos_arcsin = pos:arcsin
-    pos_arccos = pos:arccos
-    pos_arctan = pos:arctan
+#    pos_floor = pos:floor
+#    pos_ceiling = pos:ceiling
+#    pos_sin = pos:sin
+#    pos_cos = pos:cos
+#    pos_tan = pos:tan
+#    pos_sec = pos:sec
+#    pos_csc = pos:csc
+#    pos_cot = pos:cot
+#    pos_sinh = pos:sinh
+#    pos_cosh = pos:cosh
+#    pos_tanh = pos:tanh
+#    pos_sech = pos:sech
+#    pos_csch = pos:csch
+#    pos_coth = pos:coth
+#    pos_arcsin = pos:arcsin
+#    pos_arccos = pos:arccos
+#    pos_arctan = pos:arctan
 
     neg_plus = neg:plus
     neg_minus = neg:minus
@@ -179,21 +200,21 @@ outputs {
     neg_log = neg:log
     neg_log1p = neg:log1p
     neg_abs = neg:abs
-    neg_floor = neg:floor
-    neg_ceiling = neg:ceiling
-    neg_sin = neg:sin
-    neg_cos = neg:cos
-    neg_tan = neg:tan
-    neg_sec = neg:sec
-    neg_csc = neg:csc
-    neg_cot = neg:cot
-    neg_sinh = neg:sinh
-    neg_cosh = neg:cosh
-    neg_tanh = neg:tanh
-    neg_sech = neg:sech
-    neg_csch = neg:csch
-    neg_coth = neg:coth
-    neg_arcsin = neg:arcsin
-    neg_arccos = neg:arccos
-    neg_arctan = neg:arctan
+#    neg_floor = neg:floor
+#    neg_ceiling = neg:ceiling
+#    neg_sin = neg:sin
+#    neg_cos = neg:cos
+#    neg_tan = neg:tan
+#    neg_sec = neg:sec
+#    neg_csc = neg:csc
+#    neg_cot = neg:cot
+#    neg_sinh = neg:sinh
+#    neg_cosh = neg:cosh
+#    neg_tanh = neg:tanh
+#    neg_sech = neg:sech
+#    neg_csch = neg:csch
+#    neg_coth = neg:coth
+#    neg_arcsin = neg:arcsin
+#    neg_arccos = neg:arccos
+#    neg_arctan = neg:arctan
 }
