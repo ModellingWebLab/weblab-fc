@@ -87,20 +87,25 @@ else:
     import fc.simulations.simulations as Simulations
     from fc.utility.locatable import Locatable
 
-    OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power, 
-                 '==': E.Eq, '!=': E.Neq, '<': E.Lt, '>': E.Gt, '<=': E.Leq, '>=':E.Geq,
+    OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
+                 '==': E.Eq, '!=': E.Neq, '<': E.Lt, '>': E.Gt, '<=': E.Leq, '>=': E.Geq,
                  'not': E.Not, '&&': E.And, '||': E.Or}
-    MATHML = {'log': E.Log, 'ln': E.Ln, 'exp': E.Exp, 'abs': E.Abs, 'ceiling': E.Ceiling, 
-              'floor': E.Floor, 'max': E.Max, 'min': E.Min, 'rem': E.Rem, 'root': E.Root}
-    VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)), 
-              'exponentiale': E.Const(V.Simple(math.e)), 'infinity': E.Const(V.Simple(float('inf'))),
+    MATHML = {'log': E.Log, 'ln': E.Ln, 'exp': E.Exp, 'abs': E.Abs, 'ceiling': E.Ceiling,
+              'floor': E.Floor, 'max': E.Max, 'min': E.Min, 'rem': E.Rem, 'root': E.Root,
+              'power': E.Power,
+              'plus': E.Plus, 'minus': E.Minus, 'times': E.Times, 'divide': E.Divide,
+              'eq': E.Eq, 'neq': E.Neq, 'lt': E.Lt, 'gt': E.Gt, 'leq': E.Leq, 'geq': E.Geq,
+              'not': E.Not, 'and': E.And, 'or': E.Or}
+    VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)),
+              'exponentiale': E.Const(V.Simple(math.e)),
+              'infinity': E.Const(V.Simple(float('inf'))),
               'pi': E.Const(V.Simple(math.pi)), 'notanumber': E.Const(V.Simple(float('nan')))}
 
 
 class Actions(object):
     """Container for parse actions."""
-    source_file = "" # Should be filled in by main parse method
-    units_map = {}   # Will be cleared by main parse method
+    source_file = ""  # Should be filled in by main parse method
+    units_map = {}    # Will be cleared by main parse method
 
     class BaseAction(object):
         """Base parse action.
