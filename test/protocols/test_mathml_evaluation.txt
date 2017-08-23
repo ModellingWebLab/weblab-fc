@@ -139,13 +139,22 @@ post-processing {
         neg:abs
     ]
 
+    # Calculating relative error
+    rel_err_fn = lambda ref, act: if ref == 0 then MathML:abs(act)
+        else if ref != ref then 0
+        else MathML:abs((act-ref)/ref)
+
     # Check against reference data
     ref_pos = load("../data/mathml_evaluation/outputs_combined_pos.csv")
-    max_err_pos = std:Max(std:Max(lambda a, b: MathML:abs(a-b), ref_pos, combined_pos)[0])[0]
-    assert std:Close(ref_pos, combined_pos, 1e-6)
     ref_neg = load("../data/mathml_evaluation/outputs_combined_neg.csv")
-    max_err_neg = std:Max(std:Max(lambda a, b: MathML:abs(a-b), ref_neg, combined_neg)[0])[0]
-    assert std:Close(ref_neg, combined_neg, 1e-6)
+    err_pos = map(lambda a, b: MathML:abs(a-b), ref_pos, combined_pos)
+    err_neg = map(lambda a, b: MathML:abs(a-b), ref_neg, combined_neg)
+    rel_err_pos = map(rel_err_fn, ref_pos, combined_pos)
+    rel_err_neg = map(rel_err_fn, ref_neg, combined_neg)
+    max_rel_err_pos = std:Max(std:Max(rel_err_pos)[0])[0]
+    max_rel_err_neg = std:Max(std:Max(rel_err_neg)[0])[0]
+    assert max_rel_err_pos < 1e-6
+    assert max_rel_err_neg < 1e-6
 }
 
 outputs {
@@ -153,8 +162,12 @@ outputs {
     ref_neg units dimensionless "Reference outputs for negative inputs"
     combined_pos units dimensionless "All outputs for positive inputs"
     combined_neg units dimensionless "All outputs for negative inputs"
-    max_err_pos units dimensionless "Maximum error for positive inputs"
-    max_err_neg units dimensionless "Maximum error for negative inputs"
+    err_pos units dimensionless "Absolute error for positive inputs"
+    err_neg units dimensionless "Absolute error for negative inputs"
+    rel_err_pos units dimensionless "Relative error for positive inputs"
+    rel_err_neg units dimensionless "Relative error for negative inputs"
+    max_rel_err_pos units dimensionless "Max rel error for positive inputs"
+    max_rel_err_neg units dimensionless "Max rel error for negative inputs"
 
     pos_plus = pos:plus
     pos_minus = pos:minus
