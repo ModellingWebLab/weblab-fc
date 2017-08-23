@@ -141,14 +141,20 @@ post-processing {
 
     # Check against reference data
     ref_pos = load("../data/mathml_evaluation/outputs_combined_pos.csv")
+    max_err_pos = std:Max(std:Max(lambda a, b: MathML:abs(a-b), ref_pos, combined_pos)[0])[0]
     assert std:Close(ref_pos, combined_pos, 1e-6)
     ref_neg = load("../data/mathml_evaluation/outputs_combined_neg.csv")
+    max_err_neg = std:Max(std:Max(lambda a, b: MathML:abs(a-b), ref_neg, combined_neg)[0])[0]
     assert std:Close(ref_neg, combined_neg, 1e-6)
 }
 
 outputs {
+    ref_pos units dimensionless "Reference outputs for positive inputs"
+    ref_neg units dimensionless "Reference outputs for negative inputs"
     combined_pos units dimensionless "All outputs for positive inputs"
     combined_neg units dimensionless "All outputs for negative inputs"
+    max_err_pos units dimensionless "Maximum error for positive inputs"
+    max_err_neg units dimensionless "Maximum error for negative inputs"
 
     pos_plus = pos:plus
     pos_minus = pos:minus
