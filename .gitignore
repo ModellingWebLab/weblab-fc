@@ -7,6 +7,9 @@
 *.[oa]
 *.pyc
 /build/*
+/src/python/fc/sundials/solver.c
+/src/python/fc/sundials/solver.so
+/src/python/fc/sundials/sundials.so
 
 # Eclipse stuff
 /.pydevproject
