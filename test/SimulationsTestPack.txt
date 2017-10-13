@@ -1,2 +1,0 @@
-TestFunctionalCurationLiteratePaper.hpp
-TestReproducibility.hpp
