@@ -42,10 +42,10 @@ and access `E.Const` etc.
 
 # Import submodules and make the expressions they define available locally.
 
-from abstract import *
-from general import *
-from maths import *
-from array import *
+from .abstract import *
+from .general import *
+from .maths import *
+from .array import *
 
 def N(number):
     """A convenience expression constructor for defining constant numbers."""

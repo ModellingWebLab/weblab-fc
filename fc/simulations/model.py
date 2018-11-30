@@ -204,7 +204,7 @@ class NestedProtocol(AbstractModel):
 
     def Simulate(self, endPoint):
         # TODO: Better to pass 'simEnv' to this method?
-        for name, expr in self.inputExprs.iteritems():
+        for name, expr in self.inputExprs.items():
            self.proto.SetInput(name, expr.Evaluate(self.simEnv))
 #         self.proto.SetOutputfolder(self.outputPath) #TODO
         self.proto.Run()

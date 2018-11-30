@@ -33,10 +33,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import operator
 import os
-import shutil
 import sys
 import tables
 import time
+from functools import reduce
 
 import matplotlib
 matplotlib.use('agg')
@@ -112,7 +112,7 @@ class Protocol(object):
                         stmt = Assign([name], set_inputs[name])
                     self.inputEnv.ExecuteStatements([stmt])
                 # Make any prefixed imports of that protocol into our prefixed imports
-                for imported_prefix, imported_import in imported_proto.imports.iteritems():
+                for imported_prefix, imported_import in imported_proto.imports.items():
                     self.AddImportedProtocol(imported_import, imported_prefix)
                 # Merge the other elements of its definition with our own
                 self.library.extend(imported_proto.library)
@@ -130,7 +130,6 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
         self.timings['parsing'] = time.time() - start
 
-
     # Override Object serialization methods to allow pickling with the dill module
     def __getstate__(self):
         # TODO: Original object unusable after serialization.
@@ -140,7 +139,7 @@ class Protocol(object):
 
         # Must remove Model class and regenerate during unpickling
         # (Pickling errors from nested class structure of ModelWrapperEnvironment)
-        
+
         # If the protocol has been run, remove references to model environment
         # in the simulations (and un-delegate from libraryEnv)
         for sim in self.simulations:
@@ -158,10 +157,11 @@ class Protocol(object):
             del odict['parser']
             del odict['parsedProtocol']
         return odict
-    def __setstate__(self,dict):
+
+    def __setstate__(self, dict):
         self.__dict__.update(dict)
         # Re-import Model from temporary Python file (if provided)
-        if hasattr(self,'modelPath'):
+        if hasattr(self, 'modelPath'):
             sys.path.insert(0, self.modelPath)
             import model as module
             for name in module.__dict__.keys():
@@ -333,10 +333,10 @@ class Protocol(object):
         self.OutputsAndPlots(errors, verbose, writeOut)
         # Summarise time spent in each protocol section (if we're the main protocol)
         if verbose and self.indentLevel == 0:
-            print 'Time spent running protocol (s): %.6f' % sum(self.timings.values())
+            print('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
             max_len = max(len(section) for section in self.timings)
-            for section, duration in self.timings.iteritems():
-                print '   ', section, ' ' * (max_len - len(section)), '%.6f' % duration
+            for section, duration in self.timings.items():
+                print('   ', section, ' ' * (max_len - len(section)), '%.6f' % duration)
         if errors:
             # Report any errors that occurred
             raise errors
@@ -405,10 +405,10 @@ class Protocol(object):
             class_name = 'GeneratedModel'
             code_gen_cmd = self.GetConversionCommand(model, xml_file, class_name, temp_dir,
                                                      useCython=useCython, useNumba=useNumba, exposeNamedParameters=exposeNamedParameters)
-            print subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT)
+            print(subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT))
             if useCython:
                 # Compile the extension module
-                print subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir, stderr=subprocess.STDOUT)
+                print(subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir, stderr=subprocess.STDOUT))
             # Create an instance of the model
             self.modelPath = temp_dir
             sys.path.insert(0, temp_dir)
@@ -446,7 +446,7 @@ class Protocol(object):
         
         Arguments are converted to strings and space separated, as for the print builtin.
         """
-        print '  ' * self.indentLevel + ' '.join(map(str, args))
+        print('  ' * self.indentLevel + ' '.join(map(str, args)))
         sys.stdout.flush()
 
     def LogWarning(self, *args):
@@ -454,5 +454,5 @@ class Protocol(object):
         
         Arguments are converted to strings and space separated, as for the print builtin.
         """
-        print >>sys.stderr, '  ' * self.indentLevel + ' '.join(map(str, args))
+        print('  ' * self.indentLevel + ' '.join(map(str, args)), file=sys.stderr)
         sys.stderr.flush()

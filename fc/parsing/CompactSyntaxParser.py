@@ -31,7 +31,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from __future__ import division
+
 
 import os
 import sys
@@ -156,11 +156,11 @@ class Actions(object):
         
         def GetChildrenXml(self):
             """Convert all sub-tokens to XML and return the list of elements."""
-            return map(lambda tok: tok.xml(), self.tokens)
+            return [tok.xml() for tok in self.tokens]
         
         def GetChildrenExpr(self):
             """Convert all sub-tokens to expr and return the list of elements."""
-            return map(lambda tok: tok.expr(), self.tokens)
+            return [tok.expr() for tok in self.tokens]
         
         def TransferAttrs(self, *attrNames):
             """Create an attribute dictionary for use in generating XML from named parse results."""
@@ -383,7 +383,7 @@ class Actions(object):
                 return self.tokens[0].expr() #should be list containing names
         
         def names(self):
-            return map(str, self.tokens)
+            return list(map(str, self.tokens))
     
     class Tuple(BaseGroupAction):
         """Parse action for tuples."""
@@ -442,14 +442,14 @@ class Actions(object):
                 func = self.DelegateSymbol(func_name).xml()
             else:
                 func = self.tokens[0].xml()
-            args = map(lambda t: t.xml(), self.tokens[1])
+            args = [t.xml() for t in self.tokens[1]]
             return M.apply(func, *args)
         
         def _expr(self):
             assert len(self.tokens) == 2
             assert isinstance(self.tokens[0], Actions.Variable)
             func = self.tokens[0].expr()
-            args = map(lambda t: t.expr(), self.tokens[1])
+            args = [t.expr() for t in self.tokens[1]]
             if hasattr(func, 'name'):
                 if func.name == 'map':
                     result = E.Map(*args)
@@ -643,7 +643,7 @@ class Actions(object):
             if 'pad' in index_tokens:
                 assert len(index_tokens['pad']) == 2
                 apply_content.extend(index_tokens['pad']) # Pad direction & value
-            return M.apply(*map(lambda t: t.xml(), apply_content))
+            return M.apply(*[t.xml() for t in apply_content])
         
         def _expr(self):
             assert len(self.tokens) == 2
@@ -922,7 +922,7 @@ class Actions(object):
         
     class NestedSimulation(BaseGroupAction):
         def _xml(self):
-            args = map(lambda t: t.xml(), self.tokens[0:-1])
+            args = [t.xml() for t in self.tokens[0:-1]]
             if len(args) == 1:
                 # Add an empty modifiers element
                 args.append(self.Delegate('Modifiers', [[]]).xml())
@@ -937,7 +937,7 @@ class Actions(object):
             return P.nestedSimulation(*args)
         
         def _expr(self):
-            args = map(lambda t: t.expr(), self.tokens[0:-1])
+            args = [t.expr() for t in self.tokens[0:-1]]
             if len(args) == 1:
                 # Add an empty modifiers element
                 args.append(self.Delegate('Modifiers', [[]]).expr())
@@ -1199,7 +1199,7 @@ class Actions(object):
                 curve = curve[:-1]
             assert len(curve) == 2, "Only a single y variable is currently supported in XML"
             title = str(self.tokens[0])
-            y, x = map(str, curve)
+            y, x = list(map(str, curve))
             args = [P.title(title), P.x(x), P.y(y)]
             if key:
                 args.append(P.key(key))
@@ -1220,7 +1220,7 @@ class Actions(object):
                 curve = curve[:-1]
             assert len(curve) == 2, "Only a single y variable is currently supported"
             title = str(self.tokens[0])
-            y, x = map(str, curve)
+            y, x = list(map(str, curve))
             plot = {'title': title, 'x': x, 'y': y}
             if key:
                 plot['key'] = key
@@ -1701,8 +1701,8 @@ class CompactSyntaxParser(object):
     # Parsing a full protocol
     #########################
     
-    protocol = p.And(map(Optional, [nl, documentation, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
-                                    tasks, postProcessing, outputs, plots])).setName('Protocol').setParseAction(Actions.Protocol)
+    protocol = p.And(list(map(Optional, [nl, documentation, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
+                                    tasks, postProcessing, outputs, plots]))).setName('Protocol').setParseAction(Actions.Protocol)
     
     def __init__(self):
         """Initialise the parser."""
@@ -1722,11 +1722,11 @@ class CompactSyntaxParser(object):
         while self._stack_depth_factor < 3:
             try:
                 r = callable(*args, **kwargs)
-            except RuntimeError, msg:
-                print >> sys.stderr, "Got RuntimeError:", msg
+            except RuntimeError as msg:
+                print("Got RuntimeError:", msg, file=sys.stderr)
                 self._stack_depth_factor += 0.5
                 new_limit = int(self._stack_depth_factor * self._original_stack_limit)
-                print >> sys.stderr, "Increasing recursion limit to", new_limit
+                print("Increasing recursion limit to", new_limit, file=sys.stderr)
                 sys.setrecursionlimit(new_limit)
             else:
                 break # Parsed OK
@@ -1800,10 +1800,10 @@ def EnableDebug(grammars=None):
         return " at loc " + str(loc) + "(%d,%d)" % ( p.lineno(loc,instring), p.col(loc,instring) )
     
     def SuccessDebugAction( instring, startloc, endloc, expr, toks ):
-        print ("Matched " + str(expr) + " -> " + str(toks.asList()) + DisplayLoc(instring, endloc))
+        print("Matched " + str(expr) + " -> " + str(toks.asList()) + DisplayLoc(instring, endloc))
     
     def ExceptionDebugAction( instring, loc, expr, exc ):
-        print ("Exception raised:" + str(exc) + DisplayLoc(instring, loc))
+        print("Exception raised:" + str(exc) + DisplayLoc(instring, loc))
 
     for parser in grammars or GetNamedGrammars():
         parser.setDebugActions(None, SuccessDebugAction, ExceptionDebugAction)
@@ -1836,7 +1836,7 @@ if __name__ == '__main__':
     try:
         parser = CompactSyntaxParser()
         output_path = parser.ConvertProtocol(source_path, output_dir, dryRun=dry_run)
-        print output_path
+        print(output_path)
     except:
         if len(sys.argv) == 3:
             raise

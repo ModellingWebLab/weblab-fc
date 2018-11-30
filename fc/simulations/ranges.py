@@ -92,7 +92,7 @@ class UniformRange(AbstractRange):
         self.stepExpr = stepExpr
 
         try:
-            line_profile.add_function(self.next)
+            line_profile.add_function(self.__next__)
         except NameError:
             pass
 
@@ -101,7 +101,7 @@ class UniformRange(AbstractRange):
         self.value = self.start
         return self
 
-    def next(self):
+    def __next__(self):
         self.count += 1
         if self.count >= self.numberOfOutputs:
             self.count = -1
@@ -144,7 +144,7 @@ class VectorRange(AbstractRange):
         self.value = 0
         return self
 
-    def next(self):
+    def __next__(self):
         self.count += 1
         if self.count >= self.numberOfOutputs:
             self.count = -1
@@ -175,7 +175,7 @@ class While(AbstractRange):
         self.value = -1
         return self
 
-    def next(self):
+    def __next__(self):
         self.count += 1
         self.value += 1
         if self.count >= self.numberOfOutputs:

@@ -137,9 +137,9 @@ class NewArray(AbstractExpression):
                 start = self.GetValue(spec.values[0])
                 step = self.GetValue(spec.values[1])
                 end = self.GetValue(spec.values[2])
-                if range(int(start), int(end), int(step)) == []:
+                if list(range(int(start), int(end), int(step))) == []:
                     raise ProtocolError("The indices you entered created an empty range")
-                implicit_dim_slices.append(range(int(start), int(end), int(step)))
+                implicit_dim_slices.append(list(range(int(start), int(end), int(step))))
                 implicit_dim_names.append(spec.values[3].value)
             elif len(spec.values) == 5:
                 dim = self.GetValue(spec.values[0])
@@ -148,9 +148,9 @@ class NewArray(AbstractExpression):
                 end = self.GetValue(spec.values[3])
                 if dim in explicit_dim_slices:
                     raise ProtocolError("Dimension", dim, "has already been assigned")
-                if range(int(start), int(end), int(step)) == []:
+                if list(range(int(start), int(end), int(step))) == []:
                     raise ProtocolError("The indices you entered created an empty range")
-                explicit_dim_slices[dim] = range(int(start), int(end), int(step))
+                explicit_dim_slices[dim] = list(range(int(start), int(end), int(step)))
                 explicit_dim_names[dim] = spec.values[4].value
             else:
                 raise ProtocolError("Each slice must be a tuple that contains 4, or 5 values, not", len(spec.values))
@@ -175,7 +175,7 @@ class NewArray(AbstractExpression):
             ranges.append(implicit_slice)
             range_name.append(implicit_dim_names[i])
         
-        range_name = filter(None, range_name) # Remove None entries
+        range_name = [_f for _f in range_name if _f] # Remove None entries
         product = 1
         dims = []
         range_dims = []
@@ -185,7 +185,7 @@ class NewArray(AbstractExpression):
                 range_dims.append([slice(None, None, 1)])
             else:
                 dims.append(len(each))
-                range_dims.append(range(len(each)))
+                range_dims.append(list(range(len(each))))
                 last_spec_dim = i
         #stretch 
         if len(range_name) == 1:
@@ -425,9 +425,9 @@ class Fold(AbstractExpression):
        
         for i,dim in enumerate(shape):
             if i == dimension:
-                dim_ranges.append(range(1))
+                dim_ranges.append(list(range(1)))
             else:
-                dim_ranges.append(range(dim))  
+                dim_ranges.append(list(range(dim)))
 
         for indices in itertools.product(*dim_ranges):
             modifiable_indices = list(indices)
@@ -466,15 +466,15 @@ class Map(AbstractExpression):
         interpret = False
         try:
             expression,local_env = function.Compile(env, arrays)
-        except NotImplementedError, e:
+        except NotImplementedError:
             interpret = True
         else:
             try: 
                 protocol_result = V.Array(ne.evaluate(expression, local_dict=local_env.unwrappedBindings, global_dict=env.unwrappedBindings))
-            except Exception, e:
+            except Exception:
                 try:
                     protocol_result = V.Array(eval(expression, env.unwrappedBindings, local_env.unwrappedBindings))
-                except Exception, e:
+                except Exception:
                     interpret = True
         if interpret:
             protocol_result = self.Interpret(env, arrays, function)
@@ -485,7 +485,7 @@ class Map(AbstractExpression):
         dim_range = []
         shape = arrays[0].array.shape
         for dim in shape:
-            dim_range.append(range(dim))
+            dim_range.append(list(range(dim)))
         for index in itertools.product(*dim_range):
             function_inputs = []
             for array in arrays:

@@ -111,7 +111,7 @@ else:
         """Fake PySundials solver that in reality uses our own CVODE wrapper."""
         def __init__(self):
             import sys
-            print >>sys.stderr, "PySundials not found; using internal CVODE wrapper instead."
+            print("PySundials not found; using internal CVODE wrapper instead.", file=sys.stderr)
             super(PySundialsSolver, self).__init__()
 
 # Which type of ODE solver to use by default

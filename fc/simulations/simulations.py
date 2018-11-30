@@ -35,7 +35,7 @@ import operator
 import sys
 import numpy as np
 
-from itertools import izip
+
 from operator import attrgetter
 
 from . import ranges as R
@@ -111,7 +111,7 @@ class AbstractSimulation(locatable.Locatable):
         
         Arguments are converted to strings and space separated, as for the print builtin.
         """
-        print '  ' * self.indentLevel + ' '.join(map(str, args))
+        print('  ' * self.indentLevel + ' '.join(map(str, args)))
         sys.stdout.flush()
 
     def InternalRun(self, verbose=True):
@@ -162,7 +162,7 @@ class AbstractSimulation(locatable.Locatable):
         self.model.SetIndentLevel(self.indentLevel)
         model_env = model.GetEnvironmentMap()
         model.simEnv = self.env # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
-        for prefix, env in model_env.iteritems():
+        for prefix, env in model_env.items():
             self.env.SetDelegateeEnv(env, prefix)
             self.results.SetDelegateeEnv(env, prefix)
 
@@ -190,7 +190,7 @@ class AbstractSimulation(locatable.Locatable):
             if not self_results:
                 # First iteration - create empty output arrays of the correct shape
                 range_dims = tuple(r.GetNumberOfOutputPoints() for r in self.ranges)
-                for name, output in itertools.izip(self.model.outputNames, outputsList):
+                for name, output in zip(self.model.outputNames, outputsList):
                     result = V.Array(np.empty(range_dims + output.shape))
                     self_results.DefineName(name, result)
                     results_list.append(result.unwrapped)
@@ -203,7 +203,7 @@ class AbstractSimulation(locatable.Locatable):
         if results_list:
             # Note that the tuple conversion in the next line is very quick
             range_indices = tuple(map(attrgetter('count'), self.ranges))  # tuple(r.count for r in self.ranges)
-            for output, result in izip(outputsList, results_list):
+            for output, result in zip(outputsList, results_list):
                 result[range_indices] = output
 
 

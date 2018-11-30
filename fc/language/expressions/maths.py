@@ -37,6 +37,7 @@ import numexpr as ne
 from .abstract import AbstractExpression
 from ...utility.error_handling import ProtocolError
 from .. import values as V
+from functools import reduce
 
 
 class Plus(AbstractExpression):

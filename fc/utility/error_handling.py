@@ -33,7 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import inspect
 import operator
 import traceback
-from cStringIO import StringIO
+from io import StringIO
 
 
 def _ExtractProtocolInfoFromStack(frames):
@@ -78,7 +78,8 @@ class ProtocolError(Exception):
         store self.shortMessage as the message string created from the constructor arguments.
         """
         # Figure out where in the protocol this error arose
-        self.locations, location_message = _ExtractProtocolInfoFromStack(reversed(map(operator.itemgetter(0), inspect.stack())))
+        self.locations, location_message = _ExtractProtocolInfoFromStack(
+            reversed(map(operator.itemgetter(0), inspect.stack())))
         # Construct the full error message
         self.shortMessage = ' '.join(map(str, msgParts))
         msg = self.shortMessage + '\n' + location_message
@@ -123,6 +124,6 @@ class ErrorRecorder(ProtocolError):
             self.args = tuple(args)
         return True
     
-    def __nonzero__(self):
+    def __bool__(self):
         """Test if any errors have been recorded."""
         return bool(self.errors)

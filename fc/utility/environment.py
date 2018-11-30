@@ -77,8 +77,8 @@ class Environment(object):
             self.unwrappedBindings[name] = value.unwrapped
 
     def DefineNames(self, names, values):
-        for i, name in enumerate(names):
-            self.DefineName(name, values[i])
+        for name, value in zip(names, values):
+            self.DefineName(name, value)
 
     def EvaluateExpr(self, exprStr, env):
         import CompactSyntaxParser as CSP
@@ -120,7 +120,7 @@ class Environment(object):
 
     def DebugDelegatees(self, prefix):
         print('Delegatees in', prefix, '(', len(self), '):', self.delegatees)
-        for p, env in self.delegatees.iteritems():
+        for p, env in self.delegatees.items():
             env.DebugDelegatees(p)
 
     def SetDelegateeEnv(self, delegatee, prefix=""):
@@ -188,7 +188,7 @@ class Environment(object):
         self.unwrappedBindings.clear()
 
     def DefinedNames(self):
-        return self.bindings.keys()
+        return list(self.bindings.keys())
 
     def ExecuteStatements(self, statements, returnAllowed=False):
         result = V.Null()
@@ -265,8 +265,8 @@ class DelegatingDict(dict):
     def Flatten(self):
         """Return a normal dictionary containing all the definitions in this and its delegatees."""
         result = dict(self)
-        for prefix, delegatee in self.delegatees.iteritems():
-            for key, value in delegatee.Flatten().iteritems():
+        for prefix, delegatee in self.delegatees.items():
+            for key, value in delegatee.Flatten().items():
                 full_key = prefix + ':' + key if prefix else key
                 if full_key not in result:
                     result[full_key] = value
@@ -374,7 +374,7 @@ class ModelWrapperEnvironment(Environment):
         self.model = model
         self.unwrappedBindings = self._UnwrappedBindingsDict(model)
         self.bindings = self._BindingsDict(self.unwrappedBindings)
-        self.names = self.unwrappedBindings.keys()
+        self.names = list(self.unwrappedBindings.keys())
 
     def DefineName(self, name, value):
         raise ProtocolError("Defining names in a model is not allowed.")

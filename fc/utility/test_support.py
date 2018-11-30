@@ -118,7 +118,7 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
     :returns: a boolean indicating whether the results matched to within tolerances, or None if failure was expected.
     """
     results_ok = True
-    for name, ndims in expectedSpec.iteritems():
+    for name, ndims in expectedSpec.items():
         data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
         try:
             actual = proto.outputEnv.LookUp(name)
