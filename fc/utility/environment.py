@@ -36,7 +36,6 @@ from .error_handling import ProtocolError
 from ..language import values as V
 
 
-
 class Environment(object):
     """Base class for environments in the protocol language."""
     next_ident = [0]
@@ -60,18 +59,19 @@ class Environment(object):
     # Python requires __setstate__ (which restores the numpy module untracked by
     # DelegatingDict.__getstate()) to be paired with a (dummy) __getstate__() method
     def __getstate__(self):
-        odict = self.__dict__#.copy()
+        odict = self.__dict__
         return odict
-    def __setstate__(self,dict):
+
+    def __setstate__(self, dict):
         self.__dict__.update(dict)
         self.unwrappedBindings['___np'] = np
-
 
     def DefineName(self, name, value):
         if ':' in name:
             raise ProtocolError('Names such as', name, 'with a colon are not allowed.')
         if name in self.bindings:
-            raise ProtocolError(name, "is already defined as", self.bindings[name], "and may not be re-bound")
+            raise ProtocolError(name, "is already defined as", self.bindings[name],
+                                "and may not be re-bound")
         else:
             self.bindings[name] = value
             self.unwrappedBindings[name] = value.unwrapped
@@ -119,13 +119,15 @@ class Environment(object):
 #             raise
 
     def DebugDelegatees(self, prefix):
-        print 'Delegatees in', prefix, '(', len(self), '):', self.delegatees
+        print('Delegatees in', prefix, '(', len(self), '):', self.delegatees)
         for p, env in self.delegatees.iteritems():
             env.DebugDelegatees(p)
 
     def SetDelegateeEnv(self, delegatee, prefix=""):
         if prefix in self.delegatees and self.delegatees[prefix] is not delegatee:
-            raise ProtocolError("The name prefix '" + prefix + "' has already been used in this context. Check your simulations, imports, etc.")
+            raise ProtocolError(
+                "The name prefix '" + prefix +
+                "' has already been used in this context. Check your simulations, imports, etc.")
         self.delegatees[prefix] = delegatee
 #         print 'Delegating to', delegatee, 'for', prefix, 'in', self
         self.bindings.SetDelegatee(delegatee.bindings, prefix)
@@ -144,7 +146,8 @@ class Environment(object):
         if not self.allowOverwrite:
             raise ProtocolError("This environment does not support overwriting mappings")
         if name not in self.bindings:
-            raise ProtocolError(name, "is not defined in this environment and thus cannot be removed")
+            raise ProtocolError(
+                name, "is not defined in this environment and thus cannot be removed")
         del self.bindings[name]
         del self.unwrappedBindings[name]
 
@@ -169,10 +172,12 @@ class Environment(object):
                 return None
 
     def OverwriteDefinition(self, name, value):
-        """Change the binding of name to value, if this is permitting by the defining environment."""
+        """Change the binding of name to value, if this is permitted by the defining environment."""
         defining_env = self.FindDefiningEnvironment(name)
         if defining_env is None:
-            raise ProtocolError(name, "is not defined in this env or a delegating env and thus cannot be overwritten")
+            raise ProtocolError(
+                name,
+                "is not defined in this env or a delegating env and thus cannot be overwritten")
         if not defining_env.allowOverwrite:
             raise ProtocolError("This environment does not support overwriting mappings")
         defining_env.bindings[name] = value
@@ -190,7 +195,7 @@ class Environment(object):
         for statement in statements:
             result = statement.Evaluate(self)
             if not isinstance(result, V.Null) and result is not None:
-                if returnAllowed == True:
+                if returnAllowed is True:
                     break
                 else:
                     raise ProtocolError("Return statement not allowed outside of function")
@@ -263,7 +268,7 @@ class DelegatingDict(dict):
         for prefix, delegatee in self.delegatees.iteritems():
             for key, value in delegatee.Flatten().iteritems():
                 full_key = prefix + ':' + key if prefix else key
-                if not full_key in result:
+                if full_key not in result:
                     result[full_key] = value
         return result
 
@@ -285,11 +290,11 @@ class ModelWrapperEnvironment(Environment):
                 pass
 
         def __getitem__(self, key):
-            val = self._unwrapped[key] ## ~61%
+            val = self._unwrapped[key]  # ~61%
             if isinstance(val, np.ndarray):
                 return V.Array(val)
             else:
-                return V.Simple(val) ## ~21%
+                return V.Simple(val)  # ~21%
 
         def __setitem__(self, key, value):
             pass
@@ -300,32 +305,40 @@ class ModelWrapperEnvironment(Environment):
     class _UnwrappedBindingsDict(dict):
         """A dictionary subclass wrapping the Python versions of a model's variables.
 
-        TODO: look at the efficiency of get/set methods, and whether these matter for overall performance (c.f. #2459).
+        TODO: look at the efficiency of get/set methods, and whether these matter for
+        overall performance (c.f. #2459).
         """
         class _FreeVarList(list):
             """A single element list for wrapping the model's free variable."""
             def __init__(self, model):
                 self._model = model
+
             def __getitem__(self, index):
                 return self._model.freeVariable
+
             def __setitem__(self, index, value):
                 raise ProtocolError("Cannot set model free variable directly, only via simulation")
-        
+
         class _OutputsList(list):
             """A pseudo-list for wrapping the model's output values."""
             def __init__(self, model):
                 self._model = model
+
             def __getitem__(self, index):
                 return self._model.GetOutputs()[index]
+
             def __setitem__(self, index, value):
-                raise ProtocolError("Cannot set model variable '" + self._model.outputNames[index] + "': it is a model output")
+                raise ProtocolError(
+                    "Cannot set model variable '" + self._model.outputNames[index] +
+                    "': it is a model output")
 
         def __init__(self, model):
             self._model = model
             # Make the underlying dict store a map from name to (vector, index) for fast lookup
             self._freeVars = self._FreeVarList(model)
             self._outputVars = self._OutputsList(model)
-            # Note: we process outputs first so that if a variable is both an output and something else, we prefer direct access
+            # Note: we process outputs first so that if a variable is both an output and
+            # something else, we prefer direct access
             for key in model.outputNames:
                 dict.__setitem__(self, key, (self._outputVars, model.outputNames.index(key)))
             for key in model.parameterMap:
@@ -344,13 +357,6 @@ class ModelWrapperEnvironment(Environment):
             # TODO: Catch KeyError?
             vector, index = dict.__getitem__(self, key)
             return vector[index]
-#             try:
-#                 vector, index = dict.__getitem__(self, key)
-#                 return vector[index]
-#             except KeyError:
-#                 print 'Missing model var', key
-#                 print 'Model has:', self._model.stateVarMap.keys(), self._model.parameterMap.keys(), self._model.outputNames
-#                 raise
 
         def __setitem__(self, key, value):
             # TODO: Catch KeyError?
