@@ -47,7 +47,7 @@ class Plus(AbstractExpression):
         if isinstance(operands[0], V.Array):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
             arr_dict = {}
-            for i,operand in enumerate(operands):
+            for i, operand in enumerate(operands):
                 arr_dict[arr_names[i]] = operand.array
             expression = ' + '.join(arr_names)
             result = V.Array(ne.evaluate(expression, local_dict=arr_dict))
@@ -97,7 +97,7 @@ class Times(AbstractExpression):
         if any(isinstance(operand, V.Array) for operand in operands):
             arr_names = [env.FreshIdent() for i in range(len(operands))]
             arr_dict = {}
-            for i,operand in enumerate(operands):
+            for i, operand in enumerate(operands):
                 try:
                     arr_dict[arr_names[i]] = operand.array
                 except AttributeError:
@@ -348,7 +348,7 @@ class Log(AbstractExpression):
             if log_base == 10:
                 result = math.log10(operands[0].value)
             else:
-                result = math.log(operands[1].value,log_base)
+                result = math.log(operands[1].value, log_base)
         except AttributeError:
             raise ProtocolError("Logarithm operator requires its operands to evaluate to numbers")
         return V.Simple(result)

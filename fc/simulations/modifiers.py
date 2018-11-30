@@ -70,7 +70,7 @@ class SetVariable(AbstractModifier):
             del odict['_evaluate']
             del odict['_bindings']
         return odict
-    def __setstate__(self,dict):
+    def __setstate__(self, dict):
         self.__dict__.update(dict)
         self._calledOnce = False
 

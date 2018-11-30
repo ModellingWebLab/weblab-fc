@@ -73,7 +73,7 @@ class AbstractSimulation(locatable.Locatable):
         if self.model is not None:
             modelenv = self.model.GetEnvironmentMap()
             for prefix in modelenv:
-                if isinstance(self,Nested):
+                if isinstance(self, Nested):
                     self.nestedSim.env.ClearDelegateeEnv(prefix)
                 self.results.ClearDelegateeEnv(prefix)
                 self.env.ClearDelegateeEnv(prefix)
@@ -82,7 +82,7 @@ class AbstractSimulation(locatable.Locatable):
         odict['model'] = None
         return odict
 
-    def __setstate__(self,dict):
+    def __setstate__(self, dict):
         self.__dict__.update(dict)
 
     def Initialise(self, initialiseRange=True):

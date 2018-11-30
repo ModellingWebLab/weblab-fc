@@ -134,7 +134,7 @@ class NameLookUp(AbstractExpression):
         return self.PythonizeName(self.name)
 
     def GetUsedVariables(self):
-        return set([self.name])
+        return {self.name}
 
 
 class TupleExpression(AbstractExpression):

@@ -71,7 +71,7 @@ class NewArray(AbstractExpression):
     def DevelopResultWithCompile(self, range_name, ranges, compiled_gen_expr, env):
         local_dict = {}
         defined_ranges = 0
-        for i,name in enumerate(range_name):
+        for i, name in enumerate(range_name):
             local_dict[name] = np.array(ranges[i], dtype=float)
             defined_ranges += 1
         if defined_ranges > 1:
@@ -98,7 +98,7 @@ class NewArray(AbstractExpression):
                                         "dimensions, which is not enough to fill", num_gaps, "gaps")
                 sub_array_shape = sub_array.shape
                 count = 0
-                for i,dimension in enumerate(dims):
+                for i, dimension in enumerate(dims):
                     if dimension is None:
                         dims[i] = sub_array_shape[count]
                         count += 1
@@ -118,7 +118,7 @@ class NewArray(AbstractExpression):
             for child in self.children:
                 assert isinstance(child, TupleExpression)
                 assert isinstance(child.children[-1].value, V.String)
-                iterator_vars |= set([child.children[-1].value.value])
+                iterator_vars |= {child.children[-1].value.value}
             result |= self.genExpr.GetUsedVariables()
             result = result - set.intersection(result, iterator_vars)
         return result
@@ -162,7 +162,7 @@ class NewArray(AbstractExpression):
             range_name[key] = explicit_dim_names[key]
         
         num_gaps = 0
-        for i,each in enumerate(ranges):
+        for i, each in enumerate(ranges):
             if each is None:
                 if implicit_dim_slices:
                     ranges[i] = implicit_dim_slices.pop(0)
@@ -171,7 +171,7 @@ class NewArray(AbstractExpression):
                     ranges[i] = slice(None, None, 1)
                     num_gaps += 1
                     
-        for i,implicit_slice in enumerate(implicit_dim_slices):
+        for i, implicit_slice in enumerate(implicit_dim_slices):
             ranges.append(implicit_slice)
             range_name.append(implicit_dim_names[i])
         
@@ -179,7 +179,7 @@ class NewArray(AbstractExpression):
         product = 1
         dims = []
         range_dims = []
-        for i,each in enumerate(ranges):
+        for i, each in enumerate(ranges):
             if isinstance(each, slice):
                 dims.append(None)
                 range_dims.append([slice(None, None, 1)])
@@ -361,7 +361,7 @@ class Fold(AbstractExpression):
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         default_params = [V.Null(), V.Null(), V.Null(), V.Simple(operands[1].array.ndim - 1)]
-        for i,oper in enumerate(operands):
+        for i, oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
                 operands[i] = default_params[i]
         if len(self.children) == 2:
@@ -423,7 +423,7 @@ class Fold(AbstractExpression):
         
         total_so_far = initial
        
-        for i,dim in enumerate(shape):
+        for i, dim in enumerate(shape):
             if i == dimension:
                 dim_ranges.append(list(range(1)))
             else:
@@ -465,7 +465,7 @@ class Map(AbstractExpression):
                 raise ProtocolError(array, "is not the same shape as the first array input")
         interpret = False
         try:
-            expression,local_env = function.Compile(env, arrays)
+            expression, local_env = function.Compile(env, arrays)
         except NotImplementedError:
             interpret = True
         else:
@@ -521,7 +521,7 @@ class Index(AbstractExpression):
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         default_params = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
-        for i,oper in enumerate(operands):
+        for i, oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
                 operands[i] = default_params[i]
         if len(self.children) == 2:
