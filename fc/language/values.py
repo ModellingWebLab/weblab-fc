@@ -44,7 +44,7 @@ class AbstractValue(object):
     def unwrapped(self):
         """Return the underlying Python value."""
         return None
-    
+
     def __str__(self):
         """Return the string representation of the underlying Python value."""
         return repr(self.unwrapped)
@@ -59,7 +59,7 @@ class Simple(AbstractValue):
     def array(self):
         """View this number as a 0-d array."""
         return np.array(self.value)
-    
+
     @property
     def unwrapped(self):
         return self.value
@@ -77,7 +77,7 @@ class Array(AbstractValue):
             return self.array[()]
         else:
             raise AttributeError("An array with", self.array.ndim, "dimensions cannot be treated as a single value.")
-    
+
     @property
     def unwrapped(self):
         return self.array

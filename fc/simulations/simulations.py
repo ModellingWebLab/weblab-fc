@@ -54,11 +54,11 @@ class AbstractSimulation(locatable.Locatable):
         self.ranges = [self.range_]
         self.model = None
         self.results = Env.Environment()
-        self.resultsList = [] # An ordered view on the unwrapped versions of simulation results
+        self.resultsList = []  # An ordered view on the unwrapped versions of simulation results
         self.env = Env.Environment()
         self.viewEnv = None
         self.indentLevel = 0
-        
+
         try:
             line_profile.add_function(self.AddIterationOutputs)
             line_profile.add_function(self.LoopBodyStartHook)
@@ -68,7 +68,7 @@ class AbstractSimulation(locatable.Locatable):
     def __getstate__(self):
         # Must remove Model class and regenerate during unpickling
         # (Pickling errors from nested class structure of ModelWrapperEnvironment)
-        
+
         # Undo Simulation.SetModel
         if self.model is not None:
             modelenv = self.model.GetEnvironmentMap()
@@ -99,7 +99,7 @@ class AbstractSimulation(locatable.Locatable):
         self.resultsList[:] = []
         if self.viewEnv:
             self.viewEnv.Clear()
-    
+
     def SetIndentLevel(self, indentLevel):
         """Set the level of indentation to use for progress output."""
         self.indentLevel = indentLevel
@@ -130,7 +130,7 @@ class AbstractSimulation(locatable.Locatable):
                 shape[0] = self.range_.GetNumberOfOutputPoints()
                 result.resize(tuple(shape), refcheck=False)
                 # TODO: Check if the next line is needed?
-                self.viewEnv.OverwriteDefinition(name, V.Array(result[0:1+self.range_.count]))
+                self.viewEnv.OverwriteDefinition(name, V.Array(result[0:1 + self.range_.count]))
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 0:
                 modifier.Apply(self)
@@ -141,7 +141,7 @@ class AbstractSimulation(locatable.Locatable):
         if isinstance(self.range_, R.While):
             for name in self.results:
                 result = self.results.LookUp(name)
-                result.array = result.array[0:self.range_.GetNumberOfOutputPoints()] #resize function doesn't work with references
+                result.array = result.array[0:self.range_.GetNumberOfOutputPoints()]  # resize function doesn't work with references
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.END_ONLY:
                 modifier.Apply(self)
@@ -150,9 +150,9 @@ class AbstractSimulation(locatable.Locatable):
         if self.viewEnv is not None:
             for name in self.results:
                 if name not in self.viewEnv:
-                    self.viewEnv.DefineName(name, V.Array(self.results.LookUp(name).array[0:1+self.range_.count]))
+                    self.viewEnv.DefineName(name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
                 else:
-                    self.viewEnv.OverwriteDefinition(name, V.Array(self.results.LookUp(name).array[0:1+self.range_.count]))
+                    self.viewEnv.OverwriteDefinition(name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
 
     def SetModel(self, model):
         if isinstance(self.model, NestedProtocol):
@@ -161,7 +161,7 @@ class AbstractSimulation(locatable.Locatable):
             self.model = model
         self.model.SetIndentLevel(self.indentLevel)
         model_env = model.GetEnvironmentMap()
-        model.simEnv = self.env # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
+        model.simEnv = self.env  # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
         for prefix, env in model_env.items():
             self.env.SetDelegateeEnv(env, prefix)
             self.results.SetDelegateeEnv(env, prefix)
@@ -244,10 +244,10 @@ class Timecourse(AbstractSimulation):
 
 class OneStep(AbstractSimulation):
     """Simulate one logical execution of a model."""
-    
+
     class NullRange(R.AbstractRange):
         pass
-    
+
     def __init__(self, step, modifiers=[]):
         self.step = step
         self.modifiers = modifiers
@@ -285,7 +285,7 @@ class Nested(AbstractSimulation):
     def Clear(self):
         self.nestedSim.Clear()
         super(Nested, self).Clear()
-    
+
     def SetIndentLevel(self, indentLevel):
         super(Nested, self).SetIndentLevel(indentLevel)
         self.nestedSim.SetIndentLevel(indentLevel + 1)
@@ -296,7 +296,7 @@ class Nested(AbstractSimulation):
                 self.LogProgress('nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')')
             self.LoopBodyStartHook()
             if self.outputFolder:
-                self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder('run_%d' %self.range_.GetCurrentOutputNumber()))
+                self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder('run_%d' % self.range_.GetCurrentOutputNumber()))
             self.nestedSim.Run()
             self.LoopBodyEndHook()
         self.LoopEndHook()

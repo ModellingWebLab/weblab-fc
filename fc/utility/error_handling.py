@@ -45,7 +45,7 @@ def _ExtractProtocolInfoFromStack(frames):
     locations = []
     last_env = None
     trace_output = StringIO()
-    
+
     for frame in frames:
         local_vars = frame.f_locals
         obj = local_vars.get('self', None)
@@ -57,7 +57,7 @@ def _ExtractProtocolInfoFromStack(frames):
                 last_env = env
                 obj.Trace('Variables defined at ' + obj.location + ':', stream=trace_output)
                 for name in env:
-                    obj.Trace(env[name], stream=trace_output, prefix='  '+name+' = ')
+                    obj.Trace(env[name], stream=trace_output, prefix='  ' + name + ' = ')
     if locations:
         message = 'Protocol stack trace (most recent call last):\n  ' + '\n  '.join(locations)
         if last_env:
@@ -101,11 +101,11 @@ class ErrorRecorder(ProtocolError):
         """Create a new recorder."""
         self.errors = []
         super(ErrorRecorder, self).__init__("Errors occurred during execution of %s:" % protoName)
-    
+
     def __enter__(self):
         """Start a managed block of code."""
         return self
-    
+
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Finish a managed block of code, perhaps because an exception was raised."""
         if exc_value is not None:
@@ -123,7 +123,7 @@ class ErrorRecorder(ProtocolError):
             args[0] += "\n" + message
             self.args = tuple(args)
         return True
-    
+
     def __bool__(self):
         """Test if any errors have been recorded."""
         return bool(self.errors)

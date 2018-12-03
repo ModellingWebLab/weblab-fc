@@ -76,12 +76,12 @@ class NewArray(AbstractExpression):
             defined_ranges += 1
         if defined_ranges > 1:
             raise NotImplementedError
-        
+
         result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrappedBindings)
         return result
-        
+
     def DevelopResultWithInterpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
-        #print 'Comprehension', self.location
+        # print 'Comprehension', self.location
         result = None
         for range_spec_indices in itertools.product(*range_dims):
              # collect everything in range_spec_indices that is a number, not a slice
@@ -94,7 +94,7 @@ class NewArray(AbstractExpression):
             if result is None:
                 # Create result array
                 if sub_array.ndim < num_gaps:
-                    raise ProtocolError("The sub-array only has", sub_array.ndim, 
+                    raise ProtocolError("The sub-array only has", sub_array.ndim,
                                         "dimensions, which is not enough to fill", num_gaps, "gaps")
                 sub_array_shape = sub_array.shape
                 count = 0
@@ -106,11 +106,11 @@ class NewArray(AbstractExpression):
                 result = np.empty(tuple(dims), dtype=float)
             # Check sub_array shape
             if sub_array.shape != sub_array_shape:
-                raise ProtocolError("The given sub-array has shape:", sub_array.shape, 
+                raise ProtocolError("The given sub-array has shape:", sub_array.shape,
                                     "when it should be", sub_array_shape)
             result[tuple(range_spec_indices)] = sub_array
         return np.array(result)
-    
+
     def GetUsedVariables(self):
         result = super(NewArray, self).GetUsedVariables()
         if self.comprehension:
@@ -122,7 +122,7 @@ class NewArray(AbstractExpression):
             result |= self.genExpr.GetUsedVariables()
             result = result - set.intersection(result, iterator_vars)
         return result
-        
+
     def _DoComprehension(self, env):
         range_specs = self.EvaluateChildren(env)
         ranges = []
@@ -160,7 +160,7 @@ class NewArray(AbstractExpression):
         for key in explicit_dim_slices:
             ranges[key] = explicit_dim_slices[key]
             range_name[key] = explicit_dim_names[key]
-        
+
         num_gaps = 0
         for i, each in enumerate(ranges):
             if each is None:
@@ -170,12 +170,12 @@ class NewArray(AbstractExpression):
                 else:
                     ranges[i] = slice(None, None, 1)
                     num_gaps += 1
-                    
+
         for i, implicit_slice in enumerate(implicit_dim_slices):
             ranges.append(implicit_slice)
             range_name.append(implicit_dim_names[i])
-        
-        range_name = [_f for _f in range_name if _f] # Remove None entries
+
+        range_name = [_f for _f in range_name if _f]  # Remove None entries
         product = 1
         dims = []
         range_dims = []
@@ -187,10 +187,10 @@ class NewArray(AbstractExpression):
                 dims.append(len(each))
                 range_dims.append(list(range(len(each))))
                 last_spec_dim = i
-        #stretch 
+        # stretch
         if len(range_name) == 1:
             names_used = self.genExpr.GetUsedVariables()
-            local_names = set(range_name) 
+            local_names = set(range_name)
             if names_used.isdisjoint(local_names):
                 repeated_array = self.genExpr.Evaluate(env).array
                 shape = list(repeated_array.shape)
@@ -209,16 +209,16 @@ class NewArray(AbstractExpression):
         except:
             compiled = False
         if compiled and num_gaps == 0 and len(ranges) <= 1:
-            result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env) 
+            result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env)
         else:
-            result = self.DevelopResultWithInterpret(range_dims, range_name, ranges, env, num_gaps, dims) 
+            result = self.DevelopResultWithInterpret(range_dims, range_name, ranges, env, num_gaps, dims)
         return V.Array(result)
-        
+
     def _DoListMembers(self, env):
         elements = self.EvaluateChildren(env)
         elements_arr = np.array([elt.array for elt in elements])
         return V.Array(elements_arr)
-    
+
 class View(AbstractExpression):
     """Take a view of an already existing array."""
     def __init__(self, array, *children):
@@ -241,20 +241,20 @@ class View(AbstractExpression):
             return 'default'
         else:
             return int(arg.value)
-    
+
     def GetArray(self, env):
         array = self.arrayExpression.Evaluate(env)
         return array.array
-        
+
     def Interpret(self, env):
-        #print 'View', self.location
+        # print 'View', self.location
         array = self.arrayExpression.Evaluate(env)
-        if len(self.children) > array.array.ndim: 
+        if len(self.children) > array.array.ndim:
             raise ProtocolError("You entered", len(self.children), "indices, but the array has", array.array.ndim, "dimensions.")
-        indices = self.EvaluateChildren(env) # list of tuples with indices
+        indices = self.EvaluateChildren(env)  # list of tuples with indices
         if not isinstance(array, V.Array):
             raise ProtocolError("First argument must be an Array, not", type(array))
-        #try:
+        # try:
         implicit_dim_slices = []
         slices = [None] * array.array.ndim
         apply_to_rest = False
@@ -279,7 +279,7 @@ class View(AbstractExpression):
                 step = self.GetValue(index.values[1])
                 end = self.GetValue(index.values[2])
             elif len(index.values) == 4:
-                dim = self.GetValue(index.values[0], 'dim') # if this is null, then every dim in the input array that isn't specified uses this
+                dim = self.GetValue(index.values[0], 'dim')  # if this is null, then every dim in the input array that isn't specified uses this
                 start = self.GetValue(index.values[1])
                 step = self.GetValue(index.values[2])
                 end = self.GetValue(index.values[3])
@@ -291,10 +291,10 @@ class View(AbstractExpression):
                 step = 0
             if end == 'default':
                 end = start
-            
+
             if dim != None and not isinstance(dim, V.Null):
                 if dim > array.array.ndim - 1:
-                    raise ProtocolError("Array only has", array.array.ndim, "dimensions, not", dim + 1) # plus one to account for dimension zero
+                    raise ProtocolError("Array only has", array.array.ndim, "dimensions, not", dim + 1)  # plus one to account for dimension zero
                 if step == 0:
                     if start != end:
                         raise ProtocolError("Step is zero and start does not equal end")
@@ -316,7 +316,7 @@ class View(AbstractExpression):
                         apply_to_rest = True
                     else:
                         implicit_dim_slices.append(slice(start, end, step))
-            
+
         for i, each in enumerate(slices):
             dim_len = array.array.shape[i]
             if each is None:
@@ -331,7 +331,7 @@ class View(AbstractExpression):
                         if implicit_dim_slices[0].step is not None and implicit_dim_slices[0].stop is not None and implicit_dim_slices[0].start is not None:
                             if (implicit_dim_slices[0].stop - implicit_dim_slices[0].start) * implicit_dim_slices[0].step <= 0:
                                 raise ProtocolError("The sign of the step does not make sense")
-                        
+
                     slices[i] = implicit_dim_slices.pop(0)
                 else:
                     if apply_to_rest:
@@ -344,20 +344,20 @@ class View(AbstractExpression):
         except IndexError:
             raise ProtocolError("The indices must be in the range of the array")
         return V.Array(view)
-    
+
 class Fold(AbstractExpression):
     "Fold an array along a specified dimension using a specified function."
     def __init__(self, *children):
         super(Fold, self).__init__(*children)
         if len(self.children) < 2 or len(self.children) > 4:
             raise ProtocolError("Fold requires 2-4 inputs, not", len(self.children))
-        
+
     def GetValue(self, arg):
         if isinstance(arg, V.Null):
             return None
         else:
             return int(arg.value)
-        
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         default_params = [V.Null(), V.Null(), V.Null(), V.Simple(operands[1].array.ndim - 1)]
@@ -380,14 +380,14 @@ class Fold(AbstractExpression):
             initial = self.GetValue(operands[2])
             dimension = self.GetValue(operands[3])
             if dimension > array.ndim:
-                raise ProtocolError("Cannot operate on dimension", dimension, 
+                raise ProtocolError("Cannot operate on dimension", dimension,
                                      "because the array only has", array.ndim, "dimensions")
         if array.ndim == 0:
             raise ProtocolError('Array has zero dimensions.')
         shape = list(array.shape)
-        
+
         size = shape[dimension]
-        
+
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError("The function passed into fold must be a lambda expression, not", type(function))
         # if the function is plus, then do sum...etc from numpy except sum and prod in numexpr
@@ -420,9 +420,9 @@ class Fold(AbstractExpression):
         result_shape[dimension] = 1
         result = np.empty(result_shape)
         dim_ranges = []
-        
+
         total_so_far = initial
-       
+
         for i, dim in enumerate(shape):
             if i == dimension:
                 dim_ranges.append(list(range(1)))
@@ -441,9 +441,9 @@ class Fold(AbstractExpression):
                     total_so_far = function.Evaluate(env, args).value
             result[indices] = total_so_far
             total_so_far = initial
-    
+
         return V.Array(result)
-        
+
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
     def __init__(self, functionExpr, *children):
@@ -469,7 +469,7 @@ class Map(AbstractExpression):
         except NotImplementedError:
             interpret = True
         else:
-            try: 
+            try:
                 protocol_result = V.Array(ne.evaluate(expression, local_dict=local_env.unwrappedBindings, global_dict=env.unwrappedBindings))
             except Exception:
                 try:
@@ -515,7 +515,7 @@ class Index(AbstractExpression):
     """Index function for n-dimensional arrays."""
     def __init__(self, *children):
         super(Index, self).__init__(*children)
-        if len(self.children ) < 2 or len(self.children) > 6:
+        if len(self.children) < 2 or len(self.children) > 6:
             raise ProtocolError("Index requires 2-6 operands, not", len(self.children))
 
     def Interpret(self, env):
@@ -594,22 +594,22 @@ class Index(AbstractExpression):
         if pad.value != 0:
             extent = max_extent
         else:
-            extent = min_extent 
+            extent = min_extent
         shape[dim_val] = extent
-            
+
         result = np.empty(shape)
-        
+
         if pad != 0:
             result.fill(pad_value)
         if shrink.value + pad.value < 0:
-            begin = num_entries - 1   
+            begin = num_entries - 1
             end = -1
             move = -1
         else:
             begin = 0
             end = num_entries
             move = 1
-        
+
         # The next_index array keeps track of how far along dimension dim_val we should put the next kept entry at each location
         shape[dim_val] = 1
         next_index = np.zeros(shape)
@@ -621,11 +621,11 @@ class Index(AbstractExpression):
             this_next_index = next_index[tuple(idxs)]
             if this_next_index < extent:
                 if shrink.value + pad.value < 0:
-                    idxs[dim_val] = extent-this_next_index-1 
+                    idxs[dim_val] = extent - this_next_index - 1
                 else:
                     idxs[dim_val] = this_next_index
                 result[tuple(idxs)] = value
                 idxs[dim_val] = 0
                 next_index[tuple(idxs)] += 1
-                
-        return V.Array(result)  
+
+        return V.Array(result)

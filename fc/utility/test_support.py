@@ -128,13 +128,13 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
                 if messages is not None:
                     messages.append("Output %s not produced but reference result exists" % name)
             elif results_ok:
-                results_ok = None # Indicate expected failure
-            continue # Can't compare in this case
+                results_ok = None  # Indicate expected failure
+            continue  # Can't compare in this case
         if not os.path.exists(data_file):
             if messages is not None:
                 messages.append("Output %s produced but no reference result available - please save for future comparison" % name)
             results_ok = None
-            continue # Can't compare in this case
+            continue  # Can't compare in this case
         if ndims == 2:
             method = Load2d
         else:
@@ -174,7 +174,7 @@ def CheckFileCompression(filePath):
 def Load2d(filePath):
     """Load the legacy data format for 2d arrays."""
     real_path, is_compressed = CheckFileCompression(filePath)
-    array = np.loadtxt(real_path, dtype=float, delimiter=',', ndmin=2, unpack=True) # unpack transposes the array
+    array = np.loadtxt(real_path, dtype=float, delimiter=',', ndmin=2, unpack=True)  # unpack transposes the array
     assert array.ndim == 2
     return V.Array(array)
 
@@ -186,7 +186,7 @@ def Load(filePath):
         f = gzip.GzipFile(real_path, 'rb')
     else:
         f = open(real_path, 'r')
-    f.readline() # Strip comment line
+    f.readline()  # Strip comment line
     dims = map(int, f.readline().split(','))[1:]
     array = np.loadtxt(f, dtype=float)
     f.close()

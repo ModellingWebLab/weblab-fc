@@ -53,7 +53,7 @@ class Locatable(object):
             location = str(inspect.stack()[2][1:5])
         self.location = location
         self.trace = False
-        
+
     def Trace(self, value, stream=sys.stdout, prefix=''):
         """Trace the given value.
         

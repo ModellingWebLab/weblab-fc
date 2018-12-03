@@ -41,7 +41,7 @@ from functools import reduce
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-plt.switch_backend("agg") # on some machines this is required to avoid "Invalid DISPLAY variable" errors
+plt.switch_backend("agg")  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 import pylab
 
 from . import environment as Env
@@ -185,7 +185,7 @@ class Protocol(object):
         self.imports[prefix] = proto
         self.libraryEnv.SetDelegateeEnv(proto.libraryEnv, prefix)
 
-    def Initialise(self,verbose=True):
+    def Initialise(self, verbose=True):
         """(Re-)Initialise this protocol, ready to be run on a model."""
         if verbose:
             self.LogProgress('Initialising', self.protoName)
@@ -204,7 +204,7 @@ class Protocol(object):
             self.outputFolder = path
         else:
             self.outputFolder = OutputFolder(path)
-    
+
     def OutputsAndPlots(self, errors, verbose=True, writeOut=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
         # Copy protocol outputs into the self.outputs environment,
@@ -250,7 +250,7 @@ class Protocol(object):
         self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
 
         # Plots
-        if writeOut: # suppress plotting when performing fitting
+        if writeOut:  # suppress plotting when performing fitting
             start = time.time()
             for plot in self.plots:
                 with errors:
@@ -268,18 +268,18 @@ class Protocol(object):
                     for i, x in enumerate(x_data):
                         if x.ndim > 1:
                             num_repeats = reduce(operator.mul, x.shape[:-1])
-                            x_2d = x.reshape((num_repeats,x.shape[-1])) # Flatten all extra dimensions as an array view
+                            x_2d = x.reshape((num_repeats, x.shape[-1]))  # Flatten all extra dimensions as an array view
                             if x_2d.ptp(axis=0).any():
                                 # There was non-zero difference between the min & max at some position in the 1d equivalent vector
                                 raise ProtocolError('The X data for a plot must be (equivalent to) a 1d array, not', x.ndim, 'dimensions')
-                            x_data[i] = x_2d[0] # Take just the first copy
+                            x_data[i] = x_2d[0]  # Take just the first copy
                     # Plot the data
                     fig = plt.figure()
                     for i, x in enumerate(x_data):
                         y = y_data[i]
                         if y.ndim > 1:
                             # Matplotlib can handle 2d data, but plots columns not rows, so we need to flatten & transpose
-                            y_2d = y.reshape((reduce(operator.mul, y.shape[:-1]),y.shape[-1]))
+                            y_2d = y.reshape((reduce(operator.mul, y.shape[:-1]), y.shape[-1]))
                             plt.plot(x, y_2d.T)
                         else:
                             plt.plot(x, y)
@@ -289,7 +289,7 @@ class Protocol(object):
                     plt.savefig(os.path.join(self.outputFolder.path, self.SanitiseFileName(plot['title']) + '.png'))
                     plt.close()
             self.timings['create plots'] = self.timings.get('plot', 0.0) + (time.time() - start)
-    
+
     def SanitiseFileName(self, name):
         """Simply transform a name such as a graph title into a valid file name."""
         name = name.strip().replace(' ', '_')
@@ -379,7 +379,7 @@ class Protocol(object):
             model_py_file = os.path.join(tempDir, 'model.py')
             target = 'Python'
         code_gen_cmd = ['./python/pycml/translate.py', '-t', target, '-p', '--Wu',
-                        '--protocol=' + xmlFile,  model, '-c', className, '-o', model_py_file]
+                        '--protocol=' + xmlFile, model, '-c', className, '-o', model_py_file]
         if exposeNamedParameters:
             # Allow the parameter fitting code to adjust the value of any annotated constant variable
             code_gen_cmd.append('--expose-named-parameters')
@@ -436,7 +436,7 @@ class Protocol(object):
                                    'proto', 'library')
             new_path = os.path.join(library, path)
         return new_path
-    
+
     def SetIndentLevel(self, indentLevel):
         """Set the level of indentation to use for progress output."""
         self.indentLevel = indentLevel

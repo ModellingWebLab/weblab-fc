@@ -116,7 +116,7 @@ class UniformRange(AbstractRange):
         self.step = self.stepExpr.Evaluate(self.env).value
         self.end = self.endExpr.Evaluate(self.env).value
         self.value = self.start
-        self.numberOfOutputs = int((round(self.end-self.start)/self.step)) + 1
+        self.numberOfOutputs = int((round(self.end - self.start) / self.step)) + 1
 
 
 class VectorRange(AbstractRange):
@@ -159,13 +159,13 @@ class While(AbstractRange):
         super(While, self).__init__(name)
         self.condition = condition
         self._Init()
-    
+
     def _Init(self):
         """(Re-)Initialise the range loop."""
         self.count = -1
         self.value = -1
         self.numberOfOutputs = 1000
-    
+
     def Initialise(self, env):
         super(While, self).Initialise(env)
         self._Init()

@@ -42,7 +42,7 @@ class OutputFolder(object):
     of such folders, without risk of wiping a user's drive due to coding error or dodgy path settings.
     """
     SIG_FILE_NAME = '.chaste_deletable_folder'
-    
+
     def __init__(self, path, cleanFolder=True):
         """Create a new output subfolder.
         
@@ -62,7 +62,7 @@ class OutputFolder(object):
             if cleanFolder:
                 self.RemoveOutputFolder(self.path)
         CreateFolder(self.path)
-    
+
     @staticmethod
     def GetRootOutputFolder():
         """Get the root location where Chaste output files are stored.
@@ -78,7 +78,7 @@ class OutputFolder(object):
     def GetAbsolutePath(self):
         """Get the absolute path to this output folder."""
         return self.path
-    
+
     def CreateSubfolder(self, path):
         """Create a new OutputFolder inside this one.
         
@@ -86,8 +86,8 @@ class OutputFolder(object):
         """
         if os.path.isabs(path):
             raise ProtocolError('The path for the subfolder must be a relative path.')
-        return OutputFolder(os.path.join(self.path, path)) 
-    
+        return OutputFolder(os.path.join(self.path, path))
+
     @staticmethod
     def RemoveOutputFolder(path):
         """Remove an existing output folder.
@@ -103,11 +103,11 @@ class OutputFolder(object):
             shutil.rmtree(abs_path)
         else:
             raise ProtocolError("Folder cannot be removed because it was not created via the OutputFolder class.")
-    
+
     @staticmethod
     def CheckOutputPath(path):
         """Check whether the given path is a location within the Chaste output folder."""
-        #if path.startswith(OutputFolder.GetRootOutputFolder()):
+        # if path.startswith(OutputFolder.GetRootOutputFolder()):
         if os.path.isabs(path):
             abs_path = path
         else:

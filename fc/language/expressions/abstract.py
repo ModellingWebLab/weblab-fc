@@ -37,12 +37,12 @@ from ...utility import locatable
 from .. import values as V
 
 class AbstractExpression(locatable.Locatable):
-    """Base class for expressions in the protocol language."""   
+    """Base class for expressions in the protocol language."""
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         super(AbstractExpression, self).__init__()
         self.children = children
-        
+
         try:
             line_profile.add_function(self.RealEvaluateCompiled)
         except NameError:
@@ -51,7 +51,7 @@ class AbstractExpression(locatable.Locatable):
     # Override Object serialization methods to allow pickling with the dill module
     def __getstate__(self):
         odict = self.__dict__.copy()
-        # These properties cause namespace errors during pickling, and will be 
+        # These properties cause namespace errors during pickling, and will be
         # automatically regenerated on first reference after unpickling.
         if '_compiledFunction' in odict:
             del odict['_compiledFunction']
@@ -165,7 +165,7 @@ class AbstractExpression(locatable.Locatable):
             d = self._definingEnvs = {}
             l = self._usedVarLocalNames = []
             for name in self.usedVariableList:
-                local_name = name[name.rfind(':')+1:]
+                local_name = name[name.rfind(':') + 1:]
                 l.append(local_name)
                 d[local_name] = env.FindDefiningEnvironment(name)
             return d

@@ -143,7 +143,7 @@ class TupleExpression(AbstractExpression):
         super(TupleExpression, self).__init__(*children)
         if len(self.children) < 1:
             raise ProtocolError("Empty tuple expressions are not allowed")
-        
+
     def Interpret(self, env):
         return V.Tuple(*self.EvaluateChildren(env))
 
@@ -155,10 +155,10 @@ class LambdaExpression(AbstractExpression):
         self.formalParameters = formalParameters
         self.body = body
         self.defaultParameters = defaultParameters
-        
+
     def Interpret(self, env):
         return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)
-    
+
     @staticmethod
     def Wrap(operator, numParams):
         parameters = []
@@ -180,16 +180,16 @@ class Accessor(AbstractExpression):
     IS_FUNCTION = 3
     IS_TUPLE = 4
     IS_NULL = 5
-    IS_DEFAULT = 6 
+    IS_DEFAULT = 6
     NUM_DIMS = 7
     NUM_ELEMENTS = 8
     SHAPE = 9
-    
+
     def __init__(self, variableExpr, attribute):
         super(Accessor, self).__init__()
         self.variableExpr = variableExpr
         self.attribute = attribute
-        
+
     def Interpret(self, env):
         variable = self.variableExpr.Evaluate(env)
         if self.attribute == self.IS_SIMPLE_VALUE:
