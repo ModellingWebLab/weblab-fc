@@ -7,8 +7,11 @@ addons:
     packages:
       - libsundials-serial-dev
 install:
-  - pip install codecov
+  # Needed to run setup.py
+  - pip install cython numpy
   - pip install .[test]
+  # Needed to upload coverage results
+  - pip install codecov
 script:
   - python -m flake8
   - python -m pytest --cov=fccodegen fccodegen
