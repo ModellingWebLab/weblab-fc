@@ -1,0 +1,15 @@
+language: python
+python:
+  - "3.6"
+addons:
+  apt:
+    packages:
+      - libsundials-serial-dev
+install:
+  - pip install codecov
+  - pip install .[test]
+script:
+  - python -m flake8
+  - python -m pytest --cov=fccodegen fccodegen
+after_success:
+  - codecov
