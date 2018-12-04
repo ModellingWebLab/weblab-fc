@@ -36,8 +36,10 @@ import os
 from ...utility import locatable
 from .. import values as V
 
+
 class AbstractExpression(locatable.Locatable):
     """Base class for expressions in the protocol language."""
+
     def __init__(self, *children):
         """Create a new expression node, with a list of child expressions, possibly empty."""
         super(AbstractExpression, self).__init__()
@@ -155,7 +157,7 @@ class AbstractExpression(locatable.Locatable):
         """Cache which environment each variable used in this expression is actually defined in.
 
         Stores each environment indexed by the local name of the variable within that environment.
-        
+
         TODO: Handle local name conflicts!
         """
         try:

@@ -38,12 +38,14 @@ from ..utility.error_handling import ProtocolError
 
 class AbstractStatement(locatable.Locatable):
     """Base class for statements in the protocol language."""
+
     def Evaluate(self, env):
         raise NotImplementedError
 
 
 class Assign(AbstractStatement):
     """Assign statements in the protocol language."""
+
     def __init__(self, names, rhs, optional=False):
         super(Assign, self).__init__()
         self.names = names

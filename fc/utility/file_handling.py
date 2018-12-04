@@ -35,6 +35,7 @@ import shutil
 
 from .error_handling import ProtocolError
 
+
 class OutputFolder(object):
     """
     This class contains routines providing the key functionality of the C++ classes OutputFileHandler and FileFinder.
@@ -45,7 +46,7 @@ class OutputFolder(object):
 
     def __init__(self, path, cleanFolder=True):
         """Create a new output subfolder.
-        
+
         :param path:  the subfolder to create.  Relative paths are treated as relative to GetRootOutputFolder; absolute
         paths must be under this location.  Parent folders will be created as necessary.
         :param cleanFolder:  whether to wipe the folder contents if it already exists.
@@ -66,7 +67,7 @@ class OutputFolder(object):
     @staticmethod
     def GetRootOutputFolder():
         """Get the root location where Chaste output files are stored.
-        
+
         This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then a folder 'testoutput' in
         the current working directory is used.
         """
@@ -81,7 +82,7 @@ class OutputFolder(object):
 
     def CreateSubfolder(self, path):
         """Create a new OutputFolder inside this one.
-        
+
         :param path:  the name of the subfolder to create.  This must be a relative path.
         """
         if os.path.isabs(path):
@@ -91,10 +92,10 @@ class OutputFolder(object):
     @staticmethod
     def RemoveOutputFolder(path):
         """Remove an existing output folder.
-        
+
         This method will only delete folders living under the root output folder.  In addition, they must have been
         created using the OutputFolder class (this is indicated by the presence of a signature file within the folder).
-        
+
         :param path:  the folder to remove.  Relative paths are treated as relative to GetRootOutputFolder; absolute
         paths must be under this location.
         """

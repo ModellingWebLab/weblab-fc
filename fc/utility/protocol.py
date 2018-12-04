@@ -56,15 +56,17 @@ from ..simulations import simulations
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
 
+
 class Protocol(object):
     """This class represents a protocol in the functional curation 'virtual experiment' language.
-    
+
     It gives the central interface to functional curation, handling parsing a protocol description
     from file and running it on a given model.
     """
+
     def __init__(self, protoFile, indentLevel=0):
         """Construct a new protocol by parsing the description in the given file.
-        
+
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
         self.indentLevel = indentLevel
@@ -94,7 +96,8 @@ class Protocol(object):
         import CompactSyntaxParser as CSP
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
-        generator = self.parsedProtocol = parser._Try(CSP.CompactSyntaxParser.protocol.parseFile, protoFile, parseAll=True)[0]
+        generator = self.parsedProtocol = parser._Try(
+            CSP.CompactSyntaxParser.protocol.parseFile, protoFile, parseAll=True)[0]
         assert isinstance(generator, CSP.Actions.Protocol)
         details = generator.expr()
         assert isinstance(details, dict)
@@ -173,7 +176,6 @@ class Protocol(object):
             for sim in self.simulations:
                 sim.SetModel(model)
 
-
     def AddImportedProtocol(self, proto, prefix):
         """Add a protocol imported with a prefix to our collection.
 
@@ -245,7 +247,8 @@ class Protocol(object):
                 h5file = tables.open_file(filename, mode='w', title=os.path.splitext(self.protoName)[0])
                 group = h5file.create_group('/', 'output', 'output parent')
                 for output_spec in outputs_defined:
-                    h5file.create_array(group, output_spec['name'], self.outputEnv.unwrappedBindings[output_spec['name']], title=output_spec['description'])
+                    h5file.create_array(
+                        group, output_spec['name'], self.outputEnv.unwrappedBindings[output_spec['name']], title=output_spec['description'])
                 h5file.close()
         self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
 
@@ -255,7 +258,8 @@ class Protocol(object):
             for plot in self.plots:
                 with errors:
                     if verbose:
-                        self.LogProgress('plotting', plot['title'], 'curve:', plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
+                        self.LogProgress('plotting', plot['title'], 'curve:',
+                                         plot_descriptions[plot['y']], 'against', plot_descriptions[plot['x']])
                     x_data = []
                     y_data = []
                     x_data.append(self.outputEnv.LookUp(plot['x']).array)
@@ -263,15 +267,18 @@ class Protocol(object):
                     if 'key' in plot:
                         key_data = self.outputEnv.LookUp(plot['key']).array
                         if key_data.ndim != 1:
-                            raise ProtocolError('Plot key variables must be 1d vectors;', plot['key'], 'has', key_data.ndim, 'dimensions')
+                            raise ProtocolError('Plot key variables must be 1d vectors;',
+                                                plot['key'], 'has', key_data.ndim, 'dimensions')
                     # Check the x-axis data shape.  It must either be 1d, or be equivalent to a 1d vector (i.e. stacked copies of the same vector).
                     for i, x in enumerate(x_data):
                         if x.ndim > 1:
                             num_repeats = reduce(operator.mul, x.shape[:-1])
-                            x_2d = x.reshape((num_repeats, x.shape[-1]))  # Flatten all extra dimensions as an array view
+                            # Flatten all extra dimensions as an array view
+                            x_2d = x.reshape((num_repeats, x.shape[-1]))
                             if x_2d.ptp(axis=0).any():
                                 # There was non-zero difference between the min & max at some position in the 1d equivalent vector
-                                raise ProtocolError('The X data for a plot must be (equivalent to) a 1d array, not', x.ndim, 'dimensions')
+                                raise ProtocolError(
+                                    'The X data for a plot must be (equivalent to) a 1d array, not', x.ndim, 'dimensions')
                             x_data[i] = x_2d[0]  # Take just the first copy
                     # Plot the data
                     fig = plt.figure()
@@ -298,7 +305,7 @@ class Protocol(object):
 
     def ExecuteLibrary(self):
         """Run the statements in our library to build up the library environment.
-        
+
         The libraries of any imported protocols will be executed first.
         """
         for imported_proto in self.imports.values():
@@ -359,7 +366,7 @@ class Protocol(object):
 
     def SetInput(self, name, valueExpr):
         """Overwrite the value of a protocol input.
-        
+
         The value may be given either as an actual value, or as an expression which will be evaluated in
         the context of the existing inputs.
         """
@@ -408,7 +415,8 @@ class Protocol(object):
             print(subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT))
             if useCython:
                 # Compile the extension module
-                print(subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'], cwd=temp_dir, stderr=subprocess.STDOUT))
+                print(subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'],
+                                              cwd=temp_dir, stderr=subprocess.STDOUT))
             # Create an instance of the model
             self.modelPath = temp_dir
             sys.path.insert(0, temp_dir)
@@ -425,7 +433,7 @@ class Protocol(object):
 
     def GetPath(self, basePath, path):
         """Determine the full path of an imported protocol file.
-        
+
         Relative paths are resolved relative to basePath (the path to this protocol) by default.
         If this does not yield an existing file, they are resolved relative to the built-in library folder instead.
         """
@@ -443,7 +451,7 @@ class Protocol(object):
 
     def LogProgress(self, *args):
         """Print a progress line showing how far through the protocol we are.
-        
+
         Arguments are converted to strings and space separated, as for the print builtin.
         """
         print('  ' * self.indentLevel + ' '.join(map(str, args)))
@@ -451,7 +459,7 @@ class Protocol(object):
 
     def LogWarning(self, *args):
         """Print a warning message.
-        
+
         Arguments are converted to strings and space separated, as for the print builtin.
         """
         print('  ' * self.indentLevel + ' '.join(map(str, args)), file=sys.stderr)

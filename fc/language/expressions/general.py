@@ -40,6 +40,7 @@ from .. import values as V
 
 class Const(AbstractExpression):
     """Class for constant value as expression."""
+
     def __init__(self, value):
         super(Const, self).__init__()
         self.value = value
@@ -60,6 +61,7 @@ class Const(AbstractExpression):
 
 class FunctionCall(AbstractExpression):
     """Used to call a function in the protocol language."""
+
     def __init__(self, functionOrName, children):
         super(FunctionCall, self).__init__()
         if isinstance(functionOrName, str):
@@ -78,6 +80,7 @@ class FunctionCall(AbstractExpression):
 
 class If(AbstractExpression):
     """If, then, else statement in protocol language."""
+
     def __init__(self, testExpr, thenExpr, elseExpr):
         super(If, self).__init__()
         self.testExpr = testExpr
@@ -139,6 +142,7 @@ class NameLookUp(AbstractExpression):
 
 class TupleExpression(AbstractExpression):
     """Expression that returns a protocol language tuple when evaluated."""
+
     def __init__(self, *children):
         super(TupleExpression, self).__init__(*children)
         if len(self.children) < 1:
@@ -150,6 +154,7 @@ class TupleExpression(AbstractExpression):
 
 class LambdaExpression(AbstractExpression):
     """Expression for function in protocol language."""
+
     def __init__(self, formalParameters, body, defaultParameters=None):
         super(LambdaExpression, self).__init__()
         self.formalParameters = formalParameters

@@ -282,6 +282,7 @@ class ModelWrapperEnvironment(Environment):
 
     class _BindingsDict(dict):
         """A dictionary subclass wrapping the protocol language versions of a model's variables."""
+
         def __init__(self, unwrapped):
             self._unwrapped = unwrapped
             try:
@@ -310,6 +311,7 @@ class ModelWrapperEnvironment(Environment):
         """
         class _FreeVarList(list):
             """A single element list for wrapping the model's free variable."""
+
             def __init__(self, model):
                 self._model = model
 
@@ -321,6 +323,7 @@ class ModelWrapperEnvironment(Environment):
 
         class _OutputsList(list):
             """A pseudo-list for wrapping the model's output values."""
+
             def __init__(self, model):
                 self._model = model
 

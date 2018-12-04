@@ -48,6 +48,7 @@ from ..utility import locatable
 
 class AbstractSimulation(locatable.Locatable):
     """Base class for simulations in the protocol language."""
+
     def __init__(self, prefix=None):
         super(AbstractSimulation, self).__init__()
         self.prefix = prefix
@@ -108,7 +109,7 @@ class AbstractSimulation(locatable.Locatable):
 
     def LogProgress(self, *args):
         """Print a progress line showing how far through the simulation we are.
-        
+
         Arguments are converted to strings and space separated, as for the print builtin.
         """
         print('  ' * self.indentLevel + ' '.join(map(str, args)))
@@ -141,7 +142,8 @@ class AbstractSimulation(locatable.Locatable):
         if isinstance(self.range_, R.While):
             for name in self.results:
                 result = self.results.LookUp(name)
-                result.array = result.array[0:self.range_.GetNumberOfOutputPoints()]  # resize function doesn't work with references
+                # resize function doesn't work with references
+                result.array = result.array[0:self.range_.GetNumberOfOutputPoints()]
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.END_ONLY:
                 modifier.Apply(self)
@@ -150,9 +152,11 @@ class AbstractSimulation(locatable.Locatable):
         if self.viewEnv is not None:
             for name in self.results:
                 if name not in self.viewEnv:
-                    self.viewEnv.DefineName(name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
+                    self.viewEnv.DefineName(
+                        name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
                 else:
-                    self.viewEnv.OverwriteDefinition(name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
+                    self.viewEnv.OverwriteDefinition(
+                        name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
 
     def SetModel(self, model):
         if isinstance(self.model, NestedProtocol):
@@ -209,6 +213,7 @@ class AbstractSimulation(locatable.Locatable):
 
 class Timecourse(AbstractSimulation):
     """Simulate a simple loop over time."""
+
     def __init__(self, range_, modifiers=[]):
         self.range_ = range_
         super(Timecourse, self).__init__()
@@ -264,6 +269,7 @@ class OneStep(AbstractSimulation):
 
 class Nested(AbstractSimulation):
     """The main nested loop simulation construct."""
+
     def __init__(self, nestedSim, range_, modifiers=[]):
         self.range_ = range_
         super(Nested, self).__init__()
@@ -293,10 +299,12 @@ class Nested(AbstractSimulation):
     def InternalRun(self, verbose=True):
         for t in self.range_:
             if verbose:
-                self.LogProgress('nested simulation', self.range_.name, 'step', self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')')
+                self.LogProgress('nested simulation', self.range_.name, 'step',
+                                 self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')')
             self.LoopBodyStartHook()
             if self.outputFolder:
-                self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder('run_%d' % self.range_.GetCurrentOutputNumber()))
+                self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder(
+                    'run_%d' % self.range_.GetCurrentOutputNumber()))
             self.nestedSim.Run()
             self.LoopBodyEndHook()
         self.LoopEndHook()

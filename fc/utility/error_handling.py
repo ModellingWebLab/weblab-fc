@@ -38,7 +38,7 @@ from io import StringIO
 
 def _ExtractProtocolInfoFromStack(frames):
     """Figure out where within a protocol an error arose, based on the Python stack trace.
-    
+
     Returns a pair (location_list, location_message) containing a list of protocol file locations and a rendered
     explanatory message, respectively.
     """
@@ -66,11 +66,13 @@ def _ExtractProtocolInfoFromStack(frames):
         message = ""
     return locations, message
 
+
 class ProtocolError(Exception):
     """Main class for errors raised by the functional curation framework that are intended for user viewing."""
+
     def __init__(self, *msgParts):
         """Create a protocol error message.
-        
+
         The arguments are joined to create the message string as for print: converted to strings and space separated.
         In addition, when the exception is created the stack will be examined to determine what lines in the currently
         running protocol were responsible, if any, and these details added to the Python stack trace reported. (The list
@@ -85,18 +87,20 @@ class ProtocolError(Exception):
         msg = self.shortMessage + '\n' + location_message
         super(ProtocolError, self).__init__(msg)
 
+
 class ErrorRecorder(ProtocolError):
     """A context manager for recording protocol errors that arise within a block of code.
-    
+
     This is designed to be used in multiple successive code blocks.  Any error thrown from a managed block is recorded
     (appended to self.errors) and suppressed.
-    
+
     In addition to the context management protocol, this class inherits from ProtocolError and may be thrown as an exception
     to report on the collected errors.  Before doing so, check if any errors have occurred by testing in a boolean
     context.
-    
+
     TODO: Add the ability to suppress Python traceback for some errors?
     """
+
     def __init__(self, protoName):
         """Create a new recorder."""
         self.errors = []

@@ -36,8 +36,10 @@ from ..sundials.solver import CvodeSolver
 
 import scipy.integrate
 
+
 class ScipySolver(object):
     """Solver for simulating models using SciPy's builtin ODE solvers.  NB: slow!"""
+
     def ResetSolver(self, resetTo):
         self.state[:] = resetTo
         self.solver.set_initial_value(self.state, self.model.freeVariable)
@@ -70,6 +72,7 @@ except ImportError:
 if cvode:
     class PySundialsSolver(object):
         """Solver for simulating models using http://pysundials.sourceforge.net/"""
+
         def AssociateWithModel(self, model):
             self.model = model
             self._state = cvode.NVector(self.model.state)  # NB: This copies the data
@@ -109,6 +112,7 @@ if cvode:
 else:
     class PySundialsSolver(CvodeSolver):
         """Fake PySundials solver that in reality uses our own CVODE wrapper."""
+
         def __init__(self):
             import sys
             print("PySundials not found; using internal CVODE wrapper instead.", file=sys.stderr)

@@ -42,6 +42,7 @@ from functools import reduce
 
 class Plus(AbstractExpression):
     """Addition."""
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if isinstance(operands[0], V.Array):
@@ -64,8 +65,10 @@ class Plus(AbstractExpression):
         expression = ' + '.join(operands)
         return expression
 
+
 class Minus(AbstractExpression):
     """Subtraction."""
+
     def __init__(self, *children):
         super(Minus, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
@@ -90,8 +93,10 @@ class Minus(AbstractExpression):
             expression = ' - '.join(operands)
         return expression
 
+
 class Times(AbstractExpression):
     """Multiplication"""
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if any(isinstance(operand, V.Array) for operand in operands):
@@ -108,7 +113,8 @@ class Times(AbstractExpression):
             try:
                 result = V.Simple(reduce(lambda x, y: x * y, [v.value for v in operands], 1))
             except AttributeError:
-                raise ProtocolError("Operator 'times' requires all operands to evaluate to an Array or numbers;", v, "does not.")
+                raise ProtocolError(
+                    "Operator 'times' requires all operands to evaluate to an Array or numbers;", v, "does not.")
         return result
 
     def Compile(self, arrayContext=True):
@@ -116,8 +122,10 @@ class Times(AbstractExpression):
         expression = ' * '.join(operands)
         return expression
 
+
 class Divide(AbstractExpression):
     """Division."""
+
     def __init__(self, *children):
         super(Divide, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
@@ -136,8 +144,10 @@ class Divide(AbstractExpression):
         expression = ' / '.join(operands)
         return expression
 
+
 class Max(AbstractExpression):
     """Returns maximum value."""
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         try:
@@ -151,8 +161,10 @@ class Max(AbstractExpression):
         expression = "___np.maximum(" + ','.join(operands) + ")"
         return expression
 
+
 class Min(AbstractExpression):
     """Returns minimum value."""
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         try:
@@ -166,8 +178,10 @@ class Min(AbstractExpression):
         expression = "___np.minimum(" + ','.join(arr_names) + ")"
         return expression
 
+
 class Rem(AbstractExpression):
     """Remainder operator."""
+
     def __init__(self, *children):
         super(Rem, self).__init__(*children)
         if len(self.children) != 2:
@@ -186,8 +200,10 @@ class Rem(AbstractExpression):
         expression = ' % '.join(operands)
         return expression
 
+
 class Power(AbstractExpression):
     """Power operator."""
+
     def __init__(self, *children):
         super(Power, self).__init__(*children)
         if len(self.children) != 2:
@@ -206,12 +222,15 @@ class Power(AbstractExpression):
         expression = operands[0] + ' ** ' + operands[1]
         return expression
 
+
 class Root(AbstractExpression):
     """Root operator."""
+
     def __init__(self, *children):
         super(Root, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
-            raise ProtocolError("Operator 'root' requires one operand, optionally with a degree qualifier, you entered", len(self.children), "inputs")
+            raise ProtocolError(
+                "Operator 'root' requires one operand, optionally with a degree qualifier, you entered", len(self.children), "inputs")
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
@@ -232,8 +251,10 @@ class Root(AbstractExpression):
             expression = operands[0] + "** (1/" + operands[1] + ")"
         return expression
 
+
 class Abs(AbstractExpression):
     """Absolute value operator."""
+
     def __init__(self, *children):
         super(Abs, self).__init__(*children)
         if len(self.children) != 1:
@@ -252,8 +273,10 @@ class Abs(AbstractExpression):
         expression = "abs(" + operands[0] + ")"
         return expression
 
+
 class Floor(AbstractExpression):
     """Floor operator."""
+
     def __init__(self, *children):
         super(Floor, self).__init__(*children)
         if len(self.children) != 1:
@@ -272,8 +295,10 @@ class Floor(AbstractExpression):
         expression = "___np.floor(" + operands[0] + ")"
         return expression
 
+
 class Ceiling(AbstractExpression):
     """Ceiling operator."""
+
     def __init__(self, *children):
         super(Ceiling, self).__init__(*children)
         if len(self.children) != 1:
@@ -292,8 +317,10 @@ class Ceiling(AbstractExpression):
         expression = "___np.ceil(" + operands[0] + ")"
         return expression
 
+
 class Exp(AbstractExpression):
     """Exponential operator."""
+
     def __init__(self, *children):
         super(Exp, self).__init__(*children)
         if len(self.children) != 1:
@@ -312,8 +339,10 @@ class Exp(AbstractExpression):
         expression = "exp(" + operands[0] + ")"
         return expression
 
+
 class Ln(AbstractExpression):
     """Natural logarithm operator."""
+
     def __init__(self, *children):
         super(Ln, self).__init__(*children)
         if len(self.children) != 1:
@@ -332,12 +361,15 @@ class Ln(AbstractExpression):
         expression = "log(" + operands[0] + ")"
         return expression
 
+
 class Log(AbstractExpression):
     """logarithmic operator."""
+
     def __init__(self, *children):
         super(Log, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
-            raise ProtocolError("Logarithmic operator requires one operand, and optionally a log_base qualifier, you entered", len(self.children), "inputs")
+            raise ProtocolError("Logarithmic operator requires one operand, and optionally a log_base qualifier, you entered", len(
+                self.children), "inputs")
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
@@ -361,8 +393,10 @@ class Log(AbstractExpression):
             expression = "log10(" + operands[1] + ") / log10(" + operands[0] + ")"
         return expression
 
+
 class And(AbstractExpression):
     """Boolean And Operator"""
+
     def Interpret(self, env):
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'and' requires operands")
@@ -382,8 +416,10 @@ class And(AbstractExpression):
         expression = "___np.logical_and(" + ','.join(operands) + ")"
         return expression
 
+
 class Or(AbstractExpression):
     """Boolean Or Operator"""
+
     def Interpret(self, env):
         if len(self.children) == 0:
             raise ProtocolError("Boolean operator 'or' requires operands")
@@ -403,8 +439,10 @@ class Or(AbstractExpression):
         expression = "___np.logical_or(" + ','.join(operands) + ")"
         return expression
 
+
 class Xor(AbstractExpression):
     """Boolean Xor Operator"""
+
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
         if len(self.children) == 0:
@@ -422,8 +460,10 @@ class Xor(AbstractExpression):
         expression = "___np.logical_xor(" + ','.join(operands) + ")"
         return expression
 
+
 class Not(AbstractExpression):
     """Boolean Not Operator"""
+
     def __init__(self, *children):
         super(Not, self).__init__(*children)
         if len(self.children) != 1:
@@ -442,8 +482,10 @@ class Not(AbstractExpression):
         expression = "___np.logical_not(" + ','.join(operands) + ")"
         return expression
 
+
 class Eq(AbstractExpression):
     """Equality Operator"""
+
     def __init__(self, *children):
         super(Eq, self).__init__(*children)
         if len(self.children) != 2:
@@ -462,8 +504,10 @@ class Eq(AbstractExpression):
         expression = ' == '.join(operands)
         return expression
 
+
 class Neq(AbstractExpression):
     """Not equal Operator"""
+
     def __init__(self, *children):
         super(Neq, self).__init__(*children)
         if len(self.children) != 2:
@@ -482,8 +526,10 @@ class Neq(AbstractExpression):
         expression = ' != '.join(operands)
         return expression
 
+
 class Lt(AbstractExpression):
     """Less than Operator"""
+
     def __init__(self, *children):
         super(Lt, self).__init__(*children)
         if len(self.children) != 2:
@@ -494,7 +540,8 @@ class Lt(AbstractExpression):
         try:
             result = operands[0].value < operands[1].value
         except AttributeError:
-            raise ProtocolError("Less than operator requires its operands to be simple values, you entered a", type(operands[0]), 'and', type(operands[1]))
+            raise ProtocolError("Less than operator requires its operands to be simple values, you entered a", type(
+                operands[0]), 'and', type(operands[1]))
         return V.Simple(result)
 
     def Compile(self, arrayContext=True):
@@ -502,8 +549,10 @@ class Lt(AbstractExpression):
         expression = ' < '.join(operands)
         return expression
 
+
 class Gt(AbstractExpression):
     """Greater than Operator"""
+
     def __init__(self, *children):
         super(Gt, self).__init__(*children)
         if len(self.children) != 2:
@@ -522,12 +571,15 @@ class Gt(AbstractExpression):
         expression = ' > '.join(operands)
         return expression
 
+
 class Leq(AbstractExpression):
     """Less than or equal to Operator"""
+
     def __init__(self, *children):
         super(Leq, self).__init__(*children)
         if len(self.children) != 2:
-            raise ProtocolError("Boolean operator 'less than or equal to' requires two operands, not", len(self.children))
+            raise ProtocolError(
+                "Boolean operator 'less than or equal to' requires two operands, not", len(self.children))
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
@@ -542,12 +594,15 @@ class Leq(AbstractExpression):
         expression = ' <= '.join(operands)
         return expression
 
+
 class Geq(AbstractExpression):
     """Greater than or equal to Operator"""
+
     def __init__(self, *children):
         super(Geq, self).__init__(*children)
         if len(self.children) != 2:
-            raise ProtocolError("Boolean operator 'greater than or equal to' requires two operands, not", len(self.children))
+            raise ProtocolError(
+                "Boolean operator 'greater than or equal to' requires two operands, not", len(self.children))
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)

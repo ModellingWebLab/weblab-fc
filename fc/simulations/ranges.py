@@ -32,11 +32,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from ..language import values as V
 
+
 class AbstractRange(V.Simple):
     """Base class for ranges in the protocol language.
 
     Handles enforcing the update of the range's value in the simulation environment's Python bindings dictionary.
     """
+
     def __init__(self, name):
         """Initialise the common range properties."""
         self.name = name

@@ -47,6 +47,7 @@ from ...utility.error_handling import ProtocolError
 
 class NewArray(AbstractExpression):
     """Used to create new arrays, has keyword input comprehension."""
+
     def __init__(self, *children, **kwargs):
         super(NewArray, self).__init__()
         self.comprehension = kwargs.get('comprehension', False)
@@ -219,8 +220,10 @@ class NewArray(AbstractExpression):
         elements_arr = np.array([elt.array for elt in elements])
         return V.Array(elements_arr)
 
+
 class View(AbstractExpression):
     """Take a view of an already existing array."""
+
     def __init__(self, array, *children):
         super(View, self).__init__()
         self.arrayExpression = array
@@ -250,7 +253,8 @@ class View(AbstractExpression):
         # print 'View', self.location
         array = self.arrayExpression.Evaluate(env)
         if len(self.children) > array.array.ndim:
-            raise ProtocolError("You entered", len(self.children), "indices, but the array has", array.array.ndim, "dimensions.")
+            raise ProtocolError("You entered", len(self.children),
+                                "indices, but the array has", array.array.ndim, "dimensions.")
         indices = self.EvaluateChildren(env)  # list of tuples with indices
         if not isinstance(array, V.Array):
             raise ProtocolError("First argument must be an Array, not", type(array))
@@ -279,12 +283,14 @@ class View(AbstractExpression):
                 step = self.GetValue(index.values[1])
                 end = self.GetValue(index.values[2])
             elif len(index.values) == 4:
-                dim = self.GetValue(index.values[0], 'dim')  # if this is null, then every dim in the input array that isn't specified uses this
+                # if this is null, then every dim in the input array that isn't specified uses this
+                dim = self.GetValue(index.values[0], 'dim')
                 start = self.GetValue(index.values[1])
                 step = self.GetValue(index.values[2])
                 end = self.GetValue(index.values[3])
             else:
-                raise ProtocolError("Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
+                raise ProtocolError(
+                    "Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
             if dim == 'default':
                 dim = None
             if step == 'default':
@@ -294,7 +300,8 @@ class View(AbstractExpression):
 
             if dim != None and not isinstance(dim, V.Null):
                 if dim > array.array.ndim - 1:
-                    raise ProtocolError("Array only has", array.array.ndim, "dimensions, not", dim + 1)  # plus one to account for dimension zero
+                    raise ProtocolError("Array only has", array.array.ndim, "dimensions, not",
+                                        dim + 1)  # plus one to account for dimension zero
                 if step == 0:
                     if start != end:
                         raise ProtocolError("Step is zero and start does not equal end")
@@ -345,8 +352,10 @@ class View(AbstractExpression):
             raise ProtocolError("The indices must be in the range of the array")
         return V.Array(view)
 
+
 class Fold(AbstractExpression):
     "Fold an array along a specified dimension using a specified function."
+
     def __init__(self, *children):
         super(Fold, self).__init__(*children)
         if len(self.children) < 2 or len(self.children) > 4:
@@ -444,8 +453,10 @@ class Fold(AbstractExpression):
 
         return V.Array(result)
 
+
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
+
     def __init__(self, functionExpr, *children):
         super(Map, self).__init__()
         self.functionExpr = functionExpr
@@ -470,7 +481,8 @@ class Map(AbstractExpression):
             interpret = True
         else:
             try:
-                protocol_result = V.Array(ne.evaluate(expression, local_dict=local_env.unwrappedBindings, global_dict=env.unwrappedBindings))
+                protocol_result = V.Array(ne.evaluate(
+                    expression, local_dict=local_env.unwrappedBindings, global_dict=env.unwrappedBindings))
             except Exception:
                 try:
                     protocol_result = V.Array(eval(expression, env.unwrappedBindings, local_env.unwrappedBindings))
@@ -499,8 +511,10 @@ class Map(AbstractExpression):
 
         return protocol_result
 
+
 class Find(AbstractExpression):
     """Find function for n-dimensional arrays."""
+
     def __init__(self, operandExpr):
         super(Find, self).__init__()
         self.operandExpr = operandExpr
@@ -511,8 +525,10 @@ class Find(AbstractExpression):
             raise ProtocolError("Operand for find must be a non-generate Array, not " + str(operand))
         return V.Array(np.transpose(np.nonzero(operand.array)))
 
+
 class Index(AbstractExpression):
     """Index function for n-dimensional arrays."""
+
     def __init__(self, *children):
         super(Index, self).__init__(*children)
         if len(self.children) < 2 or len(self.children) > 6:
@@ -520,7 +536,8 @@ class Index(AbstractExpression):
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
-        default_params = [None, None, V.Simple(operands[0].array.ndim - 1), V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
+        default_params = [None, None, V.Simple(operands[0].array.ndim - 1),
+                          V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
         for i, oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
                 operands[i] = default_params[i]
@@ -562,21 +579,22 @@ class Index(AbstractExpression):
 
         # check for errors in inputs
         if not isinstance(operand, V.Array) or not isinstance(indices, V.Array):
-                raise ProtocolError("The first two inputs should be Arrays.")
+            raise ProtocolError("The first two inputs should be Arrays.")
         if indices.array.ndim != 2:
             raise ProtocolError("The dimension of the indices array must be 2, not", indices.array.ndim)
         if not hasattr(dim, 'value'):
-                raise ProtocolError("The dimension input should be a simple value, not a", type(dim))
+            raise ProtocolError("The dimension input should be a simple value, not a", type(dim))
         if dim.value >= operand.array.ndim:
-            raise ProtocolError("The operand to index has", operand.array.ndim, "dimensions, so it cannot be folded along dimension", dim.value)
+            raise ProtocolError("The operand to index has", operand.array.ndim,
+                                "dimensions, so it cannot be folded along dimension", dim.value)
         if not hasattr(shrink, 'value'):
-                raise ProtocolError("The shrink input should be a simple value, not a", type(shrink))
+            raise ProtocolError("The shrink input should be a simple value, not a", type(shrink))
         if not hasattr(pad, 'value'):
-                raise ProtocolError("The pad input should be a simple value, not a", type(pad))
+            raise ProtocolError("The pad input should be a simple value, not a", type(pad))
         if shrink.value != 0 and pad.value != 0:
             raise ProtocolError("You cannot both pad and shrink!")
         if not hasattr(pad, 'value'):
-                raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
+            raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
 
         dim_val = int(dim.value)
         shape = list(operand.array.shape)
@@ -590,7 +608,8 @@ class Index(AbstractExpression):
         max_extent = np.amax(extents)
         min_extent = np.amin(extents)
         if min_extent == 0 and pad.value == 0 or (min_extent != max_extent and shrink.value == 0 and pad.value == 0):
-            raise ProtocolError("Cannot index if the result is irregular (extent ranges from", min_extent, "to", max_extent, ").")
+            raise ProtocolError("Cannot index if the result is irregular (extent ranges from",
+                                min_extent, "to", max_extent, ").")
         if pad.value != 0:
             extent = max_extent
         else:

@@ -47,6 +47,7 @@ from .general import *
 from .maths import *
 from .array import *
 
+
 def N(number):
     """A convenience expression constructor for defining constant numbers."""
     return Const(V.Simple(number))

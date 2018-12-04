@@ -32,6 +32,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from ..utility.error_handling import ProtocolError
 
+
 class AbstractModifier(object):
     """Base class for modifiers in the protocol language."""
 
@@ -49,6 +50,7 @@ class AbstractModifier(object):
 
 class SetVariable(AbstractModifier):
     """Modifier for changing the values of model variables (that were specified as protocol inputs)."""
+
     def __init__(self, when, variableName, valueExpr):
         self.when = when
         self.variableName = variableName
@@ -70,6 +72,7 @@ class SetVariable(AbstractModifier):
             del odict['_evaluate']
             del odict['_bindings']
         return odict
+
     def __setstate__(self, dict):
         self.__dict__.update(dict)
         self._calledOnce = False
@@ -97,6 +100,7 @@ class SetVariable(AbstractModifier):
 
 class SaveState(AbstractModifier):
     """Modifier to cache the state of a model with an associated name."""
+
     def __init__(self, when, stateName):
         self.when = when
         self.stateName = stateName
@@ -107,6 +111,7 @@ class SaveState(AbstractModifier):
 
 class ResetState(AbstractModifier):
     """Modifier to restore the state of a model to a previously cached version."""
+
     def __init__(self, when, stateName=None):
         self.when = when
         self.stateName = stateName

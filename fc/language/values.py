@@ -37,6 +37,7 @@ from ..utility.error_handling import ProtocolError
 
 class AbstractValue(object):
     """Base class for values in the protocol language."""
+
     def __init__(self, units=None):
         self.units = units
 
@@ -52,6 +53,7 @@ class AbstractValue(object):
 
 class Simple(AbstractValue):
     """Simple value class in the protocol language for numbers."""
+
     def __init__(self, value):
         self.value = float(value)
 
@@ -67,6 +69,7 @@ class Simple(AbstractValue):
 
 class Array(AbstractValue):
     """Class in the protocol language for arrays."""
+
     def __init__(self, array):
         assert isinstance(array, (np.ndarray, np.float))
         self.array = np.array(array, dtype=float, copy=False)
@@ -85,6 +88,7 @@ class Array(AbstractValue):
 
 class Tuple(AbstractValue):
     """Tuple class in the protocol language."""
+
     def __init__(self, *values):
         self.values = tuple(values)
 
@@ -95,12 +99,14 @@ class Tuple(AbstractValue):
 
 class Null(AbstractValue):
     """Null class in the protocol language."""
+
     def __str__(self):
         return "null"
 
 
 class String(AbstractValue):
     """String class in the protocol language."""
+
     def __init__(self, value):
         self.value = value
 
@@ -111,12 +117,14 @@ class String(AbstractValue):
 
 class DefaultParameter(AbstractValue):
     """Class in protocol language used for default values."""
+
     def __str__(self):
         return "default"
 
 
 class LambdaClosure(AbstractValue):
     """Class for functions in the protocol language."""
+
     def __init__(self, definingEnv, formalParameters, body, defaultParameters):
         self.formalParameters = formalParameters
         self.body = body
@@ -161,11 +169,13 @@ class LambdaClosure(AbstractValue):
         result = local_env.ExecuteStatements(self.body, returnAllowed=True)
         return result
 
+
 class LoadFunction(LambdaClosure):
     """A built-in function for loading data files from disk.
 
     This gets inserted into the inputs environment under the name 'load'.
     """
+
     def __init__(self, basePath):
         """Initialise an instance of the load() built-in.
 
@@ -182,7 +192,7 @@ class LoadFunction(LambdaClosure):
 
     def Evaluate(self, env, actualParameters):
         """Evaluate a load() function call.
-        
+
         :param env: the environment within which to evaluate this call
         :param actualParameters: the values of the parameters to the call; should be a single
             string value containing the path of the file to load

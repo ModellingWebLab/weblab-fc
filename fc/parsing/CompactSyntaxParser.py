@@ -32,7 +32,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 
-
 import os
 import sys
 
@@ -72,6 +71,7 @@ def DoXmlImports():
     for name in local_defs:
         globals()[name] = local_defs[name]
 
+
 if __name__ == '__main__' or getattr(sys, '_fc_csp_no_pyimpl', False):
     DoXmlImports()
 else:
@@ -109,16 +109,18 @@ class Actions(object):
 
     class BaseAction(object):
         """Base parse action.
-        
+
         This contains the code for allowing parsed protocol elements to be compared to lists in the test code.
         """
+
         def __init__(self, s, loc, tokens):
             self.tokens = tokens
             if isinstance(loc, str):
                 # This instance is being created manually to implement syntactic sugar.
                 self.source_location = loc
             else:
-                self.source_location = "%s:%d:%d\t%s" % (Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
+                self.source_location = "%s:%d:%d\t%s" % (
+                    Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
 #            print 'Creating', self.__class__.__name__, self.tokens
 
         def __eq__(self, other):
@@ -151,6 +153,7 @@ class Actions(object):
             else:
                 detail = str(self.tokens)
             return self.__class__.__name__ + detail
+
         def __repr__(self):
             return str(self)
 
@@ -219,11 +222,13 @@ class Actions(object):
         """Base class for parse actions associated with a Group.
         This strips the extra nesting level in its __init__.
         """
+
         def __init__(self, s, loc, tokens):
             super(Actions.BaseGroupAction, self).__init__(s, loc, tokens[0])
 
     class Trace(BaseGroupAction):
         """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
+
         def _xml(self):
             wrapped_xml = self.tokens[0].xml()
             return self.AddTrace(wrapped_xml)
@@ -239,6 +244,7 @@ class Actions(object):
 
     class Number(BaseGroupAction):
         """Parse action for numbers."""
+
         def __init__(self, s, loc, tokens):
             super(Actions.Number, self).__init__(s, loc, tokens)
             if len(tokens) == 2:
@@ -258,6 +264,7 @@ class Actions(object):
 
     class Variable(BaseGroupAction):
         """Parse action for variable references (identifiers)."""
+
         def _xml(self):
             var_name = self.tokens
             if var_name.startswith('MathML:'):
@@ -287,6 +294,7 @@ class Actions(object):
         OP_MAP = {'+': 'plus', '-': 'minus', '*': 'times', '/': 'divide', '^': 'power',
                   '==': 'eq', '!=': 'neq', '<': 'lt', '>': 'gt', '<=': 'leq', '>=': 'geq',
                   'not': 'not', '&&': 'and', '||': 'or'}
+
         def __init__(self, *args, **kwargs):
             super(Actions.Operator, self).__init__(*args)
             self.rightAssoc = kwargs.get('rightAssoc', False)
@@ -332,6 +340,7 @@ class Actions(object):
 
     class Wrap(BaseGroupAction):
         """Parse action for wrapped MathML operators."""
+
         def _xml(self):
             assert len(self.tokens) == 2
             num_operands = self.tokens[0]
@@ -354,6 +363,7 @@ class Actions(object):
 
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
+
         def _xml(self):
             if_, then_, else_ = self.GetChildrenXml()
             return M.piecewise(M.piece(then_, if_), M.otherwise(else_))
@@ -364,6 +374,7 @@ class Actions(object):
 
     class MaybeTuple(BaseGroupAction):
         """Parse action for elements that may be grouped into a tuple, or might be a single item."""
+
         def _xml(self):
             assert len(self.tokens) > 0
             if len(self.tokens) > 1:
@@ -387,6 +398,7 @@ class Actions(object):
 
     class Tuple(BaseGroupAction):
         """Parse action for tuples."""
+
         def _xml(self):
             child_xml = self.GetChildrenXml()
             return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE + "tuple"), *child_xml)
@@ -397,6 +409,7 @@ class Actions(object):
 
     class Lambda(BaseGroupAction):
         """Parse action for lambda expressions."""
+
         def _xml(self):
             assert len(self.tokens) == 2
             param_list = self.tokens[0]
@@ -435,6 +448,7 @@ class Actions(object):
 
     class FunctionCall(BaseGroupAction):
         """Parse action for function calls."""
+
         def _xml(self):
             assert len(self.tokens) == 2
             func_name = str(self.tokens[0].tokens)
@@ -467,6 +481,7 @@ class Actions(object):
 
     class _Symbol(BaseGroupAction):
         """Parse action for csymbols."""
+
         def __init__(self, s, loc, tokens, symbol):
             super(Actions._Symbol, self).__init__(s, loc, tokens)
             self.symbol = symbol
@@ -494,6 +509,7 @@ class Actions(object):
 
     class Accessor(BaseGroupAction):
         """Parse action for accessors."""
+
         def _xml(self):
             if len(self.tokens) > 2:
                 # Chained accessors, e.g. E.SHAPE.IS_ARRAY
@@ -514,6 +530,7 @@ class Actions(object):
 
     class Comprehension(BaseGroupAction):
         """Parse action for the comprehensions with array definitions."""
+
         def _xml(self):
             assert 2 <= len(self.tokens) <= 3
             parts = []
@@ -544,6 +561,7 @@ class Actions(object):
 
     class Array(BaseGroupAction):
         """Parse action for creating arrays."""
+
         def _xml(self):
             entries = self.GetChildrenXml()
             if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
@@ -561,6 +579,7 @@ class Actions(object):
 
     class View(BaseGroupAction):
         """Parse action for array views."""
+
         def _xml(self):
             assert 2 <= len(self.tokens)
             apply_content = [self.DelegateSymbol('view').xml(), self.tokens[0].xml()]
@@ -630,6 +649,7 @@ class Actions(object):
 
     class Index(BaseGroupAction):
         """Parse action for index expressions."""
+
         def _xml(self):
             """Construct apply(csymbol-index, indexee, indices, dim, shrink, pad, padValue).
             shrink and pad both default to 0 (false).
@@ -664,6 +684,7 @@ class Actions(object):
 
     class Assignment(BaseGroupAction):
         """Parse action for both simple and tuple assignments."""
+
         def __init__(self, s, loc, tokens):
             super(Actions.Assignment, self).__init__(s, loc, tokens)
             if len(self.tokens) == 3:
@@ -693,6 +714,7 @@ class Actions(object):
 
     class Return(BaseGroupAction):
         """Parse action for return statements."""
+
         def _xml(self):
             return M.apply(self.DelegateSymbol('return').xml(), *self.GetChildrenXml())
 
@@ -701,6 +723,7 @@ class Actions(object):
 
     class Assert(BaseGroupAction):
         """Parse action for assert statements."""
+
         def _xml(self):
             return M.apply(self.DelegateSymbol('assert').xml(), *self.GetChildrenXml())
 
@@ -709,6 +732,7 @@ class Actions(object):
 
     class FunctionDef(BaseGroupAction):
         """Parse action for function definitions, which are sugar for assignment of a lambda."""
+
         def _xml(self):
             assert len(self.tokens) == 3
             lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
@@ -723,6 +747,7 @@ class Actions(object):
 
     class StatementList(BaseGroupAction):
         """Parse action for lists of post-processing language statements."""
+
         def _xml(self):
             statements = self.GetChildrenXml()
             return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
@@ -819,6 +844,7 @@ class Actions(object):
 
     class Range(BaseGroupAction):
         """Parse action for all the kinds of range supported."""
+
         def _xml(self):
             attrs = self.TransferAttrs('name', 'units')
             if 'uniform' in self.tokens:
@@ -858,6 +884,7 @@ class Actions(object):
 
     class ModifierWhen(BaseGroupAction):
         """Parse action for the when part of modifiers."""
+
         def _xml(self):
             when = {'start': 'AT_START_ONLY', 'each': 'EVERY_LOOP', 'end': 'AT_END'}[self.tokens]
             return P.when(when)
@@ -868,6 +895,7 @@ class Actions(object):
 
     class Modifier(BaseGroupAction):
         """Parse action that generates all kinds of modifier."""
+
         def _xml(self):
             args = [self.tokens[0].xml()]
             detail = self.tokens[1]
@@ -902,6 +930,7 @@ class Actions(object):
 
     class Modifiers(BaseGroupAction):
         """Parse action for the modifiers collection."""
+
         def _xml(self):
             return P.modifiers(*self.GetChildrenXml())
 
@@ -1008,6 +1037,7 @@ class Actions(object):
 
     class Simulation(BaseGroupAction):
         """Parse action for all kinds of simulation."""
+
         def _xml(self):
             sim_elt = self.tokens[1].xml()
             prefix = str(self.tokens[0])
@@ -1024,6 +1054,7 @@ class Actions(object):
 
     class Tasks(BaseGroupAction):
         """Parse action for a collection of simulation tasks."""
+
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.simulations(*self.GetChildrenXml())
@@ -1032,13 +1063,13 @@ class Actions(object):
             sims = self.GetChildrenExpr()
             return sims
 
-
     ######################################################################
     # Other protocol language constructs
     ######################################################################
 
     class Inputs(BaseAction):
         """Parse action for the inputs section of a protocol."""
+
         def _xml(self):
             assert len(self.tokens) <= 1
             if len(self.tokens) == 1:  # Don't create an empty element
@@ -1051,6 +1082,7 @@ class Actions(object):
 
     class Import(BaseGroupAction):
         """Parse action for protocol imports."""
+
         def _xml(self):
             assert len(self.tokens) >= 2
             attrs = {'source': self.tokens[1]}
@@ -1076,6 +1108,7 @@ class Actions(object):
 
     class UnitRef(BaseGroupAction):
         """Parse action for unit references within units definitions."""
+
         def GetValue(self, token, negate=False):
             """Get a decent string representation of the value of the given numeric token.
             It may be a plain number, or it may be a simple expression which we have to evaluate.
@@ -1109,6 +1142,7 @@ class Actions(object):
 
     class UnitsDef(BaseGroupAction):
         """Parse action for units definitions."""
+
         def _xml(self):
             name = str(self.tokens[0])
             if 'description' in self.tokens:
@@ -1118,12 +1152,14 @@ class Actions(object):
 
     class Units(BaseAction):
         """Parse action for the units definitions section."""
+
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.units(*self.GetChildrenXml())
 
     class Library(BaseAction):
         """Parse action for the library section."""
+
         def _xml(self):
             if len(self.tokens) > 0:
                 assert len(self.tokens) == 1
@@ -1136,6 +1172,7 @@ class Actions(object):
 
     class PostProcessing(BaseAction):
         """Parse action for the post-processing section."""
+
         def _xml(self):
             if len(self.tokens) > 0:
                 return getattr(P, 'post-processing')(self.Delegate('StatementList', [self.tokens]).xml())
@@ -1146,6 +1183,7 @@ class Actions(object):
 
     class Output(BaseGroupAction):
         """Parse action for an output specification."""
+
         def _xml(self):
             if not 'units' in self.tokens:
                 # It has to be a raw model output
@@ -1177,6 +1215,7 @@ class Actions(object):
 
     class Outputs(BaseGroupAction):
         """Parse action for the outputs section."""
+
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.outputVariables(*self.GetChildrenXml())
@@ -1186,6 +1225,7 @@ class Actions(object):
 
     class Plot(BaseGroupAction):
         """Parse action for simple plot specifications."""
+
         def _xml(self):
             using = self.tokens.get('using', '')
             if using:
@@ -1230,6 +1270,7 @@ class Actions(object):
 
     class Plots(BaseGroupAction):
         """Parse action for the plots section."""
+
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.plots(*self.GetChildrenXml())
@@ -1239,6 +1280,7 @@ class Actions(object):
 
     class Protocol(BaseAction):
         """Parse action for a full protocol."""
+
         def _xml(self):
             # Build namespace map based on bindings in the protocol
             nsmap = {'proto': PROTO_NS, 'm': MATHML_NS}
@@ -1287,14 +1329,17 @@ def MakeKw(keyword, suppress=True):
         kw = kw.suppress()
     return kw
 
+
 def Adjacent(parser):
     """Create a copy of the given parser that doesn't permit whitespace to occur before it."""
     adj = parser.copy()
     adj.setWhitespaceChars('')
     return adj
 
+
 class Optional(p.Optional):
     """An Optional pattern that doesn't consume whitespace if the contents don't match."""
+
     def __init__(self, *args, **kwargs):
         super(Optional, self).__init__(*args, **kwargs)
         self.callPreparse = False
@@ -1314,13 +1359,15 @@ class Optional(p.Optional):
                 tokens = []
         return loc, tokens
 
+
 def OptionalDelimitedList(expr, delim):
     """Like delimitedList, but the list may be empty."""
     return p.delimitedList(expr, delim) | p.Empty()
 
+
 def DelimitedMultiList(elements, delimiter):
     """Like delimitedList, but allows for a sequence of constituent element expressions.
-    
+
     elements should be a sequence of tuples (expr, unbounded), where expr is a ParserElement,
     and unbounded is True iff zero or more occurrences are allowed; otherwise the expr is
     considered to be optional (i.e. 0 or 1 occurrences).  The delimiter parameter must occur
@@ -1344,6 +1391,7 @@ def DelimitedMultiList(elements, delimiter):
             result = (expr + delimiter + rest) | expr | rest
     return result
 
+
 def UnIgnore(parser):
     """Stop ignoring things in the given parser (and its children)."""
     for child in getattr(parser, 'exprs', []):
@@ -1352,8 +1400,10 @@ def UnIgnore(parser):
         UnIgnore(parser.expr)
     parser.ignoreExprs = []
 
+
 def MonkeyPatch():
     """Monkey-patch some pyparsing methods to behave slightly differently."""
+
     def ignore(self, other):
         """Improved ignore that avoids ignoring self by accident."""
         if isinstance(other, p.Suppress):
@@ -1371,6 +1421,7 @@ def MonkeyPatch():
     import new
     setattr(p.ParserElement, 'ignore', new.instancemethod(locals()['ignore'], None, p.ParserElement))
     setattr(p.ParseException, '__str__', new.instancemethod(locals()['err_str'], None, p.ParseException))
+
 
 MonkeyPatch()
 
@@ -1391,7 +1442,8 @@ class CompactSyntaxParser(object):
     osquare = p.Suppress('[')
     csquare = p.Suppress(']')
     dollar = p.Suppress('$')
-    nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())).setName('Newline(s)')  # Any line can end with a comment
+    nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())
+                    ).setName('Newline(s)')  # Any line can end with a comment
     obrace = (Optional(nl) + p.Suppress('{') + Optional(nl)).setName('{')
     cbrace = (Optional(nl) + p.Suppress('}') + Optional(nl)).setName('}')
     embedded_cbrace = (Optional(nl) + p.Suppress('}')).setName('}')
@@ -1441,7 +1493,8 @@ class CompactSyntaxParser(object):
                      MakeKw('else') - expr).setName('IfThenElse').setParseAction(Actions.Piecewise)
 
     # Lambda definitions
-    paramDecl = p.Group(ncIdentAsVar + Optional(eq + expr))  # TODO: check we can write XML for a full expr as default value
+    # TODO: check we can write XML for a full expr as default value
+    paramDecl = p.Group(ncIdentAsVar + Optional(eq + expr))
     paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
     lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon - expr) | (obrace - stmtList + embedded_cbrace))
                          ).setName('Lambda').setParseAction(Actions.Lambda)
@@ -1449,10 +1502,12 @@ class CompactSyntaxParser(object):
     # Function calls
     # TODO: allow lambdas, not just ident?
     argList = p.Group(OptionalDelimitedList(expr, comma))
-    functionCall = p.Group(identAsVar + Adjacent(oparen) - argList + cparen).setName('FnCall').setParseAction(Actions.FunctionCall)
+    functionCall = p.Group(identAsVar + Adjacent(oparen) - argList +
+                           cparen).setName('FnCall').setParseAction(Actions.FunctionCall)
 
     # Tuples
-    tuple = p.Group(oparen + expr + comma - OptionalDelimitedList(expr, comma) + cparen).setName('Tuple').setParseAction(Actions.Tuple)
+    tuple = p.Group(oparen + expr + comma - OptionalDelimitedList(expr, comma) +
+                    cparen).setName('Tuple').setParseAction(Actions.Tuple)
 
     # Accessors
     accessor = p.Combine(Adjacent(p.Suppress('.')) -
@@ -1463,7 +1518,8 @@ class CompactSyntaxParser(object):
     pad = (MakeKw('pad') + Adjacent(colon) - expr + eq + expr).setResultsName('pad')
     shrink = (MakeKw('shrink') + Adjacent(colon) - expr).setResultsName('shrink')
     index_dim = expr.setResultsName('dim')
-    index = p.Group(Adjacent(p.Suppress('{')) - expr + p.ZeroOrMore(comma - (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
+    index = p.Group(Adjacent(p.Suppress('{')) - expr + p.ZeroOrMore(comma -
+                    (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
 
     # Special values
     nullValue = p.Group(MakeKw('null')).setName('Null').setParseAction(Actions.Symbol('null'))
@@ -1496,7 +1552,8 @@ class CompactSyntaxParser(object):
                                         ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT,
+                                         lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
@@ -1506,18 +1563,21 @@ class CompactSyntaxParser(object):
     simpleIfExpr = p.Group(MakeKw('if') - simpleExpr + MakeKw('then') - simpleExpr +
                            MakeKw('else') - simpleExpr).setName('SimpleIfThenElse').setParseAction(Actions.Piecewise)
     simpleArgList = p.Group(OptionalDelimitedList(simpleExpr, comma))
-    simpleFunctionCall = p.Group(identAsVar + Adjacent(oparen) - simpleArgList + cparen).setName('SimpleFnCall').setParseAction(Actions.FunctionCall)
+    simpleFunctionCall = p.Group(identAsVar + Adjacent(oparen) - simpleArgList +
+                                 cparen).setName('SimpleFnCall').setParseAction(Actions.FunctionCall)
     simpleExpr << p.operatorPrecedence(number.copy().setParseAction(Actions.Number) | simpleIfExpr | simpleFunctionCall | identAsVar,
                                        [('^', 2, p.opAssoc.LEFT, Actions.Operator),
                                         ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT,
+                                         lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
                                        ])
     simpleParamList = p.Group(OptionalDelimitedList(p.Group(ncIdentAsVar), comma))
-    simpleLambdaExpr = p.Group(MakeKw('lambda') - simpleParamList + colon - expr).setName('SimpleLambda').setParseAction(Actions.Lambda)
+    simpleLambdaExpr = p.Group(MakeKw('lambda') - simpleParamList + colon -
+                               expr).setName('SimpleLambda').setParseAction(Actions.Lambda)
 
     # Newlines in expressions may be escaped with a backslash
     expr.ignore('\\' + p.LineEnd())
@@ -1577,7 +1637,8 @@ class CompactSyntaxParser(object):
 
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
-    library = (MakeKw('library') - obrace - Optional(stmtList) + cbrace).setName('Library').setParseAction(Actions.Library)
+    library = (MakeKw('library') - obrace - Optional(stmtList) +
+               cbrace).setName('Library').setParseAction(Actions.Library)
 
     # Post-processing
     postProcessing = (MakeKw('post-processing') + obrace -
@@ -1660,7 +1721,8 @@ class CompactSyntaxParser(object):
 
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
-    _selectOutput = p.Group(MakeKw('select') - Optional(MakeKw('optional', suppress=False)) - MakeKw('output') - ncIdent).setName('SelectOutput')
+    _selectOutput = p.Group(MakeKw('select') - Optional(MakeKw('optional', suppress=False)) -
+                            MakeKw('output') - ncIdent).setName('SelectOutput')
     nestedProtocol = p.Group(MakeKw('protocol') - quotedUri + obrace +
                              simpleAssignList + Optional(nl) + OptionalDelimitedList(_selectOutput, nl) +
                              cbrace + Optional('?')).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
@@ -1674,7 +1736,8 @@ class CompactSyntaxParser(object):
     simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='')
                           + (timecourseSim | nestedSim | oneStepSim) - Optional('?' + nl)).setParseAction(Actions.Simulation)
 
-    tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(simulation) + cbrace).setName('Tasks').setParseAction(Actions.Tasks)
+    tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(simulation) +
+                    cbrace).setName('Tasks').setParseAction(Actions.Tasks)
 
     # Output specifications
     #######################
@@ -1683,7 +1746,8 @@ class CompactSyntaxParser(object):
     outputSpec = p.Group(Optional(MakeKw('optional', suppress=False))("optional") + ncIdent("name")
                          + ((unitsRef("units") + outputDesc) | (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))
                          ).setName('Output').setParseAction(Actions.Output)
-    outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(outputSpec, nl) + cbrace).setName('Outputs').setParseAction(Actions.Outputs)
+    outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(outputSpec, nl) +
+                      cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
     # Plot specifications
     #####################
@@ -1696,7 +1760,8 @@ class CompactSyntaxParser(object):
                                     | MakeKw('linespoints', suppress=False)))("using")
     plotSpec = p.Group(MakeKw('plot') - quotedString + Optional(plotUsing) - obrace +
                        plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
-    plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(plotSpec) + cbrace).setName('Plots').setParseAction(Actions.Plots)
+    plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(plotSpec) +
+                    cbrace).setName('Plots').setParseAction(Actions.Plots)
 
     # Parsing a full protocol
     #########################
@@ -1794,6 +1859,7 @@ def GetNamedGrammars(obj=CompactSyntaxParser):
             grammars.append(parser)
     return grammars
 
+
 def EnableDebug(grammars=None):
     """Enable debugging of our (named) grammars."""
     def DisplayLoc(instring, loc):
@@ -1808,26 +1874,29 @@ def EnableDebug(grammars=None):
     for parser in grammars or GetNamedGrammars():
         parser.setDebugActions(None, SuccessDebugAction, ExceptionDebugAction)
 
+
 def DisableDebug(grammars=None):
     """Stop debugging our (named) grammars."""
     for parser in grammars or GetNamedGrammars():
         parser.setDebug(False)
 
+
 class Debug(object):
     """A Python 2.6+ context manager that enables debugging just for the enclosed block."""
+
     def __init__(self, grammars=None):
         self._grammars = list(grammars or GetNamedGrammars())
+
     def __enter__(self):
         EnableDebug(self._grammars)
+
     def __exit__(self, type, value, traceback):
         DisableDebug(self._grammars)
-
 
 
 ################################################################################
 # Script for conversion to XML syntax, callable by C++ code
 ################################################################################
-
 if __name__ == '__main__':
     assert len(sys.argv) >= 3
     source_path = sys.argv[1]

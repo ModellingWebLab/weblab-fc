@@ -43,6 +43,7 @@ class AbstractModel(object):
     This is due to Cython limitations that prevent an extension type using multiple inheritance and inheriting from
     a Python class.  Thus if you make changes here you must also change the code generation in translators.py.
     """
+
     def __init__(self):
         self.indentLevel = 0
 
@@ -83,11 +84,12 @@ class AbstractOdeModel(AbstractModel):
       __init__: sets up self.stateVarMap, self.initialState, self.parameterMap and self.parameters
       EvaluateRhs(self, t, y): returns a numpy array containing the derivatives at the given state
       GetOutputs(self): returns a list of model outputs
-    
+
     Note that generated models using Cython don't actually inherit from this class, but expose the same interface.
     This is due to Cython limitations that prevent an extension type using multiple inheritance and inheriting from
     a Python class.  Thus if you make changes here you must also change the code generation in translators.py.
     """
+
     def __init__(self, *args, **kwargs):
         """Construct a new ODE system model.
 
@@ -155,9 +157,10 @@ class AbstractOdeModel(AbstractModel):
 
 class NestedProtocol(AbstractModel):
     """This type of model wraps the execution of an entire protocol."""
+
     def __init__(self, proto, inputExprs, outputNames, optionalFlags):
         """Create a new nested protocol.
-        
+
         :param proto: the full path to the protocol description to nest
         :param inputExprs: a map from input name to defining expression, for setting inputs of the nested protocol
         :param outputNames: list of the names of the protocol outputs to keep as our outputs
@@ -205,20 +208,22 @@ class NestedProtocol(AbstractModel):
     def Simulate(self, endPoint):
         # TODO: Better to pass 'simEnv' to this method?
         for name, expr in self.inputExprs.items():
-           self.proto.SetInput(name, expr.Evaluate(self.simEnv))
+            self.proto.SetInput(name, expr.Evaluate(self.simEnv))
 #         self.proto.SetOutputfolder(self.outputPath) #TODO
         self.proto.Run()
 
 
 class TestOdeModel(AbstractOdeModel):
     """A very simple model for use in tests: dy/dt = a."""
+
     def __init__(self, a):
         self.initialState = np.array([0.])
         self.stateVarMap = {'membrane_voltage': 0, 'y': 0}
         self.parameters = np.array([a])
         self.parameterMap = {'SR_leak_current': 0, 'leakage_current': 0, 'a': 0}
         self.freeVariableName = 'time'
-        self.outputNames = ['a', 'y', 'state_variable', 'time', 'leakage_current', 'SR_leak_current', 'membrane_voltage']
+        self.outputNames = ['a', 'y', 'state_variable', 'time',
+                            'leakage_current', 'SR_leak_current', 'membrane_voltage']
         super(TestOdeModel, self).__init__()
 
     def EvaluateRhs(self, t, y, ydot=np.empty(0)):
