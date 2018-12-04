@@ -230,7 +230,7 @@ class Protocol(object):
                         raise
                 self.outputEnv.DefineName(output_spec['name'], output)
                 outputs_defined.append(output_spec)
-                if not 'description' in output_spec:
+                if 'description' not in output_spec:
                     output_spec['description'] = output_spec['name']
                 if output_spec['name'] in plot_vars:
                     plot_descriptions[output_spec['name']] = output_spec['description']
@@ -247,8 +247,10 @@ class Protocol(object):
                 h5file = tables.open_file(filename, mode='w', title=os.path.splitext(self.protoName)[0])
                 group = h5file.create_group('/', 'output', 'output parent')
                 for output_spec in outputs_defined:
-                    h5file.create_array(
-                        group, output_spec['name'], self.outputEnv.unwrappedBindings[output_spec['name']], title=output_spec['description'])
+                    h5file.create_array(group,
+                                        output_spec['name'],
+                                        self.outputEnv.unwrappedBindings[output_spec['name']],
+                                        title=output_spec['description'])
                 h5file.close()
         self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
 
@@ -269,14 +271,16 @@ class Protocol(object):
                         if key_data.ndim != 1:
                             raise ProtocolError('Plot key variables must be 1d vectors;',
                                                 plot['key'], 'has', key_data.ndim, 'dimensions')
-                    # Check the x-axis data shape.  It must either be 1d, or be equivalent to a 1d vector (i.e. stacked copies of the same vector).
+                    # Check the x-axis data shape.  It must either be 1d, or be equivalent to
+                    # a 1d vector (i.e. stacked copies of the same vector).
                     for i, x in enumerate(x_data):
                         if x.ndim > 1:
                             num_repeats = reduce(operator.mul, x.shape[:-1])
                             # Flatten all extra dimensions as an array view
                             x_2d = x.reshape((num_repeats, x.shape[-1]))
                             if x_2d.ptp(axis=0).any():
-                                # There was non-zero difference between the min & max at some position in the 1d equivalent vector
+                                # There was non-zero difference between the min & max at some position in
+                                # the 1d equivalent vector
                                 raise ProtocolError(
                                     'The X data for a plot must be (equivalent to) a 1d array, not', x.ndim, 'dimensions')
                             x_data[i] = x_2d[0]  # Take just the first copy
@@ -285,7 +289,8 @@ class Protocol(object):
                     for i, x in enumerate(x_data):
                         y = y_data[i]
                         if y.ndim > 1:
-                            # Matplotlib can handle 2d data, but plots columns not rows, so we need to flatten & transpose
+                            # Matplotlib can handle 2d data, but plots columns not rows, so we need to
+                            # flatten & transpose
                             y_2d = y.reshape((reduce(operator.mul, y.shape[:-1]), y.shape[-1]))
                             plt.plot(x, y_2d.T)
                         else:
@@ -410,8 +415,14 @@ class Protocol(object):
             xml_file = self.parser.ConvertProtocol(self.protoFile, temp_dir, xmlGenerator=self.parsedProtocol)
             # Generate the (protocol-modified) model code
             class_name = 'GeneratedModel'
-            code_gen_cmd = self.GetConversionCommand(model, xml_file, class_name, temp_dir,
-                                                     useCython=useCython, useNumba=useNumba, exposeNamedParameters=exposeNamedParameters)
+            code_gen_cmd = self.GetConversionCommand(
+                model,
+                xml_file,
+                class_name,
+                temp_dir,
+                useCython=useCython,
+                useNumba=useNumba,
+                exposeNamedParameters=exposeNamedParameters)
             print(subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT))
             if useCython:
                 # Compile the extension module

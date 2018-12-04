@@ -230,7 +230,8 @@ class Root(AbstractExpression):
         super(Root, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
             raise ProtocolError(
-                "Operator 'root' requires one operand, optionally with a degree qualifier, you entered", len(self.children), "inputs")
+                "Operator 'root' requires one operand, optionally with a degree qualifier, you entered",
+                len(self.children), "inputs")
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)
@@ -368,8 +369,9 @@ class Log(AbstractExpression):
     def __init__(self, *children):
         super(Log, self).__init__(*children)
         if len(self.children) != 1 and len(self.children) != 2:
-            raise ProtocolError("Logarithmic operator requires one operand, and optionally a log_base qualifier, you entered", len(
-                self.children), "inputs")
+            raise ProtocolError(
+                "Logarithmic operator requires one operand, and optionally a log_base qualifier, you entered",
+                len(self.children), "inputs")
 
     def Interpret(self, env):
         operands = self.EvaluateChildren(env)

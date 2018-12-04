@@ -207,7 +207,7 @@ class NewArray(AbstractExpression):
                 compiled = True
             else:
                 raise NotImplementedError
-        except:
+        except BaseException:
             compiled = False
         if compiled and num_gaps == 0 and len(ranges) <= 1:
             result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env)
@@ -298,7 +298,7 @@ class View(AbstractExpression):
             if end == 'default':
                 end = start
 
-            if dim != None and not isinstance(dim, V.Null):
+            if dim is not None and not isinstance(dim, V.Null):
                 if dim > array.array.ndim - 1:
                     raise ProtocolError("Array only has", array.array.ndim, "dimensions, not",
                                         dim + 1)  # plus one to account for dimension zero
@@ -330,13 +330,16 @@ class View(AbstractExpression):
                 if implicit_dim_slices:
                     if isinstance(implicit_dim_slices[0], slice):
                         if implicit_dim_slices[0].start is not None:
-                            if implicit_dim_slices[0].start < -dim_len or implicit_dim_slices[0].start >= dim_len:
+                            if (implicit_dim_slices[0].start < -dim_len or
+                                    implicit_dim_slices[0].start >= dim_len):
                                 raise ProtocolError("The start of the slice is not within the range of the dimension")
                         if implicit_dim_slices[0].stop is not None:
-                            if implicit_dim_slices[0].stop < -(dim_len + 1) or implicit_dim_slices[0].stop >= (dim_len + 1):
+                            if (implicit_dim_slices[0].stop < -(dim_len + 1) or
+                                    implicit_dim_slices[0].stop >= (dim_len + 1)):
                                 raise ProtocolError("The end of the slice is not within the range of the dimension")
                         if implicit_dim_slices[0].step is not None and implicit_dim_slices[0].stop is not None and implicit_dim_slices[0].start is not None:
-                            if (implicit_dim_slices[0].stop - implicit_dim_slices[0].start) * implicit_dim_slices[0].step <= 0:
+                            if ((implicit_dim_slices[0].stop - implicit_dim_slices[0].start) *
+                                    implicit_dim_slices[0].step <= 0):
                                 raise ProtocolError("The sign of the step does not make sense")
 
                     slices[i] = implicit_dim_slices.pop(0)
@@ -390,7 +393,7 @@ class Fold(AbstractExpression):
             dimension = self.GetValue(operands[3])
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension,
-                                     "because the array only has", array.ndim, "dimensions")
+                                    "because the array only has", array.ndim, "dimensions")
         if array.ndim == 0:
             raise ProtocolError('Array has zero dimensions.')
         shape = list(array.shape)
@@ -629,7 +632,8 @@ class Index(AbstractExpression):
             end = num_entries
             move = 1
 
-        # The next_index array keeps track of how far along dimension dim_val we should put the next kept entry at each location
+        # The next_index array keeps track of how far along dimension dim_val we
+        # should put the next kept entry at each location
         shape[dim_val] = 1
         next_index = np.zeros(shape)
         for i in range(begin, end, move):

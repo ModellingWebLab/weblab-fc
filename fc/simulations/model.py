@@ -184,7 +184,7 @@ class NestedProtocol(AbstractModel):
         for i, name in enumerate(self.outputNames[:]):
             try:
                 value = self.proto.outputEnv.LookUp(name).unwrapped
-            except:
+            except BaseException:
                 if self.optionalFlags[i]:
                     value = None
                     missing.append((i, name))

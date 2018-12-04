@@ -124,7 +124,10 @@ class AbstractSimulation(locatable.Locatable):
             self.model.SetOutputFolder(folder)
 
     def LoopBodyStartHook(self):
-        if isinstance(self.range_, R.While) and self.range_.count > 0 and self.resultsList and self.range_.GetNumberOfOutputPoints() > self.resultsList[0].shape[0]:
+        if (isinstance(self.range_, R.While) and
+                self.range_.count > 0 and
+                self.resultsList and
+                self.range_.GetNumberOfOutputPoints() > self.resultsList[0].shape[0]):
             for name in self.results:
                 result = self.results.LookUp(name).array
                 shape = list(result.shape)
@@ -173,7 +176,7 @@ class AbstractSimulation(locatable.Locatable):
     def Run(self, verbose=True):
         try:
             self.InternalRun(verbose)
-        except:
+        except BaseException:
             # Shrink result arrays to reflect the number of iterations actually managed!
             if self.results is not None:
                 for name in self.results:
@@ -299,8 +302,14 @@ class Nested(AbstractSimulation):
     def InternalRun(self, verbose=True):
         for t in self.range_:
             if verbose:
-                self.LogProgress('nested simulation', self.range_.name, 'step',
-                                 self.range_.GetCurrentOutputNumber(), '(value', self.range_.GetCurrentOutputPoint(), ')')
+                self.LogProgress(
+                    'nested simulation',
+                    self.range_.name,
+                    'step',
+                    self.range_.GetCurrentOutputNumber(),
+                    '(value',
+                    self.range_.GetCurrentOutputPoint(),
+                    ')')
             self.LoopBodyStartHook()
             if self.outputFolder:
                 self.nestedSim.SetOutputFolder(self.outputFolder.CreateSubfolder(

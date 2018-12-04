@@ -49,11 +49,12 @@ def GetProcessNumber():
     name = multiprocessing.current_process().name
     try:
         num = int(name.split('-')[-1])
-    except:
+    except BaseException:
         num = 0
     return num
 
-# The following utility methods for comparing floating point numbers are based on boost/test/floating_point_comparison.hpp
+# The following utility methods for comparing floating point numbers are
+# based on boost/test/floating_point_comparison.hpp
 
 
 def WithinRelativeTolerance(arr1, arr2, tol):
@@ -163,8 +164,13 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
                     max_rel_err, max_abs_err = GetMaxErrors(bad, ref)
                     first_bad = bad.flat[:10]
                     first_expected = ref.flat[:10]
-                    messages.append("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations. Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s\nMismatch locations: %s" %
-                                    (name, rtol, atol, bad.size, actual.array.size, max_rel_err, max_abs_err, first_bad, first_expected, bad_entries.nonzero()[:10]))
+                    messages.append(
+                        ("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations." +
+                         " Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s\n" +
+                         "Mismatch locations: %s") %
+                        (name, rtol, atol, bad.size, actual.array.size,
+                         max_rel_err, max_abs_err, first_bad, first_expected,
+                         bad_entries.nonzero()[:10]))
                     results_ok = False
     return results_ok
 

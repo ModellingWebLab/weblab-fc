@@ -513,7 +513,8 @@ class Actions(object):
         def _xml(self):
             if len(self.tokens) > 2:
                 # Chained accessors, e.g. E.SHAPE.IS_ARRAY
-                return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).xml()
+                return self.Delegate(
+                    'Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).xml()
             assert len(self.tokens) == 2
             object = self.tokens[0].xml()
             property = self.tokens[1]
@@ -522,7 +523,8 @@ class Actions(object):
         def _expr(self):
             if len(self.tokens) > 2:
                 # Chained accessors, e.g. E.SHAPE.IS_ARRAY
-                return self.Delegate('Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).expr()
+                return self.Delegate(
+                    'Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).expr()
             assert len(self.tokens) == 2
             object = self.tokens[0].expr()
             property = getattr(E.Accessor, self.tokens[1])
@@ -1185,7 +1187,7 @@ class Actions(object):
         """Parse action for an output specification."""
 
         def _xml(self):
-            if not 'units' in self.tokens:
+            if 'units' not in self.tokens:
                 # It has to be a raw model output
                 elt = P.raw
             else:
@@ -1519,7 +1521,7 @@ class CompactSyntaxParser(object):
     shrink = (MakeKw('shrink') + Adjacent(colon) - expr).setResultsName('shrink')
     index_dim = expr.setResultsName('dim')
     index = p.Group(Adjacent(p.Suppress('{')) - expr + p.ZeroOrMore(comma -
-                    (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
+                                                                    (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
 
     # Special values
     nullValue = p.Group(MakeKw('null')).setName('Null').setParseAction(Actions.Symbol('null'))
@@ -1556,7 +1558,7 @@ class CompactSyntaxParser(object):
                                          lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
-                                       ])
+                                        ])
 
     # Simpler expressions containing no arrays, functions, etc. Used in the model interface.
     simpleExpr = p.Forward().setName('SimpleExpression')
@@ -1574,7 +1576,7 @@ class CompactSyntaxParser(object):
                                          lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
-                                       ])
+                                        ])
     simpleParamList = p.Group(OptionalDelimitedList(p.Group(ncIdentAsVar), comma))
     simpleLambdaExpr = p.Group(MakeKw('lambda') - simpleParamList + colon -
                                expr).setName('SimpleLambda').setParseAction(Actions.Lambda)
@@ -1607,7 +1609,7 @@ class CompactSyntaxParser(object):
     _idents = p.Group(p.delimitedList(ncIdentAsVar)).setParseAction(Actions.MaybeTuple)
     assignStmt = p.Group(((MakeKw('optional', suppress=False)("optional") + _idents) | _idents) + eq -
                          p.Group(p.delimitedList(expr)).setParseAction(Actions.MaybeTuple))   \
-                 .setName('AssignStmt').setParseAction(Actions.Assignment)
+        .setName('AssignStmt').setParseAction(Actions.Assignment)
 
     # Function definition
     functionDefn = p.Group(MakeKw('def') - ncIdentAsVar + oparen + paramList + cparen -
@@ -1631,8 +1633,18 @@ class CompactSyntaxParser(object):
     inputs = (MakeKw('inputs') - obrace - simpleAssignList + cbrace).setName('Inputs').setParseAction(Actions.Inputs)
 
     # Import statements
-    importStmt = p.Group(MakeKw('import') - Optional(ncIdent + eq, default='') + quotedUri +
-                         Optional(obrace - simpleAssignList + embedded_cbrace)).setName('Import').setParseAction(Actions.Import)
+    importStmt = p.Group(
+        MakeKw('import') -
+        Optional(
+            ncIdent +
+            eq,
+            default='') +
+        quotedUri +
+        Optional(
+            obrace -
+            simpleAssignList +
+            embedded_cbrace)).setName('Import').setParseAction(
+                Actions.Import)
     imports = OptionalDelimitedList(importStmt, nl).setName('Imports')
 
     # Library, globals defined using post-processing language.
@@ -1664,8 +1676,14 @@ class CompactSyntaxParser(object):
     # Setting the units for the independent variable
     setTimeUnits = (MakeKw('independent') - MakeKw('var') - unitsRef("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
-    inputVariable = p.Group(MakeKw('input') - cIdent("name") + Optional(unitsRef)("units")
-                            + Optional(eq + plainNumber)("initial_value")).setName('InputVariable').setParseAction(Actions.InputVariable)
+    inputVariable = p.Group(
+        MakeKw('input') -
+        cIdent("name") +
+        Optional(unitsRef)("units") +
+        Optional(
+            eq +
+            plainNumber)("initial_value")).setName('InputVariable').setParseAction(
+        Actions.InputVariable)
     # Model outputs of interest, with optional units
     outputVariable = p.Group(MakeKw('output') - cIdent("name") + Optional(unitsRef("units"))
                              ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
@@ -1675,20 +1693,47 @@ class CompactSyntaxParser(object):
     optionalVariable = p.Group(MakeKw('optional') - cIdent("name") + Optional(varDefault) + locator("default_end")
                                ).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
     # New variables added to the model, with optional initial value
-    newVariable = p.Group(MakeKw('var') - ncIdent("name") + unitsRef("units") + Optional(eq + plainNumber)("initial_value")
-                          ).setName('NewVariable').setParseAction(Actions.DeclareVariable)
+    newVariable = p.Group(
+        MakeKw('var') -
+        ncIdent("name") +
+        unitsRef("units") +
+        Optional(
+            eq +
+            plainNumber)("initial_value")).setName('NewVariable').setParseAction(
+        Actions.DeclareVariable)
     # Adding or replacing equations in the model
     clampVariable = p.Group(MakeKw('clamp') - identAsVar + Optional(MakeKw('to') - simpleExpr)
                             ).setName('ClampVariable').setParseAction(Actions.ClampVariable)
-    interpolate = p.Group(MakeKw('interpolate') - oparen - quotedString - comma - identAsVar - comma - ncIdent - comma - ncIdent - cparen
-                          ).setName('Interpolate').setParseAction(Actions.Interpolate)
-    modelEquation = p.Group(MakeKw('define')
-                            - (p.Group(MakeKw('diff') + Adjacent(oparen) - identAsVar + p.Suppress(';') + identAsVar + cparen)
-                               | identAsVar) + eq
-                            + (interpolate | simpleExpr)).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
+    interpolate = p.Group(
+        MakeKw('interpolate') -
+        oparen -
+        quotedString -
+        comma -
+        identAsVar -
+        comma -
+        ncIdent -
+        comma -
+        ncIdent -
+        cparen).setName('Interpolate').setParseAction(
+        Actions.Interpolate)
+    modelEquation = p.Group(MakeKw('define') -
+                            (p.Group(MakeKw('diff') +
+                                     Adjacent(oparen) -
+                                     identAsVar +
+                                     p.Suppress(';') +
+                                     identAsVar +
+                                     cparen) | identAsVar) +
+                            eq +
+                            (interpolate | simpleExpr)).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
-    unitsConversion = p.Group(MakeKw('convert') - ncIdent("actualDimensions") + MakeKw('to') + ncIdent("desiredDimensions") +
-                              MakeKw('by') - simpleLambdaExpr).setName('UnitsConversion').setParseAction(Actions.UnitsConversion)
+    unitsConversion = p.Group(
+        MakeKw('convert') -
+        ncIdent("actualDimensions") +
+        MakeKw('to') +
+        ncIdent("desiredDimensions") +
+        MakeKw('by') -
+        simpleLambdaExpr).setName('UnitsConversion').setParseAction(
+        Actions.UnitsConversion)
 
     modelInterface = p.Group(MakeKw('model') - MakeKw('interface') - obrace
                              - Optional(setTimeUnits - nl)
@@ -1733,8 +1778,8 @@ class CompactSyntaxParser(object):
                         + cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
     oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))("step")
                          + Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(Actions.OneStepSimulation)
-    simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='')
-                          + (timecourseSim | nestedSim | oneStepSim) - Optional('?' + nl)).setParseAction(Actions.Simulation)
+    simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='') + (timecourseSim |
+                                                                                       nestedSim | oneStepSim) - Optional('?' + nl)).setParseAction(Actions.Simulation)
 
     tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(simulation) +
                     cbrace).setName('Tasks').setParseAction(Actions.Tasks)
@@ -1743,9 +1788,13 @@ class CompactSyntaxParser(object):
     #######################
 
     outputDesc = Optional(quotedString)("description")
-    outputSpec = p.Group(Optional(MakeKw('optional', suppress=False))("optional") + ncIdent("name")
-                         + ((unitsRef("units") + outputDesc) | (eq + ident("ref") + Optional(unitsRef)("units") + outputDesc))
-                         ).setName('Output').setParseAction(Actions.Output)
+    outputSpec = p.Group(Optional(MakeKw('optional', suppress=False))("optional") +
+                         ncIdent("name") +
+                         ((unitsRef("units") +
+                           outputDesc) | (eq +
+                                          ident("ref") +
+                                          Optional(unitsRef)("units") +
+                                          outputDesc))).setName('Output').setParseAction(Actions.Output)
     outputs = p.Group(MakeKw('outputs') + obrace - OptionalDelimitedList(outputSpec, nl) +
                       cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
@@ -1766,8 +1815,19 @@ class CompactSyntaxParser(object):
     # Parsing a full protocol
     #########################
 
-    protocol = p.And(list(map(Optional, [nl, documentation, nsDecls + nl, inputs, imports + nl, library, units, modelInterface,
-                                    tasks, postProcessing, outputs, plots]))).setName('Protocol').setParseAction(Actions.Protocol)
+    protocol = p.And(list(map(Optional,
+                              [nl,
+                               documentation,
+                               nsDecls + nl,
+                               inputs,
+                               imports + nl,
+                               library,
+                               units,
+                               modelInterface,
+                               tasks,
+                               postProcessing,
+                               outputs,
+                               plots]))).setName('Protocol').setParseAction(Actions.Protocol)
 
     def __init__(self):
         """Initialise the parser."""
@@ -1906,7 +1966,7 @@ if __name__ == '__main__':
         parser = CompactSyntaxParser()
         output_path = parser.ConvertProtocol(source_path, output_dir, dryRun=dry_run)
         print(output_path)
-    except:
+    except BaseException:
         if len(sys.argv) == 3:
             raise
         # Otherwise we swallow the error
