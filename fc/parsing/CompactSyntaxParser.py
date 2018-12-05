@@ -1383,9 +1383,9 @@ def MonkeyPatch():
         return "%s (at char %d), (line:%d, col:%d):\n%s\n%s" % (self.msg, self.loc, self.lineno, self.column, self.line,
                                                                 ' ' * (self.column - 1) + '^')
 
-    import new
-    setattr(p.ParserElement, 'ignore', new.instancemethod(locals()['ignore'], None, p.ParserElement))
-    setattr(p.ParseException, '__str__', new.instancemethod(locals()['err_str'], None, p.ParseException))
+    import types
+    p.ParserElement.ignore = types.MethodType(ignore, p.ParserElement)
+    p.ParseException.__str__ = types.MethodType(err_str, p.ParseException)
 
 
 MonkeyPatch()
