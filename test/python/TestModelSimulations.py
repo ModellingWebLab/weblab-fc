@@ -1,9 +1,6 @@
 
 import numpy as np
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+import unittest
 
 import fc.language.expressions as E
 import fc.language.values as V

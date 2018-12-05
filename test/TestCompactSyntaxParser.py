@@ -3,9 +3,9 @@ import difflib
 import filecmp
 import glob
 import os
-import unittest
 import sys
 import time
+import unittest
 
 # Import the module to test
 # The default for this module now is to assume the Python implementation,
