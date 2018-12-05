@@ -40,11 +40,13 @@ except ImportError:
 
 import fc
 
+
 class TestClamping(unittest.TestCase):
     """Test implementation of voltage clamps in the Python code.
-    
+
     Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
     """
+
     def TestClampingWithVariableUnits(self):
         proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_clamping3.txt')
         proto.SetOutputFolder('Py_TestClamping_TestClampingWithVariableUnits')

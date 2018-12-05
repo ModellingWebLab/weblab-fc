@@ -41,8 +41,10 @@ from fc.utility.error_handling import ProtocolError
 
 N = E.N
 
+
 class TestFunctions(unittest.TestCase):
     """Test lambda expressions and all function methods."""
+
     def TestFuncDefinitions(self):
         env = Env.Environment()
         parameters = ["a", "b"]
@@ -60,14 +62,14 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(len(defined), 3)
         self.assertEqual(env.LookUp('a').value, 2)
         self.assertEqual(env.LookUp('b').value, 1)
-        
+
         args = [N(3), N(5)]
         swap_call = E.FunctionCall("swap", args)
         result = swap_call.Evaluate(env)
         self.assert_(isinstance(result, V.Tuple))
         self.assertAlmostEqual(result.values[0].value, 5)
         self.assertAlmostEqual(result.values[1].value, 3)
-        
+
     def TestLambdaExpressionWrap(self):
         env = Env.Environment()
         add = E.LambdaExpression.Wrap(E.Plus, 3)
@@ -87,7 +89,7 @@ class TestFunctions(unittest.TestCase):
         nested_call = E.FunctionCall(nested_scope, [])
         result = nested_call.Evaluate(env)
         self.assertEqual(result.value, 1)
-        
+
     def TestFunctionsWithDefaultsUsed(self):
         # Function has default which is used
         env = Env.Environment()
@@ -100,7 +102,7 @@ class TestFunctions(unittest.TestCase):
         nested_call = E.FunctionCall(nested_scope, [])
         result = nested_call.Evaluate(env)
         self.assertEqual(result.value, 1)
-    
+
     def TestFunctionsWithDefaultsUnused(self):
         # Function has default, but value is explicitly assigned in this case
         env = Env.Environment()
@@ -113,7 +115,7 @@ class TestFunctions(unittest.TestCase):
         nested_call = E.FunctionCall(nested_scope, [])
         result = nested_call.Evaluate(env)
         self.assertEqual(result.value, 1)
-        
+
     def TestMultipleDefaultValues(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
@@ -128,17 +130,17 @@ class TestFunctions(unittest.TestCase):
         add_call = E.FunctionCall(add, args)
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 8)
-        
+
         args = [E.Const(V.DefaultParameter()), E.Const(V.DefaultParameter()), N(1)]
         add_call = E.FunctionCall(add, args)
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 4)
-        
+
         args = [N(4), E.Const(V.DefaultParameter()), N(4)]
         add_call = E.FunctionCall(add, args)
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 10)
-        
+
     def TestAssertStatement(self):
         env = Env.Environment()
         # evaluates to one, assertion should pass

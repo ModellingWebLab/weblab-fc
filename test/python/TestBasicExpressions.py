@@ -42,13 +42,16 @@ from fc.utility.error_handling import ProtocolError
 
 N = E.N
 
+
 class TestBasicExpressions(unittest.TestCase):
-    """Test basic math expressions using simple, null, and default values.""" 
+    """Test basic math expressions using simple, null, and default values."""
+
     def TestAddition(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Plus(E.Const(V.Simple(1)), E.Const(V.Simple(2))).Evaluate(env).value, 3)
-        self.assertAlmostEqual(E.Plus(E.Const(V.Simple(1)), E.Const(V.Simple(2)), E.Const(V.Simple(4))).Evaluate(env).value, 7)
-    
+        self.assertAlmostEqual(E.Plus(E.Const(V.Simple(1)), E.Const(
+            V.Simple(2)), E.Const(V.Simple(4))).Evaluate(env).value, 7)
+
     def TestWith0dArray(self):
         env = Env.Environment()
         one = V.Array(np.array(1))
@@ -61,68 +64,71 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertAlmostEqual(E.Power(E.Const(two), E.Const(four)).Evaluate(env).value, 16)
         self.assertAlmostEqual(E.Times(E.Const(four), E.Const(two)).Evaluate(env).value, 8)
         self.assertAlmostEqual(E.Root(E.Const(four)).Evaluate(env).value, 2)
-                
+
     def TestMinus(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Minus(E.Const(V.Simple(1)), E.Const(V.Simple(2))).Evaluate(env).value, -1)
         self.assertAlmostEqual(E.Minus(E.Const(V.Simple(4))).Evaluate(env).value, -4)
-        
+
     def TestTimes(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Times(E.Const(V.Simple(6)), E.Const(V.Simple(2))).Evaluate(env).value, 12)
-        self.assertAlmostEqual(E.Times(E.Const(V.Simple(6)), E.Const(V.Simple(2)), E.Const(V.Simple(3))).Evaluate(env).value, 36)
-        
+        self.assertAlmostEqual(E.Times(E.Const(V.Simple(6)), E.Const(
+            V.Simple(2)), E.Const(V.Simple(3))).Evaluate(env).value, 36)
+
     def TestDivide(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Divide(E.Const(V.Simple(1)), E.Const(V.Simple(2))).Evaluate(env).value, .5)
-        
+
     def TestMax(self):
         env = Env.Environment()
-        self.assertAlmostEqual(E.Max(E.Const(V.Simple(6)), E.Const(V.Simple(12)), E.Const(V.Simple(2))).Evaluate(env).value, 12)
+        self.assertAlmostEqual(E.Max(E.Const(V.Simple(6)), E.Const(V.Simple(12)),
+                                     E.Const(V.Simple(2))).Evaluate(env).value, 12)
 
     def TestMin(self):
         env = Env.Environment()
-        self.assertAlmostEqual(E.Min(E.Const(V.Simple(6)), E.Const(V.Simple(2)), E.Const(V.Simple(12))).Evaluate(env).value, 2)
-        
+        self.assertAlmostEqual(E.Min(E.Const(V.Simple(6)), E.Const(V.Simple(2)),
+                                     E.Const(V.Simple(12))).Evaluate(env).value, 2)
+
     def TestRem(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Rem(E.Const(V.Simple(6)), E.Const(V.Simple(4))).Evaluate(env).value, 2)
-        
+
     def TestPower(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Power(E.Const(V.Simple(2)), E.Const(V.Simple(3))).Evaluate(env).value, 8)
-        
+
     def TestRoot(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Root(E.Const(V.Simple(16))).Evaluate(env).value, 4)
         self.assertAlmostEqual(E.Root(E.Const(V.Simple(3)), E.Const(V.Simple(8))).Evaluate(env).value, 2)
-        
+
     def TestAbs(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Abs(E.Const(V.Simple(-4))).Evaluate(env).value, 4)
         self.assertAlmostEqual(E.Abs(E.Const(V.Simple(4))).Evaluate(env).value, 4)
-        
+
     def TestFloor(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Floor(E.Const(V.Simple(1.8))).Evaluate(env).value, 1)
-        
+
     def TestCeiling(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Ceiling(E.Const(V.Simple(1.2))).Evaluate(env).value, 2)
-    
+
     def TestExp(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Exp(E.Const(V.Simple(3))).Evaluate(env).value, 20.0855369231)
-    
+
     def TestLn(self):
         env = Env.Environment()
-        self.assertAlmostEqual(E.Ln(E.Const(V.Simple(3))).Evaluate(env).value, 1.0986122886) 
-        
+        self.assertAlmostEqual(E.Ln(E.Const(V.Simple(3))).Evaluate(env).value, 1.0986122886)
+
     def TestLog(self):
         env = Env.Environment()
         self.assertAlmostEqual(E.Log(E.Const(V.Simple(3))).Evaluate(env).value, 0.4771212547196)
         self.assertAlmostEqual(E.Log(E.Const(V.Simple(4)), E.Const(V.Simple(3))).Evaluate(env).value, 0.79248125036)
-    
+
     def TestNameLookUp(self):
         env = Env.Environment()
         one = V.Simple(1)
@@ -136,19 +142,19 @@ class TestBasicExpressions(unittest.TestCase):
         env = Env.Environment()
         result = E.If(N(1), E.Plus(N(1), N(2)), E.Minus(N(1), N(2))).Evaluate(env)
         self.assertEqual(3, result.value)
-        
+
         # test is false
         result = E.If(N(0), E.Plus(N(1), N(2)), E.Minus(N(1), N(2))).Evaluate(env)
         self.assertEqual(-1, result.value)
-        
+
     def TestAccessor(self):
         env = Env.Environment()
-        
+
         # test simple value
         simple = N(1)
-        result = E.Accessor(simple, E.Accessor.IS_SIMPLE_VALUE).Interpret(env) 
+        result = E.Accessor(simple, E.Accessor.IS_SIMPLE_VALUE).Interpret(env)
         self.assertEqual(1, result.value)
-        
+
         # test array
         array = E.NewArray(E.NewArray(N(1), N(2)), E.NewArray(N(3), N(4)))
         result = E.Accessor(array, E.Accessor.IS_ARRAY).Interpret(env)
@@ -158,7 +164,7 @@ class TestBasicExpressions(unittest.TestCase):
         result = E.Accessor(array, E.Accessor.NUM_ELEMENTS).Interpret(env)
         self.assertEqual(4, result.value)
         result = E.Accessor(array, E.Accessor.SHAPE).Interpret(env)
-        np.testing.assert_array_almost_equal(result.array, np.array([2,2]))
+        np.testing.assert_array_almost_equal(result.array, np.array([2, 2]))
 
         # test string
         string_test = E.Const(V.String("hi"))
@@ -166,34 +172,32 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertEqual(1, result.value)
         result = E.Accessor(array, E.Accessor.IS_STRING).Interpret(env)
         self.assertEqual(0, result.value)
-        
+
         # test function
         function = E.LambdaExpression.Wrap(E.Plus, 3)
         result = E.Accessor(function, E.Accessor.IS_FUNCTION).Interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(string_test, E.Accessor.IS_FUNCTION).Interpret(env)
         self.assertEqual(0, result.value)
-        
+
         # test tuple
         tuple_test = E.TupleExpression(N(1), N(2))
         result = E.Accessor(tuple_test, E.Accessor.IS_TUPLE).Interpret(env)
         self.assertEqual(1, result.value)
-        
+
         # test null
         null_test = E.Const(V.Null())
         result = E.Accessor(null_test, E.Accessor.IS_NULL).Interpret(env)
         self.assertEqual(1, result.value)
-        
+
         # test default
         default_test = E.Const(V.DefaultParameter())
         result = E.Accessor(default_test, E.Accessor.IS_DEFAULT).Interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(null_test, E.Accessor.IS_DEFAULT).Interpret(env)
         self.assertEqual(0, result.value)
-        
+
         # test if non-array variables have array attributes, should raise errors
         self.assertRaises(ProtocolError, E.Accessor(default_test, E.Accessor.NUM_DIMS).Interpret, env)
         self.assertRaises(ProtocolError, E.Accessor(function, E.Accessor.SHAPE).Interpret, env)
         self.assertRaises(ProtocolError, E.Accessor(string_test, E.Accessor.NUM_ELEMENTS).Interpret, env)
-
-    

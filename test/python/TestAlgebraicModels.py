@@ -35,8 +35,10 @@ import unittest
 
 import fc
 
+
 class TestAlgebraicModels(unittest.TestCase):
     """Test behaviour on models with no ODEs; based on TestClamping.hpp"""
+
     def TestClampingToInitialValue(self):
         proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_clamping1.txt')
         proto.SetOutputFolder('Py_TestAlgebraicModels_TestClampingToInitialValue')

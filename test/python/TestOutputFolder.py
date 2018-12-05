@@ -40,12 +40,13 @@ from fc.utility.file_handling import OutputFolder
 
 class TestOutputFolder(unittest.TestCase):
     """Test the OutputFolder class."""
+
     def TestCreationSingleFolder(self):
         """Test creating output folders."""
         # Single level, relative path provided
         single_folder_path = os.path.realpath(os.path.join(CHASTE_TEST_OUTPUT, 'TestOutputFolder_TestSingleFolder'))
         if os.path.exists(single_folder_path):
-            shutil.rmtree(single_folder_path) # So we can test that the line below creates it
+            shutil.rmtree(single_folder_path)  # So we can test that the line below creates it
         single_folder = OutputFolder('TestOutputFolder_TestSingleFolder')
         self.assertEqual(single_folder.path, single_folder_path)
         self.assertTrue(os.path.exists(os.path.join(single_folder_path, OutputFolder.SIG_FILE_NAME)))
@@ -76,11 +77,12 @@ class TestOutputFolder(unittest.TestCase):
     def TestUseOfEnvironmentVariable(self):
         # Check that setting CHASTE_TEST_OUTPUT affects where outputs appear
         original_env_var = os.environ.get('CHASTE_TEST_OUTPUT', None)
-        os.environ['CHASTE_TEST_OUTPUT'] = os.path.join(original_env_var or 'testoutput', 'TestOutputFolder_NewTestOutput')
+        os.environ['CHASTE_TEST_OUTPUT'] = os.path.join(
+            original_env_var or 'testoutput', 'TestOutputFolder_NewTestOutput')
         if os.path.exists(os.environ['CHASTE_TEST_OUTPUT']):
             shutil.rmtree(os.environ['CHASTE_TEST_OUTPUT'])
         new_output_path = os.path.join(os.environ['CHASTE_TEST_OUTPUT'], 'TestUseOfEnvironmentVariable')
-        OutputFolder('TestUseOfEnvironmentVariable') 
+        OutputFolder('TestUseOfEnvironmentVariable')
         self.assertTrue(os.path.exists(new_output_path))
         if original_env_var is not None:
             os.environ['CHASTE_TEST_OUTPUT'] = original_env_var

@@ -43,6 +43,7 @@ from fc.simulations.solvers import CvodeSolver
 
 class TestS1S2Proto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
+
     def TestS1S2(self):
         proto = fc.Protocol('projects/FunctionalCuration/protocols/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')

@@ -43,6 +43,7 @@ from fc.simulations.solvers import CvodeSolver
 
 class TestIcalProto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
+
     def TestIcal(self):
         proto = fc.Protocol('projects/FunctionalCuration/protocols/ICaL.txt')
         proto.SetOutputFolder('Py_TestIcalProto')
