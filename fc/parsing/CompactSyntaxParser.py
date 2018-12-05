@@ -1377,15 +1377,13 @@ def MonkeyPatch():
         else:
             self.ignoreExprs.append(p.Suppress(other.copy()))
         return self
+    p.ParserElement.ignore = ignore
 
     def err_str(self):
         """Extended exception reporting that also prints the offending line with an error marker underneath."""
         return "%s (at char %d), (line:%d, col:%d):\n%s\n%s" % (self.msg, self.loc, self.lineno, self.column, self.line,
                                                                 ' ' * (self.column - 1) + '^')
-
-    import types
-    p.ParserElement.ignore = types.MethodType(ignore, p.ParserElement)
-    p.ParseException.__str__ = types.MethodType(err_str, p.ParseException)
+    p.ParseException.__str__ = err_str
 
 
 MonkeyPatch()
