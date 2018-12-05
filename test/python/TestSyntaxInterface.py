@@ -15,7 +15,7 @@ import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
 import fc.utility.environment as Env
 
-import CompactSyntaxParser as CSP
+import fc.parsing.CompactSyntaxParser as CSP
 
 csp = CSP.CompactSyntaxParser
 N = E.N

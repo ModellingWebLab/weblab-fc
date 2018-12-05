@@ -50,16 +50,14 @@ class Environment(object):
             self.DefineName(name, value)
 
     def EvaluateExpr(self, exprStr, env):
-        import CompactSyntaxParser as CSP
-        csp = CSP.CompactSyntaxParser
+        from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
         parse_action = csp.expr.parseString(exprStr, parseAll=True)
         expr = parse_action[0].expr()
         return expr.Evaluate(env)
 
     def EvaluateStatement(self, stmtStr, env):
-        import CompactSyntaxParser as CSP
-        csp = CSP.CompactSyntaxParser
+        from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
         parse_action = csp.stmtList.parseString(stmtStr, parseAll=True)
         stmt_list = parse_action[0].expr()

@@ -11,7 +11,7 @@ import time
 # The default for this module now is to assume the Python implementation,
 # so we have to override that!
 sys._fc_csp_no_pyimpl = True
-import CompactSyntaxParser as CSP  # noqa: E402
+import fc.parsing.CompactSyntaxParser as CSP  # noqa: E402
 CSP.DoXmlImports()
 
 csp = CSP.CompactSyntaxParser

@@ -59,7 +59,7 @@ class Protocol(object):
 
         # Parse the protocol file and fill in the structures declared above
         start = time.time()
-        import CompactSyntaxParser as CSP
+        import fc.parsing.CompactSyntaxParser as CSP
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
         generator = self.parsedProtocol = parser._Try(
@@ -379,7 +379,7 @@ class Protocol(object):
             else:
                 temp_dir = tempfile.mkdtemp()
             # Create an XML syntax version of the protocol, for PyCml's sake :(
-            import CompactSyntaxParser as CSP
+            import fc.parsing.CompactSyntaxParser as CSP
             CSP.DoXmlImports()
             xml_file = self.parser.ConvertProtocol(self.protoFile, temp_dir, xmlGenerator=self.parsedProtocol)
             # Generate the (protocol-modified) model code
