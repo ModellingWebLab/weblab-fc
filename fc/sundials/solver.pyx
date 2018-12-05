@@ -3,6 +3,7 @@
 
 cimport numpy as np
 import numpy as np
+from cython cimport view
 
 # NB: Relative cimport isn't yet implemented in Cython (although relative import should be)
 cimport fc.sundials.sundials as _lib
@@ -11,9 +12,6 @@ from fc.utility.error_handling import ProtocolError
 # Data type for numpy arrays
 np_dtype = np.float64
 assert sizeof(np.float64_t) == sizeof(_lib.realtype) # paranoia
-
-cdef extern from "Python.h":
-    object PyBuffer_FromReadWriteMemory(void *ptr, Py_ssize_t size)
 
 # # Debugging!
 # import sys
@@ -25,8 +23,10 @@ cdef extern from "Python.h":
 cdef object NumpyView(N_Vector v):
     """Create a Numpy array giving a view on the CVODE vector passed in."""
     cdef _lib.N_VectorContent_Serial v_content = <_lib.N_VectorContent_Serial>(v.content)
-    ret = np.empty(v_content.length, dtype=np_dtype)
-    ret.data = PyBuffer_FromReadWriteMemory(v_content.data, ret.nbytes)
+    cdef view.array data_view = view.array(shape=(v_content.length,), itemsize=sizeof(realtype),
+                                           format='d', mode='c', allocate_buffer=False)
+    data_view.data = <char *> v_content.data
+    ret = np.asarray(data_view, dtype=np_dtype)
     return ret
 
 cdef int _RhsWrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data):
