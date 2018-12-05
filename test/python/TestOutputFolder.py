@@ -13,7 +13,7 @@ CHASTE_TEST_OUTPUT = '/tmp/chaste_test_output'
 class TestOutputFolder(unittest.TestCase):
     """Test the OutputFolder class."""
 
-    def TestCreationSingleFolder(self):
+    def testCreationSingleFolder(self):
         """Test creating output folders."""
         # Single level, relative path provided
         single_folder_path = os.path.realpath(os.path.join(CHASTE_TEST_OUTPUT, 'TestOutputFolder_TestSingleFolder'))
@@ -46,7 +46,7 @@ class TestOutputFolder(unittest.TestCase):
         self.assertFalse(os.path.exists(single_folder_path))
         self.assertFalse(os.path.exists(multiple_folder_path))
 
-    def TestUseOfEnvironmentVariable(self):
+    def testUseOfEnvironmentVariable(self):
         # Check that setting CHASTE_TEST_OUTPUT affects where outputs appear
         original_env_var = os.environ.get('CHASTE_TEST_OUTPUT', None)
         os.environ['CHASTE_TEST_OUTPUT'] = os.path.join(
@@ -59,7 +59,7 @@ class TestOutputFolder(unittest.TestCase):
         if original_env_var is not None:
             os.environ['CHASTE_TEST_OUTPUT'] = original_env_var
 
-    def TestSafety(self):
+    def testSafety(self):
         """Check that we're prevented from deleting content we shouldn't be able to."""
         # Content that's not under CHASTE_TEST_OUTPUT
         self.assertRaises(ProtocolError, OutputFolder.RemoveOutputFolder, '/tmp/cannot_delete')

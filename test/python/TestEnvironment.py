@@ -10,7 +10,7 @@ from fc.utility.error_handling import ProtocolError
 class TestEnvironment(unittest.TestCase):
     """Test environment and delegations and associated functions."""
 
-    def TestDefiningNames(self):
+    def testDefiningNames(self):
         env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
@@ -39,7 +39,7 @@ class TestEnvironment(unittest.TestCase):
         env.DefineName("one", one)
         self.assertEqual(env.LookUp("one"), one)
 
-    def TestOverwritingEnv(self):
+    def testOverwritingEnv(self):
         env = Env.Environment()
         one = V.Simple(1)
         env.DefineName("one", one)
@@ -57,7 +57,7 @@ class TestEnvironment(unittest.TestCase):
         self.assertEqual(env.LookUp("one"), one)
         self.assertRaises(ProtocolError, env.Remove, "three")  # never added
 
-    def TestDelegation(self):
+    def testDelegation(self):
         root_env = Env.Environment()
         middle_env = Env.Environment(delegatee=root_env)
         top_env = Env.Environment()
@@ -76,7 +76,7 @@ class TestEnvironment(unittest.TestCase):
         top_env.DefineName(name, value3)
         self.assertEqual(top_env.LookUp(name), value3)
 
-    def TestPrefixedDelegation(self):
+    def testPrefixedDelegation(self):
         root_env = Env.Environment()
         env_a = Env.Environment()
         env_b = Env.Environment()
@@ -97,7 +97,7 @@ class TestEnvironment(unittest.TestCase):
         self.assertEqual(env_a.LookUp('a:A').value, 3)
         self.assertEqual(root_env.LookUp('a:a:A').value, 3)
 
-    def TestEvaluateExprAndStmt(self):
+    def testEvaluateExprAndStmt(self):
         # basic mathml function
         env = Env.Environment()
         expr_str = 'MathML:max(100, 115, 98)'

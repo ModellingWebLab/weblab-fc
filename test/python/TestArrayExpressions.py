@@ -15,7 +15,7 @@ N = E.N
 class TestArrayExpressions(unittest.TestCase):
     """Test array creation, view, map, fold, index, join, and stretch."""
 
-    def TestNewArray(self):
+    def testNewArray(self):
         arr = E.NewArray(N(1), N(2), N(3))  # simple one-dimensional array
         predictedArr = np.array([1, 2, 3])
         np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
@@ -23,7 +23,7 @@ class TestArrayExpressions(unittest.TestCase):
         predictedArr = np.array([[1, 2, 3], [3, 3, 2]])
         np.testing.assert_array_almost_equal(arr.Evaluate({}).array, predictedArr)
 
-    def TestViews(self):
+    def testViews(self):
         arr = E.NewArray(N(1), N(2), N(3), N(4))
 
         # two parameters: beginning and end, null represents end of original array
@@ -113,7 +113,7 @@ class TestArrayExpressions(unittest.TestCase):
         predictedArr = np.array([4])
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, predictedArr)
 
-    def TestArrayCreationProtocolErrors(self):
+    def testArrayCreationProtocolErrors(self):
         array = E.NewArray(E.NewArray(E.NewArray(N(-2), N(-1), N(0)),
                                       E.NewArray(N(1), N(2), N(3))),
                            E.NewArray(E.NewArray(N(4), N(5), N(6)),
@@ -147,7 +147,7 @@ class TestArrayExpressions(unittest.TestCase):
         view = E.View(array, E.TupleExpression(N(2), N(1), E.Const(V.Null())))
         self.assertRaises(ProtocolError, view.Evaluate, {})  # beginning is after end of array
 
-    def TestArrayComprehension(self):
+    def testArrayComprehension(self):
         env = Env.Environment()
 
         # 1-d array
@@ -220,7 +220,7 @@ class TestArrayExpressions(unittest.TestCase):
                                  [[[-9, 1], [10, 20]], [[-9, 1], [11, 21]]]])
         np.testing.assert_array_almost_equal(blocks.Evaluate(Env.Environment()).array, predictedArr)
 
-    def TestArrayExpressionProtocolErrors(self):
+    def testArrayExpressionProtocolErrors(self):
         env = Env.Environment()
         # creates an empty array because the start is greater than the end
         fail = E.NewArray(E.NameLookUp("i"), E.TupleExpression(
@@ -247,7 +247,7 @@ class TestArrayExpressions(unittest.TestCase):
         result = E.Map(array_default, a)
         self.assertRaises(ProtocolError, result.Evaluate, env)
 
-    def TestSimpleMap(self):
+    def testSimpleMap(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
         body = [S.Return(E.Plus(E.NameLookUp('a'), E.NameLookUp('b'), E.NameLookUp('c')))]
@@ -259,7 +259,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = V.Array(np.array([6, 13]))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
 
-    def TestMapWithMultiDimensionalArrays(self):
+    def testMapWithMultiDimensionalArrays(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
         body = [S.Return(E.Plus(E.NameLookUp('a'), E.NameLookUp('b'), E.NameLookUp('c')))]
@@ -299,7 +299,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([6, 11, 18])
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
 
-    def TestUsingManyOperationsinFunction(self):
+    def testUsingManyOperationsinFunction(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
         body = [S.Return(E.Times(E.Plus(E.NameLookUp('a'), E.Times(
@@ -312,7 +312,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([[9, 16], [100, 9]])
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
 
-    def TestMapWithFunctionWithDefaults(self):
+    def testMapWithFunctionWithDefaults(self):
         env = Env.Environment()
         body = [S.Return(E.Plus(E.NameLookUp('item'), E.NameLookUp('incr')))]
         add = E.LambdaExpression(['item', 'incr'], body, defaultParameters=[V.DefaultParameter(), V.Simple(3)])
@@ -321,7 +321,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([4, 6, 8])
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted)
 
-    def TestNestedFunction(self):
+    def testNestedFunction(self):
         env = Env.Environment()
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
         nested_function = E.LambdaExpression(["input"], nested_body)
@@ -334,7 +334,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([True])
         self.assertEqual(result.value, predicted)
 
-    def TestCompileMethodsForMathExpression(self):
+    def testCompileMethodsForMathExpression(self):
         # Minus
         env = Env.Environment()
         parameters = ['a', 'b']
@@ -463,7 +463,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = V.Array(np.array([4, 4]))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
 
-    def TestCompileMethodsForLogicalExpressions(self):
+    def testCompileMethodsForLogicalExpressions(self):
         # And
         env = Env.Environment()
         parameters = ['a', 'b']
@@ -562,7 +562,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = V.Array(np.array([True, False, True]))
         np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
 
-    def TestFold(self):
+    def testFold(self):
         # 1-d array, add fold
         env = Env.Environment()
         parameters = ['a', 'b']
@@ -641,7 +641,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([[[6], [8]], [[0], [4]]])
         np.testing.assert_array_almost_equal(result.array, predicted)
 
-    def TestFoldWithDifferentFunctions(self):
+    def testFoldWithDifferentFunctions(self):
         # fold with max function
         env = Env.Environment()
         parameters = ['a', 'b']
@@ -688,7 +688,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([[2], [1]])
         np.testing.assert_array_almost_equal(result.array, predicted)
 
-    def TestFind(self):
+    def testFind(self):
         # Find with 2-d array as input
         env = Env.Environment()
         array = E.NewArray(E.NewArray(N(1), N(0), N(2), N(3)), E.NewArray(N(0), N(0), N(3), N(9)))
@@ -701,7 +701,7 @@ class TestArrayExpressions(unittest.TestCase):
         result = E.Find(array)
         self.assertRaises(ProtocolError, result.Evaluate, env)
 
-    def TestIndex(self):
+    def testIndex(self):
         # 2-d pad first dimension to the left
         env = Env.Environment()
         array = E.NewArray(E.NewArray(N(1), N(0), N(2)), E.NewArray(N(0), N(3), N(0)), E.NewArray(N(1), N(1), N(1)))
@@ -767,7 +767,7 @@ class TestArrayExpressions(unittest.TestCase):
         predicted = np.array([1, 2])
         np.testing.assert_array_almost_equal(result.array, predicted)
 
-    def TestIndexProtocolErrors(self):
+    def testIndexProtocolErrors(self):
         # index over dimension 2 in 2 dimensional array (out of range)
         env = Env.Environment()
         array = E.NewArray(E.NewArray(N(1), N(0), N(2)), E.NewArray(N(0), N(3), N(0)), E.NewArray(N(1), N(1), N(1)))
@@ -795,7 +795,7 @@ class TestArrayExpressions(unittest.TestCase):
         result = E.Index(N(1), E.NewArray(N(1), N(2)), array, N(1), N(1), N(45))
         self.assertRaises(ProtocolError, result.Interpret, env)
 
-    def TestJoinAndStretch(self):
+    def testJoinAndStretch(self):
         env = Env.Environment()
         env.DefineName('repeated_arr', V.Array(np.array([1, 2, 3])))
         stretch = E.NewArray(E.NameLookUp("repeated_arr"),

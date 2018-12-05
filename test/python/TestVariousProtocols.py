@@ -9,7 +9,7 @@ import fc.language.expressions as E
 class TestVariousProtocols(unittest.TestCase):
     """Test that various test protocols are executed correctly."""
 
-    def TestNestedProtocols(self):
+    def testNestedProtocols(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestNestedProtocols')
@@ -20,14 +20,14 @@ class TestVariousProtocols(unittest.TestCase):
         self.assertNotIn('some_missing', proto.outputEnv)
         self.assertNotIn('first_present', proto.outputEnv)
 
-    def TestAnnotatingWithOtherOntologies(self):
+    def testAnnotatingWithOtherOntologies(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_other_ontologies.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestAnnotatingWithOtherOntologies')
         proto.SetModel('projects/FunctionalCuration/test/data/test_lr91.cellml')
         proto.Run()
 
-    def TestParallelNestedTxt(self):
+    def testParallelNestedTxt(self):
         # NB: In the current Python implementation this doesn't actually parallelise!
         proto_file = 'projects/FunctionalCuration/test/protocols/test_parallel_nested.txt'
         proto = fc.Protocol(proto_file)
@@ -37,14 +37,14 @@ class TestVariousProtocols(unittest.TestCase):
         proto.model.ResetState()
         proto.Run()
 
-    def TestSimEnvTxt(self):
+    def testSimEnvTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_sim_environments.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestSimEnv')
         proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
 
-    def TestWhileLoopTxt(self):
+    def testWhileLoopTxt(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_while_loop.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestWhileLoopTxt')

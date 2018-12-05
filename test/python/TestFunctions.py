@@ -13,7 +13,7 @@ N = E.N
 class TestFunctions(unittest.TestCase):
     """Test lambda expressions and all function methods."""
 
-    def TestFuncDefinitions(self):
+    def testFuncDefinitions(self):
         env = Env.Environment()
         parameters = ["a", "b"]
         body = [S.Return(E.NameLookUp("b"), E.NameLookUp("a"))]
@@ -38,7 +38,7 @@ class TestFunctions(unittest.TestCase):
         self.assertAlmostEqual(result.values[0].value, 5)
         self.assertAlmostEqual(result.values[1].value, 3)
 
-    def TestLambdaExpressionWrap(self):
+    def testLambdaExpressionWrap(self):
         env = Env.Environment()
         add = E.LambdaExpression.Wrap(E.Plus, 3)
         args = [N(1), N(2), N(3)]
@@ -46,7 +46,7 @@ class TestFunctions(unittest.TestCase):
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 6)
 
-    def TestNestedFunction(self):
+    def testNestedFunction(self):
         env = Env.Environment()
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
         nested_function = E.LambdaExpression(["input"], nested_body)
@@ -58,7 +58,7 @@ class TestFunctions(unittest.TestCase):
         result = nested_call.Evaluate(env)
         self.assertEqual(result.value, 1)
 
-    def TestFunctionsWithDefaultsUsed(self):
+    def testFunctionsWithDefaultsUsed(self):
         # Function has default which is used
         env = Env.Environment()
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
@@ -71,7 +71,7 @@ class TestFunctions(unittest.TestCase):
         result = nested_call.Evaluate(env)
         self.assertEqual(result.value, 1)
 
-    def TestFunctionsWithDefaultsUnused(self):
+    def testFunctionsWithDefaultsUnused(self):
         # Function has default, but value is explicitly assigned in this case
         env = Env.Environment()
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
@@ -84,7 +84,7 @@ class TestFunctions(unittest.TestCase):
         result = nested_call.Evaluate(env)
         self.assertEqual(result.value, 1)
 
-    def TestMultipleDefaultValues(self):
+    def testMultipleDefaultValues(self):
         env = Env.Environment()
         parameters = ['a', 'b', 'c']
         body = [S.Return(E.Plus(E.NameLookUp('a'), E.NameLookUp('b'), E.NameLookUp('c')))]
@@ -109,7 +109,7 @@ class TestFunctions(unittest.TestCase):
         result = add_call.Evaluate(env)
         self.assertEqual(result.value, 10)
 
-    def TestAssertStatement(self):
+    def testAssertStatement(self):
         env = Env.Environment()
         # evaluates to one, assertion should pass
         env.ExecuteStatements([S.Assert(N(1))])

@@ -11,7 +11,7 @@ class TestMathmlEvaluation(unittest.TestCase):
     Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
     """
 
-    def TestMathmlOperations(self):
+    def testMathmlOperations(self):
         proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_mathml_evaluation.txt')
         proto.SetOutputFolder('Py_TestMathmlEvaluation_TestMathmlOperations')
         proto.SetModel('projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml')

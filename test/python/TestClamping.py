@@ -11,7 +11,7 @@ class TestClamping(unittest.TestCase):
     Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
     """
 
-    def TestClampingWithVariableUnits(self):
+    def testClampingWithVariableUnits(self):
         proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_clamping3.txt')
         proto.SetOutputFolder('Py_TestClamping_TestClampingWithVariableUnits')
         proto.SetModel('projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml')
@@ -19,7 +19,7 @@ class TestClamping(unittest.TestCase):
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
 
-    def TestClampToDataFile(self):
+    def testClampToDataFile(self):
         proto_file = 'projects/FunctionalCuration/protocols/timecourse_voltage_clamp.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('Py_TestClamping_TestClampToDataFile')
@@ -28,7 +28,7 @@ class TestClamping(unittest.TestCase):
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
 
-    def TestInterpolationClamp(self):
+    def testInterpolationClamp(self):
         proto_file = 'projects/FunctionalCuration/test/protocols/test_model_interpolation.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('Py_TestClamping_TestInterpolationClamp')

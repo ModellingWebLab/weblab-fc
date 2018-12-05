@@ -6,7 +6,7 @@ import unittest
 class TestNdArray(unittest.TestCase):
     """Test functionality of numpy arrays. No protocol arrays tested here."""
 
-    def Test0dArray(self):
+    def test0dArray(self):
         array = np.array(0)
         self.assertEqual(array.ndim, 0)  # number of dimensions is 0
         self.assertEqual(array.size, 1)  # number of elements is 1
@@ -14,7 +14,7 @@ class TestNdArray(unittest.TestCase):
         array[()] = 1  # note the different syntax for indexing a 0-d array
         self.assertEqual(array[()], 1)  # value of array is one
 
-    def TestBasicFunctionality(self):
+    def testBasicFunctionality(self):
         array = np.arange(4)  # assign array to equal consecutive integers
         self.assertEqual(array.ndim, 1)  # number of dimensions is 1
         self.assertEqual(array.size, 4)  # number of elements is 4
@@ -37,7 +37,7 @@ class TestNdArray(unittest.TestCase):
         array2d = array2d.reshape(1, 6)
         self.assertEqual(array2d.shape, (1, 6))  # you can reshape the arrays
 
-    def TestMoreIterationAndViews(self):
+    def testMoreIterationAndViews(self):
         array = np.ones((3, 4, 2, 7))  # create four dimensional array of ones
         self.assertEqual(array.ndim, 4)  # assert that there are four dimensions
         self.assertEqual(array.size, 3 * 4 * 2 * 7)  # number of elements
