@@ -30,8 +30,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import itertools
-import operator
 import sys
 import numpy as np
 
@@ -168,7 +166,8 @@ class AbstractSimulation(locatable.Locatable):
             self.model = model
         self.model.SetIndentLevel(self.indentLevel)
         model_env = model.GetEnvironmentMap()
-        model.simEnv = self.env  # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
+        # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
+        model.simEnv = self.env
         for prefix, env in model_env.items():
             self.env.SetDelegateeEnv(env, prefix)
             self.results.SetDelegateeEnv(env, prefix)
@@ -186,7 +185,11 @@ class AbstractSimulation(locatable.Locatable):
         return self.results
 
     def AddIterationOutputs(self, outputsList):
-        """Copy model outputs from one simulation step into the overall output arrays for the (possibly nested) simulation."""
+        """Collect model outputs for this simulation step.
+
+        Copy model outputs from one simulation step into the overall output arrays for the
+        (possibly nested) simulation.
+        """
         self_results, results_list = self.results, self.resultsList
         if self_results is not None:
             if isinstance(outputsList, tuple):

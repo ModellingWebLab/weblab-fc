@@ -27,7 +27,8 @@ class AbstractModel(object):
         """Return a list of the model's outputs at its current state.
 
         NB: this returns a Python list containing the model outputs as numpy arrays, not subclasses of V.AbstractValue.
-        The order of outputs in this list must match self.outputNames, a list of the output names, which must be set by subclass constructors.
+        The order of outputs in this list must match self.outputNames, a list of the output names,
+        which must be set by subclass constructors.
 
         This method must be implemented by subclasses.
         """
@@ -35,6 +36,8 @@ class AbstractModel(object):
 
     def SetOutputFolder(self, path):
         # TODO: Use file_handling instead?
+        import os
+        import shutil
         if os.path.isdir(path) and path.startswith('/tmp'):
             shutil.rmtree(path)
         os.mkdir(path)
@@ -64,9 +67,11 @@ class AbstractOdeModel(AbstractModel):
 
         Before calling this constructor, subclasses should set up the following object attributes:
          * initialState: a numpy array containing initial values for the state variables
-         * stateVarMap: a mapping from variable name to index within the state variable vector, for use in our ModelWrapperEnvironment
+         * stateVarMap: a mapping from variable name to index within the state variable vector,
+            for use in our ModelWrapperEnvironment
          * parameters: a numpy array containing model parameter values
-         * parameterMap: a mapping from parameter name to index within the parameters vector, for use in our ModelWrapperEnvironment
+         * parameterMap: a mapping from parameter name to index within the parameters vector,
+            for use in our ModelWrapperEnvironment
          * freeVariableName: the name of the free variable, for use in our ModelWrapperEnvironment
          * outputNames: ordered list of the names of the model outputs, as they will be returned by GetOutputs
 

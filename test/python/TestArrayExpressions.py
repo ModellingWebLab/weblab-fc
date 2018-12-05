@@ -92,7 +92,8 @@ class TestArrayExpressions(unittest.TestCase):
                        E.TupleExpression(N(2), N(0), N(1), N(2)))
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, view2.Evaluate({}).array)
 
-        # checks to make sure the "default default" is equivalent to a tuple of (Null, Null, 1, Null), also checks to make sure implicitly defined slices go to the first dimension that is not assigned explicitly
+        # checks to make sure the "default default" is equivalent to a tuple of (Null, Null, 1, Null),
+        # also checks to make sure implicitly defined slices go to the first dimension that is not assigned explicitly
         np.testing.assert_array_almost_equal(view.Evaluate({}).array, view2.Evaluate({}).array)
         # only specified dimension is in middle
         view = E.View(array, E.TupleExpression(N(1), E.Const(V.Null()), N(-1), N(0)))
@@ -402,7 +403,7 @@ class TestArrayExpressions(unittest.TestCase):
         a = E.NewArray(N(3))
         result = E.Map(exponential, a)
         predicted = V.Array(np.array([20.0855369231]))
-        #np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
+        # np.testing.assert_array_almost_equal(result.Evaluate(env).array, predicted.array)
 
         # Natural Log
         env = Env.Environment()

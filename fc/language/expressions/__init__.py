@@ -10,12 +10,13 @@ and access `E.Const` etc.
 
 # Import submodules and make the expressions they define available locally.
 
-from .abstract import *
-from .general import *
-from .maths import *
-from .array import *
+from .abstract import *  # noqa: F403
+from .general import *  # noqa: F403
+from .maths import *  # noqa: F403
+from .array import *  # noqa: F403
 
 
 def N(number):
     """A convenience expression constructor for defining constant numbers."""
-    return Const(V.Simple(number))
+    from ..values import V
+    return Const(V.Simple(number))  # noqa: F405

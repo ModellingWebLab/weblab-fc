@@ -2,9 +2,6 @@
 import os
 import sys
 
-pycml_dir = os.path.normpath(os.path.join(__file__, os.path.pardir, os.path.pardir, os.path.pardir,
-                                          os.path.pardir, os.path.pardir, os.path.pardir, 'python', 'pycml'))
-sys.path[0:0] = [pycml_dir]
 import pyparsing as p
 
 __all__ = ['CompactSyntaxParser']
@@ -23,7 +20,7 @@ p.ParserElement.enablePackrat()
 
 def DoXmlImports():
     import lxml.builder
-    import lxml.etree as ET
+    import lxml.etree as ET  # noqa
 
     PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
     MATHML_NS = "http://www.w3.org/1998/Math/MathML"
@@ -43,7 +40,6 @@ if __name__ == '__main__' or getattr(sys, '_fc_csp_no_pyimpl', False):
     DoXmlImports()
 else:
     import math
-    import numpy as np
 
     import fc.language.expressions as E
     import fc.language.statements as S
@@ -1487,8 +1483,8 @@ class CompactSyntaxParser(object):
     pad = (MakeKw('pad') + Adjacent(colon) - expr + eq + expr).setResultsName('pad')
     shrink = (MakeKw('shrink') + Adjacent(colon) - expr).setResultsName('shrink')
     index_dim = expr.setResultsName('dim')
-    index = p.Group(Adjacent(p.Suppress('{')) - expr + p.ZeroOrMore(comma -
-                                                                    (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
+    index = p.Group(Adjacent(p.Suppress('{')) - expr +
+                    p.ZeroOrMore(comma - (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
 
     # Special values
     nullValue = p.Group(MakeKw('null')).setName('Null').setParseAction(Actions.Symbol('null'))
@@ -1518,7 +1514,8 @@ class CompactSyntaxParser(object):
                                         (index, 1, p.opAssoc.LEFT, Actions.Index),
                                         (trace, 1, p.opAssoc.LEFT, Actions.Trace),
                                         ('^', 2, p.opAssoc.LEFT, Actions.Operator),
-                                        ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        ('-', 1, p.opAssoc.RIGHT,
+                                            lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.Keyword('not'), 1, p.opAssoc.RIGHT,
@@ -1534,9 +1531,11 @@ class CompactSyntaxParser(object):
     simpleArgList = p.Group(OptionalDelimitedList(simpleExpr, comma))
     simpleFunctionCall = p.Group(identAsVar + Adjacent(oparen) - simpleArgList +
                                  cparen).setName('SimpleFnCall').setParseAction(Actions.FunctionCall)
-    simpleExpr << p.operatorPrecedence(number.copy().setParseAction(Actions.Number) | simpleIfExpr | simpleFunctionCall | identAsVar,
+    simpleExpr << p.operatorPrecedence(number.copy().setParseAction(Actions.Number) |
+                                       simpleIfExpr | simpleFunctionCall | identAsVar,
                                        [('^', 2, p.opAssoc.LEFT, Actions.Operator),
-                                        ('-', 1, p.opAssoc.RIGHT, lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                        ('-', 1, p.opAssoc.RIGHT,
+                                            lambda *args: Actions.Operator(*args, rightAssoc=True)),
                                         (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
                                         (p.Keyword('not'), 1, p.opAssoc.RIGHT,
@@ -1628,9 +1627,9 @@ class CompactSyntaxParser(object):
     siPrefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
                        'deci centi milli micro nano pico femto atto zepto yocto')
     _num_or_expr = p.originalTextFor(plainNumber | (oparen + expr + cparen))
-    unitRef = p.Group(Optional(_num_or_expr)("multiplier") + Optional(siPrefix)("prefix") + ncIdent("units")
-                      + Optional(p.Suppress('^') + plainNumber)("exponent")
-                      + Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
+    unitRef = p.Group(Optional(_num_or_expr)("multiplier") + Optional(siPrefix)("prefix") + ncIdent("units") +
+                      Optional(p.Suppress('^') + plainNumber)("exponent") +
+                      Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(Actions.UnitRef)
     unitsDef = p.Group(ncIdent + eq + p.delimitedList(unitRef, '.') + Optional(quotedString)("description")
                        ).setName('UnitsDefinition').setParseAction(Actions.UnitsDef)
     units = (MakeKw('units') - obrace - OptionalDelimitedList(unitsDef, nl) + cbrace
@@ -1691,7 +1690,8 @@ class CompactSyntaxParser(object):
                                      identAsVar +
                                      cparen) | identAsVar) +
                             eq +
-                            (interpolate | simpleExpr)).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
+                            (interpolate | simpleExpr)
+                            ).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
     unitsConversion = p.Group(
         MakeKw('convert') -
@@ -1702,11 +1702,11 @@ class CompactSyntaxParser(object):
         simpleLambdaExpr).setName('UnitsConversion').setParseAction(
         Actions.UnitsConversion)
 
-    modelInterface = p.Group(MakeKw('model') - MakeKw('interface') - obrace
-                             - Optional(setTimeUnits - nl)
-                             + OptionalDelimitedList((inputVariable | outputVariable | optionalVariable | newVariable
-                                                      | clampVariable | modelEquation | unitsConversion), nl)
-                             + cbrace).setName('ModelInterface').setParseAction(Actions.ModelInterface)
+    modelInterface = p.Group(MakeKw('model') - MakeKw('interface') - obrace -
+                             Optional(setTimeUnits - nl) +
+                             OptionalDelimitedList((inputVariable | outputVariable | optionalVariable | newVariable |
+                                                    clampVariable | modelEquation | unitsConversion), nl) +
+                             cbrace).setName('ModelInterface').setParseAction(Actions.ModelInterface)
 
     # Simulation definitions
     ########################
@@ -1715,8 +1715,8 @@ class CompactSyntaxParser(object):
     uniformRange = MakeKw('uniform') + numericRange
     vectorRange = MakeKw('vector') + expr
     whileRange = MakeKw('while') + expr
-    range = p.Group(MakeKw('range') + ncIdent("name") + unitsRef("units")
-                    + (uniformRange("uniform") | vectorRange("vector") | whileRange("while"))
+    range = p.Group(MakeKw('range') + ncIdent("name") + unitsRef("units") +
+                    (uniformRange("uniform") | vectorRange("vector") | whileRange("while"))
                     ).setName('Range').setParseAction(Actions.Range)
 
     # Modifiers
@@ -1740,13 +1740,14 @@ class CompactSyntaxParser(object):
                              cbrace + Optional('?')).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
     timecourseSim = p.Group(MakeKw('timecourse') - obrace - range + Optional(nl + modifiers) + cbrace
                             ).setName('TimecourseSim').setParseAction(Actions.TimecourseSimulation)
-    nestedSim = p.Group(MakeKw('nested') - obrace - range + nl + Optional(modifiers)
-                        + p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident))
-                        + cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
-    oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))("step")
-                         + Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(Actions.OneStepSimulation)
-    simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='') + (timecourseSim |
-                                                                                       nestedSim | oneStepSim) - Optional('?' + nl)).setParseAction(Actions.Simulation)
+    nestedSim = p.Group(MakeKw('nested') - obrace - range + nl + Optional(modifiers) +
+                        p.Group(MakeKw('nests') + (simulation | nestedProtocol | ident)) +
+                        cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
+    oneStepSim = p.Group(MakeKw('oneStep') - Optional(p.originalTextFor(expr))("step") +
+                         Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(Actions.OneStepSimulation)
+    simulation << p.Group(MakeKw('simulation') - Optional(ncIdent + eq, default='') +
+                          (timecourseSim | nestedSim | oneStepSim) -
+                          Optional('?' + nl)).setParseAction(Actions.Simulation)
 
     tasks = p.Group(MakeKw('tasks') + obrace - p.ZeroOrMore(simulation) +
                     cbrace).setName('Tasks').setParseAction(Actions.Tasks)
@@ -1768,12 +1769,12 @@ class CompactSyntaxParser(object):
     # Plot specifications
     #####################
 
-    plotCurve = p.Group(p.delimitedList(ncIdent, ',')
-                        + MakeKw('against') - ncIdent
-                        + Optional(MakeKw('key') - ncIdent("key"))).setName('Curve')
-    plotUsing = (MakeKw('using') - (MakeKw('lines', suppress=False)
-                                    | MakeKw('points', suppress=False)
-                                    | MakeKw('linespoints', suppress=False)))("using")
+    plotCurve = p.Group(p.delimitedList(ncIdent, ',') +
+                        MakeKw('against') - ncIdent +
+                        Optional(MakeKw('key') - ncIdent("key"))).setName('Curve')
+    plotUsing = (MakeKw('using') - (MakeKw('lines', suppress=False) |
+                                    MakeKw('points', suppress=False) |
+                                    MakeKw('linespoints', suppress=False)))("using")
     plotSpec = p.Group(MakeKw('plot') - quotedString + Optional(plotUsing) - obrace +
                        plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
     plots = p.Group(MakeKw('plots') + obrace - p.ZeroOrMore(plotSpec) +

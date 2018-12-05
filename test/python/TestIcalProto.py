@@ -6,7 +6,6 @@ except ImportError:
 
 import fc
 import fc.utility.test_support as TestSupport
-import fc.simulations.model as Model
 from fc.simulations.solvers import CvodeSolver
 
 

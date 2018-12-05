@@ -60,12 +60,12 @@ class ProtocolError(Exception):
 class ErrorRecorder(ProtocolError):
     """A context manager for recording protocol errors that arise within a block of code.
 
-    This is designed to be used in multiple successive code blocks.  Any error thrown from a managed block is recorded
-    (appended to self.errors) and suppressed.
+    This is designed to be used in multiple successive code blocks.
+    Any error thrown from a managed block is recorded (appended to self.errors) and suppressed.
 
-    In addition to the context management protocol, this class inherits from ProtocolError and may be thrown as an exception
-    to report on the collected errors.  Before doing so, check if any errors have occurred by testing in a boolean
-    context.
+    In addition to the context management protocol, this class inherits from ProtocolError
+    and may be thrown as an exception to report on the collected errors.  Before doing so,
+    check if any errors have occurred by testing in a boolean context.
 
     TODO: Add the ability to suppress Python traceback for some errors?
     """

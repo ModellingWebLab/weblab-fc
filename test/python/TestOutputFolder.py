@@ -21,7 +21,7 @@ class TestOutputFolder(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(single_folder_path, OutputFolder.SIG_FILE_NAME)))
         # Single level, absolute path provided
         single_folder_2 = OutputFolder(single_folder_path)
-        self.assertEqual(single_folder.path, single_folder_path)
+        self.assertEqual(single_folder_2.path, single_folder_path)
         # Second level manually
         single_folder.CreateSubfolder('subfolder')
         self.assertTrue(os.path.isdir(os.path.join(single_folder_path, 'subfolder')))
@@ -31,7 +31,7 @@ class TestOutputFolder(unittest.TestCase):
         multiple_folder_path = os.path.join(multiple_folder_root, 'L1', 'L2', 'L3')
         if os.path.exists(multiple_folder_root):
             shutil.rmtree(multiple_folder_root)
-        multiple_folders = OutputFolder(multiple_folder_path)
+        OutputFolder(multiple_folder_path)
         self.assertTrue(os.path.exists(multiple_folder_path))
         self.assertTrue(os.path.exists(os.path.join(multiple_folder_root, OutputFolder.SIG_FILE_NAME)))
         self.assertTrue(os.path.exists(os.path.join(multiple_folder_root, 'L1', OutputFolder.SIG_FILE_NAME)))

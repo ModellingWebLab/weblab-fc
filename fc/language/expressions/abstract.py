@@ -1,8 +1,6 @@
 
-import os
 
 from ...utility import locatable
-from .. import values as V
 
 
 class AbstractExpression(locatable.Locatable):
@@ -133,7 +131,7 @@ class AbstractExpression(locatable.Locatable):
         except AttributeError:
             self._rootDefiningEnv = env  # For paranoia checking that the cache is valid
             d = self._definingEnvs = {}
-            l = self._usedVarLocalNames = []
+            l = self._usedVarLocalNames = []  # noqa: E741
             for name in self.usedVariableList:
                 local_name = name[name.rfind(':') + 1:]
                 l.append(local_name)

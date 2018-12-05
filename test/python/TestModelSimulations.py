@@ -5,15 +5,12 @@ try:
 except ImportError:
     import unittest
 
-import fc
 import fc.language.expressions as E
-import fc.language.statements as S
 import fc.language.values as V
 import fc.simulations.model as Model
 import fc.simulations.modifiers as Modifiers
 import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
-import fc.simulations.solvers as Solvers
 
 N = E.N
 
@@ -29,7 +26,7 @@ class TestModelSimulation(unittest.TestCase):
             if t > 0:
                 model.Simulate(t)
             self.assertEqual(model.GetOutputs()[model.outputNames.index('a')], a)
-            self.assertAlmostEqual(model.GetOutputs()[model.outputNames.index('y')], t*a)
+            self.assertAlmostEqual(model.GetOutputs()[model.outputNames.index('y')], t * a)
 
     def TestUniformRange(self):
         a = 5
@@ -39,8 +36,8 @@ class TestModelSimulation(unittest.TestCase):
         time_sim.Initialise()
         time_sim.SetModel(model)
         results = time_sim.Run()
-        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
-        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))
+        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5] * 11))
+        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t * 5 for t in range(11)]))
 
     def TestVectorRange(self):
         a = 5
@@ -50,8 +47,8 @@ class TestModelSimulation(unittest.TestCase):
         time_sim.Initialise()
         time_sim.SetModel(model)
         results = time_sim.Run()
-        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5]*11))
-        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t*5 for t in range(11)]))
+        np.testing.assert_array_almost_equal(results.LookUp('a').array, np.array([5] * 11))
+        np.testing.assert_array_almost_equal(results.LookUp('y').array, np.array([t * 5 for t in range(11)]))
 
     def TestNestedSimulations(self):
         a = 5

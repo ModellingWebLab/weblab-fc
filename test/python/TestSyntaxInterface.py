@@ -14,7 +14,6 @@ import fc.simulations.modifiers as Modifiers
 import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
 import fc.utility.environment as Env
-from fc.simulations.solvers import CvodeSolver
 
 import CompactSyntaxParser as CSP
 
@@ -716,13 +715,13 @@ class TestSyntaxInterface(unittest.TestCase):
         a = 5
         expr.SetModel(Model.TestOdeModel(a))
         run_sim = expr.Run()
-        np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5]*11))
-        np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t*5 for t in range(11)]))
+        np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5] * 11))
+        np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t * 5 for t in range(11)]))
 
         # test parsing tasks
         parse_action = csp.tasks.parseString("""tasks {
                                 simulation timecourse { range time units second uniform 1:10 }
-                                simulation timecourse { range time units second uniform 10:20 } 
+                                simulation timecourse { range time units second uniform 10:20 }
                                  }""", parseAll=True)
         expr = parse_action[0].expr()
         for sim in expr:

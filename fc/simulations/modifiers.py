@@ -55,7 +55,7 @@ class SetVariable(AbstractModifier):
         # Old slow version: simul.env.OverwriteDefinition(self.variableName, value)
         self._bindings = simul.env.unwrappedBindings.delegatees[self.varPrefix]
         self._calledOnce = True
-        #self.Apply = self.FastApply
+        # self.Apply = self.FastApply
         return self.FastApply(simul)
 
     def FastApply(self, simul):

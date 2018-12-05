@@ -68,7 +68,8 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     proto = None
     with RedirectStdStreams(output, output):
         try:
-            print("Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
+            print("Applying", protoName, "to", modelName,
+                  "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
             setproctitle('python worker %d running %s on %s' % (TestSupport.GetProcessNumber(), protoName, modelName))
             proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
@@ -76,10 +77,10 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             for input in ['max_paces', 'max_steady_state_beats']:
                 try:
                     proto.SetInput(input, fc.language.values.Simple(1000))
-                except:
+                except BaseException:
                     pass  # Input doesn't exist
             proto.Run()
-        except:
+        except BaseException:
             result = False
             messages.append(traceback.format_exc())
         try:
@@ -96,7 +97,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
                         result = True
                 else:
                     result = result and outputs_match
-        except:
+        except BaseException:
             result = False
             messages.append(traceback.format_exc())
     return (modelName, protoName, result, output.getvalue(), messages)
@@ -139,7 +140,9 @@ class Defaults(object):
               ]
 
     # Map from protocol name to expected outputs (names & dimensions)
-    protocolOutputs = {"ExtracellularPotassiumVariation": {"scaled_APD90": 1, "scaled_resting_potential": 1, "detailed_voltage": 2},
+    protocolOutputs = {"ExtracellularPotassiumVariation": {"scaled_APD90": 1,
+                                                           "scaled_resting_potential": 1,
+                                                           "detailed_voltage": 2},
                        "GraphState": {"state": 2},
                        "ICaL": {"min_LCC": 2, "final_membrane_voltage": 1},
                        # "ICaL_block": {"scaled_APD90": 1, "detailed_voltage": 2},
@@ -186,7 +189,7 @@ class TestPythonReproducibility(unittest.TestCase):
             print(output, end=' ')
         print("Applied", protocol, "to", model)
         for i, message in enumerate(messages):
-            print("%d) %s" % (i+1, message))
+            print("%d) %s" % (i + 1, message))
         if not resultCode:
             self.failures.append(model + " / " + protocol)
         self.assertTrue(resultCode, "Experiment %s / %s failed" % (model, protocol))

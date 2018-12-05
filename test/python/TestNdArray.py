@@ -40,13 +40,13 @@ class TestNdArray(unittest.TestCase):
     def TestMoreIterationAndViews(self):
         array = np.ones((3, 4, 2, 7))  # create four dimensional array of ones
         self.assertEqual(array.ndim, 4)  # assert that there are four dimensions
-        self.assertEqual(array.size, 3*4*2*7)  # number of elements
+        self.assertEqual(array.size, 3 * 4 * 2 * 7)  # number of elements
         array = np.arange(168).reshape(3, 4, 2, 7)
         view = array[0::2, :0:-2, -1, 1::-1]  # can slice stepping forward, backward, picking a position...etc
         self.assertEqual(view.ndim, 3)  # number of dimensions in this view is 3
         np.testing.assert_array_almost_equal(view, np.array([[[50, 49], [22, 21]], [[162, 161], [134, 133]]]))
         self.assertEqual(view.shape, (2, 2, 2))
-        self.assertEqual(view.size, 2*2*2)
+        self.assertEqual(view.size, 2 * 2 * 2)
         view[0, 0, 0] = 1  # change the first element of the view
         self.assertEqual(view[0, 0, 0], array[0, 3, 1, 1])  # changing view changed the first element of the array
         copy = array.copy()

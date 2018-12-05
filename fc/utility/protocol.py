@@ -8,18 +8,16 @@ from functools import reduce
 
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend("agg")  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
-import pylab
+import pylab  # noqa: E402,F401
 
-from . import environment as Env
-from .error_handling import ProtocolError, ErrorRecorder
-from .file_handling import OutputFolder
-from .locatable import Locatable
-from ..language import values as V
-from ..language.statements import Assign
-
-from ..simulations import simulations
+from . import environment as Env  # noqa: E402
+from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
+from .file_handling import OutputFolder  # noqa: E402
+from .locatable import Locatable  # noqa: E402
+from ..language import values as V  # noqa: E402
+from ..language.statements import Assign  # noqa: E402
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -250,10 +248,11 @@ class Protocol(object):
                                 # There was non-zero difference between the min & max at some position in
                                 # the 1d equivalent vector
                                 raise ProtocolError(
-                                    'The X data for a plot must be (equivalent to) a 1d array, not', x.ndim, 'dimensions')
+                                    'The X data for a plot must be (equivalent to) a 1d array, not',
+                                    x.ndim, 'dimensions')
                             x_data[i] = x_2d[0]  # Take just the first copy
                     # Plot the data
-                    fig = plt.figure()
+                    plt.figure()
                     for i, x in enumerate(x_data):
                         y = y_data[i]
                         if y.ndim > 1:
@@ -351,7 +350,9 @@ class Protocol(object):
 
     def GetConversionCommand(self, model, xmlFile, className, tempDir,
                              useCython=True, useNumba=False, exposeNamedParameters=False):
-        """Return the command to translate a modified CellML model to Python code, optionally optimised with numba or Cython."""
+        """Return the command to translate a modified CellML model to Python code.
+
+        Optionally this can be optimised with numba or Cython."""
         if useCython:
             model_py_file = os.path.join(tempDir, 'model.pyx')
             target = 'Cython'
@@ -372,7 +373,7 @@ class Protocol(object):
         start = time.time()
         if isinstance(model, str):
             self.LogProgress('generating model code...')
-            import tempfile, subprocess, imp, sys
+            import tempfile, subprocess, sys  # noqa: E401
             if self.outputFolder:
                 temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
             else:

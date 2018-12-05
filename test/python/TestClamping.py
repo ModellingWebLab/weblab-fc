@@ -1,6 +1,5 @@
 
 import os
-import numpy as np
 try:
     import unittest2 as unittest
 except ImportError:

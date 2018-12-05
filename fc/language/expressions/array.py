@@ -53,7 +53,7 @@ class NewArray(AbstractExpression):
         # print 'Comprehension', self.location
         result = None
         for range_spec_indices in itertools.product(*range_dims):
-             # collect everything in range_spec_indices that is a number, not a slice
+            # collect everything in range_spec_indices that is a number, not a slice
             range_specs = [ranges[dim][idx]
                            for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
             sub_env = Env.Environment(delegatee=env)
@@ -145,7 +145,6 @@ class NewArray(AbstractExpression):
             range_name.append(implicit_dim_names[i])
 
         range_name = [_f for _f in range_name if _f]  # Remove None entries
-        product = 1
         dims = []
         range_dims = []
         for i, each in enumerate(ranges):
@@ -305,7 +304,9 @@ class View(AbstractExpression):
                             if (implicit_dim_slices[0].stop < -(dim_len + 1) or
                                     implicit_dim_slices[0].stop >= (dim_len + 1)):
                                 raise ProtocolError("The end of the slice is not within the range of the dimension")
-                        if implicit_dim_slices[0].step is not None and implicit_dim_slices[0].stop is not None and implicit_dim_slices[0].start is not None:
+                        if (implicit_dim_slices[0].step is not None and
+                                implicit_dim_slices[0].stop is not None and
+                                implicit_dim_slices[0].start is not None):
                             if ((implicit_dim_slices[0].stop - implicit_dim_slices[0].start) *
                                     implicit_dim_slices[0].step <= 0):
                                 raise ProtocolError("The sign of the step does not make sense")

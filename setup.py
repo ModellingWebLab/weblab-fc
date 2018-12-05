@@ -58,6 +58,7 @@ setup(
         'matplotlib',
         'numexpr',
         'numpy',
+        'pyparsing',
         'scipy',
         'tables',
     ],

@@ -67,8 +67,10 @@ def WithinAnyTolerance(arr1, arr2, relTol=None, absTol=None):
 
     If either the relative OR absolute tolerance is satisfied for a given pair of values, the result is true.
 
-    :param relTol: relative tolerance. If omitted, machine epsilon is used to effect a comparison only under absolute tolerance.
-    :param absTol: absolute tolerance. If omitted, machine epsilon is used to effect a comparison only under relative tolerance.
+    :param relTol: relative tolerance.
+        If omitted, machine epsilon is used to effect a comparison only under absolute tolerance.
+    :param absTol: absolute tolerance.
+        If omitted, machine epsilon is used to effect a comparison only under relative tolerance.
     :returns: a boolean array
     """
     if relTol is None:
@@ -81,16 +83,20 @@ def WithinAnyTolerance(arr1, arr2, relTol=None, absTol=None):
 def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
     """Check protocol results against saved values.
 
-    Note that if the protocol is missing expected results, this is only an error if reference results are actually present
-    on disk.  If no reference results are available for an 'expected' output, this indicates that the protocol is expected
-    to fail (or at least, not produce this output).  Similarly, it is not an error if the protocol produces results but no
-    reference results are available, although we do add a warning to messages (if supplied) in this case.
+    Note that if the protocol is missing expected results, this is only an error if
+    reference results are actually present on disk.  If no reference results are
+    available for an 'expected' output, this indicates that the protocol is expected
+    to fail (or at least, not produce this output).  Similarly, it is not an error
+    if the protocol produces results but no reference results are available, although
+    we do add a warning to messages (if supplied) in this case.
 
     :param proto: an instance of fc.Protocol that (hopefully) has results available to check
-    :param expectedSpec: a dictionary mapping result name to number of dimensions, so we can use the correct Load* method
+    :param expectedSpec: a dictionary mapping result name to number of dimensions,
+        so we can use the correct Load* method
     :param rtol: relative tolerance
     :param atol: absolute tolerance
-    :param messages: if provided, should be a list to which failure reports will be appended.  Otherwise any failure will raise AssertionError.
+    :param messages: if provided, should be a list to which failure reports will be appended.
+        Otherwise any failure will raise AssertionError.
     :returns: a boolean indicating whether the results matched to within tolerances, or None if failure was expected.
     """
     results_ok = True

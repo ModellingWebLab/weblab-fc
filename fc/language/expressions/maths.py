@@ -25,7 +25,11 @@ class Plus(AbstractExpression):
             try:
                 result = V.Simple(sum([v.value for v in operands]))
             except AttributeError:
-                raise ProtocolError("Operator 'plus' requires all operands to evaluate to numbers;", v, "does not.")
+                for v in operands:
+                    if not hasattr(v, 'value'):
+                        raise ProtocolError(
+                            "Operator 'plus' requires all operands to evaluate to numbers;",
+                            v, "does not.")
         return result
 
     def Compile(self, arrayContext=True):
@@ -81,8 +85,11 @@ class Times(AbstractExpression):
             try:
                 result = V.Simple(reduce(lambda x, y: x * y, [v.value for v in operands], 1))
             except AttributeError:
-                raise ProtocolError(
-                    "Operator 'times' requires all operands to evaluate to an Array or numbers;", v, "does not.")
+                for v in operands:
+                    if not hasattr(v, 'value'):
+                        raise ProtocolError(
+                            "Operator 'times' requires all operands to evaluate to an Array or numbers;",
+                            v, "does not.")
         return result
 
     def Compile(self, arrayContext=True):
@@ -143,7 +150,7 @@ class Min(AbstractExpression):
 
     def Compile(self, arrayContext=True):
         operands = ["(" + child.Compile(arrayContext) + ")" for child in self.children]
-        expression = "___np.minimum(" + ','.join(arr_names) + ")"
+        expression = "___np.minimum(" + ','.join(operands) + ")"
         return expression
 
 
