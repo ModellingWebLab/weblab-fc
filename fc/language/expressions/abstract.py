@@ -155,7 +155,7 @@ class AbstractExpression(locatable.Locatable):
         try:
             return self._usedVarList
         except AttributeError:
-            l = self._usedVarList = list(self.usedVariables)
+            l = self._usedVarList = list(self.usedVariables)  # noqa: E741
             l.sort()
             return l
 
