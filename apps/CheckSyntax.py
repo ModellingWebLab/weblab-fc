@@ -11,10 +11,12 @@ import os
 import subprocess
 import sys
 
+
 def CheckSyntax(protocolPath):
     parser = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../src/proto/parsing/CompactSyntaxParser.py')
     exit_code = subprocess.call(['python', parser, protocolPath, '--dry-run'])
     sys.exit(exit_code)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
