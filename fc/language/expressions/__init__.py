@@ -18,5 +18,5 @@ from .array import *  # noqa: F403
 
 def N(number):
     """A convenience expression constructor for defining constant numbers."""
-    from ..values import V
+    from .. import values as V
     return Const(V.Simple(number))  # noqa: F405

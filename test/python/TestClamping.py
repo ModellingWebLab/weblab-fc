@@ -12,27 +12,27 @@ class TestClamping(unittest.TestCase):
     """
 
     def testClampingWithVariableUnits(self):
-        proto = fc.Protocol('projects/FunctionalCuration/test/protocols/test_clamping3.txt')
+        proto = fc.Protocol('test/protocols/test_clamping3.txt')
         proto.SetOutputFolder('Py_TestClamping_TestClampingWithVariableUnits')
-        proto.SetModel('projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml')
+        proto.SetModel('cellml/beeler_reuter_model_1977.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
 
     def testClampToDataFile(self):
-        proto_file = 'projects/FunctionalCuration/protocols/timecourse_voltage_clamp.txt'
+        proto_file = 'protocols/timecourse_voltage_clamp.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('Py_TestClamping_TestClampToDataFile')
-        proto.SetModel('projects/FunctionalCuration/cellml/ten_tusscher_model_2004_epi.cellml')
+        proto.SetModel('cellml/ten_tusscher_model_2004_epi.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
 
     def testInterpolationClamp(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_model_interpolation.txt'
+        proto_file = 'test/protocols/test_model_interpolation.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('Py_TestClamping_TestInterpolationClamp')
-        proto.SetModel('projects/FunctionalCuration/test/data/simple_ode.cellml')
+        proto.SetModel('test/data/simple_ode.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))

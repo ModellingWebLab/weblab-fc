@@ -646,17 +646,17 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(used_vars, set(['a', 'b']))
 
     def testFindIndexTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_find_index.txt'
+        proto_file = 'test/protocols/test_find_index.txt'
         proto = fc.Protocol(proto_file)
         proto.Run()
 
     def testCorePostProcTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_core_postproc.txt'
+        proto_file = 'test/protocols/test_core_postproc.txt'
         proto = fc.Protocol(proto_file)
         proto.Run()
 
     def testGraphTxt(self):
-        proto_file = 'projects/FunctionalCuration/protocols/GraphState.txt'
+        proto_file = 'protocols/GraphState.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestGraphTxt')
         proto.SetModel(Model.TestOdeModel(1))
@@ -671,7 +671,7 @@ class TestSyntaxInterface(unittest.TestCase):
         # test below is just to test that we get the correct output for a protocol error
         # TODO - it's commented out because it causes a protocol error every time
 #     def testProtocolError(self):
-#         proto_file = 'projects/FunctionalCuration/test/protocols/test_error_msg.txt'
+#         proto_file = 'test/protocols/test_error_msg.txt'
 #         proto = fc.Protocol(proto_file)
 #         proto.Run()
 

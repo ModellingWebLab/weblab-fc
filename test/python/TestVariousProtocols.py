@@ -10,10 +10,10 @@ class TestVariousProtocols(unittest.TestCase):
     """Test that various test protocols are executed correctly."""
 
     def testNestedProtocols(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_nested_protocol.txt'
+        proto_file = 'test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestNestedProtocols')
-        proto.SetModel('projects/FunctionalCuration/cellml/luo_rudy_1991.cellml')
+        proto.SetModel('cellml/luo_rudy_1991.cellml')
         proto.Run()
         self.assertNotIn('always_missing', proto.outputEnv)
         self.assertNotIn('first_missing', proto.outputEnv)
@@ -21,15 +21,15 @@ class TestVariousProtocols(unittest.TestCase):
         self.assertNotIn('first_present', proto.outputEnv)
 
     def testAnnotatingWithOtherOntologies(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_other_ontologies.txt'
+        proto_file = 'test/protocols/test_other_ontologies.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestAnnotatingWithOtherOntologies')
-        proto.SetModel('projects/FunctionalCuration/test/data/test_lr91.cellml')
+        proto.SetModel('test/data/test_lr91.cellml')
         proto.Run()
 
     def testParallelNestedTxt(self):
         # NB: In the current Python implementation this doesn't actually parallelise!
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_parallel_nested.txt'
+        proto_file = 'test/protocols/test_parallel_nested.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestParallelNestedTxt')
         proto.SetModel(Model.TestOdeModel(1))
@@ -38,14 +38,14 @@ class TestVariousProtocols(unittest.TestCase):
         proto.Run()
 
     def testSimEnvTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_sim_environments.txt'
+        proto_file = 'test/protocols/test_sim_environments.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestSimEnv')
         proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
 
     def testWhileLoopTxt(self):
-        proto_file = 'projects/FunctionalCuration/test/protocols/test_while_loop.txt'
+        proto_file = 'test/protocols/test_while_loop.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestWhileLoopTxt')
         proto.SetModel(Model.TestOdeModel(1))

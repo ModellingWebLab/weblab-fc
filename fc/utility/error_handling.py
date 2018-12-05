@@ -4,6 +4,8 @@ import operator
 import traceback
 from io import StringIO
 
+from .locatable import Locatable
+
 
 def _ExtractProtocolInfoFromStack(frames):
     """Figure out where within a protocol an error arose, based on the Python stack trace.
@@ -18,7 +20,7 @@ def _ExtractProtocolInfoFromStack(frames):
     for frame in frames:
         local_vars = frame.f_locals
         obj = local_vars.get('self', None)
-        if obj and hasattr(obj, 'location'):
+        if obj and isinstance(obj, Locatable):
             if not locations or obj.location != locations[-1]:
                 locations.append(obj.location)
             env = local_vars.get('env', None)
@@ -50,7 +52,7 @@ class ProtocolError(Exception):
         """
         # Figure out where in the protocol this error arose
         self.locations, location_message = _ExtractProtocolInfoFromStack(
-            reversed(map(operator.itemgetter(0), inspect.stack())))
+            map(operator.itemgetter(0), reversed(inspect.stack())))
         # Construct the full error message
         self.shortMessage = ' '.join(map(str, msgParts))
         msg = self.shortMessage + '\n' + location_message

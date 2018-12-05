@@ -75,9 +75,9 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             print("Applying", protoName, "to", modelName,
                   "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
             setproctitle('python worker %d running %s on %s' % (TestSupport.GetProcessNumber(), protoName, modelName))
-            proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
+            proto = fc.Protocol('protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
-            proto.SetModel('projects/FunctionalCuration/cellml/%s.cellml' % modelName)
+            proto.SetModel('cellml/%s.cellml' % modelName)
             for input in ['max_paces', 'max_steady_state_beats']:
                 try:
                     proto.SetInput(input, fc.language.values.Simple(1000))
@@ -90,7 +90,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
         try:
             if expectedOutputs and proto:
                 outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
-                                                         'projects/FunctionalCuration/test/data/historic/%s/%s' % (
+                                                         'test/data/historic/%s/%s' % (
                                                              modelName, protoName),
                                                          rtol=0.005, atol=2.5e-4, messages=messages)
                 if outputs_match is None:

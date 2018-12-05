@@ -32,6 +32,10 @@ def WithUnits(base, units):
     return (base, {'{%s}units' % CSP.CELLML_NS: units})
 
 
+# Hack in variables defined by Chaste's testing framework, for now
+CHASTE_TEST_OUTPUT = '/tmp/chaste_test_output'
+
+
 class TestCompactSyntaxParser(unittest.TestCase):
     def checkParseResults(self, actual, expected):
         """Compare parse results to expected strings.
@@ -1043,8 +1047,8 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
                                             ('apply', ['csymbol-assert', ('apply', ['gt', 'ci:a', 'cn:5'])])])]))
 
     def testParsingFullProtocols(self):
-        test_folder = 'projects/FunctionalCuration/test/protocols/compact'
-        ref_folder = 'projects/FunctionalCuration/test/data/CompactSyntaxParser'
+        test_folder = 'test/protocols'
+        ref_folder = 'test/data/CompactSyntaxParser'
         output_folder = os.path.join(CHASTE_TEST_OUTPUT, 'TestCompactSyntaxParser')
         try:
             os.makedirs(output_folder)
