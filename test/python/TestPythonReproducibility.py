@@ -15,7 +15,7 @@ import multiprocessing
 import os
 import sys
 import traceback
-from cStringIO import StringIO
+from io import StringIO
 
 import fc
 import fc.utility.test_support as TestSupport
@@ -68,7 +68,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     proto = None
     with RedirectStdStreams(output, output):
         try:
-            print "Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS
+            print("Applying", protoName, "to", modelName, "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
             setproctitle('python worker %d running %s on %s' % (TestSupport.GetProcessNumber(), protoName, modelName))
             proto = fc.Protocol('projects/FunctionalCuration/protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
@@ -181,15 +181,15 @@ class TestPythonReproducibility(unittest.TestCase):
         # Get the first result, when available
         model, protocol, resultCode, output, messages = self.results.pop().get()
         if resultCode and len(output) > 450:
-            print output[:100] + "\n...\n" + output[-300:],
+            print(output[:100] + "\n...\n" + output[-300:], end=' ')
         else:
-            print output,
-        print "Applied", protocol, "to", model
+            print(output, end=' ')
+        print("Applied", protocol, "to", model)
         for i, message in enumerate(messages):
-            print "%d) %s" % (i+1, message)
+            print("%d) %s" % (i+1, message))
         if not resultCode:
             self.failures.append(model + " / " + protocol)
-        self.assert_(resultCode, "Experiment %s / %s failed" % (model, protocol))
+        self.assertTrue(resultCode, "Experiment %s / %s failed" % (model, protocol))
 
     @classmethod
     def setUpClass(cls):
@@ -220,9 +220,9 @@ class TestPythonReproducibility(unittest.TestCase):
         """Wait for all workers to exit, and summarise failures."""
         cls.pool.join()
         if cls.failures:
-            print "\nThe following model/protocol combinations failed unexpectedly:"
+            print("\nThe following model/protocol combinations failed unexpectedly:")
             for failure in sorted(cls.failures):
-                print "  ", failure
+                print("  ", failure)
 
 
 def MakeTestSuite():
@@ -239,7 +239,7 @@ def MakeTestSuite():
     if not options.models:
         options.models = Defaults.models
     if not options.protocols:
-        options.protocols = Defaults.protocolOutputs.keys()
+        options.protocols = list(Defaults.protocolOutputs.keys())
     # Add test cases to the suite
     for model in options.models:
         for protocol in options.protocols:

@@ -50,8 +50,8 @@ class TestCompactSyntaxParser(unittest.TestCase):
             for i, result in enumerate(expected):
                 check_result(actual[i], result)
         elif isinstance(expected, dict):
-            self.assertEqual(len(actual.keys()), len(expected), '%s != %s' % (actual, expected))
-            for key, value in expected.iteritems():
+            self.assertEqual(len(actual), len(expected), '%s != %s' % (actual, expected))
+            for key, value in expected.items():
                 check_result(actual[key], value)
 
     def assertHasLocalName(self, xmlElement, localName):
@@ -93,9 +93,9 @@ class TestCompactSyntaxParser(unittest.TestCase):
         """Utility method to test that a given grammar parses an input as expected."""
         actual_results = grammar.parseString(input, parseAll=True)
         if expectedXml:
-            self.assert_(len(actual_results) > 0, 'No results available')
-            self.assert_(hasattr(actual_results[0], 'xml'), 'No XML available')
-            self.assert_(callable(actual_results[0].xml), 'No XML available')
+            self.assertTrue(len(actual_results) > 0, 'No results available')
+            self.assertTrue(hasattr(actual_results[0], 'xml'), 'No XML available')
+            self.assertTrue(callable(actual_results[0].xml), 'No XML available')
             actual_xml = actual_results[0].xml()
 #            print X2S(actual_xml)
             self.checkXml(actual_xml, expectedXml)
@@ -122,7 +122,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             for elt in [newElement, refElement]:
                 elt.attrib.pop(attr_name, None)
         self.assertEqual(sorted(newElement.attrib.items()), sorted(refElement.attrib.items()))
-        for newChild, refChild in itertools.izip(newElement, refElement):
+        for newChild, refChild in zip(newElement, refElement):
             self.assertXmlEqual(newChild, refChild)
 
     def assertFilesMatch(self, newFilePath, refFilePath):
@@ -135,7 +135,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             for line in difflib.unified_diff(open(refFilePath).readlines(), open(newFilePath).readlines(),
                                              refFilePath, newFilePath,
                                              from_date, to_date, n=context_lines):
-                print line,
+                print(line, end=' ')
             self.fail("Output file '%s' does not match reference file '%s'" % (newFilePath, refFilePath))
 
     def TestParsingIdentifiers(self):
@@ -608,12 +608,12 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         # with the 'magic' MathML: prefix.
         self.assertEqual(len(csp.mathmlOperators), 12 + 3*8)
         for trigbase in ['sin', 'cos', 'tan', 'sec', 'csc', 'cot']:
-            self.assert_(trigbase in csp.mathmlOperators)
-            self.assert_(trigbase + 'h' in csp.mathmlOperators)
-            self.assert_('arc' + trigbase in csp.mathmlOperators)
-            self.assert_('arc' + trigbase + 'h' in csp.mathmlOperators)
+            self.assertTrue(trigbase in csp.mathmlOperators)
+            self.assertTrue(trigbase + 'h' in csp.mathmlOperators)
+            self.assertTrue('arc' + trigbase in csp.mathmlOperators)
+            self.assertTrue('arc' + trigbase + 'h' in csp.mathmlOperators)
         for op in 'quotient rem max min root xor abs floor ceiling exp ln log'.split():
-            self.assert_(op in csp.mathmlOperators)
+            self.assertTrue(op in csp.mathmlOperators)
         self.assertParses(csp.expr, 'MathML:exp(MathML:floor(MathML:exponentiale))',
                           [['MathML:exp', [['MathML:floor', ['MathML:exponentiale']]]]],
                           ('apply', ['exp', ('apply', ['floor', 'exponentiale'])]))
@@ -1028,10 +1028,10 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
             pass
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
             proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
-            print proto_base, '...'
+            print(proto_base, '...')
             parsed_tree = csp().ParseFile(proto_filename)
             # Check the xml:base attribute
-            self.assert_('{http://www.w3.org/XML/1998/namespace}base' in parsed_tree.getroot().attrib)
+            self.assertTrue('{http://www.w3.org/XML/1998/namespace}base' in parsed_tree.getroot().attrib)
             self.assertEqual(parsed_tree.getroot().base, proto_filename)
             # We write to file for easy creation of new reference versions
             output_file_path = os.path.join(output_folder, proto_base + '.xml')
@@ -1045,4 +1045,4 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
 
     def TestZzzPackratWasUsed(self):
         # Method name ensures this runs last!
-        self.assert_(len(CSP.p.ParserElement._exprArgCache) > 0)
+        self.assertTrue(len(CSP.p.ParserElement._exprArgCache) > 0)

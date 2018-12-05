@@ -22,7 +22,7 @@ class TestFunctions(unittest.TestCase):
         args = [N(1), N(2)]
         swap_call = E.FunctionCall("swap", args)
         result = swap_call.Evaluate(env)
-        self.assert_(isinstance(result, V.Tuple))
+        self.assertTrue(isinstance(result, V.Tuple))
         self.assertAlmostEqual(result.values[0].value, 2)
         self.assertAlmostEqual(result.values[1].value, 1)
         env.ExecuteStatements([S.Assign(parameters, swap_call)])
@@ -34,7 +34,7 @@ class TestFunctions(unittest.TestCase):
         args = [N(3), N(5)]
         swap_call = E.FunctionCall("swap", args)
         result = swap_call.Evaluate(env)
-        self.assert_(isinstance(result, V.Tuple))
+        self.assertTrue(isinstance(result, V.Tuple))
         self.assertAlmostEqual(result.values[0].value, 5)
         self.assertAlmostEqual(result.values[1].value, 3)
 

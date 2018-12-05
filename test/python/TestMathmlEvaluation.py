@@ -20,4 +20,4 @@ class TestMathmlEvaluation(unittest.TestCase):
         proto.SetModel('projects/FunctionalCuration/cellml/beeler_reuter_model_1977.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
-        self.assert_(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
+        self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))

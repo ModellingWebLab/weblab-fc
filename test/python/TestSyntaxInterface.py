@@ -611,7 +611,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = csp.postProcessing.parseString('post-processing{a=2}')
         expr = parse_action[0].expr()
         result = env.ExecuteStatements(expr)
-        self.assertEquals(env.LookUp('a').value, 2)
+        self.assertEqual(env.LookUp('a').value, 2)
 
         parse_action = csp.lambdaExpr.parseString('lambda t: 0*t')
         expr = parse_action[0].expr()
@@ -685,7 +685,7 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         expr.Initialise(Env.Environment())
         self.assertIsInstance(expr, Ranges.UniformRange)
-        r = range(11)
+        r = list(range(11))
         for i, num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
 
@@ -703,7 +703,7 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Ranges.While)
         expr.Initialise(Env.Environment())
-        r = range(5)
+        r = list(range(5))
         for i, num in enumerate(expr):
             self.assertAlmostEqual(r[i], num)
 
