@@ -21,6 +21,11 @@ import fc
 import fc.utility.test_support as TestSupport
 
 
+# Hack in variables defined by Chaste's testing framework, for now
+CHASTE_NUM_PROCS = 1
+CHASTE_TEST_OUTPUT = '/tmp/chaste_test_output'
+
+
 class RedirectStdStreams(object):
     """Context manager to redirect standard streams, from http://stackoverflow.com/a/6796752/2639299.
 
