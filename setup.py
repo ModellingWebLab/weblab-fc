@@ -68,7 +68,7 @@ setup(
             'setproctitle',
         ],
         'test': [
-            'flake8',
+            'flake8>=3.6',
             'pytest',
             'pytest-cov',
         ],
