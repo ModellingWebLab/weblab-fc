@@ -23,8 +23,6 @@ CHASTE_NUM_PROCS = 1
 CHASTE_TEST_OUTPUT = '/tmp/chaste_test_output'
 
 
-@pytest.mark.skipif(os.getenv('FC_LONG_TESTS', '0') == '0',
-                    reason="FC_LONG_TESTS not set to 1")
 class RedirectStdStreams(object):
     """Context manager to redirect standard streams, from http://stackoverflow.com/a/6796752/2639299.
 
@@ -172,6 +170,9 @@ class Defaults(object):
                        }
 
 
+@pytest.mark.skipif(os.getenv('FC_LONG_TESTS', '0') == '0',
+                    reason="FC_LONG_TESTS not set to 1")
+@pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 class TestPythonReproducibility(unittest.TestCase):
     """Test reproducibility of the Python implementation of Functional Curation.
 

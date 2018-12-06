@@ -13,6 +13,7 @@ from fc.simulations.solvers import CvodeSolver
 class TestIcalProto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
 
+    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def testIcal(self):
         proto = fc.Protocol('protocols/ICaL.txt')
         proto.SetOutputFolder('Py_TestIcalProto')

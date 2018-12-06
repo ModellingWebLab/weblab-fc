@@ -13,6 +13,7 @@ from fc.simulations.solvers import CvodeSolver
 class TestS1S2Proto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
 
+    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def testS1S2(self):
         proto = fc.Protocol('protocols/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')

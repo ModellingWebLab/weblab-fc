@@ -1,4 +1,5 @@
 
+import pytest
 import unittest
 
 import fc
@@ -9,6 +10,7 @@ import fc.language.expressions as E
 class TestVariousProtocols(unittest.TestCase):
     """Test that various test protocols are executed correctly."""
 
+    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def testNestedProtocols(self):
         proto_file = 'test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
@@ -20,6 +22,7 @@ class TestVariousProtocols(unittest.TestCase):
         self.assertNotIn('some_missing', proto.outputEnv)
         self.assertNotIn('first_present', proto.outputEnv)
 
+    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def testAnnotatingWithOtherOntologies(self):
         proto_file = 'test/protocols/test_other_ontologies.txt'
         proto = fc.Protocol(proto_file)

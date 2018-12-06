@@ -1,5 +1,6 @@
 
 import os
+import pytest
 import unittest
 
 import fc
@@ -11,6 +12,7 @@ class TestMathmlEvaluation(unittest.TestCase):
     Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
     """
 
+    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def testMathmlOperations(self):
         proto = fc.Protocol('test/protocols/test_mathml_evaluation.txt')
         proto.SetOutputFolder('Py_TestMathmlEvaluation_TestMathmlOperations')
