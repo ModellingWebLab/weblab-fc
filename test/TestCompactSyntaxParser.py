@@ -261,9 +261,9 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           ('inputs', [('apply', ['csymbol-statementList', ('apply', ['eq', 'ci:X', 'cn:1'])])]))
 
     def testParsingImports(self):
-        self.assertParses(csp.importStmt, 'import std = "../../../src/proto/library/BasicLibrary.xml"',
-                          [['std', '../../../src/proto/library/BasicLibrary.xml']],
-                          ('import', {'source': '../../../src/proto/library/BasicLibrary.xml', 'prefix': 'std'}))
+        self.assertParses(csp.importStmt, 'import std = "../library/BasicLibrary.xml"',
+                          [['std', '../library/BasicLibrary.xml']],
+                          ('import', {'source': '../library/BasicLibrary.xml', 'prefix': 'std'}))
         self.assertParses(csp.importStmt, "import 'TestS1S2.xml'", [['', 'TestS1S2.xml']],
                           ('import', {'source': 'TestS1S2.xml', 'mergeDefinitions': 'true'}))
         self.assertParses(csp.imports, 'import l1="file1"#blah\nimport "file2"',

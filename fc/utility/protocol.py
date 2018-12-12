@@ -420,8 +420,7 @@ class Protocol(object):
         new_path = os.path.join(os.path.dirname(basePath), path)
         if not os.path.isabs(path) and not os.path.exists(new_path):
             # Search in the library folder instead
-            library = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, os.pardir, os.pardir,
-                                   'proto', 'library')
+            library = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'library')
             new_path = os.path.join(library, path)
         return new_path
 
