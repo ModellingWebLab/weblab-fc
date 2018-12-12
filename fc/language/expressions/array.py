@@ -272,7 +272,7 @@ class View(AbstractExpression):
                 if step == 0:
                     if start != end:
                         raise ProtocolError("Step is zero and start does not equal end")
-                    slices[int(dim)] = start
+                    slices[int(dim)] = int(start)
                 else:
                     slices[int(dim)] = slice(start, end, step)
             else:
@@ -283,7 +283,7 @@ class View(AbstractExpression):
                         null_slice = start
                         apply_to_rest = True
                     else:
-                        implicit_dim_slices.append(start)
+                        implicit_dim_slices.append(int(start))
                 else:
                     if isinstance(dim, V.Null):
                         null_slice = slice(start, end, step)
@@ -569,10 +569,11 @@ class Index(AbstractExpression):
             raise ProtocolError("The pad_value input should be a simple value, not a", type(pad_value))
 
         dim_val = int(dim.value)
-        shape = list(operand.array.shape)
+        shape = list(map(int, operand.array.shape))
         num_entries = indices.array.shape[0]
         shape[dim_val] = 1
-        extents = np.zeros(tuple(shape), dtype=float)
+        extents = np.zeros(tuple(shape), dtype=np.uint32)
+        indices.array = indices.array.astype(int)
         for index in indices.array:
             extents_index = list(index)
             extents_index[dim_val] = 0
@@ -604,7 +605,7 @@ class Index(AbstractExpression):
         # The next_index array keeps track of how far along dimension dim_val we
         # should put the next kept entry at each location
         shape[dim_val] = 1
-        next_index = np.zeros(shape)
+        next_index = np.zeros(shape, dtype=np.uint32)
         for i in range(begin, end, move):
             idxs = list(indices.array[i])
             value = operand.array[tuple(idxs)]
