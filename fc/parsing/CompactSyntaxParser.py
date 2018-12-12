@@ -6,7 +6,7 @@ import pyparsing as p
 
 __all__ = ['CompactSyntaxParser']
 
-# Necessary for reasonable speed when using operatorPrecedences
+# Necessary for reasonable speed when using infixNotation
 p.ParserElement.enablePackrat()
 
 
@@ -1507,20 +1507,20 @@ class CompactSyntaxParser(object):
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
     atom = (array | wrap | number.copy().setParseAction(Actions.Number) | stringValue |
             ifExpr | nullValue | defaultValue | lambdaExpr | functionCall | identAsVar | tuple).setName('Atom')
-    expr << p.operatorPrecedence(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
-                                        (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
-                                        (index, 1, p.opAssoc.LEFT, Actions.Index),
-                                        (trace, 1, p.opAssoc.LEFT, Actions.Trace),
-                                        ('^', 2, p.opAssoc.LEFT, Actions.Operator),
-                                        ('-', 1, p.opAssoc.RIGHT,
-                                            lambda *args: Actions.Operator(*args, rightAssoc=True)),
-                                        (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT,
-                                         lambda *args: Actions.Operator(*args, rightAssoc=True)),
-                                        (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
-                                        ])
+    expr <<= p.infixNotation(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
+                                    (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
+                                    (index, 1, p.opAssoc.LEFT, Actions.Index),
+                                    (trace, 1, p.opAssoc.LEFT, Actions.Trace),
+                                    ('^', 2, p.opAssoc.LEFT, Actions.Operator),
+                                    ('-', 1, p.opAssoc.RIGHT,
+                                        lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                    (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                    (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                    (p.Keyword('not'), 1, p.opAssoc.RIGHT,
+                                     lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                    (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                    (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
+                                    ])
 
     # Simpler expressions containing no arrays, functions, etc. Used in the model interface.
     simpleExpr = p.Forward().setName('SimpleExpression')
@@ -1529,18 +1529,18 @@ class CompactSyntaxParser(object):
     simpleArgList = p.Group(OptionalDelimitedList(simpleExpr, comma))
     simpleFunctionCall = p.Group(identAsVar + Adjacent(oparen) - simpleArgList +
                                  cparen).setName('SimpleFnCall').setParseAction(Actions.FunctionCall)
-    simpleExpr << p.operatorPrecedence(number.copy().setParseAction(Actions.Number) |
-                                       simpleIfExpr | simpleFunctionCall | identAsVar,
-                                       [('^', 2, p.opAssoc.LEFT, Actions.Operator),
-                                        ('-', 1, p.opAssoc.RIGHT,
-                                            lambda *args: Actions.Operator(*args, rightAssoc=True)),
-                                        (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.Keyword('not'), 1, p.opAssoc.RIGHT,
-                                         lambda *args: Actions.Operator(*args, rightAssoc=True)),
-                                        (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
-                                        (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
-                                        ])
+    simpleExpr <<= p.infixNotation(number.copy().setParseAction(Actions.Number) |
+                                   simpleIfExpr | simpleFunctionCall | identAsVar,
+                                   [('^', 2, p.opAssoc.LEFT, Actions.Operator),
+                                    ('-', 1, p.opAssoc.RIGHT,
+                                        lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                    (p.oneOf('* /'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                    (p.oneOf('+ -'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                    (p.Keyword('not'), 1, p.opAssoc.RIGHT,
+                                     lambda *args: Actions.Operator(*args, rightAssoc=True)),
+                                    (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, Actions.Operator),
+                                    (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, Actions.Operator)
+                                    ])
     simpleParamList = p.Group(OptionalDelimitedList(p.Group(ncIdentAsVar), comma))
     simpleLambdaExpr = p.Group(MakeKw('lambda') - simpleParamList + colon -
                                expr).setName('SimpleLambda').setParseAction(Actions.Lambda)

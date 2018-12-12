@@ -243,7 +243,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.nsDecl, 'namespace prefix = "urn:test"', [{'prefix': 'prefix', 'uri': 'urn:test'}])
         self.assertParses(csp.nsDecl, "namespace prefix='urn:test'", [{'prefix': 'prefix', 'uri': 'urn:test'}])
         self.assertParses(csp.nsDecls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
-                          {'namespace': [{'prefix': 'n1', 'uri': 'urn:t1'}, {'prefix': 'n2', 'uri': 'urn:t2'}]})
+                          [{'prefix': 'n1', 'uri': 'urn:t1'}, {'prefix': 'n2', 'uri': 'urn:t2'}])
         self.assertParses(csp.nsDecls, '', [])
         self.failIfParses(csp.nsDecls, 'namespace n="uri"\n')
 
@@ -1073,4 +1073,4 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
 
     def testZzzPackratWasUsed(self):
         # Method name ensures this runs last!
-        self.assertTrue(len(CSP.p.ParserElement._exprArgCache) > 0)
+        assert CSP.p.ParserElement.packrat_cache_stats[0] > 0
