@@ -89,7 +89,6 @@ class AbstractOdeModel(AbstractModel):
         """Specify the ODE solver to use for this model."""
         self.solver = solver
         solver.AssociateWithModel(self)
-        self.state = self.solver.state  # This is backwards, but required by PySundials!
         self.SetFreeVariable(0)  # A reasonable initial assumption; can be overridden by simulations
 
     def EvaluateRhs(self, t, y, ydot=np.empty(0)):

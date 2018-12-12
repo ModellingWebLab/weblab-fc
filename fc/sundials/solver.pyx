@@ -73,8 +73,6 @@ cdef class CvodeSolver:
             _lib.N_VDestroy_Serial(self._state)
         self.model = model
         # Set our internal state vector as an N_Vector wrapper around the numpy state.
-        # Note that model.SetSolver does "self.state = self.solver.state", which is unfortunate but required
-        # by the pysundials solver, since that can only wrap an N_Vector with an ndarray, not v.v.
         assert isinstance(model.state, np.ndarray)
         self.state = model.state
         self._state_size = len(model.state)
