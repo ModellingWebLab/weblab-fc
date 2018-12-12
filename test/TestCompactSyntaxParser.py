@@ -1048,12 +1048,6 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
 
     def testParsingFullProtocols(self):
         test_folder = 'test/protocols'
-        ref_folder = 'test/data/CompactSyntaxParser'
-        output_folder = os.path.join(CHASTE_TEST_OUTPUT, 'TestCompactSyntaxParser')
-        try:
-            os.makedirs(output_folder)
-        except OSError:
-            pass
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
             proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
             print(proto_base, '...')
@@ -1061,14 +1055,6 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
             # Check the xml:base attribute
             self.assertTrue('{http://www.w3.org/XML/1998/namespace}base' in parsed_tree.getroot().attrib)
             self.assertEqual(parsed_tree.getroot().base, proto_filename)
-            # We write to file for easy creation of new reference versions
-            output_file_path = os.path.join(output_folder, proto_base + '.xml')
-            output_file = open(output_file_path, 'wb')
-            parsed_tree.write(output_file, pretty_print=True, xml_declaration=True)
-            output_file.close()
-            ref_file_path = os.path.join(ref_folder, proto_base + '.xml')
-            if os.path.exists(ref_file_path):
-                self.assertXmlEqual(parsed_tree.getroot(), CSP.ET.parse(ref_file_path).getroot())
         CSP.Actions.source_file = ''  # Avoid the last name leaking to subsequent tests
 
     def testZzzPackratWasUsed(self):
