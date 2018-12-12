@@ -1063,7 +1063,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
             self.assertEqual(parsed_tree.getroot().base, proto_filename)
             # We write to file for easy creation of new reference versions
             output_file_path = os.path.join(output_folder, proto_base + '.xml')
-            output_file = open(output_file_path, 'w')
+            output_file = open(output_file_path, 'wb')
             parsed_tree.write(output_file, pretty_print=True, xml_declaration=True)
             output_file.close()
             ref_file_path = os.path.join(ref_folder, proto_base + '.xml')
