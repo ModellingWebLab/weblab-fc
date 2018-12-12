@@ -111,20 +111,20 @@ class TestCompactSyntaxParser(unittest.TestCase):
 
     def assertXmlEqual(self, newElement, refElement):
         """Utility method for comparing two XML elements."""
-        self.assertEqual(newElement.tag, refElement.tag)
+        assert newElement.tag == refElement.tag
 
         def Strip(text):
             if isinstance(text, str):
                 text = text.strip()
             return text or None
-        self.assertEqual(len(newElement), len(refElement))
-        self.assertEqual(Strip(newElement.text), Strip(refElement.text))
-        self.assertEqual(Strip(newElement.tail), Strip(refElement.tail))
+        assert [child.tag for child in newElement] == [child.tag for child in refElement]
+        assert Strip(newElement.text) == Strip(refElement.text)
+        assert Strip(newElement.tail) == Strip(refElement.tail)
         # Remove some attributes that we shouldn't compare, if present
         for attr_name in ['{%s}loc' % CSP.PROTO_NS, '{http://www.w3.org/XML/1998/namespace}base']:
             for elt in [newElement, refElement]:
                 elt.attrib.pop(attr_name, None)
-        self.assertEqual(sorted(newElement.attrib.items()), sorted(refElement.attrib.items()))
+        assert sorted(newElement.attrib.items()) == sorted(refElement.attrib.items())
         for newChild, refChild in zip(newElement, refElement):
             self.assertXmlEqual(newChild, refChild)
 
