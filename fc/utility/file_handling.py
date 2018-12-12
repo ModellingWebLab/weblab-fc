@@ -40,7 +40,7 @@ class OutputFolder(object):
         This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then a folder 'testoutput' in
         the current working directory is used.
         """
-        root_folder = os.environ.get('CHASTE_TEST_OUTPUT', 'testoutput')
+        root_folder = os.environ.get('CHASTE_TEST_OUTPUT', '/tmp/chaste_test_output')
         if not os.path.isabs(root_folder):
             root_folder = os.path.join(os.getcwd(), root_folder)
         return os.path.realpath(root_folder)
