@@ -18,7 +18,7 @@ def GetProcessNumber():
     name = multiprocessing.current_process().name
     try:
         num = int(name.split('-')[-1])
-    except BaseException:
+    except Exception:
         num = 0
     return num
 

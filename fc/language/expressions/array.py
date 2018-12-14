@@ -174,7 +174,7 @@ class NewArray(AbstractExpression):
                 compiled = True
             else:
                 raise NotImplementedError
-        except BaseException:
+        except Exception:
             compiled = False
         if compiled and num_gaps == 0 and len(ranges) <= 1:
             result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env)

@@ -23,7 +23,7 @@ class Assign(AbstractStatement):
     def Evaluate(self, env):
         try:
             results = self.rhs.Evaluate(env)
-        except BaseException:
+        except Exception:
             if not self.optional:
                 raise
             return V.Null()

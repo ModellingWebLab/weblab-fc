@@ -144,7 +144,7 @@ class AbstractSimulation(locatable.Locatable):
     def Run(self, verbose=True):
         try:
             self.InternalRun(verbose)
-        except BaseException:
+        except Exception:
             # Shrink result arrays to reflect the number of iterations actually managed!
             if self.results is not None:
                 for name in self.results:

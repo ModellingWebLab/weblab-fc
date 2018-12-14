@@ -79,10 +79,10 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             for input in ['max_paces', 'max_steady_state_beats']:
                 try:
                     proto.SetInput(input, fc.language.values.Simple(1000))
-                except BaseException:
+                except Exception:
                     pass  # Input doesn't exist
             proto.Run()
-        except BaseException:
+        except Exception:
             result = False
             messages.append(traceback.format_exc())
         try:
@@ -99,7 +99,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
                         result = True
                 else:
                     result = result and outputs_match
-        except BaseException:
+        except Exception:
             result = False
             messages.append(traceback.format_exc())
     return (modelName, protoName, result, output.getvalue(), messages)
