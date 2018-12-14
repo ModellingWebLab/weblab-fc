@@ -406,7 +406,7 @@ class Fold(AbstractExpression):
 
         for i, dim in enumerate(shape):
             if i == dimension:
-                dim_ranges.append(list(range(1)))
+                dim_ranges.append([0])
             else:
                 dim_ranges.append(list(range(dim)))
 
