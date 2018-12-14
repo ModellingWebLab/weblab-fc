@@ -1,0 +1,22 @@
+language: python
+cache: pip
+python:
+  - "3.6"
+addons:
+  apt:
+    packages:
+      - libsundials-serial-dev
+install:
+  # Needed to run setup.py
+  - pip install cython numpy
+  - pip install .[test]
+  # Needed to upload coverage results
+  - pip install codecov
+  # Check what's installed
+  - python --version
+  - flake8 --version
+script:
+  - flake8
+  - pytest --cov=fc --cov-report=term test
+after_success:
+  - codecov

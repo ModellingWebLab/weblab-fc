@@ -4,18 +4,44 @@
 ~*
 
 # Compiled files
-*.[oa]
-*.pyc
-/build/*
-/src/python/fc/sundials/solver.c
-/src/python/fc/sundials/solver.so
-/src/python/fc/sundials/sundials.so
-
-# Eclipse stuff
-/.pydevproject
-/.settings
+*.py[cod]
 
 # CellML project, in case we've synced from a build machine
 /cellml
 # Test output, similarly
 /testoutput
+
+# C extensions
+*.so
+solver.c
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+.eggs
+parts
+bin
+var
+sdist
+wheelhouse
+develop-eggs
+.installed.cfg
+lib
+lib64
+venv*/
+pyvenv*/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+.coverage.*
+.pytest_cache/
+nosetests.xml
+coverage.xml
+htmlcov
