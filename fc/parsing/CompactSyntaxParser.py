@@ -69,7 +69,9 @@ class Actions(object):
     units_map = {}    # Will be cleared by main parse method
 
     class BaseAction(object):
-        """Base parse action.
+        """Base class for all our parse actions.
+
+        Parse actions are run on sections of protocols recognised by particular parser elements.
 
         This contains the code for allowing parsed protocol elements to be compared to lists in the test code.
         """
@@ -82,7 +84,6 @@ class Actions(object):
             else:
                 self.source_location = "%s:%d:%d\t%s" % (
                     Actions.source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
-#            print 'Creating', self.__class__.__name__, self.tokens
 
         def __eq__(self, other):
             """Comparison of these parse results to another instance or a list."""
