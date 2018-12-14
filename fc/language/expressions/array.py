@@ -572,7 +572,7 @@ class Index(AbstractExpression):
         shape = list(map(int, operand.array.shape))
         num_entries = indices.array.shape[0]
         shape[dim_val] = 1
-        extents = np.zeros(tuple(shape), dtype=np.uint32)
+        extents = np.zeros(tuple(shape), dtype=int)
         indices.array = indices.array.astype(int)
         for index in indices.array:
             extents_index = list(index)
@@ -605,7 +605,7 @@ class Index(AbstractExpression):
         # The next_index array keeps track of how far along dimension dim_val we
         # should put the next kept entry at each location
         shape[dim_val] = 1
-        next_index = np.zeros(shape, dtype=np.uint32)
+        next_index = np.zeros(shape, dtype=int)
         for i in range(begin, end, move):
             idxs = list(indices.array[i])
             value = operand.array[tuple(idxs)]
