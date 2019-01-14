@@ -68,7 +68,13 @@ cdef extern from "cvode/cvode.h":
     ctypedef int (*CVRhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     ctypedef int (*CVRootFn)(realtype t, N_Vector y, realtype *gout, void *user_data)
 
-    void *CVodeCreate(int lmm, int iter)
+    # In version 4 Newton iteration became the default, and a new syntax was
+    # introduced to change it (which we don't need to use here)
+    IF FC_SUNDIALS_MAJOR >= 4:
+        void *CVodeCreate(int lmm)
+    ELSE:
+        void *CVodeCreate(int lmm, int iter)
+
     int CVodeSetUserData(void *cvode_mem, void *user_data)
     int CVodeInit(void *cvode_mem, CVRhsFn f, realtype t0, N_Vector y0)
     int CVodeReInit(void *cvode_mem, realtype t0, N_Vector y0)

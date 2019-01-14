@@ -88,16 +88,25 @@ cdef class CvodeSolver:
         self._state_size = len(model.state)
         self._state = _lib.N_VMake_Serial(self._state_size, <realtype*>(<np.ndarray>self.state).data)
 
-        # Initialise CVODE
-        self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF, _lib.CV_NEWTON)
+        # Create CVode object
+        IF FC_SUNDIALS_MAJOR >= 4:
+            self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF)
+        ELSE:
+            self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF, _lib.CV_NEWTON)
+
+        # Initialise CVode
         if hasattr(self, 'SetRhsWrapper'):
             # A subclass will take care of the RHS function
             self.SetRhsWrapper()
         else:
             flag = _lib.CVodeInit(self.cvode_mem, _RhsWrapper, 0.0, self._state)
             self.CheckFlag(flag, 'CVodeInit')
+
+        # Pass model in as CVode user data
         flag = _lib.CVodeSetUserData(self.cvode_mem, <void*>(self.model))
         self.CheckFlag(flag, 'CVodeSetUserData')
+
+        # Set CVode tolerances
         abstol = 1e-8
         reltol = 1e-6
         flag = _lib.CVodeSStolerances(self.cvode_mem, reltol, abstol)
