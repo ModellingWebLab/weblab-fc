@@ -53,12 +53,21 @@ cdef class CvodeSolver:
         self._state = NULL
         self._state_size = 0
 
+        IF FC_SUNDIALS_MAJOR >= 3:
+            self.sundense_matrix = NULL
+            self.sundense_solver = NULL
+
     def __dealloc__(self):
         """Free solver memory if allocated."""
         if self.cvode_mem != NULL:
             _lib.CVodeFree(&self.cvode_mem)
         if self._state != NULL:
             _lib.N_VDestroy_Serial(self._state)
+        IF FC_SUNDIALS_MAJOR >= 3:
+            if self.sundense_solver != NULL:
+                _lib.SUNLinSolFree(self.sundense_solver)
+            if self.sundense_matrix != NULL:
+                _lib.SUNMatDestroy(self.sundense_matrix)
 
     def __init__(self):
         """Python level object initialisation."""
@@ -72,11 +81,13 @@ cdef class CvodeSolver:
         if self._state != NULL:
             _lib.N_VDestroy_Serial(self._state)
         self.model = model
+
         # Set our internal state vector as an N_Vector wrapper around the numpy state.
         assert isinstance(model.state, np.ndarray)
         self.state = model.state
         self._state_size = len(model.state)
         self._state = _lib.N_VMake_Serial(self._state_size, <realtype*>(<np.ndarray>self.state).data)
+
         # Initialise CVODE
         self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF, _lib.CV_NEWTON)
         if hasattr(self, 'SetRhsWrapper'):
@@ -91,9 +102,25 @@ cdef class CvodeSolver:
         reltol = 1e-6
         flag = _lib.CVodeSStolerances(self.cvode_mem, reltol, abstol)
         self.CheckFlag(flag, 'CVodeSStolerances')
+
+        # Create dense matrix for use in linear solves
         if self._state_size > 0:
-            flag = _lib.CVDense(self.cvode_mem, self._state_size)
-            self.CheckFlag(flag, 'CVDense')
+            IF FC_SUNDIALS_MAJOR >= 3:
+                # Create dense matrix
+                self.sundense_matrix = _lib.SUNDenseMatrix(self._state_size, self._state_size)
+                # Not sure how to check these now! See comments for CheckFlag below
+                #self.CheckFlag(<void*>self.sundense_matrix, 'SUNDenseMatrix')
+                # Create linear solver
+                self.sundense_solver = _lib.SUNDenseLinearSolver(self._state, self.sundense_matrix)
+                #self.CheckFlag(<void*>self.sundense_solver, 'SUNDenseLinearSolver')
+                # Tell cvode to use this solver
+                flag = _lib.CVDlsSetLinearSolver(self.cvode_mem, self.sundense_solver, self.sundense_matrix)
+                self.CheckFlag(flag, 'CVDlsSetLinearSolver')
+            ELSE:
+                # Create dense matrix
+                flag = _lib.CVDense(self.cvode_mem, self._state_size)
+                self.CheckFlag(flag, 'CVDense')
+
         _lib.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
         _lib.CVodeSetMaxStep(self.cvode_mem, 0.5)
         _lib.CVodeSetMaxErrTestFails(self.cvode_mem, 15)
@@ -131,6 +158,9 @@ cdef class CvodeSolver:
 
     cdef CheckFlag(self, int flag, char* called):
         """Check for a successful call to a CVODE routine, and report the error if not."""
+        #TODO: Sundials can also return a null pointer instead of an int, the
+        # example implementation has a void* signature and then casts/dereferences
+        # to int
         if flag != _lib.CV_SUCCESS:
             flag_name = _lib.CVodeGetReturnFlagName(flag)
             raise ProtocolError("Error calling CVODE routine %s: %s" % (called, flag_name))
