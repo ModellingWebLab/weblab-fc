@@ -117,11 +117,14 @@ cdef class CvodeSolver:
             IF FC_SUNDIALS_MAJOR >= 3:
                 # Create dense matrix
                 self.sundense_matrix = _lib.SUNDenseMatrix(self._state_size, self._state_size)
-                # Not sure how to check these now! See comments for CheckFlag below
-                #self.CheckFlag(<void*>self.sundense_matrix, 'SUNDenseMatrix')
+                if self.sundense_matrix == NULL:
+                    raise ProtocolError("Error calling CVODE routine SUNDenseMatrix: Null returned")
+
                 # Create linear solver
                 self.sundense_solver = _lib.SUNDenseLinearSolver(self._state, self.sundense_matrix)
-                #self.CheckFlag(<void*>self.sundense_solver, 'SUNDenseLinearSolver')
+                if self.sundense_solver == NULL:
+                    raise ProtocolError("Error calling CVODE routine SUNDenseLinearSolver: Null returned")
+
                 # Tell cvode to use this solver
                 flag = _lib.CVDlsSetLinearSolver(self.cvode_mem, self.sundense_solver, self.sundense_matrix)
                 self.CheckFlag(flag, 'CVDlsSetLinearSolver')
@@ -167,9 +170,6 @@ cdef class CvodeSolver:
 
     cdef CheckFlag(self, int flag, char* called):
         """Check for a successful call to a CVODE routine, and report the error if not."""
-        #TODO: Sundials can also return a null pointer instead of an int, the
-        # example implementation has a void* signature and then casts/dereferences
-        # to int
         if flag != _lib.CV_SUCCESS:
             flag_name = _lib.CVodeGetReturnFlagName(flag)
             raise ProtocolError("Error calling CVODE routine %s: %s" % (called, flag_name))
