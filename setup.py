@@ -6,28 +6,50 @@ At present, this just exists to allow us to build our Cython SUNDIALS wrapper.
 If SUNDIALS is installed in a non-standard location, it requires environment variables
 (CFLAGS and LDFLAGS) to have been set up before running.
 """
-
-
 import numpy
+
+from cython import inline
 from Cython.Distutils import build_ext
-# from distutils.core import setup
-from distutils.extension import Extension
+from Cython.Distutils.extension import Extension
 from setuptools import find_packages, setup
 
+# Detect major sundials version (defaults to 2)
+sundials_major = inline('''
+    cdef extern from *:
+        """
+        #include <sundials/sundials_config.h>
 
+        #ifndef SUNDIALS_VERSION_MAJOR
+            #define SUNDIALS_VERSION_MAJOR 2
+        #endif
+        """
+        int SUNDIALS_VERSION_MAJOR
+
+    return SUNDIALS_VERSION_MAJOR
+    ''')
+print('Building for Sundials ' + str(sundials_major) + '.x')
+
+# Define Cython modules
 ext_modules = [
     Extension('fc.sundials.sundials',
               sources=['fc/sundials/sundials.pxd'],
               include_dirs=['.', numpy.get_include()],
-              libraries=['sundials_cvode', 'sundials_nvecserial']),
+              libraries=['sundials_cvode', 'sundials_nvecserial'],
+              cython_compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major},
+              ),
     Extension('fc.sundials.solver',
               sources=['fc/sundials/solver.pyx'],
               include_dirs=['.', numpy.get_include()],
-              libraries=['sundials_cvode', 'sundials_nvecserial'])
+              libraries=['sundials_cvode', 'sundials_nvecserial'],
+              cython_compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major},
+              ),
 ]
+
+# Load readme for use as long description
 with open('README.md') as f:
     readme = f.read()
 
+# Setup
 setup(
     name='fc',
     version='0.1.0',
@@ -70,7 +92,7 @@ setup(
         ],
         'test': [
             'flake8>=3.6',
-            'pytest',
+            'pytest>=3.6',
             'pytest-cov',
         ],
     },

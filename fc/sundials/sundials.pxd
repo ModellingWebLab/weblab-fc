@@ -8,6 +8,7 @@ Based on http://code.google.com/p/python-sundials/source/browse/trunk/sundials/S
 """
 
 cdef extern from "sundials/sundials_types.h":
+    ctypedef long int sunindextype
     ctypedef double realtype
     ctypedef bint booleantype
 
@@ -67,7 +68,13 @@ cdef extern from "cvode/cvode.h":
     ctypedef int (*CVRhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     ctypedef int (*CVRootFn)(realtype t, N_Vector y, realtype *gout, void *user_data)
 
-    void *CVodeCreate(int lmm, int iter)
+    # In version 4 Newton iteration became the default, and a new syntax was
+    # introduced to change it (which we don't need to use here)
+    IF FC_SUNDIALS_MAJOR >= 4:
+        void *CVodeCreate(int lmm)
+    ELSE:
+        void *CVodeCreate(int lmm, int iter)
+
     int CVodeSetUserData(void *cvode_mem, void *user_data)
     int CVodeInit(void *cvode_mem, CVRhsFn f, realtype t0, N_Vector y0)
     int CVodeReInit(void *cvode_mem, realtype t0, N_Vector y0)
@@ -124,5 +131,28 @@ cdef extern from "cvode/cvode.h":
     char *CVodeGetReturnFlagName(int flag)
     void CVodeFree(void **cvode_mem)
 
-cdef extern from "cvode/cvode_dense.h":
-    int CVDense(void *cvode_mem, int N)
+IF FC_SUNDIALS_MAJOR >= 3:
+    cdef extern from "sundials/sundials_matrix.h":
+        ctypedef struct _generic_SUNMatrix:
+            pass
+        ctypedef _generic_SUNMatrix* SUNMatrix
+        void SUNMatDestroy(SUNMatrix A)
+
+    cdef extern from "sunmatrix/sunmatrix_dense.h":
+        SUNMatrix SUNDenseMatrix(sunindextype M, sunindextype N)
+
+    cdef extern from "sunlinsol/sunlinsol_dense.h":
+        ctypedef struct _generic_SUNLinearSolver:
+            pass
+        ctypedef _generic_SUNLinearSolver* SUNLinearSolver
+        void SUNLinSolFree(SUNLinearSolver)
+
+    cdef extern from "sundials/sundials_linearsolver.h":
+        SUNLinearSolver SUNDenseLinearSolver(N_Vector y, SUNMatrix A)
+
+    cdef extern from "cvode/cvode_direct.h":
+        int CVDlsSetLinearSolver(void* cvode_mem, SUNLinearSolver LS, SUNMatrix A)
+ELSE:
+    cdef extern from "cvode/cvode_dense.h":
+        int CVDense(void *cvode_mem, int N)
+
