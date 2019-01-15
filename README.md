@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ModellingWebLab/weblab-fc.svg?branch=master)](https://travis-ci.org/ModellingWebLab/weblab-fc)
+
 # Functional Curation backend for the Modelling Web Lab
 
 This package is currently in transition, migrating the functional curation code from being
