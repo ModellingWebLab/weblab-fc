@@ -11,6 +11,7 @@ install:
   - pip install cython numpy
   - pip install .[test]
   # Needed to upload coverage results
+  - pip install pytest>=3.6
   - pip install codecov
   # Check what's installed
   - python --version
