@@ -92,7 +92,7 @@ setup(
         ],
         'test': [
             'flake8>=3.6',
-            'pytest',
+            'pytest>=3.6',
             'pytest-cov',
         ],
     },
