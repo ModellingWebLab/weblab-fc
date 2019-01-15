@@ -6,6 +6,10 @@ addons:
   apt:
     packages:
       - libsundials-serial-dev
+branches:
+  # Only build master and PRs
+  only: 
+    - master    
 install:
   # Needed to run setup.py
   - pip install cython numpy
