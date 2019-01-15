@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/ModellingWebLab/weblab-fc.svg?branch=master)](https://travis-ci.org/ModellingWebLab/weblab-fc)
+[![codecov](https://codecov.io/gh/ModellingWebLab/weblab-fc/branch/master/graph/badge.svg)](https://codecov.io/gh/ModellingWebLab/weblab-fc)
+
 
 # Functional Curation backend for the Modelling Web Lab
 
