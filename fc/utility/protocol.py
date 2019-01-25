@@ -1,8 +1,11 @@
 
 import operator
 import os
+import shutil
+import subprocess
 import sys
 import tables
+import tempfile
 import time
 from functools import reduce
 
@@ -12,6 +15,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend("agg")  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 import pylab  # noqa: E402,F401
 
+import fc
 from . import environment as Env  # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402
@@ -21,6 +25,48 @@ from ..language.statements import Assign  # noqa: E402
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
+
+
+# Setup script
+SETUP_PY = '''
+import numpy
+
+from setuptools import setup
+from cython import inline
+from Cython.Distutils import build_ext
+from Cython.Distutils.extension import Extension
+
+
+SUNDIALS_MAJOR = inline(\'''
+    cdef extern from *:
+        """
+        #include <sundials/sundials_config.h>
+
+        #ifndef SUNDIALS_VERSION_MAJOR
+            #define SUNDIALS_VERSION_MAJOR 2
+        #endif
+        """
+        int SUNDIALS_VERSION_MAJOR
+
+    return SUNDIALS_VERSION_MAJOR
+    \''')
+
+ext_modules=[
+    Extension(
+        '%(module_name)s',
+        sources=['%(model_file)s'],
+        include_dirs=[numpy.get_include(), '%(fcpath)s'],
+        libraries=['sundials_cvode', 'sundials_nvecserial', 'm'],
+        cython_compile_time_env={'FC_SUNDIALS_MAJOR': SUNDIALS_MAJOR},
+    ),
+]
+
+setup(
+    name='%(module_name)s',
+    cmdclass={'build_ext': build_ext},
+    ext_modules=ext_modules,
+)
+'''
 
 
 class Protocol(object):
@@ -368,20 +414,30 @@ class Protocol(object):
             code_gen_cmd.append('--no-numba')
         return code_gen_cmd
 
-    def SetModel(self, model, useNumba=False, useCython=True, exposeNamedParameters=False):
-        """Specify the model this protocol is to be run on."""
+    def SetModel(self, model, useNumba=False, useCython=True,
+                 exposeNamedParameters=False):
+        """
+        Specify the model this protocol is to be run on.
+        """
+
+        # Benchmarking
         start = time.time()
-        if isinstance(model, str):
-            self.LogProgress('generating model code...')
-            import tempfile, subprocess, sys  # noqa: E401
+
+        # Compile model from CellML
+        if isinstance(model, str) and model.endswith('.cellml'):
+
+            self.LogProgress('Generating model code...')
             if self.outputFolder:
                 temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
             else:
                 temp_dir = tempfile.mkdtemp()
+
             # Create an XML syntax version of the protocol, for PyCml's sake :(
             import fc.parsing.CompactSyntaxParser as CSP
             CSP.DoXmlImports()
-            xml_file = self.parser.ConvertProtocol(self.protoFile, temp_dir, xmlGenerator=self.parsedProtocol)
+            xml_file = self.parser.ConvertProtocol(
+                self.protoFile, temp_dir, xmlGenerator=self.parsedProtocol)
+
             # Generate the (protocol-modified) model code
             class_name = 'GeneratedModel'
             code_gen_cmd = self.GetConversionCommand(
@@ -392,11 +448,16 @@ class Protocol(object):
                 useCython=useCython,
                 useNumba=useNumba,
                 exposeNamedParameters=exposeNamedParameters)
-            print(subprocess.check_output(code_gen_cmd, stderr=subprocess.STDOUT))
+            print(subprocess.check_output(
+                code_gen_cmd, stderr=subprocess.STDOUT))
             if useCython:
                 # Compile the extension module
-                print(subprocess.check_output(['python', 'setup.py', 'build_ext', '--inplace'],
-                                              cwd=temp_dir, stderr=subprocess.STDOUT))
+                print(subprocess.check_output(
+                    ['python', 'setup.py', 'build_ext', '--inplace'],
+                    cwd=temp_dir,
+                    stderr=subprocess.STDOUT
+                ))
+
             # Create an instance of the model
             self.modelPath = temp_dir
             sys.path.insert(0, temp_dir)
@@ -406,21 +467,86 @@ class Protocol(object):
                     model = getattr(module, name)()
                     model._module = module
             del sys.modules['model']
+
+        # Compile model from static .pyx file (temporary code for testing
+        # fccodegen!)
+        if isinstance(model, str) and model.endswith('.pyx'):
+
+            if not useCython:
+                raise Exception(
+                    'A pyx file model must be run with useCython=True')
+            if useNumba:
+                raise Exception(
+                    'Numba cannot be used with pyx models.')
+
+            self.LogProgress('Compiling pyx model code...')
+
+            # Create temporary directory
+            if self.outputFolder:
+                temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
+            else:
+                temp_dir = tempfile.mkdtemp()
+
+            # Copy model file
+            model_file = os.path.join(temp_dir, 'model.pyx')
+            shutil.copy(model, model_file)
+
+            # Get path to root dir of fc module
+            fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
+
+            # Write setup.py
+            setup_file = os.path.join(temp_dir, 'setup.py')
+            template_strings = {
+                'module_name': 'model',
+                'model_file': model_file,
+                'fcpath': fcpath,
+            }
+            with open(setup_file, 'w') as f:
+                f.write(SETUP_PY % template_strings)
+
+            # Compile the extension module
+            print(subprocess.check_output(
+                ['python', 'setup.py', 'build_ext', '--inplace'],
+                cwd=temp_dir,
+                stderr=subprocess.STDOUT,
+            ))
+
+            # Create an instance of the model
+            class_name = 'TestModel'
+            self.modelPath = temp_dir
+            sys.path.insert(0, temp_dir)
+            import model as module
+            for name in module.__dict__.keys():
+                if name.startswith(class_name):
+                    model = getattr(module, name)()
+                    model._module = module
+                    break
+            del sys.modules['model']
+
+        # Set model
         self.model = model
         for sim in self.simulations:
             sim.SetModel(model)
-        self.timings['load model'] = self.timings.get('load model', 0.0) + (time.time() - start)
+
+        # Benchmarking
+        self.timings['load model'] = (
+            self.timings.get('load model', 0.0) + (time.time() - start))
 
     def GetPath(self, basePath, path):
         """Determine the full path of an imported protocol file.
 
-        Relative paths are resolved relative to basePath (the path to this protocol) by default.
-        If this does not yield an existing file, they are resolved relative to the built-in library folder instead.
+        Relative paths are resolved relative to basePath (the path to this
+        protocol) by default.
+        If this does not yield an existing file, they are resolved relative to
+         the built-in library folder instead.
         """
         new_path = os.path.join(os.path.dirname(basePath), path)
         if not os.path.isabs(path) and not os.path.exists(new_path):
             # Search in the library folder instead
-            library = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'library')
+            library = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                os.pardir,
+                'library')
             new_path = os.path.join(library, path)
         return new_path
 
@@ -431,7 +557,8 @@ class Protocol(object):
     def LogProgress(self, *args):
         """Print a progress line showing how far through the protocol we are.
 
-        Arguments are converted to strings and space separated, as for the print builtin.
+        Arguments are converted to strings and space separated, as for the
+        print builtin.
         """
         print('  ' * self.indentLevel + ' '.join(map(str, args)))
         sys.stdout.flush()
@@ -439,7 +566,8 @@ class Protocol(object):
     def LogWarning(self, *args):
         """Print a warning message.
 
-        Arguments are converted to strings and space separated, as for the print builtin.
+        Arguments are converted to strings and space separated, as for the
+        print builtin.
         """
         print('  ' * self.indentLevel + ' '.join(map(str, args)), file=sys.stderr)
         sys.stderr.flush()
