@@ -17,10 +17,9 @@ pip install -r requirements/setup.txt
 ```
 
 You also need to have CVODE (from Sundials) installed. If you do this with your system package
-manager no further setup is (probably) needed. Just make sure to install version 2; we do not
-(yet) support version 3. Alternatively you can install it using `conda`:
+manager no further setup is (probably) needed. Alternatively you can install it using `conda`:
 ```sh
-conda install sundials=2.7.0 -c conda-forge
+conda install sundials -c conda-forge
 ```
 In this case, or if it is installed in another non-standard location on your machine, you'll
 need to set environment variables to tell Cython where to find it, e.g.:
