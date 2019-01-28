@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend("agg")  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 import pylab  # noqa: E402,F401
 
-import fc
+import fc   # noqa: E402
 from . import environment as Env  # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402

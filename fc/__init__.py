@@ -20,4 +20,3 @@ del(os, inspect)
 
 
 from .utility.protocol import Protocol  # noqa:F401
-
