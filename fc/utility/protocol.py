@@ -538,7 +538,7 @@ class Protocol(object):
         Relative paths are resolved relative to basePath (the path to this
         protocol) by default.
         If this does not yield an existing file, they are resolved relative to
-         the built-in library folder instead.
+        the built-in library folder instead.
         """
         new_path = os.path.join(os.path.dirname(basePath), path)
         if not os.path.isabs(path) and not os.path.exists(new_path):
