@@ -16,6 +16,6 @@ class TestGeneratedPyx(unittest.TestCase):
         proto = fc.Protocol('test/protocols/test_generated_pyx.txt')
         proto.SetOutputFolder('Py_TestGeneratedPyx_test_run')
         proto.SetModel('test/data/weblab_model.pyx')
-        #proto.Run()
+        proto.Run()
         # Test assertions are within the protocol itself
 
