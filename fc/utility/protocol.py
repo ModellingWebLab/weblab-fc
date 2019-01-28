@@ -473,10 +473,10 @@ class Protocol(object):
         if isinstance(model, str) and model.endswith('.pyx'):
 
             if not useCython:
-                raise Exception(
+                raise ValueError(
                     'A pyx file model must be run with useCython=True')
             if useNumba:
-                raise Exception(
+                raise ValueError(
                     'Numba cannot be used with pyx models.')
 
             self.LogProgress('Compiling pyx model code...')
