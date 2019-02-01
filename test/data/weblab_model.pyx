@@ -185,17 +185,17 @@ cdef class TestModel(CvodeSolver):
 
         # Oxmeta names of output variables
         self.outputNames = []
-        self.outputNames.append('membrane_fast_sodium_current')
-        self.outputNames.append('membrane_voltage')
         self.outputNames.append('time')
+        self.outputNames.append('membrane_voltage')
+        self.outputNames.append('state_variable')
 
         # Create and cache list of arrays, to avoid constant list/array
         # creation
         self._outputs = []
         self._outputs.append(np.array(0.0))
         self._outputs.append(np.array(0.0))
-        self._outputs.append(np.array(0.0))
-        # TODO Handle vector outputs
+        self._outputs.append(np.zeros(4))
+        # TODO Handle vector outputs other than state_variable
 
         self.state = self.initialState.copy()
         self.savedStates = {}
@@ -270,16 +270,15 @@ cdef class TestModel(CvodeSolver):
         cdef double var_n = self.state[3]
 
         # Mathematics
-        cdef double var_E_R = -75.0
-        cdef double var_E_Na = 115.0 + var_E_R
-        cdef double var_g_Na = parameters[0]
-        cdef double var_i_Na = var_m**3.0 * (-var_E_Na + var_V) * var_g_Na * var_h
 
         # Update output vector and return
         outputs = self._outputs
-        outputs[0][()] = var_i_Na
+        outputs[0][()] = var_time
         outputs[1][()] = var_V
-        outputs[2][()] = var_time
+        outputs[2][0] = var_V
+        outputs[2][1] = var_m
+        outputs[2][2] = var_h
+        outputs[2][3] = var_n
         return outputs
 
     cpdef ResetState(self, name=None):
