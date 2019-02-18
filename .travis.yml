@@ -12,6 +12,8 @@ branches:
     - master    
 install:
   # Needed to run setup.py
+  - pip install -e git://github.com/ModellingWebLab/cellmlmanip.git@feature/cellml-parsing#egg=cellmlmanip
+  - pip install -e git://github.com/ModellingWebLab/fccodegen@cellmlmanip-updates#egg=fccodegen 
   - pip install cython numpy
   - pip install .[test]
   # Needed to upload coverage results
