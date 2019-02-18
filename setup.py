@@ -77,6 +77,7 @@ setup(
     ext_modules=ext_modules,
     install_requires=[
         'cython',
+        # 'fccodegen',  # Add this in when fccodegen is ready
         'lxml',
         'matplotlib',
         'numexpr',
