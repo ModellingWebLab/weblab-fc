@@ -56,13 +56,13 @@ cdef int _EvaluateRhs(Sundials.realtype var_time,
     cdef double var_stim_start = 10.0
     cdef double var_i_Stim = ((var_stim_amplitude) if (var_time >= var_stim_start and var_time <= var_stim_end and -var_stim_start - var_stim_period * math.floor((-var_stim_start + var_time) / var_stim_period) + var_time <= var_stim_duration) else (0.0))
     cdef double var_E_K = -12.0 + var_E_R
-    cdef double var_g_K = parameters[1]
+    cdef double var_g_K = 36.0
     cdef double var_alpha_n = -0.01 * (65.0 + var_V) / (-1.0 + 0.0015034391929775724 * math.exp(-0.1 * var_V))
     cdef double var_beta_n = 0.31919868225786585 * math.exp(0.0125 * var_V)
     cdef double d_dt_n = (1.0 - var_n) * var_alpha_n - var_beta_n * var_n
     cdef double var_i_K = var_n**4.0 * (-var_E_K + var_V) * var_g_K
     cdef double var_E_Na = 115.0 + var_E_R
-    cdef double var_g_Na = parameters[0]
+    cdef double var_g_Na = 120.0
     cdef double var_alpha_h = 0.0016462422099206377 * math.exp(-0.05 * var_V)
     cdef double var_beta_h = 1.0 / (1.0 + 0.011108996538242306 * math.exp(-0.1 * var_V))
     cdef double d_dt_h = (1.0 - var_h) * var_alpha_h - var_beta_h * var_h
@@ -145,7 +145,7 @@ cdef class TestModel(CvodeSolver):
     # prevent garbage collection.
     cdef public object _module
 
-    # NOT SURE
+    # TODO: Not sure if needed
     cdef public object simEnv
 
     # Cached list of output values (single values or vectors e.g. the state) to
@@ -175,13 +175,9 @@ cdef class TestModel(CvodeSolver):
 
         # Mapping of parameter oxmeta names to parameter array indices
         self.parameterMap = {}
-        self.parameterMap['membrane_fast_sodium_current_conductance'] = 0
-        self.parameterMap['membrane_potassium_current_conductance'] = 1
 
         # Initial parameter values
-        self.parameters = np.zeros(2)
-        self.parameters[0] = 120.0
-        self.parameters[1] = 36.0
+        self.parameters = np.zeros(0)
 
         # Oxmeta names of output variables
         self.outputNames = []
