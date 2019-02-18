@@ -426,12 +426,20 @@ class Protocol(object):
         # Compile model from CellML
         if isinstance(model, str) and model.endswith('.cellml'):
 
+            if not useCython:
+                raise ValueError(
+                    'A CellML file model must be run with useCython=True')
+            if useNumba:
+                raise ValueError(
+                    'Numba cannot be used with CellML models.')
+
             self.LogProgress('Generating model code...')
             if self.outputFolder:
                 temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
             else:
                 temp_dir = tempfile.mkdtemp()
 
+            '''
             # Create an XML syntax version of the protocol, for PyCml's sake :(
             import fc.parsing.CompactSyntaxParser as CSP
             CSP.DoXmlImports()
@@ -467,6 +475,87 @@ class Protocol(object):
                     model = getattr(module, name)()
                     model._module = module
             del sys.modules['model']
+            '''
+            
+            raise NotImplementedError
+            
+            #TODO: ADAPT THIS CODE TO GENERATE A MODEL
+            
+            # Select output path (in temporary dir)
+            path = tmp_path / 'model.pyx'
+
+            # Select class name
+            class_name = 'TestModel'
+
+            # Load cellml model
+            model = os.path.join(
+                cg.DATA_DIR, 'tests',
+                'hodgkin_huxley_squid_axon_model_1952_modified.cellml'
+            )
+            model = cellmlmanip.load_model(model)
+
+            # Select model outputs (as oxmeta names)
+            outputs = [
+                'time',
+                'membrane_voltage',
+                'state_variable',
+            ]
+
+            # Select model parameters (as oxmeta names)
+            parameters = []
+
+            # Create weblab model at path
+            cg.create_weblab_model(path, class_name, model, outputs, parameters)
+
+
+            #TODO: UPDATE GENERATING CODE
+            
+
+            self.LogProgress('Compiling pyx model code...')
+
+            # Create temporary directory
+            if self.outputFolder:
+                temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
+            else:
+                temp_dir = tempfile.mkdtemp()
+
+            # Copy model file
+            model_file = os.path.join(temp_dir, 'model.pyx')
+            shutil.copy(model, model_file)
+
+            # Get path to root dir of fc module
+            fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
+
+            # Write setup.py
+            setup_file = os.path.join(temp_dir, 'setup.py')
+            template_strings = {
+                'module_name': 'model',
+                'model_file': model_file,
+                'fcpath': fcpath,
+            }
+            with open(setup_file, 'w') as f:
+                f.write(SETUP_PY % template_strings)
+
+            # Compile the extension module
+            print(subprocess.check_output(
+                ['python', 'setup.py', 'build_ext', '--inplace'],
+                cwd=temp_dir,
+                stderr=subprocess.STDOUT,
+            ))
+
+            # Create an instance of the model
+            class_name = 'TestModel'
+            self.modelPath = temp_dir
+            sys.path.insert(0, temp_dir)
+            import model as module
+            for name in module.__dict__.keys():
+                if name.startswith(class_name):
+                    model = getattr(module, name)()
+                    model._module = module
+                    break
+            del sys.modules['model']
+
+
 
         # Compile model from static .pyx file (temporary code for testing
         # fccodegen!)
