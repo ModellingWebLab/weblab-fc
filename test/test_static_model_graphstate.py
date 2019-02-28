@@ -1,6 +1,6 @@
 """
 
-Temporary test for static `fccodegen` generated `pyx` model.
+Temporary test for static `weblab_cg` generated `pyx` model.
 
 """
 import os

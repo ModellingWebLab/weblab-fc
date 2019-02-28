@@ -1,6 +1,6 @@
 """
 
-Temporary test for dynamically generated `pyx` model with fccodegen.
+Temporary test for dynamically generated `pyx` model with weblab_cg.
 
 """
 import os

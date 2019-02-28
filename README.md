@@ -16,6 +16,11 @@ In order to build the package you need Cython and numpy. These can be installed 
 pip install -r requirements/setup.txt
 ```
 
+For the temporary weblab_cg stuff, also run
+```sh
+requirements/weblab_cg.sh
+```
+
 You also need to have CVODE (from Sundials) installed. If you do this with your system package
 manager no further setup is (probably) needed. Alternatively you can install it using `conda`:
 ```sh

@@ -76,8 +76,8 @@ setup(
     cmdclass={'build_ext': build_ext},
     ext_modules=ext_modules,
     install_requires=[
+        # 'cellmlmanip',    # Add this in when cellmlmanip is ready
         'cython',
-        # 'fccodegen',  # Add this in when fccodegen is ready
         'lxml',
         'matplotlib',
         'numexpr',
@@ -85,6 +85,7 @@ setup(
         'pyparsing',
         'scipy',
         'tables',
+        # 'weblab_cg',      # Add this in when weblab_cg is ready
     ],
     extras_require={
         'dev': [
