@@ -30,7 +30,7 @@ class Locatable(object):
         A synopsis will be written to stream, and the full value to a trace file, if self.outputFolder
         is defined.
         """
-        from ..language import values as V
+        from .language import values as V
         if isinstance(value, V.Array) and value.array.size > 10:
             stream.write(prefix + 'array shape ' + str(value.array.shape) + '\n')
         else:

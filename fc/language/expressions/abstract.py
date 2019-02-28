@@ -1,6 +1,5 @@
 
-
-from ...utility import locatable
+from ... import locatable
 
 
 class AbstractExpression(locatable.Locatable):

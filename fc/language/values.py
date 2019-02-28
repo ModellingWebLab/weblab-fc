@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from ..utility.error_handling import ProtocolError
+from ..error_handling import ProtocolError
 
 
 class AbstractValue(object):
@@ -105,7 +105,7 @@ class LambdaClosure(AbstractValue):
         return "function" + str(tuple(self.formalParameters))
 
     def Compile(self, env, actualParameters):
-        from ..utility.environment import Environment
+        from ..environment import Environment
         local_env = Environment(delegatee=self.definingEnv)
         params = actualParameters[:]
         if len(params) < len(self.formalParameters):
@@ -124,7 +124,7 @@ class LambdaClosure(AbstractValue):
         return expression, local_env
 
     def Evaluate(self, env, actualParameters):
-        from ..utility.environment import Environment
+        from ..environment import Environment
         local_env = Environment(delegatee=self.definingEnv)
         if len(actualParameters) < len(self.formalParameters):
             actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
@@ -173,5 +173,5 @@ class LoadFunction(LambdaClosure):
             raise ProtocolError("A load() call takes a string parameter with the file path to load.")
         import os
         file_path = os.path.join(self.basePath, actualParameters[0].value)
-        from ..utility.test_support import Load2d
+        from ..test_support import Load2d
         return Load2d(file_path)

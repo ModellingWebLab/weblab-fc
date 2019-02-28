@@ -12,7 +12,7 @@ import fc.simulations.model as Model
 import fc.simulations.modifiers as Modifiers
 import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
-from fc.utility.locatable import Locatable
+from fc.locatable import Locatable
 
 __all__ = ['CompactSyntaxParser']
 
@@ -996,7 +996,7 @@ class Actions(object):
             args.extend([output_names, optional_flags])
             model = Model.NestedProtocol(*args)
             result = Simulations.OneStep(0)
-            result.SetModel(model)
+            result.set_model(model)
             return result
 
     class Simulation(BaseGroupAction):

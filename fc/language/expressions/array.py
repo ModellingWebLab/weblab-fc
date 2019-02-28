@@ -9,8 +9,8 @@ from .abstract import AbstractExpression
 from .general import TupleExpression
 from .maths import Max, Min, Plus, Times
 from .. import values as V
-from ...utility import environment as Env
-from ...utility.error_handling import ProtocolError
+from ... import environment as Env
+from ...error_handling import ProtocolError
 
 
 class NewArray(AbstractExpression):

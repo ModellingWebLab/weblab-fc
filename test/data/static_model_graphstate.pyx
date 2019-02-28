@@ -18,10 +18,10 @@ import shutil
 import sys
 
 import fc.simulations.model as Model
-import fc.utility.environment as Env
+import fc.environment as Env
 import fc.language.values as V
 from fc.sundials.solver cimport CvodeSolver
-from fc.utility.error_handling import ProtocolError
+from fc.error_handling import ProtocolError
 
 
 cdef int _EvaluateRhs(Sundials.realtype var_time,
@@ -119,7 +119,7 @@ cdef class TestModel(CvodeSolver):
     # Maps oxmeta variable names to model variables (outputs, states,
     # parameters, or the free variable).
     # From: fc.simulations.AbstractOdeModel
-    # See: fc.utility.environment.ModelWrapperEnvironment
+    # See: fc.environment.ModelWrapperEnvironment
     cdef public object env
 
     # True if the solver needs to be reset due to a model change made in the
@@ -140,7 +140,7 @@ cdef class TestModel(CvodeSolver):
     cdef public object indentLevel
 
     # Link to generated module.
-    # Set in: fc.utility.protocol.Protocol
+    # Set in: fc.protocol.Protocol
     # Note: Nobody seems to ever access this variable. Seems this is just to
     # prevent garbage collection.
     cdef public object _module

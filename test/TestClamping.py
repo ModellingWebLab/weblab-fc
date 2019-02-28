@@ -16,7 +16,7 @@ class TestClamping(unittest.TestCase):
     def testClampingWithVariableUnits(self):
         proto = fc.Protocol('test/protocols/test_clamping3.txt')
         proto.SetOutputFolder('Py_TestClamping_TestClampingWithVariableUnits')
-        proto.SetModel('cellml/beeler_reuter_model_1977.cellml')
+        proto.set_model('cellml/beeler_reuter_model_1977.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
@@ -26,7 +26,7 @@ class TestClamping(unittest.TestCase):
         proto_file = 'protocols/timecourse_voltage_clamp.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('Py_TestClamping_TestClampToDataFile')
-        proto.SetModel('cellml/ten_tusscher_model_2004_epi.cellml')
+        proto.set_model('cellml/ten_tusscher_model_2004_epi.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
@@ -36,7 +36,7 @@ class TestClamping(unittest.TestCase):
         proto_file = 'test/protocols/test_model_interpolation.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('Py_TestClamping_TestInterpolationClamp')
-        proto.SetModel('test/data/simple_ode.cellml')
+        proto.set_model('test/data/simple_ode.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))

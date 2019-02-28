@@ -3,8 +3,8 @@ import numpy as np
 import unittest
 
 import fc.language.values as V
-import fc.utility.environment as Env
-from fc.utility.error_handling import ProtocolError
+import fc.environment as Env
+from fc.error_handling import ProtocolError
 
 
 class TestEnvironment(unittest.TestCase):

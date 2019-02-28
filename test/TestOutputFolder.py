@@ -3,8 +3,8 @@ import os
 import shutil
 import unittest
 
-from fc.utility.error_handling import ProtocolError
-from fc.utility.file_handling import OutputFolder
+from fc.error_handling import ProtocolError
+from fc.file_handling import OutputFolder
 
 # Hack in variables defined by Chaste's testing framework, for now
 CHASTE_TEST_OUTPUT = '/tmp/chaste_test_output'

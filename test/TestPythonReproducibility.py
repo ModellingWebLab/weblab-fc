@@ -15,7 +15,7 @@ import unittest
 from io import StringIO
 
 import fc
-import fc.utility.test_support as TestSupport
+import fc.test_support as TestSupport
 
 
 # Hack in variables defined by Chaste's testing framework, for now
@@ -75,7 +75,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             setproctitle('python worker %d running %s on %s' % (TestSupport.GetProcessNumber(), protoName, modelName))
             proto = fc.Protocol('protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
-            proto.SetModel('cellml/%s.cellml' % modelName)
+            proto.set_model('cellml/%s.cellml' % modelName)
             for input in ['max_paces', 'max_steady_state_beats']:
                 try:
                     proto.SetInput(input, fc.language.values.Simple(1000))

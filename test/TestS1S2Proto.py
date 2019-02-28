@@ -4,7 +4,7 @@ import pytest
 import unittest
 
 import fc
-import fc.utility.test_support as TestSupport
+import fc.test_support as TestSupport
 from fc.simulations.solvers import CvodeSolver
 
 
@@ -17,7 +17,7 @@ class TestS1S2Proto(unittest.TestCase):
     def testS1S2(self):
         proto = fc.Protocol('protocols/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')
-        proto.SetModel('cellml/courtemanche_ramirez_nattel_1998.cellml')
+        proto.set_model('cellml/courtemanche_ramirez_nattel_1998.cellml')
         proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'test/data/TestSpeedRealProto/S1S2'

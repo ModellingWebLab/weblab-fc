@@ -2,7 +2,7 @@
 import numpy as np
 
 from .solvers import DefaultSolver
-from ..utility import environment as Env
+from .. import environment as Env
 
 
 class AbstractModel(object):
@@ -139,7 +139,7 @@ class NestedProtocol(AbstractModel):
         :param outputNames: list of the names of the protocol outputs to keep as our outputs
         :param optionalFlags: list matching outputNames specifying whether each output is optional (i.e. may be missing)
         """
-        from ..utility.protocol import Protocol
+        from ..protocol import Protocol
         self.proto = Protocol(proto)
         self.inputExprs = inputExprs
         self.outputNames = outputNames

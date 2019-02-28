@@ -7,7 +7,7 @@ import os
 # import pytest
 
 import fc
-import fc.utility.test_support as TestSupport
+import fc.test_support as TestSupport
 
 
 def test_static_pyx_file():
@@ -18,7 +18,7 @@ def test_static_pyx_file():
     proto = fc.Protocol(os.path.join(
         'test', 'protocols', 'static_model_graphstate.txt'))
     proto.SetOutputFolder('test_static_pyx_file')
-    proto.SetModel(os.path.join('test', 'data', 'static_model_graphstate.pyx'))
+    proto.set_model(os.path.join('test', 'data', 'static_model_graphstate.pyx'))
     proto.Run()
     # Test assertions are within the protocol itself
 

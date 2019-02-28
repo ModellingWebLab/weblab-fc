@@ -19,9 +19,9 @@ import fc   # noqa: E402
 from . import environment as Env  # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402
+from .language import values as V  # noqa: E402
+from .language.statements import Assign  # noqa: E402
 from .locatable import Locatable  # noqa: E402
-from ..language import values as V  # noqa: E402
-from ..language.statements import Assign  # noqa: E402
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -186,7 +186,7 @@ class Protocol(object):
             del sys.modules['model']
             self.model = model
             for sim in self.simulations:
-                sim.SetModel(model)
+                sim.set_model(model)
 
     def AddImportedProtocol(self, proto, prefix):
         """Add a protocol imported with a prefix to our collection.
@@ -331,7 +331,7 @@ class Protocol(object):
         self.libraryEnv.ExecuteStatements(self.library)
 
     def Run(self, verbose=True, writeOut=True):
-        """Run this protocol on the model already specified using SetModel."""
+        """Run this protocol on the model already specified using set_model."""
         Locatable.outputFolder = self.outputFolder
         self.Initialise(verbose)
         if verbose:
@@ -414,8 +414,8 @@ class Protocol(object):
             code_gen_cmd.append('--no-numba')
         return code_gen_cmd
 
-    def SetModel(self, model, useNumba=False, useCython=True,
-                 exposeNamedParameters=False):
+    def set_model(self, model, useNumba=False, useCython=True,
+                exposeNamedParameters=False):
         """
         Specify the model this protocol is to be run on.
         """
@@ -476,11 +476,11 @@ class Protocol(object):
                     model._module = module
             del sys.modules['model']
             '''
-            
+
             raise NotImplementedError
-            
+
             #TODO: ADAPT THIS CODE TO GENERATE A MODEL
-            
+
             # Select output path (in temporary dir)
             path = tmp_path / 'model.pyx'
 
@@ -509,7 +509,7 @@ class Protocol(object):
 
 
             #TODO: UPDATE GENERATING CODE
-            
+
 
             self.LogProgress('Compiling pyx model code...')
 
@@ -615,7 +615,7 @@ class Protocol(object):
         # Set model
         self.model = model
         for sim in self.simulations:
-            sim.SetModel(model)
+            sim.set_model(model)
 
         # Benchmarking
         self.timings['load model'] = (

@@ -9,8 +9,8 @@ from . import ranges as R
 from .model import NestedProtocol
 from .modifiers import AbstractModifier
 from ..language import values as V
-from ..utility import environment as Env
-from ..utility import locatable
+from .. import environment as Env
+from .. import locatable
 
 
 class AbstractSimulation(locatable.Locatable):
@@ -37,7 +37,7 @@ class AbstractSimulation(locatable.Locatable):
         # Must remove Model class and regenerate during unpickling
         # (Pickling errors from nested class structure of ModelWrapperEnvironment)
 
-        # Undo Simulation.SetModel
+        # Undo Simulation.set_model
         if self.model is not None:
             modelenv = self.model.GetEnvironmentMap()
             for prefix in modelenv:
@@ -128,9 +128,9 @@ class AbstractSimulation(locatable.Locatable):
                     self.viewEnv.OverwriteDefinition(
                         name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
 
-    def SetModel(self, model):
+    def set_model(self, model):
         if isinstance(self.model, NestedProtocol):
-            self.model.proto.SetModel(model)
+            self.model.proto.set_model(model)
         else:
             self.model = model
         self.model.SetIndentLevel(self.indentLevel)
@@ -290,6 +290,6 @@ class Nested(AbstractSimulation):
             self.LoopBodyEndHook()
         self.LoopEndHook()
 
-    def SetModel(self, model):
-        super(Nested, self).SetModel(model)
-        self.nestedSim.SetModel(model)
+    def set_model(self, model):
+        super(Nested, self).set_model(model)
+        self.nestedSim.set_model(model)

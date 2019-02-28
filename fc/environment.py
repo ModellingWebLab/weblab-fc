@@ -2,7 +2,7 @@
 import numpy as np
 
 from .error_handling import ProtocolError
-from ..language import values as V
+from .language import values as V
 
 
 class Environment(object):
@@ -191,7 +191,7 @@ class DelegatingDict(dict):
     def __init__(self, *args, **kwargs):
         super(DelegatingDict, self).__init__(*args, **kwargs)
         self.delegatees = {}
-        from ..language.expressions import NameLookUp
+        from .language.expressions import NameLookUp
         self._marker = NameLookUp.PREFIXED_NAME
         self._marker_len = len(self._marker)
 
