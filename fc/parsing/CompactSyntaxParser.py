@@ -27,6 +27,7 @@ p.ParserElement.enablePackrat()
 # Some of our tests still need the XML generation (which the C++ code used), so
 # allow its dependencies to be selectively imported iff required.
 
+#TODO: Get rid of this
 def DoXmlImports():
     import lxml.builder
     import lxml.etree as ET  # noqa
@@ -736,6 +737,15 @@ class Actions(object):
         def _xml(self):
             return P.specifyOutputVariable(**self.TransferAttrs('name', 'units'))
 
+        def _expr(self):
+            ns, local_name = self.tokens['name'].split(':', 1)
+            return {
+                'type': 'OutputVariable',
+                'ns': ns,
+                'local_name': local_name,
+                'unit': self.tokens.get('unit', None),
+            }
+
     class OptionalVariable(BaseGroupAction):
         def __init__(self, s, loc, tokens):
             super(Actions.OptionalVariable, self).__init__(s, loc, tokens)
@@ -801,6 +811,15 @@ class Actions(object):
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.modelInterface(*self.GetChildrenXml())
+
+        def _expr(self):
+            #TODO: Create objects for all parts of the model interface
+            #return self.GetChildrenExpr()
+            output = []
+            for action in self:
+                if isinstance(action, Actions.OutputVariable):
+                    output.append(action.expr())
+            return output
 
     ######################################################################
     # Simulation tasks section
@@ -1278,8 +1297,18 @@ class Actions(object):
                     d['outputs'] = token.expr()
                 if isinstance(token, Actions.Plots):
                     d['plots'] = token.expr()
+                if isinstance(token, Actions.ModelInterface):
+                    d['model_interface'] = token.expr()
+
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
+
+            ns_map = {'proto': PROTO_NS, 'm': MATHML_NS}
+            if 'namespace' in self.tokens:
+                for prefix, uri in self.tokens['namespace']:
+                    ns_map[prefix] = uri
+            d['ns_map'] = ns_map
+
             return d
 
 

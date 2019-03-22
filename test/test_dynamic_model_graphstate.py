@@ -10,7 +10,7 @@ import fc
 from fc.utility import test_support
 
 
-def test_static_pyx_file():
+def test_dynamic_pyx_file():
 
     model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
     proto_name = 'GraphState'

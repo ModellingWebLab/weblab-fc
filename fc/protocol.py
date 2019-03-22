@@ -1,4 +1,3 @@
-
 import operator
 import os
 import shutil
@@ -102,21 +101,36 @@ class Protocol(object):
         self.outputs = []
         self.plots = []
 
+        # Information from the model interface
+        self.model_interface = []
+
+        # A mapping of namespace names to uris, for namespaces used in the
+        # protocol
+        self.ns_map = {}
+
         # Parse the protocol file and fill in the structures declared above
         start = time.time()
+
         import fc.parsing.CompactSyntaxParser as CSP
+        CSP.DoXmlImports()
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
         generator = self.parsedProtocol = parser._Try(
-            CSP.CompactSyntaxParser.protocol.parseFile, protoFile, parseAll=True)[0]
+            CSP.CompactSyntaxParser.protocol.parseFile,
+            protoFile,
+            parseAll=True
+        )[0]
         assert isinstance(generator, CSP.Actions.Protocol)
+
         details = generator.expr()
         assert isinstance(details, dict)
+
         self.inputs = details.get('inputs', [])
         self.inputEnv.ExecuteStatements(self.inputs)
         for prefix, path, set_inputs in details.get('imports', []):
             self.LogProgress('Importing', path, 'as', prefix, 'in', self.protoName)
             imported_proto = Protocol(self.GetPath(protoFile, path), self.indentLevel + 1)
+
             if prefix == "":
                 # Merge inputs of the imported protocol into our own (duplicate names are an error here).
                 # Override any values specified in the import statement itself.
@@ -134,14 +148,28 @@ class Protocol(object):
                 self.postProcessing.extend(imported_proto.postProcessing)
                 self.outputs.extend(imported_proto.outputs)
                 self.plots.extend(imported_proto.plots)
+                self.model_interface.extend(imported_proto.model_interface)
+                for prefix, uri in imported_proto.ns_map.items():
+                    self.ns_map[prefix] = uri
             else:
                 self.AddImportedProtocol(imported_proto, prefix)
+
         self.libraryEnv.SetDelegateeEnv(self.inputEnv)
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
         self.postProcessing.extend(details.get('postprocessing', []))
         self.outputs.extend(details.get('outputs', []))
         self.plots.extend(details.get('plots', []))
+        self.model_interface.extend(details.get('model_interface', []))
+        for prefix, uri in details.get('ns_map', {}).items():
+            self.ns_map[prefix] = uri
+
+        # Replace ns prefixes with uris in model interface
+        for item in self.model_interface:
+            if item['type'] == 'OutputVariable':
+                item['ns'] = self.ns_map[item['ns']]
+
+        # Benchmark
         self.timings['parsing'] = time.time() - start
 
     # Override Object serialization methods to allow pickling with the dill module
@@ -420,7 +448,7 @@ class Protocol(object):
         return code_gen_cmd
 
     def set_model(self, model, useNumba=False, useCython=True,
-                exposeNamedParameters=False):
+                  exposeNamedParameters=False):
         """
         Specify the model this protocol is to be run on.
         """
@@ -437,96 +465,50 @@ class Protocol(object):
             if useNumba:
                 raise ValueError(
                     'Numba cannot be used with CellML models.')
+            if exposeNamedParameters:
+                raise ValueError('I have no idea what this does.')
 
             self.LogProgress('Generating model code...')
+
+            # Create output folder
             if self.outputFolder:
                 temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
             else:
                 temp_dir = tempfile.mkdtemp()
 
-            '''
-            # Create an XML syntax version of the protocol, for PyCml's sake :(
-            import fc.parsing.CompactSyntaxParser as CSP
-            CSP.DoXmlImports()
-            xml_file = self.parser.ConvertProtocol(
-                self.protoFile, temp_dir, xmlGenerator=self.parsedProtocol)
-
-            # Generate the (protocol-modified) model code
-            class_name = 'GeneratedModel'
-            code_gen_cmd = self.GetConversionCommand(
-                model,
-                xml_file,
-                class_name,
-                temp_dir,
-                useCython=useCython,
-                useNumba=useNumba,
-                exposeNamedParameters=exposeNamedParameters)
-            print(subprocess.check_output(
-                code_gen_cmd, stderr=subprocess.STDOUT))
-            if useCython:
-                # Compile the extension module
-                print(subprocess.check_output(
-                    ['python', 'setup.py', 'build_ext', '--inplace'],
-                    cwd=temp_dir,
-                    stderr=subprocess.STDOUT
-                ))
-
-            # Create an instance of the model
-            self.modelPath = temp_dir
-            sys.path.insert(0, temp_dir)
-            import model as module
-            for name in module.__dict__.keys():
-                if name.startswith(class_name):
-                    model = getattr(module, name)()
-                    model._module = module
-            del sys.modules['model']
-            '''
-
-            raise NotImplementedError
-
-            #TODO: ADAPT THIS CODE TO GENERATE A MODEL
-
             # Select output path (in temporary dir)
-            path = tmp_path / 'model.pyx'
+            path = os.path.join(temp_dir, 'model.pyx')
 
             # Select class name
             class_name = 'TestModel'
 
             # Load cellml model
-            model = os.path.join(
-                cg.DATA_DIR, 'tests',
-                'hodgkin_huxley_squid_axon_model_1952_modified.cellml'
-            )
+            import cellmlmanip
             model = cellmlmanip.load_model(model)
 
             # Select model outputs (as qualified names)
-            outputs = [
-                'time',
-                'membrane_voltage',
-                'state_variable',
-            ]
+            outputs = []
+            for item in self.model_interface:
+                #TODO: Update this to use objects instead of a list of dicts
+                if item['type'] == 'OutputVariable':
+                    #TODO: Better handling for `state_variable`
+                    if item['local_name'] == 'state_variable':
+                        outputs.append('state_variable')
+                    else:
+                        outputs.append((item['ns'], item['local_name']))
+                    #TODO: Handle units
 
             # Select model parameters (as qualified names)
-            parameters = []
+            #TODO DO WHATEVER WE NEED TO DO HERE
+            parameters = [
+            ]
 
             # Create weblab model at path
-            cg.create_weblab_model(path, class_name, model, outputs, parameters)
-
-
-            #TODO: UPDATE GENERATING CODE
-
+            import weblab_cg as cg
+            cg.create_weblab_model(
+                path, class_name, model, outputs, parameters)
 
             self.LogProgress('Compiling pyx model code...')
-
-            # Create temporary directory
-            if self.outputFolder:
-                temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
-            else:
-                temp_dir = tempfile.mkdtemp()
-
-            # Copy model file
-            model_file = os.path.join(temp_dir, 'model.pyx')
-            shutil.copy(model, model_file)
 
             # Get path to root dir of fc module
             fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
@@ -535,7 +517,7 @@ class Protocol(object):
             setup_file = os.path.join(temp_dir, 'setup.py')
             template_strings = {
                 'module_name': 'model',
-                'model_file': model_file,
+                'model_file': 'model.pyx',
                 'fcpath': fcpath,
             }
             with open(setup_file, 'w') as f:
@@ -549,7 +531,6 @@ class Protocol(object):
             ))
 
             # Create an instance of the model
-            class_name = 'TestModel'
             self.modelPath = temp_dir
             sys.path.insert(0, temp_dir)
             import model as module
@@ -564,7 +545,7 @@ class Protocol(object):
 
         # Compile model from static .pyx file (temporary code for testing
         # fccodegen!)
-        if isinstance(model, str) and model.endswith('.pyx'):
+        elif isinstance(model, str) and model.endswith('.pyx'):
 
             if not useCython:
                 raise ValueError(
