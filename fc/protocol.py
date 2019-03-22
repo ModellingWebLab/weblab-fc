@@ -12,8 +12,7 @@ from functools import reduce
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # noqa: E402
-plt.switch_backend("agg")  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
-import pylab  # noqa: E402,F401
+plt.switch_backend('agg')  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 
 import fc   # noqa: E402
 from . import environment as Env  # noqa: E402
