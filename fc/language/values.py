@@ -173,5 +173,5 @@ class LoadFunction(LambdaClosure):
             raise ProtocolError("A load() call takes a string parameter with the file path to load.")
         import os
         file_path = os.path.join(self.basePath, actualParameters[0].value)
-        from ..test_support import Load2d
+        from ..utility.test_support import Load2d
         return Load2d(file_path)

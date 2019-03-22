@@ -15,7 +15,7 @@ import unittest
 from io import StringIO
 
 import fc
-import fc.test_support as TestSupport
+from fc.utility import test_support
 
 
 # Hack in variables defined by Chaste's testing framework, for now
@@ -52,7 +52,7 @@ def WorkerInit():
 
     If the setproctitle module is installed, this will adjust the process title (shown by ps) to be more informative.
     """
-    setproctitle('python worker %d' % TestSupport.GetProcessNumber())
+    setproctitle('python worker %d' % test_support.GetProcessNumber())
 
 
 def RunExperiment(modelName, protoName, expectedOutputs):
@@ -71,8 +71,8 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     with RedirectStdStreams(output, output):
         try:
             print("Applying", protoName, "to", modelName,
-                  "on process", TestSupport.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
-            setproctitle('python worker %d running %s on %s' % (TestSupport.GetProcessNumber(), protoName, modelName))
+                  "on process", test_support.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
+            setproctitle('python worker %d running %s on %s' % (test_support.GetProcessNumber(), protoName, modelName))
             proto = fc.Protocol('protocols/%s.txt' % protoName)
             proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
             proto.set_model('cellml/%s.cellml' % modelName)
@@ -87,15 +87,21 @@ def RunExperiment(modelName, protoName, expectedOutputs):
             messages.append(traceback.format_exc())
         try:
             if expectedOutputs and proto:
-                outputs_match = TestSupport.CheckResults(proto, expectedOutputs,
-                                                         'test/data/historic/%s/%s' % (
-                                                             modelName, protoName),
-                                                         rtol=0.005, atol=2.5e-4, messages=messages)
+                outputs_match = test_support.CheckResults(
+                    proto,
+                    expectedOutputs,
+                     'test/data/historic/%s/%s' % (modelName, protoName),
+                     rtol=0.005,
+                     atol=2.5e-4,
+                     messages=messages,
+                 )
                 if outputs_match is None:
                     if result:
-                        messages.append("Experiment succeeded but produced no results, and this was expected!")
+                        messages.append(
+                            "Experiment succeeded but produced no results, and this was expected!")
                     else:
-                        messages.append("Note: experiment was expected to fail - no reference results stored.")
+                        messages.append(
+                            "Note: experiment was expected to fail - no reference results stored.")
                         result = True
                 else:
                     result = result and outputs_match

@@ -188,9 +188,11 @@ class Protocol(object):
                 sim.set_model(model)
 
     def AddImportedProtocol(self, proto, prefix):
-        """Add a protocol imported with a prefix to our collection.
+        """
+        Add a protocol imported with a prefix to our collection.
 
-        This also makes that protocol's library (if any) available as a delegatee of our own.
+        This also makes that protocol's library (if any) available as a
+        delegatee of our own.
         """
         assert prefix
         if prefix in self.imports:
@@ -321,7 +323,8 @@ class Protocol(object):
         return ''.join(c for c in name if c.isalnum() or c in keep)
 
     def ExecuteLibrary(self):
-        """Run the statements in our library to build up the library environment.
+        """
+        Run the statements in our library to build up the library environment.
 
         The libraries of any imported protocols will be executed first.
         """
@@ -330,7 +333,9 @@ class Protocol(object):
         self.libraryEnv.ExecuteStatements(self.library)
 
     def Run(self, verbose=True, writeOut=True):
-        """Run this protocol on the model already specified using set_model."""
+        """
+        Run this protocol on the model already specified using set_model.
+        """
         Locatable.outputFolder = self.outputFolder
         self.Initialise(verbose)
         if verbose:
@@ -341,7 +346,8 @@ class Protocol(object):
                 sim.env.SetDelegateeEnv(self.libraryEnv)
                 if sim.prefix:
                     if self.outputFolder:
-                        sim.SetOutputFolder(self.outputFolder.CreateSubfolder('simulation_' + sim.prefix))
+                        sim.SetOutputFolder(self.outputFolder.CreateSubfolder(
+                            'simulation_' + sim.prefix))
                     self.libraryEnv.SetDelegateeEnv(sim.results, sim.prefix)
             start = time.time()
             self.ExecuteLibrary()
@@ -493,14 +499,14 @@ class Protocol(object):
             )
             model = cellmlmanip.load_model(model)
 
-            # Select model outputs (as oxmeta names)
+            # Select model outputs (as qualified names)
             outputs = [
                 'time',
                 'membrane_voltage',
                 'state_variable',
             ]
 
-            # Select model parameters (as oxmeta names)
+            # Select model parameters (as qualified names)
             parameters = []
 
             # Create weblab model at path
@@ -633,7 +639,6 @@ class Protocol(object):
             # Search in the library folder instead
             library = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
-                os.pardir,
                 'library')
             new_path = os.path.join(library, path)
         return new_path

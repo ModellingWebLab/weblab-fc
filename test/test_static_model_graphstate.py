@@ -4,10 +4,9 @@ Temporary test for static `weblab_cg` generated `pyx` model.
 
 """
 import os
-# import pytest
 
 import fc
-import fc.test_support as TestSupport
+from fc.utility import test_support
 
 
 def test_static_pyx_file():
@@ -18,15 +17,17 @@ def test_static_pyx_file():
     proto = fc.Protocol(os.path.join(
         'test', 'protocols', 'static_model_graphstate.txt'))
     proto.SetOutputFolder('test_static_pyx_file')
-    proto.set_model(os.path.join('test', 'data', 'static_model_graphstate.pyx'))
+    proto.set_model(
+        os.path.join('test', 'data', 'static_model_graphstate.pyx'))
     proto.Run()
+
     # Test assertions are within the protocol itself
 
     # Check output exists
     assert os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5'))
 
     # Check output is correct
-    assert TestSupport.CheckResults(
+    assert test_support.CheckResults(
         proto,
         {'state': 2},   # Name and dimension of output to check
         os.path.join('test', 'data', 'historic', model_name, proto_name),

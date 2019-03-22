@@ -4,7 +4,7 @@ import pytest
 import unittest
 
 import fc
-import fc.test_support as TestSupport
+from fc.utility import test_support
 from fc.simulations.solvers import CvodeSolver
 
 
@@ -17,8 +17,9 @@ class TestIcalProto(unittest.TestCase):
     def testIcal(self):
         proto = fc.Protocol('protocols/ICaL.txt')
         proto.SetOutputFolder('Py_TestIcalProto')
-        proto.set_model('cellml/aslanidi_Purkinje_model_2009.cellml', useNumba=False)
+        proto.set_model('cellml/aslanidi_Purkinje_model_2009.cellml')
         proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'test/data/TestSpeedRealProto/ICaL'
-        TestSupport.CheckResults(proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)
+        test_suport.CheckResults(
+            proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)

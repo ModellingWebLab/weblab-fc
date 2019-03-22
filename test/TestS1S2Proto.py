@@ -4,12 +4,12 @@ import pytest
 import unittest
 
 import fc
-import fc.test_support as TestSupport
+from fc.utility import test_support
 from fc.simulations.solvers import CvodeSolver
 
 
 @pytest.mark.skipif(os.getenv('FC_LONG_TESTS', '0') == '0',
-                    reason="FC_LONG_TESTS not set to 1")
+                    reason='FC_LONG_TESTS not set to 1')
 class TestS1S2Proto(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
 
@@ -21,4 +21,8 @@ class TestS1S2Proto(unittest.TestCase):
         proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'test/data/TestSpeedRealProto/S1S2'
-        TestSupport.CheckResults(proto, {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1}, data_folder)
+        test_support.CheckResults(
+            proto,
+            {'raw_APD90': 2, 'raw_DI': 2, 'max_S1S2_slope': 1},
+            data_folder
+        )
