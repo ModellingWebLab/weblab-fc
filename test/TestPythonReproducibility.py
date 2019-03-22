@@ -90,11 +90,11 @@ def RunExperiment(modelName, protoName, expectedOutputs):
                 outputs_match = test_support.CheckResults(
                     proto,
                     expectedOutputs,
-                     'test/data/historic/%s/%s' % (modelName, protoName),
-                     rtol=0.005,
-                     atol=2.5e-4,
-                     messages=messages,
-                 )
+                    'test/data/historic/%s/%s' % (modelName, protoName),
+                    rtol=0.005,
+                    atol=2.5e-4,
+                    messages=messages,
+                )
                 if outputs_match is None:
                     if result:
                         messages.append(

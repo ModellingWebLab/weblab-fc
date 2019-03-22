@@ -21,5 +21,5 @@ class TestIcalProto(unittest.TestCase):
         proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'test/data/TestSpeedRealProto/ICaL'
-        test_suport.CheckResults(
+        test_support.CheckResults(
             proto, {'min_LCC': 2, 'final_membrane_voltage': 1}, data_folder)

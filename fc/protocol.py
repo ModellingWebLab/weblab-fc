@@ -113,6 +113,7 @@ class Protocol(object):
 
         import fc.parsing.CompactSyntaxParser as CSP
         CSP.DoXmlImports()
+
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
         generator = self.parsedProtocol = parser._Try(
@@ -489,17 +490,17 @@ class Protocol(object):
             # Select model outputs (as qualified names)
             outputs = []
             for item in self.model_interface:
-                #TODO: Update this to use objects instead of a list of dicts
+                # TODO: Update this to use objects instead of a list of dicts
                 if item['type'] == 'OutputVariable':
-                    #TODO: Better handling for `state_variable`
+                    # TODO: Better handling for `state_variable`
                     if item['local_name'] == 'state_variable':
                         outputs.append('state_variable')
                     else:
                         outputs.append((item['ns'], item['local_name']))
-                    #TODO: Handle units
+                    # TODO: Handle units
 
             # Select model parameters (as qualified names)
-            #TODO DO WHATEVER WE NEED TO DO HERE
+            # TODO DO WHATEVER WE NEED TO DO HERE
             parameters = [
             ]
 
@@ -540,8 +541,6 @@ class Protocol(object):
                     model._module = module
                     break
             del sys.modules['model']
-
-
 
         # Compile model from static .pyx file (temporary code for testing
         # fccodegen!)

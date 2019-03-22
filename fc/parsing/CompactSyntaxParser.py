@@ -27,7 +27,7 @@ p.ParserElement.enablePackrat()
 # Some of our tests still need the XML generation (which the C++ code used), so
 # allow its dependencies to be selectively imported iff required.
 
-#TODO: Get rid of this
+# TODO: Get rid of this
 def DoXmlImports():
     import lxml.builder
     import lxml.etree as ET  # noqa
@@ -813,7 +813,7 @@ class Actions(object):
                 return P.modelInterface(*self.GetChildrenXml())
 
         def _expr(self):
-            #TODO: Create objects for all parts of the model interface
+            # TODO: Create objects for all parts of the model interface
             #return self.GetChildrenExpr()
             output = []
             for action in self:
@@ -1962,6 +1962,7 @@ class Debug(object):
 ################################################################################
 # Script for conversion to XML syntax, callable by C++ code
 ################################################################################
+# TODO: Remove this
 if __name__ == '__main__':
     assert len(sys.argv) >= 3
     source_path = sys.argv[1]
