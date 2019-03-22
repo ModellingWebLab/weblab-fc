@@ -1,6 +1,5 @@
 import operator
 import os
-import shutil
 import subprocess
 import sys
 import tables
@@ -428,30 +427,11 @@ class Protocol(object):
             value = valueExpr.Evaluate(self.inputEnv)
         self.inputEnv.OverwriteDefinition(name, value)
 
-    def GetConversionCommand(self, model, xmlFile, className, tempDir,
-                             useCython=True, useNumba=False, exposeNamedParameters=False):
-        """Return the command to translate a modified CellML model to Python code.
-
-        Optionally this can be optimised with numba or Cython."""
-        if useCython:
-            model_py_file = os.path.join(tempDir, 'model.pyx')
-            target = 'Cython'
-        else:
-            model_py_file = os.path.join(tempDir, 'model.py')
-            target = 'Python'
-        code_gen_cmd = ['./python/pycml/translate.py', '-t', target, '-p', '--Wu',
-                        '--protocol=' + xmlFile, model, '-c', className, '-o', model_py_file]
-        if exposeNamedParameters:
-            # Allow the parameter fitting code to adjust the value of any annotated constant variable
-            code_gen_cmd.append('--expose-named-parameters')
-        if not useCython and not useNumba:
-            code_gen_cmd.append('--no-numba')
-        return code_gen_cmd
-
-    def set_model(self, model, useNumba=False, useCython=True,
-                  exposeNamedParameters=False):
+    def set_model(self, model, exposeNamedParameters=False):
         """
         Specify the model this protocol is to be run on.
+
+        The ``model`` can be given as a Model object or a string.
         """
 
         # Benchmarking
@@ -460,12 +440,6 @@ class Protocol(object):
         # Compile model from CellML
         if isinstance(model, str) and model.endswith('.cellml'):
 
-            if not useCython:
-                raise ValueError(
-                    'A CellML file model must be run with useCython=True')
-            if useNumba:
-                raise ValueError(
-                    'Numba cannot be used with CellML models.')
             if exposeNamedParameters:
                 raise ValueError('I have no idea what this does.')
 
@@ -532,61 +506,6 @@ class Protocol(object):
             ))
 
             # Create an instance of the model
-            self.modelPath = temp_dir
-            sys.path.insert(0, temp_dir)
-            import model as module
-            for name in module.__dict__.keys():
-                if name.startswith(class_name):
-                    model = getattr(module, name)()
-                    model._module = module
-                    break
-            del sys.modules['model']
-
-        # Compile model from static .pyx file (temporary code for testing
-        # fccodegen!)
-        elif isinstance(model, str) and model.endswith('.pyx'):
-
-            if not useCython:
-                raise ValueError(
-                    'A pyx file model must be run with useCython=True')
-            if useNumba:
-                raise ValueError(
-                    'Numba cannot be used with pyx models.')
-
-            self.LogProgress('Compiling pyx model code...')
-
-            # Create temporary directory
-            if self.outputFolder:
-                temp_dir = tempfile.mkdtemp(dir=self.outputFolder.path)
-            else:
-                temp_dir = tempfile.mkdtemp()
-
-            # Copy model file
-            model_file = os.path.join(temp_dir, 'model.pyx')
-            shutil.copy(model, model_file)
-
-            # Get path to root dir of fc module
-            fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
-
-            # Write setup.py
-            setup_file = os.path.join(temp_dir, 'setup.py')
-            template_strings = {
-                'module_name': 'model',
-                'model_file': model_file,
-                'fcpath': fcpath,
-            }
-            with open(setup_file, 'w') as f:
-                f.write(SETUP_PY % template_strings)
-
-            # Compile the extension module
-            print(subprocess.check_output(
-                ['python', 'setup.py', 'build_ext', '--inplace'],
-                cwd=temp_dir,
-                stderr=subprocess.STDOUT,
-            ))
-
-            # Create an instance of the model
-            class_name = 'TestModel'
             self.modelPath = temp_dir
             sys.path.insert(0, temp_dir)
             import model as module
