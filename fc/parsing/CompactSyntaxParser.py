@@ -1780,19 +1780,21 @@ class CompactSyntaxParser(object):
     # Parsing a full protocol
     #########################
 
-    protocol = p.And(list(map(Optional,
-                              [nl,
-                               documentation,
-                               nsDecls + nl,
-                               inputs,
-                               imports + nl,
-                               library,
-                               units,
-                               modelInterface,
-                               tasks,
-                               postProcessing,
-                               outputs,
-                               plots]))).setName('Protocol').setParseAction(Actions.Protocol)
+    protocol = p.And(
+        list(map(Optional, [
+            nl,
+            documentation,
+            nsDecls + nl,
+            inputs,
+            imports + nl,
+            library,
+            units,
+            modelInterface,
+            tasks,
+            postProcessing,
+            outputs,
+            plots,
+        ]))).setName('Protocol').setParseAction(Actions.Protocol)
 
     def __init__(self):
         """Initialise the parser."""
@@ -1807,16 +1809,21 @@ class CompactSyntaxParser(object):
         sys.setrecursionlimit(self._original_stack_limit)
 
     def _Try(self, callable, *args, **kwargs):
-        """Try calling the given parse command, increasing the stack depth limit if needed."""
+        """
+        Try calling the given parse command, increasing the stack depth limit
+        if needed.
+        """
         r = None  # Result
         while self._stack_depth_factor < 3:
             try:
                 r = callable(*args, **kwargs)
             except RuntimeError as msg:
-                print("Got RuntimeError:", msg, file=sys.stderr)
+                print('Got RuntimeError:', msg, file=sys.stderr)
                 self._stack_depth_factor += 0.5
-                new_limit = int(self._stack_depth_factor * self._original_stack_limit)
-                print("Increasing recursion limit to", new_limit, file=sys.stderr)
+                new_limit = int(
+                    self._stack_depth_factor * self._original_stack_limit)
+                print('Increasing recursion limit to', new_limit,
+                      file=sys.stderr)
                 sys.setrecursionlimit(new_limit)
             else:
                 break  # Parsed OK
@@ -1841,11 +1848,15 @@ class CompactSyntaxParser(object):
         if source_path.endswith('.txt'):
             # We'll need to convert.  Figure out the full path to the referent.
             if not os.path.isabs(source_path):
-                source_path = os.path.join(os.path.dirname(referringProtoPath), source_path)
+                source_path = os.path.join(
+                    os.path.dirname(referringProtoPath), source_path)
             if not os.path.exists(source_path):
-                library = os.path.join(os.path.dirname(__file__), os.pardir, 'library')
-                source_path = os.path.join(library, referringElt.attrib['source'])
-            new_path = self.ConvertProtocol(source_path, outputDir, dryRun=dryRun)
+                library = os.path.join(
+                    os.path.dirname(__file__), os.pardir, 'library')
+                source_path = os.path.join(
+                    library, referringElt.attrib['source'])
+            new_path = self.ConvertProtocol(
+                source_path, outputDir, dryRun=dryRun)
             if not dryRun:
                 referringElt.attrib['source'] = new_path
 
