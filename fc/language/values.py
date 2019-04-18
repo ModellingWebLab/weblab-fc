@@ -94,17 +94,17 @@ class DefaultParameter(AbstractValue):
 class LambdaClosure(AbstractValue):
     """Class for functions in the protocol language."""
 
-    def __init__(self, definingEnv, formalParameters, body, defaultParameters):
+    def __init__(self, definingEnv, formalParameters, body, default_parameters):
         self.formalParameters = formalParameters
         self.body = body
-        self.defaultParameters = defaultParameters
+        self.default_parameters = default_parameters
         self.definingEnv = definingEnv
 
     def __str__(self):
         """Return a string representation of this function."""
         return "function" + str(tuple(self.formalParameters))
 
-    def Compile(self, env, actualParameters):
+    def compile(self, env, actualParameters):
         from ..environment import Environment
         local_env = Environment(delegatee=self.definingEnv)
         params = actualParameters[:]
@@ -112,30 +112,30 @@ class LambdaClosure(AbstractValue):
             params.extend([DefaultParameter()] * (len(self.formalParameters) - len(params)))
         for i, param in enumerate(params):
             if not isinstance(param, DefaultParameter):
-                local_env.DefineName(self.formalParameters[i], param)
-            elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
-                if not hasattr(self.defaultParameters[i], 'value'):
+                local_env.define_name(self.formalParameters[i], param)
+            elif self.default_parameters[i] is not None and not isinstance(self.default_parameters[i], DefaultParameter):
+                if not hasattr(self.default_parameters[i], 'value'):
                     raise NotImplementedError
-                local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
+                local_env.define_name(self.formalParameters[i], self.default_parameters[i])
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
         if len(self.body) == 1:
-            expression = self.body[0].Compile(env)
+            expression = self.body[0].compile(env)
         return expression, local_env
 
-    def Evaluate(self, env, actualParameters):
+    def evaluate(self, env, actualParameters):
         from ..environment import Environment
         local_env = Environment(delegatee=self.definingEnv)
         if len(actualParameters) < len(self.formalParameters):
             actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
         for i, param in enumerate(actualParameters):
             if not isinstance(param, DefaultParameter):
-                local_env.DefineName(self.formalParameters[i], param)
-            elif self.defaultParameters[i] is not None:
-                local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
+                local_env.define_name(self.formalParameters[i], param)
+            elif self.default_parameters[i] is not None:
+                local_env.define_name(self.formalParameters[i], self.default_parameters[i])
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
-        result = local_env.ExecuteStatements(self.body, returnAllowed=True)
+        result = local_env.execute_statements(self.body, return_allowed=True)
         return result
 
 
@@ -146,7 +146,7 @@ class LoadFunction(LambdaClosure):
     """
 
     def __init__(self, basePath):
-        """Initialise an instance of the load() built-in.
+        """initialise an instance of the load() built-in.
 
         :param basePath: path with respect to which to resolve relative data file paths.
         """
@@ -156,11 +156,11 @@ class LoadFunction(LambdaClosure):
         """Return a string representation of this function."""
         return "load()"
 
-    def Compile(self, env, actualParameters):
+    def compile(self, env, actualParameters):
         raise NotImplementedError
 
-    def Evaluate(self, env, actualParameters):
-        """Evaluate a load() function call.
+    def evaluate(self, env, actualParameters):
+        """evaluate a load() function call.
 
         :param env: the environment within which to evaluate this call
         :param actualParameters: the values of the parameters to the call; should be a single
@@ -173,5 +173,5 @@ class LoadFunction(LambdaClosure):
             raise ProtocolError("A load() call takes a string parameter with the file path to load.")
         import os
         file_path = os.path.join(self.basePath, actualParameters[0].value)
-        from ..test_support import Load2d
-        return Load2d(file_path)
+        from ..test_support import load2d
+        return load2d(file_path)

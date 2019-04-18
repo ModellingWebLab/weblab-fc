@@ -16,17 +16,17 @@ def test_dynamic_pyx_file():
 
     proto = fc.Protocol(os.path.join(
         'test', 'protocols', 'dynamic_model_graphstate.txt'))
-    proto.SetOutputFolder('test_dynamic_pyx_file')
-    proto.SetModel(os.path.join(
+    proto.set_output_folder('test_dynamic_pyx_file')
+    proto.set_model(os.path.join(
         'test', 'models', model_name + '.cellml'))
-    proto.Run()
+    proto.run()
     # Test assertions are within the protocol itself
 
     # Check output exists
     assert os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5'))
 
     # Check output is correct
-    assert test_support.CheckResults(
+    assert test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
         os.path.join('test', 'data', 'historic', model_name, proto_name),

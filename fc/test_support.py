@@ -9,7 +9,7 @@ import numpy as np
 from .language import values as V
 
 
-def GetProcessNumber():
+def get_process_number():
     """Get the number of the current process within a process pool.
 
     Numbering starts from 1.  If this process is not one started by the multiprocessing module, 0 is returned.
@@ -26,7 +26,7 @@ def GetProcessNumber():
 # based on boost/test/floating_point_comparison.hpp
 
 
-def WithinRelativeTolerance(arr1, arr2, tol):
+def within_relative_tolerance(arr1, arr2, tol):
     """Determine if two arrays are element-wise close within the given relative tolerance.
 
     :returns: a boolean array
@@ -38,7 +38,7 @@ def WithinRelativeTolerance(arr1, arr2, tol):
     return np.logical_and(d1 <= tol, d2 <= tol)
 
 
-def WithinAbsoluteTolerance(arr1, arr2, tol):
+def within_absolute_tolerance(arr1, arr2, tol):
     """Determine if two arrays are element-wise close within the given absolute tolerance.
 
     A difference of exactly the tolerance is considered to be OK.
@@ -48,7 +48,7 @@ def WithinAbsoluteTolerance(arr1, arr2, tol):
     return np.fabs(arr1 - arr2) <= tol
 
 
-def GetMaxErrors(arr1, arr2):
+def get_max_errors(arr1, arr2):
     """Compute the maximum relative and absolute pairwise errors between two arrays.
 
     :returns: (max relative error, max absolute error)
@@ -62,7 +62,7 @@ def GetMaxErrors(arr1, arr2):
     return (max_rel_err, max_abs_err)
 
 
-def WithinAnyTolerance(arr1, arr2, relTol=None, absTol=None):
+def within_any_tolerance(arr1, arr2, relTol=None, absTol=None):
     """Determine if two arrays are element-wise close within the given tolerances.
 
     If either the relative OR absolute tolerance is satisfied for a given pair of values, the result is true.
@@ -77,10 +77,10 @@ def WithinAnyTolerance(arr1, arr2, relTol=None, absTol=None):
         relTol = np.finfo(np.float).eps
     if absTol is None:
         absTol = np.finfo(np.float).eps
-    return np.logical_or(WithinAbsoluteTolerance(arr1, arr2, absTol), WithinRelativeTolerance(arr1, arr2, relTol))
+    return np.logical_or(within_absolute_tolerance(arr1, arr2, absTol), within_relative_tolerance(arr1, arr2, relTol))
 
 
-def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
+def check_results(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
     """Check protocol results against saved values.
 
     Note that if the protocol is missing expected results, this is only an error if
@@ -92,7 +92,7 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
 
     :param proto: an instance of fc.Protocol that (hopefully) has results available to check
     :param expectedSpec: a dictionary mapping result name to number of dimensions,
-        so we can use the correct Load* method
+        so we can use the correct load* method
     :param rtol: relative tolerance
     :param atol: absolute tolerance
     :param messages: if provided, should be a list to which failure reports will be appended.
@@ -103,7 +103,7 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
     for name, ndims in expectedSpec.items():
         data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
         try:
-            actual = proto.outputEnv.LookUp(name)
+            actual = proto.outputEnv.look_up(name)
         except KeyError:
             if os.path.exists(data_file):
                 results_ok = False
@@ -119,9 +119,9 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
             results_ok = None
             continue  # Can't compare in this case
         if ndims == 2:
-            method = Load2d
+            method = load2d
         else:
-            method = Load
+            method = load
         expected = method(data_file)
         if messages is None:
             np.testing.assert_allclose(actual.array, expected.array, rtol=rtol, atol=atol)
@@ -131,12 +131,12 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
                                 (name, actual.array.shape, expected.array.shape))
                 results_ok = False
             else:
-                close_entries = WithinAnyTolerance(actual.array, expected.array, relTol=rtol, absTol=atol)
+                close_entries = within_any_tolerance(actual.array, expected.array, relTol=rtol, absTol=atol)
                 if not close_entries.all():
                     bad_entries = np.logical_not(close_entries)
                     bad = actual.array[bad_entries]
                     ref = expected.array[bad_entries]
-                    max_rel_err, max_abs_err = GetMaxErrors(bad, ref)
+                    max_rel_err, max_abs_err = get_max_errors(bad, ref)
                     first_bad = bad.flat[:10]
                     first_expected = ref.flat[:10]
                     messages.append(
@@ -150,7 +150,7 @@ def CheckResults(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=No
     return results_ok
 
 
-def CheckFileCompression(filePath):
+def check_file_compression(filePath):
     """Return (real_path, is_compressed) if a .gz compressed version of filePath exists."""
     real_path = filePath
     is_compressed = False
@@ -162,23 +162,23 @@ def CheckFileCompression(filePath):
     return real_path, is_compressed
 
 
-def Load2d(filePath):
-    """Load the legacy data format for 2d arrays."""
-    real_path, is_compressed = CheckFileCompression(filePath)
+def load2d(filePath):
+    """load the legacy data format for 2d arrays."""
+    real_path, is_compressed = check_file_compression(filePath)
     array = np.loadtxt(real_path, dtype=float, delimiter=',', ndmin=2, unpack=True)  # unpack transposes the array
     assert array.ndim == 2
     return V.Array(array)
 
 
-def Load(filePath):
-    """Load the legacy data format for arbitrary dimension arrays."""
-    real_path, is_compressed = CheckFileCompression(filePath)
+def load(filePath):
+    """load the legacy data format for arbitrary dimension arrays."""
+    real_path, is_compressed = check_file_compression(filePath)
     if is_compressed:
         import gzip
         f = gzip.GzipFile(real_path, 'rb')
     else:
         f = open(real_path, 'r')
-    f.readline()  # Strip comment line
+    f.readline()  # strip comment line
     dims = map(int, f.readline().split(','))[1:]
     array = np.loadtxt(f, dtype=float)
     f.close()

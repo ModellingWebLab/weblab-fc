@@ -7,7 +7,7 @@ from io import StringIO
 from .locatable import Locatable
 
 
-def _ExtractProtocolInfoFromStack(frames):
+def _extract_protocol_info_from_stack(frames):
     """Figure out where within a protocol an error arose, based on the Python stack trace.
 
     Returns a pair (location_list, location_message) containing a list of protocol file locations and a rendered
@@ -26,9 +26,9 @@ def _ExtractProtocolInfoFromStack(frames):
             env = local_vars.get('env', None)
             if env and env is not last_env:
                 last_env = env
-                obj.Trace('Variables defined at ' + obj.location + ':', stream=trace_output)
+                obj.trace('Variables defined at ' + obj.location + ':', stream=trace_output)
                 for name in env:
-                    obj.Trace(env[name], stream=trace_output, prefix='  ' + name + ' = ')
+                    obj.trace(env[name], stream=trace_output, prefix='  ' + name + ' = ')
     if locations:
         message = 'Protocol stack trace (most recent call last):\n  ' + '\n  '.join(locations)
         if last_env:
@@ -48,14 +48,14 @@ class ProtocolError(Exception):
         In addition, when the exception is created the stack will be examined to determine what lines in the currently
         running protocol were responsible, if any, and these details added to the Python stack trace reported. (The list
         of locations will also be stored as self.locations.) Since this can make the error message rather long, we also
-        store self.shortMessage as the message string created from the constructor arguments.
+        store self.short_message as the message string created from the constructor arguments.
         """
         # Figure out where in the protocol this error arose
-        self.locations, location_message = _ExtractProtocolInfoFromStack(
+        self.locations, location_message = _extract_protocol_info_from_stack(
             map(operator.itemgetter(0), reversed(inspect.stack())))
         # Construct the full error message
-        self.shortMessage = ' '.join(map(str, msgParts))
-        msg = self.shortMessage + '\n' + location_message
+        self.short_message = ' '.join(map(str, msgParts))
+        msg = self.short_message + '\n' + location_message
         super(ProtocolError, self).__init__(msg)
 
 
@@ -86,14 +86,14 @@ class ErrorRecorder(ProtocolError):
         if exc_value is not None:
             self.errors.append(exc_value)
             message = "%d. %s: %s" % (len(self.errors), exc_type.__name__, str(exc_value))
-            if hasattr(exc_value, 'shortMessage'):
-                self.shortMessage += "\n" + exc_value.shortMessage
+            if hasattr(exc_value, 'short_message'):
+                self.short_message += "\n" + exc_value.short_message
             message += "\nTraceback (most recent call last):\n" + ''.join(traceback.format_tb(exc_traceback))
             frames = []
             while exc_traceback:
                 frames.append(exc_traceback.tb_frame)
                 exc_traceback = exc_traceback.tb_next
-            message += _ExtractProtocolInfoFromStack(frames)[1]
+            message += _extract_protocol_info_from_stack(frames)[1]
             args = list(self.args)
             args[0] += "\n" + message
             self.args = tuple(args)

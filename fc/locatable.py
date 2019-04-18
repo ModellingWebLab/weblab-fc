@@ -10,7 +10,7 @@ class Locatable(object):
     This class stores the location within a protocol file giving rise to the construct,
     and also whether the construct is being traced, i.e. can have its value written to a trace
     file when evaluated.  The class variable outputFolder records where trace should be written,
-    if enabled, and the Trace method can be used to trace a value.
+    if enabled, and the trace method can be used to trace a value.
     """
 
     def __init__(self, location=None):
@@ -24,8 +24,8 @@ class Locatable(object):
         self.location = location
         self.trace = False
 
-    def Trace(self, value, stream=sys.stdout, prefix=''):
-        """Trace the given value.
+    def trace(self, value, stream=sys.stdout, prefix=''):
+        """trace the given value.
 
         A synopsis will be written to stream, and the full value to a trace file, if self.outputFolder
         is defined.
