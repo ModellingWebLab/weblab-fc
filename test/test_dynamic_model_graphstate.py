@@ -4,10 +4,9 @@ Temporary test for dynamically generated `pyx` model with weblab_cg.
 
 """
 import os
-# import pytest
 
 import fc
-from fc.utility import test_support
+from fc import test_support
 
 
 def test_dynamic_pyx_file():

@@ -6,7 +6,7 @@ Routines of use in tests of Functional Curation.
 import os
 import numpy as np
 
-from ..language import values as V
+from .language import values as V
 
 
 def GetProcessNumber():

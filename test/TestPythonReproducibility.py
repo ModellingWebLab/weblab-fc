@@ -1,4 +1,3 @@
-
 try:
     from setproctitle import setproctitle
 except ImportError:
@@ -15,7 +14,7 @@ import unittest
 from io import StringIO
 
 import fc
-from fc.utility import test_support
+from fc import test_support
 
 
 # Hack in variables defined by Chaste's testing framework, for now

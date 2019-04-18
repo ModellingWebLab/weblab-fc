@@ -1,10 +1,9 @@
-
 import os
 import pytest
 import unittest
 
 import fc
-from fc.utility import test_support
+from fc import test_support
 from fc.simulations.solvers import CvodeSolver
 
 
