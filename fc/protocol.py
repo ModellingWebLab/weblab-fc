@@ -131,7 +131,9 @@ class Protocol(object):
             self.LogProgress('Importing', path, 'as', prefix, 'in', self.protoName)
             imported_proto = Protocol(self.GetPath(protoFile, path), self.indentLevel + 1)
 
-            if prefix == "":
+            if prefix:
+                self.AddImportedProtocol(imported_proto, prefix)
+            else:            
                 # Merge inputs of the imported protocol into our own (duplicate names are an error here).
                 # Override any values specified in the import statement itself.
                 for stmt in imported_proto.inputs:
@@ -149,10 +151,14 @@ class Protocol(object):
                 self.outputs.extend(imported_proto.outputs)
                 self.plots.extend(imported_proto.plots)
                 self.model_interface.extend(imported_proto.model_interface)
-                for prefix, uri in imported_proto.ns_map.items():
-                    self.ns_map[prefix] = uri
-            else:
-                self.AddImportedProtocol(imported_proto, prefix)
+                for ns_prefix, uri in imported_proto.ns_map.items():
+                    existing_uri = self.ns_map.get(ns_prefix, None)
+                    if existing_uri is None:
+                        self.ns_map[ns_prefix] = uri
+                    elif existing_uri != uri:
+                        raise ProtocolError(
+                            'Prefix ' + str(ns_prefix) + ' is used for'
+                            ' multiple URIs in imported protocols.')
 
         self.libraryEnv.SetDelegateeEnv(self.inputEnv)
         self.library.extend(details.get('library', []))
@@ -162,7 +168,12 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
         self.model_interface.extend(details.get('model_interface', []))
         for prefix, uri in details.get('ns_map', {}).items():
-            self.ns_map[prefix] = uri
+            existing_uri = self.ns_map.get(prefix, None)
+            if existing_uri is None:
+                self.ns_map[prefix] = uri
+            elif existing_uri != uri:
+                raise ProtocolError(
+                    'Prefix ' + str(prefix) + ' is used for multiple URIs.')
 
         # Replace ns prefixes with uris in model interface
         for item in self.model_interface:
