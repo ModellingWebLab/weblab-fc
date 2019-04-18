@@ -17,7 +17,7 @@ class TestS1S2Proto(unittest.TestCase):
     def testS1S2(self):
         proto = fc.Protocol('protocols/S1S2.txt')
         proto.SetOutputFolder('Py_TestS1S2Proto')
-        proto.set_model('cellml/courtemanche_ramirez_nattel_1998.cellml')
+        proto.SetModel('cellml/courtemanche_ramirez_nattel_1998.cellml')
         proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'test/data/TestSpeedRealProto/S1S2'

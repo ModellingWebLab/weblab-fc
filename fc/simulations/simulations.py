@@ -37,7 +37,7 @@ class AbstractSimulation(locatable.Locatable):
         # Must remove Model class and regenerate during unpickling
         # (Pickling errors from nested class structure of ModelWrapperEnvironment)
 
-        # Undo Simulation.set_model
+        # Undo Simulation.SetModel
         if self.model is not None:
             modelenv = self.model.GetEnvironmentMap()
             for prefix in modelenv:
@@ -128,9 +128,9 @@ class AbstractSimulation(locatable.Locatable):
                     self.viewEnv.OverwriteDefinition(
                         name, V.Array(self.results.LookUp(name).array[0:1 + self.range_.count]))
 
-    def set_model(self, model):
+    def SetModel(self, model):
         if isinstance(self.model, NestedProtocol):
-            self.model.proto.set_model(model)
+            self.model.proto.SetModel(model)
         else:
             self.model = model
         self.model.SetIndentLevel(self.indentLevel)
@@ -290,6 +290,6 @@ class Nested(AbstractSimulation):
             self.LoopBodyEndHook()
         self.LoopEndHook()
 
-    def set_model(self, model):
-        super(Nested, self).set_model(model)
-        self.nestedSim.set_model(model)
+    def SetModel(self, model):
+        super(Nested, self).SetModel(model)
+        self.nestedSim.SetModel(model)

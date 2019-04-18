@@ -213,7 +213,7 @@ class Protocol(object):
             del sys.modules['model']
             self.model = model
             for sim in self.simulations:
-                sim.set_model(model)
+                sim.SetModel(model)
 
     def AddImportedProtocol(self, proto, prefix):
         """
@@ -361,9 +361,7 @@ class Protocol(object):
         self.libraryEnv.ExecuteStatements(self.library)
 
     def Run(self, verbose=True, writeOut=True):
-        """
-        Run this protocol on the model already specified using set_model.
-        """
+        """Run this protocol on the model already specified using SetModel."""
         Locatable.outputFolder = self.outputFolder
         self.Initialise(verbose)
         if verbose:
@@ -427,7 +425,7 @@ class Protocol(object):
             value = valueExpr.Evaluate(self.inputEnv)
         self.inputEnv.OverwriteDefinition(name, value)
 
-    def set_model(self, model, exposeNamedParameters=False):
+    def SetModel(self, model, exposeNamedParameters=False):
         """
         Specify the model this protocol is to be run on.
 
@@ -519,7 +517,7 @@ class Protocol(object):
         # Set model
         self.model = model
         for sim in self.simulations:
-            sim.set_model(model)
+            sim.SetModel(model)
 
         # Benchmarking
         self.timings['load model'] = (

@@ -16,7 +16,7 @@ class TestMathmlEvaluation(unittest.TestCase):
     def testMathmlOperations(self):
         proto = fc.Protocol('test/protocols/test_mathml_evaluation.txt')
         proto.SetOutputFolder('Py_TestMathmlEvaluation_TestMathmlOperations')
-        proto.set_model('cellml/beeler_reuter_model_1977.cellml')
+        proto.SetModel('cellml/beeler_reuter_model_1977.cellml')
         proto.Run()
         # Test assertions are within the protocol itself
         self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))

@@ -659,7 +659,7 @@ class TestSyntaxInterface(unittest.TestCase):
         proto_file = 'protocols/GraphState.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestSyntaxInterface_TestGraphTxt')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
 
     def testParsingInputs(self):
@@ -710,7 +710,7 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         expr.Initialise()
         a = 5
-        expr.set_model(Model.TestOdeModel(a))
+        expr.SetModel(Model.TestOdeModel(a))
         run_sim = expr.Run()
         np.testing.assert_array_almost_equal(run_sim.LookUp('a').array, np.array([5] * 11))
         np.testing.assert_array_almost_equal(run_sim.LookUp('y').array, np.array([t * 5 for t in range(11)]))

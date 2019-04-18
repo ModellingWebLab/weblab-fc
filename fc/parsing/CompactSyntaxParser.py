@@ -1015,7 +1015,7 @@ class Actions(object):
             args.extend([output_names, optional_flags])
             model = Model.NestedProtocol(*args)
             result = Simulations.OneStep(0)
-            result.set_model(model)
+            result.SetModel(model)
             return result
 
     class Simulation(BaseGroupAction):

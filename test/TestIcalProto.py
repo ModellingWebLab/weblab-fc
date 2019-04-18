@@ -17,7 +17,7 @@ class TestIcalProto(unittest.TestCase):
     def testIcal(self):
         proto = fc.Protocol('protocols/ICaL.txt')
         proto.SetOutputFolder('Py_TestIcalProto')
-        proto.set_model('cellml/aslanidi_Purkinje_model_2009.cellml')
+        proto.SetModel('cellml/aslanidi_Purkinje_model_2009.cellml')
         proto.model.SetSolver(CvodeSolver())
         proto.Run()
         data_folder = 'test/data/TestSpeedRealProto/ICaL'

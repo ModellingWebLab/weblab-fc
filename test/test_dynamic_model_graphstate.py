@@ -18,7 +18,7 @@ def test_dynamic_pyx_file():
     proto = fc.Protocol(os.path.join(
         'test', 'protocols', 'dynamic_model_graphstate.txt'))
     proto.SetOutputFolder('test_dynamic_pyx_file')
-    proto.set_model(os.path.join(
+    proto.SetModel(os.path.join(
         'test', 'models', model_name + '.cellml'))
     proto.Run()
     # Test assertions are within the protocol itself

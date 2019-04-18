@@ -15,7 +15,7 @@ class TestVariousProtocols(unittest.TestCase):
         proto_file = 'test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestNestedProtocols')
-        proto.set_model('cellml/luo_rudy_1991.cellml')
+        proto.SetModel('cellml/luo_rudy_1991.cellml')
         proto.Run()
         self.assertNotIn('always_missing', proto.outputEnv)
         self.assertNotIn('first_missing', proto.outputEnv)
@@ -27,7 +27,7 @@ class TestVariousProtocols(unittest.TestCase):
         proto_file = 'test/protocols/test_other_ontologies.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestAnnotatingWithOtherOntologies')
-        proto.set_model('test/data/test_lr91.cellml')
+        proto.SetModel('test/data/test_lr91.cellml')
         proto.Run()
 
     def testParallelNestedTxt(self):
@@ -35,7 +35,7 @@ class TestVariousProtocols(unittest.TestCase):
         proto_file = 'test/protocols/test_parallel_nested.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestParallelNestedTxt')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
         proto.model.ResetState()
         proto.Run()
@@ -44,13 +44,13 @@ class TestVariousProtocols(unittest.TestCase):
         proto_file = 'test/protocols/test_sim_environments.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestSimEnv')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.Run()
 
     def testWhileLoopTxt(self):
         proto_file = 'test/protocols/test_while_loop.txt'
         proto = fc.Protocol(proto_file)
         proto.SetOutputFolder('TestVariousProtocols_TestWhileLoopTxt')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.SetModel(Model.TestOdeModel(1))
         proto.SetInput('num_iters', E.N(10))
         proto.Run()
