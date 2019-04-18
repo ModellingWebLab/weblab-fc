@@ -133,7 +133,7 @@ class Protocol(object):
 
             if prefix:
                 self.AddImportedProtocol(imported_proto, prefix)
-            else:            
+            else:
                 # Merge inputs of the imported protocol into our own (duplicate names are an error here).
                 # Override any values specified in the import statement itself.
                 for stmt in imported_proto.inputs:
