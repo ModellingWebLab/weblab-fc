@@ -9,8 +9,8 @@ from . import ranges as R
 from .model import NestedProtocol
 from .modifiers import AbstractModifier
 from ..language import values as V
-from ..utility import environment as Env
-from ..utility import locatable
+from .. import environment as Env
+from .. import locatable
 
 
 class AbstractSimulation(locatable.Locatable):

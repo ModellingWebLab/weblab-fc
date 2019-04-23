@@ -12,7 +12,7 @@ import fc.simulations.model as Model
 import fc.simulations.modifiers as Modifiers
 import fc.simulations.ranges as Ranges
 import fc.simulations.simulations as Simulations
-from fc.utility.locatable import Locatable
+from fc.locatable import Locatable
 
 __all__ = ['CompactSyntaxParser']
 
@@ -27,6 +27,7 @@ p.ParserElement.enablePackrat()
 # Some of our tests still need the XML generation (which the C++ code used), so
 # allow its dependencies to be selectively imported iff required.
 
+# TODO: Get rid of this
 def DoXmlImports():
     import lxml.builder
     import lxml.etree as ET  # noqa
@@ -736,6 +737,15 @@ class Actions(object):
         def _xml(self):
             return P.specifyOutputVariable(**self.TransferAttrs('name', 'units'))
 
+        def _expr(self):
+            ns, local_name = self.tokens['name'].split(':', 1)
+            return {
+                'type': 'OutputVariable',
+                'ns': ns,
+                'local_name': local_name,
+                'unit': self.tokens.get('unit', None),
+            }
+
     class OptionalVariable(BaseGroupAction):
         def __init__(self, s, loc, tokens):
             super(Actions.OptionalVariable, self).__init__(s, loc, tokens)
@@ -801,6 +811,15 @@ class Actions(object):
         def _xml(self):
             if len(self.tokens) > 0:
                 return P.modelInterface(*self.GetChildrenXml())
+
+        def _expr(self):
+            # TODO: Create objects for all parts of the model interface
+            #return self.GetChildrenExpr()
+            output = []
+            for action in self:
+                if isinstance(action, Actions.OutputVariable):
+                    output.append(action.expr())
+            return output
 
     ######################################################################
     # Simulation tasks section
@@ -1278,8 +1297,18 @@ class Actions(object):
                     d['outputs'] = token.expr()
                 if isinstance(token, Actions.Plots):
                     d['plots'] = token.expr()
+                if isinstance(token, Actions.ModelInterface):
+                    d['model_interface'] = token.expr()
+
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
+
+            ns_map = {'proto': PROTO_NS, 'm': MATHML_NS}
+            if 'namespace' in self.tokens:
+                for prefix, uri in self.tokens['namespace']:
+                    ns_map[prefix] = uri
+            d['ns_map'] = ns_map
+
             return d
 
 
@@ -1780,19 +1809,21 @@ class CompactSyntaxParser(object):
     # Parsing a full protocol
     #########################
 
-    protocol = p.And(list(map(Optional,
-                              [nl,
-                               documentation,
-                               nsDecls + nl,
-                               inputs,
-                               imports + nl,
-                               library,
-                               units,
-                               modelInterface,
-                               tasks,
-                               postProcessing,
-                               outputs,
-                               plots]))).setName('Protocol').setParseAction(Actions.Protocol)
+    protocol = p.And(
+        list(map(Optional, [
+            nl,
+            documentation,
+            nsDecls + nl,
+            inputs,
+            imports + nl,
+            library,
+            units,
+            modelInterface,
+            tasks,
+            postProcessing,
+            outputs,
+            plots,
+        ]))).setName('Protocol').setParseAction(Actions.Protocol)
 
     def __init__(self):
         """Initialise the parser."""
@@ -1807,16 +1838,21 @@ class CompactSyntaxParser(object):
         sys.setrecursionlimit(self._original_stack_limit)
 
     def _Try(self, callable, *args, **kwargs):
-        """Try calling the given parse command, increasing the stack depth limit if needed."""
+        """
+        Try calling the given parse command, increasing the stack depth limit
+        if needed.
+        """
         r = None  # Result
         while self._stack_depth_factor < 3:
             try:
                 r = callable(*args, **kwargs)
             except RuntimeError as msg:
-                print("Got RuntimeError:", msg, file=sys.stderr)
+                print('Got RuntimeError:', msg, file=sys.stderr)
                 self._stack_depth_factor += 0.5
-                new_limit = int(self._stack_depth_factor * self._original_stack_limit)
-                print("Increasing recursion limit to", new_limit, file=sys.stderr)
+                new_limit = int(
+                    self._stack_depth_factor * self._original_stack_limit)
+                print('Increasing recursion limit to', new_limit,
+                      file=sys.stderr)
                 sys.setrecursionlimit(new_limit)
             else:
                 break  # Parsed OK
@@ -1841,11 +1877,15 @@ class CompactSyntaxParser(object):
         if source_path.endswith('.txt'):
             # We'll need to convert.  Figure out the full path to the referent.
             if not os.path.isabs(source_path):
-                source_path = os.path.join(os.path.dirname(referringProtoPath), source_path)
+                source_path = os.path.join(
+                    os.path.dirname(referringProtoPath), source_path)
             if not os.path.exists(source_path):
-                library = os.path.join(os.path.dirname(__file__), os.pardir, 'library')
-                source_path = os.path.join(library, referringElt.attrib['source'])
-            new_path = self.ConvertProtocol(source_path, outputDir, dryRun=dryRun)
+                library = os.path.join(
+                    os.path.dirname(__file__), os.pardir, 'library')
+                source_path = os.path.join(
+                    library, referringElt.attrib['source'])
+            new_path = self.ConvertProtocol(
+                source_path, outputDir, dryRun=dryRun)
             if not dryRun:
                 referringElt.attrib['source'] = new_path
 
@@ -1922,6 +1962,7 @@ class Debug(object):
 ################################################################################
 # Script for conversion to XML syntax, callable by C++ code
 ################################################################################
+# TODO: Remove this
 if __name__ == '__main__':
     assert len(sys.argv) >= 3
     source_path = sys.argv[1]

@@ -2,7 +2,7 @@
 import numpy as np
 
 from .abstract import AbstractExpression
-from ...utility.error_handling import ProtocolError
+from ...error_handling import ProtocolError
 from .. import values as V
 
 

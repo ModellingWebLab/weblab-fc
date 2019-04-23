@@ -16,7 +16,7 @@ class AbstractRange(V.Simple):
         self.numberOfOutputs = 0
         # Set an initial empty environment so calls to set our value in constructors don't fail
         # (since Initialise hasn't been called by our simulation yet)
-        from ..utility.environment import Environment
+        from ..environment import Environment
         AbstractRange.Initialise(self, Environment())
 
     def Initialise(self, env):

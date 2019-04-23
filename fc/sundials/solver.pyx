@@ -7,7 +7,7 @@ from cython cimport view
 
 # NB: Relative cimport isn't yet implemented in Cython (although relative import should be)
 cimport fc.sundials.sundials as _lib
-from fc.utility.error_handling import ProtocolError
+from fc.error_handling import ProtocolError
 
 # Data type for numpy arrays
 np_dtype = np.float64

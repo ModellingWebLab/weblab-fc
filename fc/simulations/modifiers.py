@@ -1,5 +1,5 @@
 
-from ..utility.error_handling import ProtocolError
+from ..error_handling import ProtocolError
 
 
 class AbstractModifier(object):

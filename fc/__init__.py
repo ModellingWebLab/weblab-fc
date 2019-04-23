@@ -19,4 +19,4 @@ finally:
 del(os, inspect)
 
 
-from .utility.protocol import Protocol  # noqa:F401
+from .protocol import Protocol  # noqa:F401

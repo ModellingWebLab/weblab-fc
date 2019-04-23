@@ -3,7 +3,7 @@ import math
 import numexpr as ne
 
 from .abstract import AbstractExpression
-from ...utility.error_handling import ProtocolError
+from ...error_handling import ProtocolError
 from .. import values as V
 from functools import reduce
 

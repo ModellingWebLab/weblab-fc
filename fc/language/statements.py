@@ -1,7 +1,7 @@
 
 from . import values as V
-from ..utility import locatable
-from ..utility.error_handling import ProtocolError
+from .. import locatable
+from ..error_handling import ProtocolError
 
 
 class AbstractStatement(locatable.Locatable):
