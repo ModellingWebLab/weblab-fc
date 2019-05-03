@@ -16,7 +16,7 @@ from .maths import *  # noqa: F403
 from .array import *  # noqa: F403
 
 
-def N(number):
+def n(number):
     """A convenience expression constructor for defining constant numbers."""
     from .. import values as V
     return Const(V.Simple(number))  # noqa: F405

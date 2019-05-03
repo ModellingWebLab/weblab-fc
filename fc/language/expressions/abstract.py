@@ -11,7 +11,7 @@ class AbstractExpression(locatable.Locatable):
         self.children = children
 
         try:
-            line_profile.add_function(self.RealEvaluateCompiled)
+            line_profile.add_function(self.real_evaluate_compiled)
         except NameError:
             pass
 
@@ -28,73 +28,73 @@ class AbstractExpression(locatable.Locatable):
             del odict['_definingEnvs']
         return odict
 
-    def GetUsedVariables(self):
+    def get_used_variables(self):
         """Get the set of (non-local) identifiers referenced within this expression."""
         result = set()
         for child in self.children:
-            result |= child.GetUsedVariables()
+            result |= child.get_used_variables()
         return result
 
-    def EvaluateChildren(self, env):
-        """Evaluate our child expressions and return a list of their values."""
-        return [child.Evaluate(env) for child in self.children]
+    def evaluate_children(self, env):
+        """evaluate our child expressions and return a list of their values."""
+        return [child.evaluate(env) for child in self.children]
 
-    def Interpret(self, env):
-        """Evaluate this expression by interpreting the expression tree.
+    def interpret(self, env):
+        """evaluate this expression by interpreting the expression tree.
         Must be implemented by subclasses.
         """
         raise NotImplementedError
 
-    def Compile(self, arrayContext=True):
+    def compile(self, array_context=True):
         """Create a string representation of this expression for evaluation by numexpr or numpy.
 
         By default, evaluation of the generated string is only guaranteed to give correct results (as defined
-        by the Interpret method) in certain array contexts, for instance maps and array comprehensions.
-        If arrayContext is set to False, the generated string will instead only evaluate correctly when
-        considered as a standalone expression operating on simple values (useful in the SetVariable modifier,
+        by the interpret method) in certain array contexts, for instance maps and array comprehensions.
+        If array_context is set to False, the generated string will instead only evaluate correctly when
+        considered as a standalone expression operating on simple values (useful in the set_variable modifier,
         for instance).
 
         TODO: Always stop compilation succeeding if an expression or subexpression is traced.
-        (Make trace on the base class a property, which when set replaces the Compile method with one
+        (Make trace on the base class a property, which when set replaces the compile method with one
         that always fails.)
         """
         raise NotImplementedError
 
-    def Evaluate(self, env):
-        """We always default to using Interpret for evaluating standalone expressions."""
-        result = self.Interpret(env)
+    def evaluate(self, env):
+        """We always default to using interpret for evaluating standalone expressions."""
+        result = self.interpret(env)
         if self.trace:
-            self.Trace(result)
+            self.trace_value(result)
         return result
 
-    def EvaluateCompiled(self, env):
+    def evaluate_compiled(self, env):
         """Try to evaluate the compiled version of this expression, returning an unwrapped Python value.
 
         This method only gets used on the first call.  If compilation fails, this method's name will be rebound
-        to the normal Evaluate method (or rather, a lambda which unwraps the result).  If compilation succeeds,
-        the RealEvaluateCompiled method will be used.
+        to the normal evaluate method (or rather, a lambda which unwraps the result).  If compilation succeeds,
+        the real_evaluate_compiled method will be used.
         """
         try:
-            value = self.RealEvaluateCompiled(env)
+            value = self.real_evaluate_compiled(env)
         except NotImplementedError:
-            self.EvaluateCompiled = lambda env: self.Evaluate(env).value
-            value = self.EvaluateCompiled(env)
+            self.evaluate_compiled = lambda env: self.evaluate(env).value
+            value = self.evaluate_compiled(env)
         else:
-            self.EvaluateCompiled = self.RealEvaluateCompiled
+            self.evaluate_compiled = self.real_evaluate_compiled
         return value
 
     @property
     def compiled(self):
-        """Compile this expression and cache the result."""
+        """compile this expression and cache the result."""
         try:
             return self._compiled
         except AttributeError:
-            # We haven't called Compile yet; cache the result
-            c = self._compiled = self.Compile(arrayContext=False)
+            # We haven't called compile yet; cache the result
+            c = self._compiled = self.compile(array_context=False)
             return c
 
     @property
-    def evalGlobals(self):
+    def eval_globals(self):
         try:
             return self._evalGlobals
         except AttributeError:
@@ -107,18 +107,18 @@ class AbstractExpression(locatable.Locatable):
             d['___np'] = numpy
             return d
 
-    def RealEvaluateCompiled(self, env):
-        """Evaluate the compiled form of this expression using eval().
+    def real_evaluate_compiled(self, env):
+        """evaluate the compiled form of this expression using eval().
 
-        This is suitable for use only in non-array contexts, such as by the SetVariable modifier.
+        This is suitable for use only in non-array contexts, such as by the set_variable modifier.
         """
-        func = self.compiledFunction
-        arg_envs = self.GetDefiningEnvironments(env)
+        func = self.compiled_function
+        arg_envs = self.get_defining_environments(env)
         assert env is self._rootDefiningEnv, "Internal implementation assumption violated"
-        args = [arg_envs[name].unwrappedBindings[name] for name in self._usedVarLocalNames]
+        args = [arg_envs[name].unwrapped_bindings[name] for name in self._usedVarLocalNames]
         return func(*args)
 
-    def GetDefiningEnvironments(self, env):
+    def get_defining_environments(self, env):
         """Cache which environment each variable used in this expression is actually defined in.
 
         Stores each environment indexed by the local name of the variable within that environment.
@@ -131,39 +131,39 @@ class AbstractExpression(locatable.Locatable):
             self._rootDefiningEnv = env  # For paranoia checking that the cache is valid
             d = self._definingEnvs = {}
             l = self._usedVarLocalNames = []  # noqa: E741
-            for name in self.usedVariableList:
+            for name in self.used_variable_list:
                 local_name = name[name.rfind(':') + 1:]
                 l.append(local_name)
-                d[local_name] = env.FindDefiningEnvironment(name)
+                d[local_name] = env.find_defining_environment(name)
             return d
 
     @property
-    def compiledFunction(self):
+    def compiled_function(self):
         """A version of self.compiled that has been converted to a Python function by eval()."""
         try:
             return self._compiledFunction
         except AttributeError:
             from .general import NameLookUp
-            arg_defs = ', '.join(NameLookUp.PythonizeName(name) for name in self.usedVariableList)
-            f = self._compiledFunction = eval('lambda ' + arg_defs + ': ' + self.compiled, self.evalGlobals)
+            arg_defs = ', '.join(NameLookUp.pythonize_name(name) for name in self.used_variable_list)
+            f = self._compiledFunction = eval('lambda ' + arg_defs + ': ' + self.compiled, self.eval_globals)
             return f
 
     @property
-    def usedVariableList(self):
-        """Cached property version of self.usedVariables that's in a predictable order."""
+    def used_variable_list(self):
+        """Cached property version of self.used_variables that's in a predictable order."""
         try:
             return self._usedVarList
         except AttributeError:
-            l = self._usedVarList = list(self.usedVariables)  # noqa: E741
+            l = self._usedVarList = list(self.used_variables)  # noqa: E741
             l.sort()
             return l
 
     @property
-    def usedVariables(self):
-        """Cached property version of self.GetUsedVariables()."""
+    def used_variables(self):
+        """Cached property version of self.get_used_variables()."""
         try:
             return self._usedVars
         except AttributeError:
             # Create the cache
-            u = self._usedVars = self.GetUsedVariables()
+            u = self._usedVars = self.get_used_variables()
             return u

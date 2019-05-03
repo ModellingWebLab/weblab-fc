@@ -9,24 +9,24 @@ class AbstractRange(V.Simple):
     """
 
     def __init__(self, name):
-        """Initialise the common range properties."""
+        """initialise the common range properties."""
         self.name = name
         self.count = -1
         self._value = float('nan')
         self.numberOfOutputs = 0
         # Set an initial empty environment so calls to set our value in constructors don't fail
-        # (since Initialise hasn't been called by our simulation yet)
+        # (since initialise hasn't been called by our simulation yet)
         from ..environment import Environment
-        AbstractRange.Initialise(self, Environment())
+        AbstractRange.initialise(self, Environment())
 
-    def Initialise(self, env):
+    def initialise(self, env):
         """Called by the associated simulation when its environment is initialised.
 
         Here we define the range variable within the environment.
         Subclasses should also evaluate any expressions used to define the range.
         """
         self.env = env
-        env.DefineName(self.name, self)
+        env.define_name(self.name, self)
 
     @property
     def value(self):
@@ -35,7 +35,7 @@ class AbstractRange(V.Simple):
     @value.setter
     def value(self, value):
         self._value = value
-        self.env.unwrappedBindings[self.name] = value
+        self.env.unwrapped_bindings[self.name] = value
 
     @property
     def unwrapped(self):
@@ -45,13 +45,13 @@ class AbstractRange(V.Simple):
     def current(self):
         return self._value
 
-    def GetCurrentOutputPoint(self):
+    def get_current_output_point(self):
         return self._value
 
-    def GetCurrentOutputNumber(self):
+    def get_current_output_number(self):
         return self.count
 
-    def GetNumberOfOutputPoints(self):
+    def get_number_of_output_points(self):
         return self.numberOfOutputs
 
 
@@ -81,11 +81,11 @@ class UniformRange(AbstractRange):
             self.value = self.start + self.step * self.count
             return self.value
 
-    def Initialise(self, env):
-        super(UniformRange, self).Initialise(env)
-        self.start = self.startExpr.Evaluate(self.env).value
-        self.step = self.stepExpr.Evaluate(self.env).value
-        self.end = self.endExpr.Evaluate(self.env).value
+    def initialise(self, env):
+        super(UniformRange, self).initialise(env)
+        self.start = self.startExpr.evaluate(self.env).value
+        self.step = self.stepExpr.evaluate(self.env).value
+        self.end = self.endExpr.evaluate(self.env).value
         self.value = self.start
         self.numberOfOutputs = int((round(self.end - self.start) / self.step)) + 1
 
@@ -103,10 +103,10 @@ class VectorRange(AbstractRange):
             self.value = float('nan')
         self.count = -1
 
-    def Initialise(self, env):
-        super(VectorRange, self).Initialise(env)
+    def initialise(self, env):
+        super(VectorRange, self).initialise(env)
         if self.expr:
-            self.arrRange = self.expr.Evaluate(env).array
+            self.arrRange = self.expr.evaluate(env).array
             self.value = self.arrRange[0]
             self.numberOfOutputs = len(self.arrRange)
 
@@ -129,17 +129,17 @@ class While(AbstractRange):
     def __init__(self, name, condition):
         super(While, self).__init__(name)
         self.condition = condition
-        self._Init()
+        self.__init()
 
-    def _Init(self):
-        """(Re-)Initialise the range loop."""
+    def __init(self):
+        """(Re-)initialise the range loop."""
         self.count = -1
         self.value = -1
         self.numberOfOutputs = 1000
 
-    def Initialise(self, env):
-        super(While, self).Initialise(env)
-        self._Init()
+    def initialise(self, env):
+        super(While, self).initialise(env)
+        self.__init()
 
     def __iter__(self):
         self.count = -1
@@ -151,7 +151,7 @@ class While(AbstractRange):
         self.value += 1
         if self.count >= self.numberOfOutputs:
             self.numberOfOutputs += 1000
-        if self.count > 0 and not self.condition.Evaluate(self.env).value:
+        if self.count > 0 and not self.condition.evaluate(self.env).value:
             self.numberOfOutputs = self.count
             raise StopIteration
         else:

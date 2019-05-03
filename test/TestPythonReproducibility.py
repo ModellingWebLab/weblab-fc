@@ -46,15 +46,15 @@ class RedirectStdStreams(object):
         sys.stderr = self.old_stderr
 
 
-def WorkerInit():
+def worker_init():
     """Function run on initialization of a Pool worker process.
 
     If the setproctitle module is installed, this will adjust the process title (shown by ps) to be more informative.
     """
-    setproctitle('python worker %d' % test_support.GetProcessNumber())
+    setproctitle('python worker %d' % test_support.get_process_number())
 
 
-def RunExperiment(modelName, protoName, expectedOutputs):
+def run_experiment(modelName, protoName, expectedOutputs):
     """Worker function to run a single experiment, i.e. application of a protocol to a model.
 
     :param modelName: name of model to run, i.e. no path or extension
@@ -70,23 +70,25 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     with RedirectStdStreams(output, output):
         try:
             print("Applying", protoName, "to", modelName,
-                  "on process", test_support.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
-            setproctitle('python worker %d running %s on %s' % (test_support.GetProcessNumber(), protoName, modelName))
+                  "on process", test_support.get_process_number(), "of", CHASTE_NUM_PROCS)
+            setproctitle(
+                'python worker %d running %s on %s' % (
+                    test_support.get_process_number(), protoName, modelName))
             proto = fc.Protocol('protocols/%s.txt' % protoName)
-            proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
-            proto.SetModel('cellml/%s.cellml' % modelName)
+            proto.set_output_folder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
+            proto.set_model('cellml/%s.cellml' % modelName)
             for input in ['max_paces', 'max_steady_state_beats']:
                 try:
-                    proto.SetInput(input, fc.language.values.Simple(1000))
+                    proto.set_input(input, fc.language.values.Simple(1000))
                 except Exception:
                     pass  # Input doesn't exist
-            proto.Run()
+            proto.run()
         except Exception:
             result = False
             messages.append(traceback.format_exc())
         try:
             if expectedOutputs and proto:
-                outputs_match = test_support.CheckResults(
+                outputs_match = test_support.check_results(
                     proto,
                     expectedOutputs,
                     'test/data/historic/%s/%s' % (modelName, protoName),
@@ -190,7 +192,7 @@ class TestPythonReproducibility(unittest.TestCase):
     # We keep a record of all failures to summarise at the end
     failures = []
 
-    def testExperimentReproducibility(self):
+    def test_experiment_reproducibility(self):
         # Get the first result, when available
         model, protocol, resultCode, output, messages = self.results.pop().get()
         if resultCode and len(output) > 450:
@@ -205,10 +207,10 @@ class TestPythonReproducibility(unittest.TestCase):
         self.assertTrue(resultCode, "Experiment %s / %s failed" % (model, protocol))
 
     @classmethod
-    def setUpClass(cls):
+    def set_up_class(cls):
         """Set up a pool of workers for executing experiments, and submit all experiments to the pool."""
         # Set up parallel execution if available (if not, we have just one worker)
-        cls.pool = multiprocessing.Pool(processes=CHASTE_NUM_PROCS, initializer=WorkerInit)
+        cls.pool = multiprocessing.Pool(processes=CHASTE_NUM_PROCS, initializer=worker_init)
         if CHASTE_NUM_PROCS > 1:
             # If we're parallelising at this level, don't parallelise internally
             import numexpr
@@ -222,14 +224,14 @@ class TestPythonReproducibility(unittest.TestCase):
             except os.error:
                 pass
             for protocol in cls.options.protocols:
-                cls.results.append(cls.pool.apply_async(RunExperiment,
+                cls.results.append(cls.pool.apply_async(run_experiment,
                                                         args=(model, protocol, Defaults.protocolOutputs[protocol])))
 
         # Disallow further job submission to the pool
         cls.pool.close()
 
     @classmethod
-    def tearDownClass(cls):
+    def tear_down_class(cls):
         """Wait for all workers to exit, and summarise failures."""
         cls.pool.join()
         if cls.failures:
@@ -238,7 +240,7 @@ class TestPythonReproducibility(unittest.TestCase):
                 print("  ", failure)
 
 
-def MakeTestSuite():
+def make_test_suite():
     """Build a suite where each test checks one experiment.
 
     This instantiates the TestPythonReproducibility class once for each model/protocol combination.

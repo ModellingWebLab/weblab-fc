@@ -138,7 +138,7 @@ class Actions(object):
         def __init__(self, s, loc, tokens):
             super(Actions.BaseGroupAction, self).__init__(s, loc, tokens[0])
 
-    class Trace(BaseGroupAction):
+    class trace(BaseGroupAction):
         """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
 
         def _expr(self):
@@ -220,7 +220,7 @@ class Actions(object):
                     result = OPERATORS[operator](result, operand.expr())
             return result
 
-    class Wrap(BaseGroupAction):
+    class wrap(BaseGroupAction):
         """Parse action for wrapped MathML operators."""
 
         def _expr(self):
@@ -231,7 +231,7 @@ class Actions(object):
             else:
                 operator = OPERATORS[operator_name]
             num_operands = int(self.tokens[0])
-            return E.LambdaExpression.Wrap(operator, num_operands)
+            return E.LambdaExpression.wrap(operator, num_operands)
 
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
@@ -620,14 +620,14 @@ class Actions(object):
             args = [self.tokens[0].expr()]
             detail = self.tokens[1]
             if 'set' in self.tokens[1]:
-                modifier = Modifiers.SetVariable
+                modifier = Modifiers.set_variable
                 args.append(detail[0])
                 args.append(detail[1].expr())
             elif 'save' in self.tokens[1]:
-                modifier = Modifiers.SaveState
+                modifier = Modifiers.save_state
                 args.append(detail[0])
             elif 'reset' in self.tokens[1]:
-                modifier = Modifiers.ResetState
+                modifier = Modifiers.reset_state
                 if len(detail) > 0:
                     args.append(detail[0])
             return modifier(*args)
@@ -696,7 +696,7 @@ class Actions(object):
             args.extend([output_names, optional_flags])
             model = Model.NestedProtocol(*args)
             result = Simulations.OneStep(0)
-            result.SetModel(model)
+            result.set_model(model)
             return result
 
     class Simulation(BaseGroupAction):
@@ -742,7 +742,7 @@ class Actions(object):
     class UnitRef(BaseGroupAction):
         """Parse action for unit references within units definitions."""
 
-        def GetValue(self, token, negate=False):
+        def get_value(self, token, negate=False):
             """Get a decent string representation of the value of the given numeric token.
             It may be a plain number, or it may be a simple expression which we have to evaluate.
             """
@@ -1111,7 +1111,7 @@ class CompactSyntaxParser(object):
     mathmlOperator = (p.oneOf('^ * / + - not == != <= >= < > && ||') |
                       p.Combine('MathML:' + p.oneOf(' '.join(mathmlOperators))))
     wrap = p.Group(p.Suppress('@') - Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator
-                   ).setName('WrapMathML').setParseAction(Actions.Wrap)
+                   ).setName('WrapMathML').setParseAction(Actions.wrap)
 
     # Turning on tracing for debugging protocols
     trace = Adjacent(p.Suppress('?'))
@@ -1122,7 +1122,7 @@ class CompactSyntaxParser(object):
     expr <<= p.infixNotation(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                     (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
                                     (index, 1, p.opAssoc.LEFT, Actions.Index),
-                                    (trace, 1, p.opAssoc.LEFT, Actions.Trace),
+                                    (trace, 1, p.opAssoc.LEFT, Actions.trace),
                                     ('^', 2, p.opAssoc.LEFT, Actions.Operator),
                                     ('-', 1, p.opAssoc.RIGHT,
                                         lambda *args: Actions.Operator(*args, rightAssoc=True)),
@@ -1410,7 +1410,7 @@ class CompactSyntaxParser(object):
         ]))).setName('Protocol').setParseAction(Actions.Protocol)
 
     def __init__(self):
-        """Initialise the parser."""
+        """initialise the parser."""
         # We just store the original stack limit here, so we can increase
         # it for the lifetime of this object if needed for parsing, on the
         # basis that if one expression needs to, several are likely to.

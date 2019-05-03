@@ -10,9 +10,9 @@ IF FC_SUNDIALS_MAJOR >= 3:
     ctypedef _lib.SUNLinearSolver SUNLinearSolver
 
 
-#cdef object NumpyView(N_Vector v)
+#cdef object numpy_view(N_Vector v)
 
-#cdef int _RhsWrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data)
+#cdef int _rhs_wrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data)
 
 cdef class CvodeSolver:
     cdef void* cvode_mem # CVODE solver 'object'
@@ -23,13 +23,13 @@ cdef class CvodeSolver:
     cdef public np.ndarray state # Numpy view of the state vector
     cdef public object model # The model being simulated
 
-    cpdef AssociateWithModel(self, model)
-    cpdef ResetSolver(self, np.ndarray[realtype, ndim=1] resetTo)
-    cpdef SetFreeVariable(self, realtype t)
-    cpdef Simulate(self, realtype endPoint)
+    cpdef associate_with_model(self, model)
+    cpdef reset_solver(self, np.ndarray[realtype, ndim=1] reset_to)
+    cpdef set_free_variable(self, realtype t)
+    cpdef simulate(self, realtype end_point)
 
-    cdef ReInit(self)
-    cdef CheckFlag(self, int flag, char* called)
+    cdef re_init(self)
+    cdef check_flag(self, int flag, char* called)
 
     IF FC_SUNDIALS_MAJOR >= 3:
         # Linear matrix solving in sundials 3+
