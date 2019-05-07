@@ -41,7 +41,7 @@ def _extract_protocol_info_from_stack(frames):
 class ProtocolError(Exception):
     """Main class for errors raised by the functional curation framework that are intended for user viewing."""
 
-    def __init__(self, *msgParts):
+    def __init__(self, *msg_parts):
         """Create a protocol error message.
 
         The arguments are joined to create the message string as for print: converted to strings and space separated.
@@ -54,7 +54,7 @@ class ProtocolError(Exception):
         self.locations, location_message = _extract_protocol_info_from_stack(
             map(operator.itemgetter(0), reversed(inspect.stack())))
         # Construct the full error message
-        self.short_message = ' '.join(map(str, msgParts))
+        self.short_message = ' '.join(map(str, msg_parts))
         msg = self.short_message + '\n' + location_message
         super(ProtocolError, self).__init__(msg)
 
@@ -72,10 +72,10 @@ class ErrorRecorder(ProtocolError):
     TODO: Add the ability to suppress Python traceback for some errors?
     """
 
-    def __init__(self, protoName):
+    def __init__(self, proto_name):
         """Create a new recorder."""
         self.errors = []
-        super(ErrorRecorder, self).__init__("Errors occurred during execution of %s:" % protoName)
+        super(ErrorRecorder, self).__init__("Errors occurred during execution of %s:" % proto_name)
 
     def __enter__(self):
         """Start a managed block of code."""

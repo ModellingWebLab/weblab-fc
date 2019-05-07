@@ -48,17 +48,17 @@ class Environment(object):
         for name, value in zip(names, values):
             self.define_name(name, value)
 
-    def evaluate_expr(self, exprStr, env):
+    def evaluate_expr(self, expr_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.expr.parseString(exprStr, parseAll=True)
+        parse_action = csp.expr.parseString(expr_str, parseAll=True)
         expr = parse_action[0].expr()
         return expr.evaluate(env)
 
-    def evaluate_statement(self, stmtStr, env):
+    def evaluate_statement(self, stmt_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.stmtList.parseString(stmtStr, parseAll=True)
+        parse_action = csp.stmtList.parseString(stmt_str, parseAll=True)
         stmt_list = parse_action[0].expr()
         return env.execute_statements(stmt_list)
 

@@ -3,8 +3,8 @@ import pytest
 import unittest
 
 import fc
-import fc.simulations.model as Model
 import fc.language.expressions as E
+from fc.simulations.model import TestOdeModel
 
 
 class TestVariousProtocols(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestVariousProtocols(unittest.TestCase):
         proto_file = 'test/protocols/test_parallel_nested.txt'
         proto = fc.Protocol(proto_file)
         proto.set_output_folder('TestVariousProtocols_TestParallelNestedTxt')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.set_model(TestOdeModel(1))
         proto.run()
         proto.model.reset_state()
         proto.run()
@@ -44,13 +44,13 @@ class TestVariousProtocols(unittest.TestCase):
         proto_file = 'test/protocols/test_sim_environments.txt'
         proto = fc.Protocol(proto_file)
         proto.set_output_folder('TestVariousProtocols_TestSimEnv')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.set_model(TestOdeModel(1))
         proto.run()
 
     def test_while_loop_txt(self):
         proto_file = 'test/protocols/test_while_loop.txt'
         proto = fc.Protocol(proto_file)
         proto.set_output_folder('TestVariousProtocols_TestWhileLoopTxt')
-        proto.set_model(Model.TestOdeModel(1))
+        proto.set_model(TestOdeModel(1))
         proto.set_input('num_iters', E.n(10))
         proto.run()

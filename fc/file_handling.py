@@ -13,12 +13,12 @@ class OutputFolder(object):
     """
     SIG_FILE_NAME = '.chaste_deletable_folder'
 
-    def __init__(self, path, cleanFolder=True):
+    def __init__(self, path, clean_folder=True):
         """Create a new output subfolder.
 
         :param path:  the subfolder to create.  Relative paths are treated as relative to get_root_output_folder;
         absolute paths must be under this location.  Parent folders will be created as necessary.
-        :param cleanFolder:  whether to wipe the folder contents if it already exists.
+        :param clean_folder:  whether to wipe the folder contents if it already exists.
         """
         def create_folder(path):
             if not os.path.exists(path):
@@ -29,7 +29,7 @@ class OutputFolder(object):
                 f.close()
         self.path = OutputFolder.check_output_path(path)
         if os.path.exists(self.path):
-            if cleanFolder:
+            if clean_folder:
                 self.remove_output_folder(self.path)
         create_folder(self.path)
 

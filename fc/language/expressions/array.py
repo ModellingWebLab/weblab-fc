@@ -21,7 +21,7 @@ class NewArray(AbstractExpression):
         self.comprehension = kwargs.get('comprehension', False)
         if self.comprehension:
             self.children = children[1:]
-            self.genExpr = children[0]
+            self.gen_expr = children[0]
         else:
             self.children = children
 
@@ -59,7 +59,7 @@ class NewArray(AbstractExpression):
             sub_env = Env.Environment(delegatee=env)
             for i, range_value in enumerate(range_specs):
                 sub_env.define_name(range_name[i], V.Simple(range_value))
-            sub_array = self.genExpr.evaluate(sub_env).array
+            sub_array = self.gen_expr.evaluate(sub_env).array
             if result is None:
                 # Create result array
                 if sub_array.ndim < num_gaps:
@@ -88,7 +88,7 @@ class NewArray(AbstractExpression):
                 assert isinstance(child, TupleExpression)
                 assert isinstance(child.children[-1].value, V.String)
                 iterator_vars |= {child.children[-1].value.value}
-            result |= self.genExpr.get_used_variables()
+            result |= self.gen_expr.get_used_variables()
             result = result - set.intersection(result, iterator_vars)
         return result
 
@@ -157,10 +157,10 @@ class NewArray(AbstractExpression):
                 last_spec_dim = i
         # stretch
         if len(range_name) == 1:
-            names_used = self.genExpr.get_used_variables()
+            names_used = self.gen_expr.get_used_variables()
             local_names = set(range_name)
             if names_used.isdisjoint(local_names):
-                repeated_array = self.genExpr.evaluate(env).array
+                repeated_array = self.gen_expr.evaluate(env).array
                 shape = list(repeated_array.shape)
                 shape.insert(last_spec_dim, 1)
                 repeated_array = repeated_array.reshape(tuple(shape))
@@ -170,7 +170,7 @@ class NewArray(AbstractExpression):
                 return V.Array(result)
         try:
             if set.intersection(names_used, local_names) == local_names:
-                compiled_gen_expr = self.genExpr.compile()
+                compiled_gen_expr = self.gen_expr.compile()
                 compiled = True
             else:
                 raise NotImplementedError
@@ -193,7 +193,7 @@ class View(AbstractExpression):
 
     def __init__(self, array, *children):
         super(View, self).__init__()
-        self.arrayExpression = array
+        self.array_expression = array
         self.children = children
 
         try:
@@ -213,12 +213,12 @@ class View(AbstractExpression):
             return int(arg.value)
 
     def get_array(self, env):
-        array = self.arrayExpression.evaluate(env)
+        array = self.array_expression.evaluate(env)
         return array.array
 
     def interpret(self, env):
         # print 'View', self.location
-        array = self.arrayExpression.evaluate(env)
+        array = self.array_expression.evaluate(env)
         if len(self.children) > array.array.ndim:
             raise ProtocolError("You entered", len(self.children),
                                 "indices, but the array has", array.array.ndim, "dimensions.")
@@ -429,15 +429,15 @@ class Fold(AbstractExpression):
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
 
-    def __init__(self, functionExpr, *children):
+    def __init__(self, function_expr, *children):
         super(Map, self).__init__()
-        self.functionExpr = functionExpr
+        self.function_expr = function_expr
         self.children = children
         if len(self.children) < 1:
             raise ProtocolError("Map requires at least one parameter")
 
     def evaluate(self, env):
-        function = self.functionExpr.evaluate(env)
+        function = self.function_expr.evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError("Function passed is not a function")
         arrays = self.evaluate_children(env)
@@ -487,12 +487,12 @@ class Map(AbstractExpression):
 class Find(AbstractExpression):
     """Find function for n-dimensional arrays."""
 
-    def __init__(self, operandExpr):
+    def __init__(self, operand_expr):
         super(Find, self).__init__()
-        self.operandExpr = operandExpr
+        self.operand_expr = operand_expr
 
     def interpret(self, env):
-        operand = self.operandExpr.evaluate(env)
+        operand = self.operand_expr.evaluate(env)
         if not isinstance(operand, V.Array) or operand.array.ndim == 0:
             raise ProtocolError("Operand for find must be a non-generate Array, not " + str(operand))
         return V.Array(np.transpose(np.nonzero(operand.array)))

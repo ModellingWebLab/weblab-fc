@@ -92,8 +92,8 @@ def run_experiment(modelName, protoName, expectedOutputs):
                     proto,
                     expectedOutputs,
                     'test/data/historic/%s/%s' % (modelName, protoName),
-                    rtol=0.005,
-                    atol=2.5e-4,
+                    rel_tol=0.005,
+                    abs_tol=2.5e-4,
                     messages=messages,
                 )
                 if outputs_match is None:

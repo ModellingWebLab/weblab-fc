@@ -62,25 +62,27 @@ def get_max_errors(arr1, arr2):
     return (max_rel_err, max_abs_err)
 
 
-def within_any_tolerance(arr1, arr2, relTol=None, absTol=None):
+def within_any_tolerance(arr1, arr2, rel_tol=None, abs_tol=None):
     """Determine if two arrays are element-wise close within the given tolerances.
 
     If either the relative OR absolute tolerance is satisfied for a given pair of values, the result is true.
 
-    :param relTol: relative tolerance.
+    :param rel_tol: relative tolerance.
         If omitted, machine epsilon is used to effect a comparison only under absolute tolerance.
-    :param absTol: absolute tolerance.
+    :param abs_tol: absolute tolerance.
         If omitted, machine epsilon is used to effect a comparison only under relative tolerance.
     :returns: a boolean array
     """
-    if relTol is None:
-        relTol = np.finfo(np.float).eps
-    if absTol is None:
-        absTol = np.finfo(np.float).eps
-    return np.logical_or(within_absolute_tolerance(arr1, arr2, absTol), within_relative_tolerance(arr1, arr2, relTol))
+    if rel_tol is None:
+        rel_tol = np.finfo(np.float).eps
+    if abs_tol is None:
+        abs_tol = np.finfo(np.float).eps
+    return np.logical_or(
+        within_absolute_tolerance(arr1, arr2, abs_tol),
+        within_relative_tolerance(arr1, arr2, rel_tol))
 
 
-def check_results(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=None):
+def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0, messages=None):
     """Check protocol results against saved values.
 
     Note that if the protocol is missing expected results, this is only an error if
@@ -91,17 +93,17 @@ def check_results(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=N
     we do add a warning to messages (if supplied) in this case.
 
     :param proto: an instance of fc.Protocol that (hopefully) has results available to check
-    :param expectedSpec: a dictionary mapping result name to number of dimensions,
+    :param expected_spec: a dictionary mapping result name to number of dimensions,
         so we can use the correct load* method
-    :param rtol: relative tolerance
-    :param atol: absolute tolerance
+    :param rel_tol: relative tolerance
+    :param abs_tol: absolute tolerance
     :param messages: if provided, should be a list to which failure reports will be appended.
         Otherwise any failure will raise AssertionError.
     :returns: a boolean indicating whether the results matched to within tolerances, or None if failure was expected.
     """
     results_ok = True
-    for name, ndims in expectedSpec.items():
-        data_file = os.path.join(dataFolder, 'outputs_' + name + '.csv')
+    for name, ndims in expected_spec.items():
+        data_file = os.path.join(data_folder, 'outputs_' + name + '.csv')
         try:
             actual = proto.output_env.look_up(name)
         except KeyError:
@@ -124,14 +126,14 @@ def check_results(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=N
             method = load
         expected = method(data_file)
         if messages is None:
-            np.testing.assert_allclose(actual.array, expected.array, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(actual.array, expected.array, rtol=rel_tol, atol=abs_tol)
         else:
             if actual.array.shape != expected.array.shape:
                 messages.append("Output %s shape %s does not match expected shape %s" %
                                 (name, actual.array.shape, expected.array.shape))
                 results_ok = False
             else:
-                close_entries = within_any_tolerance(actual.array, expected.array, relTol=rtol, absTol=atol)
+                close_entries = within_any_tolerance(actual.array, expected.array, rel_tol=rel_tol, abs_tol=abs_tol)
                 if not close_entries.all():
                     bad_entries = np.logical_not(close_entries)
                     bad = actual.array[bad_entries]
@@ -143,36 +145,36 @@ def check_results(proto, expectedSpec, dataFolder, rtol=0.01, atol=0, messages=N
                         ("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations." +
                          " Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s\n" +
                          "Mismatch locations: %s") %
-                        (name, rtol, atol, bad.size, actual.array.size,
+                        (name, rel_tol, abs_tol, bad.size, actual.array.size,
                          max_rel_err, max_abs_err, first_bad, first_expected,
                          bad_entries.nonzero()[:10]))
                     results_ok = False
     return results_ok
 
 
-def check_file_compression(filePath):
-    """Return (real_path, is_compressed) if a .gz compressed version of filePath exists."""
-    real_path = filePath
+def check_file_compression(file_path):
+    """Return (real_path, is_compressed) if a .gz compressed version of file_path exists."""
+    real_path = file_path
     is_compressed = False
-    if filePath.endswith('.gz'):
+    if file_path.endswith('.gz'):
         is_compressed = True
-    elif os.path.exists(filePath + '.gz'):
+    elif os.path.exists(file_path + '.gz'):
         real_path += '.gz'
         is_compressed = True
     return real_path, is_compressed
 
 
-def load2d(filePath):
+def load2d(file_path):
     """load the legacy data format for 2d arrays."""
-    real_path, is_compressed = check_file_compression(filePath)
+    real_path, is_compressed = check_file_compression(file_path)
     array = np.loadtxt(real_path, dtype=float, delimiter=',', ndmin=2, unpack=True)  # unpack transposes the array
     assert array.ndim == 2
     return V.Array(array)
 
 
-def load(filePath):
+def load(file_path):
     """load the legacy data format for arbitrary dimension arrays."""
-    real_path, is_compressed = check_file_compression(filePath)
+    real_path, is_compressed = check_file_compression(file_path)
     if is_compressed:
         import gzip
         f = gzip.GzipFile(real_path, 'rb')
@@ -183,3 +185,4 @@ def load(filePath):
     array = np.loadtxt(f, dtype=float)
     f.close()
     return V.Array(array.reshape(tuple(dims)))
+

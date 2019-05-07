@@ -146,12 +146,12 @@ class LoadFunction(LambdaClosure):
     This gets inserted into the inputs environment under the name 'load'.
     """
 
-    def __init__(self, basePath):
+    def __init__(self, base_path):
         """Initialise an instance of the load() built-in.
 
-        :param basePath: path with respect to which to resolve relative data file paths.
+        :param base_path: path with respect to which to resolve relative data file paths.
         """
-        self.basePath = basePath
+        self.base_path = base_path
 
     def __str__(self):
         """Return a string representation of this function."""
@@ -173,6 +173,6 @@ class LoadFunction(LambdaClosure):
         if not isinstance(actual_parameters[0], String):
             raise ProtocolError("A load() call takes a string parameter with the file path to load.")
         import os
-        file_path = os.path.join(self.basePath, actual_parameters[0].value)
+        file_path = os.path.join(self.base_path, actual_parameters[0].value)
         from ..test_support import load2d
         return load2d(file_path)

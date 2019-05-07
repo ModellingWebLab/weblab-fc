@@ -30,7 +30,7 @@ def test_dynamic_pyx_file():
         proto,
         {'state': 2},   # Name and dimension of output to check
         os.path.join('test', 'data', 'historic', model_name, proto_name),
-        rtol=0.005,
-        atol=2.5e-4
+        rel_tol=0.005,
+        abs_tol=2.5e-4
     )
 

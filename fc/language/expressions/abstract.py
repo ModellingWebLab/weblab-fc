@@ -20,12 +20,12 @@ class AbstractExpression(locatable.Locatable):
         odict = self.__dict__.copy()
         # These properties cause namespace errors during pickling, and will be
         # automatically regenerated on first reference after unpickling.
-        if '_compiledFunction' in odict:
-            del odict['_compiledFunction']
-        if '_evalGlobals' in odict:
-            del odict['_evalGlobals']
-        if '_definingEnvs' in odict:
-            del odict['_definingEnvs']
+        if '_compiled_function' in odict:
+            del odict['_compiled_function']
+        if '_eval_globals' in odict:
+            del odict['_eval_globals']
+        if '_defining_envs' in odict:
+            del odict['_defining_envs']
         return odict
 
     def get_used_variables(self):
@@ -96,9 +96,9 @@ class AbstractExpression(locatable.Locatable):
     @property
     def eval_globals(self):
         try:
-            return self._evalGlobals
+            return self._eval_globals
         except AttributeError:
-            d = self._evalGlobals = {}
+            d = self._eval_globals = {}
             d['abs'] = abs
             import math
             for name in ['log', 'log10', 'exp']:
@@ -114,8 +114,8 @@ class AbstractExpression(locatable.Locatable):
         """
         func = self.compiled_function
         arg_envs = self.get_defining_environments(env)
-        assert env is self._rootDefiningEnv, "Internal implementation assumption violated"
-        args = [arg_envs[name].unwrapped_bindings[name] for name in self._usedVarLocalNames]
+        assert env is self._root_defining_env, "Internal implementation assumption violated"
+        args = [arg_envs[name].unwrapped_bindings[name] for name in self._used_var_local_names]
         return func(*args)
 
     def get_defining_environments(self, env):
@@ -126,11 +126,11 @@ class AbstractExpression(locatable.Locatable):
         TODO: Handle local name conflicts!
         """
         try:
-            return self._definingEnvs
+            return self._defining_envs
         except AttributeError:
-            self._rootDefiningEnv = env  # For paranoia checking that the cache is valid
-            d = self._definingEnvs = {}
-            l = self._usedVarLocalNames = []  # noqa: E741
+            self._root_defining_env = env  # For paranoia checking that the cache is valid
+            d = self._defining_envs = {}
+            l = self._used_var_local_names = []  # noqa: E741
             for name in self.used_variable_list:
                 local_name = name[name.rfind(':') + 1:]
                 l.append(local_name)
@@ -152,9 +152,9 @@ class AbstractExpression(locatable.Locatable):
     def used_variable_list(self):
         """Cached property version of self.used_variables that's in a predictable order."""
         try:
-            return self._usedVarList
+            return self._used_var_list
         except AttributeError:
-            l = self._usedVarList = list(self.used_variables)  # noqa: E741
+            l = self._used_var_list = list(self.used_variables)  # noqa: E741
             l.sort()
             return l
 
@@ -162,8 +162,8 @@ class AbstractExpression(locatable.Locatable):
     def used_variables(self):
         """Cached property version of self.get_used_variables()."""
         try:
-            return self._usedVars
+            return self._used_vars
         except AttributeError:
             # Create the cache
-            u = self._usedVars = self.get_used_variables()
+            u = self._used_vars = self.get_used_variables()
             return u
