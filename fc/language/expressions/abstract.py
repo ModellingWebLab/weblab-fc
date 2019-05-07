@@ -1,8 +1,8 @@
 
-from ... import locatable
+from ...locatable import Locatable
 
 
-class AbstractExpression(locatable.Locatable):
+class AbstractExpression(Locatable):
     """Base class for expressions in the protocol language."""
 
     def __init__(self, *children):
@@ -141,11 +141,11 @@ class AbstractExpression(locatable.Locatable):
     def compiled_function(self):
         """A version of self.compiled that has been converted to a Python function by eval()."""
         try:
-            return self._compiledFunction
+            return self._compiled_function
         except AttributeError:
             from .general import NameLookUp
             arg_defs = ', '.join(NameLookUp.pythonize_name(name) for name in self.used_variable_list)
-            f = self._compiledFunction = eval('lambda ' + arg_defs + ': ' + self.compiled, self.eval_globals)
+            f = self._compiled_function = eval('lambda ' + arg_defs + ': ' + self.compiled, self.eval_globals)
             return f
 
     @property
@@ -167,3 +167,4 @@ class AbstractExpression(locatable.Locatable):
             # Create the cache
             u = self._used_vars = self.get_used_variables()
             return u
+

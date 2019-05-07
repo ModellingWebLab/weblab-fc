@@ -13,7 +13,7 @@ class AbstractRange(V.Simple):
         self.name = name
         self.count = -1
         self._value = float('nan')
-        self.numberOfOutputs = 0
+        self.number_of_outputs = 0
         # Set an initial empty environment so calls to set our value in constructors don't fail
         # (since initialise hasn't been called by our simulation yet)
         from ..environment import Environment
@@ -52,15 +52,15 @@ class AbstractRange(V.Simple):
         return self.count
 
     def get_number_of_output_points(self):
-        return self.numberOfOutputs
+        return self.number_of_outputs
 
 
 class UniformRange(AbstractRange):
-    def __init__(self, name, startExpr, endExpr, stepExpr):
+    def __init__(self, name, start_expr, end_expr, step_expr):
         super(UniformRange, self).__init__(name)
-        self.startExpr = startExpr
-        self.endExpr = endExpr
-        self.stepExpr = stepExpr
+        self.start_expr = start_expr
+        self.end_expr = end_expr
+        self.step_expr = step_expr
 
         try:
             line_profile.add_function(self.__next__)
@@ -74,7 +74,7 @@ class UniformRange(AbstractRange):
 
     def __next__(self):
         self.count += 1
-        if self.count >= self.numberOfOutputs:
+        if self.count >= self.number_of_outputs:
             self.count = -1
             raise StopIteration
         else:
@@ -83,32 +83,32 @@ class UniformRange(AbstractRange):
 
     def initialise(self, env):
         super(UniformRange, self).initialise(env)
-        self.start = self.startExpr.evaluate(self.env).value
-        self.step = self.stepExpr.evaluate(self.env).value
-        self.end = self.endExpr.evaluate(self.env).value
+        self.start = self.start_expr.evaluate(self.env).value
+        self.step = self.step_expr.evaluate(self.env).value
+        self.end = self.end_expr.evaluate(self.env).value
         self.value = self.start
-        self.numberOfOutputs = int((round(self.end - self.start) / self.step)) + 1
+        self.number_of_outputs = int((round(self.end - self.start) / self.step)) + 1
 
 
 class VectorRange(AbstractRange):
-    def __init__(self, name, arrOrExpr):
+    def __init__(self, name, arr_or_expr):
         super(VectorRange, self).__init__(name)
-        if isinstance(arrOrExpr, V.Array):
+        if isinstance(arr_or_expr, V.Array):
             self.expr = None
-            self.arrRange = arrOrExpr.array
-            self.value = self.arrRange[0]
-            self.numberOfOutputs = len(self.arrRange)
+            self.arr_range = arr_or_expr.array
+            self.value = self.arr_range[0]
+            self.number_of_outputs = len(self.arr_range)
         else:
-            self.expr = arrOrExpr
+            self.expr = arr_or_expr
             self.value = float('nan')
         self.count = -1
 
     def initialise(self, env):
         super(VectorRange, self).initialise(env)
         if self.expr:
-            self.arrRange = self.expr.evaluate(env).array
-            self.value = self.arrRange[0]
-            self.numberOfOutputs = len(self.arrRange)
+            self.arr_range = self.expr.evaluate(env).array
+            self.value = self.arr_range[0]
+            self.number_of_outputs = len(self.arr_range)
 
     def __iter__(self):
         self.count = -1
@@ -117,11 +117,11 @@ class VectorRange(AbstractRange):
 
     def __next__(self):
         self.count += 1
-        if self.count >= self.numberOfOutputs:
+        if self.count >= self.number_of_outputs:
             self.count = -1
             raise StopIteration
         else:
-            self.value = self.arrRange[self.count]
+            self.value = self.arr_range[self.count]
             return self.current
 
 
@@ -135,7 +135,7 @@ class While(AbstractRange):
         """(Re-)initialise the range loop."""
         self.count = -1
         self.value = -1
-        self.numberOfOutputs = 1000
+        self.number_of_outputs = 1000
 
     def initialise(self, env):
         super(While, self).initialise(env)
@@ -149,10 +149,10 @@ class While(AbstractRange):
     def __next__(self):
         self.count += 1
         self.value += 1
-        if self.count >= self.numberOfOutputs:
-            self.numberOfOutputs += 1000
+        if self.count >= self.number_of_outputs:
+            self.number_of_outputs += 1000
         if self.count > 0 and not self.condition.evaluate(self.env).value:
-            self.numberOfOutputs = self.count
+            self.number_of_outputs = self.count
             raise StopIteration
         else:
             return self.value

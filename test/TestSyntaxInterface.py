@@ -737,21 +737,22 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = CSP.modifier.parseString('at start set model:a = 5.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.set_variable)
-        self.assertEqual(expr.variableName, 'model:a')
+        self.assertEqual(expr.variable_name, 'model:a')
         self.assertEqual(expr.value_expr.value.value, 5)
 
         parse_action = CSP.modifier.parseString('at start set model:t = 10.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.set_variable)
-        self.assertEqual(expr.variableName, 'model:t')
+        self.assertEqual(expr.variable_name, 'model:t')
         self.assertEqual(expr.value_expr.value.value, 10)
 
         parse_action = CSP.modifier.parseString('at start save as state_name', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.save_state)
-        self.assertEqual(expr.stateName, 'state_name')
+        self.assertEqual(expr.state_name, 'state_name')
 
         parse_action = CSP.modifier.parseString('at start reset to state_name', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.reset_state)
-        self.assertEqual(expr.stateName, 'state_name')
+        self.assertEqual(expr.state_name, 'state_name')
+

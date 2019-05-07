@@ -8,12 +8,12 @@ from operator import attrgetter
 from . import ranges as R
 from .model import NestedProtocol
 from .modifiers import AbstractModifier
+from ..environment import Environment
 from ..language import values as V
-from .. import environment as Env
-from .. import locatable
+from ..locatable import Locatable
 
 
-class AbstractSimulation(locatable.Locatable):
+class AbstractSimulation(Locatable):
     """Base class for simulations in the protocol language."""
 
     def __init__(self, prefix=None):
@@ -21,10 +21,10 @@ class AbstractSimulation(locatable.Locatable):
         self.prefix = prefix
         self.ranges = [self.range_]
         self.model = None
-        self.results = Env.Environment()
-        self.resultsList = []  # An ordered view on the unwrapped versions of simulation results
-        self.env = Env.Environment()
-        self.viewEnv = None
+        self.results = Environment()
+        self.results_list = []  # An ordered view on the unwrapped versions of simulation results
+        self.env = Environment()
+        self.view_env = None
         self.indent_level = 0
 
         try:
@@ -42,7 +42,7 @@ class AbstractSimulation(locatable.Locatable):
             modelenv = self.model.get_environment_map()
             for prefix in modelenv:
                 if isinstance(self, Nested):
-                    self.nestedSim.env.clear_delegatee_env(prefix)
+                    self.nested_sim.env.clear_delegatee_env(prefix)
                 self.results.clear_delegatee_env(prefix)
                 self.env.clear_delegatee_env(prefix)
 
@@ -53,20 +53,20 @@ class AbstractSimulation(locatable.Locatable):
     def __setstate__(self, dict):
         self.__dict__.update(dict)
 
-    def initialise(self, initialiseRange=True):
-        if initialiseRange:
+    def initialise(self, initialise_range=True):
+        if initialise_range:
             self.range_.initialise(self.env)
-        if self.viewEnv is None and isinstance(self.range_, R.While) and self.prefix:
+        if self.view_env is None and isinstance(self.range_, R.While) and self.prefix:
             # NB: We can't do this in the constructor as self.prefix may not be set until later
-            self.viewEnv = Env.Environment(allow_overwrite=True)
-            self.env.set_delegatee_env(self.viewEnv, self.prefix)
+            self.view_env = Environment(allow_overwrite=True)
+            self.env.set_delegatee_env(self.view_env, self.prefix)
 
     def clear(self):
         self.env.clear()
         self.results.clear()
-        self.resultsList[:] = []
-        if self.viewEnv:
-            self.viewEnv.clear()
+        self.results_list[:] = []
+        if self.view_env:
+            self.view_env.clear()
 
     def set_indent_level(self, indent_level):
         """Set the level of indentation to use for progress output."""
@@ -93,15 +93,15 @@ class AbstractSimulation(locatable.Locatable):
     def loop_body_start_hook(self):
         if (isinstance(self.range_, R.While) and
                 self.range_.count > 0 and
-                self.resultsList and
-                self.range_.get_number_of_output_points() > self.resultsList[0].shape[0]):
+                self.results_list and
+                self.range_.get_number_of_output_points() > self.results_list[0].shape[0]):
             for name in self.results:
                 result = self.results.look_up(name).array
                 shape = list(result.shape)
                 shape[0] = self.range_.get_number_of_output_points()
                 result.resize(tuple(shape), refcheck=False)
                 # TODO: Check if the next line is needed?
-                self.viewEnv.overwrite_definition(name, V.Array(result[0:1 + self.range_.count]))
+                self.view_env.overwrite_definition(name, V.Array(result[0:1 + self.range_.count]))
         for modifier in self.modifiers:
             if modifier.when == AbstractModifier.START_ONLY and self.range_.count == 0:
                 modifier.apply(self)
@@ -119,13 +119,13 @@ class AbstractSimulation(locatable.Locatable):
                 modifier.apply(self)
 
     def loop_body_end_hook(self):
-        if self.viewEnv is not None:
+        if self.view_env is not None:
             for name in self.results:
-                if name not in self.viewEnv:
-                    self.viewEnv.define_name(
+                if name not in self.view_env:
+                    self.view_env.define_name(
                         name, V.Array(self.results.look_up(name).array[0:1 + self.range_.count]))
                 else:
-                    self.viewEnv.overwrite_definition(
+                    self.view_env.overwrite_definition(
                         name, V.Array(self.results.look_up(name).array[0:1 + self.range_.count]))
 
     def set_model(self, model):
@@ -159,7 +159,7 @@ class AbstractSimulation(locatable.Locatable):
         Copy model outputs from one simulation step into the overall output arrays for the
         (possibly nested) simulation.
         """
-        self_results, results_list = self.results, self.resultsList
+        self_results, results_list = self.results, self.results_list
         if self_results is not None:
             if isinstance(outputs_list, tuple):
                 # Some simulation outputs were missing
@@ -245,31 +245,31 @@ class OneStep(AbstractSimulation):
 class Nested(AbstractSimulation):
     """The main nested loop simulation construct."""
 
-    def __init__(self, nestedSim, range_, modifiers=[]):
+    def __init__(self, nested_sim, range_, modifiers=[]):
         self.range_ = range_
         super(Nested, self).__init__()
-        self.nestedSim = nestedSim
+        self.nested_sim = nested_sim
         self.modifiers = modifiers
-        self.ranges = self.nestedSim.ranges
+        self.ranges = self.nested_sim.ranges
         self.ranges.insert(0, self.range_)
-        self.results = self.nestedSim.results
-        self.resultsList = self.nestedSim.resultsList
-        nestedSim.env.set_delegatee_env(self.env)
+        self.results = self.nested_sim.results
+        self.results_list = self.nested_sim.results_list
+        nested_sim.env.set_delegatee_env(self.env)
 
     def initialise(self):
         self.range_.initialise(self.env)
-        self.nestedSim.initialise()
+        self.nested_sim.initialise()
         if self.trace:
-            self.nestedSim.trace = True
-        super(Nested, self).initialise(initialiseRange=False)
+            self.nested_sim.trace = True
+        super(Nested, self).initialise(initialise_range=False)
 
     def clear(self):
-        self.nestedSim.clear()
+        self.nested_sim.clear()
         super(Nested, self).clear()
 
     def set_indent_level(self, indent_level):
         super(Nested, self).set_indent_level(indent_level)
-        self.nestedSim.set_indent_level(indent_level + 1)
+        self.nested_sim.set_indent_level(indent_level + 1)
 
     def internal_run(self, verbose=True):
         for t in self.range_:
@@ -284,12 +284,12 @@ class Nested(AbstractSimulation):
                     ')')
             self.loop_body_start_hook()
             if self.output_folder:
-                self.nestedSim.set_output_folder(self.output_folder.create_subfolder(
+                self.nested_sim.set_output_folder(self.output_folder.create_subfolder(
                     'run_%d' % self.range_.get_current_output_number()))
-            self.nestedSim.run()
+            self.nested_sim.run()
             self.loop_body_end_hook()
         self.loop_end_hook()
 
     def set_model(self, model):
         super(Nested, self).set_model(model)
-        self.nestedSim.set_model(model)
+        self.nested_sim.set_model(model)

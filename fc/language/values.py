@@ -94,11 +94,11 @@ class DefaultParameter(AbstractValue):
 class LambdaClosure(AbstractValue):
     """Class for functions in the protocol language."""
 
-    def __init__(self, definingEnv, formal_parameters, body, default_parameters):
+    def __init__(self, defining_env, formal_parameters, body, default_parameters):
         self.formal_parameters = formal_parameters
         self.body = body
         self.default_parameters = default_parameters
-        self.definingEnv = definingEnv
+        self.defining_env = defining_env
 
     def __str__(self):
         """Return a string representation of this function."""
@@ -106,7 +106,7 @@ class LambdaClosure(AbstractValue):
 
     def compile(self, env, actual_parameters):
         from ..environment import Environment
-        local_env = Environment(delegatee=self.definingEnv)
+        local_env = Environment(delegatee=self.defining_env)
         params = actual_parameters[:]
         if len(params) < len(self.formal_parameters):
             params.extend([DefaultParameter()] * (len(self.formal_parameters) - len(params)))
@@ -126,7 +126,7 @@ class LambdaClosure(AbstractValue):
 
     def evaluate(self, env, actual_parameters):
         from ..environment import Environment
-        local_env = Environment(delegatee=self.definingEnv)
+        local_env = Environment(delegatee=self.defining_env)
         if len(actual_parameters) < len(self.formal_parameters):
             actual_parameters.extend([DefaultParameter()] * (len(self.formal_parameters) - len(actual_parameters)))
         for i, param in enumerate(actual_parameters):
@@ -176,3 +176,4 @@ class LoadFunction(LambdaClosure):
         file_path = os.path.join(self.base_path, actual_parameters[0].value)
         from ..test_support import load2d
         return load2d(file_path)
+
