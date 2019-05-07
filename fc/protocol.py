@@ -472,7 +472,9 @@ class Protocol(object):
             path = os.path.join(temp_dir, 'model.pyx')
 
             # Select class name
-            class_name = 'TestModel'
+            # Note: Code further down relies on this starting with
+            # 'GeneratedModel'
+            class_name = 'GeneratedModel'
 
             # load cellml model
             import cellmlmanip
