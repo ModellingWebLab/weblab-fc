@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend('agg')  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 
 import fc   # noqa: E402
-from . import environment as Env  # noqa: E402
+from .environment import Environment    # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402
 from .language import values as V  # noqa: E402
@@ -73,30 +73,30 @@ class Protocol(object):
     from file and running it on a given model.
     """
 
-    def __init__(self, protoFile, indent_level=0):
+    def __init__(self, proto_file, indent_level=0):
         """Construct a new protocol by parsing the description in the given file.
 
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
         self.indent_level = indent_level
         self.output_folder = None
-        self.protoFile = protoFile
-        self.protoName = os.path.basename(self.protoFile)
+        self.proto_file = proto_file
+        self.proto_name = os.path.basename(self.proto_file)
         self.timings = {}
-        self.log_progress('Constructing', self.protoName)
+        self.log_progress('Constructing', self.proto_name)
         # Main environments used when running the protocol
-        self.env = Env.Environment()
-        self.inputEnv = Env.Environment(allow_overwrite=True)
-        self.inputEnv.define_name("load", V.LoadFunction(os.path.dirname(self.protoFile)))
-        self.libraryEnv = Env.Environment()
-        self.output_env = Env.Environment()
-        self.postProcessingEnv = Env.Environment(delegatee=self.libraryEnv)
+        self.env = Environment()
+        self.input_env = Environment(allow_overwrite=True)
+        self.input_env.define_name("load", V.LoadFunction(os.path.dirname(self.proto_file)))
+        self.library_env = Environment()
+        self.output_env = Environment()
+        self.post_processing_env = Environment(delegatee=self.library_env)
         # The elements making up this protocol's definition
         self.inputs = []
         self.imports = {}
         self.library = []
         self.simulations = []
-        self.postProcessing = []
+        self.post_processing = []
         self.outputs = []
         self.plots = []
 
@@ -108,15 +108,18 @@ class Protocol(object):
         self.ns_map = {}
 
         # Parse the protocol file and fill in the structures declared above
+        self.parser = None
+        self.parsed_protocol = None
+
         start = time.time()
 
         import fc.parsing.CompactSyntaxParser as CSP
 
         parser = self.parser = CSP.CompactSyntaxParser()
-        CSP.Actions.source_file = protoFile
-        generator = self.parsedProtocol = parser._Try(
+        CSP.Actions.source_file = proto_file
+        generator = self.parsed_protocol = parser._Try(
             CSP.CompactSyntaxParser.protocol.parseFile,
-            protoFile,
+            proto_file,
             parseAll=True
         )[0]
         assert isinstance(generator, CSP.Actions.Protocol)
@@ -125,10 +128,10 @@ class Protocol(object):
         assert isinstance(details, dict)
 
         self.inputs = details.get('inputs', [])
-        self.inputEnv.execute_statements(self.inputs)
+        self.input_env.execute_statements(self.inputs)
         for prefix, path, set_inputs in details.get('imports', []):
-            self.log_progress('Importing', path, 'as', prefix, 'in', self.protoName)
-            imported_proto = Protocol(self.get_path(protoFile, path), self.indent_level + 1)
+            self.log_progress('Importing', path, 'as', prefix, 'in', self.proto_name)
+            imported_proto = Protocol(self.get_path(proto_file, path), self.indent_level + 1)
 
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
@@ -139,14 +142,14 @@ class Protocol(object):
                     name = stmt.names[0]
                     if name in set_inputs:
                         stmt = Assign([name], set_inputs[name])
-                    self.inputEnv.execute_statements([stmt])
+                    self.input_env.execute_statements([stmt])
                 # Make any prefixed imports of that protocol into our prefixed imports
                 for imported_prefix, imported_import in imported_proto.imports.items():
                     self.add_imported_protocol(imported_import, imported_prefix)
                 # merge the other elements of its definition with our own
                 self.library.extend(imported_proto.library)
                 self.simulations.extend(imported_proto.simulations)
-                self.postProcessing.extend(imported_proto.postProcessing)
+                self.post_processing.extend(imported_proto.post_processing)
                 self.outputs.extend(imported_proto.outputs)
                 self.plots.extend(imported_proto.plots)
                 self.model_interface.extend(imported_proto.model_interface)
@@ -159,10 +162,10 @@ class Protocol(object):
                             'Prefix ' + str(ns_prefix) + ' is used for'
                             ' multiple URIs in imported protocols.')
 
-        self.libraryEnv.set_delegatee_env(self.inputEnv)
+        self.library_env.set_delegatee_env(self.input_env)
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
-        self.postProcessing.extend(details.get('postprocessing', []))
+        self.post_processing.extend(details.get('postprocessing', []))
         self.outputs.extend(details.get('outputs', []))
         self.plots.extend(details.get('plots', []))
         self.model_interface.extend(details.get('model_interface', []))
@@ -193,13 +196,13 @@ class Protocol(object):
         # (Pickling errors from nested class structure of ModelWrapperEnvironment)
 
         # If the protocol has been run, remove references to model environment
-        # in the simulations (and un-delegate from libraryEnv)
+        # in the simulations (and un-delegate from library_env)
         for sim in self.simulations:
             if sim.model is not None:
                 if "" in sim.env.delegatees:
                     sim.env.clear_delegatee_env("")
-                if sim.prefix and sim.prefix in self.libraryEnv.delegatees:
-                    self.libraryEnv.clear_delegatee_env(sim.prefix)
+                if sim.prefix and sim.prefix in self.library_env.delegatees:
+                    self.library_env.clear_delegatee_env(sim.prefix)
 
         odict = self.__dict__.copy()
         # remove Model and CSP from Protocol
@@ -207,7 +210,7 @@ class Protocol(object):
             del odict['model']
         if 'parser' in odict:
             del odict['parser']
-            del odict['parsedProtocol']
+            del odict['parsed_protocol']
         return odict
 
     def __setstate__(self, dict):
@@ -236,14 +239,14 @@ class Protocol(object):
         if prefix in self.imports:
             raise ProtocolError("The prefix '", prefix, "' has already been used for an imported protocol.")
         self.imports[prefix] = proto
-        self.libraryEnv.set_delegatee_env(proto.libraryEnv, prefix)
+        self.library_env.set_delegatee_env(proto.library_env, prefix)
 
     def initialise(self, verbose=True):
         """(Re-)initialise this protocol, ready to be run on a model."""
         if verbose:
-            self.log_progress('Initialising', self.protoName)
-        self.libraryEnv.clear()
-        self.postProcessingEnv.clear()
+            self.log_progress('Initialising', self.proto_name)
+        self.library_env.clear()
+        self.post_processing_env.clear()
         self.output_env.clear()
         for sim in self.simulations:
             sim.clear()
@@ -258,7 +261,7 @@ class Protocol(object):
         else:
             self.output_folder = OutputFolder(path)
 
-    def outputs_and_plots(self, errors, verbose=True, writeOut=True):
+    def outputs_and_plots(self, errors, verbose=True, write_out=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
         # Copy protocol outputs into the self.outputs environment,
         # and capture output descriptions needed by plots in the process.
@@ -272,7 +275,7 @@ class Protocol(object):
             with errors:
                 output_var = output_spec.get('ref', output_spec['name'])
                 try:
-                    output = self.postProcessingEnv.look_up(output_var)
+                    output = self.post_processing_env.look_up(output_var)
                 except KeyError:
                     if output_spec['optional']:
                         self.log_warning("Ignoring missing optional output", output_spec['name'])
@@ -285,17 +288,17 @@ class Protocol(object):
                     output_spec['description'] = output_spec['name']
                 if output_spec['name'] in plot_vars:
                     plot_descriptions[output_spec['name']] = output_spec['description']
-        if not self.output_folder and verbose and writeOut:
+        if not self.output_folder and verbose and write_out:
             self.log_warning("Warning: protocol output folder not set, so not writing outputs to file")
             return
 
         if verbose:
             self.log_progress('saving output data to h5 file...')
         start = time.time()
-        if writeOut:
+        if write_out:
             with errors:
                 filename = os.path.join(self.output_folder.path, 'output.h5')
-                h5file = tables.open_file(filename, mode='w', title=os.path.splitext(self.protoName)[0])
+                h5file = tables.open_file(filename, mode='w', title=os.path.splitext(self.proto_name)[0])
                 group = h5file.create_group('/', 'output', 'output parent')
                 for output_spec in outputs_defined:
                     h5file.create_array(group,
@@ -306,7 +309,7 @@ class Protocol(object):
         self.timings['save outputs'] = self.timings.get('output', 0.0) + (time.time() - start)
 
         # Plots
-        if writeOut:  # suppress plotting when performing fitting
+        if write_out:  # suppress plotting when performing fitting
             start = time.time()
             for plot in self.plots:
                 with errors:
@@ -374,23 +377,23 @@ class Protocol(object):
         """
         for imported_proto in self.imports.values():
             imported_proto.execute_library()
-        self.libraryEnv.execute_statements(self.library)
+        self.library_env.execute_statements(self.library)
 
-    def run(self, verbose=True, writeOut=True):
+    def run(self, verbose=True, write_out=True):
         """run this protocol on the model already specified using set_model."""
         Locatable.output_folder = self.output_folder
         self.initialise(verbose)
         if verbose:
-            self.log_progress('running protocol', self.protoName, '...')
-        errors = ErrorRecorder(self.protoName)
+            self.log_progress('running protocol', self.proto_name, '...')
+        errors = ErrorRecorder(self.proto_name)
         with errors:
             for sim in self.simulations:
-                sim.env.set_delegatee_env(self.libraryEnv)
+                sim.env.set_delegatee_env(self.library_env)
                 if sim.prefix:
                     if self.output_folder:
                         sim.set_output_folder(self.output_folder.create_subfolder(
                             'simulation_' + sim.prefix))
-                    self.libraryEnv.set_delegatee_env(sim.results, sim.prefix)
+                    self.library_env.set_delegatee_env(sim.results, sim.prefix)
             start = time.time()
             self.execute_library()
             self.timings['run library'] = self.timings.get('library', 0.0) + (time.time() - start)
@@ -402,7 +405,7 @@ class Protocol(object):
             start = time.time()
             self.run_post_processing(verbose)
             self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
-        self.outputs_and_plots(errors, verbose, writeOut)
+        self.outputs_and_plots(errors, verbose, write_out)
         # Summarise time spent in each protocol section (if we're the main protocol)
         if verbose and self.indent_level == 0:
             print('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
@@ -426,8 +429,8 @@ class Protocol(object):
     def run_post_processing(self, verbose=True):
         """run the post-processing section of this protocol."""
         if verbose:
-            self.log_progress('running post processing for', self.protoName, '...')
-        self.postProcessingEnv.execute_statements(self.postProcessing)
+            self.log_progress('running post processing for', self.proto_name, '...')
+        self.post_processing_env.execute_statements(self.post_processing)
 
     def set_input(self, name, value_expr):
         """Overwrite the value of a protocol input.
@@ -438,8 +441,8 @@ class Protocol(object):
         if isinstance(value_expr, V.AbstractValue):
             value = value_expr
         else:
-            value = value_expr.evaluate(self.inputEnv)
-        self.inputEnv.overwrite_definition(name, value)
+            value = value_expr.evaluate(self.input_env)
+        self.input_env.overwrite_definition(name, value)
 
     def set_model(self, model, exposeNamedParameters=False):
         """
@@ -539,15 +542,15 @@ class Protocol(object):
         self.timings['load model'] = (
             self.timings.get('load model', 0.0) + (time.time() - start))
 
-    def get_path(self, basePath, path):
+    def get_path(self, base_path, path):
         """Determine the full path of an imported protocol file.
 
-        Relative paths are resolved relative to basePath (the path to this
+        Relative paths are resolved relative to base_path (the path to this
         protocol) by default.
         If this does not yield an existing file, they are resolved relative to
         the built-in library folder instead.
         """
-        new_path = os.path.join(os.path.dirname(basePath), path)
+        new_path = os.path.join(os.path.dirname(base_path), path)
         if not os.path.isabs(path) and not os.path.exists(new_path):
             # Search in the library folder instead
             library = os.path.join(
