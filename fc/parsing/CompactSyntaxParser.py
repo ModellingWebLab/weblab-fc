@@ -513,13 +513,9 @@ class Actions(object):
     ######################################################################
 
     class SetTimeUnits(BaseAction):
-        #def _xml(self):
-        #    return P.setIndependentVariableUnits(**self.TransferAttrs('units'))
         pass
 
     class InputVariable(BaseGroupAction):
-        #def _xml(self):
-        #    return P.specifyInputVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
         pass
 
     class OutputVariable(BaseGroupAction):
@@ -545,61 +541,19 @@ class Actions(object):
             else:
                 self.default_expr = ''
 
-        #def _xml(self):
-        #    children = []
-        #    if 'default' in self.tokens:
-        #        children.append(self.tokens['default'].xml())
-        #    return P.specifyOptionalVariable(*children, **self.TransferAttrs('name'))
-
     class DeclareVariable(BaseGroupAction):
-        #def _xml(self):
-        #    return P.declareNewVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
         pass
 
     class ClampVariable(BaseGroupAction):
-        #def _xml(self):
-        #    assert 1 <= len(self.tokens) <= 2
-        #    name = self.tokens[0]
-        #    if len(self.tokens) == 1:
-        #        value = name
-        #    else:
-        #        value = self.tokens[1]
-        #    return self.Delegate('ModelEquation', [[name, value]]).xml()
         pass
 
     class ModelEquation(BaseGroupAction):
-        #def _xml(self):
-        #    assert len(self.tokens) == 2
-        #    if isinstance(self.tokens[0], Actions.Variable):
-        #        lhs = self.tokens[0].xml()
-        #    else:
-        #        # Assigning an ODE
-        #        assert len(self.tokens[0]) == 2
-        #        bvar = M.bvar(self.tokens[0][1].xml())
-        #        lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
-        #    rhs = self.tokens[1].xml()
-        #    return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
         pass
 
     class Interpolate(BaseGroupAction):
-        #def _xml(self):
-        #    assert len(self.tokens) == 4
-        #    assert isinstance(self.tokens[0], str)
-        #    file_path = self.DelegateSymbol('string', self.tokens[0]).xml()
-        #    assert isinstance(self.tokens[1], Actions.Variable)
-        #    indep_var = self.tokens[1].xml()
-        #    units = []
-        #    for i in [2, 3]:
-        #        assert isinstance(self.tokens[i], str)
-        #        units.append(M.ci(self.tokens[i]))
-        #    return M.apply(self.DelegateSymbol('interpolate').xml(), file_path, indep_var, *units)
         pass
 
     class UnitsConversion(BaseGroupAction):
-        #def _xml(self):
-        #    attrs = self.TransferAttrs('desiredDimensions', 'actualDimensions')
-        #    rule = self.tokens[-1].xml()
-        #    return P.unitsConversionRule(rule, **attrs)
         pass
 
     class ModelInterface(BaseGroupAction):
@@ -694,14 +648,6 @@ class Actions(object):
             return Simulations.Nested(args[2], args[0], args[1])
 
     class OneStepSimulation(BaseGroupAction):
-        #def _xml(self):
-        #    attrs = {}
-        #    args = []
-        #    if 'step' in self.tokens:
-        #        attrs['step'] = str(self.tokens['step'][0])
-        #    if 'modifiers' in self.tokens:
-        #        args.append(self.tokens['modifiers'][0].xml())
-        #    return P.oneStep(*args, **attrs)
         pass
 
     class NestedProtocol(BaseGroupAction):
@@ -802,13 +748,6 @@ class Actions(object):
 
     class UnitsDef(BaseGroupAction):
         """Parse action for units definitions."""
-
-        #def _xml(self):
-        #    name = str(self.tokens[0])
-        #    if 'description' in self.tokens:
-        #        Actions.units_map[name] = str(self.tokens['description'])
-        #    unit_refs = [t.xml() for t in self.tokens if isinstance(t, Actions.UnitRef)]
-        #    return CELLML.units(*unit_refs, name=name)
 
     class Units(BaseAction):
         """Parse action for the units definitions section."""
@@ -1022,7 +961,7 @@ MonkeyPatch()
 
 
 class CompactSyntaxParser(object):
-    """A parser that converts a compact textual syntax for protocols into XML."""
+    """A parser for the compact textual syntax for protocols."""
     # Newlines are significant most of the time for us
     p.ParserElement.setDefaultWhitespaceChars(' \t\r')
     # Single-line Python-style comments
@@ -1088,7 +1027,6 @@ class CompactSyntaxParser(object):
                      MakeKw('else') - expr).setName('IfThenElse').setParseAction(Actions.Piecewise)
 
     # Lambda definitions
-    # TODO: check we can write XML for a full expr as default value
     paramDecl = p.Group(ncIdentAsVar + Optional(eq + expr))
     paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
     lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon - expr) | (obrace - stmtList + embedded_cbrace))
@@ -1465,15 +1403,15 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
 
-    def ParseFile(self, filename, xmlGenerator=None):
-        """Main entry point for parsing a single protocol file; returns an ElementTree."""
-        Actions.source_file = filename
-        Actions.units_map = {}
-        if xmlGenerator is None:
-            xmlGenerator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
-        xml = xmlGenerator.xml()
-        xml.base = filename
-        return ET.ElementTree(xml)
+    #def ParseFile(self, filename, xmlGenerator=None):
+    #    """Main entry point for parsing a single protocol file; returns an ElementTree."""
+    #    Actions.source_file = filename
+    #    Actions.units_map = {}
+    #    if xmlGenerator is None:
+    #        xmlGenerator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
+    #    xml = xmlGenerator.xml()
+    #    xml.base = filename
+    #    return ET.ElementTree(xml)
 
 
 ################################################################################
