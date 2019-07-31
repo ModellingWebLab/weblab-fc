@@ -89,7 +89,7 @@ setup(
     ],
     extras_require={
         'dev': [
-            #'line_profiler',
+            # 'line_profiler',
             'setproctitle',
         ],
         'test': [
