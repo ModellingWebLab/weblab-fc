@@ -124,8 +124,8 @@ class Actions(object):
             """Convert all sub-tokens to expr and return the list of elements."""
             return [tok.expr() for tok in self.tokens]
 
-        def TransferAttrs(self, *attrNames):
-            """Create an attribute dictionary for use in generating XML from named parse results."""
+        def GetAttributeDict(self, *attrNames):
+            """Create an attribute dictionary from named parse results."""
             attrs = {}
             for key in attrNames:
                 if key in self.tokens:
@@ -515,13 +515,13 @@ class Actions(object):
     class SetTimeUnits(BaseAction):
         # Leaving old XML method in to document existing properties.
         # def _xml(self):
-        #     return P.setIndependentVariableUnits(**self.TransferAttrs('units'))
+        #     return P.setIndependentVariableUnits(**self.GetAttributeDict('units'))
         pass
 
     class InputVariable(BaseGroupAction):
         # Leaving old XML method in to document existing properties.
         # def _xml(self):
-        #    return P.specifyInputVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+        #    return P.specifyInputVariable(**self.GetAttributeDict('name', 'units', 'initial_value'))
         pass
 
     class OutputVariable(BaseGroupAction):
@@ -550,7 +550,7 @@ class Actions(object):
     class DeclareVariable(BaseGroupAction):
         # Leaving old XML method in to document existing properties.
         # def _xml(self):
-        #    return P.declareNewVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+        #    return P.declareNewVariable(**self.GetAttributeDict('name', 'units', 'initial_value'))
         pass
 
     class ClampVariable(BaseGroupAction):
@@ -598,7 +598,7 @@ class Actions(object):
     class UnitsConversion(BaseGroupAction):
         # Leaving old XML method in to document existing properties / tokens.
         # def _xml(self):
-        #    attrs = self.TransferAttrs('desiredDimensions', 'actualDimensions')
+        #    attrs = self.GetAttributeDict('desiredDimensions', 'actualDimensions')
         #    rule = self.tokens[-1].xml()
         #    return P.unitsConversionRule(rule, **attrs)
         pass
@@ -622,7 +622,7 @@ class Actions(object):
         """Parse action for all the kinds of range supported."""
 
         def _expr(self):
-            attrs = self.TransferAttrs('name', 'units')
+            attrs = self.GetAttributeDict('name', 'units')
             if 'uniform' in self.tokens:
                 tokens = self.tokens['uniform'][0]
                 start = tokens[0].expr()
@@ -801,7 +801,7 @@ class Actions(object):
 
         # Leaving old XML method in to document existing properties / tokens.
         # def _xml(self):
-        #    attrs = self.TransferAttrs('prefix', 'units', 'exponent')
+        #    attrs = self.GetAttributeDict('prefix', 'units', 'exponent')
         #    if 'multiplier' in self.tokens:
         #        attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
         #    if 'offset' in self.tokens:
