@@ -887,6 +887,13 @@ class Actions(object):
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
 
+            # Scan for any declared namespaces
+            ns_map = {}
+            if 'namespace' in self.tokens:
+                for prefix, uri in self.tokens['namespace']:
+                    ns_map[prefix] = uri
+            d['ns_map'] = ns_map
+
             return d
 
 
