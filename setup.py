@@ -82,14 +82,14 @@ setup(
         'matplotlib',
         'numexpr',
         'numpy',
-        'pyparsing',
+        'pyparsing<2.4',
         'scipy',
         'tables',
         # 'weblab_cg',      # Add this in when weblab_cg is ready
     ],
     extras_require={
         'dev': [
-            'line_profiler',
+            # 'line_profiler',
             'setproctitle',
         ],
         'test': [
