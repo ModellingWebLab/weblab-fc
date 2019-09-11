@@ -24,30 +24,6 @@ p.ParserElement.enablePackrat()
 # Parse actions that can generate Python implementation objects
 ###############################################################
 
-# Some of our tests still need the XML generation (which the C++ code used), so
-# allow its dependencies to be selectively imported iff required.
-
-# TODO: Get rid of this
-def DoXmlImports():
-    import lxml.builder
-    import lxml.etree as ET  # noqa
-
-    PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
-    MATHML_NS = "http://www.w3.org/1998/Math/MathML"
-    CELLML_NS = "http://www.cellml.org/cellml/1.0#"
-    PROTO_CSYM_BASE = "https://chaste.cs.ox.ac.uk/nss/protocol/"
-    P = lxml.builder.ElementMaker(namespace=PROTO_NS)
-    M = lxml.builder.ElementMaker(namespace=MATHML_NS)
-    CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
-                                       nsmap={'cellml': CELLML_NS})
-
-    local_defs = locals()
-    for name in local_defs:
-        globals()[name] = local_defs[name]
-
-
-if getattr(sys, '_fc_csp_no_pyimpl', False):
-    DoXmlImports()
 
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
              '==': E.Eq, '!=': E.Neq, '<': E.Lt, '>': E.Gt, '<=': E.Leq, '>=': E.Geq,
@@ -146,16 +122,6 @@ class Actions(object):
             if content is None:
                 content = list()
             return self.Delegate(Actions.Symbol(symbol), [content])
-
-        def AddLoc(self, elt):
-            """Add our location information to the given element."""
-            elt.set('{%s}loc' % PROTO_NS, self.source_location)
-            return elt
-
-        def AddTrace(self, elt):
-            """Turn on tracing of the construct represented by the given element."""
-            elt.set('{%s}trace' % PROTO_NS, '1')
-            return elt
 
         def expr(self):
             """Updates location in parent locatable class and calls _expr method."""
@@ -920,12 +886,6 @@ class Actions(object):
 
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
-
-            ns_map = {'proto': PROTO_NS, 'm': MATHML_NS}
-            if 'namespace' in self.tokens:
-                for prefix, uri in self.tokens['namespace']:
-                    ns_map[prefix] = uri
-            d['ns_map'] = ns_map
 
             return d
 

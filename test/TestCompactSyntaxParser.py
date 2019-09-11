@@ -12,7 +12,6 @@ import unittest
 # so we have to override that!
 sys._fc_csp_no_pyimpl = True
 import fc.parsing.CompactSyntaxParser as CSP  # noqa: E402
-CSP.DoXmlImports()
 
 csp = CSP.CompactSyntaxParser
 # An end-of-string match that doesn't allow trailing whitespace

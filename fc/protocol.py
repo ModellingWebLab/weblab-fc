@@ -111,7 +111,6 @@ class Protocol(object):
         start = time.time()
 
         import fc.parsing.CompactSyntaxParser as CSP
-        CSP.DoXmlImports()
 
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = protoFile
