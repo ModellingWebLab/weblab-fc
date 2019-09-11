@@ -82,7 +82,7 @@ setup(
         'matplotlib',
         'numexpr',
         'numpy',
-        'pyparsing',
+        'pyparsing<2.4',
         'scipy',
         'tables',
         # 'weblab_cg',      # Add this in when weblab_cg is ready
