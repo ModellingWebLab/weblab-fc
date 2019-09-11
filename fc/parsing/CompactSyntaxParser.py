@@ -20,34 +20,10 @@ __all__ = ['CompactSyntaxParser']
 p.ParserElement.enablePackrat()
 
 
-#################################################################################
-# Parse actions that can generate the XML syntax or Python implementation objects
-#################################################################################
+###############################################################
+# Parse actions that can generate Python implementation objects
+###############################################################
 
-# Some of our tests still need the XML generation (which the C++ code used), so
-# allow its dependencies to be selectively imported iff required.
-
-# TODO: Get rid of this
-def DoXmlImports():
-    import lxml.builder
-    import lxml.etree as ET  # noqa
-
-    PROTO_NS = "https://chaste.cs.ox.ac.uk/nss/protocol/0.1#"
-    MATHML_NS = "http://www.w3.org/1998/Math/MathML"
-    CELLML_NS = "http://www.cellml.org/cellml/1.0#"
-    PROTO_CSYM_BASE = "https://chaste.cs.ox.ac.uk/nss/protocol/"
-    P = lxml.builder.ElementMaker(namespace=PROTO_NS)
-    M = lxml.builder.ElementMaker(namespace=MATHML_NS)
-    CELLML = lxml.builder.ElementMaker(namespace=CELLML_NS,
-                                       nsmap={'cellml': CELLML_NS})
-
-    local_defs = locals()
-    for name in local_defs:
-        globals()[name] = local_defs[name]
-
-
-if __name__ == '__main__' or getattr(sys, '_fc_csp_no_pyimpl', False):
-    DoXmlImports()
 
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
              '==': E.Eq, '!=': E.Neq, '<': E.Lt, '>': E.Gt, '<=': E.Leq, '>=': E.Geq,
@@ -120,16 +96,12 @@ class Actions(object):
         def __repr__(self):
             return str(self)
 
-        def GetChildrenXml(self):
-            """Convert all sub-tokens to XML and return the list of elements."""
-            return [tok.xml() for tok in self.tokens]
-
         def GetChildrenExpr(self):
             """Convert all sub-tokens to expr and return the list of elements."""
             return [tok.expr() for tok in self.tokens]
 
-        def TransferAttrs(self, *attrNames):
-            """Create an attribute dictionary for use in generating XML from named parse results."""
+        def GetAttributeDict(self, *attrNames):
+            """Create an attribute dictionary from named parse results."""
             attrs = {}
             for key in attrNames:
                 if key in self.tokens:
@@ -151,35 +123,12 @@ class Actions(object):
                 content = list()
             return self.Delegate(Actions.Symbol(symbol), [content])
 
-        def AddLoc(self, elt):
-            """Add our location information to the given element."""
-            elt.set('{%s}loc' % PROTO_NS, self.source_location)
-            return elt
-
-        def AddTrace(self, elt):
-            """Turn on tracing of the construct represented by the given element."""
-            elt.set('{%s}trace' % PROTO_NS, '1')
-            return elt
-
         def expr(self):
             """Updates location in parent locatable class and calls _expr method."""
             result = self._expr()
             if isinstance(result, Locatable):
                 result.location = self.source_location
             return result
-
-        def xml(self):
-            """Main method to generate the XML syntax.
-            Will add an attribute containing source location information where appropriate.
-            """
-            result = self._xml()
-            if ET.iselement(result):
-                self.AddLoc(result)
-            return result
-
-        def _xml(self):
-            """Subclasses must implement this method to generate their specific XML."""
-            raise NotImplementedError
 
     class BaseGroupAction(BaseAction):
         """Base class for parse actions associated with a Group.
@@ -191,10 +140,6 @@ class Actions(object):
 
     class Trace(BaseGroupAction):
         """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
-
-        def _xml(self):
-            wrapped_xml = self.tokens[0].xml()
-            return self.AddTrace(wrapped_xml)
 
         def _expr(self):
             wrapped_expr = self.tokens[0].expr()
@@ -216,25 +161,11 @@ class Actions(object):
             else:
                 self._units = None
 
-        def _xml(self):
-            elt = M.cn(self.tokens)
-            if self._units is not None:
-                elt.set('{%s}units' % CELLML_NS, self._units)
-            return elt
-
         def _expr(self):
             return E.Const(V.Simple(self.tokens))
 
     class Variable(BaseGroupAction):
         """Parse action for variable references (identifiers)."""
-
-        def _xml(self):
-            var_name = self.tokens
-            if var_name.startswith('MathML:'):
-                result = getattr(M, var_name[7:])
-            else:
-                result = M.ci(self.tokens)
-            return result
 
         def _expr(self):
             var_name = self.tokens
@@ -277,18 +208,6 @@ class Actions(object):
             """Get the MathML element for the given operator."""
             return getattr(M, self.OP_MAP[operator])
 
-        def _xml(self):
-            if self.rightAssoc:
-                # The only right-associative operators are also unary
-                result = self.tokens[-1].xml()
-                for operator in self.tokens[-2:-1:]:
-                    result = M.apply(self.Operator(operator), result)
-            else:
-                result = self.tokens[0].xml()
-                for operator, operand in self.OperatorOperands():
-                    result = M.apply(self.Operator(operator), result, operand.xml())
-            return result
-
         def _expr(self):
             if self.rightAssoc:
                 # The only right-associative operators are also unary
@@ -304,16 +223,6 @@ class Actions(object):
     class Wrap(BaseGroupAction):
         """Parse action for wrapped MathML operators."""
 
-        def _xml(self):
-            assert len(self.tokens) == 2
-            num_operands = self.tokens[0]
-            operator = self.tokens[1]
-            if operator.startswith('MathML:'):
-                operator = operator[7:]
-            else:
-                operator = Actions.Operator.OP_MAP[operator]
-            return self.DelegateSymbol('wrap/' + num_operands, operator).xml()
-
         def _expr(self):
             assert len(self.tokens) == 2
             operator_name = self.tokens[1]
@@ -327,25 +236,12 @@ class Actions(object):
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
 
-        def _xml(self):
-            if_, then_, else_ = self.GetChildrenXml()
-            return M.piecewise(M.piece(then_, if_), M.otherwise(else_))
-
         def _expr(self):
             if_, then_, else_ = self.GetChildrenExpr()
             return E.If(if_, then_, else_)
 
     class MaybeTuple(BaseGroupAction):
         """Parse action for elements that may be grouped into a tuple, or might be a single item."""
-
-        def _xml(self):
-            assert len(self.tokens) > 0
-            if len(self.tokens) > 1:
-                # Tuple
-                return self.Delegate('Tuple', [self.tokens]).xml()
-            else:
-                # Single item
-                return self.tokens[0].xml()
 
         def _expr(self):
             assert len(self.tokens) > 0
@@ -362,30 +258,12 @@ class Actions(object):
     class Tuple(BaseGroupAction):
         """Parse action for tuples."""
 
-        def _xml(self):
-            child_xml = self.GetChildrenXml()
-            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE + "tuple"), *child_xml)
-
         def _expr(self):
             child_expr = self.GetChildrenExpr()
             return E.TupleExpression(*child_expr)
 
     class Lambda(BaseGroupAction):
         """Parse action for lambda expressions."""
-
-        def _xml(self):
-            assert len(self.tokens) == 2
-            param_list = self.tokens[0]
-            body = self.tokens[1].xml()  # expr
-            children = []
-            for param_decl in param_list:
-                param_bvar = M.bvar(param_decl[0].xml())  # names method
-                if len(param_decl) == 1:  # No default given
-                    children.append(param_bvar)
-                else:  # Default value case
-                    children.append(M.semantics(param_bvar, getattr(M, 'annotation-xml')(param_decl[1].xml())))
-            children.append(body)
-            return getattr(M, 'lambda')(*children)
 
         def _expr(self):
             assert len(self.tokens) == 2
@@ -411,16 +289,6 @@ class Actions(object):
 
     class FunctionCall(BaseGroupAction):
         """Parse action for function calls."""
-
-        def _xml(self):
-            assert len(self.tokens) == 2
-            func_name = str(self.tokens[0].tokens)
-            if func_name in ['map', 'fold', 'find']:
-                func = self.DelegateSymbol(func_name).xml()
-            else:
-                func = self.tokens[0].xml()
-            args = [t.xml() for t in self.tokens[1]]
-            return M.apply(func, *args)
 
         def _expr(self):
             assert len(self.tokens) == 2
@@ -449,12 +317,6 @@ class Actions(object):
             super(Actions._Symbol, self).__init__(s, loc, tokens)
             self.symbol = symbol
 
-        def _xml(self):
-            if isinstance(self.tokens, str):
-                return M.csymbol(self.tokens, definitionURL=PROTO_CSYM_BASE + self.symbol)
-            else:
-                return M.csymbol(definitionURL=PROTO_CSYM_BASE + self.symbol)
-
         def _expr(self):
             if self.symbol == "null":
                 return E.Const(V.Null())
@@ -473,16 +335,6 @@ class Actions(object):
     class Accessor(BaseGroupAction):
         """Parse action for accessors."""
 
-        def _xml(self):
-            if len(self.tokens) > 2:
-                # Chained accessors, e.g. E.SHAPE.IS_ARRAY
-                return self.Delegate(
-                    'Accessor', [[self.Delegate('Accessor', [self.tokens[:-1]]), self.tokens[-1]]]).xml()
-            assert len(self.tokens) == 2
-            object = self.tokens[0].xml()
-            property = self.tokens[1]
-            return M.apply(self.DelegateSymbol('accessor', property).xml(), object)
-
         def _expr(self):
             if len(self.tokens) > 2:
                 # Chained accessors, e.g. E.SHAPE.IS_ARRAY
@@ -495,20 +347,6 @@ class Actions(object):
 
     class Comprehension(BaseGroupAction):
         """Parse action for the comprehensions with array definitions."""
-
-        def _xml(self):
-            assert 2 <= len(self.tokens) <= 3
-            parts = []
-            if len(self.tokens) == 3:
-                # There's an explicit dimension
-                parts.append(self.tokens[0])
-            range = self.tokens[-1]
-            if len(range) == 2:
-                # Add a step of 1
-                range = [range[0], self.Delegate('Number', ['1']), range[-1]]
-            parts.extend(range)
-            parts.append(self.DelegateSymbol('string', self.tokens[-2]))  # The variable name
-            return self.Delegate('Tuple', [parts]).xml()
 
         def _expr(self):
             assert 2 <= len(self.tokens) <= 3
@@ -527,13 +365,6 @@ class Actions(object):
     class Array(BaseGroupAction):
         """Parse action for creating arrays."""
 
-        def _xml(self):
-            entries = self.GetChildrenXml()
-            if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
-                # Array comprehension
-                entries = [M.domainofapplication(*entries[1:]), entries[0]]
-            return M.apply(M.csymbol(definitionURL=PROTO_CSYM_BASE + 'newArray'), *entries)
-
         def _expr(self):
             entries = self.GetChildrenExpr()
             if len(entries) > 1 and isinstance(self.tokens[1], Actions.Comprehension):
@@ -544,46 +375,6 @@ class Actions(object):
 
     class View(BaseGroupAction):
         """Parse action for array views."""
-
-        def _xml(self):
-            assert 2 <= len(self.tokens)
-            apply_content = [self.DelegateSymbol('view').xml(), self.tokens[0].xml()]
-            seen_generic_dim = False
-            null_token = self.DelegateSymbol('null')
-            next_dimension = 0
-            for viewspec in self.tokens[1:]:
-                tuple_tokens = []
-                if 'dimspec' in viewspec:
-                    dimspec = viewspec['dimspec'][0]
-                    if dimspec == '*':
-                        seen_generic_dim = True
-                        dimspec = null_token
-                    tuple_tokens.append(dimspec)
-                    viewspec = viewspec[1:]
-                else:
-                    # Since we will provide a generic specification, all tuples need 4 elements for the XML parser :(
-                    # This is very fragile!
-                    tuple_tokens.append(self.Delegate('Number', [str(next_dimension)]))
-                    next_dimension += 1
-                if len(viewspec) == 1:
-                    # Take single value (in this dimension)
-                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['0']), viewspec[0]])
-                elif len(viewspec) == 2:
-                    # Range with step 1
-                    tuple_tokens.extend([viewspec[0], self.Delegate('Number', ['1']), viewspec[1]])
-                else:
-                    # Fully specified range
-                    tuple_tokens.extend(viewspec)
-                # Replace unspecified elements with csymbol-null
-                for i, token in enumerate(tuple_tokens):
-                    if token == '':
-                        tuple_tokens[i] = null_token
-                apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
-            if not seen_generic_dim:
-                # Add a 'take everything from other dimensions' view specification
-                tuple_tokens = [null_token, null_token, self.Delegate('Number', ['1']), null_token]
-                apply_content.append(self.Delegate('Tuple', [tuple_tokens]).xml())
-            return M.apply(*apply_content)
 
         def _expr(self):
             assert 2 <= len(self.tokens)
@@ -615,21 +406,6 @@ class Actions(object):
     class Index(BaseGroupAction):
         """Parse action for index expressions."""
 
-        def _xml(self):
-            """Construct apply(csymbol-index, indexee, indices, dim, shrink, pad, padValue).
-            shrink and pad both default to 0 (false).
-            """
-            assert len(self.tokens) == 2
-            index_tokens = self.tokens[1]
-            assert 1 <= len(index_tokens)
-            apply_content = [self.DelegateSymbol('index'), self.tokens[0], index_tokens[0]]
-            apply_content.append(index_tokens.get('dim', self.DelegateSymbol('defaultParameter')))
-            apply_content.append(index_tokens.get('shrink', [self.DelegateSymbol('defaultParameter')])[0])
-            if 'pad' in index_tokens:
-                assert len(index_tokens['pad']) == 2
-                apply_content.extend(index_tokens['pad'])  # Pad direction & value
-            return M.apply(*[t.xml() for t in apply_content])
-
         def _expr(self):
             assert len(self.tokens) == 2
             index_tokens = self.tokens[1]
@@ -659,13 +435,6 @@ class Actions(object):
             else:
                 self._optional = False
 
-        def _xml(self):
-            assignee, value = self.GetChildrenXml()
-            elt = M.apply(M.eq, assignee, value)
-            if self._optional:
-                elt.set('{%s}optional' % PROTO_NS, 'true')
-            return elt
-
         def _expr(self):
             assignee, value = self.GetChildrenExpr()
             if isinstance(assignee, E.NameLookUp):
@@ -680,29 +449,17 @@ class Actions(object):
     class Return(BaseGroupAction):
         """Parse action for return statements."""
 
-        def _xml(self):
-            return M.apply(self.DelegateSymbol('return').xml(), *self.GetChildrenXml())
-
         def _expr(self):
             return S.Return(*self.GetChildrenExpr())
 
     class Assert(BaseGroupAction):
         """Parse action for assert statements."""
 
-        def _xml(self):
-            return M.apply(self.DelegateSymbol('assert').xml(), *self.GetChildrenXml())
-
         def _expr(self):
             return S.Assert(*self.GetChildrenExpr())
 
     class FunctionDef(BaseGroupAction):
         """Parse action for function definitions, which are sugar for assignment of a lambda."""
-
-        def _xml(self):
-            assert len(self.tokens) == 3
-            lambda_ = self.Delegate('Lambda', [self.tokens[1:]])
-            assign = self.Delegate('Assignment', [[self.tokens[0], lambda_]])
-            return assign.xml()
 
         def _expr(self):
             assert len(self.tokens) == 3
@@ -713,10 +470,6 @@ class Actions(object):
     class StatementList(BaseGroupAction):
         """Parse action for lists of post-processing language statements."""
 
-        def _xml(self):
-            statements = self.GetChildrenXml()
-            return M.apply(self.DelegateSymbol('statementList').xml(), *statements)
-
         def _expr(self):
             statements = self.GetChildrenExpr()
             return statements
@@ -726,16 +479,21 @@ class Actions(object):
     ######################################################################
 
     class SetTimeUnits(BaseAction):
-        def _xml(self):
-            return P.setIndependentVariableUnits(**self.TransferAttrs('units'))
+        # Leaving old XML method in to document existing properties.
+        # def _xml(self):
+        #     return P.setIndependentVariableUnits(**self.GetAttributeDict('units'))
+        pass
 
     class InputVariable(BaseGroupAction):
-        def _xml(self):
-            return P.specifyInputVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+        # Leaving old XML method in to document existing properties.
+        # def _xml(self):
+        #    return P.specifyInputVariable(**self.GetAttributeDict('name', 'units', 'initial_value'))
+        pass
 
     class OutputVariable(BaseGroupAction):
-        def _xml(self):
-            return P.specifyOutputVariable(**self.TransferAttrs('name', 'units'))
+        """
+        Parse action for output variables defined in the model interface.
+        """
 
         def _expr(self):
             ns, local_name = self.tokens['name'].split(':', 1)
@@ -755,62 +513,63 @@ class Actions(object):
             else:
                 self.default_expr = ''
 
-        def _xml(self):
-            children = []
-            if 'default' in self.tokens:
-                children.append(self.tokens['default'].xml())
-            return P.specifyOptionalVariable(*children, **self.TransferAttrs('name'))
-
     class DeclareVariable(BaseGroupAction):
-        def _xml(self):
-            return P.declareNewVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
+        # Leaving old XML method in to document existing properties.
+        # def _xml(self):
+        #    return P.declareNewVariable(**self.GetAttributeDict('name', 'units', 'initial_value'))
+        pass
 
     class ClampVariable(BaseGroupAction):
-        def _xml(self):
-            assert 1 <= len(self.tokens) <= 2
-            name = self.tokens[0]
-            if len(self.tokens) == 1:
-                value = name
-            else:
-                value = self.tokens[1]
-            return self.Delegate('ModelEquation', [[name, value]]).xml()
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    assert 1 <= len(self.tokens) <= 2
+        #    name = self.tokens[0]
+        #    if len(self.tokens) == 1:
+        #        value = name
+        #    else:
+        #        value = self.tokens[1]
+        #    return self.Delegate('ModelEquation', [[name, value]]).xml()
+        pass
 
     class ModelEquation(BaseGroupAction):
-        def _xml(self):
-            assert len(self.tokens) == 2
-            if isinstance(self.tokens[0], Actions.Variable):
-                lhs = self.tokens[0].xml()
-            else:
-                # Assigning an ODE
-                assert len(self.tokens[0]) == 2
-                bvar = M.bvar(self.tokens[0][1].xml())
-                lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
-            rhs = self.tokens[1].xml()
-            return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    assert len(self.tokens) == 2
+        #    if isinstance(self.tokens[0], Actions.Variable):
+        #        lhs = self.tokens[0].xml()
+        #    else:
+        #        # Assigning an ODE
+        #        assert len(self.tokens[0]) == 2
+        #        bvar = M.bvar(self.tokens[0][1].xml())
+        #        lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
+        #    rhs = self.tokens[1].xml()
+        #    return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
+        pass
 
     class Interpolate(BaseGroupAction):
-        def _xml(self):
-            assert len(self.tokens) == 4
-            assert isinstance(self.tokens[0], str)
-            file_path = self.DelegateSymbol('string', self.tokens[0]).xml()
-            assert isinstance(self.tokens[1], Actions.Variable)
-            indep_var = self.tokens[1].xml()
-            units = []
-            for i in [2, 3]:
-                assert isinstance(self.tokens[i], str)
-                units.append(M.ci(self.tokens[i]))
-            return M.apply(self.DelegateSymbol('interpolate').xml(), file_path, indep_var, *units)
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    assert len(self.tokens) == 4
+        #    assert isinstance(self.tokens[0], str)
+        #    file_path = self.DelegateSymbol('string', self.tokens[0]).xml()
+        #    assert isinstance(self.tokens[1], Actions.Variable)
+        #    indep_var = self.tokens[1].xml()
+        #    units = []
+        #    for i in [2, 3]:
+        #        assert isinstance(self.tokens[i], str)
+        #        units.append(M.ci(self.tokens[i]))
+        #    return M.apply(self.DelegateSymbol('interpolate').xml(), file_path, indep_var, *units)
+        pass
 
     class UnitsConversion(BaseGroupAction):
-        def _xml(self):
-            attrs = self.TransferAttrs('desiredDimensions', 'actualDimensions')
-            rule = self.tokens[-1].xml()
-            return P.unitsConversionRule(rule, **attrs)
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    attrs = self.GetAttributeDict('desiredDimensions', 'actualDimensions')
+        #    rule = self.tokens[-1].xml()
+        #    return P.unitsConversionRule(rule, **attrs)
+        pass
 
     class ModelInterface(BaseGroupAction):
-        def _xml(self):
-            if len(self.tokens) > 0:
-                return P.modelInterface(*self.GetChildrenXml())
 
         def _expr(self):
             # TODO: Create objects for all parts of the model interface
@@ -828,26 +587,8 @@ class Actions(object):
     class Range(BaseGroupAction):
         """Parse action for all the kinds of range supported."""
 
-        def _xml(self):
-            attrs = self.TransferAttrs('name', 'units')
-            if 'uniform' in self.tokens:
-                tokens = self.tokens['uniform'][0]
-                start = P.start(tokens[0].xml())
-                stop = P.stop(tokens[-1].xml())
-                if len(tokens) == 3:
-                    step = P.step(tokens[1].xml())
-                else:
-                    step = P.step(self.Delegate('Number', '1').xml())
-                range = P.uniformStepper(start, stop, step, **attrs)
-            elif 'vector' in self.tokens:
-                range = P.vectorStepper(self.tokens['vector'][0].xml(), **attrs)
-            elif 'while' in self.tokens:
-                cond = self.AddLoc(P.condition(self.tokens['while'][0].xml()))
-                range = P.whileStepper(cond, **attrs)
-            return range
-
         def _expr(self):
-            attrs = self.TransferAttrs('name', 'units')
+            attrs = self.GetAttributeDict('name', 'units')
             if 'uniform' in self.tokens:
                 tokens = self.tokens['uniform'][0]
                 start = tokens[0].expr()
@@ -868,32 +609,12 @@ class Actions(object):
     class ModifierWhen(BaseGroupAction):
         """Parse action for the when part of modifiers."""
 
-        def _xml(self):
-            when = {'start': 'AT_START_ONLY', 'each': 'EVERY_LOOP', 'end': 'AT_END'}[self.tokens]
-            return P.when(when)
-
         def _expr(self):
             when = {'start': 'START_ONLY', 'each': 'EACH_LOOP', 'end': 'END_ONLY'}[self.tokens]
             return getattr(Modifiers.AbstractModifier, when)
 
     class Modifier(BaseGroupAction):
         """Parse action that generates all kinds of modifier."""
-
-        def _xml(self):
-            args = [self.tokens[0].xml()]
-            detail = self.tokens[1]
-            if 'set' in self.tokens[1]:
-                modifier = P.setVariable
-                args.append(P.name(detail[0]))
-                args.append(P.value(detail[1].xml()))
-            elif 'save' in self.tokens[1]:
-                modifier = P.saveState
-                args.append(P.name(detail[0]))
-            elif 'reset' in self.tokens[1]:
-                modifier = P.resetState
-                if len(detail) > 0:
-                    args.append(P.state(detail[0]))
-            return modifier(*args)
 
         def _expr(self):
             args = [self.tokens[0].expr()]
@@ -914,39 +635,16 @@ class Actions(object):
     class Modifiers(BaseGroupAction):
         """Parse action for the modifiers collection."""
 
-        def _xml(self):
-            return P.modifiers(*self.GetChildrenXml())
-
         def _expr(self):
             return self.GetChildrenExpr()
 
     class TimecourseSimulation(BaseGroupAction):
-        def _xml(self):
-            args = self.GetChildrenXml()
-            if len(args) == 1:
-                # Add an empty modifiers element
-                args.append(self.Delegate('Modifiers', [[]]).xml())
-            return P.timecourseSimulation(*args)
 
         def _expr(self):
             args = self.GetChildrenExpr()
             return Simulations.Timecourse(*args)
 
     class NestedSimulation(BaseGroupAction):
-        def _xml(self):
-            args = [t.xml() for t in self.tokens[0:-1]]
-            if len(args) == 1:
-                # Add an empty modifiers element
-                args.append(self.Delegate('Modifiers', [[]]).xml())
-            nested = self.tokens[-1][0]
-            if isinstance(nested, (Actions.Simulation, Actions.NestedProtocol)):
-                # Inline definition
-                args.append(nested.xml())
-            else:
-                # Reference to named task
-                nested = P.subTask(task=str(nested))
-                args.append(self.AddLoc(nested))
-            return P.nestedSimulation(*args)
 
         def _expr(self):
             args = [t.expr() for t in self.tokens[0:-1]]
@@ -960,14 +658,16 @@ class Actions(object):
             return Simulations.Nested(args[2], args[0], args[1])
 
     class OneStepSimulation(BaseGroupAction):
-        def _xml(self):
-            attrs = {}
-            args = []
-            if 'step' in self.tokens:
-                attrs['step'] = str(self.tokens['step'][0])
-            if 'modifiers' in self.tokens:
-                args.append(self.tokens['modifiers'][0].xml())
-            return P.oneStep(*args, **attrs)
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    attrs = {}
+        #    args = []
+        #    if 'step' in self.tokens:
+        #        attrs['step'] = str(self.tokens['step'][0])
+        #    if 'modifiers' in self.tokens:
+        #        args.append(self.tokens['modifiers'][0].xml())
+        #    return P.oneStep(*args, **attrs)
+        pass
 
     class NestedProtocol(BaseGroupAction):
         def __init__(self, s, loc, tokens):
@@ -975,25 +675,6 @@ class Actions(object):
             if self.trace:
                 tokens[0] = tokens[0][:-1]
             super(Actions.NestedProtocol, self).__init__(s, loc, tokens)
-
-        def _xml(self):
-            attrs = {'source': str(self.tokens[0])}
-            args = []
-            # TODO: consider doing setInput more like the inputs section (requires change to XML syntax)
-            assert isinstance(self.tokens[1], Actions.StatementList)
-            for assignment in self.tokens[1]:
-                input_name = assignment.tokens[0].tokens
-                input_value = assignment.tokens[1].xml()
-                args.append(self.AddLoc(P.setInput(input_value, name=input_name)))
-            for output in self.tokens[2:]:
-                output_attrs = {'name': output[-1]}
-                if len(output) == 2:
-                    output_attrs['optional'] = 'true'
-                args.append(self.AddLoc(P.selectOutput(**output_attrs)))
-            result = P.nestedProtocol(*args, **attrs)
-            if self.trace:
-                self.AddTrace(result)
-            return result
 
         def _expr(self):
             args = []
@@ -1021,15 +702,6 @@ class Actions(object):
     class Simulation(BaseGroupAction):
         """Parse action for all kinds of simulation."""
 
-        def _xml(self):
-            sim_elt = self.tokens[1].xml()
-            prefix = str(self.tokens[0])
-            if prefix:
-                sim_elt.set('prefix', prefix)
-            if self.tokens[-1] == '?':
-                self.AddTrace(sim_elt)
-            return sim_elt
-
         def _expr(self):
             sim = self.tokens[1].expr()
             sim.prefix = str(self.tokens[0])
@@ -1037,10 +709,6 @@ class Actions(object):
 
     class Tasks(BaseGroupAction):
         """Parse action for a collection of simulation tasks."""
-
-        def _xml(self):
-            if len(self.tokens) > 0:
-                return P.simulations(*self.GetChildrenXml())
 
         def _expr(self):
             sims = self.GetChildrenExpr()
@@ -1053,11 +721,6 @@ class Actions(object):
     class Inputs(BaseAction):
         """Parse action for the inputs section of a protocol."""
 
-        def _xml(self):
-            assert len(self.tokens) <= 1
-            if len(self.tokens) == 1:  # Don't create an empty element
-                return P.inputs(self.tokens[0].xml())
-
         def _expr(self):
             assert len(self.tokens) <= 1
             if len(self.tokens) == 1:  # Don't create an empty element
@@ -1065,19 +728,6 @@ class Actions(object):
 
     class Import(BaseGroupAction):
         """Parse action for protocol imports."""
-
-        def _xml(self):
-            assert len(self.tokens) >= 2
-            attrs = {'source': self.tokens[1]}
-            if self.tokens[0]:
-                attrs['prefix'] = self.tokens[0]
-            else:
-                attrs['mergeDefinitions'] = 'true'
-            children = []
-            if len(self.tokens) == 3:
-                for set_input in self.tokens[2].tokens:
-                    children.append(P.setInput(set_input.tokens[1].xml(), name=set_input.tokens[0].tokens))
-            return getattr(P, 'import')(*children, **attrs)
 
         def _expr(self):
             assert len(self.tokens) >= 2
@@ -1115,38 +765,36 @@ class Actions(object):
                         result = '-' + result
             return result
 
-        def _xml(self):
-            attrs = self.TransferAttrs('prefix', 'units', 'exponent')
-            if 'multiplier' in self.tokens:
-                attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
-            if 'offset' in self.tokens:
-                attrs['offset'] = self.GetValue(self.tokens['offset'][0][1], self.tokens['offset'][0][0] == '-')
-            return CELLML.unit(**attrs)
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    attrs = self.GetAttributeDict('prefix', 'units', 'exponent')
+        #    if 'multiplier' in self.tokens:
+        #        attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
+        #    if 'offset' in self.tokens:
+        #        attrs['offset'] = self.GetValue(self.tokens['offset'][0][1], self.tokens['offset'][0][0] == '-')
+        #    return CELLML.unit(**attrs)
 
     class UnitsDef(BaseGroupAction):
         """Parse action for units definitions."""
 
-        def _xml(self):
-            name = str(self.tokens[0])
-            if 'description' in self.tokens:
-                Actions.units_map[name] = str(self.tokens['description'])
-            unit_refs = [t.xml() for t in self.tokens if isinstance(t, Actions.UnitRef)]
-            return CELLML.units(*unit_refs, name=name)
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    name = str(self.tokens[0])
+        #    if 'description' in self.tokens:
+        #        Actions.units_map[name] = str(self.tokens['description'])
+        #    unit_refs = [t.xml() for t in self.tokens if isinstance(t, Actions.UnitRef)]
+        #    return CELLML.units(*unit_refs, name=name)
 
     class Units(BaseAction):
         """Parse action for the units definitions section."""
 
-        def _xml(self):
-            if len(self.tokens) > 0:
-                return P.units(*self.GetChildrenXml())
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    if len(self.tokens) > 0:
+        #        return P.units(*self.GetChildrenXml())
 
     class Library(BaseAction):
         """Parse action for the library section."""
-
-        def _xml(self):
-            if len(self.tokens) > 0:
-                assert len(self.tokens) == 1
-                return P.library(*self.GetChildrenXml())
 
         def _expr(self):
             if len(self.tokens) > 0:
@@ -1156,32 +804,12 @@ class Actions(object):
     class PostProcessing(BaseAction):
         """Parse action for the post-processing section."""
 
-        def _xml(self):
-            if len(self.tokens) > 0:
-                return getattr(P, 'post-processing')(self.Delegate('StatementList', [self.tokens]).xml())
-
         def _expr(self):
             if len(self.tokens) > 0:
                 return self.Delegate('StatementList', [self.tokens]).expr()
 
     class Output(BaseGroupAction):
         """Parse action for an output specification."""
-
-        def _xml(self):
-            if 'units' not in self.tokens:
-                # It has to be a raw model output
-                elt = P.raw
-            else:
-                # It's a post-processed output
-                elt = P.postprocessed
-                # Check if the units referenced have a description which should be used instead of their name
-                units = self.tokens['units']
-                if units[0] in Actions.units_map:
-                    units[0] = Actions.units_map[units[0]]
-            attrs = self.TransferAttrs('name', 'ref', 'units', 'description')
-            if 'optional' in self.tokens:
-                attrs['optional'] = 'true'
-            return elt(**attrs)
 
         def _expr(self):
             output = {}
@@ -1199,36 +827,11 @@ class Actions(object):
     class Outputs(BaseGroupAction):
         """Parse action for the outputs section."""
 
-        def _xml(self):
-            if len(self.tokens) > 0:
-                return P.outputVariables(*self.GetChildrenXml())
-
         def _expr(self):
             return self.GetChildrenExpr()
 
     class Plot(BaseGroupAction):
         """Parse action for simple plot specifications."""
-
-        def _xml(self):
-            using = self.tokens.get('using', '')
-            if using:
-                expected_num_tokens = 3
-            else:
-                expected_num_tokens = 2
-            assert len(self.tokens) == expected_num_tokens, "Only a single plot curve is currently supported in XML"
-            curve = self.tokens[-1]
-            key = curve.get('key', '')
-            if key:
-                curve = curve[:-1]
-            assert len(curve) == 2, "Only a single y variable is currently supported in XML"
-            title = str(self.tokens[0])
-            y, x = list(map(str, curve))
-            args = [P.title(title), P.x(x), P.y(y)]
-            if key:
-                args.append(P.key(key))
-            if using:
-                args.append(P.using(using[0]))
-            return P.plot(*args)
 
         def _expr(self):
             using = self.tokens.get('using', '')
@@ -1254,30 +857,11 @@ class Actions(object):
     class Plots(BaseGroupAction):
         """Parse action for the plots section."""
 
-        def _xml(self):
-            if len(self.tokens) > 0:
-                return P.plots(*self.GetChildrenXml())
-
         def _expr(self):
             return self.GetChildrenExpr()
 
     class Protocol(BaseAction):
         """Parse action for a full protocol."""
-
-        def _xml(self):
-            # Build namespace map based on bindings in the protocol
-            nsmap = {'proto': PROTO_NS, 'm': MATHML_NS}
-            if 'namespace' in self.tokens:
-                for prefix, uri in self.tokens['namespace']:
-                    nsmap[prefix] = uri
-            # Create root element, then add children
-            root = ET.Element('{%s}protocol' % PROTO_NS, nsmap=nsmap)
-            for token in self.tokens:
-                if isinstance(token, Actions.BaseAction):
-                    xml = token.xml()
-                    if xml is not None:
-                        root.append(xml)
-            return root
 
         def _expr(self):
             d = {}
@@ -1303,7 +887,8 @@ class Actions(object):
             if 'dox' in self.tokens:
                 d['dox'] = self.tokens['dox'][0]
 
-            ns_map = {'proto': PROTO_NS, 'm': MATHML_NS}
+            # Scan for any declared namespaces
+            ns_map = {}
             if 'namespace' in self.tokens:
                 for prefix, uri in self.tokens['namespace']:
                     ns_map[prefix] = uri
@@ -1418,7 +1003,7 @@ MonkeyPatch()
 
 
 class CompactSyntaxParser(object):
-    """A parser that converts a compact textual syntax for protocols into XML."""
+    """A parser for the compact textual syntax for protocols."""
     # Newlines are significant most of the time for us
     p.ParserElement.setDefaultWhitespaceChars(' \t\r')
     # Single-line Python-style comments
@@ -1484,7 +1069,6 @@ class CompactSyntaxParser(object):
                      MakeKw('else') - expr).setName('IfThenElse').setParseAction(Actions.Piecewise)
 
     # Lambda definitions
-    # TODO: check we can write XML for a full expr as default value
     paramDecl = p.Group(ncIdentAsVar + Optional(eq + expr))
     paramList = p.Group(OptionalDelimitedList(paramDecl, comma))
     lambdaExpr = p.Group(MakeKw('lambda') - paramList + ((colon - expr) | (obrace - stmtList + embedded_cbrace))
@@ -1861,54 +1445,15 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
 
-    def ParseFile(self, filename, xmlGenerator=None):
-        """Main entry point for parsing a single protocol file; returns an ElementTree."""
-        Actions.source_file = filename
-        Actions.units_map = {}
-        if xmlGenerator is None:
-            xmlGenerator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
-        xml = xmlGenerator.xml()
-        xml.base = filename
-        return ET.ElementTree(xml)
-
-    def _ConvertSource(self, referringElt, referringProtoPath, outputDir, dryRun=False):
-        """Possibly convert a protocol referred to by another."""
-        source_path = referringElt.attrib['source']
-        if source_path.endswith('.txt'):
-            # We'll need to convert.  Figure out the full path to the referent.
-            if not os.path.isabs(source_path):
-                source_path = os.path.join(
-                    os.path.dirname(referringProtoPath), source_path)
-            if not os.path.exists(source_path):
-                library = os.path.join(
-                    os.path.dirname(__file__), os.pardir, 'library')
-                source_path = os.path.join(
-                    library, referringElt.attrib['source'])
-            new_path = self.ConvertProtocol(
-                source_path, outputDir, dryRun=dryRun)
-            if not dryRun:
-                referringElt.attrib['source'] = new_path
-
-    def ConvertProtocol(self, sourcePath, outputDir, xmlGenerator=None, dryRun=False):
-        """Convert a protocol from textual syntax to XML in a temporary file.
-
-        Recursively converts imported/nested textual protocols too.
-        """
-        import tempfile
-        xml = self.ParseFile(sourcePath, xmlGenerator)
-        # Find imported/nested textual protocols, and convert them first, updating our references to them
-        subst = {'ns': '{%s}' % PROTO_NS}
-        for import_elt in xml.iterfind('%(ns)simport' % subst):
-            self._ConvertSource(import_elt, sourcePath, outputDir, dryRun=dryRun)
-        for nested_proto in xml.iterfind('%(ns)ssimulations//%(ns)snestedProtocol' % subst):
-            self._ConvertSource(nested_proto, sourcePath, outputDir, dryRun=dryRun)
-        if not dryRun:
-            # Write this protocol to file
-            handle, output_path = tempfile.mkstemp(dir=outputDir, text=True, suffix='.xml')
-            output_file = os.fdopen(handle, 'w')
-            xml.write(output_file, pretty_print=True, xml_declaration=True)
-            output_file.close()
-            return output_path
+    #def ParseFile(self, filename, xmlGenerator=None):
+    #    """Main entry point for parsing a single protocol file; returns an ElementTree."""
+    #    Actions.source_file = filename
+    #    Actions.units_map = {}
+    #    if xmlGenerator is None:
+    #        xmlGenerator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
+    #    xml = xmlGenerator.xml()
+    #    xml.base = filename
+    #    return ET.ElementTree(xml)
 
 
 ################################################################################
@@ -1958,21 +1503,3 @@ class Debug(object):
     def __exit__(self, type, value, traceback):
         DisableDebug(self._grammars)
 
-
-################################################################################
-# Script for conversion to XML syntax, callable by C++ code
-################################################################################
-# TODO: Remove this
-if __name__ == '__main__':
-    assert len(sys.argv) >= 3
-    source_path = sys.argv[1]
-    output_dir = sys.argv[2]
-    dry_run = output_dir == '--dry-run'
-    try:
-        parser = CompactSyntaxParser()
-        output_path = parser.ConvertProtocol(source_path, output_dir, dryRun=dry_run)
-        print(output_path)
-    except BaseException:
-        if len(sys.argv) == 3:
-            raise
-        # Otherwise we swallow the error
