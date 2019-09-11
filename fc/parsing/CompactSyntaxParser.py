@@ -513,9 +513,15 @@ class Actions(object):
     ######################################################################
 
     class SetTimeUnits(BaseAction):
+        # Leaving old XML method in to document existing properties.
+        # def _xml(self):
+        #     return P.setIndependentVariableUnits(**self.TransferAttrs('units'))
         pass
 
     class InputVariable(BaseGroupAction):
+        # Leaving old XML method in to document existing properties.
+        # def _xml(self):
+        #    return P.specifyInputVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
         pass
 
     class OutputVariable(BaseGroupAction):
@@ -542,24 +548,62 @@ class Actions(object):
                 self.default_expr = ''
 
     class DeclareVariable(BaseGroupAction):
+        # Leaving old XML method in to document existing properties.
+        # def _xml(self):
+        #    return P.declareNewVariable(**self.TransferAttrs('name', 'units', 'initial_value'))
         pass
 
     class ClampVariable(BaseGroupAction):
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    assert 1 <= len(self.tokens) <= 2
+        #    name = self.tokens[0]
+        #    if len(self.tokens) == 1:
+        #        value = name
+        #    else:
+        #        value = self.tokens[1]
+        #    return self.Delegate('ModelEquation', [[name, value]]).xml()
         pass
 
     class ModelEquation(BaseGroupAction):
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    assert len(self.tokens) == 2
+        #    if isinstance(self.tokens[0], Actions.Variable):
+        #        lhs = self.tokens[0].xml()
+        #    else:
+        #        # Assigning an ODE
+        #        assert len(self.tokens[0]) == 2
+        #        bvar = M.bvar(self.tokens[0][1].xml())
+        #        lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
+        #    rhs = self.tokens[1].xml()
+        #    return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
         pass
 
     class Interpolate(BaseGroupAction):
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    assert len(self.tokens) == 4
+        #    assert isinstance(self.tokens[0], str)
+        #    file_path = self.DelegateSymbol('string', self.tokens[0]).xml()
+        #    assert isinstance(self.tokens[1], Actions.Variable)
+        #    indep_var = self.tokens[1].xml()
+        #    units = []
+        #    for i in [2, 3]:
+        #        assert isinstance(self.tokens[i], str)
+        #        units.append(M.ci(self.tokens[i]))
+        #    return M.apply(self.DelegateSymbol('interpolate').xml(), file_path, indep_var, *units)
         pass
 
     class UnitsConversion(BaseGroupAction):
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    attrs = self.TransferAttrs('desiredDimensions', 'actualDimensions')
+        #    rule = self.tokens[-1].xml()
+        #    return P.unitsConversionRule(rule, **attrs)
         pass
 
     class ModelInterface(BaseGroupAction):
-        """
-        Parse action for the model interface section of a protocol.
-        """
 
         def _expr(self):
             # TODO: Create objects for all parts of the model interface
@@ -648,6 +692,15 @@ class Actions(object):
             return Simulations.Nested(args[2], args[0], args[1])
 
     class OneStepSimulation(BaseGroupAction):
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    attrs = {}
+        #    args = []
+        #    if 'step' in self.tokens:
+        #        attrs['step'] = str(self.tokens['step'][0])
+        #    if 'modifiers' in self.tokens:
+        #        args.append(self.tokens['modifiers'][0].xml())
+        #    return P.oneStep(*args, **attrs)
         pass
 
     class NestedProtocol(BaseGroupAction):
@@ -746,11 +799,33 @@ class Actions(object):
                         result = '-' + result
             return result
 
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    attrs = self.TransferAttrs('prefix', 'units', 'exponent')
+        #    if 'multiplier' in self.tokens:
+        #        attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
+        #    if 'offset' in self.tokens:
+        #        attrs['offset'] = self.GetValue(self.tokens['offset'][0][1], self.tokens['offset'][0][0] == '-')
+        #    return CELLML.unit(**attrs)
+
     class UnitsDef(BaseGroupAction):
         """Parse action for units definitions."""
 
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    name = str(self.tokens[0])
+        #    if 'description' in self.tokens:
+        #        Actions.units_map[name] = str(self.tokens['description'])
+        #    unit_refs = [t.xml() for t in self.tokens if isinstance(t, Actions.UnitRef)]
+        #    return CELLML.units(*unit_refs, name=name)
+
     class Units(BaseAction):
         """Parse action for the units definitions section."""
+
+        # Leaving old XML method in to document existing properties / tokens.
+        # def _xml(self):
+        #    if len(self.tokens) > 0:
+        #        return P.units(*self.GetChildrenXml())
 
     class Library(BaseAction):
         """Parse action for the library section."""
