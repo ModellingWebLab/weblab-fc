@@ -129,7 +129,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
 
     def testParsingTrace(self):
-
         trace = {'{%s}trace' % CSP.PROTO_NS: '1'}
         self.assertParses(csp.expr, '1?', [['1']])
         self.assertParses(csp.expr, 'var?', [['var']])
@@ -137,7 +136,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, '1 + a?', [['1', '+', ['a']]])
 
     def testParsingMultiLineExpressions(self):
-
         self.assertParses(csp.expr, '(1 + 2) * 3', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '(1 + 2)\\\n * 3', [[['1', '+', '2'], '*', '3']])
@@ -148,7 +146,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, '(1 + 2)\n * 3', [[['1', '+', '2'], '*', '3']])
 
     def testParsingSimpleAssignments(self):
-
         self.assertParses(csp.simpleAssign, 'var = value', [['var', 'value']])
         self.assertParses(csp.simpleAssign, 'var = pre:value', [['var', 'pre:value']])
         self.failIfParses(csp.simpleAssign, 'pre:var = value')
@@ -166,7 +163,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.nsDecls, 'namespace n="uri"\n')
 
     def testParsingInputs(self):
-
         mls = """inputs {
     label_duration = 300  # How long to label for
     unlabel_time = 600000 # When to stop labelling
@@ -197,7 +193,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.imports, 'import "file"\n')
 
     def testParsingImportsWithSetInput(self):
-
         mls = """import "S1S2.txt" {
     steady_state_beats = 10
     timecourse_duration = 2000
@@ -211,7 +206,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.failIfParses(csp.importStmt, 'import "file.txt" { } \n')
 
     def testParsingModelInterface(self):
-
         self.assertParses(csp.setTimeUnits, 'independent var units u', [['u']])
         self.assertParses(csp.inputVariable, 'input test:var units u = 1.2', [['test:var', 'u', '1.2']])
         self.assertParses(csp.inputVariable, 'input test:var units u', [['test:var', 'u']])
@@ -373,7 +367,6 @@ modifiers { at end save as prelim }
             [['', [[['start', ['a', '1']]]]]])
 
     def testParsingNestedSimulations(self):
-
         self.assertParses(
             csp.simulation,
             'simulation rpt = nested { range run units U while not rpt:result\n nests sim }',
@@ -397,7 +390,6 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.failIfParses(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
 
     def testParsingNestedProtocol(self):
-
         self.assertParses(
             csp.simulation,
             'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { } }',
@@ -529,7 +521,6 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.failIfParses(csp.assignStmt, '')
 
     def testParsingOptionalAssignments(self):
-
         self.assertParses(
             csp.assignStmt, 'optional var = value', [[['var'], ['value']]])
 
@@ -550,7 +541,6 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.assertParses(csp.assertStmt, 'assert 1', [['1']])
 
     def testParsingStatementLists(self):
-
         self.assertParses(csp.stmtList, "b=-a\nassert 1", [[[['b'], [['-', 'a']]], ['1']]])
 
         mls = """assert a < 0 # comments are ok
@@ -599,7 +589,6 @@ return c
         self.assertParses(csp.expr, 'lambda: 1', [[[], '1']])
 
     def testParsingFunctionDefinitions(self):
-
         self.assertParses(
             csp.functionDefn,
             'def double(a)\n {\n return a * 2\n }',
@@ -651,7 +640,6 @@ return c
             [[[[['1', '+', '2'], 'a', 'b']], [[['3', '/', '4'], 'c', 'd']]]])
 
     def testParsingArrayComprehensions(self):
-
         self.assertParses(csp.array, '[i for i in 0:N]', [['i', ['i', ['0', 'N']]]])
 
         self.assertParses(csp.expr, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', ['0', '2', '4']]]])
@@ -677,7 +665,6 @@ return c
         self.failIfParses(csp.expr, '[i for 1 $i in 2:4]')
 
     def testParsingViews(self):
-
         self.assertParses(csp.expr, 'A[1:3:7]', [['A', ['1', '3', '7']]])
         self.assertParses(csp.expr, 'A[2$6:-2:4]', [['A', ['2', '6', ['-', '2'], '4']]])
         self.assertParses(csp.expr, 'sim:res[1$2]', [['sim:res', ['1', '2']]])
@@ -714,7 +701,6 @@ return c
         self.failIfParses(csp.expr, 'arr[1 $ 2]')
 
     def testParsingFindAndIndex(self):
-
         # Curly braces represent index, with optional pad or shrink argument.  Find is a function call.
         self.assertParses(csp.expr, 'find(arr)', [['find', ['arr']]])
         self.failIfParses(csp.expr, 'find (arr)')
@@ -730,7 +716,6 @@ return c
         self.assertParses(csp.expr, 'A{find(A), 0, pad:-1=1+2}', [['A', [['find', ['A']], '0', ['-', '1'], ['1', '+', '2']]]])
 
     def testParsingUnitsDefinitions(self):
-
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
         #  new_simple = [mult] [prefix] base [+|- offset]
         #  new_complex = p.delimitedList( [mult] [prefix] base [^expt], '.')
@@ -812,12 +797,10 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         self.failIfParses(csp.expr, '@N:+')
 
     def testParsingNullAndDefault(self):
-
         self.assertParses(csp.expr, 'null', [[]])
         self.assertParses(csp.expr, 'default', [[]])
 
     def testParsingLibrary(self):
-
         self.assertParses(csp.library, 'library {}', [[]])
 
         mls = """library
@@ -837,7 +820,6 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         self.assertParses(csp.library, mls, out)
 
     def testParsingPostProcessing(self):
-
         mls = """post-processing
 {
     a = check(sim:result)
