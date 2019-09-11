@@ -105,23 +105,23 @@ class TestBasicExpressions(unittest.TestCase):
     def test_if(self):
         # test is true
         env = Env.Environment()
-        result = E.If(E.n(1), E.Plus(E.n(1), E.n(2)), E.Minus(E.n(1), E.n(2))).evaluate(env)
+        result = E.If(E.N(1), E.Plus(E.N(1), E.N(2)), E.Minus(E.N(1), E.N(2))).evaluate(env)
         self.assertEqual(3, result.value)
 
         # test is false
-        result = E.If(E.n(0), E.Plus(E.n(1), E.n(2)), E.Minus(E.n(1), E.n(2))).evaluate(env)
+        result = E.If(E.N(0), E.Plus(E.N(1), E.N(2)), E.Minus(E.N(1), E.N(2))).evaluate(env)
         self.assertEqual(-1, result.value)
 
     def test_accessor(self):
         env = Env.Environment()
 
         # test simple value
-        simple = E.n(1)
+        simple = E.N(1)
         result = E.Accessor(simple, E.Accessor.IS_SIMPLE_VALUE).interpret(env)
         self.assertEqual(1, result.value)
 
         # test array
-        array = E.NewArray(E.NewArray(E.n(1), E.n(2)), E.NewArray(E.n(3), E.n(4)))
+        array = E.NewArray(E.NewArray(E.N(1), E.N(2)), E.NewArray(E.N(3), E.N(4)))
         result = E.Accessor(array, E.Accessor.IS_ARRAY).interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(array, E.Accessor.NUM_DIMS).interpret(env)
@@ -146,7 +146,7 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertEqual(0, result.value)
 
         # test tuple
-        tuple_test = E.TupleExpression(E.n(1), E.n(2))
+        tuple_test = E.TupleExpression(E.N(1), E.N(2))
         result = E.Accessor(tuple_test, E.Accessor.IS_TUPLE).interpret(env)
         self.assertEqual(1, result.value)
 

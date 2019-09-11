@@ -399,7 +399,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = CSP.lambdaExpr.parseString('lambda a: a + 1', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
-        result = E.FunctionCall(expr, [E.n(3)]).evaluate(env)
+        result = E.FunctionCall(expr, [E.N(3)]).evaluate(env)
         self.assertEqual(result.value, 4)
 
         # no default, two variables
@@ -407,7 +407,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = CSP.lambdaExpr.parseString('lambda a, b: a * b', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
-        result = E.FunctionCall(expr, [E.n(4), E.n(2)]).evaluate(env)
+        result = E.FunctionCall(expr, [E.N(4), E.N(2)]).evaluate(env)
         self.assertEqual(result.value, 8)
 
         # test lambda with defaults unused
@@ -415,7 +415,7 @@ class TestSyntaxInterface(unittest.TestCase):
         parse_action = CSP.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
-        result = E.FunctionCall(expr, [E.n(2), E.n(6)]).evaluate(env)
+        result = E.FunctionCall(expr, [E.N(2), E.N(6)]).evaluate(env)
         self.assertEqual(result.value, 8)
 
         # test lambda with defaults used
@@ -608,8 +608,8 @@ class TestSyntaxInterface(unittest.TestCase):
 
         parse_action = CSP.lambdaExpr.parseString('lambda t: 0*t')
         expr = parse_action[0].expr()
-        result = E.FunctionCall(expr, [E.NewArray(E.NewArray(E.n(1), E.n(2), E.n(3)),
-                                                  E.NewArray(E.n(3), E.n(4), E.n(5)))]).evaluate(env)
+        result = E.FunctionCall(expr, [E.NewArray(E.NewArray(E.N(1), E.N(2), E.N(3)),
+                                                  E.NewArray(E.N(3), E.N(4), E.N(5)))]).evaluate(env)
         predicted = np.array([[0, 0, 0], [0, 0, 0]])
         np.testing.assert_array_almost_equal(predicted, result.array)
 

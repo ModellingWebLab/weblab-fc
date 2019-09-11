@@ -17,7 +17,7 @@ class TestFunctions(unittest.TestCase):
         body = [S.Return(E.NameLookUp("b"), E.NameLookUp("a"))]
         swap = E.LambdaExpression(parameters, body)
         env.execute_statements([S.Assign(["swap"], swap)])
-        args = [E.n(1), E.n(2)]
+        args = [E.N(1), E.N(2)]
         swap_call = E.FunctionCall("swap", args)
         result = swap_call.evaluate(env)
         self.assertTrue(isinstance(result, V.Tuple))
@@ -29,7 +29,7 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(env.look_up('a').value, 2)
         self.assertEqual(env.look_up('b').value, 1)
 
-        args = [E.n(3), E.n(5)]
+        args = [E.N(3), E.N(5)]
         swap_call = E.FunctionCall("swap", args)
         result = swap_call.evaluate(env)
         self.assertTrue(isinstance(result, V.Tuple))
@@ -39,7 +39,7 @@ class TestFunctions(unittest.TestCase):
     def test_lambda_expression_wrap(self):
         env = Env.Environment()
         add = E.LambdaExpression.wrap(E.Plus, 3)
-        args = [E.n(1), E.n(2), E.n(3)]
+        args = [E.N(1), E.N(2), E.N(3)]
         add_call = E.FunctionCall(add, args)
         result = add_call.evaluate(env)
         self.assertEqual(result.value, 6)
@@ -49,8 +49,8 @@ class TestFunctions(unittest.TestCase):
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
         nested_function = E.LambdaExpression(["input"], nested_body)
         body = [S.Assign(["nested_fn"], nested_function),
-                S.Assign(["outer_var"], E.n(1)),
-                S.Return(E.Eq(E.FunctionCall("nested_fn", [E.n(1)]), E.n(2)))]
+                S.Assign(["outer_var"], E.N(1)),
+                S.Return(E.Eq(E.FunctionCall("nested_fn", [E.N(1)]), E.N(2)))]
         nested_scope = E.LambdaExpression([], body)
         nested_call = E.FunctionCall(nested_scope, [])
         result = nested_call.evaluate(env)
@@ -62,8 +62,8 @@ class TestFunctions(unittest.TestCase):
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
         nested_function = E.LambdaExpression(["input"], nested_body, default_parameters=[V.Simple(1)])
         body = [S.Assign(["nested_fn"], nested_function),
-                S.Assign(["outer_var"], E.n(1)),
-                S.Return(E.Eq(E.FunctionCall("nested_fn", [E.Const(V.DefaultParameter())]), E.n(2)))]
+                S.Assign(["outer_var"], E.N(1)),
+                S.Return(E.Eq(E.FunctionCall("nested_fn", [E.Const(V.DefaultParameter())]), E.N(2)))]
         nested_scope = E.LambdaExpression([], body)
         nested_call = E.FunctionCall(nested_scope, [])
         result = nested_call.evaluate(env)
@@ -75,8 +75,8 @@ class TestFunctions(unittest.TestCase):
         nested_body = [S.Return(E.Plus(E.NameLookUp('input'), E.NameLookUp('outer_var')))]
         nested_function = E.LambdaExpression(["input"], nested_body, default_parameters=[V.Simple(0)])
         body = [S.Assign(["nested_fn"], nested_function),
-                S.Assign(["outer_var"], E.n(1)),
-                S.Return(E.Eq(E.FunctionCall("nested_fn", [E.n(1)]), E.n(2)))]
+                S.Assign(["outer_var"], E.N(1)),
+                S.Return(E.Eq(E.FunctionCall("nested_fn", [E.N(1)]), E.N(2)))]
         nested_scope = E.LambdaExpression([], body)
         nested_call = E.FunctionCall(nested_scope, [])
         result = nested_call.evaluate(env)
@@ -92,17 +92,17 @@ class TestFunctions(unittest.TestCase):
         result = add_call.evaluate(env)
         self.assertEqual(result.value, 6)
 
-        args = [E.n(3)]
+        args = [E.N(3)]
         add_call = E.FunctionCall(add, args)
         result = add_call.evaluate(env)
         self.assertEqual(result.value, 8)
 
-        args = [E.Const(V.DefaultParameter()), E.Const(V.DefaultParameter()), E.n(1)]
+        args = [E.Const(V.DefaultParameter()), E.Const(V.DefaultParameter()), E.N(1)]
         add_call = E.FunctionCall(add, args)
         result = add_call.evaluate(env)
         self.assertEqual(result.value, 4)
 
-        args = [E.n(4), E.Const(V.DefaultParameter()), E.n(4)]
+        args = [E.N(4), E.Const(V.DefaultParameter()), E.N(4)]
         add_call = E.FunctionCall(add, args)
         result = add_call.evaluate(env)
         self.assertEqual(result.value, 10)
@@ -110,8 +110,8 @@ class TestFunctions(unittest.TestCase):
     def test_assert_statement(self):
         env = Env.Environment()
         # evaluates to one, assertion should pass
-        env.execute_statements([S.Assert(E.n(1))])
+        env.execute_statements([S.Assert(E.N(1))])
         # evaluates to zero, assertion should fail
-        self.assertRaises(ProtocolError, env.execute_statements, [S.Assert(E.n(0))])
+        self.assertRaises(ProtocolError, env.execute_statements, [S.Assert(E.N(0))])
         # evaluates to non-simple value, assertion should fail
         self.assertRaises(ProtocolError, env.execute_statements, [S.Assert(E.Const(V.DefaultParameter()))])

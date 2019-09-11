@@ -26,7 +26,7 @@ class TestModelSimulation(unittest.TestCase):
     def test_uniform_range(self):
         a = 5
         model = Model.TestOdeModel(a)
-        range_ = Ranges.UniformRange('count', E.n(0), E.n(10), E.n(1))
+        range_ = Ranges.UniformRange('count', E.N(0), E.N(10), E.N(1))
         time_sim = Simulations.Timecourse(range_)
         time_sim.initialise()
         time_sim.set_model(model)
@@ -134,7 +134,7 @@ class TestModelSimulation(unittest.TestCase):
         # set variable
         a = 5
         model = Model.TestOdeModel(a)
-        modifier = Modifiers.set_variable(Modifiers.AbstractModifier.START_ONLY, 'oxmeta:leakage_current', E.n(1))
+        modifier = Modifiers.set_variable(Modifiers.AbstractModifier.START_ONLY, 'oxmeta:leakage_current', E.N(1))
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
 
@@ -168,7 +168,7 @@ class TestModelSimulation(unittest.TestCase):
     def test_whiles(self):
         a = 10
         model = Model.TestOdeModel(a)
-        while_range = Ranges.While('while', E.Lt(E.NameLookUp('while'), E.n(10)))
+        while_range = Ranges.While('while', E.Lt(E.NameLookUp('while'), E.N(10)))
         time_sim = Simulations.Timecourse(while_range)
         time_sim.set_model(model)
         time_sim.initialise()

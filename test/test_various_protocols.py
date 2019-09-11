@@ -52,5 +52,5 @@ class TestVariousProtocols(unittest.TestCase):
         proto = fc.Protocol(proto_file)
         proto.set_output_folder('TestVariousProtocols_TestWhileLoopTxt')
         proto.set_model(TestOdeModel(1))
-        proto.set_input('num_iters', E.n(10))
+        proto.set_input('num_iters', E.N(10))
         proto.run()
