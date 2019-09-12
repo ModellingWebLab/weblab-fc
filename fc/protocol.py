@@ -205,7 +205,7 @@ class Protocol(object):
                     self.library_env.clear_delegatee_env(sim.prefix)
 
         odict = self.__dict__.copy()
-        # remove Model and CSP from Protocol
+        # Remove Model and CSP from Protocol
         if 'model' in odict:
             del odict['model']
         if 'parser' in odict:
@@ -242,7 +242,7 @@ class Protocol(object):
         self.library_env.set_delegatee_env(proto.library_env, prefix)
 
     def initialise(self, verbose=True):
-        """(Re-)initialise this protocol, ready to be run on a model."""
+        """(Re-)Initialise this protocol, ready to be run on a model."""
         if verbose:
             self.log_progress('Initialising', self.proto_name)
         self.library_env.clear()
@@ -315,12 +315,9 @@ class Protocol(object):
                 with errors:
                     if verbose:
                         self.log_progress(
-                            'plotting',
-                            plot['title'],
-                            'curve:',
-                            plot_descriptions[plot['y']],
-                            'against',
-                            plot_descriptions[plot['x']]
+                            'plotting', plot['title'],
+                            'curve:', plot_descriptions[plot['y']],
+                            'against', plot_descriptions[plot['x']]
                         )
                     x_data = []
                     y_data = []
@@ -336,7 +333,7 @@ class Protocol(object):
                     for i, x in enumerate(x_data):
                         if x.ndim > 1:
                             num_repeats = reduce(operator.mul, x.shape[:-1])
-                            # flatten all extra dimensions as an array view
+                            # Flatten all extra dimensions as an array view
                             x_2d = x.reshape((num_repeats, x.shape[-1]))
                             if x_2d.ptp(axis=0).any():
                                 # There was non-zero difference between the min & max at some position in
@@ -351,7 +348,7 @@ class Protocol(object):
                         y = y_data[i]
                         if y.ndim > 1:
                             # Matplotlib can handle 2d data, but plots columns not rows, so we need to
-                            # flatten & transpose
+                            # Flatten & transpose
                             y_2d = y.reshape((reduce(operator.mul, y.shape[:-1]), y.shape[-1]))
                             plt.plot(x, y_2d.T)
                         else:
@@ -454,7 +451,7 @@ class Protocol(object):
         # Benchmarking
         start = time.time()
 
-        # compile model from CellML
+        # Compile model from CellML
         if isinstance(model, str) and model.endswith('.cellml'):
 
             if exposeNamedParameters:
@@ -476,7 +473,7 @@ class Protocol(object):
             # 'GeneratedModel'
             class_name = 'GeneratedModel'
 
-            # load cellml model
+            # Load cellml model
             import cellmlmanip
             model = cellmlmanip.load_model(model)
 
@@ -517,7 +514,7 @@ class Protocol(object):
             with open(setup_file, 'w') as f:
                 f.write(SETUP_PY % template_strings)
 
-            # compile the extension module
+            # Compile the extension module
             print(subprocess.check_output(
                 ['python', 'setup.py', 'build_ext', '--inplace'],
                 cwd=temp_dir,
