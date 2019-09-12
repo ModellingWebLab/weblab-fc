@@ -620,14 +620,14 @@ class Actions(object):
             args = [self.tokens[0].expr()]
             detail = self.tokens[1]
             if 'set' in self.tokens[1]:
-                modifier = Modifiers.set_variable
+                modifier = Modifiers.SetVariable
                 args.append(detail[0])
                 args.append(detail[1].expr())
             elif 'save' in self.tokens[1]:
-                modifier = Modifiers.save_state
+                modifier = Modifiers.SaveState
                 args.append(detail[0])
             elif 'reset' in self.tokens[1]:
-                modifier = Modifiers.reset_state
+                modifier = Modifiers.ResetState
                 if len(detail) > 0:
                     args.append(detail[0])
             return modifier(*args)

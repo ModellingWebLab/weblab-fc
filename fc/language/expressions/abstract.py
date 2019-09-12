@@ -110,7 +110,7 @@ class AbstractExpression(Locatable):
     def real_evaluate_compiled(self, env):
         """Evaluate the compiled form of this expression using eval().
 
-        This is suitable for use only in non-array contexts, such as by the set_variable modifier.
+        This is suitable for use only in non-array contexts, such as by the SetVariable modifier.
         """
         func = self.compiled_function
         arg_envs = self.get_defining_environments(env)
