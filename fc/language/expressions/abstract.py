@@ -36,11 +36,11 @@ class AbstractExpression(Locatable):
         return result
 
     def evaluate_children(self, env):
-        """evaluate our child expressions and return a list of their values."""
+        """Evaluate our child expressions and return a list of their values."""
         return [child.evaluate(env) for child in self.children]
 
     def interpret(self, env):
-        """evaluate this expression by interpreting the expression tree.
+        """Evaluate this expression by interpreting the expression tree.
         Must be implemented by subclasses.
         """
         raise NotImplementedError
@@ -85,7 +85,7 @@ class AbstractExpression(Locatable):
 
     @property
     def compiled(self):
-        """compile this expression and cache the result."""
+        """Compile this expression and cache the result."""
         try:
             return self._compiled
         except AttributeError:
@@ -108,7 +108,7 @@ class AbstractExpression(Locatable):
             return d
 
     def real_evaluate_compiled(self, env):
-        """evaluate the compiled form of this expression using eval().
+        """Evaluate the compiled form of this expression using eval().
 
         This is suitable for use only in non-array contexts, such as by the set_variable modifier.
         """

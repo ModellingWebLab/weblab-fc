@@ -161,7 +161,7 @@ class LoadFunction(LambdaClosure):
         raise NotImplementedError
 
     def evaluate(self, env, actual_parameters):
-        """evaluate a load() function call.
+        """Evaluate a load() function call.
 
         :param env: the environment within which to evaluate this call
         :param actual_parameters: the values of the parameters to the call; should be a single
