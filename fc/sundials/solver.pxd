@@ -10,10 +10,6 @@ IF FC_SUNDIALS_MAJOR >= 3:
     ctypedef _lib.SUNLinearSolver SUNLinearSolver
 
 
-#cdef object numpy_view(N_Vector v)
-
-#cdef int _rhs_wrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data)
-
 cdef class CvodeSolver:
     cdef void* cvode_mem # CVODE solver 'object'
 
