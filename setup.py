@@ -8,10 +8,10 @@ If SUNDIALS is installed in a non-standard location, it requires environment var
 """
 import numpy
 
+from setuptools import find_packages, setup  # Must come before Cython!
+from distutils.extension import Extension
 from cython import inline
-from Cython.Distutils import build_ext
-from Cython.Distutils.extension import Extension
-from setuptools import find_packages, setup
+from Cython.Build import cythonize
 
 # Detect major sundials version (defaults to 2)
 sundials_major = inline('''
@@ -30,18 +30,16 @@ sundials_major = inline('''
 print('Building for Sundials ' + str(sundials_major) + '.x')
 
 # Define Cython modules
-ext_modules = [
+extensions = [
     Extension('fc.sundials.sundials',
               sources=['fc/sundials/sundials.pxd'],
               include_dirs=['.', numpy.get_include()],
               libraries=['sundials_cvode', 'sundials_nvecserial'],
-              cython_compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major},
               ),
     Extension('fc.sundials.solver',
               sources=['fc/sundials/solver.pyx'],
               include_dirs=['.', numpy.get_include()],
               libraries=['sundials_cvode', 'sundials_nvecserial'],
-              cython_compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major},
               ),
 ]
 
@@ -73,8 +71,9 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering',
     ],
-    cmdclass={'build_ext': build_ext},
-    ext_modules=ext_modules,
+    ext_modules=cythonize(extensions,
+                          compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major}
+    ),
     install_requires=[
         # 'cellmlmanip',    # Add this in when cellmlmanip is ready
         'cython',
