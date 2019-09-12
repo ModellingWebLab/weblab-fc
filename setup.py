@@ -12,6 +12,7 @@ from setuptools import find_packages, setup  # Must come before Cython!
 from distutils.extension import Extension
 from cython import inline
 from Cython.Build import cythonize
+from Cython.Distutils import build_ext
 
 # Detect major sundials version (defaults to 2)
 sundials_major = inline('''
@@ -71,6 +72,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering',
     ],
+    cmdclass={'build_ext': build_ext},
     ext_modules=cythonize(extensions,
                           compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major}
     ),
