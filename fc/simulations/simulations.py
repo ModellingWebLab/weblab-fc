@@ -135,7 +135,7 @@ class AbstractSimulation(Locatable):
             self.model = model
         self.model.set_indent_level(self.indent_level)
         model_env = model.get_environment_map()
-        # TODO: this breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
+        # TODO: This breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
         model.sim_env = self.env
         for prefix, env in model_env.items():
             self.env.set_delegatee_env(env, prefix)

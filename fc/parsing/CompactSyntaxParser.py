@@ -1075,7 +1075,7 @@ class CompactSyntaxParser(object):
                          ).setName('Lambda').setParseAction(Actions.Lambda)
 
     # Function calls
-    # TODO: allow lambdas, not just ident?
+    # TODO: Allow lambdas, not just ident?
     argList = p.Group(OptionalDelimitedList(expr, comma))
     functionCall = p.Group(identAsVar + Adjacent(oparen) - argList +
                            cparen).setName('FnCall').setParseAction(Actions.FunctionCall)

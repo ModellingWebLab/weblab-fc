@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend('agg')  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 
 import fc   # noqa: E402
-from .environment import Environment    # noqa: E402
+from .environment import Environment  # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402
 from .language import values as V  # noqa: E402
