@@ -6,7 +6,7 @@ import unittest
 class TestNdArray(unittest.TestCase):
     """Test functionality of numpy arrays. No protocol arrays tested here."""
 
-    def test0d_array(self):
+    def test_0d_array(self):
         array = np.array(0)
         self.assertEqual(array.ndim, 0)  # number of dimensions is 0
         self.assertEqual(array.size, 1)  # number of elements is 1

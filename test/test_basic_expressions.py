@@ -17,7 +17,7 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertAlmostEqual(E.Plus(E.Const(V.Simple(1)), E.Const(
             V.Simple(2)), E.Const(V.Simple(4))).evaluate(env).value, 7)
 
-    def test_with0d_array(self):
+    def test_with_0d_array(self):
         env = Env.Environment()
         one = V.Array(np.array(1))
         self.assertEqual(one.value, 1)

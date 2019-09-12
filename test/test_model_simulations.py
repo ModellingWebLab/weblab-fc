@@ -13,7 +13,7 @@ import fc.simulations.simulations as Simulations
 class TestModelSimulation(unittest.TestCase):
     """Test models, simulations, ranges, and modifiers."""
 
-    def test_simple_o_d_e(self):
+    def test_simple_ODE(self):
         # using range made in python
         a = 5
         model = Model.TestOdeModel(a)
