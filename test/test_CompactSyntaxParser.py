@@ -1,7 +1,5 @@
-
 import difflib
 import filecmp
-import glob
 import os
 import sys
 import time
@@ -387,14 +385,9 @@ nests sim
 nests simulation timecourse { range t units u uniform 1:100 } }""",
             [['', [['R', 'U', ['1', '2']], [['', [['t', 'u', ['1', '100']]]]]]]])
 
-                          [['', [['R', 'U', ['1', '2']], [['', [['t', 'u', ['1', '100']]]]]]]],
-                          ('nestedSimulation', {},
-                           [('uniformStepper', [('start', ['cn:1']), ('stop', ['cn:2']), ('step', ['cn:1'])]),
-                            'modifiers',
-                            ('timecourseSimulation', {},
-                             [('uniformStepper', [('start', ['cn:1']), ('stop', ['cn:100']), ('step', ['cn:1'])]),
-                              'modifiers'])]))
-        self.assertDoesNotParse(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
+        self.assertDoesNotParse(
+            csp.simulation,
+            'simulation rpt = nested { range run units U while 1 }')
 
     def test_parsing_nested_protocol(self):
         self.assertParses(
@@ -565,8 +558,8 @@ return c, d"""
                 [['b'], [['-', 'a']]],
                 [['b', '>', '0']],
                 [['c', 'd'], [['a', '*', '2'], ['b', '+', '1']]],
-                ['c', 'd']]
-            ])
+                ['c', 'd']
+            ]])
         self.assertDoesNotParse(csp.stmtList, '')
 
     def test_parsing_lambda_expressions(self):
@@ -719,8 +712,16 @@ return c
         self.assertParses(csp.expr, 'arr{idxs, dim, shrink:-1}', [['arr', ['idxs', 'dim', ['-', '1']]]])
         self.assertParses(csp.expr, 'arr{idxs, dim, pad:1=value}', [['arr', ['idxs', 'dim', '1', 'value']]])
         self.assertParses(csp.expr, 'arr{idxs, shrink:0, pad:1=value}', [['arr', ['idxs', '0', '1', 'value']]])
-        self.assertParses(csp.expr, 'f(1,2){find(blah), 0, shrink:1}', [[['f', ['1', '2']], [['find', ['blah']], '0', '1']]])
-        self.assertParses(csp.expr, 'A{find(A), 0, pad:-1=1+2}', [['A', [['find', ['A']], '0', ['-', '1'], ['1', '+', '2']]]])
+        self.assertParses(
+            csp.expr,
+            'f(1,2){find(blah), 0, shrink:1}',
+            [[['f', ['1', '2']], [['find', ['blah']], '0', '1']]]
+        )
+        self.assertParses(
+            csp.expr,
+            'A{find(A), 0, pad:-1=1+2}',
+            [['A', [['find', ['A']], '0', ['-', '1'], ['1', '+', '2']]]]
+        )
 
     def test_parsing_units_definitions(self):
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
