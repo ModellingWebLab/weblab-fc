@@ -138,7 +138,7 @@ class Actions(object):
         def __init__(self, s, loc, tokens):
             super(Actions.BaseGroupAction, self).__init__(s, loc, tokens[0])
 
-    class trace(BaseGroupAction):
+    class Trace(BaseGroupAction):
         """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
 
         def _expr(self):
@@ -1122,7 +1122,7 @@ class CompactSyntaxParser(object):
     expr <<= p.infixNotation(atom, [(accessor, 1, p.opAssoc.LEFT, Actions.Accessor),
                                     (viewSpec, 1, p.opAssoc.LEFT, Actions.View),
                                     (index, 1, p.opAssoc.LEFT, Actions.Index),
-                                    (trace, 1, p.opAssoc.LEFT, Actions.trace),
+                                    (trace, 1, p.opAssoc.LEFT, Actions.Trace),
                                     ('^', 2, p.opAssoc.LEFT, Actions.Operator),
                                     ('-', 1, p.opAssoc.RIGHT,
                                         lambda *args: Actions.Operator(*args, rightAssoc=True)),
