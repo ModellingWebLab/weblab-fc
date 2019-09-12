@@ -62,7 +62,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
             self.fail("Output file '%s' does not match reference file '%s'" % (newFilePath, refFilePath))
 
     def test_parsing_identifiers(self):
-        self.assertParses(csp.ncIdentAsVar, 'abc', ['abc'], 'ci:abc')
         self.assertDoesNotParse(csp.ncIdent, 'abc:def')
         self.assertDoesNotParse(csp.ncIdent, '123')
 
