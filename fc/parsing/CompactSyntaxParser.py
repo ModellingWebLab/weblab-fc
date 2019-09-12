@@ -1421,7 +1421,7 @@ class CompactSyntaxParser(object):
         """Reset the stack limit if it changed."""
         sys.setrecursionlimit(self._original_stack_limit)
 
-    def _Try(self, callable, *args, **kwargs):
+    def try_parse(self, callable, *args, **kwargs):
         """
         Try calling the given parse command, increasing the stack depth limit
         if needed.
@@ -1445,7 +1445,7 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
 
-    #def ParseFile(self, filename, xmlGenerator=None):
+    # def ParseFile(self, filename, xmlGenerator=None):
     #    """Main entry point for parsing a single protocol file; returns an ElementTree."""
     #    Actions.source_file = filename
     #    Actions.units_map = {}
@@ -1454,7 +1454,6 @@ class CompactSyntaxParser(object):
     #    xml = xmlGenerator.xml()
     #    xml.base = filename
     #    return ET.ElementTree(xml)
-
 
 ################################################################################
 # Parser debugging support

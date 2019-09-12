@@ -117,7 +117,7 @@ class Protocol(object):
 
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = proto_file
-        generator = self.parsed_protocol = parser._Try(
+        generator = self.parsed_protocol = parser.try_parse(
             CSP.CompactSyntaxParser.protocol.parseFile,
             proto_file,
             parseAll=True
@@ -136,7 +136,7 @@ class Protocol(object):
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
             else:
-                # merge inputs of the imported protocol into our own (duplicate names are an error here).
+                # Merge inputs of the imported protocol into our own (duplicate names are an error here).
                 # Override any values specified in the import statement itself.
                 for stmt in imported_proto.inputs:
                     name = stmt.names[0]
@@ -146,7 +146,7 @@ class Protocol(object):
                 # Make any prefixed imports of that protocol into our prefixed imports
                 for imported_prefix, imported_import in imported_proto.imports.items():
                     self.add_imported_protocol(imported_import, imported_prefix)
-                # merge the other elements of its definition with our own
+                # Merge the other elements of its definition with our own
                 self.library.extend(imported_proto.library)
                 self.simulations.extend(imported_proto.simulations)
                 self.post_processing.extend(imported_proto.post_processing)
