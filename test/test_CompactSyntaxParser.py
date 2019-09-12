@@ -20,7 +20,7 @@ strict_string_end = CSP.p.StringEnd().leaveWhitespace()
 
 class TestCompactSyntaxParser(unittest.TestCase):
 
-    def check_parse_results(self, actual, expected):
+    def checkParseResults(self, actual, expected):
         """Compare parse results to expected strings.
 
         The expected results may be given as a (nested) list or a dictionary, depending
@@ -30,7 +30,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             if isinstance(expected, str):
                 self.assertEqual(actual, expected, '%s != %s' % (actual, expected))
             else:
-                self.check_parse_results(actual, expected)
+                self.checkParseResults(actual, expected)
         if isinstance(expected, list):
             self.assertEqual(len(actual), len(expected), '%s != %s' % (actual, expected))
             for i, result in enumerate(expected):
@@ -387,6 +387,13 @@ nests sim
 nests simulation timecourse { range t units u uniform 1:100 } }""",
             [['', [['R', 'U', ['1', '2']], [['', [['t', 'u', ['1', '100']]]]]]]])
 
+                          [['', [['R', 'U', ['1', '2']], [['', [['t', 'u', ['1', '100']]]]]]]],
+                          ('nestedSimulation', {},
+                           [('uniformStepper', [('start', ['cn:1']), ('stop', ['cn:2']), ('step', ['cn:1'])]),
+                            'modifiers',
+                            ('timecourseSimulation', {},
+                             [('uniformStepper', [('start', ['cn:1']), ('stop', ['cn:100']), ('step', ['cn:1'])]),
+                              'modifiers'])]))
         self.assertDoesNotParse(csp.simulation, 'simulation rpt = nested { range run units U while 1 }')
 
     def test_parsing_nested_protocol(self):
