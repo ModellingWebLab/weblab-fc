@@ -73,8 +73,9 @@ setup(
         'Topic :: Scientific/Engineering',
     ],
     cmdclass={'build_ext': build_ext},
-    ext_modules=cythonize(extensions,
-                          compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major}
+    ext_modules=cythonize(
+        extensions,
+        compile_time_env={'FC_SUNDIALS_MAJOR': sundials_major},
     ),
     install_requires=[
         # 'cellmlmanip',    # Add this in when cellmlmanip is ready

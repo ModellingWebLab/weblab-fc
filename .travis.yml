@@ -25,6 +25,6 @@ install:
   - flake8 --version
 script:
   - flake8
-  - pytest --cov test
+  - pytest --cov=fc test
 after_success:
   - codecov
