@@ -184,7 +184,7 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertEqual(expr.evaluate(env).value, 1)
 
-    def test_parsing_math_m_l_funcs(self):
+    def test_parsing_MathML_funcs(self):
         # ceiling
         parse_action = CSP.expr.parseString('MathML:ceiling(1.2)', parseAll=True)
         expr = parse_action[0].expr()
@@ -599,7 +599,7 @@ class TestSyntaxInterface(unittest.TestCase):
         predicted = np.array([[10], [16]])
         np.testing.assert_array_almost_equal(result.array, predicted)
 
-    def test_protocoland_post_processing(self):
+    def test_protocol_and_post_processing(self):
         env = Environment()
         parse_action = CSP.postProcessing.parseString('post-processing{a=2}')
         expr = parse_action[0].expr()
