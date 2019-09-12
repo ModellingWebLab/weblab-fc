@@ -1410,7 +1410,7 @@ class CompactSyntaxParser(object):
         ]))).setName('Protocol').setParseAction(Actions.Protocol)
 
     def __init__(self):
-        """initialise the parser."""
+        """Initialise the parser."""
         # We just store the original stack limit here, so we can increase
         # it for the lifetime of this object if needed for parsing, on the
         # basis that if one expression needs to, several are likely to.

@@ -9,7 +9,7 @@ class AbstractRange(V.Simple):
     """
 
     def __init__(self, name):
-        """initialise the common range properties."""
+        """Initialise the common range properties."""
         self.name = name
         self.count = -1
         self._value = float('nan')

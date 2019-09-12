@@ -10,7 +10,7 @@ class AbstractModifier(object):
     END_ONLY = 2
 
     def apply(self, simul):
-        """apply this modifier to the given simulation.
+        """Apply this modifier to the given simulation.
 
         Must be implemented by subclasses.
         """
