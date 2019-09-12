@@ -38,7 +38,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_lambda_expression_wrap(self):
         env = Env.Environment()
-        add = E.LambdaExpression.wrap(E.Plus, 3)
+        add = E.LambdaExpression.Wrap(E.Plus, 3)
         args = [E.N(1), E.N(2), E.N(3)]
         add_call = E.FunctionCall(add, args)
         result = add_call.evaluate(env)

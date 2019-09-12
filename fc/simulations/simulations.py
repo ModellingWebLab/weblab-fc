@@ -225,13 +225,13 @@ class Timecourse(AbstractSimulation):
 class OneStep(AbstractSimulation):
     """simulate one logical execution of a model."""
 
-    class null_range(R.AbstractRange):
+    class Null_range(R.AbstractRange):
         pass
 
     def __init__(self, step, modifiers=[]):
         self.step = step
         self.modifiers = modifiers
-        self.range_ = self.null_range('_')
+        self.range_ = self.Null_range('_')
         super(OneStep, self).__init__()
         self.ranges = []
 

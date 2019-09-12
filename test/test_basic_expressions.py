@@ -139,7 +139,7 @@ class TestBasicExpressions(unittest.TestCase):
         self.assertEqual(0, result.value)
 
         # test function
-        function = E.LambdaExpression.wrap(E.Plus, 3)
+        function = E.LambdaExpression.Wrap(E.Plus, 3)
         result = E.Accessor(function, E.Accessor.IS_FUNCTION).interpret(env)
         self.assertEqual(1, result.value)
         result = E.Accessor(string_test, E.Accessor.IS_FUNCTION).interpret(env)

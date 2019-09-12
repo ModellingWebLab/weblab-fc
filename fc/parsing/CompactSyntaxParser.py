@@ -220,7 +220,7 @@ class Actions(object):
                     result = OPERATORS[operator](result, operand.expr())
             return result
 
-    class wrap(BaseGroupAction):
+    class Wrap(BaseGroupAction):
         """Parse action for wrapped MathML operators."""
 
         def _expr(self):
@@ -231,7 +231,7 @@ class Actions(object):
             else:
                 operator = OPERATORS[operator_name]
             num_operands = int(self.tokens[0])
-            return E.LambdaExpression.wrap(operator, num_operands)
+            return E.LambdaExpression.Wrap(operator, num_operands)
 
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
@@ -1111,7 +1111,7 @@ class CompactSyntaxParser(object):
     mathmlOperator = (p.oneOf('^ * / + - not == != <= >= < > && ||') |
                       p.Combine('MathML:' + p.oneOf(' '.join(mathmlOperators))))
     wrap = p.Group(p.Suppress('@') - Adjacent(p.Word(p.nums)) + Adjacent(colon) + mathmlOperator
-                   ).setName('WrapMathML').setParseAction(Actions.wrap)
+                   ).setName('WrapMathML').setParseAction(Actions.Wrap)
 
     # Turning on tracing for debugging protocols
     trace = Adjacent(p.Suppress('?'))

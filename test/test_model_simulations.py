@@ -80,7 +80,7 @@ class TestModelSimulation(unittest.TestCase):
         a = 5
         model = Model.TestOdeModel(a)
         when = Modifiers.AbstractModifier.EACH_LOOP
-        modifier = Modifiers.reset_state(when)
+        modifier = Modifiers.Reset_state(when)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
 
@@ -96,8 +96,8 @@ class TestModelSimulation(unittest.TestCase):
         # save state and reset using save state
         a = 5
         model = Model.TestOdeModel(a)
-        save_modifier = Modifiers.save_state(Modifiers.AbstractModifier.START_ONLY, 'start')
-        reset_modifier = Modifiers.reset_state(Modifiers.AbstractModifier.EACH_LOOP, 'start')
+        save_modifier = Modifiers.Save_state(Modifiers.AbstractModifier.START_ONLY, 'start')
+        reset_modifier = Modifiers.Reset_state(Modifiers.AbstractModifier.EACH_LOOP, 'start')
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
 
@@ -112,8 +112,8 @@ class TestModelSimulation(unittest.TestCase):
         # save state and reset using save state
         a = 5
         model = Model.TestOdeModel(a)
-        save_modifier = Modifiers.save_state(Modifiers.AbstractModifier.END_ONLY, 'start')
-        reset_modifier = Modifiers.reset_state(Modifiers.AbstractModifier.EACH_LOOP, 'start')
+        save_modifier = Modifiers.Save_state(Modifiers.AbstractModifier.END_ONLY, 'start')
+        reset_modifier = Modifiers.Reset_state(Modifiers.AbstractModifier.EACH_LOOP, 'start')
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         initial_time_sim = Simulations.Timecourse(range_, modifiers=[save_modifier])
         initial_time_sim.initialise()
@@ -134,7 +134,7 @@ class TestModelSimulation(unittest.TestCase):
         # set variable
         a = 5
         model = Model.TestOdeModel(a)
-        modifier = Modifiers.set_variable(Modifiers.AbstractModifier.START_ONLY, 'oxmeta:leakage_current', E.N(1))
+        modifier = Modifiers.Set_variable(Modifiers.AbstractModifier.START_ONLY, 'oxmeta:leakage_current', E.N(1))
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
         time_sim = Simulations.Timecourse(range_)
 
@@ -149,11 +149,11 @@ class TestModelSimulation(unittest.TestCase):
     def test_set_with_range(self):
         a = 5
         model = Model.TestOdeModel(a)
-        set_modifier = Modifiers.set_variable(
+        set_modifier = Modifiers.Set_variable(
             Modifiers.AbstractModifier.START_ONLY,
             'oxmeta:leakage_current',
             E.NameLookUp('count'))
-        reset_modifier = Modifiers.reset_state(Modifiers.AbstractModifier.START_ONLY)
+        reset_modifier = Modifiers.Reset_state(Modifiers.AbstractModifier.START_ONLY)
         range_ = Ranges.VectorRange('range', V.Array(np.array([0, 1, 2, 3])))
         time_sim = Simulations.Timecourse(range_, modifiers=[set_modifier, reset_modifier])
 
