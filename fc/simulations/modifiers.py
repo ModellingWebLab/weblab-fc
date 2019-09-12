@@ -17,7 +17,7 @@ class AbstractModifier(object):
         raise NotImplementedError
 
 
-class Set_variable(AbstractModifier):
+class SetVariable(AbstractModifier):
     """Modifier for changing the values of model variables (that were specified as protocol inputs)."""
 
     def __init__(self, when, variable_name, value_expr):
@@ -27,7 +27,7 @@ class Set_variable(AbstractModifier):
         # Note that we must be modifying a model variable, so the name must be prefixed
         parts = variable_name.split(':')
         if len(parts) != 2:
-            raise ProtocolError("A set_variable modifier must set a model variable")
+            raise ProtocolError("A SetVariable modifier must set a model variable")
         self.var_prefix, self.var_local_name = parts
 
         # Save a reference so when an instance is unpickled it can revert to apply
@@ -67,7 +67,7 @@ class Set_variable(AbstractModifier):
         self._bindings[self.var_local_name] = self._evaluate(simul.env)
 
 
-class Save_state(AbstractModifier):
+class SaveState(AbstractModifier):
     """Modifier to cache the state of a model with an associated name."""
 
     def __init__(self, when, state_name):
@@ -78,7 +78,7 @@ class Save_state(AbstractModifier):
         simul.model.save_state(self.state_name)
 
 
-class Reset_state(AbstractModifier):
+class ResetState(AbstractModifier):
     """Modifier to restore the state of a model to a previously cached version."""
 
     def __init__(self, when, state_name=None):

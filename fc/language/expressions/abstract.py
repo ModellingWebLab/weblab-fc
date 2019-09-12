@@ -51,7 +51,7 @@ class AbstractExpression(Locatable):
         By default, evaluation of the generated string is only guaranteed to give correct results (as defined
         by the interpret method) in certain array contexts, for instance maps and array comprehensions.
         If array_context is set to False, the generated string will instead only evaluate correctly when
-        considered as a standalone expression operating on simple values (useful in the set_variable modifier,
+        considered as a standalone expression operating on simple values (useful in the SetVariable modifier,
         for instance).
 
         TODO: Always stop compilation succeeding if an expression or subexpression is traced.
