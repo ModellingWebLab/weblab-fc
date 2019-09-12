@@ -231,7 +231,7 @@ class Actions(object):
             else:
                 operator = OPERATORS[operator_name]
             num_operands = int(self.tokens[0])
-            return E.LambdaExpression.Wrap(operator, num_operands)
+            return E.LambdaExpression.wrap(operator, num_operands)
 
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
