@@ -12,9 +12,10 @@ branches:
     - master
 install:
   # Needed to run setup.py
+  - pip install --upgrade setuptools
   - pip install -e git://github.com/ModellingWebLab/cellmlmanip.git#egg=cellmlmanip
   - pip install -e git://github.com/ModellingWebLab/weblab_cg#egg=weblab_cg
-  - pip install cython numpy
+  - pip install cython>=0.23 numpy
   - pip install -vv .[test]
   # Needed to upload coverage results
   - pip install codecov
