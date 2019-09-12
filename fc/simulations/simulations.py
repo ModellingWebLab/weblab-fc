@@ -187,7 +187,7 @@ class AbstractSimulation(Locatable):
 
 
 class Timecourse(AbstractSimulation):
-    """simulate a simple loop over time."""
+    """Simulate a simple loop over time."""
 
     def __init__(self, range_, modifiers=[]):
         self.range_ = range_
@@ -223,7 +223,7 @@ class Timecourse(AbstractSimulation):
 
 
 class OneStep(AbstractSimulation):
-    """simulate one logical execution of a model."""
+    """Simulate one logical execution of a model."""
 
     class Null_range(R.AbstractRange):
         pass

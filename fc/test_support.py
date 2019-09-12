@@ -165,7 +165,7 @@ def check_file_compression(file_path):
 
 
 def load2d(file_path):
-    """load the legacy data format for 2d arrays."""
+    """Load the legacy data format for 2d arrays."""
     real_path, is_compressed = check_file_compression(file_path)
     array = np.loadtxt(real_path, dtype=float, delimiter=',', ndmin=2, unpack=True)  # unpack transposes the array
     assert array.ndim == 2
@@ -173,7 +173,7 @@ def load2d(file_path):
 
 
 def load(file_path):
-    """load the legacy data format for arbitrary dimension arrays."""
+    """Load the legacy data format for arbitrary dimension arrays."""
     real_path, is_compressed = check_file_compression(file_path)
     if is_compressed:
         import gzip

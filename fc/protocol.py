@@ -371,7 +371,7 @@ class Protocol(object):
 
     def execute_library(self):
         """
-        run the statements in our library to build up the library environment.
+        Run the statements in our library to build up the library environment.
 
         The libraries of any imported protocols will be executed first.
         """
@@ -380,7 +380,7 @@ class Protocol(object):
         self.library_env.execute_statements(self.library)
 
     def run(self, verbose=True, write_out=True):
-        """run this protocol on the model already specified using set_model."""
+        """Run this protocol on the model already specified using set_model."""
         Locatable.output_folder = self.output_folder
         self.initialise(verbose)
         if verbose:
@@ -417,7 +417,7 @@ class Protocol(object):
             raise errors
 
     def run_simulations(self, verbose=True):
-        """run the model simulations specified in this protocol."""
+        """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
             if verbose:
                 self.log_progress('running simulation', sim.prefix)
@@ -427,7 +427,7 @@ class Protocol(object):
             Locatable.output_folder = self.output_folder
 
     def run_post_processing(self, verbose=True):
-        """run the post-processing section of this protocol."""
+        """Run the post-processing section of this protocol."""
         if verbose:
             self.log_progress('running post processing for', self.proto_name, '...')
         self.post_processing_env.execute_statements(self.post_processing)

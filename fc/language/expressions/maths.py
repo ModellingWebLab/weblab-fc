@@ -339,7 +339,7 @@ class Ln(AbstractExpression):
 
 
 class Log(AbstractExpression):
-    """logarithmic operator."""
+    """Logarithmic operator."""
 
     def __init__(self, *children):
         super(Log, self).__init__(*children)

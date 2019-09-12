@@ -17,7 +17,7 @@ class AbstractModel(object):
         self.indent_level = 0
 
     def simulate(self, end_point):
-        """simulate the model up to the given end point (value of the free variable).
+        """Simulate the model up to the given end point (value of the free variable).
 
         This method must be implemented by subclasses.
         """
@@ -123,7 +123,7 @@ class AbstractOdeModel(AbstractModel):
             self.solver.reset_solver(self.saved_states[name].copy())
 
     def simulate(self, end_point):
-        """simulate the model up to the given end point (value of the free variable)."""
+        """Simulate the model up to the given end point (value of the free variable)."""
         self.solver.simulate(end_point)
         self.free_variable = end_point
 
