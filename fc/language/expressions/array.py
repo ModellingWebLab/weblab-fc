@@ -50,10 +50,10 @@ class NewArray(AbstractExpression):
         return result
 
     def develop_result_with_interpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
-        # print 'Comprehension', self.location
+        # print('Comprehension', self.location)
         result = None
         for range_spec_indices in itertools.product(*range_dims):
-            # collect everything in range_spec_indices that is a number, not a slice
+            # Collect everything in range_spec_indices that is a number, not a slice
             range_specs = [ranges[dim][idx]
                            for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
             sub_env = Env.Environment(delegatee=env)
@@ -144,7 +144,7 @@ class NewArray(AbstractExpression):
             ranges.append(implicit_slice)
             range_name.append(implicit_dim_names[i])
 
-        range_name = [_f for _f in range_name if _f]  # remove None entries
+        range_name = [_f for _f in range_name if _f]  # Remove None entries
         dims = []
         range_dims = []
         for i, each in enumerate(ranges):
@@ -155,7 +155,7 @@ class NewArray(AbstractExpression):
                 dims.append(len(each))
                 range_dims.append(list(range(len(each))))
                 last_spec_dim = i
-        # stretch
+        # Stretch
         if len(range_name) == 1:
             names_used = self.gen_expr.get_used_variables()
             local_names = set(range_name)
@@ -217,7 +217,7 @@ class View(AbstractExpression):
         return array.array
 
     def interpret(self, env):
-        # print 'View', self.location
+        # print('View', self.location)
         array = self.array_expression.evaluate(env)
         if len(self.children) > array.array.ndim:
             raise ProtocolError("You entered", len(self.children),
