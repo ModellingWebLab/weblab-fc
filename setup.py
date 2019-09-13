@@ -59,7 +59,7 @@ setup(
     maintainer='Web Lab team',
     maintainer_email='j.p.cooper@ucl.ac.uk',
     url='https://github.com/ModellingWebLab/weblab-fc',
-    packages=find_packages(exclude=['test', 'test.*']),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,  # Include non-python files via MANIFEST.in
     zip_safe=False,
     classifiers=[
