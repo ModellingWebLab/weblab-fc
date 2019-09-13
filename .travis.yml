@@ -24,6 +24,6 @@ install:
   - flake8 --version
 script:
   - flake8
-  - coverage -m pytest
+  - coverage run -m pytest
 after_success:
   - codecov
