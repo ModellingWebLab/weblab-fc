@@ -15,7 +15,7 @@ install:
   - pip install -e git://github.com/ModellingWebLab/cellmlmanip.git#egg=cellmlmanip
   - pip install -e git://github.com/ModellingWebLab/weblab_cg#egg=weblab_cg
   - pip install cython numpy
-  - pip install -vv .[test]
+  - pip install -e .[test]
   # Needed to upload coverage results
   - pip install codecov
   # Check what's installed
