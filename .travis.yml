@@ -24,6 +24,6 @@ install:
   - flake8 --version
 script:
   - flake8
-  - pytest --cov=fc --cov-report=term tests
+  - coverage -m pytest
 after_success:
   - codecov
