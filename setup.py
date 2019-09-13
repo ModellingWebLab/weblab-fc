@@ -8,10 +8,10 @@ If SUNDIALS is installed in a non-standard location, it requires environment var
 """
 import numpy
 
+from setuptools import find_packages, setup  # Must come before Cython!
 from cython import inline
 from Cython.Distutils import build_ext
 from Cython.Distutils.extension import Extension
-from setuptools import find_packages, setup
 
 # Detect major sundials version (defaults to 2)
 sundials_major = inline('''
@@ -59,7 +59,7 @@ setup(
     maintainer='Web Lab team',
     maintainer_email='j.p.cooper@ucl.ac.uk',
     url='https://github.com/ModellingWebLab/weblab-fc',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['test', 'test.*']),
     include_package_data=True,  # Include non-python files via MANIFEST.in
     zip_safe=False,
     classifiers=[
