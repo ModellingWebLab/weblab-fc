@@ -1445,13 +1445,13 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
 
-    # def ParseFile(self, filename, xmlGenerator=None):
+    # def parse_file(self, filename, xml_generator=None):
     #    """Main entry point for parsing a single protocol file; returns an ElementTree."""
     #    Actions.source_file = filename
     #    Actions.units_map = {}
-    #    if xmlGenerator is None:
-    #        xmlGenerator = self._Try(self.protocol.parseFile, filename, parseAll=True)[0]
-    #    xml = xmlGenerator.xml()
+    #    if xml_generator is None:
+    #        xml_generator = self.try_parse(self.protocol.parse_file, filename, parse_all=True)[0]
+    #    xml = xml_generator.xml()
     #    xml.base = filename
     #    return ET.ElementTree(xml)
 

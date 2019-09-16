@@ -841,7 +841,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
             proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
             print(proto_base, '...')
-            parsed_tree = csp().ParseFile(proto_filename)
+            parsed_tree = csp().parse_file(proto_filename)
             # Check the xml:base attribute
             self.assertTrue('{http://www.w3.org/XML/1998/namespace}base' in parsed_tree.getroot().attrib)
             self.assertEqual(parsed_tree.getroot().base, proto_filename)
