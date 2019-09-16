@@ -18,7 +18,7 @@ strict_string_end = CSP.p.StringEnd().leaveWhitespace()
 
 class TestCompactSyntaxParser(unittest.TestCase):
 
-    def checkParseResults(self, actual, expected):
+    def check_parse_results(self, actual, expected):
         """Compare parse results to expected strings.
 
         The expected results may be given as a (nested) list or a dictionary, depending
@@ -28,7 +28,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             if isinstance(expected, str):
                 self.assertEqual(actual, expected, '%s != %s' % (actual, expected))
             else:
-                self.checkParseResults(actual, expected)
+                self.check_parse_results(actual, expected)
         if isinstance(expected, list):
             self.assertEqual(len(actual), len(expected), '%s != %s' % (actual, expected))
             for i, result in enumerate(expected):
@@ -41,7 +41,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
     def assertParses(self, grammar, input, results):
         """Utility method to test that a given grammar parses an input as expected."""
         actual_results = grammar.parseString(input, parseAll=True)
-        self.checkParseResults(actual_results, results)
+        self.check_parse_results(actual_results, results)
 
     def assertDoesNotParse(self, grammar, input):
         """Utility method to test that a given grammar fails to parse an input."""
@@ -125,7 +125,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
 
     # XML-Only method?
-    # def testParsingTrace(self):
+    # def test_parsing_trace(self):
     #    trace = {'{%s}trace' % CSP.PROTO_NS: '1'}
     #    self.assertParses(csp.expr, '1?', [['1']])
     #    self.assertParses(csp.expr, 'var?', [['var']])
