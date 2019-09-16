@@ -316,9 +316,9 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.save_state, 'save as state_name', ['state_name'])
         self.assertDoesNotParse(csp.save_state, 'save as state:name')
 
-        self.assertParses(csp.resetState, 'reset', [])
-        self.assertParses(csp.resetState, 'reset to state_name', ['state_name'])
-        self.assertDoesNotParse(csp.resetState, 'reset to state:name')
+        self.assertParses(csp.reset_state, 'reset', [])
+        self.assertParses(csp.reset_state, 'reset to state_name', ['state_name'])
+        self.assertDoesNotParse(csp.reset_state, 'reset to state:name')
 
         mls = """modifiers {
         # Multiple

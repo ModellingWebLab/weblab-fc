@@ -1337,28 +1337,28 @@ class CompactSyntaxParser(object):
                                    make_kw('end', False)).setParseAction(Actions.ModifierWhen)
     set_variable = make_kw('set') - ident + eq + expr
     save_state = make_kw('save') - make_kw('as') - nc_ident
-    resetState = make_kw('reset') - Optional(make_kw('to') + nc_ident)
-    modifier = p.Group(modifier_when + p.Group(set_variable("set") | save_state("save") | resetState("reset"))
+    reset_state = make_kw('reset') - Optional(make_kw('to') + nc_ident)
+    modifier = p.Group(modifier_when + p.Group(set_variable("set") | save_state("save") | reset_state("reset"))
                        ).setName('Modifier').setParseAction(Actions.Modifier)
     modifiers = p.Group(make_kw('modifiers') + obrace - optional_delimited_list(modifier, nl) + cbrace
                         ).setName('Modifiers').setParseAction(Actions.Modifiers)
 
     # The simulations themselves
     simulation = p.Forward().setName('Simulation')
-    _selectOutput = p.Group(make_kw('select') - Optional(make_kw('optional', suppress=False)) -
+    _select_output = p.Group(make_kw('select') - Optional(make_kw('optional', suppress=False)) -
                             make_kw('output') - nc_ident).setName('SelectOutput')
-    nestedProtocol = p.Group(make_kw('protocol') - quoted_uri + obrace +
-                             simple_assign_list + Optional(nl) + optional_delimited_list(_selectOutput, nl) +
+    nested_protocol = p.Group(make_kw('protocol') - quoted_uri + obrace +
+                             simple_assign_list + Optional(nl) + optional_delimited_list(_select_output, nl) +
                              cbrace + Optional('?')).setName('NestedProtocol').setParseAction(Actions.NestedProtocol)
-    timecourseSim = p.Group(make_kw('timecourse') - obrace - range + Optional(nl + modifiers) + cbrace
+    timecourse_sim = p.Group(make_kw('timecourse') - obrace - range + Optional(nl + modifiers) + cbrace
                             ).setName('TimecourseSim').setParseAction(Actions.TimecourseSimulation)
-    nestedSim = p.Group(make_kw('nested') - obrace - range + nl + Optional(modifiers) +
-                        p.Group(make_kw('nests') + (simulation | nestedProtocol | ident)) +
+    nested_sim = p.Group(make_kw('nested') - obrace - range + nl + Optional(modifiers) +
+                        p.Group(make_kw('nests') + (simulation | nested_protocol | ident)) +
                         cbrace).setName('NestedSim').setParseAction(Actions.NestedSimulation)
-    oneStepSim = p.Group(make_kw('oneStep') - Optional(p.originalTextFor(expr))("step") +
+    one_step_sim = p.Group(make_kw('oneStep') - Optional(p.originalTextFor(expr))("step") +
                          Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(Actions.OneStepSimulation)
     simulation << p.Group(make_kw('simulation') - Optional(nc_ident + eq, default='') +
-                          (timecourseSim | nestedSim | oneStepSim) -
+                          (timecourse_sim | nested_sim | one_step_sim) -
                           Optional('?' + nl)).setParseAction(Actions.Simulation)
 
     tasks = p.Group(make_kw('tasks') + obrace - p.ZeroOrMore(simulation) +
