@@ -1252,9 +1252,9 @@ class CompactSyntaxParser(object):
     units_ref = make_kw('units') - nc_ident
 
     # Setting the units for the independent variable
-    setTimeUnits = (make_kw('independent') - make_kw('var') - units_ref("units")).setParseAction(Actions.SetTimeUnits)
+    set_time_units = (make_kw('independent') - make_kw('var') - units_ref("units")).setParseAction(Actions.SetTimeUnits)
     # Input variables, with optional units and initial value
-    inputVariable = p.Group(
+    input_variable = p.Group(
         make_kw('input') -
         c_ident("name") +
         Optional(units_ref)("units") +
@@ -1263,15 +1263,15 @@ class CompactSyntaxParser(object):
             plain_number)("initial_value")).setName('InputVariable').setParseAction(
         Actions.InputVariable)
     # Model outputs of interest, with optional units
-    outputVariable = p.Group(make_kw('output') - c_ident("name") + Optional(units_ref("units"))
+    output_variable = p.Group(make_kw('output') - c_ident("name") + Optional(units_ref("units"))
                              ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
     # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
     locator = p.Empty().leaveWhitespace().setParseAction(lambda s, l, t: l)
-    varDefault = make_kw('default') - locator("default_start") + simple_expr("default")
-    optionalVariable = p.Group(make_kw('optional') - c_ident("name") + Optional(varDefault) + locator("default_end")
+    var_default = make_kw('default') - locator("default_start") + simple_expr("default")
+    optional_variable = p.Group(make_kw('optional') - c_ident("name") + Optional(var_default) + locator("default_end")
                                ).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
     # New variables added to the model, with optional initial value
-    newVariable = p.Group(
+    new_variable = p.Group(
         make_kw('var') -
         nc_ident("name") +
         units_ref("units") +
@@ -1280,7 +1280,7 @@ class CompactSyntaxParser(object):
             plain_number)("initial_value")).setName('NewVariable').setParseAction(
         Actions.DeclareVariable)
     # Adding or replacing equations in the model
-    clampVariable = p.Group(make_kw('clamp') - ident_as_var + Optional(make_kw('to') - simple_expr)
+    clamp_variable = p.Group(make_kw('clamp') - ident_as_var + Optional(make_kw('to') - simple_expr)
                             ).setName('ClampVariable').setParseAction(Actions.ClampVariable)
     interpolate = p.Group(
         make_kw('interpolate') -
@@ -1294,7 +1294,7 @@ class CompactSyntaxParser(object):
         nc_ident -
         cparen).setName('Interpolate').setParseAction(
         Actions.Interpolate)
-    modelEquation = p.Group(make_kw('define') -
+    model_equation = p.Group(make_kw('define') -
                             (p.Group(make_kw('diff') +
                                      adjacent(oparen) -
                                      ident_as_var +
@@ -1305,7 +1305,7 @@ class CompactSyntaxParser(object):
                             (interpolate | simple_expr)
                             ).setName('AddOrReplaceEquation').setParseAction(Actions.ModelEquation)
     # Units conversion rules
-    unitsConversion = p.Group(
+    units_conversion = p.Group(
         make_kw('convert') -
         nc_ident("actualDimensions") +
         make_kw('to') +
@@ -1314,31 +1314,31 @@ class CompactSyntaxParser(object):
         simple_lambda_expr).setName('UnitsConversion').setParseAction(
         Actions.UnitsConversion)
 
-    modelInterface = p.Group(make_kw('model') - make_kw('interface') - obrace -
-                             Optional(setTimeUnits - nl) +
-                             optional_delimited_list((inputVariable | outputVariable | optionalVariable | newVariable |
-                                                    clampVariable | modelEquation | unitsConversion), nl) +
+    model_interface = p.Group(make_kw('model') - make_kw('interface') - obrace -
+                             Optional(set_time_units - nl) +
+                             optional_delimited_list((input_variable | output_variable | optional_variable | new_variable |
+                                                    clamp_variable | model_equation | units_conversion), nl) +
                              cbrace).setName('ModelInterface').setParseAction(Actions.ModelInterface)
 
     # Simulation definitions
     ########################
 
     # Ranges
-    uniformRange = make_kw('uniform') + numeric_range
-    vectorRange = make_kw('vector') + expr
-    whileRange = make_kw('while') + expr
+    uniform_range = make_kw('uniform') + numeric_range
+    vector_range = make_kw('vector') + expr
+    while_range = make_kw('while') + expr
     range = p.Group(make_kw('range') + nc_ident("name") + units_ref("units") +
-                    (uniformRange("uniform") | vectorRange("vector") | whileRange("while"))
+                    (uniform_range("uniform") | vector_range("vector") | while_range("while"))
                     ).setName('Range').setParseAction(Actions.Range)
 
     # Modifiers
-    modifierWhen = make_kw('at') - (make_kw('start', False) |
+    modifier_when = make_kw('at') - (make_kw('start', False) |
                                    (make_kw('each', False) - make_kw('loop')) |
                                    make_kw('end', False)).setParseAction(Actions.ModifierWhen)
-    setVariable = make_kw('set') - ident + eq + expr
-    saveState = make_kw('save') - make_kw('as') - nc_ident
+    set_variable = make_kw('set') - ident + eq + expr
+    save_state = make_kw('save') - make_kw('as') - nc_ident
     resetState = make_kw('reset') - Optional(make_kw('to') + nc_ident)
-    modifier = p.Group(modifierWhen + p.Group(setVariable("set") | saveState("save") | resetState("reset"))
+    modifier = p.Group(modifier_when + p.Group(set_variable("set") | save_state("save") | resetState("reset"))
                        ).setName('Modifier').setParseAction(Actions.Modifier)
     modifiers = p.Group(make_kw('modifiers') + obrace - optional_delimited_list(modifier, nl) + cbrace
                         ).setName('Modifiers').setParseAction(Actions.Modifiers)
@@ -1367,29 +1367,29 @@ class CompactSyntaxParser(object):
     # Output specifications
     #######################
 
-    outputDesc = Optional(quoted_string)("description")
-    outputSpec = p.Group(Optional(make_kw('optional', suppress=False))("optional") +
+    output_desc = Optional(quoted_string)("description")
+    output_spec = p.Group(Optional(make_kw('optional', suppress=False))("optional") +
                          nc_ident("name") +
                          ((units_ref("units") +
-                           outputDesc) | (eq +
+                           output_desc) | (eq +
                                           ident("ref") +
                                           Optional(units_ref)("units") +
-                                          outputDesc))).setName('Output').setParseAction(Actions.Output)
-    outputs = p.Group(make_kw('outputs') + obrace - optional_delimited_list(outputSpec, nl) +
+                                          output_desc))).setName('Output').setParseAction(Actions.Output)
+    outputs = p.Group(make_kw('outputs') + obrace - optional_delimited_list(output_spec, nl) +
                       cbrace).setName('Outputs').setParseAction(Actions.Outputs)
 
     # Plot specifications
     #####################
 
-    plotCurve = p.Group(p.delimitedList(nc_ident, ',') +
+    plot_curve = p.Group(p.delimitedList(nc_ident, ',') +
                         make_kw('against') - nc_ident +
                         Optional(make_kw('key') - nc_ident("key"))).setName('Curve')
-    plotUsing = (make_kw('using') - (make_kw('lines', suppress=False) |
+    plot_using = (make_kw('using') - (make_kw('lines', suppress=False) |
                                     make_kw('points', suppress=False) |
                                     make_kw('linespoints', suppress=False)))("using")
-    plotSpec = p.Group(make_kw('plot') - quoted_string + Optional(plotUsing) - obrace +
-                       plotCurve + p.ZeroOrMore(nl + plotCurve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
-    plots = p.Group(make_kw('plots') + obrace - p.ZeroOrMore(plotSpec) +
+    plot_spec = p.Group(make_kw('plot') - quoted_string + Optional(plot_using) - obrace +
+                       plot_curve + p.ZeroOrMore(nl + plot_curve) + cbrace).setName('Plot').setParseAction(Actions.Plot)
+    plots = p.Group(make_kw('plots') + obrace - p.ZeroOrMore(plot_spec) +
                     cbrace).setName('Plots').setParseAction(Actions.Plots)
 
     # Parsing a full protocol
@@ -1404,7 +1404,7 @@ class CompactSyntaxParser(object):
             imports + nl,
             library,
             units,
-            modelInterface,
+            model_interface,
             tasks,
             post_processing,
             outputs,

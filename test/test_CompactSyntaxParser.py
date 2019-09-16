@@ -202,44 +202,44 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertDoesNotParse(csp.import_stmt, 'import "file.txt" { } \n')
 
     def test_parsing_model_interface(self):
-        self.assertParses(csp.setTimeUnits, 'independent var units u', [['u']])
-        self.assertParses(csp.inputVariable, 'input test:var units u = 1.2', [['test:var', 'u', '1.2']])
-        self.assertParses(csp.inputVariable, 'input test:var units u', [['test:var', 'u']])
-        self.assertParses(csp.inputVariable, 'input test:var = -1e2', [['test:var', '-1e2']])
-        self.assertParses(csp.inputVariable, 'input test:var', [['test:var']])
-        self.assertDoesNotParse(csp.inputVariable, 'input no_prefix')
+        self.assertParses(csp.set_time_units, 'independent var units u', [['u']])
+        self.assertParses(csp.input_variable, 'input test:var units u = 1.2', [['test:var', 'u', '1.2']])
+        self.assertParses(csp.input_variable, 'input test:var units u', [['test:var', 'u']])
+        self.assertParses(csp.input_variable, 'input test:var = -1e2', [['test:var', '-1e2']])
+        self.assertParses(csp.input_variable, 'input test:var', [['test:var']])
+        self.assertDoesNotParse(csp.input_variable, 'input no_prefix')
 
-        self.assertParses(csp.outputVariable, 'output test:var', [['test:var']])
-        self.assertParses(csp.outputVariable, 'output test:var units uname', [['test:var', 'uname']])
-        self.assertDoesNotParse(csp.outputVariable, 'output no_prefix')
+        self.assertParses(csp.output_variable, 'output test:var', [['test:var']])
+        self.assertParses(csp.output_variable, 'output test:var units uname', [['test:var', 'uname']])
+        self.assertDoesNotParse(csp.output_variable, 'output no_prefix')
 
         self.assertParses(
-            csp.optionalVariable, 'optional prefix:name', [['prefix:name', 20]])
+            csp.optional_variable, 'optional prefix:name', [['prefix:name', 20]])
         self.assertParses(
-            csp.optionalVariable,
+            csp.optional_variable,
             'optional p:n default p:v + local * 2 :: u',
             [['p:n', 12, ['p:v', '+', ['local', '*', '2']], 41]])
-        self.assertDoesNotParse(csp.optionalVariable, 'optional no_prefix')
+        self.assertDoesNotParse(csp.optional_variable, 'optional no_prefix')
 
-        self.assertParses(csp.newVariable, 'var varname units uname = 0', [['varname', 'uname', '0']])
-        self.assertParses(csp.newVariable, 'var varname units uname', [['varname', 'uname']])
-        self.assertDoesNotParse(csp.newVariable, 'var prefix:varname units uname = 0')
-        self.assertDoesNotParse(csp.newVariable, 'var varname = 0')
-        self.assertDoesNotParse(csp.newVariable, 'var varname')
+        self.assertParses(csp.new_variable, 'var varname units uname = 0', [['varname', 'uname', '0']])
+        self.assertParses(csp.new_variable, 'var varname units uname', [['varname', 'uname']])
+        self.assertDoesNotParse(csp.new_variable, 'var prefix:varname units uname = 0')
+        self.assertDoesNotParse(csp.new_variable, 'var varname = 0')
+        self.assertDoesNotParse(csp.new_variable, 'var varname')
 
-        self.assertParses(csp.clampVariable, 'clamp p:v', [['p:v']])
-        self.assertParses(csp.clampVariable, 'clamp p:v to 0 :: U', [['p:v', '0']])
+        self.assertParses(csp.clamp_variable, 'clamp p:v', [['p:v']])
+        self.assertParses(csp.clamp_variable, 'clamp p:v to 0 :: U', [['p:v', '0']])
 
         self.assertParses(
-            csp.modelEquation,
+            csp.model_equation,
             'define local_var = 1::U + model:var',
             [['local_var', ['1', '+', 'model:var']]])
         self.assertParses(
-            csp.modelEquation,
+            csp.model_equation,
             'define model:var = 2.5 :: units / local_var',
             [['model:var', ['2.5', '/', 'local_var']]])
         self.assertParses(
-            csp.modelEquation,
+            csp.model_equation,
             'define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms',
             [[['oxmeta:membrane_voltage', 'oxmeta:time'], '1']])
 
@@ -276,10 +276,10 @@ class TestCompactSyntaxParser(unittest.TestCase):
             ['test:v3', ['test:v2', '*', 'local']],
             ['u1', 'u2', [[['u']], ['u', '*', 'test:v3']]]
         ]]
-        self.assertParses(csp.modelInterface, mls, out)
-        self.assertParses(csp.modelInterface, 'model interface {}', [[]])
-        self.assertParses(csp.modelInterface, 'model interface#comment\n{output test:time\n}', [[['test:time']]])
-        self.assertParses(csp.modelInterface, 'model interface {output test:time }', [[['test:time']]])
+        self.assertParses(csp.model_interface, mls, out)
+        self.assertParses(csp.model_interface, 'model interface {}', [[]])
+        self.assertParses(csp.model_interface, 'model interface#comment\n{output test:time\n}', [[['test:time']]])
+        self.assertParses(csp.model_interface, 'model interface {output test:time }', [[['test:time']]])
 
     def test_parsing_uniform_range(self):
         self.assertParses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
@@ -306,15 +306,15 @@ class TestCompactSyntaxParser(unittest.TestCase):
             [['rpt', 'dimensionless', ['rpt', '<', '5']]])
 
     def test_parsing_modifiers(self):
-        self.assertParses(csp.modifierWhen, 'at start', ['start'])
-        self.assertParses(csp.modifierWhen, 'at each loop', ['each'])
-        self.assertParses(csp.modifierWhen, 'at end', ['end'])
+        self.assertParses(csp.modifier_when, 'at start', ['start'])
+        self.assertParses(csp.modifier_when, 'at each loop', ['each'])
+        self.assertParses(csp.modifier_when, 'at end', ['end'])
 
-        self.assertParses(csp.setVariable, 'set model:V = 5.0', ['model:V', '5.0'])
-        self.assertParses(csp.setVariable, 'set model:t = time + 10.0', ['model:t', ['time', '+', '10.0']])
+        self.assertParses(csp.set_variable, 'set model:V = 5.0', ['model:V', '5.0'])
+        self.assertParses(csp.set_variable, 'set model:t = time + 10.0', ['model:t', ['time', '+', '10.0']])
 
-        self.assertParses(csp.saveState, 'save as state_name', ['state_name'])
-        self.assertDoesNotParse(csp.saveState, 'save as state:name')
+        self.assertParses(csp.save_state, 'save as state_name', ['state_name'])
+        self.assertDoesNotParse(csp.save_state, 'save as state:name')
 
         self.assertParses(csp.resetState, 'reset', [])
         self.assertParses(csp.resetState, 'reset to state_name', ['state_name'])
@@ -444,16 +444,16 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
             ]])
 
     def test_parsing_output_specifications(self):
-        self.assertParses(csp.outputSpec, 'name = model:var "Description"', [['name', 'model:var', 'Description']])
-        self.assertParses(csp.outputSpec, r'name = ref:var units U "Description \"quotes\""',
+        self.assertParses(csp.output_spec, 'name = model:var "Description"', [['name', 'model:var', 'Description']])
+        self.assertParses(csp.output_spec, r'name = ref:var units U "Description \"quotes\""',
                           [['name', 'ref:var', 'U', 'Description "quotes"']])
-        self.assertParses(csp.outputSpec, "name = ref:var units U 'Description \\'quotes\\' \"too\"'",
+        self.assertParses(csp.output_spec, "name = ref:var units U 'Description \\'quotes\\' \"too\"'",
                           [['name', 'ref:var', 'U', 'Description \'quotes\' "too"']])
-        self.assertParses(csp.outputSpec, 'varname units UU', [['varname', 'UU']])
-        self.assertParses(csp.outputSpec, 'varname units UU "desc"', [['varname', 'UU', 'desc']])
-        self.assertParses(csp.outputSpec, 'optional varname units UU', [['optional', 'varname', 'UU']])
-        self.assertParses(csp.outputSpec, 'optional varname = ref:var', [['optional', 'varname', 'ref:var']])
-        self.assertDoesNotParse(csp.outputSpec, 'varname_no_units')
+        self.assertParses(csp.output_spec, 'varname units UU', [['varname', 'UU']])
+        self.assertParses(csp.output_spec, 'varname units UU "desc"', [['varname', 'UU', 'desc']])
+        self.assertParses(csp.output_spec, 'optional varname units UU', [['optional', 'varname', 'UU']])
+        self.assertParses(csp.output_spec, 'optional varname = ref:var', [['optional', 'varname', 'ref:var']])
+        self.assertDoesNotParse(csp.output_spec, 'varname_no_units')
 
         self.assertParses(csp.outputs, """outputs #cccc
 { #cdc
@@ -466,17 +466,17 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.assertParses(csp.outputs, "outputs {}", [[]])
 
     def test_parsing_plot_specifications(self):
-        self.assertParses(csp.plotCurve, 'y against x', [['y', 'x']])
-        self.assertParses(csp.plotCurve, 'y, y2 against x', [['y', 'y2', 'x']])
-        self.assertDoesNotParse(csp.plotCurve, 'm:y against x')
-        self.assertDoesNotParse(csp.plotCurve, 'y against m:x')
+        self.assertParses(csp.plot_curve, 'y against x', [['y', 'x']])
+        self.assertParses(csp.plot_curve, 'y, y2 against x', [['y', 'y2', 'x']])
+        self.assertDoesNotParse(csp.plot_curve, 'm:y against x')
+        self.assertDoesNotParse(csp.plot_curve, 'y against m:x')
         self.assertParses(
-            csp.plotSpec,
+            csp.plot_spec,
             'plot "A title\'s good" { y1, y2 against x1\n y3 against x2 }',
             [["A title's good", ['y1', 'y2', 'x1'], ['y3', 'x2']]])
-        self.assertParses(csp.plotSpec, 'plot "Keys" { y against x key k }', [["Keys", ['y', 'x', 'k']]])
-        self.assertDoesNotParse(csp.plotSpec, 'plot "only title" {}')
-        self.assertDoesNotParse(csp.plotSpec, 'plot "only title"')
+        self.assertParses(csp.plot_spec, 'plot "Keys" { y against x key k }', [["Keys", ['y', 'x', 'k']]])
+        self.assertDoesNotParse(csp.plot_spec, 'plot "only title" {}')
+        self.assertDoesNotParse(csp.plot_spec, 'plot "only title"')
 
         self.assertParses(csp.plots, """plots { plot "t1" { v1 against v2 key vk }
         plot "t1" { v3, v4 against v5 }
