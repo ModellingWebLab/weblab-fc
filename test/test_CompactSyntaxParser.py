@@ -62,14 +62,14 @@ class TestCompactSyntaxParser(unittest.TestCase):
             self.fail("Output file '%s' does not match reference file '%s'" % (new_file_path, ref_file_path))
 
     def test_parsing_identifiers(self):
-        self.assertDoesNotParse(csp.ncIdent, 'abc:def')
-        self.assertDoesNotParse(csp.ncIdent, '123')
+        self.assertDoesNotParse(csp.nc_ident, 'abc:def')
+        self.assertDoesNotParse(csp.nc_ident, '123')
 
-        self.assertParses(csp.identAsVar, 'abc', ['abc'])
+        self.assertParses(csp.ident_as_var, 'abc', ['abc'])
         self.assertParses(csp.ident, 'abc_def', ['abc_def'])
         self.assertParses(csp.ident, 'abc123', ['abc123'])
         self.assertParses(csp.ident, '_abc', ['_abc'])
-        self.assertParses(csp.identAsVar, 'abc:def', ['abc:def'])
+        self.assertParses(csp.ident_as_var, 'abc:def', ['abc:def'])
         self.assertDoesNotParse(csp.ident, '123')
 
     def test_parsing_numbers(self):
@@ -143,20 +143,20 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, '(1 + 2)\n * 3', [[['1', '+', '2'], '*', '3']])
 
     def test_parsing_simple_assignments(self):
-        self.assertParses(csp.simpleAssign, 'var = value', [['var', 'value']])
-        self.assertParses(csp.simpleAssign, 'var = pre:value', [['var', 'pre:value']])
-        self.assertDoesNotParse(csp.simpleAssign, 'pre:var = value')
-        self.assertParses(csp.simpleAssign, 'var = 1 + 2', [['var', ['1', '+', '2']]])
-        self.assertParses(csp.simpleAssignList, 'v1 = 1\nv2=2', [[['v1', '1'], ['v2', '2']]])
-        self.assertParses(csp.simpleAssignList, '', [[]])
+        self.assertParses(csp.simple_assign, 'var = value', [['var', 'value']])
+        self.assertParses(csp.simple_assign, 'var = pre:value', [['var', 'pre:value']])
+        self.assertDoesNotParse(csp.simple_assign, 'pre:var = value')
+        self.assertParses(csp.simple_assign, 'var = 1 + 2', [['var', ['1', '+', '2']]])
+        self.assertParses(csp.simple_assign_list, 'v1 = 1\nv2=2', [[['v1', '1'], ['v2', '2']]])
+        self.assertParses(csp.simple_assign_list, '', [[]])
 
     def test_parsing_namespaces(self):
-        self.assertParses(csp.nsDecl, 'namespace prefix = "urn:test"', [{'prefix': 'prefix', 'uri': 'urn:test'}])
-        self.assertParses(csp.nsDecl, "namespace prefix='urn:test'", [{'prefix': 'prefix', 'uri': 'urn:test'}])
-        self.assertParses(csp.nsDecls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
+        self.assertParses(csp.ns_decl, 'namespace prefix = "urn:test"', [{'prefix': 'prefix', 'uri': 'urn:test'}])
+        self.assertParses(csp.ns_decl, "namespace prefix='urn:test'", [{'prefix': 'prefix', 'uri': 'urn:test'}])
+        self.assertParses(csp.ns_decls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
                           [{'prefix': 'n1', 'uri': 'urn:t1'}, {'prefix': 'n2', 'uri': 'urn:t2'}])
-        self.assertParses(csp.nsDecls, '', [])
-        self.assertDoesNotParse(csp.nsDecls, 'namespace n="uri"\n')
+        self.assertParses(csp.ns_decls, '', [])
+        self.assertDoesNotParse(csp.ns_decls, 'namespace n="uri"\n')
 
     def test_parsing_inputs(self):
         mls = """inputs {
@@ -173,12 +173,12 @@ class TestCompactSyntaxParser(unittest.TestCase):
 
     def test_parsing_imports(self):
         self.assertParses(
-            csp.importStmt,
+            csp.import_stmt,
             'import std = "../library/BasicLibrary.xml"',
             [['std', '../library/BasicLibrary.xml']]
         )
         self.assertParses(
-            csp.importStmt,
+            csp.import_stmt,
             "import 'TestS1S2.xml'",
             [['', 'TestS1S2.xml']])
         self.assertParses(
@@ -194,12 +194,12 @@ class TestCompactSyntaxParser(unittest.TestCase):
     timecourse_duration = 2000
 }"""
         self.assertParses(
-            csp.importStmt,
+            csp.import_stmt,
             mls,
             [['', 'S1S2.txt', [['steady_state_beats', '10'], ['timecourse_duration', '2000']]]]
         )
-        self.assertParses(csp.importStmt, 'import "file.txt" { }', [['', 'file.txt', []]])
-        self.assertDoesNotParse(csp.importStmt, 'import "file.txt" { } \n')
+        self.assertParses(csp.import_stmt, 'import "file.txt" { }', [['', 'file.txt', []]])
+        self.assertDoesNotParse(csp.import_stmt, 'import "file.txt" { } \n')
 
     def test_parsing_model_interface(self):
         self.assertParses(csp.setTimeUnits, 'independent var units u', [['u']])
@@ -484,62 +484,62 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.assertParses(csp.plots, 'plots {}', [[]])
 
     def test_parsing_function_calls(self):
-        self.assertParses(csp.functionCall, 'noargs()', [['noargs', []]])
-        self.assertParses(csp.functionCall, 'swap(a, b)', [['swap', ['a', 'b']]])
-        self.assertParses(csp.functionCall, 'double(33)', [['double', ['33']]])
-        self.assertParses(csp.functionCall, 'double(a + b)', [['double', [['a', '+', 'b']]]])
-        self.assertParses(csp.functionCall, 'std:max(A)', [['std:max', ['A']]])
-        self.assertDoesNotParse(csp.functionCall, 'spaced (param)')
+        self.assertParses(csp.function_call, 'noargs()', [['noargs', []]])
+        self.assertParses(csp.function_call, 'swap(a, b)', [['swap', ['a', 'b']]])
+        self.assertParses(csp.function_call, 'double(33)', [['double', ['33']]])
+        self.assertParses(csp.function_call, 'double(a + b)', [['double', [['a', '+', 'b']]]])
+        self.assertParses(csp.function_call, 'std:max(A)', [['std:max', ['A']]])
+        self.assertDoesNotParse(csp.function_call, 'spaced (param)')
         self.assertParses(csp.expr, 'func(a,b, 3)', [['func', ['a', 'b', '3']]])
 
     def test_parsing_mathml_operators(self):
         # MathML that doesn't have a special operator is represented as a normal function call,
         # with the 'magic' MathML: prefix.
-        self.assertEqual(len(csp.mathmlOperators), 12 + 3 * 8)
+        self.assertEqual(len(csp.mathml_operators), 12 + 3 * 8)
         for trigbase in ['sin', 'cos', 'tan', 'sec', 'csc', 'cot']:
-            self.assertTrue(trigbase in csp.mathmlOperators)
-            self.assertTrue(trigbase + 'h' in csp.mathmlOperators)
-            self.assertTrue('arc' + trigbase in csp.mathmlOperators)
-            self.assertTrue('arc' + trigbase + 'h' in csp.mathmlOperators)
+            self.assertTrue(trigbase in csp.mathml_operators)
+            self.assertTrue(trigbase + 'h' in csp.mathml_operators)
+            self.assertTrue('arc' + trigbase in csp.mathml_operators)
+            self.assertTrue('arc' + trigbase + 'h' in csp.mathml_operators)
         for op in 'quotient rem max min root xor abs floor ceiling exp ln log'.split():
-            self.assertTrue(op in csp.mathmlOperators)
+            self.assertTrue(op in csp.mathml_operators)
         self.assertParses(csp.expr, 'MathML:exp(MathML:floor(MathML:exponentiale))',
                           [['MathML:exp', [['MathML:floor', ['MathML:exponentiale']]]]])
 
     def test_parsing_assign_statements(self):
-        self.assertParses(csp.assignStmt, 'var = value', [[['var'], ['value']]])
-        self.assertParses(csp.assignStmt, 'var = pre:value', [[['var'], ['pre:value']]])
-        self.assertDoesNotParse(csp.assignStmt, 'pre:var = value')
-        self.assertParses(csp.assignStmt, 'var = 1 + 2', [[['var'], [['1', '+', '2']]]])
+        self.assertParses(csp.assign_stmt, 'var = value', [[['var'], ['value']]])
+        self.assertParses(csp.assign_stmt, 'var = pre:value', [[['var'], ['pre:value']]])
+        self.assertDoesNotParse(csp.assign_stmt, 'pre:var = value')
+        self.assertParses(csp.assign_stmt, 'var = 1 + 2', [[['var'], [['1', '+', '2']]]])
 
-        self.assertParses(csp.assignStmt, 'a, b = tuple', [[['a', 'b'], ['tuple']]])
-        self.assertParses(csp.assignStmt, 'a, b = b, a', [[['a', 'b'], ['b', 'a']]])
-        self.assertParses(csp.assignStmt, 'a, b = (b, a)', [[['a', 'b'], [['b', 'a']]]])
-        self.assertDoesNotParse(csp.assignStmt, 'p:a, p:b = e')
-        self.assertDoesNotParse(csp.assignStmt, '')
+        self.assertParses(csp.assign_stmt, 'a, b = tuple', [[['a', 'b'], ['tuple']]])
+        self.assertParses(csp.assign_stmt, 'a, b = b, a', [[['a', 'b'], ['b', 'a']]])
+        self.assertParses(csp.assign_stmt, 'a, b = (b, a)', [[['a', 'b'], [['b', 'a']]]])
+        self.assertDoesNotParse(csp.assign_stmt, 'p:a, p:b = e')
+        self.assertDoesNotParse(csp.assign_stmt, '')
 
     def test_parsing_optional_assignments(self):
         self.assertParses(
-            csp.assignStmt, 'optional var = value', [[['var'], ['value']]])
+            csp.assign_stmt, 'optional var = value', [[['var'], ['value']]])
 
         # The following should parse as a non-optional assignment!
         self.assertParses(
-            csp.assignStmt, 'optional = expr', [[['optional'], ['expr']]])
+            csp.assign_stmt, 'optional = expr', [[['optional'], ['expr']]])
 
     def test_parsing_return_statements(self):
-        self.assertParses(csp.returnStmt, 'return 2 * a', [[['2', '*', 'a']]])
-        self.assertParses(csp.returnStmt, 'return (3 - 4)', [[['3', '-', '4']]])
-        self.assertParses(csp.returnStmt, 'return a, b', [['a', 'b']])
-        self.assertParses(csp.returnStmt, 'return a + 1, b - 1', [[['a', '+', '1'], ['b', '-', '1']]])
-        self.assertParses(csp.returnStmt, 'return (a, b)', [[['a', 'b']]])
+        self.assertParses(csp.return_stmt, 'return 2 * a', [[['2', '*', 'a']]])
+        self.assertParses(csp.return_stmt, 'return (3 - 4)', [[['3', '-', '4']]])
+        self.assertParses(csp.return_stmt, 'return a, b', [['a', 'b']])
+        self.assertParses(csp.return_stmt, 'return a + 1, b - 1', [[['a', '+', '1'], ['b', '-', '1']]])
+        self.assertParses(csp.return_stmt, 'return (a, b)', [[['a', 'b']]])
 
     def test_parsing_assert_statements(self):
-        self.assertParses(csp.assertStmt, 'assert a + b', [[['a', '+', 'b']]])
-        self.assertParses(csp.assertStmt, 'assert (a + b)', [[['a', '+', 'b']]])
-        self.assertParses(csp.assertStmt, 'assert 1', [['1']])
+        self.assertParses(csp.assert_stmt, 'assert a + b', [[['a', '+', 'b']]])
+        self.assertParses(csp.assert_stmt, 'assert (a + b)', [[['a', '+', 'b']]])
+        self.assertParses(csp.assert_stmt, 'assert 1', [['1']])
 
     def test_parsing_statement_lists(self):
-        self.assertParses(csp.stmtList, "b=-a\nassert 1", [[[['b'], [['-', 'a']]], ['1']]])
+        self.assertParses(csp.stmt_list, "b=-a\nassert 1", [[[['b'], [['-', 'a']]], ['1']]])
 
         mls = """assert a < 0 # comments are ok
 
@@ -549,7 +549,7 @@ assert b > 0
 c, d = a * 2, b + 1
 return c, d"""
         self.assertParses(
-            csp.stmtList,
+            csp.stmt_list,
             mls,
             [[
                 [['a', '<', '0']],
@@ -558,15 +558,15 @@ return c, d"""
                 [['c', 'd'], [['a', '*', '2'], ['b', '+', '1']]],
                 ['c', 'd']
             ]])
-        self.assertDoesNotParse(csp.stmtList, '')
+        self.assertDoesNotParse(csp.stmt_list, '')
 
     def test_parsing_lambda_expressions(self):
-        self.assertParses(csp.lambdaExpr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
+        self.assertParses(csp.lambda_expr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
+        self.assertParses(csp.lambda_expr, 'lambda a, b: a + b', [[[['a'], ['b']], ['a', '+', 'b']]])
+        self.assertParses(csp.lambda_expr, 'lambda a, b=2: a - b', [[[['a'], ['b', '2']], ['a', '-', 'b']]])
         self.assertParses(csp.expr, 'lambda a=c, b: a * b', [[[['a', 'c'], ['b']], ['a', '*', 'b']]])
-        self.assertParses(csp.lambdaExpr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
-        self.assertDoesNotParse(csp.lambdaExpr, 'lambda p:a: 5')
+        self.assertParses(csp.lambda_expr, 'lambda a=p:c, b: a * b', [[[['a', 'p:c'], ['b']], ['a', '*', 'b']]])
+        self.assertDoesNotParse(csp.lambda_expr, 'lambda p:a: 5')
 
         mls = """lambda a, b {
 assert a > b
@@ -575,7 +575,7 @@ return c
 }
 """
         self.assertParses(
-            csp.lambdaExpr,
+            csp.lambda_expr,
             mls,
             [[
                 [['a'], ['b']],
@@ -588,25 +588,25 @@ return c
 
     def test_parsing_function_definitions(self):
         self.assertParses(
-            csp.functionDefn,
+            csp.function_defn,
             'def double(a)\n {\n return a * 2\n }',
             [['double', [['a']], [[['a', '*', '2']]]]])
 
         self.assertParses(
-            csp.functionDefn,
+            csp.function_defn,
             'def double(a): a * 2',
             [['double', [['a']], ['a', '*', '2']]])
 
         # A function definition is just sugar for an assignment of a lambda expression
         self.assertParses(
-            csp.stmtList,
+            csp.stmt_list,
             'def double(a) {\n    return a * 2}',
             [[['double', [['a']], [[['a', '*', '2']]]]]])
         self.assertParses(
-            csp.functionDefn, 'def noargs(): 1', [['noargs', [], '1']])
+            csp.function_defn, 'def noargs(): 1', [['noargs', [], '1']])
 
     def test_parsing_nested_functions(self):
-        self.assertParses(csp.functionDefn, """def outer()
+        self.assertParses(csp.function_defn, """def outer()
 {
     def inner1(a): a/2
     inner2 = lambda { return 5 }
@@ -626,8 +626,8 @@ return c
         self.assertDoesNotParse(csp.tuple, '(1)')  # You need a Python-style comma as above
         self.assertParses(csp.expr, '(1,2)', [['1', '2']])
         self.assertParses(csp.expr, '(1,a,3,c)', [['1', 'a', '3', 'c']])
-        self.assertParses(csp.assignStmt, 't = (1,2)', [[['t'], [['1', '2']]]])
-        self.assertParses(csp.assignStmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
+        self.assertParses(csp.assign_stmt, 't = (1,2)', [[['t'], [['1', '2']]]])
+        self.assertParses(csp.assign_stmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
 
     def test_parsing_arrays(self):
         self.assertParses(csp.expr, '[1, 2, 3]', [['1', '2', '3']])
@@ -725,20 +725,20 @@ return c
         # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
         #  new_simple = [mult] [prefix] base [+|- offset]
         #  new_complex = p.delimitedList( [mult] [prefix] base [^expt], '.')
-        self.assertParses(csp.unitsDef, 'ms = milli second', [['ms', ['milli', 'second']]])
-        self.assertParses(csp.unitsDef, 'C = kelvin - 273.15', [['C', ['kelvin', ['-', '273.15']]]])
-        self.assertParses(csp.unitsDef, 'C=kelvin+(-273.15)', [['C', ['kelvin', ['+', '(-273.15)']]]])
-        self.assertParses(csp.unitsDef, 'litre = 1000 centi metre^3', [['litre', ['1000', 'centi', 'metre', '3']]])
+        self.assertParses(csp.units_def, 'ms = milli second', [['ms', ['milli', 'second']]])
+        self.assertParses(csp.units_def, 'C = kelvin - 273.15', [['C', ['kelvin', ['-', '273.15']]]])
+        self.assertParses(csp.units_def, 'C=kelvin+(-273.15)', [['C', ['kelvin', ['+', '(-273.15)']]]])
+        self.assertParses(csp.units_def, 'litre = 1000 centi metre^3', [['litre', ['1000', 'centi', 'metre', '3']]])
         self.assertParses(
-            csp.unitsDef,
+            csp.units_def,
             'accel_units = kilo metre . second^-2 "km/s^2"',
             [['accel_units', ['kilo', 'metre'], ['second', '-2'], 'km/s^2']])
         self.assertParses(
-            csp.unitsDef,
+            csp.units_def,
             'fahrenheit = (5/9) celsius + 32.0',
             [['fahrenheit', ['(5/9)', 'celsius', ['+', '32.0']]]])
         self.assertParses(
-            csp.unitsDef,
+            csp.units_def,
             'fahrenheit = (5/9) kelvin + (32 - 273.15 * 9 / 5)',
             [['fahrenheit', ['(5/9)', 'kelvin', ['+', '(32 - 273.15 * 9 / 5)']]]])
 
@@ -833,7 +833,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
 }
 """
         out = [[[['a'], [['check', ['sim:result']]]], [['a', '>', '5']]]]
-        self.assertParses(csp.postProcessing, mls, out)
+        self.assertParses(csp.post_processing, mls, out)
 
     '''
     def test_parsing_full_protocols(self):

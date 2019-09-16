@@ -331,7 +331,7 @@ class TestSyntaxInterface(unittest.TestCase):
 
     def test_statements(self):
         # test assertion
-        parse_action = CSP.assertStmt.parseString("assert 1", parseAll=True)
+        parse_action = CSP.assert_stmt.parseString("assert 1", parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Assert)
         env = Environment()
@@ -341,14 +341,14 @@ class TestSyntaxInterface(unittest.TestCase):
 
         # assign one variable to an expression
         env = Environment()
-        parse_action = CSP.assignStmt.parseString('a = 1.0 + 2.0', parseAll=True)
+        parse_action = CSP.assign_stmt.parseString('a = 1.0 + 2.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Assign)
         expr.evaluate(env)
         self.assertEqual(env.look_up('a').value, 3)
 
         # assign two variables at once to numbers
-        parse_action = CSP.assignStmt.parseString('b, c = 1.0, 2.0', parseAll=True)
+        parse_action = CSP.assign_stmt.parseString('b, c = 1.0, 2.0', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Assign)
         expr.evaluate(env)
@@ -356,7 +356,7 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(env.look_up('c').value, 2)
 
         # assign three variables at once to expressions
-        parse_action = CSP.assignStmt.parseString('d, e, f = 1.0, 2 + 2.0, (3*4)-2', parseAll=True)
+        parse_action = CSP.assign_stmt.parseString('d, e, f = 1.0, 2 + 2.0, (3*4)-2', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Assign)
         expr.evaluate(env)
@@ -367,21 +367,21 @@ class TestSyntaxInterface(unittest.TestCase):
         # test return
 
         # return one number
-        parse_action = CSP.returnStmt.parseString('return 1', parseAll=True)
+        parse_action = CSP.return_stmt.parseString('return 1', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Return)
         results = expr.evaluate(env)
         self.assertEqual(results.value, 1)
 
         # return one expression involving variables
-        parse_action = CSP.returnStmt.parseString('return d + e', parseAll=True)
+        parse_action = CSP.return_stmt.parseString('return d + e', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Return)
         results = expr.evaluate(env)
         self.assertEqual(results.value, 5)
 
         # return two numbers
-        parse_action = CSP.returnStmt.parseString('return 1, 3', parseAll=True)
+        parse_action = CSP.return_stmt.parseString('return 1, 3', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, S.Return)
         result1, result2 = expr.evaluate(env).values
@@ -389,14 +389,14 @@ class TestSyntaxInterface(unittest.TestCase):
         self.assertEqual(result2.value, 3)
 
         # test statement list
-        parse_action = CSP.stmtList.parseString('z = lambda a: a+2\nassert z(2) == 4', parseAll=True)
+        parse_action = CSP.stmt_list.parseString('z = lambda a: a+2\nassert z(2) == 4', parseAll=True)
         result = parse_action[0].expr()
         env.execute_statements(result)
 
     def test_parsing_lambda(self):
         # no default, one variable
         env = Environment()
-        parse_action = CSP.lambdaExpr.parseString('lambda a: a + 1', parseAll=True)
+        parse_action = CSP.lambda_expr.parseString('lambda a: a + 1', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
         result = E.FunctionCall(expr, [E.N(3)]).evaluate(env)
@@ -404,7 +404,7 @@ class TestSyntaxInterface(unittest.TestCase):
 
         # no default, two variables
         env = Environment()
-        parse_action = CSP.lambdaExpr.parseString('lambda a, b: a * b', parseAll=True)
+        parse_action = CSP.lambda_expr.parseString('lambda a, b: a * b', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
         result = E.FunctionCall(expr, [E.N(4), E.N(2)]).evaluate(env)
@@ -412,7 +412,7 @@ class TestSyntaxInterface(unittest.TestCase):
 
         # test lambda with defaults unused
         env = Environment()
-        parse_action = CSP.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
+        parse_action = CSP.lambda_expr.parseString('lambda a=2, b=3: a + b', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
         result = E.FunctionCall(expr, [E.N(2), E.N(6)]).evaluate(env)
@@ -420,7 +420,7 @@ class TestSyntaxInterface(unittest.TestCase):
 
         # test lambda with defaults used
         env = Environment()
-        parse_action = CSP.lambdaExpr.parseString('lambda a=2, b=3: a + b', parseAll=True)
+        parse_action = CSP.lambda_expr.parseString('lambda a=2, b=3: a + b', parseAll=True)
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, E.LambdaExpression)
         result = E.FunctionCall(expr, [E.Const(V.DefaultParameter())]).evaluate(env)
@@ -573,7 +573,7 @@ class TestSyntaxInterface(unittest.TestCase):
         arr = V.Array(np.arange(4))
         arr2 = V.Array(np.array([4, 5, 6, 7]))
         env.define_names(['arr', 'arr2'], [arr, arr2])
-        lambda_parse_action = CSP.lambdaExpr.parseString('lambda a, b: a + b', parseAll=True)
+        lambda_parse_action = CSP.lambda_expr.parseString('lambda a, b: a + b', parseAll=True)
         add_function = lambda_parse_action[0].expr()
         env.define_name('add_function', add_function.interpret(env))
         map_parse_action = CSP.expr.parseString('map(add_function, arr, arr2)', parseAll=True)
@@ -601,12 +601,12 @@ class TestSyntaxInterface(unittest.TestCase):
 
     def test_protocol_and_post_processing(self):
         env = Environment()
-        parse_action = CSP.postProcessing.parseString('post-processing{a=2}')
+        parse_action = CSP.post_processing.parseString('post-processing{a=2}')
         expr = parse_action[0].expr()
         result = env.execute_statements(expr)
         self.assertEqual(env.look_up('a').value, 2)
 
-        parse_action = CSP.lambdaExpr.parseString('lambda t: 0*t')
+        parse_action = CSP.lambda_expr.parseString('lambda t: 0*t')
         expr = parse_action[0].expr()
         result = E.FunctionCall(expr, [E.NewArray(E.NewArray(E.N(1), E.N(2), E.N(3)),
                                                   E.NewArray(E.N(3), E.N(4), E.N(5)))]).evaluate(env)
