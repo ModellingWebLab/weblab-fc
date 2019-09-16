@@ -214,8 +214,10 @@ class TestArrayExpressions(unittest.TestCase):
                             E.TupleExpression(E.N(0), E.N(1), E.N(2), E.Const(V.String("j"))),
                             E.TupleExpression(E.N(0), E.N(1), E.N(2), E.Const(V.String("i"))),
                             comprehension=True)
-        predicted = np.array([[[[-10, 0], [10, 20]], [[-10, 0], [11, 21]]],
-                                 [[[-9, 1], [10, 20]], [[-9, 1], [11, 21]]]])
+        predicted = np.array([
+            [[[-10, 0], [10, 20]], [[-10, 0], [11, 21]]],
+            [[[-9, 1], [10, 20]], [[-9, 1], [11, 21]]]
+        ])
         np.testing.assert_array_almost_equal(blocks.evaluate(Env.Environment()).array, predicted)
 
     def test_array_expression_protocol_errors(self):
