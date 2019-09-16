@@ -466,7 +466,6 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
         self.assertParses(csp.outputs, "outputs {}", [[]])
 
     def test_parsing_plot_specifications(self):
-        # TODO: Test these more once the XML syntax catches up!
         self.assertParses(csp.plotCurve, 'y against x', [['y', 'x']])
         self.assertParses(csp.plotCurve, 'y, y2 against x', [['y', 'y2', 'x']])
         self.assertDoesNotParse(csp.plotCurve, 'm:y against x')
