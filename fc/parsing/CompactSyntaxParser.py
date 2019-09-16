@@ -921,18 +921,18 @@ class Optional(p.Optional):
     def __init__(self, *args, **kwargs):
         super(Optional, self).__init__(*args, **kwargs)
         self.callPreparse = False
-        self._optionalNotMatched = p.Optional(p.Empty()).default_value
+        self._optionalNotMatched = p.Optional(p.Empty()).defaultValue
 
     def parseImpl(self, instring, loc, doActions=True):
         try:
             loc, tokens = self.expr._parse(instring, loc, doActions, callPreParse=True)
         except (p.ParseException, IndexError):
-            if self.default_value is not self._optionalNotMatched:
+            if self.defaultValue is not self._optionalNotMatched:
                 if self.expr.resultsName:
-                    tokens = p.ParseResults([self.default_value])
-                    tokens[self.expr.resultsName] = self.default_value
+                    tokens = p.ParseResults([self.defaultValue])
+                    tokens[self.expr.resultsName] = self.defaultValue
                 else:
-                    tokens = [self.default_value]
+                    tokens = [self.defaultValue]
             else:
                 tokens = []
         return loc, tokens
