@@ -58,7 +58,7 @@ class Environment(object):
     def evaluate_statement(self, stmt_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.stmtList.parseString(stmt_str, parseAll=True)
+        parse_action = csp.stmt_list.parseString(stmt_str, parseAll=True)
         stmt_list = parse_action[0].expr()
         return env.execute_statements(stmt_list)
 

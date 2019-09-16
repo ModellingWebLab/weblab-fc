@@ -244,7 +244,7 @@ class TestCompactSyntaxParser(unittest.TestCase):
             [[['oxmeta:membrane_voltage', 'oxmeta:time'], '1']])
 
         self.assertParses(
-            csp.unitsConversion,
+            csp.units_conversion,
             'convert uname1 to uname2 by lambda u: u / model:var',
             [['uname1', 'uname2', [[['u']], ['u', '/', 'model:var']]]])
 

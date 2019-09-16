@@ -722,15 +722,15 @@ class TestSyntaxInterface(unittest.TestCase):
             self.assertIsInstance(sim, Simulations.AbstractSimulation)
 
     def test_parsing_modifiers(self):
-        parse_action = CSP.modifierWhen.parseString('at start', parseAll=True)
+        parse_action = CSP.modifier_when.parseString('at start', parseAll=True)
         expr = parse_action[0].expr()
         self.assertEqual(expr, Modifiers.AbstractModifier.START_ONLY)
 
-        parse_action = CSP.modifierWhen.parseString('at each loop', parseAll=True)
+        parse_action = CSP.modifier_when.parseString('at each loop', parseAll=True)
         expr = parse_action[0].expr()
         self.assertEqual(expr, Modifiers.AbstractModifier.EACH_LOOP)
 
-        parse_action = CSP.modifierWhen.parseString('at end', parseAll=True)
+        parse_action = CSP.modifier_when.parseString('at end', parseAll=True)
         expr = parse_action[0].expr()
         self.assertEqual(expr, Modifiers.AbstractModifier.END_ONLY)
 
