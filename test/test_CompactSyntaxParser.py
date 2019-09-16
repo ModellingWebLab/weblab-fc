@@ -48,18 +48,18 @@ class TestCompactSyntaxParser(unittest.TestCase):
         strict_grammar = grammar + strict_string_end
         self.assertRaises(CSP.p.ParseBaseException, strict_grammar.parseString, input)
 
-    def assertFilesMatch(self, newFilePath, refFilePath):
+    def assertFilesMatch(self, new_file_path, ref_file_path):
         """Utility method to check that two files have matching contents."""
-        if not filecmp.cmp(newFilePath, refFilePath):
+        if not filecmp.cmp(new_file_path, ref_file_path):
             # Matching failed, so print something informative
             context_lines = 3
-            from_date = time.ctime(os.stat(refFilePath).st_mtime)
-            to_date = time.ctime(os.stat(newFilePath).st_mtime)
-            for line in difflib.unified_diff(open(refFilePath).readlines(), open(newFilePath).readlines(),
-                                             refFilePath, newFilePath,
+            from_date = time.ctime(os.stat(ref_file_path).st_mtime)
+            to_date = time.ctime(os.stat(new_file_path).st_mtime)
+            for line in difflib.unified_diff(open(ref_file_path).readlines(), open(new_file_path).readlines(),
+                                             ref_file_path, new_file_path,
                                              from_date, to_date, n=context_lines):
                 print(line, end=' ')
-            self.fail("Output file '%s' does not match reference file '%s'" % (newFilePath, refFilePath))
+            self.fail("Output file '%s' does not match reference file '%s'" % (new_file_path, ref_file_path))
 
     def test_parsing_identifiers(self):
         self.assertDoesNotParse(csp.ncIdent, 'abc:def')

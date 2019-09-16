@@ -1004,8 +1004,10 @@ monkey_patch_pyparsing()
 
 class CompactSyntaxParser(object):
     """A parser for the compact textual syntax for protocols."""
+
     # Newlines are significant most of the time for us
     p.ParserElement.setDefaultWhitespaceChars(' \t\r')
+
     # Single-line Python-style comments
     comment = p.Regex(r'#.*').suppress().setName('Comment')
 
