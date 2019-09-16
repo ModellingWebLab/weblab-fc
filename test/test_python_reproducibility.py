@@ -51,7 +51,7 @@ def WorkerInit():
 
     If the setproctitle module is installed, this will adjust the process title (shown by ps) to be more informative.
     """
-    setproctitle('python worker %d' % test_support.GetProcessNumber())
+    setproctitle('python worker %d' % test_support.get_process_number())
 
 
 def RunExperiment(modelName, protoName, expectedOutputs):
@@ -70,28 +70,30 @@ def RunExperiment(modelName, protoName, expectedOutputs):
     with RedirectStdStreams(output, output):
         try:
             print("Applying", protoName, "to", modelName,
-                  "on process", test_support.GetProcessNumber(), "of", CHASTE_NUM_PROCS)
-            setproctitle('python worker %d running %s on %s' % (test_support.GetProcessNumber(), protoName, modelName))
+                  "on process", test_support.get_process_number(), "of", CHASTE_NUM_PROCS)
+            setproctitle(
+                'python worker %d running %s on %s' % (
+                    test_support.get_process_number(), protoName, modelName))
             proto = fc.Protocol('protocols/%s.txt' % protoName)
-            proto.SetOutputFolder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
-            proto.SetModel('cellml/%s.cellml' % modelName)
+            proto.set_output_folder(os.path.join(CHASTE_TEST_OUTPUT, 'Py_FunctionalCuration', modelName, protoName))
+            proto.set_model('cellml/%s.cellml' % modelName)
             for input in ['max_paces', 'max_steady_state_beats']:
                 try:
-                    proto.SetInput(input, fc.language.values.Simple(1000))
+                    proto.set_input(input, fc.language.values.Simple(1000))
                 except Exception:
                     pass  # Input doesn't exist
-            proto.Run()
+            proto.run()
         except Exception:
             result = False
             messages.append(traceback.format_exc())
         try:
             if expectedOutputs and proto:
-                outputs_match = test_support.CheckResults(
+                outputs_match = test_support.check_results(
                     proto,
                     expectedOutputs,
                     'test/data/historic/%s/%s' % (modelName, protoName),
-                    rtol=0.005,
-                    atol=2.5e-4,
+                    rel_tol=0.005,
+                    abs_tol=2.5e-4,
                     messages=messages,
                 )
                 if outputs_match is None:

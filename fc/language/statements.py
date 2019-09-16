@@ -7,7 +7,7 @@ from ..error_handling import ProtocolError
 class AbstractStatement(locatable.Locatable):
     """Base class for statements in the protocol language."""
 
-    def Evaluate(self, env):
+    def evaluate(self, env):
         raise NotImplementedError
 
 
@@ -20,9 +20,9 @@ class Assign(AbstractStatement):
         self.rhs = rhs
         self.optional = optional
 
-    def Evaluate(self, env):
+    def evaluate(self, env):
         try:
-            results = self.rhs.Evaluate(env)
+            results = self.rhs.evaluate(env)
         except Exception:
             if not self.optional:
                 raise
@@ -30,9 +30,9 @@ class Assign(AbstractStatement):
         if len(self.names) > 1:
             if not isinstance(results, V.Tuple):
                 raise ProtocolError("When assigning multiple names the value to assign must be a tuple.")
-            env.DefineNames(self.names, results.values)
+            env.define_names(self.names, results.values)
         else:
-            env.DefineName(self.names[0], results)
+            env.define_name(self.names[0], results)
         return V.Null()
 
 
@@ -41,8 +41,8 @@ class Assert(AbstractStatement):
         super(Assert, self).__init__()
         self.expr = expr
 
-    def Evaluate(self, env):
-        result = self.expr.Evaluate(env)
+    def evaluate(self, env):
+        result = self.expr.evaluate(env)
         try:
             if not result.value:
                 raise ProtocolError("Assertion failed.")
@@ -56,8 +56,8 @@ class Return(AbstractStatement):
         super(Return, self).__init__()
         self.parameters = parameters
 
-    def Evaluate(self, env):
-        results = [expr.Evaluate(env) for expr in self.parameters]
+    def evaluate(self, env):
+        results = [expr.evaluate(env) for expr in self.parameters]
         if len(results) == 0:
             return V.Null()
         elif len(results) == 1:
@@ -65,12 +65,12 @@ class Return(AbstractStatement):
         else:
             return V.Tuple(*results)
 
-    def Compile(self, env):
+    def compile(self, env):
         if len(self.parameters) == 1:
             from .expressions import Const
             if isinstance(self.parameters[0], Const):
                 raise NotImplementedError
-            expression = self.parameters[0].Compile()
+            expression = self.parameters[0].compile()
         else:
             raise NotImplementedError
         return expression

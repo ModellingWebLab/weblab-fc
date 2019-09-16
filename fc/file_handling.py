@@ -13,28 +13,28 @@ class OutputFolder(object):
     """
     SIG_FILE_NAME = '.chaste_deletable_folder'
 
-    def __init__(self, path, cleanFolder=True):
+    def __init__(self, path, clean_folder=True):
         """Create a new output subfolder.
 
-        :param path:  the subfolder to create.  Relative paths are treated as relative to GetRootOutputFolder; absolute
-        paths must be under this location.  Parent folders will be created as necessary.
-        :param cleanFolder:  whether to wipe the folder contents if it already exists.
+        :param path:  the subfolder to create.  Relative paths are treated as relative to get_root_output_folder;
+        absolute paths must be under this location.  Parent folders will be created as necessary.
+        :param clean_folder:  whether to wipe the folder contents if it already exists.
         """
-        def CreateFolder(path):
+        def create_folder(path):
             if not os.path.exists(path):
                 head, tail = os.path.split(path)
-                CreateFolder(head)
+                create_folder(head)
                 os.mkdir(path)
                 f = open(os.path.join(path, OutputFolder.SIG_FILE_NAME), 'w')
                 f.close()
-        self.path = OutputFolder.CheckOutputPath(path)
+        self.path = OutputFolder.check_output_path(path)
         if os.path.exists(self.path):
-            if cleanFolder:
-                self.RemoveOutputFolder(self.path)
-        CreateFolder(self.path)
+            if clean_folder:
+                self.remove_output_folder(self.path)
+        create_folder(self.path)
 
     @staticmethod
-    def GetRootOutputFolder():
+    def get_root_output_folder():
         """Get the root location where Chaste output files are stored.
 
         This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then a folder 'testoutput' in
@@ -45,11 +45,11 @@ class OutputFolder(object):
             root_folder = os.path.join(os.getcwd(), root_folder)
         return os.path.realpath(root_folder)
 
-    def GetAbsolutePath(self):
+    def get_absolute_path(self):
         """Get the absolute path to this output folder."""
         return self.path
 
-    def CreateSubfolder(self, path):
+    def create_subfolder(self, path):
         """Create a new OutputFolder inside this one.
 
         :param path:  the name of the subfolder to create.  This must be a relative path.
@@ -59,30 +59,30 @@ class OutputFolder(object):
         return OutputFolder(os.path.join(self.path, path))
 
     @staticmethod
-    def RemoveOutputFolder(path):
+    def remove_output_folder(path):
         """Remove an existing output folder.
 
         This method will only delete folders living under the root output folder.  In addition, they must have been
         created using the OutputFolder class (this is indicated by the presence of a signature file within the folder).
 
-        :param path:  the folder to remove.  Relative paths are treated as relative to GetRootOutputFolder; absolute
+        :param path:  the folder to remove.  Relative paths are treated as relative to get_root_output_folder; absolute
         paths must be under this location.
         """
-        abs_path = OutputFolder.CheckOutputPath(path)
+        abs_path = OutputFolder.check_output_path(path)
         if os.path.isfile(abs_path + '/' + OutputFolder.SIG_FILE_NAME):
             shutil.rmtree(abs_path)
         else:
             raise ProtocolError("Folder cannot be removed because it was not created via the OutputFolder class.")
 
     @staticmethod
-    def CheckOutputPath(path):
+    def check_output_path(path):
         """Check whether the given path is a location within the Chaste output folder."""
-        # if path.startswith(OutputFolder.GetRootOutputFolder()):
+        # if path.startswith(OutputFolder.get_root_output_folder()):
         if os.path.isabs(path):
             abs_path = path
         else:
-            abs_path = os.path.join(OutputFolder.GetRootOutputFolder(), path)
+            abs_path = os.path.join(OutputFolder.get_root_output_folder(), path)
         abs_path = os.path.realpath(abs_path)
-        if not abs_path.startswith(OutputFolder.GetRootOutputFolder()):
+        if not abs_path.startswith(OutputFolder.get_root_output_folder()):
             raise ProtocolError('Cannot alter the directory or file in this path.')
         return abs_path

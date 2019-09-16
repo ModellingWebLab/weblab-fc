@@ -13,10 +13,10 @@ class TestMathmlEvaluation(unittest.TestCase):
     """
 
     @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
-    def testMathmlOperations(self):
+    def test_mathml_operations(self):
         proto = fc.Protocol('test/protocols/test_mathml_evaluation.txt')
-        proto.SetOutputFolder('Py_TestMathmlEvaluation_TestMathmlOperations')
-        proto.SetModel('cellml/beeler_reuter_model_1977.cellml')
-        proto.Run()
+        proto.set_output_folder('Py_TestMathmlEvaluation_TestMathmlOperations')
+        proto.set_model('cellml/beeler_reuter_model_1977.cellml')
+        proto.run()
         # Test assertions are within the protocol itself
-        self.assertTrue(os.path.exists(os.path.join(proto.outputFolder.path, 'output.h5')))
+        self.assertTrue(os.path.exists(os.path.join(proto.output_folder.path, 'output.h5')))

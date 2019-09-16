@@ -13,7 +13,7 @@ CHASTE_TEST_OUTPUT = '/tmp/chaste_test_output'
 class TestOutputFolder(unittest.TestCase):
     """Test the OutputFolder class."""
 
-    def testCreationSingleFolder(self):
+    def test_creation_single_folder(self):
         """Test creating output folders."""
         # Single level, relative path provided
         single_folder_path = os.path.realpath(os.path.join(CHASTE_TEST_OUTPUT, 'TestOutputFolder_TestSingleFolder'))
@@ -26,7 +26,7 @@ class TestOutputFolder(unittest.TestCase):
         single_folder_2 = OutputFolder(single_folder_path)
         self.assertEqual(single_folder_2.path, single_folder_path)
         # Second level manually
-        single_folder.CreateSubfolder('subfolder')
+        single_folder.create_subfolder('subfolder')
         self.assertTrue(os.path.isdir(os.path.join(single_folder_path, 'subfolder')))
         self.assertTrue(os.path.isfile(os.path.join(single_folder_path, 'subfolder', OutputFolder.SIG_FILE_NAME)))
         # Multiple levels at once
@@ -41,12 +41,12 @@ class TestOutputFolder(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(multiple_folder_root, 'L1', 'L2', OutputFolder.SIG_FILE_NAME)))
         self.assertTrue(os.path.exists(os.path.join(multiple_folder_path, OutputFolder.SIG_FILE_NAME)))
         # Check we can remove folders we have created
-        OutputFolder.RemoveOutputFolder(single_folder_path)
-        OutputFolder.RemoveOutputFolder(multiple_folder_root)
+        OutputFolder.remove_output_folder(single_folder_path)
+        OutputFolder.remove_output_folder(multiple_folder_root)
         self.assertFalse(os.path.exists(single_folder_path))
         self.assertFalse(os.path.exists(multiple_folder_path))
 
-    def testUseOfEnvironmentVariable(self):
+    def test_use_of_environment_variable(self):
         # Check that setting CHASTE_TEST_OUTPUT affects where outputs appear
         original_env_var = os.environ.get('CHASTE_TEST_OUTPUT', None)
         os.environ['CHASTE_TEST_OUTPUT'] = os.path.join(
@@ -59,17 +59,17 @@ class TestOutputFolder(unittest.TestCase):
         if original_env_var is not None:
             os.environ['CHASTE_TEST_OUTPUT'] = original_env_var
 
-    def testSafety(self):
+    def test_safety(self):
         """Check that we're prevented from deleting content we shouldn't be able to."""
         # Content that's not under CHASTE_TEST_OUTPUT
-        self.assertRaises(ProtocolError, OutputFolder.RemoveOutputFolder, '/tmp/cannot_delete')
+        self.assertRaises(ProtocolError, OutputFolder.remove_output_folder, '/tmp/cannot_delete')
         # Content that doesn't contain the signature file (but is under CHASTE_TEST_OUTPUT)
         testoutput = os.path.join(CHASTE_TEST_OUTPUT, 'TestOutputFolder_TestSafety')
         cannot_delete = os.path.join(testoutput, 'cannot_delete')
         if not os.path.exists(testoutput):
             os.mkdir(testoutput)
         open(cannot_delete, 'w').close()
-        self.assertRaises(ProtocolError, OutputFolder.RemoveOutputFolder, cannot_delete)
-        self.assertRaises(ProtocolError, OutputFolder.RemoveOutputFolder, testoutput)
+        self.assertRaises(ProtocolError, OutputFolder.remove_output_folder, cannot_delete)
+        self.assertRaises(ProtocolError, OutputFolder.remove_output_folder, testoutput)
         # A relative path containing .., putting it outside CHASTE_TEST_OUTPUT
         self.assertRaises(ProtocolError, OutputFolder, 'folder/../../../../../../etc')

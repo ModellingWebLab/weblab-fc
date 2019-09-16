@@ -13,69 +13,69 @@ class Const(AbstractExpression):
         super(Const, self).__init__()
         self.value = value
 
-    def Interpret(self, env):
+    def interpret(self, env):
         return self.value
 
-    def Compile(self, arrayContext=True):
+    def compile(self, array_context=True):
         """If this is a simple value, return a string containing the value."""
         try:
             return str(self.value.value)
         except AttributeError:
             raise NotImplementedError
 
-    def GetUsedVariables(self):
+    def get_used_variables(self):
         return set()
 
 
 class FunctionCall(AbstractExpression):
     """Used to call a function in the protocol language."""
 
-    def __init__(self, functionOrName, children):
+    def __init__(self, function_or_name, children):
         super(FunctionCall, self).__init__()
-        if isinstance(functionOrName, str):
-            self.function = NameLookUp(functionOrName)
+        if isinstance(function_or_name, str):
+            self.function = NameLookUp(function_or_name)
         else:
-            self.function = functionOrName
+            self.function = function_or_name
         self.children = children
 
-    def Interpret(self, env):
-        actual_params = self.EvaluateChildren(env)
-        function = self.function.Evaluate(env)
+    def interpret(self, env):
+        actual_params = self.evaluate_children(env)
+        function = self.function.evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError(function, "is not a function")
-        return function.Evaluate(env, actual_params)
+        return function.evaluate(env, actual_params)
 
 
 class If(AbstractExpression):
     """If, then, else statement in protocol language."""
 
-    def __init__(self, testExpr, thenExpr, elseExpr):
+    def __init__(self, test_expr, then_expr, else_expr):
         super(If, self).__init__()
-        self.testExpr = testExpr
-        self.thenExpr = thenExpr
-        self.elseExpr = elseExpr
+        self.test_expr = test_expr
+        self.then_expr = then_expr
+        self.else_expr = else_expr
 
-    def Interpret(self, env):
-        test = self.testExpr.Evaluate(env)
+    def interpret(self, env):
+        test = self.test_expr.evaluate(env)
         if not hasattr(test, 'value'):
             raise ProtocolError("The test in an if expression must be a simple value or 0-d array, not", test)
         if test.value:
-            result = self.thenExpr.Evaluate(env)
+            result = self.then_expr.evaluate(env)
         else:
-            result = self.elseExpr.Evaluate(env)
+            result = self.else_expr.evaluate(env)
         return result
 
-    def GetUsedVariables(self):
-        result = self.testExpr.GetUsedVariables()
-        result |= self.thenExpr.GetUsedVariables()
-        result |= self.elseExpr.GetUsedVariables()
+    def get_used_variables(self):
+        result = self.test_expr.get_used_variables()
+        result |= self.then_expr.get_used_variables()
+        result |= self.else_expr.get_used_variables()
         return result
 
-    def Compile(self, arrayContext=True):
-        test = self.testExpr.Compile()
-        then = self.thenExpr.Compile()
-        else_ = self.elseExpr.Compile()
-        if arrayContext:
+    def compile(self, array_context=True):
+        test = self.test_expr.compile()
+        then = self.then_expr.compile()
+        else_ = self.else_expr.compile()
+        if array_context:
             return '___np.where(%s,%s,%s)' % (test, then, else_)
         else:
             return '(%s if %s else %s)' % (then, test, else_)
@@ -88,7 +88,7 @@ class NameLookUp(AbstractExpression):
     PREFIXED_NAME = '__PPM__'
 
     @staticmethod
-    def PythonizeName(name):
+    def pythonize_name(name):
         if ':' in name:
             return NameLookUp.PREFIXED_NAME + name.replace(':', NameLookUp.PREFIXED_NAME)
         return name
@@ -98,13 +98,13 @@ class NameLookUp(AbstractExpression):
         super(NameLookUp, self).__init__()
         self.name = name
 
-    def Interpret(self, env):
-        return env.LookUp(self.name)
+    def interpret(self, env):
+        return env.look_up(self.name)
 
-    def Compile(self, arrayContext=True):
-        return self.PythonizeName(self.name)
+    def compile(self, array_context=True):
+        return self.pythonize_name(self.name)
 
-    def GetUsedVariables(self):
+    def get_used_variables(self):
         return {self.name}
 
 
@@ -116,27 +116,27 @@ class TupleExpression(AbstractExpression):
         if len(self.children) < 1:
             raise ProtocolError("Empty tuple expressions are not allowed")
 
-    def Interpret(self, env):
-        return V.Tuple(*self.EvaluateChildren(env))
+    def interpret(self, env):
+        return V.Tuple(*self.evaluate_children(env))
 
 
 class LambdaExpression(AbstractExpression):
     """Expression for function in protocol language."""
 
-    def __init__(self, formalParameters, body, defaultParameters=None):
+    def __init__(self, formal_parameters, body, default_parameters=None):
         super(LambdaExpression, self).__init__()
-        self.formalParameters = formalParameters
+        self.formal_parameters = formal_parameters
         self.body = body
-        self.defaultParameters = defaultParameters
+        self.default_parameters = default_parameters
 
-    def Interpret(self, env):
-        return V.LambdaClosure(env, self.formalParameters, self.body, self.defaultParameters)
+    def interpret(self, env):
+        return V.LambdaClosure(env, self.formal_parameters, self.body, self.default_parameters)
 
     @staticmethod
-    def Wrap(operator, numParams):
+    def wrap(operator, num_params):
         parameters = []
         look_up_list = []
-        for i in range(numParams):
+        for i in range(num_params):
             parameters.append("___" + str(i))
             look_up_list.append(NameLookUp("___" + str(i)))
         from ..statements import Return
@@ -158,13 +158,13 @@ class Accessor(AbstractExpression):
     NUM_ELEMENTS = 8
     SHAPE = 9
 
-    def __init__(self, variableExpr, attribute):
+    def __init__(self, variable_expr, attribute):
         super(Accessor, self).__init__()
-        self.variableExpr = variableExpr
+        self.variable_expr = variable_expr
         self.attribute = attribute
 
-    def Interpret(self, env):
-        variable = self.variableExpr.Evaluate(env)
+    def interpret(self, env):
+        variable = self.variable_expr.evaluate(env)
         if self.attribute == self.IS_SIMPLE_VALUE:
             result = hasattr(variable, 'value')
         elif self.attribute == self.IS_ARRAY:
@@ -198,3 +198,4 @@ class Accessor(AbstractExpression):
             return result
         else:
             return V.Simple(result)
+

@@ -94,48 +94,49 @@ class DefaultParameter(AbstractValue):
 class LambdaClosure(AbstractValue):
     """Class for functions in the protocol language."""
 
-    def __init__(self, definingEnv, formalParameters, body, defaultParameters):
-        self.formalParameters = formalParameters
+    def __init__(self, defining_env, formal_parameters, body, default_parameters):
+        self.formal_parameters = formal_parameters
         self.body = body
-        self.defaultParameters = defaultParameters
-        self.definingEnv = definingEnv
+        self.default_parameters = default_parameters
+        self.defining_env = defining_env
 
     def __str__(self):
         """Return a string representation of this function."""
-        return "function" + str(tuple(self.formalParameters))
+        return "function" + str(tuple(self.formal_parameters))
 
-    def Compile(self, env, actualParameters):
+    def compile(self, env, actual_parameters):
         from ..environment import Environment
-        local_env = Environment(delegatee=self.definingEnv)
-        params = actualParameters[:]
-        if len(params) < len(self.formalParameters):
-            params.extend([DefaultParameter()] * (len(self.formalParameters) - len(params)))
+        local_env = Environment(delegatee=self.defining_env)
+        params = actual_parameters[:]
+        if len(params) < len(self.formal_parameters):
+            params.extend([DefaultParameter()] * (len(self.formal_parameters) - len(params)))
         for i, param in enumerate(params):
             if not isinstance(param, DefaultParameter):
-                local_env.DefineName(self.formalParameters[i], param)
-            elif self.defaultParameters[i] is not None and not isinstance(self.defaultParameters[i], DefaultParameter):
-                if not hasattr(self.defaultParameters[i], 'value'):
+                local_env.define_name(self.formal_parameters[i], param)
+            elif (self.default_parameters[i] is not None
+                  and not isinstance(self.default_parameters[i], DefaultParameter)):
+                if not hasattr(self.default_parameters[i], 'value'):
                     raise NotImplementedError
-                local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
+                local_env.define_name(self.formal_parameters[i], self.default_parameters[i])
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
         if len(self.body) == 1:
-            expression = self.body[0].Compile(env)
+            expression = self.body[0].compile(env)
         return expression, local_env
 
-    def Evaluate(self, env, actualParameters):
+    def evaluate(self, env, actual_parameters):
         from ..environment import Environment
-        local_env = Environment(delegatee=self.definingEnv)
-        if len(actualParameters) < len(self.formalParameters):
-            actualParameters.extend([DefaultParameter()] * (len(self.formalParameters) - len(actualParameters)))
-        for i, param in enumerate(actualParameters):
+        local_env = Environment(delegatee=self.defining_env)
+        if len(actual_parameters) < len(self.formal_parameters):
+            actual_parameters.extend([DefaultParameter()] * (len(self.formal_parameters) - len(actual_parameters)))
+        for i, param in enumerate(actual_parameters):
             if not isinstance(param, DefaultParameter):
-                local_env.DefineName(self.formalParameters[i], param)
-            elif self.defaultParameters[i] is not None:
-                local_env.DefineName(self.formalParameters[i], self.defaultParameters[i])
+                local_env.define_name(self.formal_parameters[i], param)
+            elif self.default_parameters[i] is not None:
+                local_env.define_name(self.formal_parameters[i], self.default_parameters[i])
             else:
                 raise ProtocolError("One of the parameters is not defined and has no default value")
-        result = local_env.ExecuteStatements(self.body, returnAllowed=True)
+        result = local_env.execute_statements(self.body, return_allowed=True)
         return result
 
 
@@ -145,33 +146,34 @@ class LoadFunction(LambdaClosure):
     This gets inserted into the inputs environment under the name 'load'.
     """
 
-    def __init__(self, basePath):
+    def __init__(self, base_path):
         """Initialise an instance of the load() built-in.
 
-        :param basePath: path with respect to which to resolve relative data file paths.
+        :param base_path: path with respect to which to resolve relative data file paths.
         """
-        self.basePath = basePath
+        self.base_path = base_path
 
     def __str__(self):
         """Return a string representation of this function."""
         return "load()"
 
-    def Compile(self, env, actualParameters):
+    def compile(self, env, actual_parameters):
         raise NotImplementedError
 
-    def Evaluate(self, env, actualParameters):
+    def evaluate(self, env, actual_parameters):
         """Evaluate a load() function call.
 
         :param env: the environment within which to evaluate this call
-        :param actualParameters: the values of the parameters to the call; should be a single
+        :param actual_parameters: the values of the parameters to the call; should be a single
             string value containing the path of the file to load
         :returns: an Array containing the file's data, if successful
         """
-        if len(actualParameters) != 1:
-            raise ProtocolError("A load() call takes a single parameter, not %d." % len(actualParameters))
-        if not isinstance(actualParameters[0], String):
+        if len(actual_parameters) != 1:
+            raise ProtocolError("A load() call takes a single parameter, not %d." % len(actual_parameters))
+        if not isinstance(actual_parameters[0], String):
             raise ProtocolError("A load() call takes a string parameter with the file path to load.")
         import os
-        file_path = os.path.join(self.basePath, actualParameters[0].value)
-        from ..test_support import Load2d
-        return Load2d(file_path)
+        file_path = os.path.join(self.base_path, actual_parameters[0].value)
+        from ..test_support import load2d
+        return load2d(file_path)
+

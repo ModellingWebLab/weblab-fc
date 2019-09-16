@@ -231,7 +231,7 @@ class Actions(object):
             else:
                 operator = OPERATORS[operator_name]
             num_operands = int(self.tokens[0])
-            return E.LambdaExpression.Wrap(operator, num_operands)
+            return E.LambdaExpression.wrap(operator, num_operands)
 
     class Piecewise(BaseGroupAction):
         """Parse action for if-then-else."""
@@ -696,7 +696,7 @@ class Actions(object):
             args.extend([output_names, optional_flags])
             model = Model.NestedProtocol(*args)
             result = Simulations.OneStep(0)
-            result.SetModel(model)
+            result.set_model(model)
             return result
 
     class Simulation(BaseGroupAction):
@@ -742,7 +742,7 @@ class Actions(object):
     class UnitRef(BaseGroupAction):
         """Parse action for unit references within units definitions."""
 
-        def GetValue(self, token, negate=False):
+        def get_value(self, token, negate=False):
             """Get a decent string representation of the value of the given numeric token.
             It may be a plain number, or it may be a simple expression which we have to evaluate.
             """
@@ -1075,7 +1075,7 @@ class CompactSyntaxParser(object):
                          ).setName('Lambda').setParseAction(Actions.Lambda)
 
     # Function calls
-    # TODO: allow lambdas, not just ident?
+    # TODO: Allow lambdas, not just ident?
     argList = p.Group(OptionalDelimitedList(expr, comma))
     functionCall = p.Group(identAsVar + Adjacent(oparen) - argList +
                            cparen).setName('FnCall').setParseAction(Actions.FunctionCall)
@@ -1421,7 +1421,7 @@ class CompactSyntaxParser(object):
         """Reset the stack limit if it changed."""
         sys.setrecursionlimit(self._original_stack_limit)
 
-    def _Try(self, callable, *args, **kwargs):
+    def try_parse(self, callable, *args, **kwargs):
         """
         Try calling the given parse command, increasing the stack depth limit
         if needed.
@@ -1445,7 +1445,7 @@ class CompactSyntaxParser(object):
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
 
-    #def ParseFile(self, filename, xmlGenerator=None):
+    # def ParseFile(self, filename, xmlGenerator=None):
     #    """Main entry point for parsing a single protocol file; returns an ElementTree."""
     #    Actions.source_file = filename
     #    Actions.units_map = {}
@@ -1454,7 +1454,6 @@ class CompactSyntaxParser(object):
     #    xml = xmlGenerator.xml()
     #    xml.base = filename
     #    return ET.ElementTree(xml)
-
 
 ################################################################################
 # Parser debugging support

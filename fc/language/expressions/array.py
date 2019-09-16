@@ -21,23 +21,23 @@ class NewArray(AbstractExpression):
         self.comprehension = kwargs.get('comprehension', False)
         if self.comprehension:
             self.children = children[1:]
-            self.genExpr = children[0]
+            self.gen_expr = children[0]
         else:
             self.children = children
 
-    def GetValue(self, arg):
+    def get_value(self, arg):
         if isinstance(arg, V.Null):
             return None
         else:
             return int(arg.value)
 
-    def Interpret(self, env):
+    def interpret(self, env):
         if self.comprehension:
-            return self._DoComprehension(env)
+            return self._do_comprehension(env)
         else:
-            return self._DoListMembers(env)
+            return self._do_list_members(env)
 
-    def DevelopResultWithCompile(self, range_name, ranges, compiled_gen_expr, env):
+    def develop_result_with_compile(self, range_name, ranges, compiled_gen_expr, env):
         local_dict = {}
         defined_ranges = 0
         for i, name in enumerate(range_name):
@@ -46,20 +46,20 @@ class NewArray(AbstractExpression):
         if defined_ranges > 1:
             raise NotImplementedError
 
-        result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrappedBindings)
+        result = ne.evaluate(compiled_gen_expr, local_dict, env.unwrapped_bindings)
         return result
 
-    def DevelopResultWithInterpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
-        # print 'Comprehension', self.location
+    def develop_result_with_interpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
+        # print('Comprehension', self.location)
         result = None
         for range_spec_indices in itertools.product(*range_dims):
-            # collect everything in range_spec_indices that is a number, not a slice
+            # Collect everything in range_spec_indices that is a number, not a slice
             range_specs = [ranges[dim][idx]
                            for dim, idx in enumerate(range_spec_indices) if not isinstance(idx, slice)]
             sub_env = Env.Environment(delegatee=env)
             for i, range_value in enumerate(range_specs):
-                sub_env.DefineName(range_name[i], V.Simple(range_value))
-            sub_array = self.genExpr.Evaluate(sub_env).array
+                sub_env.define_name(range_name[i], V.Simple(range_value))
+            sub_array = self.gen_expr.evaluate(sub_env).array
             if result is None:
                 # Create result array
                 if sub_array.ndim < num_gaps:
@@ -80,20 +80,20 @@ class NewArray(AbstractExpression):
             result[tuple(range_spec_indices)] = sub_array
         return np.array(result)
 
-    def GetUsedVariables(self):
-        result = super(NewArray, self).GetUsedVariables()
+    def get_used_variables(self):
+        result = super(NewArray, self).get_used_variables()
         if self.comprehension:
             iterator_vars = set()
             for child in self.children:
                 assert isinstance(child, TupleExpression)
                 assert isinstance(child.children[-1].value, V.String)
                 iterator_vars |= {child.children[-1].value.value}
-            result |= self.genExpr.GetUsedVariables()
+            result |= self.gen_expr.get_used_variables()
             result = result - set.intersection(result, iterator_vars)
         return result
 
-    def _DoComprehension(self, env):
-        range_specs = self.EvaluateChildren(env)
+    def _do_comprehension(self, env):
+        range_specs = self.evaluate_children(env)
         ranges = []
         range_name = []
         implicit_dim_slices = []
@@ -103,18 +103,18 @@ class NewArray(AbstractExpression):
         for spec in range_specs:
             if len(spec.values) == 4:
                 dim = None
-                start = self.GetValue(spec.values[0])
-                step = self.GetValue(spec.values[1])
-                end = self.GetValue(spec.values[2])
+                start = self.get_value(spec.values[0])
+                step = self.get_value(spec.values[1])
+                end = self.get_value(spec.values[2])
                 if list(range(int(start), int(end), int(step))) == []:
                     raise ProtocolError("The indices you entered created an empty range")
                 implicit_dim_slices.append(list(range(int(start), int(end), int(step))))
                 implicit_dim_names.append(spec.values[3].value)
             elif len(spec.values) == 5:
-                dim = self.GetValue(spec.values[0])
-                start = self.GetValue(spec.values[1])
-                step = self.GetValue(spec.values[2])
-                end = self.GetValue(spec.values[3])
+                dim = self.get_value(spec.values[0])
+                start = self.get_value(spec.values[1])
+                step = self.get_value(spec.values[2])
+                end = self.get_value(spec.values[3])
                 if dim in explicit_dim_slices:
                     raise ProtocolError("Dimension", dim, "has already been assigned")
                 if list(range(int(start), int(end), int(step))) == []:
@@ -155,12 +155,12 @@ class NewArray(AbstractExpression):
                 dims.append(len(each))
                 range_dims.append(list(range(len(each))))
                 last_spec_dim = i
-        # stretch
+        # Stretch
         if len(range_name) == 1:
-            names_used = self.genExpr.GetUsedVariables()
+            names_used = self.gen_expr.get_used_variables()
             local_names = set(range_name)
             if names_used.isdisjoint(local_names):
-                repeated_array = self.genExpr.Evaluate(env).array
+                repeated_array = self.gen_expr.evaluate(env).array
                 shape = list(repeated_array.shape)
                 shape.insert(last_spec_dim, 1)
                 repeated_array = repeated_array.reshape(tuple(shape))
@@ -170,20 +170,20 @@ class NewArray(AbstractExpression):
                 return V.Array(result)
         try:
             if set.intersection(names_used, local_names) == local_names:
-                compiled_gen_expr = self.genExpr.Compile()
+                compiled_gen_expr = self.gen_expr.compile()
                 compiled = True
             else:
                 raise NotImplementedError
         except Exception:
             compiled = False
         if compiled and num_gaps == 0 and len(ranges) <= 1:
-            result = self.DevelopResultWithCompile(range_name, ranges, compiled_gen_expr, env)
+            result = self.develop_result_with_compile(range_name, ranges, compiled_gen_expr, env)
         else:
-            result = self.DevelopResultWithInterpret(range_dims, range_name, ranges, env, num_gaps, dims)
+            result = self.develop_result_with_interpret(range_dims, range_name, ranges, env, num_gaps, dims)
         return V.Array(result)
 
-    def _DoListMembers(self, env):
-        elements = self.EvaluateChildren(env)
+    def _do_list_members(self, env):
+        elements = self.evaluate_children(env)
         elements_arr = np.array([elt.array for elt in elements])
         return V.Array(elements_arr)
 
@@ -193,15 +193,15 @@ class View(AbstractExpression):
 
     def __init__(self, array, *children):
         super(View, self).__init__()
-        self.arrayExpression = array
+        self.array_expression = array
         self.children = children
 
         try:
-            line_profile.add_function(self.Interpret)
+            line_profile.add_function(self.interpret)
         except NameError:
             pass
 
-    def GetValue(self, arg, arg_name='not dim'):
+    def get_value(self, arg, arg_name='not dim'):
         if isinstance(arg, V.Null):
             if arg_name == 'dim':
                 return V.Null()
@@ -212,17 +212,17 @@ class View(AbstractExpression):
         else:
             return int(arg.value)
 
-    def GetArray(self, env):
-        array = self.arrayExpression.Evaluate(env)
+    def get_array(self, env):
+        array = self.array_expression.evaluate(env)
         return array.array
 
-    def Interpret(self, env):
-        # print 'View', self.location
-        array = self.arrayExpression.Evaluate(env)
+    def interpret(self, env):
+        # print('View', self.location)
+        array = self.array_expression.evaluate(env)
         if len(self.children) > array.array.ndim:
             raise ProtocolError("You entered", len(self.children),
                                 "indices, but the array has", array.array.ndim, "dimensions.")
-        indices = self.EvaluateChildren(env)  # list of tuples with indices
+        indices = self.evaluate_children(env)  # list of tuples with indices
         if not isinstance(array, V.Array):
             raise ProtocolError("First argument must be an Array, not", type(array))
         # try:
@@ -236,25 +236,25 @@ class View(AbstractExpression):
                 step = 0
             elif len(index.values) == 1:
                 dim = None
-                start = self.GetValue(index.values[0])
+                start = self.get_value(index.values[0])
                 step = 0
                 end = start
             elif len(index.values) == 2:
                 dim = None
-                start = self.GetValue(index.values[0])
+                start = self.get_value(index.values[0])
                 step = None
-                end = self.GetValue(index.values[1])
+                end = self.get_value(index.values[1])
             elif len(index.values) == 3:
                 dim = None
-                start = self.GetValue(index.values[0])
-                step = self.GetValue(index.values[1])
-                end = self.GetValue(index.values[2])
+                start = self.get_value(index.values[0])
+                step = self.get_value(index.values[1])
+                end = self.get_value(index.values[2])
             elif len(index.values) == 4:
                 # if this is null, then every dim in the input array that isn't specified uses this
-                dim = self.GetValue(index.values[0], 'dim')
-                start = self.GetValue(index.values[1])
-                step = self.GetValue(index.values[2])
-                end = self.GetValue(index.values[3])
+                dim = self.get_value(index.values[0], 'dim')
+                start = self.get_value(index.values[1])
+                step = self.get_value(index.values[2])
+                end = self.get_value(index.values[3])
             else:
                 raise ProtocolError(
                     "Each slice must be a tuple that contains 1, 2, 3 or 4 values, not", len(index.values))
@@ -333,14 +333,14 @@ class Fold(AbstractExpression):
         if len(self.children) < 2 or len(self.children) > 4:
             raise ProtocolError("Fold requires 2-4 inputs, not", len(self.children))
 
-    def GetValue(self, arg):
+    def get_value(self, arg):
         if isinstance(arg, V.Null):
             return None
         else:
             return int(arg.value)
 
-    def Interpret(self, env):
-        operands = self.EvaluateChildren(env)
+    def interpret(self, env):
+        operands = self.evaluate_children(env)
         default_params = [V.Null(), V.Null(), V.Null(), V.Simple(operands[1].array.ndim - 1)]
         for i, oper in enumerate(operands):
             if isinstance(oper, V.DefaultParameter):
@@ -353,13 +353,13 @@ class Fold(AbstractExpression):
         elif len(self.children) == 3:
             function = operands[0]
             array = operands[1].array
-            initial = self.GetValue(operands[2])
+            initial = self.get_value(operands[2])
             dimension = int(array.ndim - 1)
         elif len(self.children) == 4:
             function = operands[0]
             array = operands[1].array
-            initial = self.GetValue(operands[2])
-            dimension = self.GetValue(operands[3])
+            initial = self.get_value(operands[2])
+            dimension = self.get_value(operands[3])
             if dimension > array.ndim:
                 raise ProtocolError("Cannot operate on dimension", dimension,
                                     "because the array only has", array.ndim, "dimensions")
@@ -419,7 +419,7 @@ class Fold(AbstractExpression):
                     total_so_far = array[next_index]
                 else:
                     args = [V.Simple(total_so_far), V.Simple(array[next_index])]
-                    total_so_far = function.Evaluate(env, args).value
+                    total_so_far = function.evaluate(env, args).value
             result[indices] = total_so_far
             total_so_far = initial
 
@@ -429,18 +429,18 @@ class Fold(AbstractExpression):
 class Map(AbstractExpression):
     """Mapping function for n-dimensional arrays"""
 
-    def __init__(self, functionExpr, *children):
+    def __init__(self, function_expr, *children):
         super(Map, self).__init__()
-        self.functionExpr = functionExpr
+        self.function_expr = function_expr
         self.children = children
         if len(self.children) < 1:
             raise ProtocolError("Map requires at least one parameter")
 
-    def Evaluate(self, env):
-        function = self.functionExpr.Evaluate(env)
+    def evaluate(self, env):
+        function = self.function_expr.evaluate(env)
         if not isinstance(function, V.LambdaClosure):
             raise ProtocolError("Function passed is not a function")
-        arrays = self.EvaluateChildren(env)
+        arrays = self.evaluate_children(env)
 
         shape = arrays[0].array.shape
         for array in arrays:
@@ -448,23 +448,23 @@ class Map(AbstractExpression):
                 raise ProtocolError(array, "is not the same shape as the first array input")
         interpret = False
         try:
-            expression, local_env = function.Compile(env, arrays)
+            expression, local_env = function.compile(env, arrays)
         except NotImplementedError:
             interpret = True
         else:
             try:
                 protocol_result = V.Array(ne.evaluate(
-                    expression, local_dict=local_env.unwrappedBindings, global_dict=env.unwrappedBindings))
+                    expression, local_dict=local_env.unwrapped_bindings, global_dict=env.unwrapped_bindings))
             except Exception:
                 try:
-                    protocol_result = V.Array(eval(expression, env.unwrappedBindings, local_env.unwrappedBindings))
+                    protocol_result = V.Array(eval(expression, env.unwrapped_bindings, local_env.unwrapped_bindings))
                 except Exception:
                     interpret = True
         if interpret:
-            protocol_result = self.Interpret(env, arrays, function)
+            protocol_result = self.interpret(env, arrays, function)
         return protocol_result
 
-    def Interpret(self, env, arrays, function):
+    def interpret(self, env, arrays, function):
         result = np.empty_like(arrays[0].array)
         dim_range = []
         shape = arrays[0].array.shape
@@ -474,7 +474,7 @@ class Map(AbstractExpression):
             function_inputs = []
             for array in arrays:
                 function_inputs.append(V.Simple(float(array.array[index])))
-            fn_result = function.Evaluate(env, function_inputs)
+            fn_result = function.evaluate(env, function_inputs)
             try:
                 result[index] = fn_result.value
             except AttributeError:
@@ -487,12 +487,12 @@ class Map(AbstractExpression):
 class Find(AbstractExpression):
     """Find function for n-dimensional arrays."""
 
-    def __init__(self, operandExpr):
+    def __init__(self, operand_expr):
         super(Find, self).__init__()
-        self.operandExpr = operandExpr
+        self.operand_expr = operand_expr
 
-    def Interpret(self, env):
-        operand = self.operandExpr.Evaluate(env)
+    def interpret(self, env):
+        operand = self.operand_expr.evaluate(env)
         if not isinstance(operand, V.Array) or operand.array.ndim == 0:
             raise ProtocolError("Operand for find must be a non-generate Array, not " + str(operand))
         return V.Array(np.transpose(np.nonzero(operand.array)))
@@ -506,8 +506,8 @@ class Index(AbstractExpression):
         if len(self.children) < 2 or len(self.children) > 6:
             raise ProtocolError("Index requires 2-6 operands, not", len(self.children))
 
-    def Interpret(self, env):
-        operands = self.EvaluateChildren(env)
+    def interpret(self, env):
+        operands = self.evaluate_children(env)
         default_params = [None, None, V.Simple(operands[0].array.ndim - 1),
                           V.Simple(0), V.Simple(0), V.Simple(sys.float_info.max)]
         for i, oper in enumerate(operands):
