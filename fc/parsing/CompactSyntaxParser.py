@@ -984,6 +984,9 @@ def MonkeyPatch():
 
     def ignore(self, other):
         """Improved ignore that avoids ignoring self by accident."""
+        if isinstance(other, str):
+            other = Suppress(other)
+
         if isinstance(other, p.Suppress):
             if other not in self.ignoreExprs and other != self:
                 self.ignoreExprs.append(other.copy())
@@ -997,6 +1000,16 @@ def MonkeyPatch():
         return "%s (at char %d), (line:%d, col:%d):\n%s\n%s" % (self.msg, self.loc, self.lineno, self.column, self.line,
                                                                 ' ' * (self.column - 1) + '^')
     p.ParseException.__str__ = err_str
+
+    def __eq__(self, other):
+        if self is other:
+            return True
+        elif isinstance(other, p.basestring):
+            return self.matches(other)
+        elif isinstance(other, p.ParserElement):
+            return vars(self) == vars(other)
+        return False
+    p.ParserElement.__eq__ = __eq__
 
 
 MonkeyPatch()
