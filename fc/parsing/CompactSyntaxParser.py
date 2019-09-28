@@ -184,10 +184,6 @@ class Actions(object):
 
     class Operator(BaseGroupAction):
         """Parse action for most MathML operators that are represented as operators in the syntax."""
-        # Map from operator symbols used to MathML element names
-        OP_MAP = {'+': 'plus', '-': 'minus', '*': 'times', '/': 'divide', '^': 'power',
-                  '==': 'eq', '!=': 'neq', '<': 'lt', '>': 'gt', '<=': 'leq', '>=': 'geq',
-                  'not': 'not', '&&': 'and', '||': 'or'}
 
         def __init__(self, *args, **kwargs):
             super(Actions.Operator, self).__init__(*args)
