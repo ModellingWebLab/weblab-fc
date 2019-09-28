@@ -124,14 +124,6 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, 'if 1 < 2 then 3 + 4 else 5 * 6',
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
 
-    # XML-Only method?
-    # def test_parsing_trace(self):
-    #    trace = {'{%s}trace' % CSP.PROTO_NS: '1'}
-    #    self.assertParses(csp.expr, '1?', [['1']])
-    #    self.assertParses(csp.expr, 'var?', [['var']])
-    #    self.assertParses(csp.expr, '(1 + a)?', [[['1', '+', 'a']]])
-    #    self.assertParses(csp.expr, '1 + a?', [['1', '+', ['a']]])
-
     def test_parsing_multi_line_expressions(self):
         self.assertParses(csp.expr, '(1 + 2) * 3', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
@@ -834,19 +826,6 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
 """
         out = [[[['a'], [['check', ['sim:result']]]], [['a', '>', '5']]]]
         self.assertParses(csp.post_processing, mls, out)
-
-    '''
-    def test_parsing_full_protocols(self):
-        test_folder = 'test/protocols'
-        for proto_filename in glob.glob(os.path.join(test_folder, '*.txt')):
-            proto_base = os.path.splitext(os.path.basename(proto_filename))[0]
-            print(proto_base, '...')
-            parsed_tree = csp().parse_file(proto_filename)
-            # Check the xml:base attribute
-            self.assertTrue('{http://www.w3.org/XML/1998/namespace}base' in parsed_tree.getroot().attrib)
-            self.assertEqual(parsed_tree.getroot().base, proto_filename)
-        CSP.Actions.source_file = ''  # Avoid the last name leaking to subsequent tests
-    '''
 
     def test_zzz_packrat_was_used(self):
         # Method name ensures this runs last!

@@ -204,10 +204,6 @@ class Actions(object):
                 except StopIteration:
                     break
 
-        # def operator(self, operator):
-        #    """Get the MathML element for the given operator."""
-        #    return getattr(M, self.OP_MAP[operator])
-
         def _expr(self):
             if self.rightAssoc:
                 # The only right-associative operators are also unary
@@ -1104,16 +1100,25 @@ class CompactSyntaxParser(object):
     string_value = quoted_string.copy().setName('String').setParseAction(Actions.Symbol('string'))
 
     # Recognised MathML operators
-    mathml_operators = set('''quotient rem max min root xor abs floor ceiling exp ln log
-                             sin cos tan   sec csc cot   sinh cosh tanh   sech csch coth
-                             arcsin arccos arctan   arccosh arccot arccoth
-                             arccsc arccsch arcsec   arcsech arcsinh arctanh'''.split())
+    mathml_operators = set('''
+        quotient rem max min root xor abs floor ceiling exp ln log
+        sin cos tan
+        sec csc cot
+        sinh cosh tanh
+        sech csch coth
+        arcsin arccos arctan
+        arccosh arccot arccoth
+        arccsc arccsch arcsec
+        arcsech arcsinh arctanh
+        '''.split())
 
     # Wrapping MathML operators into lambdas
-    mathml_operator = (p.oneOf('^ * / + - not == != <= >= < > && ||') |
-                      p.Combine('MathML:' + p.oneOf(' '.join(mathml_operators))))
-    wrap = p.Group(p.Suppress('@') - adjacent(p.Word(p.nums)) + adjacent(colon) + mathml_operator
-                   ).setName('WrapMathML').setParseAction(Actions.Wrap)
+    mathml_operator = (
+        p.oneOf('^ * / + - not == != <= >= < > && ||') |
+        p.Combine('MathML:' + p.oneOf(' '.join(mathml_operators))))
+    wrap = p.Group(
+            p.Suppress('@') - adjacent(p.Word(p.nums)) + adjacent(colon) + mathml_operator
+        ).setName('WrapMathML').setParseAction(Actions.Wrap)
 
     # Turning on tracing for debugging protocols
     trace = adjacent(p.Suppress('?'))
@@ -1446,16 +1451,6 @@ class CompactSyntaxParser(object):
             raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
-
-    # def parse_file(self, filename, xml_generator=None):
-    #    """Main entry point for parsing a single protocol file; returns an ElementTree."""
-    #    Actions.source_file = filename
-    #    Actions.units_map = {}
-    #    if xml_generator is None:
-    #        xml_generator = self.try_parse(self.protocol.parse_file, filename, parse_all=True)[0]
-    #    xml = xml_generator.xml()
-    #    xml.base = filename
-    #    return ET.ElementTree(xml)
 
 ################################################################################
 # Parser debugging support
