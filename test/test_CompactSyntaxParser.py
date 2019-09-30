@@ -124,6 +124,18 @@ class TestCompactSyntaxParser(unittest.TestCase):
         self.assertParses(csp.expr, 'if 1 < 2 then 3 + 4 else 5 * 6',
                           [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
 
+    def test_parsing_trace(self):
+        self.assertParses(csp.expr, '1?', [['1']])
+        self.assertParses(csp.expr, 'var?', [['var']])
+        self.assertParses(csp.expr, '(1 + a)?', [[['1', '+', 'a']]])
+        self.assertParses(csp.expr, '1 + a?', [['1', '+', ['a']]])
+
+        action = csp.expr.parseString('var?', parseAll=True)
+        assert action[0].expr().trace
+
+        action = csp.expr.parseString('var', parseAll=True)
+        assert not action[0].expr().trace
+
     def test_parsing_multi_line_expressions(self):
         self.assertParses(csp.expr, '(1 + 2) * 3', [[['1', '+', '2'], '*', '3']])
         self.assertParses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
