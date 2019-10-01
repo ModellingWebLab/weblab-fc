@@ -4,10 +4,17 @@
 
 # Functional Curation backend for the Modelling Web Lab
 
+This is a Python implementation of the Functional Curation (FC) language, intended for use with the Cardiac Electrophysiology Web Lab.
+
+Documentation on FC can be found [here](https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration), while the syntax of FC protols is described [here](https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax).
+
+An ongoing attempt to document the Web Lab and all its interconnected technologies is given at https://github.com/ModellingWebLab/weblab_docs
+
+
+## Transition!
+
 This package is currently in transition, migrating the functional curation code from being
 a Chaste extension project to a standalone Python package.
-
-The original project readme is in README.txt.
 
 ## Installation
 
