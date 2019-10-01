@@ -8,7 +8,7 @@ This is a Python implementation of the Functional Curation (FC) language, intend
 
 Documentation on FC can be found [here](https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration), while the syntax of FC protocols is described [here](https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax).
 
-An ongoing attempt to document the Web Lab and all its interconnected technologies is given at https://github.com/ModellingWebLab/weblab_docs
+An ongoing attempt to document the Web Lab and all its interconnected technologies can be viewed in the [weblab docs repository](https://github.com/ModellingWebLab/weblab_docs).
 
 
 ## Transition!
