@@ -10,6 +10,11 @@ Documentation on FC can be found [here](https://chaste.cs.ox.ac.uk/trac/wiki/Fun
 
 An ongoing attempt to document the Web Lab and all its interconnected technologies can be viewed in the [weblab docs repository](https://github.com/ModellingWebLab/weblab_docs).
 
+## No windows support
+
+**FC is tested/developed on Linux and OS/X. There are no plans to run it work on Windows**.
+
+It _might_ run on Windows, if you have installed CVODE with the shared libraries, and an MSVC compiler that matches your Python installation (see [here](https://wiki.python.org/moin/WindowsCompilers)).
 
 ## Transition!
 
@@ -40,7 +45,12 @@ export CFLAGS="-I$HOME/anaconda3/envs/weblab/include"
 export LDFLAGS="-L$HOME/anaconda3/envs/weblab/lib"
 ```
 
-You can then install this package with developer dependencies:
+Because the `weblab_fc` module has Cython components, it needs to be compiled before you can use it.
+Compilation is performed using Python's [`distutils`](https://docs.python.org/3/library/distutils.html) and [`setuptools`](https://setuptools.readthedocs.io/en/latest/), and happens automatically when you install the package using `setup.py`.
+For developers, this can be done using:
+
 ```sh
-pip install .[dev,test]
+pip install -e .[dev,test]
 ```
+
+Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.
