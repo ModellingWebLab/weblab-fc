@@ -40,7 +40,12 @@ export CFLAGS="-I$HOME/anaconda3/envs/weblab/include"
 export LDFLAGS="-L$HOME/anaconda3/envs/weblab/lib"
 ```
 
-You can then install the `weblab_fc` package along with its developer dependencies, using:
+Because the `weblab_fc` module has Cython components, it needs to be compiled before you can use it (and after any changes to the cython parts).
+Compilation is performed using `distutils/setuptools`, and happens automatically when you install the package using `setup.py`.
+For developers, this can be done using:
+
 ```sh
-pip install .[dev,test]
+pip install -e .[dev,test]
 ```
+
+Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files).
