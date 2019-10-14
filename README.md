@@ -10,9 +10,11 @@ Documentation on FC can be found [here](https://chaste.cs.ox.ac.uk/trac/wiki/Fun
 
 An ongoing attempt to document the Web Lab and all its interconnected technologies can be viewed in the [weblab docs repository](https://github.com/ModellingWebLab/weblab_docs).
 
-## Linux-only
+## No windows support
 
-**FC has not been tested on Windows.**
+**FC is tested/developed on Linux and OS/X. There are no plans to run it work on Windows**.
+
+It _might_ run on Windows, if you have installed CVODE with the shared libraries, and an MSVC compiler that matches your Python installation (see [here](https://wiki.python.org/moin/WindowsCompilers)).
 
 ## Transition!
 
@@ -51,4 +53,4 @@ For developers, this can be done using:
 pip install -e .[dev,test]
 ```
 
-Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files).
+Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.
