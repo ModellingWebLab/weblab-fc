@@ -45,3 +45,6 @@ pip-log.txt
 nosetests.xml
 coverage.xml
 htmlcov
+
+#Pycharm IDE
+.idea/
