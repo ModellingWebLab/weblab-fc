@@ -40,7 +40,7 @@ export CFLAGS="-I$HOME/anaconda3/envs/weblab/include"
 export LDFLAGS="-L$HOME/anaconda3/envs/weblab/lib"
 ```
 
-Because the `weblab_fc` module has Cython components, it needs to be compiled before you can use it (and after any changes to the cython parts).
+Because the `weblab_fc` module has Cython components, it needs to be compiled before you can use it.
 Compilation is performed using `distutils/setuptools`, and happens automatically when you install the package using `setup.py`.
 For developers, this can be done using:
 
