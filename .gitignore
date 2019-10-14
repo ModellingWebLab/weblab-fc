@@ -48,3 +48,13 @@ htmlcov
 
 #Pycharm IDE
 .idea/
+#
+#Vagrant files
+Vagrantfile
+.vagrant/
+ubuntu-*
+# other repos used by VM
+src/cellmlmanip/
+src/weblab-cg
+src/pip-delete*
+
