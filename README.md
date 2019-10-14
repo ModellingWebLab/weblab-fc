@@ -40,7 +40,7 @@ export CFLAGS="-I$HOME/anaconda3/envs/weblab/include"
 export LDFLAGS="-L$HOME/anaconda3/envs/weblab/lib"
 ```
 
-You can then install this package with developer dependencies:
+You can then install the `weblab_fc` package along with its developer dependencies, using:
 ```sh
 pip install .[dev,test]
 ```
