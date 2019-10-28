@@ -48,6 +48,7 @@ htmlcov
 
 #Pycharm IDE
 .idea/
+
 #
 #Vagrant files
 Vagrantfile
@@ -58,3 +59,4 @@ src/cellmlmanip/
 src/weblab-cg
 src/pip-delete*
 
+.vscode/
