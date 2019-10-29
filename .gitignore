@@ -45,3 +45,10 @@ pip-log.txt
 nosetests.xml
 coverage.xml
 htmlcov
+
+#ide
+.idea/
+.vscode/
+
+# files created for linked code
+src/*
