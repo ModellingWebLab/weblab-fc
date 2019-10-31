@@ -60,3 +60,10 @@ src/weblab-cg
 src/pip-delete*
 
 .vscode/
+
+#ide
+.idea/
+.vscode/
+
+# files created for linked code
+src/*
