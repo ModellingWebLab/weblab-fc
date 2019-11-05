@@ -1,6 +1,12 @@
+"""
+Classes for values in the protocol language (e.g. numbers, but also lambda
+functions and data loading).
+"""
 
+import os
 import numpy as np
 
+from ..data_loading import load2d
 from ..error_handling import ProtocolError
 
 
@@ -172,8 +178,6 @@ class LoadFunction(LambdaClosure):
             raise ProtocolError("A load() call takes a single parameter, not %d." % len(actual_parameters))
         if not isinstance(actual_parameters[0], String):
             raise ProtocolError("A load() call takes a string parameter with the file path to load.")
-        import os
         file_path = os.path.join(self.base_path, actual_parameters[0].value)
-        from ..test_support import load2d
         return load2d(file_path)
 
