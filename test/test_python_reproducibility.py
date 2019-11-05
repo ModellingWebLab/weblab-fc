@@ -1,9 +1,3 @@
-try:
-    from setproctitle import setproctitle
-except ImportError:
-    def setproctitle(t):
-        return None
-
 import argparse
 import multiprocessing
 import os
@@ -12,6 +6,7 @@ import sys
 import traceback
 import unittest
 from io import StringIO
+from setproctitle import setproctitle
 
 import fc
 from fc import test_support
