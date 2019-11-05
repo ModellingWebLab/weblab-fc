@@ -90,12 +90,12 @@ setup(
     extras_require={
         'dev': [
             # 'line_profiler',
+            'setproctitle',
         ],
         'test': [
             'flake8>=3.6',
             'pytest>=3.6',
             'pytest-cov',
-            'setproctitle',
         ],
     },
     entry_points={
