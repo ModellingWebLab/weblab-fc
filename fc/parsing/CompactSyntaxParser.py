@@ -118,7 +118,10 @@ class Actions(object):
             return action('', self.source_location, tokens)
 
         def delegate_symbol(self, symbol, content=None):
-            """Create a csymbol parse action for producing part of our XML output."""
+            """
+            Create a Symbol parse action, used e.g. for the ``null`` symbol in the protocol
+            language.
+            """
             if content is None:
                 content = list()
             return self.delegate(Actions.Symbol(symbol), [content])
