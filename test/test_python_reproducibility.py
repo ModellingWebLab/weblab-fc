@@ -1,6 +1,7 @@
 try:
     from setproctitle import setproctitle
 except ImportError:
+    # setproctitle is only installed with the dev requirements
     def setproctitle(t):
         return None
 
