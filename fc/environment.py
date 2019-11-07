@@ -5,7 +5,53 @@ from .language import values as V
 
 
 class Environment(object):
-    """Base class for environments in the protocol language."""
+    """
+    Base class for environments in the protocol language.
+
+    In the run-time implementation of a protocol many environments exist,
+    mapping names to the corresponding values. Any environment may associate
+    another with a particular prefix, and names starting with that prefix are
+    looked up in that environment. As well as for simulation results, this
+    mechanism is used to refer to names from imported protocols, and also to
+    refer to model variables. In the latter case we utilise ontology terms,
+    i.e. URIs, and the prefix to use is given by the namespace bindings in the
+    protocol definition.
+
+    An environment may also have a default delegatee, which is used to look up
+    any name not found within the environment. Understanding the delegations
+    occurring between environments is thus important for understanding what
+    variable names to use if you want to look up a particular entity. The
+    delegation graph is shown in the schematic on the right.
+
+    The following environments exist.
+
+    - An environment containing the protocol inputs.
+    - An environment containing the definitions in the protocol library.
+    - An environment for names defined in the post-processing section.
+    - Each simulation has an associated environment as it runs, which is used
+      for evaluating expressions in ranges and setVariable modifiers. The
+      environment itself contains only the current value of the associated
+      range(s). However it delegates to many useful environments. In a nested
+      simulation, note that the environment for each nested level delegates by
+      default to the next level out.
+    - Environments containing the results of each simulation. These always
+      exist, but only contain values once the simulation has run.
+      - The environments delegate by (ontology) prefix to the environments
+        containing the current values of variables in the model that will be
+        simulated.
+      - The names of results within these environments use the local names of
+        variable annotations, i.e. with the base URI for whatever ontology
+        stripped out. This may change; see #2529.
+    - An environment containing the declared outputs of the protocol. Its
+      contents are copied from the post-processing environment once the
+      protocol has run - it does not delegate to any environment. Any variables
+      to be plotted must appear in this environment.
+    - Function definitions define a local environment for the function body,
+      which delegates to the statically enclosing scope (i.e. the environment
+      where the function was defined). Note that function parameters get
+      evaluated in the environment of the caller of the function, however.
+
+    """
     next_ident = [0]
 
     def __init__(self, allow_overwrite=False, delegatee=None):
