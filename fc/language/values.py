@@ -1,7 +1,13 @@
+"""
+Classes for values in the protocol language (e.g. numbers, but also lambda
+functions and data loading).
+"""
 
+import os
 import numpy as np
 
-from ..error_handling import ProtocolError
+from .. import data_loading
+from .. import error_handling
 
 
 class AbstractValue(object):
@@ -119,7 +125,8 @@ class LambdaClosure(AbstractValue):
                     raise NotImplementedError
                 local_env.define_name(self.formal_parameters[i], self.default_parameters[i])
             else:
-                raise ProtocolError("One of the parameters is not defined and has no default value")
+                raise error_handling.ProtocolError(
+                    "One of the parameters is not defined and has no default value")
         if len(self.body) == 1:
             expression = self.body[0].compile(env)
         return expression, local_env
@@ -135,7 +142,8 @@ class LambdaClosure(AbstractValue):
             elif self.default_parameters[i] is not None:
                 local_env.define_name(self.formal_parameters[i], self.default_parameters[i])
             else:
-                raise ProtocolError("One of the parameters is not defined and has no default value")
+                raise error_handling.ProtocolError(
+                    "One of the parameters is not defined and has no default value")
         result = local_env.execute_statements(self.body, return_allowed=True)
         return result
 
@@ -169,11 +177,11 @@ class LoadFunction(LambdaClosure):
         :returns: an Array containing the file's data, if successful
         """
         if len(actual_parameters) != 1:
-            raise ProtocolError("A load() call takes a single parameter, not %d." % len(actual_parameters))
+            raise error_handling.ProtocolError(
+                "A load() call takes a single parameter, not %d." % len(actual_parameters))
         if not isinstance(actual_parameters[0], String):
-            raise ProtocolError("A load() call takes a string parameter with the file path to load.")
-        import os
+            raise error_handling.ProtocolError(
+                "A load() call takes a string parameter with the file path to load.")
         file_path = os.path.join(self.base_path, actual_parameters[0].value)
-        from ..test_support import load2d
-        return load2d(file_path)
+        return data_loading.load2d(file_path)
 
