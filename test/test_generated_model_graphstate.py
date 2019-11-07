@@ -1,6 +1,6 @@
 """
 
-Temporary test for dynamically generated `pyx` model with weblab_cg.
+Simplest test for using model generated with weblab_cg.
 
 """
 import os
@@ -9,18 +9,21 @@ import fc
 from fc import test_support
 
 
-def test_dynamic_pyx_file():
+def test_generated_model_graphstate():
 
+    # Select model & protocol
     model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
     proto_name = 'GraphState'
 
+    # Create protocol (generates model)
     proto = fc.Protocol(os.path.join(
-        'test', 'protocols', 'dynamic_model_graphstate.txt'))
-    proto.set_output_folder('test_dynamic_pyx_file')
-    proto.set_model(os.path.join(
-        'test', 'models', model_name + '.cellml'))
+        'test', 'protocols', 'generated_model_graphstate.txt'))
+
+    # Run protocol
+    proto.set_output_folder('test_generated_model_graphstate')
+    proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
     proto.run()
-    # Test assertions are within the protocol itself
+    # The test assertions are within the protocol itself
 
     # Check output exists
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
