@@ -573,45 +573,6 @@ class Protocol(object):
             # 'GeneratedModel'
             class_name = 'GeneratedModel'
 
-            # Things from Protocol that we can use
-            '''
-            # Main environments used when running the protocol
-            self.env = Environment()
-            self.input_env = Environment(allow_overwrite=True)
-            self.library_env = Environment()
-            self.output_env = Environment()
-            self.post_processing_env = Environment(delegatee=self.library_env)
-
-            # The elements making up this protocol's definition
-            self.inputs = []
-            self.imports = {}
-            self.library = []
-            self.simulations = []
-            self.post_processing = []
-            self.outputs = []
-            self.plots = []
-
-            # Information from the model interface
-            self.model_interface = []
-
-            # A mapping of namespace names to uris, for namespaces used in the
-            # protocol
-            self.ns_map = {}
-            '''
-            print('=' * 80)
-            print('== Inputs ==')
-            for i in self.inputs:
-                print(i)
-            print('== Outputs ==')
-            for i in self.outputs:
-                print(i)
-            print('== Model interface ==')
-            for i in self.model_interface:
-                print(i)
-            print('=' * 80)
-            print('=' * 80)
-            #
-
             # Load cellml model
             import cellmlmanip
             model = cellmlmanip.load_model(model)
@@ -631,12 +592,6 @@ class Protocol(object):
             # Select model parameters (as qualified names)
             # TODO DO WHATEVER WE NEED TO DO HERE
             parameters = []
-            for item in self.model_interface:
-                print(item)
-                if item['type'] == 'InputVariable':
-                    print(item)
-            import sys
-            sys.exit(1)
 
             # Create weblab model at path
             import weblab_cg as cg
