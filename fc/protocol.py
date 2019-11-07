@@ -78,12 +78,19 @@ class Protocol(object):
 
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
-        self.indent_level = indent_level
-        self.output_folder = None
         self.proto_file = proto_file
         self.proto_name = os.path.basename(self.proto_file)
-        self.timings = {}
+
+        # Indent level used for progress reporting
+        self.indent_level = indent_level
         self.log_progress('Constructing', self.proto_name)
+
+        # A dict with benchmarking information
+        self.timings = {}
+
+        # Path to store protocol output at
+        self.output_folder = None
+
         # Main environments used when running the protocol
         self.env = Environment()
         self.input_env = Environment(allow_overwrite=True)
@@ -91,21 +98,90 @@ class Protocol(object):
         self.library_env = Environment()
         self.output_env = Environment()
         self.post_processing_env = Environment(delegatee=self.library_env)
-        # The elements making up this protocol's definition
-        self.inputs = []
-        self.imports = {}
-        self.library = []
-        self.simulations = []
-        self.post_processing = []
-        self.outputs = []
-        self.plots = []
 
-        # Information from the model interface
+        #
+        # The elements making up this protocol's definition
+        #
+
+        # 1. The ``documentation`` section.
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Documentation
+
+        # TODO Is this parsed / stored?
+
+        # 2. Namespace bindings (no section, just a list of statements)
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Namespacebindings
+
+        # Maps namespaces (prefixes) to URIs.
+        self.ns_map = {}
+
+        # 3. Parsed results from the ``inputs`` section.
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Protocolinputdeclarations
+        # This contains inputs _to the protocol_, that can be used when this
+        # protocol is used by another protocol.
+
+        # A list of :class:`fc.language.statements.Assign` objects.
+        # Each representing an assignment ``local var = expression``.
+        self.inputs = []
+
+        # 4. Any number of ``import`` statements (again, no section)
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Importsofotherprotocols
+
+        # TODO: Not sure what this dict contains
+        self.imports = {}
+
+        # 5. The ``library`` section
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Library
+        # Can contain assignment statements (``var = expr``), function
+        # assignment statements (``var = lambda(...)``), or assertions
+        # (``assert cond``).
+
+        # TODO: Do all of these end up in this list?
+        # TODO: Who checks the assertions?
+        self.library = []
+
+        # 6. The ``units`` section
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Physicalunitdefinitions
+        # TODO: Where do these end up?
+
+        # 7. The ``model interface`` section, which specifies model variables
+        # that act as inputs and outputs.
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface
+
+        # TODO: Contains?
         self.model_interface = []
 
-        # A mapping of namespace names to uris, for namespaces used in the
-        # protocol
-        self.ns_map = {}
+        # 8. The ``tasks`` section, which contains any number of simulation
+        # tasks (possibly with nested ones).
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Simulationtasks
+
+        # TODO: Contains?
+        self.simulations = []
+
+        # 9. The ``post-processing`` section, that contains post-processing
+        # code
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Post-processing
+
+        # TODO: Contains?
+        self.post_processing = []
+
+        # 10. The ``outputs`` section, listing outputs from the model or from
+        # post-processing, that can be used in the ``plots`` section or by
+        # other protocols.
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Protocoloutputs
+
+        # A list of dictionaries, where each dict specifies an output
+        # TODO: dict format
+        self.outputs = []
+
+        # 11. The ``plots`` section
+        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Graphicalplots
+
+        # TODO: Contains?
+        self.plots = []
+
+        #
+        # Start parsing
+        #
 
         # Parse the protocol file and fill in the structures declared above
         self.parser = None
@@ -114,7 +190,6 @@ class Protocol(object):
         start = time.time()
 
         import fc.parsing.CompactSyntaxParser as CSP
-
         parser = self.parser = CSP.CompactSyntaxParser()
         CSP.Actions.source_file = proto_file
         generator = self.parsed_protocol = parser.try_parse(
@@ -124,11 +199,21 @@ class Protocol(object):
         )[0]
         assert isinstance(generator, CSP.Actions.Protocol)
 
+        # A class:`fc.parsing.CompactSyntaxParser.Actions.Protocol` object,
+        # containing parsed information about the protocol
         details = generator.expr()
         assert isinstance(details, dict)
+        del(generator)
 
+        #
+        # Process parsed information
+        #
+
+        # Store inputs
         self.inputs = details.get('inputs', [])
         self.input_env.execute_statements(self.inputs)
+
+        # Store information from imported protocols
         for prefix, path, set_inputs in details.get('imports', []):
             self.log_progress('Importing', path, 'as', prefix, 'in', self.proto_name)
             imported_proto = Protocol(self.get_path(proto_file, path), self.indent_level + 1)
@@ -143,9 +228,11 @@ class Protocol(object):
                     if name in set_inputs:
                         stmt = Assign([name], set_inputs[name])
                     self.input_env.execute_statements([stmt])
+
                 # Make any prefixed imports of that protocol into our prefixed imports
                 for imported_prefix, imported_import in imported_proto.imports.items():
                     self.add_imported_protocol(imported_import, imported_prefix)
+
                 # Merge the other elements of its definition with our own
                 self.library.extend(imported_proto.library)
                 self.simulations.extend(imported_proto.simulations)
@@ -162,6 +249,7 @@ class Protocol(object):
                             'Prefix ' + str(ns_prefix) + ' is used for'
                             ' multiple URIs in imported protocols.')
 
+        # Store information from this protocol (potentially overriding info from imported protocols)
         self.library_env.set_delegatee_env(self.input_env)
         self.library.extend(details.get('library', []))
         self.simulations.extend(details.get('simulations', []))
@@ -182,7 +270,7 @@ class Protocol(object):
             if item['type'] == 'OutputVariable':
                 item['ns'] = self.ns_map[item['ns']]
 
-        # Benchmark
+        # Store benchmarking information
         self.timings['parsing'] = time.time() - start
 
     # Override Object serialization methods to allow pickling with the dill module
@@ -377,11 +465,17 @@ class Protocol(object):
         self.library_env.execute_statements(self.library)
 
     def run(self, verbose=True, write_out=True):
-        """Run this protocol on the model already specified using set_model."""
+        """
+        Run this protocol on the model already specified using set_model.
+        """
+
+        # Initialise
         Locatable.output_folder = self.output_folder
         self.initialise(verbose)
         if verbose:
             self.log_progress('running protocol', self.proto_name, '...')
+
+        # Run the statements in our library to build up the library environment
         errors = ErrorRecorder(self.proto_name)
         with errors:
             for sim in self.simulations:
@@ -394,23 +488,29 @@ class Protocol(object):
             start = time.time()
             self.execute_library()
             self.timings['run library'] = self.timings.get('library', 0.0) + (time.time() - start)
+
+        # Run the simulation block
         with errors:
             start = time.time()
             self.run_simulations(verbose)
             self.timings['simulations'] = self.timings.get('simulations', 0.0) + (time.time() - start)
+
+        # Run the post-processing block
         with errors:
             start = time.time()
             self.run_post_processing(verbose)
             self.timings['post-processing'] = self.timings.get('post-processing', 0.0) + (time.time() - start)
         self.outputs_and_plots(errors, verbose, write_out)
+
         # Summarise time spent in each protocol section (if we're the main protocol)
         if verbose and self.indent_level == 0:
             print('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
             max_len = max(len(section) for section in self.timings)
             for section, duration in self.timings.items():
                 print('   ', section, ' ' * (max_len - len(section)), '%.6f' % duration)
+
+        # Report any errors that occurred
         if errors:
-            # Report any errors that occurred
             raise errors
 
     def run_simulations(self, verbose=True):
@@ -448,7 +548,7 @@ class Protocol(object):
         The ``model`` can be given as a Model object or a string.
         """
 
-        # Benchmarking
+        # Benchmark model creation time
         start = time.time()
 
         # Compile model from CellML
@@ -473,6 +573,45 @@ class Protocol(object):
             # 'GeneratedModel'
             class_name = 'GeneratedModel'
 
+            # Things from Protocol that we can use
+            '''
+            # Main environments used when running the protocol
+            self.env = Environment()
+            self.input_env = Environment(allow_overwrite=True)
+            self.library_env = Environment()
+            self.output_env = Environment()
+            self.post_processing_env = Environment(delegatee=self.library_env)
+
+            # The elements making up this protocol's definition
+            self.inputs = []
+            self.imports = {}
+            self.library = []
+            self.simulations = []
+            self.post_processing = []
+            self.outputs = []
+            self.plots = []
+
+            # Information from the model interface
+            self.model_interface = []
+
+            # A mapping of namespace names to uris, for namespaces used in the
+            # protocol
+            self.ns_map = {}
+            '''
+            print('=' * 80)
+            print('== Inputs ==')
+            for i in self.inputs:
+                print(i)
+            print('== Outputs ==')
+            for i in self.outputs:
+                print(i)
+            print('== Model interface ==')
+            for i in self.model_interface:
+                print(i)
+            print('=' * 80)
+            print('=' * 80)
+            #
+
             # Load cellml model
             import cellmlmanip
             model = cellmlmanip.load_model(model)
@@ -491,8 +630,13 @@ class Protocol(object):
 
             # Select model parameters (as qualified names)
             # TODO DO WHATEVER WE NEED TO DO HERE
-            parameters = [
-            ]
+            parameters = []
+            for item in self.model_interface:
+                print(item)
+                if item['type'] == 'InputVariable':
+                    print(item)
+            import sys
+            sys.exit(1)
 
             # Create weblab model at path
             import weblab_cg as cg
