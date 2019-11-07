@@ -18,8 +18,13 @@ It _might_ run on Windows, if you have installed CVODE with the shared libraries
 
 ## Transition!
 
-This package is currently in transition, migrating the functional curation code from being
-a Chaste extension project to a standalone Python package.
+This package is currently in transition, migrating the functional curation code from being a Chaste extension project to a standalone Python package.
+In particular, we're replacing the CellML and code-generation tool PyCml with [cellmlmanip](https://github.com/ModellingWebLab/cellmlmanip) to read and manipulate CellML code and [weblab_cg](https://github.com/ModellingWebLab/weblab-cg) to generate Model code.
+
+The code from before this transition started can be seen using the [`pycml-version` tag](https://github.com/ModellingWebLab/weblab-fc/tree/pycml-version).
+In addition, crucial parts of PyCml weblab code can be seen in the [pycml](./pycml) directory.
+In particular, most of the code from [pycml_protocol.py](.pycml/pycml_protocol.py) will have to be replaced by (1) changes to `fc` so that it extracts and stores _all_ the protocol information, and (2) updates to `weblab_cg` so that it can use information provides by `fc` to generate a model. 
+(At the moment both `fc` and `pycml` read the protocol, but in the new code `fc` should gather all the information and then pass it to `weblab_cg`.)
 
 ## Installation
 
