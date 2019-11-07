@@ -1,27 +1,26 @@
 """
 
-Simplest test for using model generated with weblab_cg.
+Run the (relatively simple) GraphState protocol on a model generated with weblab_cg.
 
 """
+import fc
 import os
 
-import fc
 from fc import test_support
 
 
 def test_generated_model_graphstate():
 
-    # Select model & protocol
-    model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
-    proto_name = 'GraphState'
-
-    # Create protocol (generates model)
+    # Create protocol
     proto = fc.Protocol(os.path.join(
         'test', 'protocols', 'generated_model_graphstate.txt'))
 
+    # Set model (generates & compiles model)
+    model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
+    proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
+
     # Run protocol
     proto.set_output_folder('test_generated_model_graphstate')
-    proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
     proto.run()
     # The test assertions are within the protocol itself
 
@@ -32,7 +31,7 @@ def test_generated_model_graphstate():
     assert test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'data', 'historic', model_name, proto_name),
+        os.path.join('test', 'data', 'historic', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
