@@ -316,11 +316,12 @@ class ModelWrapperEnvironment(Environment):
             return key in self._unwrapped
 
     class _UnwrappedBindingsDict(dict):
-        """A dictionary subclass wrapping the Python versions of a model's variables.
-
-        TODO: Look at the efficiency of get/set methods, and whether these matter for
-        overall performance (c.f. #2459).
         """
+        A dictionary subclass wrapping the Python versions of a model's variables.
+        """
+        # TODO: Look at the efficiency of get/set methods, and whether these matter for
+        # overall performance (c.f. #2459).
+
         class _FreeVarList(list):
             """A single element list for wrapping the model's free variable."""
 

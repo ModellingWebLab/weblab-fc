@@ -127,7 +127,7 @@ class Actions(object):
             return self.delegate(Actions.Symbol(symbol), [content])
 
         def expr(self):
-            """Updates location in parent locatable class and calls _expr method."""
+            """Updates location in parent locatable class and calls :meth:`_expr()`."""
             result = self._expr()
             if isinstance(result, Locatable):
                 result.location = self.source_location
