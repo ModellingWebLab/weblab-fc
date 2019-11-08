@@ -480,23 +480,32 @@ class Actions(object):
         pass
 
     class InputVariable(BaseGroupAction):
-        # Leaving old XML method in to document existing properties.
-        # def _xml(self):
-        #    return P.specifyInputVariable(**self.get_attribute_dict('name', 'units', 'initial_value'))
-        pass
+        """
+        Parse action for input variables defined in the model interface.
+        """
+        def _expr(self):
+            # TODO: Will this always return 2 parts?
+            ns, local_name = self.tokens['name'].split(':', 1)
+            return {
+                'type': 'InputVariable',
+                'ns': ns,
+                'local_name': local_name,
+                'units': self.tokens.get('units', None),
+                'initial_value': self.tokens.get('initial_value', None),
+            }
 
     class OutputVariable(BaseGroupAction):
         """
         Parse action for output variables defined in the model interface.
         """
-
         def _expr(self):
+            # TODO: Will this always return 2 parts?
             ns, local_name = self.tokens['name'].split(':', 1)
             return {
                 'type': 'OutputVariable',
                 'ns': ns,
                 'local_name': local_name,
-                'unit': self.tokens.get('unit', None),
+                'units': self.tokens.get('units', None),
             }
 
     class OptionalVariable(BaseGroupAction):
@@ -567,12 +576,14 @@ class Actions(object):
     class ModelInterface(BaseGroupAction):
 
         def _expr(self):
-            # TODO: Create objects for all parts of the model interface
             #return self.get_children_expr()
             output = []
             for action in self:
                 if isinstance(action, Actions.OutputVariable):
                     output.append(action.expr())
+                if isinstance(action, Actions.InputVariable):
+                    output.append(action.expr())
+                # TODO: Create objects for all parts of the model interface
             return output
 
     ######################################################################
@@ -1257,23 +1268,28 @@ class CompactSyntaxParser(object):
 
     # Setting the units for the independent variable
     set_time_units = (make_kw('independent') - make_kw('var') - units_ref("units")).setParseAction(Actions.SetTimeUnits)
+
     # Input variables, with optional units and initial value
     input_variable = p.Group(
         make_kw('input') -
-        c_ident("name") +
-        Optional(units_ref)("units") +
-        Optional(
-            eq +
-            plain_number)("initial_value")).setName('InputVariable').setParseAction(
-        Actions.InputVariable)
+        c_ident('name') +
+        Optional(units_ref)('units') +
+        Optional(eq + plain_number)('initial_value')
+    ).setName('InputVariable').setParseAction(Actions.InputVariable)
+
     # Model outputs of interest, with optional units
-    output_variable = p.Group(make_kw('output') - c_ident("name") + Optional(units_ref("units"))
-                             ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
+    output_variable = p.Group(
+        make_kw('output') -
+        c_ident("name") +
+        Optional(units_ref("units"))
+    ).setName('OutputVariable').setParseAction(Actions.OutputVariable)
+
     # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
     locator = p.Empty().leaveWhitespace().setParseAction(lambda s, l, t: l)
     var_default = make_kw('default') - locator("default_start") + simple_expr("default")
     optional_variable = p.Group(make_kw('optional') - c_ident("name") + Optional(var_default) + locator("default_end")
                                ).setName('OptionalVar').setParseAction(Actions.OptionalVariable)
+
     # New variables added to the model, with optional initial value
     new_variable = p.Group(
         make_kw('var') -

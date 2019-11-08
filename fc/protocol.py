@@ -1,3 +1,6 @@
+#
+# Contains the main classes representing an FC Protocol.
+#
 import operator
 import os
 import subprocess
@@ -91,13 +94,21 @@ class Protocol(object):
         # Path to store protocol output at
         self.output_folder = None
 
-        # Main environments used when running the protocol
+        # Main environment used when running the protocol
         self.env = Environment()
+
+        # Environment containing the protocol inputs
         self.input_env = Environment(allow_overwrite=True)
         self.input_env.define_name("load", V.LoadFunction(os.path.dirname(self.proto_file)))
+
+        # Environment for variables defined in the protocol library
         self.library_env = Environment()
-        self.output_env = Environment()
+
+        # Environment containing variables defined in post-processing
         self.post_processing_env = Environment(delegatee=self.library_env)
+
+        # Environment containing the protocol outputs
+        self.output_env = Environment()
 
         #
         # The elements making up this protocol's definition
@@ -143,12 +154,11 @@ class Protocol(object):
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Physicalunitdefinitions
         # TODO: Where do these end up?
 
-        # 7. The ``model interface`` section, which specifies model variables
-        # that act as inputs and outputs.
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface
+        # 7. The ``model interface`` section.
+        # See :class:`ModelInterface`.
 
-        # TODO: Contains?
-        self.model_interface = []
+        # TODO: Only seems to contain model outputs at the moment
+        self.model_interface = ModelInterface()
 
         # 8. The ``tasks`` section, which contains any number of simulation
         # tasks (possibly with nested ones).
@@ -164,12 +174,12 @@ class Protocol(object):
         # TODO: Contains?
         self.post_processing = []
 
-        # 10. The ``outputs`` section, listing outputs from the model or from
-        # post-processing, that can be used in the ``plots`` section or by
+        # 10. The ``outputs`` section, listing outputs from the simulations or
+        # from post-processing, that can be used in the ``plots`` section or by
         # other protocols.
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Protocoloutputs
 
-        # A list of dictionaries, where each dict specifies an output
+        # A list of dictionaries, where each dict specifies a protocol output
         # TODO: dict format
         self.outputs = []
 
@@ -179,9 +189,13 @@ class Protocol(object):
         # TODO: Contains?
         self.plots = []
 
-        #
-        # Start parsing
-        #
+        # Parse, and fill section information objects defined above
+        self._parse()
+
+    def _parse(self):
+        """
+        Parses the protocol, and fills in this object's fields.
+        """
 
         # Parse the protocol file and fill in the structures declared above
         self.parser = None
@@ -191,10 +205,10 @@ class Protocol(object):
 
         import fc.parsing.CompactSyntaxParser as CSP
         parser = self.parser = CSP.CompactSyntaxParser()
-        CSP.Actions.source_file = proto_file
+        CSP.Actions.source_file = self.proto_file
         generator = self.parsed_protocol = parser.try_parse(
             CSP.CompactSyntaxParser.protocol.parseFile,
-            proto_file,
+            self.proto_file,
             parseAll=True
         )[0]
         assert isinstance(generator, CSP.Actions.Protocol)
@@ -205,18 +219,17 @@ class Protocol(object):
         assert isinstance(details, dict)
         del(generator)
 
-        #
-        # Process parsed information
-        #
-
-        # Store inputs
+        # Store protocol inputs
         self.inputs = details.get('inputs', [])
         self.input_env.execute_statements(self.inputs)
+
+        # Create model interface
+        self.model_interface = ModelInterface()
 
         # Store information from imported protocols
         for prefix, path, set_inputs in details.get('imports', []):
             self.log_progress('Importing', path, 'as', prefix, 'in', self.proto_name)
-            imported_proto = Protocol(self.get_path(proto_file, path), self.indent_level + 1)
+            imported_proto = Protocol(self.get_path(self.proto_file, path), self.indent_level + 1)
 
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
@@ -233,13 +246,28 @@ class Protocol(object):
                 for imported_prefix, imported_import in imported_proto.imports.items():
                     self.add_imported_protocol(imported_import, imported_prefix)
 
-                # Merge the other elements of its definition with our own
+                # Merge various elements with our own
                 self.library.extend(imported_proto.library)
                 self.simulations.extend(imported_proto.simulations)
                 self.post_processing.extend(imported_proto.post_processing)
                 self.outputs.extend(imported_proto.outputs)
                 self.plots.extend(imported_proto.plots)
-                self.model_interface.extend(imported_proto.model_interface)
+
+                # Merge model interface
+                for item in imported_proto.model_interface:
+                    if item['type'] == 'OutputVariable':
+                        self.model_interface.outputs.append((
+                            VariableReference(item['local_name'], item['ns']),
+                            item['units'],
+                        ))
+                    elif item['type'] == 'InputVariable':
+                        self.model_interface.inputs.append((
+                            VariableReference(item['local_name'], item['ns']),
+                            item['units'],
+                            item['initial_value'],
+                        ))
+
+                # Merge namespace map
                 for ns_prefix, uri in imported_proto.ns_map.items():
                     existing_uri = self.ns_map.get(ns_prefix, None)
                     if existing_uri is None:
@@ -256,7 +284,23 @@ class Protocol(object):
         self.post_processing.extend(details.get('postprocessing', []))
         self.outputs.extend(details.get('outputs', []))
         self.plots.extend(details.get('plots', []))
-        self.model_interface.extend(details.get('model_interface', []))
+
+        # Store information from the model interface section
+        # TODO: Avoid code duplication w. above
+        for item in details.get('model_interface', []):
+            if item['type'] == 'OutputVariable':
+                self.model_interface.outputs.append((
+                    VariableReference(item['local_name'], item['ns']),
+                    item['units'],
+                ))
+            elif item['type'] == 'InputVariable':
+                self.model_interface.inputs.append((
+                    VariableReference(item['local_name'], item['ns']),
+                    item['units'],
+                    item['initial_value'],
+                ))
+
+        # Store namespace map
         for prefix, uri in details.get('ns_map', {}).items():
             existing_uri = self.ns_map.get(prefix, None)
             if existing_uri is None:
@@ -266,15 +310,18 @@ class Protocol(object):
                     'Prefix ' + str(prefix) + ' is used for multiple URIs.')
 
         # Replace ns prefixes with uris in model interface
-        for item in self.model_interface:
-            if item['type'] == 'OutputVariable':
-                item['ns'] = self.ns_map[item['ns']]
+        for item in self.model_interface.outputs:
+            item[0].ns = self.ns_map[item[0].ns]
+        for item in self.model_interface.inputs:
+            item[0].ns = self.ns_map[item[0].ns]
 
         # Store benchmarking information
         self.timings['parsing'] = time.time() - start
 
-    # Override Object serialization methods to allow pickling with the dill module
     def __getstate__(self):
+        """
+        Override Object serialization methods to allow pickling with the dill module
+        """
         # TODO: Original object unusable after serialization.
         # Should either maintain object state (i.e., remove reference to simulations
         # in copied dict and re-initialize in __setstate__) or dynamically restore
@@ -302,6 +349,7 @@ class Protocol(object):
         return odict
 
     def __setstate__(self, dict):
+        """ Set fields of a protocol after unpickling. """
         self.__dict__.update(dict)
         # Re-import Model from temporary Python file (if provided)
         if hasattr(self, 'model_path'):
@@ -579,15 +627,23 @@ class Protocol(object):
 
             # Select model outputs (as qualified names)
             outputs = []
-            for item in self.model_interface:
-                # TODO: Update this to use objects instead of a list of dicts
-                if item['type'] == 'OutputVariable':
-                    # TODO: Better handling for `state_variable`
-                    if item['local_name'] == 'state_variable':
-                        outputs.append('state_variable')
-                    else:
-                        outputs.append((item['ns'], item['local_name']))
-                    # TODO: Handle units
+            for var, units in self.model_interface.outputs:
+                if var.name == 'state_variable':
+                    outputs.append('state_variable')
+                else:
+                    outputs.append((var.ns, var.name))
+                    #TODO: Ask cellmlmanip to check if var has one of the
+                    # allowed types: states, parameters, or derived quantities.
+                # TODO: Handle units
+
+            # Select module inputs
+            # TODO DO WHATEVER WE NEED TO DO HERE
+            # TODO: Check if inputs are of allowed types, i.e. states or
+            # parameters
+            for var, units, default in self.model_interface.inputs:
+                print(var)
+            import sys
+            sys.exit(1)
 
             # Select model parameters (as qualified names)
             # TODO DO WHATEVER WE NEED TO DO HERE
@@ -625,7 +681,7 @@ class Protocol(object):
             sys.path.insert(0, temp_dir)
             import model as module
             for name in module.__dict__.keys():
-                if name.startswith(class_name):
+                if name.startswith(class_name):     # Note: This bit!
                     model = getattr(module, name)()
                     model._module = module
                     break
@@ -678,3 +734,55 @@ class Protocol(object):
         """
         print('  ' * self.indent_level + ' '.join(map(str, args)), file=sys.stderr)
         sys.stderr.flush()
+
+
+class ModelInterface(object):
+    """
+    Holds information about a model interface.
+
+    Properties:
+
+    ``inputs``
+        A list of :class:`VariableReference` objects indicating model inputs
+        (model variables that can be changed by the protocol).
+    ``outputs``
+        A list of :class:`VariableReference` objects indicating model outputs
+        (model variables that can be read by the protocol).
+
+    See: https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface
+    """
+    def __init__(self):
+
+        #self.independent_var = None
+        self.inputs = []
+        self.outputs = []
+
+        '''
+        ``clamps``
+            A list of model variables to be clamped
+        ``defines``
+           A list of define statements
+        ``vars``
+        ``converts``
+        ``independent_var``
+            Specifies the units that the indepdendent variable (time) should be in.
+
+        self.clamps = []
+        self.defines = []
+        self.vars = []
+        self.converts = []
+        '''
+
+class VariableReference(object):
+    """
+    Reference to a variable with a ``name`` and an optional namespace ``ns``.
+    """
+    def __init__(self, name, ns=None):
+        self.ns = ns
+        self.name = name
+        # TODO: Unit?
+        # TODO: Initial value?
+        # Not sure these go here
+
+    def __str__(self):
+        return self.name if self.ns is None else self.ns + ':' + self.name
