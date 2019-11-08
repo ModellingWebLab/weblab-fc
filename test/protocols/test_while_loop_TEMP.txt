@@ -6,8 +6,6 @@ inputs {
     num_iters = 5
 }
 
-import std = "BasicLibrary.txt"
-
 units {
     ms = milli second
     mV = milli volt
@@ -18,7 +16,6 @@ model interface {
     independent var units ms
     input oxmeta:membrane_voltage
     output oxmeta:membrane_voltage units mV
-    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms
 }
 
 tasks {
@@ -110,12 +107,6 @@ post-processing {
     assert Check(sim_long:membrane_voltage, 3001)
     assert Check(not_empty:membrane_voltage, 1)
 
-    # Nested case requires special checking
-    def Close(a1, a2, tol=1e-6) {
-        return std:MultiFold(@2:&&, map(lambda x1, x2: MathML:abs(x1-x2)<tol, a1, a2), 1)
-    }
-    assert Close(nested:membrane_voltage, [ i*9+j for i in 0:2 for j in 0:10 ])
-    assert Close(long_nested:membrane_voltage, [ i*9+j for i in 0:3001 for j in 0:10 ])
 }
 
 outputs {
