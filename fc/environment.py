@@ -1,3 +1,6 @@
+#
+# Contains the Environment class
+#
 import numpy as np
 
 from .error_handling import ProtocolError

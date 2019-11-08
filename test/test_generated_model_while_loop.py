@@ -19,7 +19,7 @@ def test_generated_model_while_loop():
     proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
 
     # Set protocol input
-    proto.set_input('num_iters', E.N(10))
+    #proto.set_input('num_iters', E.N(10))
 
     # Run protocol
     # Test assertions are within the protocol itself

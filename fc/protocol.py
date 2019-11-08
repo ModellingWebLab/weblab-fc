@@ -642,8 +642,7 @@ class Protocol(object):
             # parameters
             for var, units, default in self.model_interface.inputs:
                 print(var)
-            import sys
-            sys.exit(1)
+            #sys.exit(1)
 
             # Select model parameters (as qualified names)
             # TODO DO WHATEVER WE NEED TO DO HERE
