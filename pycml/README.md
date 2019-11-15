@@ -20,7 +20,7 @@ Many of the complexities in pycml arise from:
 
 Protocol parsing starts with `parse_protocol`, called by `apply_protocol_file`. It ensures that the different parts of the interface are processed in an order that respects the principle of least surprise for protocol authors: it tries to ensure their modifications do what they probably expect!
 
-Imports are treated first, included those arising implicitly from nested protocols. Where relevant, units definitions, interface definitions, etc. from imports are merged with the parent protocol's definitions.
+Imports are treated first, included those arising implicitly from nested protocols (just model modifications, i.e. the model interface section, are applied from these). Where relevant, units definitions, interface definitions, etc. from imports are merged with the parent protocol's definitions.
 
 Parts of the interface are then processed in the following order:
 1. Optional variable specifications (`optional ...`) using `specify_optional_variable()`. If the variable doesn't exist and a default definition is given, will add the defining equation to `self.inputs`.
