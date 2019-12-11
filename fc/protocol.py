@@ -224,13 +224,52 @@ class Protocol(object):
         self.input_env.execute_statements(self.inputs)
 
         # Create model interface
-        self.model_interface = ModelInterface()
+        def process_interface(interface):
+            """ Process a protocol's model interface. """
+
+            for item in interface:
+                if item['type'] == 'OutputVariable':
+                    self.model_interface.outputs.append(
+                        VariableReference(
+                            item['local_name'],
+                            item['ns'],
+                            item['units'],
+                        ))
+
+                elif item['type'] == 'InputVariable':
+                    var = VariableReference(
+                        item['local_name'],
+                        item['ns'],
+                        item['units'],
+                    )
+                    self.model_interface.inputs.append(var)
+                    if item['initial_value'] is not None:
+                        self.model_interface.input_values[var] = item['initial_value']
+
+                elif item['type'] == 'ModelEquation':
+                    self.model_interface.defines.append(
+                        DefineStatement(
+                            VariableReference.from_string(item['var']),
+                            item['rhs'],
+                            item['ode'],
+                            VariableReference.from_string(item['bvar']),
+                        ))
+
+        # Update namespace map
+        def process_ns_map(ns_map):
+            """ Merge the items from ``ns_map`` with this protocol's prefix to namespace mapping. """
+
+            for ns_prefix, uri in ns_map.items():
+                existing_uri = self.ns_map.get(ns_prefix, None)
+                if existing_uri is None:
+                    self.ns_map[ns_prefix] = uri
+                elif existing_uri != uri:
+                    raise ProtocolError('Prefix ' + str(ns_prefix) + ' is used for multiple URIs.')
 
         # Store information from imported protocols
         for prefix, path, set_inputs in details.get('imports', []):
             self.log_progress('Importing', path, 'as', prefix, 'in', self.proto_name)
             imported_proto = Protocol(self.get_path(self.proto_file, path), self.indent_level + 1)
-
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
             else:
@@ -242,7 +281,7 @@ class Protocol(object):
                         stmt = Assign([name], set_inputs[name])
                     self.input_env.execute_statements([stmt])
 
-                # Make any prefixed imports of that protocol into our prefixed imports
+                # Merge any prefixed imports of that protocol into our prefixed imports
                 for imported_prefix, imported_import in imported_proto.imports.items():
                     self.add_imported_protocol(imported_import, imported_prefix)
 
@@ -253,29 +292,11 @@ class Protocol(object):
                 self.outputs.extend(imported_proto.outputs)
                 self.plots.extend(imported_proto.plots)
 
-                # Merge model interface
-                for item in imported_proto.model_interface:
-                    if item['type'] == 'OutputVariable':
-                        self.model_interface.outputs.append((
-                            VariableReference(item['local_name'], item['ns']),
-                            item['units'],
-                        ))
-                    elif item['type'] == 'InputVariable':
-                        self.model_interface.inputs.append((
-                            VariableReference(item['local_name'], item['ns']),
-                            item['units'],
-                            item['initial_value'],
-                        ))
+                # Process interface
+                process_interface(imported_proto.model_interface)
 
-                # Merge namespace map
-                for ns_prefix, uri in imported_proto.ns_map.items():
-                    existing_uri = self.ns_map.get(ns_prefix, None)
-                    if existing_uri is None:
-                        self.ns_map[ns_prefix] = uri
-                    elif existing_uri != uri:
-                        raise ProtocolError(
-                            'Prefix ' + str(ns_prefix) + ' is used for'
-                            ' multiple URIs in imported protocols.')
+                # Process namespace mapping
+                process_ns_map(imported_proto.ns_map)
 
         # Store information from this protocol (potentially overriding info from imported protocols)
         self.library_env.set_delegatee_env(self.input_env)
@@ -286,34 +307,13 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
 
         # Store information from the model interface section
-        # TODO: Avoid code duplication w. above
-        for item in details.get('model_interface', []):
-            if item['type'] == 'OutputVariable':
-                self.model_interface.outputs.append((
-                    VariableReference(item['local_name'], item['ns']),
-                    item['units'],
-                ))
-            elif item['type'] == 'InputVariable':
-                self.model_interface.inputs.append((
-                    VariableReference(item['local_name'], item['ns']),
-                    item['units'],
-                    item['initial_value'],
-                ))
+        process_interface(details.get('model_interface', []))
 
         # Store namespace map
-        for prefix, uri in details.get('ns_map', {}).items():
-            existing_uri = self.ns_map.get(prefix, None)
-            if existing_uri is None:
-                self.ns_map[prefix] = uri
-            elif existing_uri != uri:
-                raise ProtocolError(
-                    'Prefix ' + str(prefix) + ' is used for multiple URIs.')
+        process_ns_map(details.get('ns_map', {}))
 
         # Replace ns prefixes with uris in model interface
-        for item in self.model_interface.outputs:
-            item[0].ns = self.ns_map[item[0].ns]
-        for item in self.model_interface.inputs:
-            item[0].ns = self.ns_map[item[0].ns]
+        self.model_interface.resolve_namespaces(self.ns_map)
 
         # Store benchmarking information
         self.timings['parsing'] = time.time() - start
@@ -603,7 +603,7 @@ class Protocol(object):
         if isinstance(model, str) and model.endswith('.cellml'):
 
             if exposeNamedParameters:
-                raise ValueError('I have no idea what this does.')
+                raise ValueError('Michael has no idea what this does.')
 
             self.log_progress('Generating model code...')
 
@@ -625,28 +625,32 @@ class Protocol(object):
             import cellmlmanip
             model = cellmlmanip.load_model(model)
 
-            # Select model outputs (as qualified names)
-            outputs = []
-            for var, units in self.model_interface.outputs:
+            # Create protocol unit store
+            #TODO
+
+            # Add model outputs
+            outputs = []    # annotated names
+            for var in self.model_interface.outputs:
                 if var.name == 'state_variable':
                     outputs.append('state_variable')
                 else:
                     outputs.append((var.ns, var.name))
-                    #TODO: Ask cellmlmanip to check if var has one of the
-                    # allowed types: states, parameters, or derived quantities.
-                # TODO: Handle units
+                    # TODO: Ask cellmlmanip to check if var has one of the allowed types: states, parameters, or derived
+                    #       quantities.
+                    # TODO: Handle units
 
-            # Select module inputs
-            # TODO DO WHATEVER WE NEED TO DO HERE
-            # TODO: Check if inputs are of allowed types, i.e. states or
-            # parameters
-            for var, units, default in self.model_interface.inputs:
-                print(var)
-            #sys.exit(1)
+            # Add model inputs
+            for var in self.model_interface.inputs:
+                # TODO: Check if inputs are of allowed types, i.e. states or parameters
+                # TODO Add input variables to cellmlmanip model
+                pass
 
             # Select model parameters (as qualified names)
             # TODO DO WHATEVER WE NEED TO DO HERE
             parameters = []
+
+            # Handle define statements
+            # TODO MANIPULATE MODEL HERE
 
             # Create weblab model at path
             import weblab_cg as cg
@@ -744,9 +748,13 @@ class ModelInterface(object):
     ``inputs``
         A list of :class:`VariableReference` objects indicating model inputs
         (model variables that can be changed by the protocol).
+    ``input_values``
+        A mapping from variable references to the initial values they take.
     ``outputs``
         A list of :class:`VariableReference` objects indicating model outputs
         (model variables that can be read by the protocol).
+    ``defines``
+       A list of define statements
 
     See: https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface
     """
@@ -754,13 +762,13 @@ class ModelInterface(object):
 
         #self.independent_var = None
         self.inputs = []
+        self.input_values = {}
         self.outputs = []
+        self.defines = []
 
         '''
         ``clamps``
             A list of model variables to be clamped
-        ``defines``
-           A list of define statements
         ``vars``
         ``converts``
         ``independent_var``
@@ -772,16 +780,70 @@ class ModelInterface(object):
         self.converts = []
         '''
 
+    def resolve_namespaces(self, ns_map):
+        """ Resolve the variable references in this interface, changing all prefixes to the full namespaces. """
+
+        for ref in self.inputs:
+            ref.ns = ns_map[ref.ns]
+
+        for ref in self.outputs:
+            ref.ns = ns_map[ref.ns]
+
+        for item in self.defines:
+            item.var.ns = ns_map[item.var.ns]
+            if item.ode:
+                item.bvar.ns = ns_map[item.bvar.ns]
+            #TODO Update references in equation
+
+    def resolve_units(self):
+        """ Resolve unit names in this interface. """
+
+        raise NotImplementedError
+
+
 class VariableReference(object):
     """
     Reference to a variable with a ``name`` and an optional namespace ``ns``.
     """
-    def __init__(self, name, ns=None):
+    def __init__(self, name, ns=None, units=None):
         self.ns = ns
         self.name = name
-        # TODO: Unit?
-        # TODO: Initial value?
-        # Not sure these go here
+        self.units = units
+        # TODO: Initial value? Not sure if this goes here
 
     def __str__(self):
         return self.name if self.ns is None else self.ns + ':' + self.name
+
+    @staticmethod
+    def from_string(name):
+        ns, name = name.split(':', 2)
+        return VariableReference(name, ns)
+
+
+class DefineStatement(object):
+    """
+    A statement that defines or replaces a model variable.
+
+    Arguments:
+
+    ``var``
+        A :class:`VariableReference` indicating the variable this statement defines or modifies.
+    ``rhs``
+        The new RHS ????????????????????????????? AS A WHAT ??????????????????????????????
+    ``ode``
+        True if the variable should be a state.
+    ``bvar``
+        ``None`` if this variable isn't a state, but a :class:`VariableReference` if it is.
+
+    """
+    def __init__(self, var, rhs, ode, bvar=None):
+        self.var = var
+        self.rhs = rhs
+        self.ode = bool(ode)
+        self.bvar = bvar
+
+    def __str__(self):
+        lhs = ('diff(' + str(self.var) + ', ' + str(self.bvar) + ')') if self.ode else str(self.var)
+        rhs = '???'
+        return 'Define[' + lhs + ' = ' + rhs + ']'
+

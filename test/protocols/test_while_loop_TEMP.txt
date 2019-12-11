@@ -16,6 +16,7 @@ model interface {
     independent var units ms
     input oxmeta:membrane_voltage
     output oxmeta:membrane_voltage units mV
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 1 :: mV_per_ms
 }
 
 tasks {

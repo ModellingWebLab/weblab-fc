@@ -535,20 +535,37 @@ class Actions(object):
         #    return self.delegate('ModelEquation', [[name, value]]).xml()
         pass
 
+    # TODO: Rename to class DefineVariable ?
     class ModelEquation(BaseGroupAction):
-        # Leaving old XML method in to document existing properties / tokens.
-        # def _xml(self):
-        #    assert len(self.tokens) == 2
-        #    if isinstance(self.tokens[0], Actions.Variable):
-        #        lhs = self.tokens[0].xml()
-        #    else:
-        #        # Assigning an ODE
-        #        assert len(self.tokens[0]) == 2
-        #        bvar = M.bvar(self.tokens[0][1].xml())
-        #        lhs = self.AddLoc(M.apply(M.diff, bvar, self.tokens[0][0].xml()))
-        #    rhs = self.tokens[1].xml()
-        #    return P.addOrReplaceEquation(self.AddLoc(M.apply(M.eq, lhs, rhs)))
-        pass
+        """
+        Parse action for ``define`` declarations in the model interface, that
+        add or replace model variable's equations.
+        """
+        def _expr(self):
+
+            # Parse LHS
+            var = None
+            bvar = None
+            if isinstance(self.tokens[0], Actions.Variable):
+                # Assigning a normal variable
+                assert len(self.tokens[0]) == 1
+                var = self.tokens[0].names()[0]
+            else:
+                # Assigning an ODE
+                assert len(self.tokens[0]) == 2
+                var = self.tokens[0][0].names()[0]
+                bvar = self.tokens[0][1].names()[0]
+
+            # Store (don't parse) RHS
+            rhs = self.tokens[1]
+
+            return {
+                'type': 'ModelEquation',
+                'var': var,
+                'bvar': bvar,
+                'ode': bvar is not None,
+                'rhs': rhs,
+            }
 
     class Interpolate(BaseGroupAction):
         # Leaving old XML method in to document existing properties / tokens.
@@ -578,10 +595,13 @@ class Actions(object):
         def _expr(self):
             #return self.get_children_expr()
             output = []
+            handled = (
+                Actions.OutputVariable,
+                Actions.InputVariable,
+                Actions.ModelEquation,
+            )
             for action in self:
-                if isinstance(action, Actions.OutputVariable):
-                    output.append(action.expr())
-                if isinstance(action, Actions.InputVariable):
+                if isinstance(action, handled):
                     output.append(action.expr())
                 # TODO: Create objects for all parts of the model interface
             return output
