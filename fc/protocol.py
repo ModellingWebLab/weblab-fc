@@ -628,29 +628,37 @@ class Protocol(object):
             # Create protocol unit store
             #TODO
 
-            # Add model outputs
-            outputs = []    # annotated names
-            for var in self.model_interface.outputs:
-                if var.name == 'state_variable':
-                    outputs.append('state_variable')
-                else:
-                    outputs.append((var.ns, var.name))
-                    # TODO: Ask cellmlmanip to check if var has one of the allowed types: states, parameters, or derived
-                    #       quantities.
-                    # TODO: Handle units
-
-            # Add model inputs
+            # Add input variables in correct units
             for var in self.model_interface.inputs:
                 # TODO: Check if inputs are of allowed types, i.e. states or parameters
                 # TODO Add input variables to cellmlmanip model
                 pass
 
-            # Select model parameters (as qualified names)
-            # TODO DO WHATEVER WE NEED TO DO HERE
+            # Add output variables in correct units
+            for var in self.model_interface.outputs:
+                # TODO: Ask cellmlmanip to check if var has one of the allowed types: states, parameters, or derived
+                #       quantities.
+                # TODO: Handle units
+                pass
+
+            # Create a list of model outputs (as ontology terms) for code generation
+            outputs = []
+            for var in self.model_interface.outputs:
+                if var.name == 'state_variable':
+                    outputs.append('state_variable')
+                else:
+                    outputs.append((var.ns, var.name))
+
+            # Create a list of parameters (as ontology terms). Parameters are inputs that are constants.
             parameters = []
+            for var in self.model_interface.inputs:
+                # TODO: Check if a constant, if so add to parameter list
+                pass
 
             # Handle define statements
-            # TODO MANIPULATE MODEL HERE
+            for define in self.model_interface.defines:
+                # TODO Convert parse tree to sympy expression with correct variables
+                pass
 
             # Create weblab model at path
             import weblab_cg as cg
