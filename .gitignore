@@ -45,3 +45,10 @@ pip-log.txt
 nosetests.xml
 coverage.xml
 htmlcov
+
+# IDES
+.vscode/
+.idea/
+
+# other packages
+/src/
