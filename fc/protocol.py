@@ -397,6 +397,10 @@ class Protocol(object):
         else:
             self.output_folder = OutputFolder(path)
 
+    def get_output_folder(self):
+        """ Return the output folder used to save data """
+        return self.output_folder.path
+
     def outputs_and_plots(self, errors, verbose=True, write_out=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
         # Copy protocol outputs into the self.outputs environment,

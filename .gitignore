@@ -46,9 +46,24 @@ nosetests.xml
 coverage.xml
 htmlcov
 
-# IDES
-.vscode/
+#Pycharm IDE
 .idea/
 
-# other packages
-/src/
+#
+#Vagrant files
+Vagrantfile
+.vagrant/
+ubuntu-*
+# other repos used by VM
+src/cellmlmanip/
+src/weblab-cg
+src/pip-delete*
+
+.vscode/
+
+#ide
+.idea/
+.vscode/
+
+# files created for linked code
+src/*
