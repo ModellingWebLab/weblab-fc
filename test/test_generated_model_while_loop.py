@@ -3,15 +3,15 @@
 Run the `test_while_loop` protocol on a generated model.
 
 """
-import fc
-import fc.language.expressions as E
-import os
+# import fc
+# import fc.language.expressions as E
+# import os
 
 
 def test_generated_model_while_loop():
     pass
 
-    #TODO fix
+    # TODO fix
 
     # # Create protocol
     # proto = fc.Protocol(os.path.join(

@@ -630,7 +630,7 @@ class Protocol(object):
             model = cellmlmanip.load_model(model)
 
             # Create protocol unit store
-            #TODO
+            # TODO
 
             # Add input variables in correct units
             for var in self.model_interface.inputs:
@@ -772,7 +772,7 @@ class ModelInterface(object):
     """
     def __init__(self):
 
-        #self.independent_var = None
+        # self.independent_var = None
         self.inputs = []
         self.input_values = {}
         self.outputs = []
@@ -805,7 +805,7 @@ class ModelInterface(object):
             item.var.ns = ns_map[item.var.ns]
             if item.ode:
                 item.bvar.ns = ns_map[item.bvar.ns]
-            #TODO Update references in equation
+            # TODO Update references in equation
 
     def resolve_units(self):
         """ Resolve unit names in this interface. """

@@ -3,10 +3,10 @@
 Run the (relatively simple) GraphState protocol on a model generated with weblab_cg.
 
 """
-import fc
-import os
+# import fc
+# import os
 
-from fc import test_support
+# from fc import test_support
 
 
 def test_generated_model_graphstate():
@@ -16,7 +16,7 @@ def test_generated_model_graphstate():
 
     # # Create protocol
     # proto = fc.Protocol(os.path.join(
-    #     'test', 'protocols', 'generated_model_graphstate.txt'))
+    #    'test', 'protocols', 'generated_model_graphstate.txt'))
 
     # # Set model (generates & compiles model)
     # model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
