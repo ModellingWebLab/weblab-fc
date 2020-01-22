@@ -664,6 +664,10 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.set_model(Model.TestOdeModel(1))
         proto.run()
 
+    def test_non_existent(self):
+        proto_file = 'protocols/not_here.txt'
+        # self.assertRaises(FileNotFoundError, fc.Protocol(proto_file))
+
     def test_parsing_inputs(self):
         parse_action = CSP.inputs.parseString('inputs{X=1}', parseAll=True)
         expr = parse_action[0].expr()
