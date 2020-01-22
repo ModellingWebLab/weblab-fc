@@ -665,12 +665,14 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.run()
 
     def test_non_existent(self):
-        proto_file = 'protocols/not_here.txt'
+        # proto_file = 'protocols/not_here.txt'
         # self.assertRaises(FileNotFoundError, fc.Protocol(proto_file))
+        pass
 
     def test_non_existent_library(self):
-        proto_file = 'protocols/test_non_existent_library.txt'
+        # proto_file = 'protocols/test_non_existent_library.txt'
         # self.assertRaises(FileNotFoundError, fc.Protocol(proto_file))
+        pass
 
     def test_parsing_inputs(self):
         parse_action = CSP.inputs.parseString('inputs{X=1}', parseAll=True)
