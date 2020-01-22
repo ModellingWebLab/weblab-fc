@@ -1,0 +1,39 @@
+# Test using the original definition when replacing an equation.
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace test = "urn:test-ns#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+    mV_per_ms = mV . ms^-1
+}
+
+model interface {
+    output oxmeta:membrane_voltage units mV
+    output test:parameter_a
+    output test:parameter_b
+
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 10 :: mV_per_ms + original_definition  # i.e. 10 + a
+    define test:parameter_b = (5 :: dimensionless * original_definition) - original_definition # i.e. (5*(-1)) - (-1) = -4
+    define test:parameter_a = 1 :: mV_per_ms + original_definition
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:5
+    }
+}
+
+post-processing {
+    assert std:Close(sim:membrane_voltage, [12*i for i in 0:6])
+    assert sim:parameter_a[0] == 2
+    assert sim:parameter_b[0] == -4
+}
+
+outputs {
+    V = sim:membrane_voltage
+    b = sim:parameter_b
+}
