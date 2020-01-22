@@ -3,7 +3,7 @@
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 namespace test = "urn:test-ns#"
 
-import std = "BasicLibrary.txt"
+import std = "non_existent.txt"
 
 units {
     mV = milli volt
