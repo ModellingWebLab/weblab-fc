@@ -81,6 +81,19 @@ class Protocol(object):
 
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
+        # if the filename passed as argument to CompactSyntaxParser is not found
+        # it tries to read it before checking it exists
+        # and you get a messy exit
+        # file_contents = file_or_filename.read()
+        #     E AttributeError: 'str' object has no attribute 'read'
+        #
+        #     During handling of the above exception, another exception occurred:
+        #     E FileNotFoundError: [Errno 2] No such file or directory:
+        # throw exception
+
+        with open(proto_file) as f:
+            f.close()
+
         self.proto_file = proto_file
         self.proto_name = os.path.basename(self.proto_file)
 
