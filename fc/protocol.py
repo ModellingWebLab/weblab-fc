@@ -306,7 +306,7 @@ class Protocol(object):
                 self.plots.extend(imported_proto.plots)
 
                 # Process interface
-                process_interface(imported_proto.model_interface)
+                # process_interface(imported_proto.model_interface)
 
                 # Process namespace mapping
                 process_ns_map(imported_proto.ns_map)
