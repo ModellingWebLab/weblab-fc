@@ -119,6 +119,7 @@ class BaseAction(object):
             result.location = self.source_location
         return result
 
+
 class BaseGroupAction(BaseAction):
     """Base class for parse actions associated with a Group.
     This strips the extra nesting level in its __init__.
@@ -126,6 +127,7 @@ class BaseGroupAction(BaseAction):
 
     def __init__(self, s, loc, tokens):
         super(BaseGroupAction, self).__init__(s, loc, tokens[0])
+
 
 class Trace(BaseGroupAction):
     """This wrapping action turns on tracing of the enclosed expression or nested protocol."""
@@ -138,6 +140,7 @@ class Trace(BaseGroupAction):
 ######################################################################
 # Post-processing language expressions
 ######################################################################
+
 
 class Number(BaseGroupAction):
     """Parse action for numbers."""
@@ -152,6 +155,7 @@ class Number(BaseGroupAction):
 
     def _expr(self):
         return E.Const(V.Simple(self.tokens))
+
 
 class Variable(BaseGroupAction):
     """Parse action for variable references (identifiers)."""
@@ -170,6 +174,7 @@ class Variable(BaseGroupAction):
 
     def names(self):
         return [str(self.tokens)]
+
 
 class Operator(BaseGroupAction):
     """Parse action for most MathML operators that are represented as operators in the syntax."""
@@ -201,6 +206,7 @@ class Operator(BaseGroupAction):
                 result = OPERATORS[operator](result, operand.expr())
         return result
 
+
 class Wrap(BaseGroupAction):
     """Parse action for wrapped MathML operators."""
 
@@ -214,12 +220,14 @@ class Wrap(BaseGroupAction):
         num_operands = int(self.tokens[0])
         return E.LambdaExpression.wrap(operator, num_operands)
 
+
 class Piecewise(BaseGroupAction):
     """Parse action for if-then-else."""
 
     def _expr(self):
         if_, then_, else_ = self.get_children_expr()
         return E.If(if_, then_, else_)
+
 
 class MaybeTuple(BaseGroupAction):
     """Parse action for elements that may be grouped into a tuple, or might be a single item."""
@@ -236,12 +244,14 @@ class MaybeTuple(BaseGroupAction):
     def names(self):
         return list(map(str, self.tokens))
 
+
 class Tuple(BaseGroupAction):
     """Parse action for tuples."""
 
     def _expr(self):
         child_expr = self.get_children_expr()
         return E.TupleExpression(*child_expr)
+
 
 class Lambda(BaseGroupAction):
     """Parse action for lambda expressions."""
@@ -268,6 +278,7 @@ class Lambda(BaseGroupAction):
         lambda_params.extend([body, default_params])
         return E.LambdaExpression(*lambda_params)
 
+
 class FunctionCall(BaseGroupAction):
     """Parse action for function calls."""
 
@@ -291,6 +302,7 @@ class FunctionCall(BaseGroupAction):
             result = E.FunctionCall(func, args)
         return result
 
+
 class _Symbol(BaseGroupAction):
     """Parse action for csymbols."""
 
@@ -306,11 +318,13 @@ class _Symbol(BaseGroupAction):
         if isinstance(self.tokens, str):
             return E.Const(V.String(self.tokens))
 
+
 def Symbol(symbol):
     """Wrapper around the _Symbol class."""
     def parse_action(s, loc, tokens):
         return _Symbol(s, loc, tokens, symbol)
     return parse_action
+
 
 class Accessor(BaseGroupAction):
     """Parse action for accessors."""
@@ -324,6 +338,7 @@ class Accessor(BaseGroupAction):
         object = self.tokens[0].expr()
         property = getattr(E.Accessor, self.tokens[1])
         return E.Accessor(object, property)
+
 
 class Comprehension(BaseGroupAction):
     """Parse action for the comprehensions with array definitions."""
@@ -342,6 +357,7 @@ class Comprehension(BaseGroupAction):
         parts.append(self.delegate_symbol('string', self.tokens[-2]))  # The variable name
         return self.delegate('Tuple', [parts]).expr()
 
+
 class Array(BaseGroupAction):
     """Parse action for creating arrays."""
 
@@ -352,6 +368,7 @@ class Array(BaseGroupAction):
             return E.NewArray(*entries, comprehension=True)
         else:
             return E.NewArray(*entries)
+
 
 class View(BaseGroupAction):
     """Parse action for array views."""
@@ -383,6 +400,7 @@ class View(BaseGroupAction):
             args.append(self.delegate('Tuple', [real_tuple_tokens]).expr())
         return E.View(*args)
 
+
 class Index(BaseGroupAction):
     """Parse action for index expressions."""
 
@@ -402,6 +420,7 @@ class Index(BaseGroupAction):
 ######################################################################
 # Post-processing language statements
 ######################################################################
+
 
 class Assignment(BaseGroupAction):
     """Parse action for both simple and tuple assignments."""
@@ -426,17 +445,20 @@ class Assignment(BaseGroupAction):
             args.append(True)
         return S.Assign(*args)
 
+
 class Return(BaseGroupAction):
     """Parse action for return statements."""
 
     def _expr(self):
         return S.Return(*self.get_children_expr())
 
+
 class Assert(BaseGroupAction):
     """Parse action for assert statements."""
 
     def _expr(self):
         return S.Assert(*self.get_children_expr())
+
 
 class FunctionDef(BaseGroupAction):
     """Parse action for function definitions, which are sugar for assignment of a lambda."""
@@ -446,6 +468,7 @@ class FunctionDef(BaseGroupAction):
         lambda_ = self.delegate('Lambda', [self.tokens[1:]])
         assign = self.delegate('Assignment', [[self.tokens[0], lambda_]])
         return assign.expr()
+
 
 class StatementList(BaseGroupAction):
     """Parse action for lists of post-processing language statements."""
@@ -458,11 +481,13 @@ class StatementList(BaseGroupAction):
 # Model interface section
 ######################################################################
 
+
 class SetTimeUnits(BaseAction):
     # Leaving old XML method in to document existing properties.
     # def _xml(self):
     #     return P.setIndependentVariableUnits(**self.get_attribute_dict('units'))
     pass
+
 
 class InputVariable(BaseGroupAction):
     """
@@ -479,6 +504,7 @@ class InputVariable(BaseGroupAction):
             'initial_value': self.tokens.get('initial_value', None),
         }
 
+
 class OutputVariable(BaseGroupAction):
     """
     Parse action for output variables defined in the model interface.
@@ -493,6 +519,7 @@ class OutputVariable(BaseGroupAction):
             'units': self.tokens.get('units', None),
         }
 
+
 class OptionalVariable(BaseGroupAction):
     def __init__(self, s, loc, tokens):
         super(OptionalVariable, self).__init__(s, loc, tokens)
@@ -502,11 +529,13 @@ class OptionalVariable(BaseGroupAction):
         else:
             self.default_expr = ''
 
+
 class DeclareVariable(BaseGroupAction):
     # Leaving old XML method in to document existing properties.
     # def _xml(self):
     #    return P.declareNewVariable(**self.get_attribute_dict('name', 'units', 'initial_value'))
     pass
+
 
 class ClampVariable(BaseGroupAction):
     # Leaving old XML method in to document existing properties / tokens.
@@ -521,6 +550,8 @@ class ClampVariable(BaseGroupAction):
     pass
 
 # TODO: Rename to class DefineVariable ?
+
+
 class ModelEquation(BaseGroupAction):
     """
     Parse action for ``define`` declarations in the model interface, that
@@ -552,6 +583,7 @@ class ModelEquation(BaseGroupAction):
             'rhs': rhs,
         }
 
+
 class Interpolate(BaseGroupAction):
     # Leaving old XML method in to document existing properties / tokens.
     # def _xml(self):
@@ -567,6 +599,7 @@ class Interpolate(BaseGroupAction):
     #    return M.apply(self.delegate_symbol('interpolate').xml(), file_path, indep_var, *units)
     pass
 
+
 class UnitsConversion(BaseGroupAction):
     # Leaving old XML method in to document existing properties / tokens.
     # def _xml(self):
@@ -575,10 +608,11 @@ class UnitsConversion(BaseGroupAction):
     #    return P.unitsConversionRule(rule, **attrs)
     pass
 
+
 class ModelInterface(BaseGroupAction):
 
     def _expr(self):
-        #return self.get_children_expr()
+        # return self.get_children_expr()
         output = []
         handled = (
             OutputVariable,
@@ -594,6 +628,7 @@ class ModelInterface(BaseGroupAction):
 ######################################################################
 # Simulation tasks section
 ######################################################################
+
 
 class Range(BaseGroupAction):
     """Parse action for all the kinds of range supported."""
@@ -617,12 +652,14 @@ class Range(BaseGroupAction):
             range_ = ranges.While(attrs['name'], cond)
         return range_
 
+
 class ModifierWhen(BaseGroupAction):
     """Parse action for the when part of modifiers."""
 
     def _expr(self):
         when = {'start': 'START_ONLY', 'each': 'EACH_LOOP', 'end': 'END_ONLY'}[self.tokens]
         return getattr(modifiers.AbstractModifier, when)
+
 
 class Modifier(BaseGroupAction):
     """Parse action that generates all kinds of modifier."""
@@ -643,17 +680,20 @@ class Modifier(BaseGroupAction):
                 args.append(detail[0])
         return modifier(*args)
 
+
 class Modifiers(BaseGroupAction):
     """Parse action for the modifiers collection."""
 
     def _expr(self):
         return self.get_children_expr()
 
+
 class TimecourseSimulation(BaseGroupAction):
 
     def _expr(self):
         args = self.get_children_expr()
         return simulations.Timecourse(*args)
+
 
 class NestedSimulation(BaseGroupAction):
 
@@ -668,6 +708,7 @@ class NestedSimulation(BaseGroupAction):
             args.append(nested.expr())
         return simulations.Nested(args[2], args[0], args[1])
 
+
 class OneStepSimulation(BaseGroupAction):
     # Leaving old XML method in to document existing properties / tokens.
     # def _xml(self):
@@ -679,6 +720,7 @@ class OneStepSimulation(BaseGroupAction):
     #        args.append(self.tokens['modifiers'][0].xml())
     #    return P.oneStep(*args, **attrs)
     pass
+
 
 class NestedProtocol(BaseGroupAction):
     def __init__(self, s, loc, tokens):
@@ -704,10 +746,11 @@ class NestedProtocol(BaseGroupAction):
             output_names.append(output[-1])
             optional_flags.append(len(output) == 2)
         args.extend([output_names, optional_flags])
-        model = model.NestedProtocol(*args)
+        nested_proto = model.NestedProtocol(*args)
         result = simulations.OneStep(0)
-        result.set_model(model)
+        result.set_model(nested_proto)
         return result
+
 
 class Simulation(BaseGroupAction):
     """Parse action for all kinds of simulation."""
@@ -716,6 +759,7 @@ class Simulation(BaseGroupAction):
         sim = self.tokens[1].expr()
         sim.prefix = str(self.tokens[0])
         return sim
+
 
 class Tasks(BaseGroupAction):
     """Parse action for a collection of simulation tasks."""
@@ -728,6 +772,7 @@ class Tasks(BaseGroupAction):
 # Other protocol language constructs
 ######################################################################
 
+
 class Inputs(BaseAction):
     """Parse action for the inputs section of a protocol."""
 
@@ -735,6 +780,7 @@ class Inputs(BaseAction):
         assert len(self.tokens) <= 1
         if len(self.tokens) == 1:  # Don't create an empty element
             return self.tokens[0].expr()
+
 
 class Import(BaseGroupAction):
     """Parse action for protocol imports."""
@@ -748,6 +794,7 @@ class Import(BaseGroupAction):
                 value_expr = set_input.tokens[1].expr()
                 set_inputs[name] = value_expr
         return self.tokens[0], self.tokens[1], set_inputs
+
 
 class UnitRef(BaseGroupAction):
     """Parse action for unit references within units definitions."""
@@ -784,6 +831,7 @@ class UnitRef(BaseGroupAction):
     #        attrs['offset'] = self.GetValue(self.tokens['offset'][0][1], self.tokens['offset'][0][0] == '-')
     #    return CELLML.unit(**attrs)
 
+
 class UnitsDef(BaseGroupAction):
     """Parse action for units definitions."""
 
@@ -795,6 +843,7 @@ class UnitsDef(BaseGroupAction):
     #    unit_refs = [t.xml() for t in self.tokens if isinstance(t, UnitRef)]
     #    return CELLML.units(*unit_refs, name=name)
 
+
 class Units(BaseAction):
     """Parse action for the units definitions section."""
 
@@ -802,6 +851,7 @@ class Units(BaseAction):
     # def _xml(self):
     #    if len(self.tokens) > 0:
     #        return P.units(*self.get_children_XML())
+
 
 class Library(BaseAction):
     """Parse action for the library section."""
@@ -811,12 +861,14 @@ class Library(BaseAction):
             assert len(self.tokens) == 1
             return self.tokens[0].expr()
 
+
 class PostProcessing(BaseAction):
     """Parse action for the post-processing section."""
 
     def _expr(self):
         if len(self.tokens) > 0:
             return self.delegate('StatementList', [self.tokens]).expr()
+
 
 class Output(BaseGroupAction):
     """Parse action for an output specification."""
@@ -834,11 +886,13 @@ class Output(BaseGroupAction):
         output['optional'] = 'optional' in self.tokens
         return output
 
+
 class Outputs(BaseGroupAction):
     """Parse action for the outputs section."""
 
     def _expr(self):
         return self.get_children_expr()
+
 
 class Plot(BaseGroupAction):
     """Parse action for simple plot specifications."""
@@ -864,11 +918,13 @@ class Plot(BaseGroupAction):
             plot['using'] = using[0]
         return plot
 
+
 class Plots(BaseGroupAction):
     """Parse action for the plots section."""
 
     def _expr(self):
         return self.get_children_expr()
+
 
 class Protocol(BaseAction):
     """Parse action for a full protocol."""
