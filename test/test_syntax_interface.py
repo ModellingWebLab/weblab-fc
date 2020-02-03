@@ -2,7 +2,6 @@
 import numpy as np
 import unittest
 
-import fc
 import fc.language.expressions as E
 import fc.language.statements as S
 import fc.language.values as V
@@ -641,28 +640,6 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         used_vars = expr.get_used_variables()
         self.assertEqual(used_vars, set(['a', 'b']))
-
-    def test_find_index_txt(self):
-        pass
-        # TODO fix failing test
-        # proto_file = 'test/protocols/test_find_index.txt'
-        # proto = fc.Protocol(proto_file)
-        # proto.run()
-
-    def test_core_post_proc_txt(self):
-        pass
-        # TODO fix failing test
-        # ModelInterface not iterable
-        # proto_file = 'test/protocols/test_core_postproc.txt'
-        # proto = fc.Protocol(proto_file)
-        # proto.run()
-
-    def test_graph_txt(self):
-        proto_file = 'protocols/GraphState.txt'
-        proto = fc.Protocol(proto_file)
-        proto.set_output_folder('TestSyntaxInterface_TestGraphTxt')
-        proto.set_model(Model.TestOdeModel(1))
-        proto.run()
 
     def test_parsing_inputs(self):
         parse_action = CSP.inputs.parseString('inputs{X=1}', parseAll=True)
