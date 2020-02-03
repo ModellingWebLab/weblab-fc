@@ -210,7 +210,7 @@ class Protocol(object):
             self.proto_file,
             parseAll=True
         )[0]
-        # A class:`fc.parsing.actions.Protocol` object,
+        # A :class:`fc.parsing.actions.Protocol` object,
         # containing parsed information about the protocol
         import fc.parsing.actions as actions
         assert isinstance(generator, actions.Protocol)
