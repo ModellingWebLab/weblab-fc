@@ -78,14 +78,13 @@ setup(
     install_requires=[
         # 'cellmlmanip',    # Add this in when cellmlmanip is ready
         'cython',
-        'lxml',
+        'Jinja2>=2.10',
         'matplotlib',
         'numexpr',
         'numpy',
         'pyparsing!=2.4.2',
         'scipy',
         'tables',
-        # 'weblab_cg',      # Add this in when weblab_cg is ready
     ],
     extras_require={
         'dev': [

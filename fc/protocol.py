@@ -22,6 +22,7 @@ from .file_handling import OutputFolder  # noqa: E402
 from .language import values as V  # noqa: E402
 from .language.statements import Assign  # noqa: E402
 from .locatable import Locatable  # noqa: E402
+from .code_generation import create_weblab_model  # noqa: E402
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -674,8 +675,7 @@ class Protocol(object):
                 pass
 
             # Create weblab model at path
-            import weblab_cg as cg
-            cg.create_weblab_model(
+            create_weblab_model(
                 path, class_name, model, outputs, parameters)
 
             self.log_progress('Compiling pyx model code...')
