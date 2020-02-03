@@ -54,3 +54,17 @@ pip install -e .[dev,test]
 ```
 
 Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.
+
+## Full installation steps on Jonathan's Macbook
+
+```sh
+export CONDA_ENV=weblab-fc-py36
+conda create -n $CONDA_ENV python=3.6
+conda activate $CONDA_ENV
+conda install -c conda-forge sundials=4 pytables scipy numpy numexpr
+pip install -r requirements/setup.txt
+./requirements/weblab_cg.sh
+export CFLAGS="-I/anaconda3/envs/$CONDA_ENV/include"
+export LDFLAGS="-L/anaconda3/envs/$CONDA_ENV/lib"
+pip install -e .[dev,test]
+```
