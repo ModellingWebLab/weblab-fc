@@ -1,5 +1,6 @@
 
 import numpy as np
+import pytest
 import unittest
 
 import fc
@@ -670,13 +671,6 @@ class TestSyntaxInterface(unittest.TestCase):
         for each in expr:
             self.assertIsInstance(each, S.Assign)
 
-        # test below is just to test that we get the correct output for a protocol error
-        # TODO - it's commented out because it causes a protocol error every time
-#     def test_protocol_error(self):
-#         proto_file = 'test/protocols/test_error_msg.txt'
-#         proto = fc.Protocol(proto_file)
-#         proto.run()
-
     def test_parsing_ranges(self):
         # test parsing uniform range
         parse_action = CSP.range.parseString('range t units s uniform 0:10', parseAll=True)
@@ -760,4 +754,3 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.ResetState)
         self.assertEqual(expr.state_name, 'state_name')
-
