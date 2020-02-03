@@ -1458,10 +1458,20 @@ class CompactSyntaxParser(object):
         # basis that if one expression needs to, several are likely to.
         self._stack_depth_factor = 1
         self._original_stack_limit = sys.getrecursionlimit()
+        self.increase_stack_depth_limit()
 
     def __del__(self):
         """Reset the stack limit if it changed."""
         sys.setrecursionlimit(self._original_stack_limit)
+
+    def increase_stack_depth_limit(self, step=0.5):
+        """Increase the limit by the given factor of the original."""
+        self._stack_depth_factor += 0.5
+        new_limit = int(
+            self._stack_depth_factor * self._original_stack_limit)
+        print('Increasing recursion limit to', new_limit,
+              file=sys.stderr)
+        sys.setrecursionlimit(new_limit)
 
     def try_parse(self, callable, *args, **kwargs):
         """
@@ -1474,12 +1484,7 @@ class CompactSyntaxParser(object):
                 r = callable(*args, **kwargs)
             except RuntimeError as msg:
                 print('Got RuntimeError:', msg, file=sys.stderr)
-                self._stack_depth_factor += 0.5
-                new_limit = int(
-                    self._stack_depth_factor * self._original_stack_limit)
-                print('Increasing recursion limit to', new_limit,
-                      file=sys.stderr)
-                sys.setrecursionlimit(new_limit)
+                self.increase_stack_depth_limit()
             else:
                 break  # Parsed OK
         if not r:
