@@ -606,7 +606,7 @@ class Protocol(object):
             value = value_expr.evaluate(self.input_env)
         self.input_env.overwrite_definition(name, value)
 
-    def set_model(self, model, exposeNamedParameters=False):
+    def set_model(self, model):
         """
         Specify the model this protocol is to be run on.
 
@@ -618,10 +618,6 @@ class Protocol(object):
 
         # Compile model from CellML
         if isinstance(model, str) and model.endswith('.cellml'):
-
-            if exposeNamedParameters:
-                raise ValueError('Michael has no idea what this does.')
-
             self.log_progress('Generating model code...')
 
             # Create output folder
@@ -698,11 +694,14 @@ class Protocol(object):
                 f.write(SETUP_PY % template_strings)
 
             # Compile the extension module
-            print(subprocess.check_output(
+            result = subprocess.run(
                 ['python', 'setup.py', 'build_ext', '--inplace'],
                 cwd=temp_dir,
-                stderr=subprocess.STDOUT,
-            ))
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            )
+            print(result.stdout.decode())
+            if result.returncode != 0:
+                raise ProtocolError('Failed to generate executable model code; see output above for details')
 
             # Create an instance of the model
             self.model_path = temp_dir

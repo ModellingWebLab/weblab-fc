@@ -10,11 +10,13 @@ def test_non_existent_protocol():
     with pytest.raises(FileNotFoundError):
         fc.Protocol(proto_file)
 
+
 def test_non_existent_library():
     # Checks that a missing imported library is handled cleanly
     proto_file = 'test/protocols/test_non_existent_library.txt'
     with pytest.raises(FileNotFoundError):
         fc.Protocol(proto_file)
+
 
 def test_protocol_error():
     # Checks that running a protocol with an error in it reports this cleanly
