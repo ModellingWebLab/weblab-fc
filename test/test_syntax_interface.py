@@ -665,27 +665,11 @@ class TestSyntaxInterface(unittest.TestCase):
         proto.set_model(Model.TestOdeModel(1))
         proto.run()
 
-    def test_non_existent(self):
-        proto_file = 'protocols/not_here.txt'
-        with pytest.raises(FileNotFoundError):
-            fc.Protocol(proto_file)
-
-    def test_non_existent_library(self):
-        proto_file = 'test/protocols/test_non_existent_library.txt'
-        with pytest.raises(FileNotFoundError):
-            fc.Protocol(proto_file)
-
     def test_parsing_inputs(self):
         parse_action = CSP.inputs.parseString('inputs{X=1}', parseAll=True)
         expr = parse_action[0].expr()
         for each in expr:
             self.assertIsInstance(each, S.Assign)
-
-    def test_protocol_error(self):
-        proto_file = 'test/protocols/test_error_msg.txt'
-        proto = fc.Protocol(proto_file)
-        with pytest.raises(fc.error_handling.ErrorRecorder):
-            proto.run()
 
     def test_parsing_ranges(self):
         # test parsing uniform range
@@ -770,4 +754,3 @@ class TestSyntaxInterface(unittest.TestCase):
         expr = parse_action[0].expr()
         self.assertIsInstance(expr, Modifiers.ResetState)
         self.assertEqual(expr.state_name, 'state_name')
-
