@@ -205,16 +205,16 @@ class Protocol(object):
 
         import fc.parsing.CompactSyntaxParser as CSP
         parser = self.parser = CSP.CompactSyntaxParser()
-        CSP.Actions.source_file = self.proto_file
         generator = self.parsed_protocol = parser.try_parse(
             CSP.CompactSyntaxParser.protocol.parseFile,
             self.proto_file,
             parseAll=True
         )[0]
-        assert isinstance(generator, CSP.Actions.Protocol)
-
-        # A class:`fc.parsing.CompactSyntaxParser.Actions.Protocol` object,
+        # A class:`fc.parsing.actions.Protocol` object,
         # containing parsed information about the protocol
+        import fc.parsing.actions as actions
+        assert isinstance(generator, actions.Protocol)
+
         details = generator.expr()
         assert isinstance(details, dict)
         del(generator)
