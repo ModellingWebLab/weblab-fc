@@ -26,9 +26,6 @@ def _jinja_environment():
     """
     Returns a shared Jinja environment to create templates from.
     """
-    print('* '*40)
-    print(os.path.join(fc.MODULE_DIR, 'templates'))
-    print('* '*40)
 
     global _environment
     if _environment is None:
