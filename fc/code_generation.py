@@ -200,8 +200,9 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
             'var_names': model.get_ontology_terms_by_symbol(state, oxmeta),
         })
 
-    # Create parameter information dicts
+    # Create parameter information dicts, and map of parameter symbols to their indices
     parameter_info = []
+    parameter_symbols = {}
     for i, parameter in enumerate(parameters):
         symbol = model.get_symbol_by_ontology_term(*parameter)
         parameter_info.append({
@@ -210,11 +211,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
             'var_name': symbol_name(symbol),
             'initial_value': model.get_value(symbol),
         })
-
-    # Create map of parameter symbols to their indices
-    parameter_symbols = {}
-    for i, parameter in enumerate(parameters):
-        symbol = model.get_symbol_by_ontology_term(*parameter)
         parameter_symbols[symbol] = i
 
     # Create output information dicts
