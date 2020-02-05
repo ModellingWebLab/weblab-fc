@@ -670,7 +670,6 @@ class ModelInterface(BaseGroupAction):
 
     def _expr(self):
         actions = self.get_children_expr()
-        print('in MI._expr', self.tokens, actions, map(type, actions))
         self.time_units = [a for a in actions if isinstance(a, SetTimeUnits)]
         self.inputs = [a for a in actions if isinstance(a, InputVariable)]
         self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
