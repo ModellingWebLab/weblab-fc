@@ -2,14 +2,12 @@
 Methods for code generation (using jinja2 templates).
 """
 import jinja2
-import os
 import posixpath
 import sympy
 import time
 
 from cellmlmanip import transpiler
 from cellmlmanip.printer import Printer
-import fc
 
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
@@ -196,7 +194,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
             'index': i,
             'var_name': symbol_name(state),
             'deriv_name': derivative_name(state),
-            'initial_value': model.get_initial_value(state),
+            'initial_value': state.initial_value,
             'var_names': model.get_ontology_terms_by_symbol(state, oxmeta),
         })
 
