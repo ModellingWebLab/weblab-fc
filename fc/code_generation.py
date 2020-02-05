@@ -218,7 +218,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
 
         # Allow special output value 'state_variable'
         # TODO Replace this with a more generic implementation
-        if output == 'state_variable':
+        if output[1] == 'state_variable':
             var_name = [{'index': x['index'], 'var_name': x['var_name']}
                         for x in state_info]
             parameter_index = None
@@ -251,7 +251,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
     # Create output equation information dicts
     output_equations = []
     output_symbols = [model.get_symbol_by_ontology_term(*x) for x in outputs
-                      if x != 'state_variable']
+                      if x[1] != 'state_variable']
     for eq in model.get_equations_for(output_symbols):
         output_equations.append({
             'lhs': printer.doprint(eq.lhs),
