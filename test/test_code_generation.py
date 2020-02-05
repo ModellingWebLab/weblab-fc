@@ -6,7 +6,6 @@ import logging
 import os
 import re
 
-import fc
 import fc.code_generation as cg
 
 
@@ -48,7 +47,7 @@ def test_generate_weblab_model(tmp_path):
     class_name = 'TestModel'
 
     # Load cellml model
-    model = os.path.join('test', 'models',  'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
+    model = os.path.join('test', 'models', 'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
     model = cellmlmanip.load_model(model)
 
     # Select model outputs (as qualified names)
