@@ -7,6 +7,7 @@ import math
 import os
 
 import pyparsing as p
+import sympy
 
 import fc.language.expressions as E
 import fc.language.statements as S
@@ -124,6 +125,18 @@ class BaseAction(object):
             result.location = self.source_location
         return result
 
+    def to_sympy(self, symbol_generator, number_generator):
+        """Convert this parse tree to a Sympy expression.
+
+        May be implemented by subclasses if the operation makes sense, i.e. they represent (part of) an expression.
+
+        :param symbol_generator: Method to create expressions for symbols.
+            Must have signature ``f(name) -> sympy.Basic``.
+        :param number_generator: Method to create expressions for numbers with units.
+            Must have signature ``f(value, unit) -> sympy.Basic`` where ``value`` is a ``float`` or ``str``.
+        """
+        raise NotImplementedError
+
 
 class BaseGroupAction(BaseAction):
     """Base class for parse actions associated with a Group.
@@ -161,6 +174,12 @@ class Number(BaseGroupAction):
     def _expr(self):
         return E.Const(V.Simple(self.tokens))
 
+    def to_sympy(self, symbol_generator, number_generator):
+        number = self.tokens
+        if self._units is None:
+            raise ValueError('Numbers in the model interface must have units attached; %s does not' % number)
+        return number_generator(number, self._units)
+
 
 class Variable(BaseGroupAction):
     """Parse action for variable references (identifiers)."""
@@ -179,6 +198,9 @@ class Variable(BaseGroupAction):
 
     def names(self):
         return [str(self.tokens)]
+
+    def to_sympy(self, symbol_generator, number_generator):
+        return symbol_generator(self.tokens)
 
 
 class Operator(BaseGroupAction):
@@ -571,43 +593,59 @@ class ModelEquation(BaseGroupAction):
     Parse action for ``define`` declarations in the model interface, that
     add or replace model variable's equations.
 
+    ``define diff(<prefix:term>;<prefix:term>) | <prefix:term> = <simple_expr>``
+
     Properties:
 
     ``var``
-        Indicates the variable this statement defines or modifies. Can be a simple name local
-        to the model interface, or a prefixed name.
+        A :class:`Variable` indicating the variable this statement defines or modifies.
+        Can be a simple name local to the model interface (see :class:`DefineVariable`), or a prefixed name.
     ``rhs``
-        The new RHS ????????????????????????????? AS A WHAT ??????????????????????????????
-    ``ode``
+        The new RHS, as a parse action tree initially. Call :meth:`to_sympy` to convert it.
+    ``is_ode``
         True if the variable should be a state.
     ``bvar``
-        ``None`` if this variable isn't a state, but a variable reference if it is.
+        ``None`` if this variable isn't a state, but a :class:`Variable` if it is, giving the 'time' variable.
     """
     def _expr(self):
-
         # Parse LHS
-        var = None
-        bvar = None
         if isinstance(self.tokens[0], Variable):
             # Assigning a normal variable
             assert len(self.tokens[0]) == 1
-            var = self.tokens[0].names()[0]
+            self.var = self.tokens[0]
+            self.bvar = None
         else:
             # Assigning an ODE
             assert len(self.tokens[0]) == 2
-            var = self.tokens[0][0].names()[0]
-            bvar = self.tokens[0][1].names()[0]
+            self.var = self.tokens[0][0]
+            self.bvar = self.tokens[0][1]
+        self.is_ode = self.bvar is not None
 
-        # Store (don't parse) RHS
-        rhs = self.tokens[1]
+        # Store RHS just as the tokens for now; converting to Sympy happens later
+        self.rhs = self.tokens[1]
 
-        return {
-            'type': 'ModelEquation',
-            'var': var,
-            'bvar': bvar,
-            'ode': bvar is not None,
-            'rhs': rhs,
-        }
+        return self
+
+    def to_sympy(self, symbol_generator, number_generator):
+        """Convert this equation to Sympy.
+
+        Notes for later implementation:
+        * ``number_generator`` can be the same as the CellML parser:
+            ``lambda x, y: model.add_number(x, model.get_units(y))``
+        * ``symbol_generator`` will be different. It will be set up by our parent ModelInterface,
+            and needs to dereference all the name lookups we might encounter. Prefixed names will
+            need to use the ns_map to get a (URI, local_name) pair and do ``model.get_symbol_by_ontology_term``.
+            Plain names will need to check they've been defined in a ``DeclareVariable`` stanza, which should
+            maintain a map from name to ``VariableDummy``.
+        """
+        var = self.var.to_sympy(symbol_generator, number_generator)
+        if self.is_ode:
+            bvar = self.bvar.to_sympy(symbol_generator, number_generator)
+            lhs = sympy.Derivative(var, bvar, evaluate=False)
+        else:
+            lhs = var
+        rhs = self.rhs.to_sympy(symbol_generator, number_generator)
+        return sympy.Eq(lhs, rhs)
 
 
 class Interpolate(BaseGroupAction):
