@@ -2,6 +2,7 @@
 Parse actions that can generate Python implementation objects
 """
 
+import itertools
 import math
 import os
 
@@ -86,15 +87,19 @@ class BaseAction(object):
         """Convert all sub-tokens to expr and return the list of elements."""
         return [tok.expr() for tok in self.tokens]
 
+    def get_named_token_as_string(self, token_name, default=None):
+        """Helper to get simple properties of this parse result."""
+        value = self.tokens.get(token_name, default)
+        if not isinstance(value, str) and value is not None:
+            value = value[0]
+        return value
+
     def get_attribute_dict(self, *attrNames):
         """Create an attribute dictionary from named parse results."""
         attrs = {}
         for key in attrNames:
             if key in self.tokens:
-                value = self.tokens[key]
-                if not isinstance(value, str):
-                    value = value[0]
-                attrs[key] = value
+                attrs[key] = self.get_named_token_as_string(key)
         return attrs
 
     def delegate(self, action, tokens):
@@ -483,46 +488,55 @@ class StatementList(BaseGroupAction):
 
 
 class SetTimeUnits(BaseAction):
-    # Leaving old XML method in to document existing properties.
-    # def _xml(self):
-    #     return P.setIndependentVariableUnits(**self.get_attribute_dict('units'))
-    pass
+    """Parse action for specifying the units time should have in the model.
+
+    ``independent var units <uname>``
+    """
+    def _expr(self):
+        self.time_units = self.get_named_token_as_string('units')
+        assert self.time_units is not None
+        return self
 
 
 class InputVariable(BaseGroupAction):
     """
     Parse action for input variables defined in the model interface.
+
+    ``input <prefix:term> [units <uname>] [= <initial_value>]``
     """
     def _expr(self):
-        # TODO: Will this always return 2 parts?
-        ns, local_name = self.tokens['name'].split(':', 1)
-        return {
-            'type': 'InputVariable',
-            'ns': ns,
-            'local_name': local_name,
-            'units': self.tokens.get('units', None),
-            'initial_value': self.tokens.get('initial_value', None),
-        }
+        name = self.prefixed_name = self.get_named_token_as_string('name')
+        self.ns_prefix, self.local_name = name.split(':', 1)
+        self.ns_uri = None  # Will be set later using protocol's namespace mapping
+        self.units = self.get_named_token_as_string('units', default=None)
+        self.initial_value = self.get_named_token_as_string('initial_value', default=None)
+        return self
 
 
 class OutputVariable(BaseGroupAction):
     """
     Parse action for output variables defined in the model interface.
+
+    ``output <prefix:term> [units <uname>]``
     """
     def _expr(self):
-        # TODO: Will this always return 2 parts?
-        ns, local_name = self.tokens['name'].split(':', 1)
-        return {
-            'type': 'OutputVariable',
-            'ns': ns,
-            'local_name': local_name,
-            'units': self.tokens.get('units', None),
-        }
+        name = self.prefixed_name = self.get_named_token_as_string('name')
+        self.ns_prefix, self.local_name = name.split(':', 1)
+        self.ns_uri = None  # Will be set later using protocol's namespace mapping
+        self.units = self.get_named_token_as_string('units', default=None)
+        return self
 
 
 class OptionalVariable(BaseGroupAction):
+    """Parse action for specifying optional variables in the model interface.
+
+    ``optional <prefix:term> [default <simple_expr>]``
+    """
     def __init__(self, s, loc, tokens):
         super(OptionalVariable, self).__init__(s, loc, tokens)
+        name = self.prefixed_name = self.get_named_token_as_string('name')
+        self.ns_prefix, self.local_name = name.split(':', 1)
+        self.ns_uri = None  # Will be set later using protocol's namespace mapping
         if 'default' in self.tokens:
             # Record the actual string making up the default expression
             self.default_expr = s[self.tokens['default_start']:self.tokens['default_end']]
@@ -556,6 +570,18 @@ class ModelEquation(BaseGroupAction):
     """
     Parse action for ``define`` declarations in the model interface, that
     add or replace model variable's equations.
+
+    Properties:
+
+    ``var``
+        Indicates the variable this statement defines or modifies. Can be a simple name local
+        to the model interface, or a prefixed name.
+    ``rhs``
+        The new RHS ????????????????????????????? AS A WHAT ??????????????????????????????
+    ``ode``
+        True if the variable should be a state.
+    ``bvar``
+        ``None`` if this variable isn't a state, but a variable reference if it is.
     """
     def _expr(self):
 
@@ -610,20 +636,57 @@ class UnitsConversion(BaseGroupAction):
 
 
 class ModelInterface(BaseGroupAction):
+    """Parse action for the model interface section of a protocol.
+
+    See https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface for more on the syntax
+    and semantics of the model interface.
+
+    Includes helper methods for merging model interfaces, e.g. when one protocol imports another.
+
+    Properties:
+
+    ``time_units``
+        Either an empty list, or a singleton list specifying the units for time.
+    ``inputs``
+        A list of :class:`InputVariable` objects specifying model variables that can be changed by the protocol.
+    ``outputs``
+        A list of :class:`OutputVariable` objects specifying model variables that can be read by the protocol.
+    ``optional_decls``
+        A list of :class:`OptionalVariable` objects specifying model variables referenced by the protocol
+        that can be missing without causing an immediate error. This applies to variables declared as inputs or
+        outputs, or referenced in new/changed equations. Errors may still arise later if a missing optional
+        variable still ends up included in the generated model code, e.g. because no default clause or alternative
+        was found.
+    """
+    def __init__(self, *args, **kwargs):
+        if len(args) == 0:
+            # This is an empty instance not created by pyparsing. Fake the arguments pyparsing needs.
+            args = ('', '', [[]])
+        super().__init__(*args, **kwargs)
+        self.time_units = []
+        self.inputs = []
+        self.outputs = []
+        self.optional_decls = []
 
     def _expr(self):
-        # return self.get_children_expr()
-        output = []
-        handled = (
-            OutputVariable,
-            InputVariable,
-            ModelEquation,
-        )
-        for action in self:
-            if isinstance(action, handled):
-                output.append(action.expr())
-            # TODO: Create objects for all parts of the model interface
-        return output
+        actions = self.get_children_expr()
+        self.time_units = [a for a in actions if isinstance(a, SetTimeUnits)]
+        self.inputs = [a for a in actions if isinstance(a, InputVariable)]
+        self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
+        self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
+
+        # Some basic semantics checking
+        if len(self.time_units) > 1:
+            raise ValueError('The units for time cannot be set multiple times')
+        return self
+
+    def resolve_namespaces(self, ns_map):
+        """Resolve namespace prefixes to full URIs for all parts of the interface.
+
+        :param ns_map: mapping from NS prefix to URI.
+        """
+        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
+            item.ns_uri = ns_map[item.ns_prefix]
 
 ######################################################################
 # Simulation tasks section

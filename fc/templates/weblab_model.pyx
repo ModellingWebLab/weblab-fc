@@ -168,11 +168,7 @@ cdef class {{ class_name }}(CvodeSolver):
         # Local names of output variables
         self.output_names = []
         {%- for output in outputs %}
-        {%- if output.length is none %}
         self.output_names.append('{{ output.annotation[1] }}')
-        {%- else %}
-        self.output_names.append('{{ output.annotation }}')
-        {%- endif %}
         {%- endfor %}
 
         # Create and cache list of arrays, to avoid constant list/array

@@ -16,13 +16,14 @@ import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend('agg')  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 
 import fc   # noqa: E402
+from .code_generation import create_weblab_model  # noqa: E402
 from .environment import Environment  # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402
 from .language import values as V  # noqa: E402
 from .language.statements import Assign  # noqa: E402
 from .locatable import Locatable  # noqa: E402
-from .code_generation import create_weblab_model  # noqa: E402
+from .parsing import actions  # noqa: E402
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -172,7 +173,7 @@ class Protocol(object):
         # See :class:`ModelInterface`.
 
         # TODO: Only seems to contain model outputs at the moment
-        self.model_interface = ModelInterface()
+        self.model_interface = actions.ModelInterface()
 
         # 8. The ``tasks`` section, which contains any number of simulation
         # tasks (possibly with nested ones).
@@ -226,7 +227,6 @@ class Protocol(object):
         )[0]
         # A :class:`fc.parsing.actions.Protocol` object,
         # containing parsed information about the protocol
-        import fc.parsing.actions as actions
         assert isinstance(generator, actions.Protocol)
 
         details = generator.expr()
@@ -240,34 +240,7 @@ class Protocol(object):
         # Create model interface
         def process_interface(interface):
             """ Process a protocol's model interface. """
-
-            for item in interface:
-                if item['type'] == 'OutputVariable':
-                    self.model_interface.outputs.append(
-                        VariableReference(
-                            item['local_name'],
-                            item['ns'],
-                            item['units'],
-                        ))
-
-                elif item['type'] == 'InputVariable':
-                    var = VariableReference(
-                        item['local_name'],
-                        item['ns'],
-                        item['units'],
-                    )
-                    self.model_interface.inputs.append(var)
-                    if item['initial_value'] is not None:
-                        self.model_interface.input_values[var] = item['initial_value']
-
-                elif item['type'] == 'ModelEquation':
-                    self.model_interface.defines.append(
-                        DefineStatement(
-                            VariableReference.from_string(item['var']),
-                            item['rhs'],
-                            item['ode'],
-                            VariableReference.from_string(item['bvar']),
-                        ))
+            self.model_interface = interface  # TODO: Merging!
 
         # Update namespace map
         def process_ns_map(ns_map):
@@ -321,7 +294,7 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
 
         # Store information from the model interface section
-        process_interface(details.get('model_interface', []))
+        process_interface(details.get('model_interface', actions.ModelInterface()))
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))
@@ -656,12 +629,9 @@ class Protocol(object):
                 pass
 
             # Create a list of model outputs (as ontology terms) for code generation
-            outputs = []
-            for var in self.model_interface.outputs:
-                if var.name == 'state_variable':
-                    outputs.append('state_variable')
-                else:
-                    outputs.append((var.ns, var.name))
+            # TODO: Handle units
+            # TODO: Handle optionality
+            outputs = [(var.ns_uri, var.local_name) for var in self.model_interface.outputs]
 
             # Create a list of parameters (as ontology terms). Parameters are inputs that are constants.
             parameters = []
@@ -670,9 +640,7 @@ class Protocol(object):
                 pass
 
             # Handle define statements
-            for define in self.model_interface.defines:
-                # TODO Convert parse tree to sympy expression with correct variables
-                pass
+            # TODO Convert parse tree to sympy expression with correct variables
 
             # Create weblab model at path
             create_weblab_model(
@@ -761,113 +729,3 @@ class Protocol(object):
         """
         print('  ' * self.indent_level + ' '.join(map(str, args)), file=sys.stderr)
         sys.stderr.flush()
-
-
-class ModelInterface(object):
-    """
-    Holds information about a model interface.
-
-    Properties:
-
-    ``inputs``
-        A list of :class:`VariableReference` objects indicating model inputs
-        (model variables that can be changed by the protocol).
-    ``input_values``
-        A mapping from variable references to the initial values they take.
-    ``outputs``
-        A list of :class:`VariableReference` objects indicating model outputs
-        (model variables that can be read by the protocol).
-    ``defines``
-       A list of define statements
-
-    See: https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface
-    """
-    def __init__(self):
-
-        # self.independent_var = None
-        self.inputs = []
-        self.input_values = {}
-        self.outputs = []
-        self.defines = []
-
-        '''
-        ``clamps``
-            A list of model variables to be clamped
-        ``vars``
-        ``converts``
-        ``independent_var``
-            Specifies the units that the indepdendent variable (time) should be in.
-
-        self.clamps = []
-        self.defines = []
-        self.vars = []
-        self.converts = []
-        '''
-
-    def resolve_namespaces(self, ns_map):
-        """ Resolve the variable references in this interface, changing all prefixes to the full namespaces. """
-
-        for ref in self.inputs:
-            ref.ns = ns_map[ref.ns]
-
-        for ref in self.outputs:
-            ref.ns = ns_map[ref.ns]
-
-        for item in self.defines:
-            item.var.ns = ns_map[item.var.ns]
-            if item.ode:
-                item.bvar.ns = ns_map[item.bvar.ns]
-            # TODO Update references in equation
-
-    def resolve_units(self):
-        """ Resolve unit names in this interface. """
-
-        raise NotImplementedError
-
-
-class VariableReference(object):
-    """
-    Reference to a variable with a ``name`` and an optional namespace ``ns``.
-    """
-    def __init__(self, name, ns=None, units=None):
-        self.ns = ns
-        self.name = name
-        self.units = units
-        # TODO: Initial value? Not sure if this goes here
-
-    def __str__(self):
-        return self.name if self.ns is None else self.ns + ':' + self.name
-
-    @staticmethod
-    def from_string(name):
-        ns, name = name.split(':', 2)
-        return VariableReference(name, ns)
-
-
-class DefineStatement(object):
-    """
-    A statement that defines or replaces a model variable.
-
-    Arguments:
-
-    ``var``
-        A :class:`VariableReference` indicating the variable this statement defines or modifies.
-    ``rhs``
-        The new RHS ????????????????????????????? AS A WHAT ??????????????????????????????
-    ``ode``
-        True if the variable should be a state.
-    ``bvar``
-        ``None`` if this variable isn't a state, but a :class:`VariableReference` if it is.
-
-    """
-    def __init__(self, var, rhs, ode, bvar=None):
-        self.var = var
-        self.rhs = rhs
-        self.ode = bool(ode)
-        self.bvar = bvar
-
-    def __str__(self):
-        lhs = ('diff(' + str(self.var) + ', ' + str(self.bvar) + ')') if self.ode else str(self.var)
-        rhs = '???'
-        return 'Define[' + lhs + ' = ' + rhs + ']'
-
