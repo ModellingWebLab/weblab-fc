@@ -59,7 +59,7 @@ cdef class {{ class_name }}(CvodeSolver):
 
     # The name of the free variable, for use in the ModelWrapperEnvironment
     # From: fc.simulations.AbstractOdeModel
-    cdef public char* free_variable_name
+    cdef public str free_variable_name
 
     # The value of the free variable
     # From: fc.simulations.AbstractOdeModel
@@ -132,7 +132,7 @@ cdef class {{ class_name }}(CvodeSolver):
     #cdef Sundials.N_Vector _parameters
 
     def __init__(self):
-        self.free_variable_name = "time"
+        self.free_variable_name = "time"  # TODO: Should be taken from annotation
         self.free_variable = 0.0
 
         # State values
