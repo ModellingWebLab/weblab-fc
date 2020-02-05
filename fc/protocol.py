@@ -617,6 +617,10 @@ class Protocol(object):
 
             # Add input variables in correct units
             for var in self.model_interface.inputs:
+                # Just check the variable exists for now; no units or initial_value handling!
+                assert var.units is None
+                assert var.initial_value is None
+                model.get_symbol_by_ontology_term(var.ns_uri, var.local_name)
                 # TODO: Check if inputs are of allowed types, i.e. states or parameters
                 # TODO Add input variables to cellmlmanip model
                 pass
