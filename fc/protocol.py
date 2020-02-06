@@ -660,9 +660,8 @@ class Protocol(object):
                     var = lhs
                     var.initial_value = None  # In case it was a state variable previously
                 # Figure out if this is a replace or add
-                # TODO: Make a cellmlmanip helper method for this
-                defn = model._ode_definition_map.get(var) or model._var_definition_map.get(var)
-                if defn:
+                defn = model.get_definition(var)
+                if defn is not None:
                     model.remove_equation(defn)
                 model.add_equation(eq)
             # TODO: Check units of newly added equations; apply conversions where needed?
