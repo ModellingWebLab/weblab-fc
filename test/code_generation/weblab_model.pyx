@@ -65,7 +65,7 @@ cdef int _evaluate_rhs(Sundials.realtype var_time,
     cdef double var_beta_h = 1.0 / (1.0 + math.exp(-4.5 - 0.1 * var_V))
     cdef double d_dt_h = (1.0 - var_h) * var_alpha_h - var_beta_h * var_h
     cdef double var_alpha_m = -0.1 * (50.0 + var_V) / (-1.0 + math.exp(-5.0 - 0.1 * var_V))
-    cdef double var_beta_m = 4.0 * math.exp(-4.166666666666666 - 0.05555555555555555 * var_V)
+    cdef double var_beta_m = 4.0 * math.exp(-4.166666666666667 - 0.05555555555555555 * var_V)
     cdef double d_dt_m = (1.0 - var_m) * var_alpha_m - var_beta_m * var_m
     cdef double var_i_Na = var_m**3.0 * (-var_E_Na + var_V) * var_g_Na * var_h
     cdef double d_dt_V = (-var_i_L - var_i_Stim - var_i_K - var_i_Na) / var_Cm
