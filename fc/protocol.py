@@ -10,6 +10,8 @@ import tempfile
 import time
 from functools import reduce
 
+from cellmlmanip.units import UnitStore
+
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # noqa: E402
@@ -163,7 +165,7 @@ class Protocol(object):
 
         # 6. The ``units`` section
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Physicalunitdefinitions
-        # TODO: Where do these end up?
+        self.units = UnitStore()
 
         # 7. The ``model interface`` section.
         # See :class:`fc.parsing.actions.ModelInterface`.
@@ -236,6 +238,10 @@ class Protocol(object):
         # Store protocol inputs
         self.inputs = details.get('inputs', [])
         self.input_env.execute_statements(self.inputs)
+
+        # Store unit definitions
+        for units in details.get('units', []):
+            self.units.add_unit(units.name, units.pint_expression)
 
         # Create model interface
         def process_interface(interface):
