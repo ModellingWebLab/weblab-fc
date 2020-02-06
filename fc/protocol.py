@@ -10,6 +10,8 @@ import tempfile
 import time
 from functools import reduce
 
+from cellmlmanip.units import UnitStore
+
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt  # noqa: E402
@@ -131,8 +133,7 @@ class Protocol(object):
 
         # 1. The ``documentation`` section.
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Documentation
-
-        # TODO Is this parsed / stored?
+        # This is currently not stored in this object.
 
         # 2. Namespace bindings (no section, just a list of statements)
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Namespacebindings
@@ -151,8 +152,7 @@ class Protocol(object):
 
         # 4. Any number of ``import`` statements (again, no section)
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Importsofotherprotocols
-
-        # TODO: Not sure what this dict contains
+        # Maps an import 'name' prefix to a :class:`Protocol` instance.
         self.imports = {}
 
         # 5. The ``library`` section
@@ -160,33 +160,27 @@ class Protocol(object):
         # Can contain assignment statements (``var = expr``), function
         # assignment statements (``var = lambda(...)``), or assertions
         # (``assert cond``).
-
-        # TODO: Do all of these end up in this list?
-        # TODO: Who checks the assertions?
+        # These statements will be executed when the protocol is run.
         self.library = []
 
         # 6. The ``units`` section
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Physicalunitdefinitions
-        # TODO: Where do these end up?
+        self.units = UnitStore()
 
         # 7. The ``model interface`` section.
-        # See :class:`ModelInterface`.
-
-        # TODO: Only seems to contain model outputs at the moment
+        # See :class:`fc.parsing.actions.ModelInterface`.
         self.model_interface = actions.ModelInterface()
 
         # 8. The ``tasks`` section, which contains any number of simulation
         # tasks (possibly with nested ones).
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Simulationtasks
-
-        # TODO: Contains?
+        # Contains instances of :class:`fc.simulations.simulations.AbstractSimulation` subclasses.
         self.simulations = []
 
         # 9. The ``post-processing`` section, that contains post-processing
         # code
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Post-processing
-
-        # TODO: Contains?
+        # Contains statement instances, as with the library.
         self.post_processing = []
 
         # 10. The ``outputs`` section, listing outputs from the simulations or
@@ -194,14 +188,22 @@ class Protocol(object):
         # other protocols.
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Protocoloutputs
 
-        # A list of dictionaries, where each dict specifies a protocol output
-        # TODO: dict format
+        # A list of dictionaries, where each dict specifies a protocol output. They can have keys:
+        # - name: name to give the output; should be a valid simple identifier.
+        # - ref (optional): the (prefixed or simple) variable name giving the output's value.
+        #   Will be looked up in the post-processing results if no prefix. Defaults to name.
+        # - description (optional): human-readable description of the output; defaults to name.
+        #   Used for plot labels.
+        # - optional: whether it is an error if the variable referenced doesn't exist.
         self.outputs = []
 
         # 11. The ``plots`` section
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Graphicalplots
-
-        # TODO: Contains?
+        # A list of dictionaries with keys:
+        # - title: title for the plot.
+        # - x: name of the x-variable; should be a protocol output.
+        # - y: name of the y-variable; should be a protocol output.
+        # - key (optional): name of the key variable; should be a protocol output.
         self.plots = []
 
         # Parse, and fill section information objects defined above
@@ -236,6 +238,10 @@ class Protocol(object):
         # Store protocol inputs
         self.inputs = details.get('inputs', [])
         self.input_env.execute_statements(self.inputs)
+
+        # Store unit definitions
+        for units in details.get('units', []):
+            self.units.add_unit(units.name, units.pint_expression)
 
         # Create model interface
         def process_interface(interface):
@@ -390,7 +396,7 @@ class Protocol(object):
 
     def outputs_and_plots(self, errors, verbose=True, write_out=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
-        # Copy protocol outputs into the self.outputs environment,
+        # Copy protocol outputs into the self.output_env environment,
         # and capture output descriptions needed by plots in the process.
         plot_vars = []
         plot_descriptions = {}
@@ -654,9 +660,8 @@ class Protocol(object):
                     var = lhs
                     var.initial_value = None  # In case it was a state variable previously
                 # Figure out if this is a replace or add
-                # TODO: Make a cellmlmanip helper method for this
-                defn = model._ode_definition_map.get(var) or model._var_definition_map.get(var)
-                if defn:
+                defn = model.get_definition(var)
+                if defn is not None:
                     model.remove_equation(defn)
                 model.add_equation(eq)
             # TODO: Check units of newly added equations; apply conversions where needed?
