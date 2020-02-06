@@ -611,6 +611,7 @@ class Protocol(object):
             # Load cellml model
             import cellmlmanip
             model = cellmlmanip.load_model(model)
+            self.model_interface.associate_model(model)
 
             # Create protocol unit store
             # TODO
@@ -644,7 +645,21 @@ class Protocol(object):
                 pass
 
             # Handle define statements
-            # TODO Convert parse tree to sympy expression with correct variables
+            for eq in self.model_interface.sympy_equations:
+                lhs = eq.lhs
+                if lhs.is_Derivative:
+                    var = lhs.free_symbols.pop()
+                    assert var.initial_value is not None
+                else:
+                    var = lhs
+                    var.initial_value = None  # In case it was a state variable previously
+                # Figure out if this is a replace or add
+                # TODO: Make a cellmlmanip helper method for this
+                defn = model._ode_definition_map.get(var) or model._var_definition_map.get(var)
+                if defn:
+                    model.remove_equation(defn)
+                model.add_equation(eq)
+            # TODO: Check units of newly added equations; apply conversions where needed?
 
             # Create weblab model at path
             create_weblab_model(

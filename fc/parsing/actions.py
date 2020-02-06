@@ -630,7 +630,7 @@ class ModelEquation(BaseGroupAction):
         """Convert this equation to Sympy.
 
         Notes for later implementation:
-        * ``number_generator`` can be the same as the CellML parser:
+        * ``number_generator`` can be the same as the CellML parser, except using the protocol's UnitStore:
             ``lambda x, y: model.add_number(x, model.get_units(y))``
         * ``symbol_generator`` will be different. It will be set up by our parent ModelInterface,
             and needs to dereference all the name lookups we might encounter. Prefixed names will
@@ -695,6 +695,12 @@ class ModelInterface(BaseGroupAction):
         outputs, or referenced in new/changed equations. Errors may still arise later if a missing optional
         variable still ends up included in the generated model code, e.g. because no default clause or alternative
         was found.
+    ``equations``
+        A list of :class:`ModelEquation` objects specifying equations to be added to the model, possibly replacing
+        existing equations defining the same variable(s).
+    ``sympy_equations``
+        Once :meth:`associate_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
+        versions of ``self.equations``.
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
@@ -705,6 +711,10 @@ class ModelInterface(BaseGroupAction):
         self.inputs = []
         self.outputs = []
         self.optional_decls = []
+        self.equations = []
+        self._sympy_equations = None
+        self._model = None
+        self._ns_map = None
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -712,6 +722,7 @@ class ModelInterface(BaseGroupAction):
         self.inputs = [a for a in actions if isinstance(a, InputVariable)]
         self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
         self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
+        self.equations = [a for a in actions if isinstance(a, ModelEquation)]
 
         # Some basic semantics checking
         if len(self.time_units) > 1:
@@ -723,8 +734,40 @@ class ModelInterface(BaseGroupAction):
 
         :param ns_map: mapping from NS prefix to URI.
         """
+        self._ns_map = ns_map
         for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
             item.ns_uri = ns_map[item.ns_prefix]
+
+    def associate_model(self, model):
+        """Tell this interface what model it is being used to manipulate."""
+        self._model = model
+
+    def _symbol_generator(self, name):
+        if ':' in name:
+            prefix, local_name = name.split(':', 1)
+            ns_uri = self._ns_map[prefix]
+            return self._model.get_symbol_by_ontology_term(ns_uri, local_name)
+        else:
+            # DeclareVariable not yet done
+            raise NotImplementedError
+
+    def _number_generator(self, value, units):
+        # TODO: Use the protocol's UnitStore instead!
+        return self._model.add_number(value, self._model.get_units(units))
+
+    @property
+    def sympy_equations(self):
+        """The equations defined by the interface in Sympy form.
+
+        Requires :meth:`associate_model` to have been called.
+        """
+        if self._sympy_equations is None:
+            # Do the transformation
+            self._sympy_equations = eqs = []
+            for eq in self.equations:
+                eqs.append(eq.to_sympy(self._symbol_generator, self._number_generator))
+        return self._sympy_equations
+
 
 ######################################################################
 # Simulation tasks section

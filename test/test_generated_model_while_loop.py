@@ -8,16 +8,13 @@ import fc.language.expressions as E
 import os
 
 
-def test_while_loop_on_simple_ode_model():
-    # This model has the same ODE that the protocol defines, so is useful for testing
-    # the input and time units constructs before we've implemented 'define'.
-
+def test_while_loop_on_hh_model():
     # Create protocol
     proto = fc.Protocol(os.path.join(
         'test', 'protocols', 'test_while_loop.txt'))
 
     # Set model (generates & compiles model)
-    model_name = 'single_ode'
+    model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
     proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
 
     # Set protocol input
