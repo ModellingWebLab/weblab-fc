@@ -941,60 +941,77 @@ class Import(BaseGroupAction):
 
 
 class UnitRef(BaseGroupAction):
-    """Parse action for unit references within units definitions."""
+    """Parse action for unit references within units definitions.
 
-    def get_value(self, token, negate=False):
-        """Get a decent string representation of the value of the given numeric token.
-        It may be a plain number, or it may be a simple expression which we have to evaluate.
-        """
-        format = "%.17g"
-        result = str(token).strip()
-        try:
-            value = float(result)
-        except ValueError:
-            # Evaluation required; somewhat risky!
-            value = eval(result)
-            if negate:
-                value = -value
-            result = format % value
-        else:
-            # Just use the string representation in the protocol
-            if negate:
-                if result[0] == '-':
-                    result = result[1:]
-                else:
-                    result = '-' + result
-        return result
+    Properties:
 
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    attrs = self.get_attribute_dict('prefix', 'units', 'exponent')
-    #    if 'multiplier' in self.tokens:
-    #        attrs['multiplier'] = self.GetValue(self.tokens['multiplier'][0])
-    #    if 'offset' in self.tokens:
-    #        attrs['offset'] = self.GetValue(self.tokens['offset'][0][1], self.tokens['offset'][0][0] == '-')
-    #    return CELLML.unit(**attrs)
+    ``units``
+        Name of the units referenced.
+    ``prefix``
+        Optional SI prefix name, e.g. milli, deca. Defaults to ''.
+    ``multiplier``
+        Optional scalar multiplier; None if omitted.
+    ``exponent``
+        Optional exponent; None if omitted.
+    ``offset``
+        For defining units such as fahrenheit. Will raise an error if given.
+    ``pint_expression``
+        Pint syntax for this unit reference.
+    """
+    def _expr(self):
+        if 'offset' in self.tokens:
+            raise ValueError('Offset units are no longer supported')
+        self.units = self.get_named_token_as_string('units')
+        assert self.units is not None
+        self.prefix = self.get_named_token_as_string('prefix', '')
+        self.exponent = self.get_named_token_as_string('exponent')
+        self.multiplier = self.get_named_token_as_string('multiplier')
+
+        expr = self.prefix + self.units
+        if self.exponent is not None:
+            expr = '{}**{}'.format(expr, self.exponent)
+        if self.multiplier is not None:
+            expr = '{} * {}'.format(self.multiplier, expr)
+        self.pint_expression = expr
+
+        return self
 
 
 class UnitsDef(BaseGroupAction):
-    """Parse action for units definitions."""
+    """Parse action for units definitions.
 
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    name = str(self.tokens[0])
-    #    if 'description' in self.tokens:
-    #        units_map[name] = str(self.tokens['description'])
-    #    unit_refs = [t.xml() for t in self.tokens if isinstance(t, UnitRef)]
-    #    return CELLML.units(*unit_refs, name=name)
+    Example definitions::
+
+        my_units = 50 deci metre^2
+        mV = milli volt
+        uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2"
+        A_per_F = ampere . farad^-1
+        mM = milli mole . litre^-1 "{/Symbol m}M"
+
+    Properties:
+
+    ``name``
+        The name of the units defined.
+    ``description``
+        Optional formatted description of the units, or None.
+    ``unit_refs``
+        List of UnitRef instances comprising the definition.
+    ``pint_expression``
+        Definition of these units in pint syntax.
+    """
+    def _expr(self):
+        self.name = str(self.tokens[0])
+        self.description = self.tokens.get('description')
+        self.unit_refs = [t.expr() for t in self.tokens if isinstance(t, UnitRef)]
+        self.pint_expression = ' * '.join(r.pint_expression for r in self.unit_refs)
+
+        return self
 
 
 class Units(BaseAction):
     """Parse action for the units definitions section."""
-
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    if len(self.tokens) > 0:
-    #        return P.units(*self.get_children_XML())
+    def _expr(self):
+        return self.get_children_expr()
 
 
 class Library(BaseAction):
@@ -1077,22 +1094,24 @@ class Protocol(BaseAction):
         d = {}
         d['imports'] = []
         for token in self.tokens:
-            if isinstance(token, Library):
-                d['library'] = token.expr()
-            if isinstance(token, PostProcessing):
-                d['postprocessing'] = token.expr()
-            if isinstance(token, Import):
-                d['imports'].append(token.expr())
-            if isinstance(token, Tasks):
-                d['simulations'] = token.expr()
             if isinstance(token, Inputs):
                 d['inputs'] = token.expr()
+            if isinstance(token, Import):
+                d['imports'].append(token.expr())
+            if isinstance(token, Library):
+                d['library'] = token.expr()
+            if isinstance(token, Units):
+                d['units'] = token.expr()
+            if isinstance(token, ModelInterface):
+                d['model_interface'] = token.expr()
+            if isinstance(token, Tasks):
+                d['simulations'] = token.expr()
+            if isinstance(token, PostProcessing):
+                d['postprocessing'] = token.expr()
             if isinstance(token, Outputs):
                 d['outputs'] = token.expr()
             if isinstance(token, Plots):
                 d['plots'] = token.expr()
-            if isinstance(token, ModelInterface):
-                d['model_interface'] = token.expr()
 
         if 'dox' in self.tokens:
             d['dox'] = self.tokens['dox'][0]
