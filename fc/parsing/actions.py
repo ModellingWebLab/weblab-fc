@@ -684,7 +684,7 @@ class ModelInterface(BaseGroupAction):
     Properties:
 
     ``time_units``
-        Either an empty list, or a singleton list specifying the units for time.
+        Either None, or the name of the units to use for time.
     ``inputs``
         A list of :class:`InputVariable` objects specifying model variables that can be changed by the protocol.
     ``outputs``
@@ -707,7 +707,7 @@ class ModelInterface(BaseGroupAction):
             # This is an empty instance not created by pyparsing. Fake the arguments pyparsing needs.
             args = ('', '', [[]])
         super().__init__(*args, **kwargs)
-        self.time_units = []
+        self._time_units = []
         self.inputs = []
         self.outputs = []
         self.optional_decls = []
@@ -718,16 +718,22 @@ class ModelInterface(BaseGroupAction):
 
     def _expr(self):
         actions = self.get_children_expr()
-        self.time_units = [a for a in actions if isinstance(a, SetTimeUnits)]
+        self._time_units = [a for a in actions if isinstance(a, SetTimeUnits)]
         self.inputs = [a for a in actions if isinstance(a, InputVariable)]
         self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
         self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
         self.equations = [a for a in actions if isinstance(a, ModelEquation)]
 
         # Some basic semantics checking
-        if len(self.time_units) > 1:
+        if len(self._time_units) > 1:
             raise ValueError('The units for time cannot be set multiple times')
         return self
+
+    @property
+    def time_units(self):
+        if self._time_units:
+            return self._time_units.time_units
+        return None
 
     def resolve_namespaces(self, ns_map):
         """Resolve namespace prefixes to full URIs for all parts of the interface.
