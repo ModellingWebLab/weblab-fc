@@ -454,7 +454,7 @@ class Protocol(object):
                             'against', plot_descriptions[plot['x']]
                         )
 
-                    #TODO Looks like this isn't used?
+                    # TODO Looks like this isn't used?
                     if 'key' in plot:
                         key_data = self.output_env.look_up(plot['key']).array
                         if key_data.ndim != 1:
