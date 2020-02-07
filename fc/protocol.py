@@ -10,6 +10,7 @@ import tempfile
 import time
 from functools import reduce
 
+from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.units import UnitStore
 
 import matplotlib
@@ -619,8 +620,11 @@ class Protocol(object):
             model = cellmlmanip.load_model(model, self.units)
             self.model_interface.associate_model(model, self.units)
 
-            # Create protocol unit store
-            # TODO
+            # Convert time units if required
+            if self.model_interface.time_units:
+                time_units = self.units.get_unit(self.model_interface.time_units)
+                time_var = model.get_free_variable_symbol()
+                time_var = model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
 
             # Add input variables in correct units
             for var in self.model_interface.inputs:
