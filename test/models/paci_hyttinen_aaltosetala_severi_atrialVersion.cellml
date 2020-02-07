@@ -1,6 +1,16 @@
-<model xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#" name="paci_hyttinen_aaltosetala_severi_ventricularVersion" cmeta:id="paci_hyttinen_aaltosetala_severi_ventricularVersion">
-	
-   <units xmlns="http://www.cellml.org/cellml/1.0#" name="millivolt">
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This CellML file was generated on 04/06/2013 at 16:01:27 using:
+
+COR (0.9.31.1409)
+Copyright 2002-2013 Dr Alan Garny
+http://cor.physiol.ox.ac.uk/ - cor@physiol.ox.ac.uk
+
+CellML 1.0 was used to generate this model
+http://www.cellml.org/
+-->
+<model name="paci_hyttinen_aaltosetala_severi_atrialVersion" cmeta:id="paci_hyttinen_aaltosetala_severi_atrialVersion" xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
+	<units xmlns="http://www.cellml.org/cellml/1.0#" name="millivolt">
       <unit units="volt" prefix="milli"/>
    </units>
    <units xmlns="http://www.cellml.org/cellml/1.0#" name="per_millivolt">
@@ -32,6 +42,9 @@
    <units xmlns="http://www.cellml.org/cellml/1.0#" name="millimolar_per_second">
       <unit units="millimolar"/>
       <unit units="second" exponent="-1"/>
+   </units>
+   <units xmlns="http://www.cellml.org/cellml/1.0#" name="picoF">
+      <unit units="farad" prefix="pico"/>
    </units>
    <units xmlns="http://www.cellml.org/cellml/1.0#" name="micrometre">
       <unit units="metre" prefix="micro"/>
@@ -70,12 +83,20 @@
    </units>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="environment">
       <variable name="time" units="second" public_interface="out" cmeta:id="time">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#time">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="Membrane">
-      <variable name="Vm" units="volt" initial_value="-0.0743340057623841" public_interface="out" cmeta:id="membrane_voltage">
-         
+      <variable name="Vm" units="volt" initial_value="-0.068733823452164" public_interface="out" cmeta:id="membrane_voltage">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_voltage">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="time" units="second" public_interface="in"/>
       <variable name="i_CaL" units="A_per_F" public_interface="in"/>
@@ -129,22 +150,44 @@
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="stim_mode">
       <variable name="time" units="second" public_interface="in"/>
       <variable name="Cm" units="farad" public_interface="in"/>
-      <variable name="stim_flag" units="dimensionless" initial_value="1"/>
+      <variable name="stim_flag" units="dimensionless" initial_value="0"/>
       <variable name="i_stim" units="A_per_F" public_interface="out" cmeta:id="membrane_stimulus_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_stimulus_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="i_stim_Start" units="second" initial_value="0" cmeta:id="membrane_stimulus_current_offset">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_stimulus_current_offset">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_offset"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="i_stim_End" units="second" initial_value="800"/>
-      <variable name="i_stim_Amplitude" units="A_per_F" initial_value="5.57182641826414" cmeta:id="membrane_stimulus_current_amplitude">
-         
+      <!-- This model is given a stimulus current to help Chaste with the conversion, 
+         and as one may be applied in experiments, but it is set to zero amplitude -->
+      <variable name="i_stim_Amplitude" units="ampere" initial_value="0" cmeta:id="membrane_stimulus_current_amplitude">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_stimulus_current_amplitude">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="i_stim_Period" units="second" initial_value="1" cmeta:id="membrane_stimulus_current_period">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_stimulus_current_period">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_period"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="i_stim_PulseDuration" units="second" initial_value="0.005" cmeta:id="membrane_stimulus_current_duration">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_stimulus_current_duration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_duration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">         
          <apply>
@@ -212,21 +255,6 @@
             </piecewise>
          </apply>
       </math>
-   </component>
-   <component xmlns="http://www.cellml.org/cellml/1.0#" name="current_blockers">
-      <variable name="TTX_3uM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="TTX_10uM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="TTX_30uM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="E4031_30nM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="E4031_100nM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="nifed_3nM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="nifed_10nM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="nifed_30nM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="nifed_100nM" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="Chromanol_iKs30" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="Chromanol_iKs50" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="Chromanol_iKs70" units="dimensionless" initial_value="0" public_interface="out"/>
-      <variable name="Chromanol_iKs90" units="dimensionless" initial_value="0" public_interface="out"/>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="electric_potentials">
       <variable name="E_Na" units="volt" public_interface="out"/>
@@ -364,10 +392,18 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Na">
       <variable name="i_Na" units="A_per_F" public_interface="out" cmeta:id="membrane_fast_sodium_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
-      <variable name="g_Na" units="S_per_F" initial_value="3671.2302" cmeta:id="membrane_fast_sodium_current_conductance">
-         
+      <variable name="g_Na" units="S_per_F" initial_value="6646.185" cmeta:id="membrane_fast_sodium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="time" units="second" public_interface="in" private_interface="out"/>
       <variable name="Vm" units="volt" public_interface="in" private_interface="out"/>
@@ -375,71 +411,30 @@
       <variable name="m" units="dimensionless" private_interface="in"/>
       <variable name="h" units="dimensionless" private_interface="in"/>
       <variable name="j" units="dimensionless" private_interface="in"/>
-      <variable name="TTX_3uM" units="dimensionless" public_interface="in"/>
-      <variable name="TTX_10uM" units="dimensionless" public_interface="in"/>
-      <variable name="TTX_30uM" units="dimensionless" public_interface="in"/>
-      <variable name="TTX_coeff" units="dimensionless"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
-         <apply>
-            <eq/>
-            <ci>TTX_coeff</ci>
-            <piecewise>
-               <piece>
-                  <cn cellml:units="dimensionless">0.18</cn>
-                  <apply>
-                     <eq/>
-                     <ci>TTX_3uM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.06</cn>
-                  <apply>
-                     <eq/>
-                     <ci>TTX_10uM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.02</cn>
-                  <apply>
-                     <eq/>
-                     <ci>TTX_30uM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <otherwise>
-                  <cn cellml:units="dimensionless">1</cn>
-               </otherwise>
-            </piecewise>
-         </apply>
          <apply>
             <eq/>
             <ci>i_Na</ci>
             <apply>
                <times/>
-               <ci>TTX_coeff</ci>
+               <ci>g_Na</ci>
                <apply>
                   <times/>
-                  <ci>g_Na</ci>
+                  <apply>
+                     <power/>
+                     <ci>m</ci>
+                     <cn cellml:units="dimensionless">3</cn>
+                  </apply>
                   <apply>
                      <times/>
-                     <apply>
-                        <power/>
-                        <ci>m</ci>
-                        <cn cellml:units="dimensionless">3</cn>
-                     </apply>
+                     <ci>h</ci>
                      <apply>
                         <times/>
-                        <ci>h</ci>
+                        <ci>j</ci>
                         <apply>
-                           <times/>
-                           <ci>j</ci>
-                           <apply>
-                              <minus/>
-                              <ci>Vm</ci>
-                              <ci>E_Na</ci>
-                           </apply>
+                           <minus/>
+                           <ci>Vm</ci>
+                           <ci>E_Na</ci>
                         </apply>
                      </apply>
                   </apply>
@@ -449,8 +444,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Na_m_gate">
-      <variable name="m" units="dimensionless" initial_value="0.102953468725004" public_interface="out" cmeta:id="membrane_fast_sodium_current_m_gate">
-         
+      <variable name="m" units="dimensionless" initial_value="0.141183142078492" public_interface="out" cmeta:id="membrane_fast_sodium_current_m_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_m_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_m_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="m_inf" units="dimensionless"/>
       <variable name="tau_m" units="second"/>
@@ -623,8 +622,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Na_h_gate">
-      <variable name="h" units="dimensionless" initial_value="0.786926637881461" public_interface="out" cmeta:id="membrane_fast_sodium_current_h_gate">
-         
+      <variable name="h" units="dimensionless" initial_value="0.642108593994587" public_interface="out" cmeta:id="membrane_fast_sodium_current_h_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_h_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="h_inf" units="dimensionless"/>
       <variable name="alpha_h" units="dimensionless"/>
@@ -856,8 +859,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Na_j_gate">
-      <variable name="j" units="dimensionless" initial_value="0.253943221774722" public_interface="out" cmeta:id="membrane_fast_sodium_current_j_gate">
-         
+      <variable name="j" units="dimensionless" initial_value="0.173566329483423" public_interface="out" cmeta:id="membrane_fast_sodium_current_j_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_fast_sodium_current_j_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="j_inf" units="dimensionless"/>
       <variable name="alpha_j" units="dimensionless"/>
@@ -1148,10 +1155,18 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_CaL">
       <variable name="i_CaL" units="A_per_F" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="g_CaL" units="metre_cube_per_F_per_s" initial_value="8.635702e-5" cmeta:id="membrane_L_type_calcium_current_conductance">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="R" units="joule_per_mole_kelvin" public_interface="in"/>
       <variable name="T" units="kelvin" public_interface="in"/>
@@ -1164,53 +1179,7 @@
       <variable name="f1" units="dimensionless" private_interface="in"/>
       <variable name="f2" units="dimensionless" private_interface="in"/>
       <variable name="fCa" units="dimensionless" private_interface="in"/>
-      <variable name="nifed_3nM" units="dimensionless" public_interface="in"/>
-      <variable name="nifed_10nM" units="dimensionless" public_interface="in"/>
-      <variable name="nifed_30nM" units="dimensionless" public_interface="in"/>
-      <variable name="nifed_100nM" units="dimensionless" public_interface="in"/>
-      <variable name="nifed_coeff" units="dimensionless"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
-         <apply>
-            <eq/>
-            <ci>nifed_coeff</ci>
-            <piecewise>
-               <piece>
-                  <cn cellml:units="dimensionless">0.93</cn>
-                  <apply>
-                     <eq/>
-                     <ci>nifed_3nM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.79</cn>
-                  <apply>
-                     <eq/>
-                     <ci>nifed_10nM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.56</cn>
-                  <apply>
-                     <eq/>
-                     <ci>nifed_30nM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.28</cn>
-                  <apply>
-                     <eq/>
-                     <ci>nifed_100nM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <otherwise>
-                  <cn cellml:units="dimensionless">1</cn>
-               </otherwise>
-            </piecewise>
-         </apply>
          <apply>
             <eq/>
             <ci>i_CaL</ci>
@@ -1321,8 +1290,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_CaL_d_gate">
-      <variable name="d" units="dimensionless" initial_value="8.96088425225182e-5" public_interface="out" cmeta:id="membrane_L_type_calcium_current_d_gate">
-         
+      <variable name="d" units="dimensionless" initial_value="0.000127632520741878" public_interface="out" cmeta:id="membrane_L_type_calcium_current_d_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_d_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_d_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="d_infinity" units="dimensionless"/>
       <variable name="tau_d" units="second"/>
@@ -1355,7 +1328,7 @@
                                  <ci>Vm</ci>
                                  <cn cellml:units="millivolt_per_volt">1000</cn>
                               </apply>
-                              <cn cellml:units="millivolt">9.1</cn>
+                              <cn cellml:units="millivolt">5.986</cn>
                            </apply>
                         </apply>
                         <cn cellml:units="millivolt">7</cn>
@@ -1501,8 +1474,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_CaL_f1_gate">
-      <variable name="f1" units="dimensionless" initial_value="0.970411811263976" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f_gate">
-         
+      <variable name="f1" units="dimensionless" initial_value="0.98038400433601" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_f_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="f1_inf" units="dimensionless"/>
       <variable name="tau_f1" units="second"/>
@@ -1531,7 +1508,7 @@
                               <ci>Vm</ci>
                               <cn cellml:units="millivolt_per_volt">1000</cn>
                            </apply>
-                           <cn cellml:units="millivolt">26</cn>
+                           <cn cellml:units="millivolt">25.226</cn>
                         </apply>
                         <cn cellml:units="millivolt">3</cn>
                      </apply>
@@ -1700,8 +1677,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_CaL_f2_gate">
-      <variable name="f2" units="dimensionless" initial_value="0.999965815466749" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f2_gate">
-         
+      <variable name="f2" units="dimensionless" initial_value="0.999953006710394" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f2_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_f2_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f2_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="f2_inf" units="dimensionless"/>
       <variable name="tau_f2" units="second"/>
@@ -1732,7 +1713,7 @@
                                  <ci>Vm</ci>
                                  <cn cellml:units="millivolt_per_volt">1000</cn>
                               </apply>
-                              <cn cellml:units="millivolt">35</cn>
+                              <cn cellml:units="millivolt">31.226</cn>
                            </apply>
                            <cn cellml:units="millivolt">4</cn>
                         </apply>
@@ -1744,7 +1725,7 @@
          <apply>
             <eq/>
             <ci>constf2</ci>
-            <cn cellml:units="dimensionless">1</cn>
+            <cn cellml:units="dimensionless">2</cn>
          </apply>
          <apply>
             <eq/>
@@ -1861,8 +1842,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_CaL_fCa_gate">
-      <variable name="fCa" units="dimensionless" initial_value="0.998925296531804" public_interface="out" cmeta:id="membrane_L_type_calcium_current_fCa_gate">
-         
+      <variable name="fCa" units="dimensionless" initial_value="0.997346890768643" public_interface="out" cmeta:id="membrane_L_type_calcium_current_fCa_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_L_type_calcium_current_fCa_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_fCa_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="constfCa" units="dimensionless"/>
       <variable name="alpha_fCa" units="dimensionless"/>
@@ -2015,10 +2000,18 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Kr">
       <variable name="i_Kr" units="A_per_F" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="g_Kr" units="S_per_F" initial_value="29.8667" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="time" units="second" public_interface="in" private_interface="out"/>
       <variable name="Vm" units="volt" public_interface="in" private_interface="out"/>
@@ -2030,64 +2023,32 @@
       <variable name="R" units="joule_per_mole_kelvin" public_interface="in" private_interface="out"/>
       <variable name="T" units="kelvin" public_interface="in" private_interface="out"/>
       <variable name="F" units="coulomb_per_mole" public_interface="in" private_interface="out"/>
-      <variable name="E4031_30nM" units="dimensionless" public_interface="in"/>
-      <variable name="E4031_100nM" units="dimensionless" public_interface="in"/>
-      <variable name="E4031_coeff" units="dimensionless"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
-         <apply>
-            <eq/>
-            <ci>E4031_coeff</ci>
-            <piecewise>
-               <piece>
-                  <cn cellml:units="dimensionless">0.77</cn>
-                  <apply>
-                     <eq/>
-                     <ci>E4031_30nM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.5</cn>
-                  <apply>
-                     <eq/>
-                     <ci>E4031_100nM</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <otherwise>
-                  <cn cellml:units="dimensionless">1</cn>
-               </otherwise>
-            </piecewise>
-         </apply>
          <apply>
             <eq/>
             <ci>i_Kr</ci>
             <apply>
                <times/>
-               <ci>E4031_coeff</ci>
+               <ci>g_Kr</ci>
                <apply>
                   <times/>
-                  <ci>g_Kr</ci>
+                  <apply>
+                     <minus/>
+                     <ci>Vm</ci>
+                     <ci>E_K</ci>
+                  </apply>
                   <apply>
                      <times/>
-                     <apply>
-                        <minus/>
-                        <ci>Vm</ci>
-                        <ci>E_K</ci>
-                     </apply>
+                     <ci>Xr1</ci>
                      <apply>
                         <times/>
-                        <ci>Xr1</ci>
+                        <ci>Xr2</ci>
                         <apply>
-                           <times/>
-                           <ci>Xr2</ci>
+                           <root/>
                            <apply>
-                              <root/>
-                              <apply>
-                                 <divide/>
-                                 <ci>Ko</ci>
-                                 <cn cellml:units="millimolar">5.4</cn>
-                              </apply>
+                              <divide/>
+                              <ci>Ko</ci>
+                              <cn cellml:units="millimolar">5.4</cn>
                            </apply>
                         </apply>
                      </apply>
@@ -2098,7 +2059,7 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Kr_Xr1_gate">
-      <variable name="Xr1" units="dimensionless" initial_value="0.00778547011240132" public_interface="out"/>
+      <variable name="Xr1" units="dimensionless" initial_value="0.0257889110986083" public_interface="out"/>
       <variable name="Xr1_inf" units="dimensionless"/>
       <variable name="alpha_Xr1" units="dimensionless"/>
       <variable name="beta_Xr1" units="dimensionless"/>
@@ -2306,7 +2267,7 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Kr_Xr2_gate">
-      <variable name="Xr2" units="dimensionless" initial_value="0.432162576531617" public_interface="out"/>
+      <variable name="Xr2" units="dimensionless" initial_value="0.405046678739985" public_interface="out"/>
       <variable name="Xr2_infinity" units="dimensionless"/>
       <variable name="alpha_Xr2" units="dimensionless"/>
       <variable name="beta_Xr2" units="dimensionless"/>
@@ -2444,108 +2405,66 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Ks">
       <variable name="i_Ks" units="A_per_F" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="g_Ks" units="S_per_F" initial_value="2.041" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="E_Ks" units="volt" public_interface="in"/>
       <variable name="Cai" units="millimolar" public_interface="in"/>
       <variable name="time" units="second" public_interface="in" private_interface="out"/>
       <variable name="Vm" units="volt" public_interface="in" private_interface="out"/>
       <variable name="Xs" units="dimensionless" private_interface="in"/>
-      <variable name="Chromanol_iKs30" units="dimensionless" public_interface="in"/>
-      <variable name="Chromanol_iKs50" units="dimensionless" public_interface="in"/>
-      <variable name="Chromanol_iKs70" units="dimensionless" public_interface="in"/>
-      <variable name="Chromanol_iKs90" units="dimensionless" public_interface="in"/>
-      <variable name="Chromanol_coeff" units="dimensionless"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
-         <apply>
-            <eq/>
-            <ci>Chromanol_coeff</ci>
-            <piecewise>
-               <piece>
-                  <cn cellml:units="dimensionless">0.7</cn>
-                  <apply>
-                     <eq/>
-                     <ci>Chromanol_iKs30</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.5</cn>
-                  <apply>
-                     <eq/>
-                     <ci>Chromanol_iKs50</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.3</cn>
-                  <apply>
-                     <eq/>
-                     <ci>Chromanol_iKs70</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <piece>
-                  <cn cellml:units="dimensionless">0.1</cn>
-                  <apply>
-                     <eq/>
-                     <ci>Chromanol_iKs90</ci>
-                     <cn cellml:units="dimensionless">1</cn>
-                  </apply>
-               </piece>
-               <otherwise>
-                  <cn cellml:units="dimensionless">1</cn>
-               </otherwise>
-            </piecewise>
-         </apply>
          <apply>
             <eq/>
             <ci>i_Ks</ci>
             <apply>
                <times/>
-               <ci>Chromanol_coeff</ci>
+               <ci>g_Ks</ci>
                <apply>
                   <times/>
-                  <ci>g_Ks</ci>
+                  <apply>
+                     <minus/>
+                     <ci>Vm</ci>
+                     <ci>E_Ks</ci>
+                  </apply>
                   <apply>
                      <times/>
                      <apply>
-                        <minus/>
-                        <ci>Vm</ci>
-                        <ci>E_Ks</ci>
+                        <power/>
+                        <ci>Xs</ci>
+                        <cn cellml:units="dimensionless">2</cn>
                      </apply>
                      <apply>
-                        <times/>
+                        <plus/>
+                        <cn cellml:units="dimensionless">1</cn>
                         <apply>
-                           <power/>
-                           <ci>Xs</ci>
-                           <cn cellml:units="dimensionless">2</cn>
-                        </apply>
-                        <apply>
-                           <plus/>
-                           <cn cellml:units="dimensionless">1</cn>
+                           <divide/>
+                           <cn cellml:units="dimensionless">0.6</cn>
                            <apply>
-                              <divide/>
-                              <cn cellml:units="dimensionless">0.6</cn>
+                              <plus/>
+                              <cn cellml:units="dimensionless">1</cn>
                               <apply>
-                                 <plus/>
-                                 <cn cellml:units="dimensionless">1</cn>
+                                 <power/>
                                  <apply>
-                                    <power/>
+                                    <divide/>
                                     <apply>
-                                       <divide/>
-                                       <apply>
-                                          <times/>
-                                          <cn cellml:units="millimolar">3.8</cn>
-                                          <cn cellml:units="dimensionless">0.00001</cn>
-                                       </apply>
-                                       <ci>Cai</ci>
+                                       <times/>
+                                       <cn cellml:units="millimolar">3.8</cn>
+                                       <cn cellml:units="dimensionless">0.00001</cn>
                                     </apply>
-                                    <cn cellml:units="dimensionless">1.4</cn>
+                                    <ci>Cai</ci>
                                  </apply>
+                                 <cn cellml:units="dimensionless">1.4</cn>
                               </apply>
                            </apply>
                         </apply>
@@ -2557,7 +2476,7 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_Ks_Xs_gate">
-      <variable name="Xs" units="dimensionless" initial_value="0.0322944866983666" public_interface="out"/>
+      <variable name="Xs" units="dimensionless" initial_value="0.0447460799149437" public_interface="out"/>
       <variable name="Xs_infinity" units="dimensionless"/>
       <variable name="alpha_Xs" units="dimensionless"/>
       <variable name="beta_Xs" units="dimensionless"/>
@@ -2701,10 +2620,18 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_K1">
       <variable name="i_K1" units="A_per_F" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
-      <variable name="g_K1" units="S_per_F" initial_value="28.1492" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
-         
+      <variable name="g_K1" units="S_per_F" initial_value="19.1925" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="XK1_inf" units="dimensionless"/>
       <variable name="E_K" units="volt" public_interface="in"/>
@@ -2884,10 +2811,18 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_f">
       <variable name="i_f" units="A_per_F" public_interface="out" cmeta:id="membrane_hyperpolarisation_activated_funny_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_hyperpolarisation_activated_funny_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_hyperpolarisation_activated_funny_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="g_f" units="S_per_F" initial_value="30.10312" cmeta:id="membrane_hyperpolarisation_activated_funny_current_potassium_component_conductance">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_hyperpolarisation_activated_funny_current_potassium_component_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_hyperpolarisation_activated_funny_current_potassium_component_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="time" units="second" public_interface="in" private_interface="out"/>
       <variable name="E_f" units="volt" initial_value="-0.017"/>
@@ -2914,8 +2849,12 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_f_Xf_gate">
-      <variable name="Xf" units="dimensionless" initial_value="0.100615100568753" public_interface="out" cmeta:id="membrane_hyperpolarisation_activated_funny_current_single_gate">
-         
+      <variable name="Xf" units="dimensionless" initial_value="0.0607988713874682" public_interface="out" cmeta:id="membrane_hyperpolarisation_activated_funny_current_single_gate">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_hyperpolarisation_activated_funny_current_single_gate">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_hyperpolarisation_activated_funny_current_single_gate"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Xf_infinity" units="dimensionless"/>
       <variable name="tau_Xf" units="second"/>
@@ -3005,7 +2944,13 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_b_Na">
       <variable name="i_b_Na" units="A_per_F" public_interface="out"/>
-      <variable name="g_b_Na" units="S_per_F" initial_value="0.9"/>
+      <variable name="g_b_Na" units="S_per_F" initial_value="0.9" cmeta:id="membrane_background_sodium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_background_sodium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_background_sodium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="E_Na" units="volt" public_interface="in"/>
       <variable name="Vm" units="volt" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -3026,7 +2971,13 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_b_Ca">
       <variable name="i_b_Ca" units="A_per_F" public_interface="out"/>
-      <variable name="g_b_Ca" units="S_per_F" initial_value="0.69264"/>
+      <variable name="g_b_Ca" units="S_per_F" initial_value="0.69264" cmeta:id="membrane_background_calcium_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_background_calcium_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_background_calcium_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="E_Ca" units="volt" public_interface="in"/>
       <variable name="Vm" units="volt" public_interface="in"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
@@ -3047,7 +2998,11 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_NaK">
       <variable name="i_NaK" units="A_per_F" public_interface="out" cmeta:id="membrane_sodium_potassium_pump_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_sodium_potassium_pump_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_potassium_pump_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="E_Na" units="volt" public_interface="in"/>
       <variable name="time" units="second" public_interface="in"/>
@@ -3059,7 +3014,13 @@
       <variable name="F" units="coulomb_per_mole" public_interface="in"/>
       <variable name="Km_K" units="millimolar" initial_value="1"/>
       <variable name="Km_Na" units="millimolar" initial_value="40"/>
-      <variable name="PNaK" units="A_per_F" initial_value="1.841424"/>
+      <variable name="PNaK" units="A_per_F" initial_value="1.4731392" cmeta:id="membrane_sodium_potassium_pump_current_permeability">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_sodium_potassium_pump_current_permeability">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_potassium_pump_current_permeability"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -3154,7 +3115,11 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_NaCa">
       <variable name="i_NaCa" units="A_per_F" public_interface="out" cmeta:id="membrane_sodium_calcium_exchanger_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_sodium_calcium_exchanger_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_calcium_exchanger_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Cao" units="millimolar" public_interface="in"/>
       <variable name="Nao" units="millimolar" public_interface="in"/>
@@ -3165,7 +3130,13 @@
       <variable name="F" units="coulomb_per_mole" public_interface="in"/>
       <variable name="time" units="second" public_interface="in"/>
       <variable name="Vm" units="volt" public_interface="in"/>
-      <variable name="kNaCa" units="A_per_F" initial_value="4900"/>
+      <variable name="kNaCa" units="A_per_F" initial_value="2450" cmeta:id="membrane_sodium_calcium_exchanger_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_sodium_calcium_exchanger_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_calcium_exchanger_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="alpha" units="dimensionless" initial_value="2.8571432"/>
       <variable name="gamma" units="dimensionless" initial_value="0.35"/>
       <variable name="Ksat" units="dimensionless" initial_value="0.1"/>
@@ -3317,11 +3288,17 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_PCa">
-      <variable name="i_PCa" units="A_per_F" public_interface="out" xmlns:ns4166699="http://www.cellml.org/metadata/1.0#" ns4166699:id="i_PCa_i_PCa"/>
+      <variable name="i_PCa" units="A_per_F" public_interface="out"/>
       <variable name="Cai" units="millimolar" public_interface="in"/>
       <variable name="time" units="second" public_interface="in"/>
       <variable name="Vm" units="volt" public_interface="in"/>
-      <variable name="g_PCa" units="A_per_F" initial_value="0.4125"/>
+      <variable name="g_PCa" units="A_per_F" initial_value="0.4125" cmeta:id="membrane_calcium_pump_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_calcium_pump_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_calcium_pump_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
+      </variable>
       <variable name="KPCa" units="millimolar" initial_value="0.0005"/>
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
@@ -3345,10 +3322,18 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_to">
       <variable name="i_to" units="A_per_F" public_interface="out" cmeta:id="membrane_transient_outward_current">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_transient_outward_current">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
-      <variable name="g_to" units="S_per_F" initial_value="29.9038" cmeta:id="membrane_transient_outward_current_conductance">
-         
+      <variable name="g_to" units="S_per_F" initial_value="59.8077" cmeta:id="membrane_transient_outward_current_conductance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_transient_outward_current_conductance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="E_K" units="volt" public_interface="in"/>
       <variable name="time" units="second" public_interface="in" private_interface="out"/>
@@ -3380,7 +3365,7 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_to_q_gate">
-      <variable name="q" units="dimensionless" initial_value="0.839295925773219" public_interface="out"/>
+      <variable name="q" units="dimensionless" initial_value="0.776163826643278" public_interface="out"/>
       <variable name="q_inf" units="dimensionless"/>
       <variable name="tau_q" units="second"/>
       <variable name="Vm" units="volt" public_interface="in"/>
@@ -3498,7 +3483,7 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="i_to_r_gate">
-      <variable name="r" units="dimensionless" initial_value="0.00573289893326379" public_interface="out"/>
+      <variable name="r" units="dimensionless" initial_value="0.000503296941001262" public_interface="out"/>
       <variable name="r_inf" units="dimensionless"/>
       <variable name="tau_r" units="second"/>
       <variable name="Vm" units="volt" public_interface="in"/>
@@ -3620,31 +3605,59 @@
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="model_parameters">
       <variable name="Cao" units="millimolar" initial_value="1.8" public_interface="out" cmeta:id="extracellular_calcium_concentration">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Nao" units="millimolar" initial_value="151" public_interface="out" cmeta:id="extracellular_sodium_concentration">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Ki" units="millimolar" initial_value="150" public_interface="out" cmeta:id="cytosolic_potassium_concentration">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#cytosolic_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Ko" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#extracellular_potassium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
-      <variable name="Cm" units="farad" initial_value="9.87109e-11" public_interface="out" cmeta:id="membrane_capacitance">
-         
+      <variable name="Cm" units="farad" initial_value="7.86671e-11" public_interface="out" cmeta:id="membrane_capacitance">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#membrane_capacitance">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
-      <variable name="Vc" units="micrometre_cube" initial_value="8800" public_interface="out"/>
-      <variable name="V_SR" units="micrometre_cube" initial_value="583.73" public_interface="out"/>
+      <variable name="Vc" units="micrometre_cube" initial_value="7012" public_interface="out"/>
+      <variable name="V_SR" units="micrometre_cube" initial_value="465.2" public_interface="out"/>
       <variable name="R" units="joule_per_mole_kelvin" initial_value="8.314472" public_interface="out"/>
       <variable name="T" units="kelvin" initial_value="310" public_interface="out" cmeta:id="temperature">
-         
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#temperature">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#temperature"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="F" units="coulomb_per_mole" initial_value="96485.3415" public_interface="out"/>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="sodium_dynamics">
-      <variable name="Nai" units="millimolar" initial_value="10.9248496211574" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
-         
+      <variable name="Nai" units="millimolar" initial_value="14.4424010544424" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#cytosolic_sodium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Cm" units="farad" public_interface="in"/>
       <variable name="Vc" units="micrometre_cube" public_interface="in"/>
@@ -3709,11 +3722,19 @@
       </math>
    </component>
    <component xmlns="http://www.cellml.org/cellml/1.0#" name="calcium_dynamics">
-      <variable name="Cai" units="millimolar" initial_value="1.80773974140477e-5" public_interface="out" cmeta:id="cytosolic_calcium_concentration">
-         
+      <variable name="Cai" units="millimolar" initial_value="4.49232909234503e-5" public_interface="out" cmeta:id="cytosolic_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#cytosolic_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
-      <variable name="Ca_SR" units="millimolar" initial_value="-0.2734234751931" cmeta:id="JSR_calcium_concentration">
-         
+      <variable name="Ca_SR" units="millimolar" initial_value="0.149980051221604" cmeta:id="JSR_calcium_concentration">
+         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#JSR_calcium_concentration">
+               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
+            </rdf:Description>
+         </rdf:RDF>
       </variable>
       <variable name="Vc" units="micrometre_cube" public_interface="in"/>
       <variable name="V_SR" units="micrometre_cube" public_interface="in"/>
@@ -3728,7 +3749,7 @@
       <variable name="a_rel" units="millimolar_per_second" initial_value="16.464"/>
       <variable name="b_rel" units="millimolar" initial_value="0.25"/>
       <variable name="c_rel" units="millimolar_per_second" initial_value="8.232"/>
-      <variable name="g" units="dimensionless" initial_value="0.999999981028517"/>
+      <variable name="g" units="dimensionless" initial_value="1"/>
       <variable name="tau_g" units="second" initial_value="0.002"/>
       <variable name="g_inf" units="dimensionless"/>
       <variable name="Kup" units="millimolar" initial_value="0.00025"/>
@@ -3736,10 +3757,10 @@
       <variable name="Buf_SR" units="millimolar" initial_value="10"/>
       <variable name="Kbuf_C" units="millimolar" initial_value="0.001"/>
       <variable name="Kbuf_SR" units="millimolar" initial_value="0.3"/>
-      <variable xmlns:ns4166699="http://www.cellml.org/metadata/1.0#" name="Cai_bufc" units="dimensionless" ns4166699:id="calcium_dynamics_Cai_bufc"/>
+      <variable name="Cai_bufc" units="dimensionless"/>
       <variable name="Ca_SR_bufSR" units="dimensionless"/>
       <variable name="d" units="dimensionless" public_interface="in"/>
-      <variable name="VmaxUp" units="millimolar_per_second" initial_value="0.56064"/>
+      <variable name="VmaxUp" units="millimolar_per_second" initial_value="0.22"/>
       <variable name="const2" units="dimensionless"/>
       <variable name="V_leak" units="per_second" initial_value="0.00044444"/>
       <variable name="i_rel" units="millimolar_per_second"/>
@@ -3786,7 +3807,7 @@
                   <apply>
                      <times/>
                      <ci>g</ci>
-                     <cn cellml:units="dimensionless">0.0411</cn>
+                     <cn cellml:units="dimensionless">0.0556</cn>
                   </apply>
                </apply>
             </apply>
@@ -4098,7 +4119,6 @@
          <component_ref component="i_PCa"/>
          <component_ref component="i_K1"/>
          <component_ref component="stim_mode"/>
-         <component_ref component="current_blockers"/>
          <component_ref component="i_Na">
             <component_ref component="i_Na_m_gate"/>
             <component_ref component="i_Na_h_gate"/>
@@ -4273,31 +4293,6 @@
       <map_components component_1="i_NaCa" component_2="Membrane"/>
       <map_variables variable_1="Vm" variable_2="Vm"/>
       <map_variables variable_1="i_NaCa" variable_2="i_NaCa"/>
-   </connection>
-   <connection xmlns="http://www.cellml.org/cellml/1.0#">
-      <map_components component_1="current_blockers" component_2="i_Na"/>
-      <map_variables variable_1="TTX_3uM" variable_2="TTX_3uM"/>
-      <map_variables variable_1="TTX_10uM" variable_2="TTX_10uM"/>
-      <map_variables variable_1="TTX_30uM" variable_2="TTX_30uM"/>
-   </connection>
-   <connection xmlns="http://www.cellml.org/cellml/1.0#">
-      <map_components component_1="current_blockers" component_2="i_Kr"/>
-      <map_variables variable_1="E4031_30nM" variable_2="E4031_30nM"/>
-      <map_variables variable_1="E4031_100nM" variable_2="E4031_100nM"/>
-   </connection>
-   <connection xmlns="http://www.cellml.org/cellml/1.0#">
-      <map_components component_1="current_blockers" component_2="i_CaL"/>
-      <map_variables variable_1="nifed_3nM" variable_2="nifed_3nM"/>
-      <map_variables variable_1="nifed_10nM" variable_2="nifed_10nM"/>
-      <map_variables variable_1="nifed_30nM" variable_2="nifed_30nM"/>
-      <map_variables variable_1="nifed_100nM" variable_2="nifed_100nM"/>
-   </connection>
-   <connection xmlns="http://www.cellml.org/cellml/1.0#">
-      <map_components component_1="current_blockers" component_2="i_Ks"/>
-      <map_variables variable_1="Chromanol_iKs30" variable_2="Chromanol_iKs30"/>
-      <map_variables variable_1="Chromanol_iKs50" variable_2="Chromanol_iKs50"/>
-      <map_variables variable_1="Chromanol_iKs70" variable_2="Chromanol_iKs70"/>
-      <map_variables variable_1="Chromanol_iKs90" variable_2="Chromanol_iKs90"/>
    </connection>
    <connection xmlns="http://www.cellml.org/cellml/1.0#">
       <map_components component_1="electric_potentials" component_2="model_parameters"/>
@@ -4532,15 +4527,134 @@
       <map_variables variable_1="Vm" variable_2="Vm"/>
    </connection>
    
-   
-   
-  
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqs="http://www.cellml.org/bqs/1.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#">
+   <!--
+      The following RDF block contains metadata that applies to this document
+      as a whole, as indicated by the empty about attribute on the 
+      <rdf:Description> element.
+    -->
+   <rdf:Description rdf:about="">
+      <!--
+        The Model Builder Metadata.  The Dublin Core "creator" element is used  
+        to indicate the person who translated the model into CellML.
+      -->
+      <dc:creator rdf:parseType="Resource">
+         <vCard:N rdf:parseType="Resource">
+            <vCard:Family>Severi</vCard:Family>
+            <vCard:Given>Stefano</vCard:Given>
+         </vCard:N>
+         <vCard:ORG rdf:parseType="Resource">
+            <vCard:Orgname>University of Bologna</vCard:Orgname>
+            <vCard:Orgunit>Biomedical Engineering Laboratory - DEIS</vCard:Orgunit>
+         </vCard:ORG>
+      </dc:creator>
 
+      <!--
+        The Creation Date metadata. This is the date on which the model
+        was translated into CellML.-->
 
+      <dcterms:created rdf:parseType="Resource">
+        <dcterms:W3CDTF>2012</dcterms:W3CDTF>
+      </dcterms:created>
 
+   </rdf:Description>
+
+   <!--
+      The following metadata refers to the model itself, as indicated by the
+      reference to the ID "aslanidi_atrial_model_2009", which is    
+      declared on the <model> element.
+    -->
+    
+   <rdf:Description rdf:about="#paci_hyttinen_aaltosetala_severi_atrialVersion">
    
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"><rdf:Description rdf:about="#time"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/></rdf:Description><rdf:Description rdf:about="#membrane_voltage"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_offset"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_offset"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_amplitude"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_period"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_period"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_duration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_duration"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_m_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_m_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_h_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_j_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_d_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_d_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_f_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_f2_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f2_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_fCa_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_fCa_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_hyperpolarisation_activated_funny_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_hyperpolarisation_activated_funny_current"/></rdf:Description><rdf:Description rdf:about="#membrane_hyperpolarisation_activated_funny_current_potassium_component_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_hyperpolarisation_activated_funny_current_potassium_component_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_hyperpolarisation_activated_funny_current_single_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_hyperpolarisation_activated_funny_current_single_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_sodium_potassium_pump_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_potassium_pump_current"/></rdf:Description><rdf:Description rdf:about="#membrane_sodium_calcium_exchanger_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_calcium_exchanger_current"/></rdf:Description><rdf:Description rdf:about="#membrane_transient_outward_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current"/></rdf:Description><rdf:Description rdf:about="#membrane_transient_outward_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/></rdf:Description><rdf:Description rdf:about="#extracellular_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_sodium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/></rdf:Description><rdf:Description rdf:about="#cytosolic_potassium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_potassium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/></rdf:Description><rdf:Description rdf:about="#membrane_capacitance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/></rdf:Description><rdf:Description rdf:about="#temperature"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#temperature"/></rdf:Description><rdf:Description rdf:about="#cytosolic_sodium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/></rdf:Description><rdf:Description rdf:about="#cytosolic_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#JSR_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/></rdf:Description><rdf:Description rdf:nodeID="b1f9"><bqbiol:Family xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Severi</bqbiol:Family><bqbiol:Given xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Stefano</bqbiol:Given></rdf:Description><rdf:Description rdf:nodeID="b1f8"><bqbiol:N xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#" rdf:nodeID="b1f9"/><bqbiol:ORG xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#" rdf:nodeID="b1fa"/></rdf:Description><rdf:Description rdf:nodeID="b1fa"><bqbiol:Orgname xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">University of Bologna</bqbiol:Orgname><bqbiol:Orgunit xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Biomedical Engineering Laboratory - DEIS</bqbiol:Orgunit></rdf:Description><rdf:Description rdf:about=""><bqbiol:creator xmlns:bqbiol="http://purl.org/dc/elements/1.1/" rdf:nodeID="b1f8"/><bqbiol:created xmlns:bqbiol="http://purl.org/dc/terms/" rdf:nodeID="b1fb"/></rdf:Description><rdf:Description rdf:nodeID="b1fb"><bqbiol:W3CDTF xmlns:bqbiol="http://purl.org/dc/terms/">2012</bqbiol:W3CDTF></rdf:Description><rdf:Description rdf:about="#paci_hyttinen_aaltosetala_severi_ventricularVersion"><bqbiol:title xmlns:bqbiol="http://purl.org/dc/elements/1.1/">
+      <!-- A human readable name for the model. -->
+      
+      <dc:title>
          Computational models of ventricular- and atrial-like human induced pluripotent stem cell derived cardiomyocytes
-      </bqbiol:title><bqbiol:reference xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b1fc"/><bqbiol:reference xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b1ff"/></rdf:Description><rdf:Description rdf:nodeID="b1fd"><bqbiol:subject_type xmlns:bqbiol="http://www.cellml.org/bqs/1.0#">keyword</bqbiol:subject_type><bqbiol:value xmlns:bqbiol="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:nodeID="b1fe"/></rdf:Description><bqbiol:Bag xmlns:bqbiol="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:nodeID="b1fe"><bqbiol:_1>electrophysiology</bqbiol:_1><bqbiol:_2>cardiac</bqbiol:_2></bqbiol:Bag><rdf:Description rdf:nodeID="b1fc"><bqbiol:subject xmlns:bqbiol="http://purl.org/dc/elements/1.1/" rdf:nodeID="b1fd"/></rdf:Description><rdf:Description rdf:nodeID="b1ff"><bqbiol:Pubmed_id xmlns:bqbiol="http://www.cellml.org/bqs/1.0#">23722932</bqbiol:Pubmed_id><bqbiol:JournalArticle xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b200"/></rdf:Description><bqbiol:Seq xmlns:bqbiol="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:nodeID="b201"><bqbiol:_1 rdf:nodeID="b202"/><bqbiol:_2 rdf:nodeID="b205"/><bqbiol:_3 rdf:nodeID="b208"/><bqbiol:_4 rdf:nodeID="b20b"/></bqbiol:Seq><rdf:Description rdf:nodeID="b204"><bqbiol:Family xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Paci</bqbiol:Family><bqbiol:Given xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">S</bqbiol:Given></rdf:Description><rdf:Description rdf:nodeID="b203"><bqbiol:N xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#" rdf:nodeID="b204"/></rdf:Description><rdf:Description rdf:nodeID="b202"><bqbiol:Person xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b203"/></rdf:Description><rdf:Description rdf:nodeID="b207"><bqbiol:Family xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Hyttinen</bqbiol:Family><bqbiol:Given xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">M</bqbiol:Given></rdf:Description><rdf:Description rdf:nodeID="b206"><bqbiol:N xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#" rdf:nodeID="b207"/></rdf:Description><rdf:Description rdf:nodeID="b205"><bqbiol:Person xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b206"/></rdf:Description><rdf:Description rdf:nodeID="b20a"><bqbiol:Family xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Aalto-Setala</bqbiol:Family><bqbiol:Given xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">L A</bqbiol:Given></rdf:Description><rdf:Description rdf:nodeID="b209"><bqbiol:N xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#" rdf:nodeID="b20a"/></rdf:Description><rdf:Description rdf:nodeID="b208"><bqbiol:Person xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b209"/></rdf:Description><rdf:Description rdf:nodeID="b20d"><bqbiol:Family xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">Severi</bqbiol:Family><bqbiol:Given xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#">D</bqbiol:Given></rdf:Description><rdf:Description rdf:nodeID="b20c"><bqbiol:N xmlns:bqbiol="http://www.w3.org/2001/vcard-rdf/3.0#" rdf:nodeID="b20d"/></rdf:Description><rdf:Description rdf:nodeID="b20b"><bqbiol:Person xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b20c"/></rdf:Description><rdf:Description rdf:nodeID="b200"><bqbiol:creator xmlns:bqbiol="http://purl.org/dc/elements/1.1/" rdf:nodeID="b201"/><bqbiol:title xmlns:bqbiol="http://purl.org/dc/elements/1.1/">
+      </dc:title>
+
+      <!--  Keyword(s) -->
+      
+      <bqs:reference rdf:parseType="Resource">
+         <dc:subject rdf:parseType="Resource">
+            <bqs:subject_type>keyword</bqs:subject_type>
+            <rdf:value>
+               <rdf:Bag>
+                  <rdf:li>electrophysiology</rdf:li>
+                  <rdf:li>cardiac</rdf:li>
+               </rdf:Bag>
+            </rdf:value>
+         </dc:subject>
+      </bqs:reference>
+
+      <!-- Reference -->
+      
+      <bqs:reference rdf:parseType="Resource">
+         <bqs:Pubmed_id>23722932</bqs:Pubmed_id>
+         <bqs:JournalArticle rdf:parseType="Resource">
+            <dc:creator>
+               <rdf:Seq>
+               
+                  <!-- make additional copies of this rdf:li block
+                       for more authors -->
+                       
+                  <rdf:li rdf:parseType="Resource">
+                     <bqs:Person rdf:parseType="Resource">
+                        <vCard:N rdf:parseType="Resource">
+                           <vCard:Family>Paci</vCard:Family>
+                           <vCard:Given>S</vCard:Given>
+                        </vCard:N>
+                     </bqs:Person>
+                  </rdf:li>
+                       
+                  <rdf:li rdf:parseType="Resource">
+                     <bqs:Person rdf:parseType="Resource">
+                        <vCard:N rdf:parseType="Resource">
+                           <vCard:Family>Hyttinen</vCard:Family>
+                           <vCard:Given>M</vCard:Given>
+                        </vCard:N>
+                     </bqs:Person>
+                  </rdf:li>
+                       
+                  <rdf:li rdf:parseType="Resource">
+                     <bqs:Person rdf:parseType="Resource">
+                        <vCard:N rdf:parseType="Resource">
+                           <vCard:Family>Aalto-Setala</vCard:Family>
+                           <vCard:Given>L A</vCard:Given>
+                        </vCard:N>
+                     </bqs:Person>
+                  </rdf:li>
+                       
+                  <rdf:li rdf:parseType="Resource">
+                     <bqs:Person rdf:parseType="Resource">
+                        <vCard:N rdf:parseType="Resource">
+                           <vCard:Family>Severi</vCard:Family>
+                           <vCard:Given>D</vCard:Given>
+                        </vCard:N>
+                     </bqs:Person>
+                  </rdf:li>
+
+                  
+               </rdf:Seq>
+            </dc:creator>
+            
+            <!-- Reference title -->
+            
+            <dc:title>
                Computational models of ventricular- and atrial-like human induced pluripotent stem cell derived cardiomyocytes
-            </bqbiol:title><bqbiol:Journal xmlns:bqbiol="http://www.cellml.org/bqs/1.0#" rdf:nodeID="b20e"/><bqbiol:volume xmlns:bqbiol="http://www.cellml.org/bqs/1.0#">Epub ahead of print</bqbiol:volume><bqbiol:first_page xmlns:bqbiol="http://www.cellml.org/bqs/1.0#">Epub ahead of print</bqbiol:first_page><bqbiol:last_page xmlns:bqbiol="http://www.cellml.org/bqs/1.0#">Epub ahead of print</bqbiol:last_page></rdf:Description><rdf:Description rdf:nodeID="b20e"><bqbiol:title xmlns:bqbiol="http://purl.org/dc/elements/1.1/">Annals of biomedical engineering.</bqbiol:title></rdf:Description><rdf:Description rdf:about="#calcium_dynamics_Cai_bufc"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_flux_scaling_from_intrinsic_buffers"/></rdf:Description><rdf:Description rdf:about="#i_PCa_i_PCa"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_calcium_pump_current"/></rdf:Description></rdf:RDF></model>
+            </dc:title>
+            <bqs:Journal rdf:parseType="Resource">
+               <dc:title>Annals of biomedical engineering.</dc:title>
+            </bqs:Journal>
+            <bqs:volume>Epub ahead of print</bqs:volume>
+            <bqs:first_page>Epub ahead of print</bqs:first_page>
+            <bqs:last_page>Epub ahead of print</bqs:last_page>
+         </bqs:JournalArticle>
+      </bqs:reference>
+   </rdf:Description>
+</rdf:RDF>   
+   
+   
+
+   
+</model>
