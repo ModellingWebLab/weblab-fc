@@ -8,6 +8,7 @@ import os
 
 import pyparsing as p
 import sympy
+from cellmlmanip.parser import UNIT_PREFIXES
 
 import fc.language.expressions as E
 import fc.language.statements as S
@@ -978,7 +979,9 @@ class UnitRef(BaseGroupAction):
         self.exponent = self.get_named_token_as_string('exponent')
         self.multiplier = self.get_named_token_as_string('multiplier')
 
-        expr = self.prefix + self.units
+        expr = self.units
+        if self.prefix:
+            expr = '({:e} * {})'.format(UNIT_PREFIXES[self.prefix], self.units)
         if self.exponent is not None:
             expr = '{}**{}'.format(expr, self.exponent)
         if self.multiplier is not None:
