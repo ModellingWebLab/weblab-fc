@@ -21,7 +21,7 @@ def test_generated_model_graphstate():
     # Run protocol
     proto.set_output_folder('test_generated_model_graphstate')
     proto.run()
-    # The test assertions are within the protocol itself
+    # Some test assertions are within the protocol itself
 
     # Check output exists
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))

@@ -713,6 +713,7 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = []
         self.equations = []
         self._sympy_equations = None
+        self._units = None  # Will be the protocol's UnitStore
         self._model = None
         self._ns_map = None
 
@@ -732,7 +733,7 @@ class ModelInterface(BaseGroupAction):
     @property
     def time_units(self):
         if self._time_units:
-            return self._time_units.time_units
+            return self._time_units[0].time_units
         return None
 
     def resolve_namespaces(self, ns_map):
@@ -744,9 +745,14 @@ class ModelInterface(BaseGroupAction):
         for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
             item.ns_uri = ns_map[item.ns_prefix]
 
-    def associate_model(self, model):
-        """Tell this interface what model it is being used to manipulate."""
+    def associate_model(self, model, units):
+        """Tell this interface what model it is being used to manipulate.
+
+        :param cellmlmanip.model.Model model: the model, for resolving variable references via ontology terms
+        :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
+        """
         self._model = model
+        self._units = units
 
     def _symbol_generator(self, name):
         if ':' in name:
@@ -758,8 +764,7 @@ class ModelInterface(BaseGroupAction):
             raise NotImplementedError
 
     def _number_generator(self, value, units):
-        # TODO: Use the protocol's UnitStore instead!
-        return self._model.add_number(value, self._model.get_units(units))
+        return self._model.add_number(value, self._units.get_unit(units))
 
     @property
     def sympy_equations(self):

@@ -616,8 +616,8 @@ class Protocol(object):
 
             # Load cellml model
             import cellmlmanip
-            model = cellmlmanip.load_model(model)
-            self.model_interface.associate_model(model)
+            model = cellmlmanip.load_model(model, self.units)
+            self.model_interface.associate_model(model, self.units)
 
             # Create protocol unit store
             # TODO
@@ -665,6 +665,39 @@ class Protocol(object):
                     model.remove_equation(defn)
                 model.add_equation(eq)
             # TODO: Check units of newly added equations; apply conversions where needed?
+
+            # Finally, remove equations & variables not needed for generating model outputs
+            # TODO: stop handling state_variable specially
+            output_symbols = {model.get_symbol_by_ontology_term(*x) for x in outputs
+                              if x[1] != 'state_variable'}
+            for x in outputs:
+                if x[1] == 'state_variable':
+                    output_symbols.update(model.get_state_symbols())
+            import networkx as nx
+            graph = model.graph_with_sympy_numbers
+            required_symbols = set(output_symbols)
+            # Symbols used directly in equations computing outputs
+            for symbol in output_symbols:
+                required_symbols.update(nx.ancestors(graph, symbol))
+            # Symbols used indirectly to compute state variables referenced in equations
+            derivatives = model.get_derivative_symbols()
+            old_len = 0
+            while old_len != len(required_symbols):
+                old_len = len(required_symbols)
+                for deriv in derivatives:
+                    if deriv.args[0] in required_symbols:
+                        required_symbols.update(nx.ancestors(graph, deriv))
+                        # And we also need time...
+                        required_symbols.add(deriv.args[1])
+            # Now figure out which symbols *aren't* used
+            all_symbols = set(model.variables())
+            unused_symbols = all_symbols - required_symbols
+            # Remove their definitions
+            for symbol in unused_symbols:
+                defn = model.get_definition(symbol)
+                print('Unused symbol', symbol, defn)
+                if defn is not None:
+                    model.remove_equation(defn)
 
             # Create weblab model at path
             create_weblab_model(
