@@ -11,16 +11,16 @@ import time
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.units import UnitStore
 
-import fc   # noqa: E402
-from .code_generation import create_weblab_model  # noqa: E402
-from .environment import Environment  # noqa: E402
-from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
-from .file_handling import OutputFolder  # noqa: E402
-from .language import values as V  # noqa: E402
-from .language.statements import Assign  # noqa: E402
-from .locatable import Locatable  # noqa: E402
-from .parsing import actions  # noqa: E402
-from .plotting import create_plot  # noqa: E402
+import fc
+from .code_generation import create_weblab_model
+from .environment import Environment
+from .error_handling import ProtocolError, ErrorRecorder
+from .file_handling import OutputFolder
+from .language import values as V
+from .language.statements import Assign
+from .locatable import Locatable
+from .parsing import actions
+from .plotting import create_plot
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -439,8 +439,8 @@ class Protocol(object):
         # Plots
         if write_out:  # suppress plotting when performing fitting
             start = time.time()
-            with errors:
-                for plot in self.plots:
+            for plot in self.plots:
+                with errors:
                     path = os.path.join(self.output_folder.path, self.sanitise_file_name(plot['title']) + '.png')
                     x_label = plot_descriptions[plot['x']]
                     y_label = plot_descriptions[plot['y']]
@@ -454,7 +454,6 @@ class Protocol(object):
                             'against', plot_descriptions[plot['x']]
                         )
 
-                    # TODO Looks like this isn't used?
                     if 'key' in plot:
                         key_data = self.output_env.look_up(plot['key']).array
                         if key_data.ndim != 1:

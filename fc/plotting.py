@@ -4,7 +4,7 @@ Methods for plotting simulation results.
 import operator
 from functools import reduce
 
-from .error_handling import ProtocolError  # noqa: E402
+from .error_handling import ProtocolError
 
 import matplotlib
 matplotlib.use('agg')
