@@ -1,0 +1,24 @@
+# Check we get an error when a library file doesn't exist
+
+import std = "NonExistLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+}
+
+model interface {
+    output oxmeta:time units ms
+    output oxmeta:membrane_voltage units mV
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:5
+    }
+}
+
+outputs {
+    V = sim:membrane_voltage
+    t = sim:time
+}

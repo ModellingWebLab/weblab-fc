@@ -1,3 +1,6 @@
+#
+# Contains the Environment class
+#
 import numpy as np
 
 from .error_handling import ProtocolError
@@ -5,7 +8,21 @@ from .language import values as V
 
 
 class Environment(object):
-    """Base class for environments in the protocol language."""
+    """
+    Base class for environments in the protocol language.
+
+    Environments hold variables. For example, there's an environment holding
+    the protocol inputs and each simulation runs in its own environment.
+
+    Environments can refer to variables in other environments, by associating
+    the other environment with a particular prefix.
+
+    Variables not found within the environment are looked up in its "default
+    delegatee".
+
+    For more information, see
+    https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Identifiersandnameresolution
+    """
     next_ident = [0]
 
     def __init__(self, allow_overwrite=False, delegatee=None):
@@ -270,11 +287,12 @@ class ModelWrapperEnvironment(Environment):
             return key in self._unwrapped
 
     class _UnwrappedBindingsDict(dict):
-        """A dictionary subclass wrapping the Python versions of a model's variables.
-
-        TODO: Look at the efficiency of get/set methods, and whether these matter for
-        overall performance (c.f. #2459).
         """
+        A dictionary subclass wrapping the Python versions of a model's variables.
+        """
+        # TODO: Look at the efficiency of get/set methods, and whether these matter for
+        # overall performance (c.f. #2459).
+
         class _FreeVarList(list):
             """A single element list for wrapping the model's free variable."""
 
@@ -303,9 +321,11 @@ class ModelWrapperEnvironment(Environment):
 
         def __init__(self, model):
             self._model = model
+
             # Make the underlying dict store a map from name to (vector, index) for fast lookup
             self._free_vars = self._FreeVarList(model)
             self._output_vars = self._OutputsList(model)
+
             # Note: we process outputs first so that if a variable is both an output and
             # something else, we prefer direct access
             for key in model.output_names:
