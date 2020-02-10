@@ -69,7 +69,7 @@ def test_graphstate_voltage_conversion():
         'test', 'protocols', 'generated_model_graphstate.txt'))
 
     # Set model (generates & compiles model)
-    model_name = 'paci_hyttinen_aaltosetala_severi_ventricularVersion'  # has time in seconds, not milliseconds
+    model_name = 'paci_hyttinen_aaltosetala_severi_ventricularVersion'  # has voltage in volt, not millivolt
     proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
 
     # Run protocol
