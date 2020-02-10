@@ -65,6 +65,19 @@ def test_generate_weblab_model(tmp_path):
         (oxmeta, 'membrane_potassium_current_conductance'),
     ]
 
+    # Annotate state variables with the magic oxmeta:state_variable term
+    from cellmlmanip.rdf import create_rdf_node, rdflib
+    is_version_of = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
+    state_annotation = ('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#', 'state_variable')
+    state_annotation_term = create_rdf_node(state_annotation)
+    vector_orderings = {state_annotation: {}}
+    for i, state_var in enumerate(model.get_state_symbols()):
+        if not state_var.cmeta_id:
+            state_var.cmeta_id = state_var.name.replace('$', '__')  # TODO: Check for uniqueness!
+        subject = rdflib.term.URIRef('#' + state_var.cmeta_id)
+        model.rdf.add((subject, is_version_of, state_annotation_term))
+        vector_orderings[state_annotation][state_var.cmeta_id] = i
+
     # Create weblab model at path
     cg.create_weblab_model(str(path), class_name, model, outputs, parameters)
 
