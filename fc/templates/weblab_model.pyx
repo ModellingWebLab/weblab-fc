@@ -266,7 +266,6 @@ cdef class {{ class_name }}(CvodeSolver):
         # Update output vector and return
         outputs = self._outputs
         {%- for output in outputs %}
-        {%- if output.parameter_index is none %}
         {%-   if output.length is none %}
         outputs[{{ output.index }}][()] = {{ output.var_name }}
         {%-   else %}
@@ -274,9 +273,6 @@ cdef class {{ class_name }}(CvodeSolver):
         outputs[{{ output.index }}][{{ sub_output.index }}] = {{ sub_output.var_name }}
         {%-     endfor %}
         {%-   endif %}
-        {%- else %}
-        outputs[{{ output.index }}][()] = parameters[{{ output.parameter_index }}]
-        {%- endif %}
         {%- endfor %}
         return outputs
 

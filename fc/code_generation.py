@@ -1,13 +1,17 @@
 """
 Methods for code generation (using jinja2 templates).
 """
-import jinja2
+import pkg_resources
 import posixpath
-import sympy
 import time
+
+import jinja2
+import rdflib
+import sympy
 
 from cellmlmanip import transpiler
 from cellmlmanip.printer import Printer
+from cellmlmanip.rdf import create_rdf_node
 
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
@@ -131,7 +135,39 @@ def get_unique_names(model):
     return symbols
 
 
-def create_weblab_model(path, class_name, model, outputs, parameters):
+_ONTOLOGY = None
+
+
+def get_variables_transitively(model, term):
+    global _ONTOLOGY
+
+    if _ONTOLOGY is None:
+        # Load oxmeta ontology
+        g = _ONTOLOGY = rdflib.Graph()
+        oxmeta_ttl = pkg_resources.resource_stream('fc', 'ontologies/oxford-metadata.ttl')
+        g.parse(oxmeta_ttl, format='turtle')
+
+    term = create_rdf_node(term)
+    pred_is = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'is'))
+    pred_is_ver = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
+
+    cmeta_ids = set()
+    for annotation in _ONTOLOGY.transitive_subjects(rdflib.RDF.type, term):
+        cmeta_ids.update(model.rdf.subjects(pred_is, annotation))
+        cmeta_ids.update(model.rdf.subjects(pred_is_ver, annotation))
+    symbols = []
+    for cmeta_id in cmeta_ids:
+        assert isinstance(cmeta_id, rdflib.URIRef), 'Non-resource {} annotated.'.format(cmeta_id)
+        cmeta_id = str(cmeta_id)
+        if cmeta_id[0] != '#':
+            # TODO This should eventually be implemented
+            raise NotImplementedError(
+                'Non-local annotations are not supported.')
+        symbols.append(model.get_symbol_by_cmeta_id(cmeta_id[1:]))
+    return sorted(symbols, key=lambda sym: sym.order_added)
+
+
+def create_weblab_model(path, class_name, model, outputs, parameters, vector_orderings={}):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
     the Web Lab, and stores it at ``path``.
@@ -151,6 +187,10 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
         An ordered list of annotations ``(namespace_uri, local_name)`` for the
         variables to use as model parameters. All variables used as parameters
         must be literal constants.
+    ``vector_orderings``
+        An optional mapping defining custom orderings for vector outputs, instead
+        of the default symbol.order_added ordering. Should be a map from annotation
+        ``(namespace_uri, local_name)`` to a mapping from cmeta_id to order index.
 
     """
     # TODO: Jon's comment on the outputs/parameters being annotations:
@@ -212,22 +252,29 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
         parameter_symbols[symbol] = i
 
     # Create output information dicts
-    # Each output is associated either with a symbol or a parameter.
+    print(vector_orderings)
+    print('state vector:', [(i, s.cmeta_id) for i, s in enumerate(model.get_state_symbols())])
+    # Each output is associated either with a symbol, a parameter, or a list thereof.
     output_info = []
+    output_symbols = set()
     for i, output in enumerate(outputs):
-
-        # Allow special output value 'state_variable'
-        # TODO Replace this with a more generic implementation
-        if output[1] == 'state_variable':
-            var_name = [{'index': x['index'], 'var_name': x['var_name']}
-                        for x in state_info]
-            parameter_index = None
-            length = len(state_info)
+        symbols = get_variables_transitively(model, output)
+        output_symbols.update(symbols)
+        if len(symbols) == 0:
+            raise ValueError('No variable annotated as {{{}}}{} found'.format(*output))
+        elif len(symbols) == 1:
+            length = None  # Not a vector output
+            var_name = symbol_name(symbols[0])
+            parameter_index = parameter_symbols.get(symbols[0], None)
         else:
-            symbol = model.get_symbol_by_ontology_term(*output)
-            var_name = symbol_name(symbol)
-            parameter_index = parameter_symbols.get(symbol, None)
-            length = None
+            # Vector output
+            print(output, output in vector_orderings)
+            if output in vector_orderings:
+                order = vector_orderings[output]
+                symbols.sort(key=lambda s: order[s.cmeta_id])
+            length = len(symbols)
+            var_name = [{'index': i, 'var_name': symbol_name(s)} for i, s in enumerate(symbols)]
+            parameter_index = [parameter_symbols.get(s, None) for s in symbols]
 
         output_info.append({
             'index': i,
@@ -250,8 +297,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
 
     # Create output equation information dicts
     output_equations = []
-    output_symbols = [model.get_symbol_by_ontology_term(*x) for x in outputs
-                      if x[1] != 'state_variable']
     for eq in model.get_equations_for(output_symbols):
         output_equations.append({
             'lhs': printer.doprint(eq.lhs),

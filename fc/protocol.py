@@ -3,6 +3,7 @@
 #
 import operator
 import os
+import rdflib
 import subprocess
 import sys
 import tables
@@ -670,10 +671,32 @@ class Protocol(object):
                 model.add_equation(eq)
             # TODO: Check units of newly added equations; apply conversions where needed?
 
+            # Annotate state variables with the magic oxmeta:state_variable term
+            from cellmlmanip.rdf import create_rdf_node
+            is_version_of = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
+            state_annotation = ('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#', 'state_variable')
+            state_annotation_term = create_rdf_node(state_annotation)
+            vector_orderings = {state_annotation: {}}
+            for i, state_var in enumerate(model.get_state_symbols()):
+                if not state_var.cmeta_id:
+                    state_var.cmeta_id = state_var.name.replace('$', '__')  # TODO: Check for uniqueness!
+                subject = rdflib.term.URIRef('#' + state_var.cmeta_id)
+                model.rdf.add((subject, is_version_of, state_annotation_term))
+                vector_orderings[state_annotation][state_var.cmeta_id] = i
+                print('state var', i, state_var.cmeta_id)
+
+            # Convert units for outputs if needed
+            output_symbols = set()
+            for output in self.model_interface.outputs:
+                if output.local_name != 'state_variable':
+                    symbol = model.get_symbol_by_ontology_term(output.ns_uri, output.local_name)
+                    if output.units is not None:
+                        symbol = model.convert_variable(
+                            symbol, self.units.get_unit(output.units), DataDirectionFlow.OUTPUT)
+                    output_symbols.add(symbol)
+
             # Finally, remove equations & variables not needed for generating model outputs
             # TODO: stop handling state_variable specially
-            output_symbols = {model.get_symbol_by_ontology_term(*x) for x in outputs
-                              if x[1] != 'state_variable'}
             for x in outputs:
                 if x[1] == 'state_variable':
                     output_symbols.update(model.get_state_symbols())
@@ -702,10 +725,18 @@ class Protocol(object):
                 print('Unused symbol', symbol, defn)
                 if defn is not None:
                     model.remove_equation(defn)
+                # TODO: wrap as model.remove_variable(symbol)
+                if symbol.cmeta_id:
+                    subject = rdflib.term.URIRef('#' + symbol.cmeta_id)  # TODO: Make a helper property for this
+                    for triple in model.rdf.triples((subject, None, None)):
+                        model.rdf.remove(triple)
+                del model._name_to_symbol[symbol.name]
+                model._invalidate_cache()
 
             # Create weblab model at path
             create_weblab_model(
-                path, class_name, model, outputs, parameters)
+                path, class_name, model, outputs, parameters,
+                vector_orderings=vector_orderings)
 
             self.log_progress('Compiling pyx model code...')
 
