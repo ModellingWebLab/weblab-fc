@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 plt.switch_backend('agg')  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
 
 import fc   # noqa: E402
-from .code_generation import create_weblab_model  # noqa: E402
+from .code_generation import create_weblab_model, get_variables_transitively  # noqa: E402
 from .environment import Environment  # noqa: E402
 from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
 from .file_handling import OutputFolder  # noqa: E402
@@ -687,18 +687,15 @@ class Protocol(object):
             # Convert units for outputs if needed
             output_symbols = set()
             for output in self.model_interface.outputs:
-                if output.local_name != 'state_variable':
-                    symbol = model.get_symbol_by_ontology_term((output.ns_uri, output.local_name))
-                    if output.units is not None:
-                        symbol = model.convert_variable(
-                            symbol, self.units.get_unit(output.units), DataDirectionFlow.OUTPUT)
-                    output_symbols.add(symbol)
+                symbols = get_variables_transitively(model, output.rdf_term)
+                if output.units is not None:
+                    desired_units = self.units.get_unit(output.units)
+                    for i, symbol in enumerate(symbols):
+                        symbols[i] = model.convert_variable(
+                            symbol, desired_units, DataDirectionFlow.OUTPUT)
+                output_symbols.update(symbols)
 
             # Finally, remove equations & variables not needed for generating model outputs
-            # TODO: stop handling state_variable specially
-            for x in outputs:
-                if x[1] == 'state_variable':
-                    output_symbols.update(model.get_state_symbols())
             import networkx as nx
             graph = model.graph_with_sympy_numbers
             required_symbols = set(output_symbols)
