@@ -1,32 +1,26 @@
 #
 # Contains the main classes representing an FC Protocol.
 #
-import operator
 import os
 import subprocess
 import sys
 import tables
 import tempfile
 import time
-from functools import reduce
 
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.units import UnitStore
 
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt  # noqa: E402
-plt.switch_backend('agg')  # on some machines this is required to avoid "Invalid DISPLAY variable" errors
-
-import fc   # noqa: E402
-from .code_generation import create_weblab_model, get_variables_transitively  # noqa: E402
-from .environment import Environment  # noqa: E402
-from .error_handling import ProtocolError, ErrorRecorder  # noqa: E402
-from .file_handling import OutputFolder  # noqa: E402
-from .language import values as V  # noqa: E402
-from .language.statements import Assign  # noqa: E402
-from .locatable import Locatable  # noqa: E402
-from .parsing import actions  # noqa: E402
+import fc
+from .code_generation import create_weblab_model, get_variables_transitively
+from .environment import Environment
+from .error_handling import ProtocolError, ErrorRecorder
+from .file_handling import OutputFolder
+from .language import values as V
+from .language.statements import Assign
+from .locatable import Locatable
+from .parsing import actions
+from .plotting import create_plot
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
 # Only import it within methods that use it.
@@ -447,51 +441,27 @@ class Protocol(object):
             start = time.time()
             for plot in self.plots:
                 with errors:
+                    path = os.path.join(self.output_folder.path, self.sanitise_file_name(plot['title']) + '.png')
+                    x_label = plot_descriptions[plot['x']]
+                    y_label = plot_descriptions[plot['y']]
+                    x_data = [self.output_env.look_up(plot['x']).array]
+                    y_data = [self.output_env.look_up(plot['y']).array]
+
                     if verbose:
                         self.log_progress(
                             'plotting', plot['title'],
                             'curve:', plot_descriptions[plot['y']],
                             'against', plot_descriptions[plot['x']]
                         )
-                    x_data = []
-                    y_data = []
-                    x_data.append(self.output_env.look_up(plot['x']).array)
-                    y_data.append(self.output_env.look_up(plot['y']).array)
+
                     if 'key' in plot:
                         key_data = self.output_env.look_up(plot['key']).array
                         if key_data.ndim != 1:
                             raise ProtocolError('Plot key variables must be 1d vectors;',
                                                 plot['key'], 'has', key_data.ndim, 'dimensions')
-                    # Check the x-axis data shape.  It must either be 1d, or be equivalent to
-                    # a 1d vector (i.e. stacked copies of the same vector).
-                    for i, x in enumerate(x_data):
-                        if x.ndim > 1:
-                            num_repeats = reduce(operator.mul, x.shape[:-1])
-                            # Flatten all extra dimensions as an array view
-                            x_2d = x.reshape((num_repeats, x.shape[-1]))
-                            if x_2d.ptp(axis=0).any():
-                                # There was non-zero difference between the min & max at some position in
-                                # the 1d equivalent vector
-                                raise ProtocolError(
-                                    'The X data for a plot must be (equivalent to) a 1d array, not',
-                                    x.ndim, 'dimensions')
-                            x_data[i] = x_2d[0]  # Take just the first copy
-                    # Plot the data
-                    plt.figure()
-                    for i, x in enumerate(x_data):
-                        y = y_data[i]
-                        if y.ndim > 1:
-                            # Matplotlib can handle 2d data, but plots columns not rows, so we need to
-                            # Flatten & transpose
-                            y_2d = y.reshape((reduce(operator.mul, y.shape[:-1]), y.shape[-1]))
-                            plt.plot(x, y_2d.T)
-                        else:
-                            plt.plot(x, y)
-                        plt.title(plot['title'])
-                        plt.xlabel(plot_descriptions[plot['x']])
-                        plt.ylabel(plot_descriptions[plot['y']])
-                    plt.savefig(os.path.join(self.output_folder.path, self.sanitise_file_name(plot['title']) + '.png'))
-                    plt.close()
+
+                    create_plot(path, x_data, y_data, x_label, y_label, plot['title'])
+
             self.timings['create plots'] = self.timings.get('plot', 0.0) + (time.time() - start)
 
     def sanitise_file_name(self, name):
