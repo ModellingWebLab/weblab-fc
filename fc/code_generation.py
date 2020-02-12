@@ -170,13 +170,7 @@ def get_variables_transitively(model, term):
         cmeta_ids.update(model.rdf.subjects(pred_is_ver, annotation))
     symbols = []
     for cmeta_id in cmeta_ids:
-        assert isinstance(cmeta_id, rdflib.URIRef), 'Non-resource {} annotated.'.format(cmeta_id)
-        cmeta_id = str(cmeta_id)
-        if cmeta_id[0] != '#':
-            # TODO This should eventually be implemented
-            raise NotImplementedError(
-                'Non-local annotations are not supported.')
-        symbols.append(model.get_symbol_by_cmeta_id(cmeta_id[1:]))
+        symbols.append(model.get_symbol_by_cmeta_id(cmeta_id))
     return sorted(symbols, key=lambda sym: sym.order_added)
 
 
@@ -255,7 +249,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     parameter_info = []
     parameter_symbols = {}
     for i, parameter in enumerate(parameters):
-        symbol = model.get_symbol_by_ontology_term(*parameter)
+        symbol = model.get_symbol_by_ontology_term(parameter)
         parameter_info.append({
             'index': i,
             'annotation': parameter,

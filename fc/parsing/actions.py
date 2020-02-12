@@ -9,6 +9,7 @@ import os
 import pyparsing as p
 import sympy
 from cellmlmanip.parser import UNIT_PREFIXES
+from cellmlmanip.rdf import create_rdf_node
 
 import fc.language.expressions as E
 import fc.language.statements as S
@@ -549,6 +550,11 @@ class OutputVariable(BaseGroupAction):
         self.units = self.get_named_token_as_string('units', default=None)
         return self
 
+    @property
+    def rdf_term(self):
+        """The RDF term annotating this model output."""
+        return create_rdf_node((self.ns_uri, self.local_name))
+
 
 class OptionalVariable(BaseGroupAction):
     """Parse action for specifying optional variables in the model interface.
@@ -765,7 +771,7 @@ class ModelInterface(BaseGroupAction):
         if ':' in name:
             prefix, local_name = name.split(':', 1)
             ns_uri = self._ns_map[prefix]
-            return self._model.get_symbol_by_ontology_term(ns_uri, local_name)
+            return self._model.get_symbol_by_ontology_term((ns_uri, local_name))
         else:
             # DeclareVariable not yet done
             raise NotImplementedError

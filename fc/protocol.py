@@ -3,7 +3,6 @@
 #
 import operator
 import os
-import rdflib
 import subprocess
 import sys
 import tables
@@ -632,7 +631,7 @@ class Protocol(object):
                 # Just check the variable exists for now; no units or initial_value handling!
                 assert var.units is None
                 assert var.initial_value is None
-                model.get_symbol_by_ontology_term(var.ns_uri, var.local_name)
+                model.get_symbol_by_ontology_term((var.ns_uri, var.local_name))
                 # TODO: Check if inputs are of allowed types, i.e. states or parameters
                 # TODO Add input variables to cellmlmanip model
                 pass
@@ -679,8 +678,8 @@ class Protocol(object):
             vector_orderings = {state_annotation: {}}
             for i, state_var in enumerate(model.get_state_symbols()):
                 if not state_var.cmeta_id:
-                    state_var.cmeta_id = state_var.name.replace('$', '__')  # TODO: Check for uniqueness!
-                subject = rdflib.term.URIRef('#' + state_var.cmeta_id)
+                    state_var.cmeta_id = model.get_unique_cmeta_id(state_var.name.replace('$', '__'))
+                subject = state_var.rdf_identity
                 model.rdf.add((subject, is_version_of, state_annotation_term))
                 vector_orderings[state_annotation][state_var.cmeta_id] = i
                 print('state var', i, state_var.cmeta_id)
@@ -689,7 +688,7 @@ class Protocol(object):
             output_symbols = set()
             for output in self.model_interface.outputs:
                 if output.local_name != 'state_variable':
-                    symbol = model.get_symbol_by_ontology_term(output.ns_uri, output.local_name)
+                    symbol = model.get_symbol_by_ontology_term((output.ns_uri, output.local_name))
                     if output.units is not None:
                         symbol = model.convert_variable(
                             symbol, self.units.get_unit(output.units), DataDirectionFlow.OUTPUT)
@@ -719,19 +718,9 @@ class Protocol(object):
             # Now figure out which symbols *aren't* used
             all_symbols = set(model.variables())
             unused_symbols = all_symbols - required_symbols
-            # Remove their definitions
+            # Remove them and their definitions
             for symbol in unused_symbols:
-                defn = model.get_definition(symbol)
-                print('Unused symbol', symbol, defn)
-                if defn is not None:
-                    model.remove_equation(defn)
-                # TODO: wrap as model.remove_variable(symbol)
-                if symbol.cmeta_id:
-                    subject = rdflib.term.URIRef('#' + symbol.cmeta_id)  # TODO: Make a helper property for this
-                    for triple in model.rdf.triples((subject, None, None)):
-                        model.rdf.remove(triple)
-                del model._name_to_symbol[symbol.name]
-                model._invalidate_cache()
+                model.remove_variable(symbol)
 
             # Create weblab model at path
             create_weblab_model(
