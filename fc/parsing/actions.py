@@ -630,14 +630,11 @@ class ModelEquation(BaseGroupAction):
     def to_sympy(self, symbol_generator, number_generator):
         """Convert this equation to Sympy.
 
-        Notes for later implementation:
-        * ``number_generator`` can be the same as the CellML parser, except using the protocol's UnitStore:
-            ``lambda x, y: model.add_number(x, model.get_units(y))``
-        * ``symbol_generator`` will be different. It will be set up by our parent ModelInterface,
-            and needs to dereference all the name lookups we might encounter. Prefixed names will
-            need to use the ns_map to get a (URI, local_name) pair and do ``model.get_symbol_by_ontology_term``.
-            Plain names will need to check they've been defined in a ``DeclareVariable`` stanza, which should
-            maintain a map from name to ``VariableDummy``.
+        Typically this will be called via :meth:`ModelInterface.sympy_equations` which sets up appropriate
+        generators.
+
+        :param symbol_generator: a function to resolve a name reference within the equation to a symbol in the model.
+        :param number_generator: converts a number with units to a Sympy entity.
         """
         var = self.var.to_sympy(symbol_generator, number_generator)
         if self.is_ode:
@@ -756,6 +753,15 @@ class ModelInterface(BaseGroupAction):
         self._units = units
 
     def _symbol_generator(self, name):
+        """Resolve a name reference within a model interface equation to a symbol in the model.
+
+        Used by :meth:`sympy_equations`.
+
+        :param str name: a name reference. If it contains a ':' then it is treated as a prefix:local_name
+            ontology term reference. The prefix is looked up in our namespace URI map, and the symbol then
+            found with :meth:`cellmlmanip.model.Model.get_symbol_by_ontology_term`. Otherwise we look for
+            a variable defined within the protocol's model interface using :class:`DeclareVariable`.
+        """
         if ':' in name:
             prefix, local_name = name.split(':', 1)
             ns_uri = self._ns_map[prefix]
@@ -765,6 +771,13 @@ class ModelInterface(BaseGroupAction):
             raise NotImplementedError
 
     def _number_generator(self, value, units):
+        """Convert a number with units in an equation to a :class:`cellmlmanip.model.NumberDummy`.
+
+        Used by :meth:`sympy_equations`.
+
+        :param value: the numerical value
+        :param units: the *name* of the units for this quantity. Will be looked up from the protocol's definitions.
+        """
         return self._model.add_number(value, self._units.get_unit(units))
 
     @property
