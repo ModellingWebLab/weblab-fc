@@ -139,6 +139,19 @@ _ONTOLOGY = None
 
 
 def get_variables_transitively(model, term):
+    """Return a list of variables annotated (directly or otherwise) with the given ontology term.
+
+    Direct annotations are those variables annotated with the term via the bqbiol:is or
+    bqbiol:isVersionOf predicates.
+
+    However we also look transitively through the 'oxmeta' ontology for terms belonging to the RDF
+    class given by ``term``, i.e. are connected to it by a path of ``rdf:type`` predicates, and
+    return variables annotated with those terms.
+
+    :param term: the ontology term to search for. Can be anything suitable as input to
+        :meth:`create_rdf_node`, typically a :class:`rdflib.term.Node` or ``(ns_uri, local_name)`` pair.
+    :return: a list of :class:`VariableDummy` symbols, sorted by order added to the model.
+    """
     global _ONTOLOGY
 
     if _ONTOLOGY is None:
