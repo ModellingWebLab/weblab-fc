@@ -259,8 +259,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
         parameter_symbols[symbol] = i
 
     # Create output information dicts
-    print(vector_orderings)
-    print('state vector:', [(i, s.cmeta_id) for i, s in enumerate(model.get_state_symbols())])
     # Each output is associated either with a symbol, a parameter, or a list thereof.
     output_info = []
     output_symbols = set()
@@ -275,7 +273,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
             parameter_index = parameter_symbols.get(symbols[0], None)
         else:
             # Vector output
-            print(output, output in vector_orderings)
             if output in vector_orderings:
                 order = vector_orderings[output]
                 symbols.sort(key=lambda s: order[s.cmeta_id])

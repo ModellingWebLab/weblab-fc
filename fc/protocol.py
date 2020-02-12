@@ -682,7 +682,6 @@ class Protocol(object):
                 subject = state_var.rdf_identity
                 model.rdf.add((subject, is_version_of, state_annotation_term))
                 vector_orderings[state_annotation][state_var.cmeta_id] = i
-                print('state var', i, state_var.cmeta_id)
 
             # Convert units for outputs if needed
             output_symbols = set()
