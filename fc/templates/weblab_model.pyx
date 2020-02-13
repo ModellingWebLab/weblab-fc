@@ -156,7 +156,7 @@ cdef class {{ class_name }}(CvodeSolver):
         # Mapping of parameter qualified names to parameter array indices
         self.parameter_map = {}
         {%- for parameter in parameters %}
-        self.parameter_map['{{ parameter.annotation[1] }}'] = {{ parameter.index }}
+        self.parameter_map['{{ parameter.local_name }}'] = {{ parameter.index }}
         {%- endfor %}
 
         # Initial parameter values
@@ -168,7 +168,7 @@ cdef class {{ class_name }}(CvodeSolver):
         # Local names of output variables
         self.output_names = []
         {%- for output in outputs %}
-        self.output_names.append('{{ output.annotation[1] }}')
+        self.output_names.append('{{ output.local_name }}')
         {%- endfor %}
 
         # Create and cache list of arrays, to avoid constant list/array

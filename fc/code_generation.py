@@ -1,17 +1,16 @@
 """
 Methods for code generation (using jinja2 templates).
 """
-import pkg_resources
 import posixpath
 import time
 
 import jinja2
-import rdflib
 import sympy
 
 from cellmlmanip import transpiler
 from cellmlmanip.printer import Printer
-from cellmlmanip.rdf import create_rdf_node
+
+from .parsing.rdf import OXMETA_NS, get_variables_transitively
 
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
@@ -135,45 +134,6 @@ def get_unique_names(model):
     return symbols
 
 
-_ONTOLOGY = None
-
-
-def get_variables_transitively(model, term):
-    """Return a list of variables annotated (directly or otherwise) with the given ontology term.
-
-    Direct annotations are those variables annotated with the term via the bqbiol:is or
-    bqbiol:isVersionOf predicates.
-
-    However we also look transitively through the 'oxmeta' ontology for terms belonging to the RDF
-    class given by ``term``, i.e. are connected to it by a path of ``rdf:type`` predicates, and
-    return variables annotated with those terms.
-
-    :param term: the ontology term to search for. Can be anything suitable as input to
-        :meth:`create_rdf_node`, typically a :class:`rdflib.term.Node` or ``(ns_uri, local_name)`` pair.
-    :return: a list of :class:`VariableDummy` symbols, sorted by order added to the model.
-    """
-    global _ONTOLOGY
-
-    if _ONTOLOGY is None:
-        # Load oxmeta ontology
-        g = _ONTOLOGY = rdflib.Graph()
-        oxmeta_ttl = pkg_resources.resource_stream('fc', 'ontologies/oxford-metadata.ttl')
-        g.parse(oxmeta_ttl, format='turtle')
-
-    term = create_rdf_node(term)
-    pred_is = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'is'))
-    pred_is_ver = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
-
-    cmeta_ids = set()
-    for annotation in _ONTOLOGY.transitive_subjects(rdflib.RDF.type, term):
-        cmeta_ids.update(model.rdf.subjects(pred_is, annotation))
-        cmeta_ids.update(model.rdf.subjects(pred_is_ver, annotation))
-    symbols = []
-    for cmeta_id in cmeta_ids:
-        symbols.append(model.get_symbol_by_cmeta_id(cmeta_id))
-    return sorted(symbols, key=lambda sym: sym.order_added)
-
-
 def create_weblab_model(path, class_name, model, outputs, parameters, vector_orderings={}):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
@@ -188,23 +148,16 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     ``model``
         A :class:`cellmlmanip.Model` object.
     ``outputs``
-        An ordered list of annotations ``(namespace_uri, local_name)`` for the
-        variables to use as model outputs.
+        An ordered list of :class:`VariableReference`s for the variables to use as model outputs.
     ``parameters``
-        An ordered list of annotations ``(namespace_uri, local_name)`` for the
-        variables to use as model parameters. All variables used as parameters
-        must be literal constants.
+        An ordered list of :class:`VariableReference`s for the variables to use as model parameters.
+        All variables used as parameters must be literal constants.
     ``vector_orderings``
-        An optional mapping defining custom orderings for vector outputs, instead
-        of the default symbol.order_added ordering. Should be a map from annotation
-        ``(namespace_uri, local_name)`` to a mapping from cmeta_id to order index.
+        An optional mapping defining custom orderings for vector outputs, instead of the default
+        ``symbol.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings
+        from cmeta_id to order index.
 
     """
-    # TODO: Jon's comment on the outputs/parameters being annotations:
-    # IIRC the pycml code basically says you can use anything that's a valid
-    # input to create_rdf_node. So we might eventually want to avoid all the
-    # *parameter unpacking when passing around, but I don't think it's urgent.
-
     # TODO: About the outputs:
     # WL1 uses just the local names here, without the base URI part. What we
     # should do eventually is update the ModelWrapperEnvironment so we can use
@@ -212,9 +165,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     # we can use longer names here and let each environment wrap its respective
     # subset. But until that happens, users just have to make sure not to use
     # the same local name in different namespaces.
-
-    # Oxmeta namespace
-    oxmeta = 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata'
 
     # Get unique names for all symbols
     unames = get_unique_names(model)
@@ -242,49 +192,47 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
             'var_name': symbol_name(state),
             'deriv_name': derivative_name(state),
             'initial_value': state.initial_value,
-            'var_names': model.get_ontology_terms_by_symbol(state, oxmeta),
+            'var_names': model.get_ontology_terms_by_symbol(state, OXMETA_NS),
         })
 
     # Create parameter information dicts, and map of parameter symbols to their indices
     parameter_info = []
     parameter_symbols = {}
     for i, parameter in enumerate(parameters):
-        symbol = model.get_symbol_by_ontology_term(parameter)
+        symbol = model.get_symbol_by_ontology_term(parameter.rdf_term)
         parameter_info.append({
             'index': i,
-            'annotation': parameter,
+            'local_name': parameter.local_name,
             'var_name': symbol_name(symbol),
             'initial_value': model.get_value(symbol),
         })
         parameter_symbols[symbol] = i
 
     # Create output information dicts
-    # Each output is associated either with a symbol, a parameter, or a list thereof.
+    # Each output is associated either with a symbol or a list thereof.
     output_info = []
     output_symbols = set()
     for i, output in enumerate(outputs):
-        symbols = get_variables_transitively(model, output)
+        term = output.rdf_term
+        symbols = get_variables_transitively(model, term)
         output_symbols.update(symbols)
         if len(symbols) == 0:
-            raise ValueError('No variable annotated as {{{}}}{} found'.format(*output))
+            raise ValueError('No variable annotated as {} found'.format(term))
         elif len(symbols) == 1:
             length = None  # Not a vector output
             var_name = symbol_name(symbols[0])
-            parameter_index = parameter_symbols.get(symbols[0], None)
         else:
             # Vector output
-            if output in vector_orderings:
-                order = vector_orderings[output]
+            if term in vector_orderings:
+                order = vector_orderings[term]
                 symbols.sort(key=lambda s: order[s.cmeta_id])
             length = len(symbols)
             var_name = [{'index': i, 'var_name': symbol_name(s)} for i, s in enumerate(symbols)]
-            parameter_index = [parameter_symbols.get(s, None) for s in symbols]
 
         output_info.append({
             'index': i,
-            'annotation': output,
+            'local_name': output.local_name,
             'var_name': var_name,
-            'parameter_index': parameter_index,
             'length': length,
         })
 
