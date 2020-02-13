@@ -8,12 +8,14 @@ import os
 
 import pyparsing as p
 import sympy
+from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.parser import UNIT_PREFIXES
 from cellmlmanip.rdf import create_rdf_node
 
 import fc.language.expressions as E
 import fc.language.statements as S
 import fc.language.values as V
+from fc.code_generation import get_variables_transitively
 from fc.locatable import Locatable
 from fc.simulations import model, modifiers, ranges, simulations
 
@@ -522,52 +524,91 @@ class SetTimeUnits(BaseAction):
         return self
 
 
-class InputVariable(BaseGroupAction):
-    """
-    Parse action for input variables defined in the model interface.
+class VariableReference:
+    """Mixin providing properties for resolving variable references.
 
-    ``input <prefix:term> [units <uname>] [= <initial_value>]``
+    Used by input & output variable specifications, inter alia.
+
+    Properties:
+
+    ``prefixed_name``
+        A 'prefix:local_name' string.
+
+    ``ns_prefix``
+        The namespace prefix part of ``prefixed_name``.
+
+    ``local_name``
+        The local name part of ``prefixed_name``.
+
+    ``ns_uri``
+        Once namespace prefixes have been resolved, the namespace URI corresponding to ``ns_prefix``.
+
+    ``rdf_term``
+        The RDF term that annotates variable(s) we reference.
+
     """
     def _expr(self):
         name = self.prefixed_name = self.get_named_token_as_string('name')
         self.ns_prefix, self.local_name = name.split(':', 1)
         self.ns_uri = None  # Will be set later using protocol's namespace mapping
+        return self
+
+    @property
+    def rdf_term(self):
+        """The RDF term annotating this variable."""
+        return create_rdf_node((self.ns_uri, self.local_name))
+
+
+class InputVariable(BaseGroupAction, VariableReference):
+    """
+    Parse action for input variables defined in the model interface.
+
+    ``input <prefix:term> [units <uname>] [= <initial_value>]``
+
+    Provides additional properties:
+
+    ``units``
+        Name of the units this variable is wanted in. Optional; default None.
+    ``initial_value``
+        Optional initial value for the variable; default None.
+    """
+    def _expr(self):
+        super()._expr()
         self.units = self.get_named_token_as_string('units', default=None)
         self.initial_value = self.get_named_token_as_string('initial_value', default=None)
         return self
 
 
-class OutputVariable(BaseGroupAction):
+class OutputVariable(BaseGroupAction, VariableReference):
     """
     Parse action for output variables defined in the model interface.
 
     ``output <prefix:term> [units <uname>]``
+
+    Provides additional properties:
+
+    ``units``
+        Name of the units this variable is wanted in. Optional; default None.
     """
     def _expr(self):
-        name = self.prefixed_name = self.get_named_token_as_string('name')
-        self.ns_prefix, self.local_name = name.split(':', 1)
-        self.ns_uri = None  # Will be set later using protocol's namespace mapping
+        super()._expr()
         self.units = self.get_named_token_as_string('units', default=None)
         return self
 
-    @property
-    def rdf_term(self):
-        """The RDF term annotating this model output."""
-        return create_rdf_node((self.ns_uri, self.local_name))
 
-
-class OptionalVariable(BaseGroupAction):
+class OptionalVariable(BaseGroupAction, VariableReference):
     """Parse action for specifying optional variables in the model interface.
 
     ``optional <prefix:term> [default <simple_expr>]``
+
+    Provides additional properties:
+
+    ``default_expr``
+        Optional string giving the default expression for the variable.
     """
     def __init__(self, s, loc, tokens):
-        super(OptionalVariable, self).__init__(s, loc, tokens)
-        name = self.prefixed_name = self.get_named_token_as_string('name')
-        self.ns_prefix, self.local_name = name.split(':', 1)
-        self.ns_uri = None  # Will be set later using protocol's namespace mapping
+        super().__init__(s, loc, tokens)
         if 'default' in self.tokens:
-            # Record the actual string making up the default expression
             self.default_expr = s[self.tokens['default_start']:self.tokens['default_end']]
         else:
             self.default_expr = ''
@@ -717,9 +758,10 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = []
         self.equations = []
         self._sympy_equations = None
-        self._units = None  # Will be the protocol's UnitStore
-        self._model = None
-        self._ns_map = None
+        self.units = None  # Will be the protocol's UnitStore
+        self.model = None  # The model to be modified
+        self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
+        self.vector_orderings = {}  # Used for consistent code generation of vector outputs
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -749,14 +791,21 @@ class ModelInterface(BaseGroupAction):
         for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
             item.ns_uri = ns_map[item.ns_prefix]
 
-    def associate_model(self, model, units):
-        """Tell this interface what model it is being used to manipulate.
+    def modify_model(self, model, units):
+        """Use the definitions in this interface to transform the provided model.
 
-        :param cellmlmanip.model.Model model: the model, for resolving variable references via ontology terms
+        :param cellmlmanip.model.Model model: the model to manipulate
         :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
         """
-        self._model = model
-        self._units = units
+        self.model = model
+        self.units = units
+        self._convert_time_if_needed()
+        self._add_input_variables()
+        self._add_or_replace_equations()
+        self._annotate_state_variables()
+        output_symbols = self._convert_output_units()
+        self._purge_unused_mathematics(output_symbols)
+        # TODO: Any final consistency checks on the model?
 
     def _symbol_generator(self, name):
         """Resolve a name reference within a model interface equation to a symbol in the model.
@@ -771,7 +820,7 @@ class ModelInterface(BaseGroupAction):
         if ':' in name:
             prefix, local_name = name.split(':', 1)
             ns_uri = self._ns_map[prefix]
-            return self._model.get_symbol_by_ontology_term((ns_uri, local_name))
+            return self.model.get_symbol_by_ontology_term((ns_uri, local_name))
         else:
             # DeclareVariable not yet done
             raise NotImplementedError
@@ -784,7 +833,7 @@ class ModelInterface(BaseGroupAction):
         :param value: the numerical value
         :param units: the *name* of the units for this quantity. Will be looked up from the protocol's definitions.
         """
-        return self._model.add_number(value, self._units.get_unit(units))
+        return self.model.add_number(value, self.units.get_unit(units))
 
     @property
     def sympy_equations(self):
@@ -798,6 +847,103 @@ class ModelInterface(BaseGroupAction):
             for eq in self.equations:
                 eqs.append(eq.to_sympy(self._symbol_generator, self._number_generator))
         return self._sympy_equations
+
+    #######################################
+    # Helper methods for model manipulation
+
+    def _convert_time_if_needed(self):
+        """Units-convert the time variable if not in the protocol's units."""
+        time_units = self.units.get_unit(self.time_units)
+        time_var = self.model.get_free_variable_symbol()
+        time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
+
+    def _add_input_variables(self):
+        """Ensure input variables exist in the desired units.
+
+        TODO: At present this just checks they exist; no units conversion or initial_value handling.
+        TODO: If an input doesn't exist but has units & initial_value here, or is defined via
+        an equation, then add a new variable to the model.
+        """
+        for var in self.inputs:
+            assert var.units is None
+            assert var.initial_value is None
+            self.model.get_symbol_by_ontology_term(var.rdf_term)
+
+    def _add_or_replace_equations(self):
+        """Process define statements and modify the model's equations accordingly."""
+        for eq in self.sympy_equations:
+            lhs = eq.lhs
+            if lhs.is_Derivative:
+                var = lhs.args[0]
+                assert var.initial_value is not None  # TODO: Maybe throw ProtocolError instead?
+            else:
+                var = lhs
+                var.initial_value = None  # In case it was a state variable previously
+            # Figure out if this is a replace or add
+            defn = self.model.get_definition(var)
+            if defn is not None:
+                self.model.remove_equation(defn)
+            self.model.add_equation(eq)
+        # TODO: Check units of newly added equations; apply conversions where needed?
+
+    def _annotate_state_variables(self):
+        """Annotate all state variables with the 'magic' oxmeta:state_variable term."""
+        from cellmlmanip.rdf import create_rdf_node
+        is_version_of = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
+        state_annotation = ('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#', 'state_variable')
+        state_annotation_term = create_rdf_node(state_annotation)
+        self.vector_orderings[state_annotation] = {}
+        for i, state_var in enumerate(self.model.get_state_symbols()):
+            if not state_var.cmeta_id:
+                state_var.cmeta_id = self.model.get_unique_cmeta_id(state_var.name.replace('$', '__'))
+            subject = state_var.rdf_identity
+            self.model.rdf.add((subject, is_version_of, state_annotation_term))
+            self.vector_orderings[state_annotation][state_var.cmeta_id] = i
+
+    def _convert_output_units(self):
+        """Convert units for all outputs if needed.
+
+        :return: the set of symbols appearing in outputs, either directly or as part of a vector,
+            in the desired units
+        """
+        output_symbols = set()
+        for output in self.outputs:
+            symbols = get_variables_transitively(self.model, output.rdf_term)
+            if output.units is not None:
+                desired_units = self.units.get_unit(output.units)
+                for i, symbol in enumerate(symbols):
+                    symbols[i] = self.model.convert_variable(
+                        symbol, desired_units, DataDirectionFlow.OUTPUT)
+            output_symbols.update(symbols)
+        return output_symbols
+
+    def _purge_unused_mathematics(self, output_symbols):
+        """Remove model equations and variables not needed for generating desired outputs.
+
+        :param output_symbols: the set of symbols appearing in outputs, either directly or as part of a vector
+        """
+        import networkx as nx
+        graph = self.model.graph_with_sympy_numbers
+        required_symbols = set(output_symbols)
+        # Symbols used directly in equations computing outputs
+        for symbol in output_symbols:
+            required_symbols.update(nx.ancestors(graph, symbol))
+        # Symbols used indirectly to compute state variables referenced in equations
+        derivatives = self.model.get_derivative_symbols()
+        old_len = 0
+        while old_len != len(required_symbols):
+            old_len = len(required_symbols)
+            for deriv in derivatives:
+                if deriv.args[0] in required_symbols:
+                    required_symbols.update(nx.ancestors(graph, deriv))
+                    # And we also need time...
+                    required_symbols.add(deriv.args[1])
+        # Now figure out which symbols *aren't* used
+        all_symbols = set(self.model.variables())
+        unused_symbols = all_symbols - required_symbols
+        # Remove them and their definitions
+        for symbol in unused_symbols:
+            self.model.remove_variable(symbol)
 
 
 ######################################################################
