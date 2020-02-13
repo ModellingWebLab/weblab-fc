@@ -1,17 +1,16 @@
 """
 Methods for code generation (using jinja2 templates).
 """
-import pkg_resources
 import posixpath
 import time
 
 import jinja2
-import rdflib
 import sympy
 
 from cellmlmanip import transpiler
 from cellmlmanip.printer import Printer
-from cellmlmanip.rdf import create_rdf_node
+
+from .parsing.rdf import OXMETA_NS, get_variables_transitively
 
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
@@ -135,45 +134,6 @@ def get_unique_names(model):
     return symbols
 
 
-_ONTOLOGY = None
-
-
-def get_variables_transitively(model, term):
-    """Return a list of variables annotated (directly or otherwise) with the given ontology term.
-
-    Direct annotations are those variables annotated with the term via the bqbiol:is or
-    bqbiol:isVersionOf predicates.
-
-    However we also look transitively through the 'oxmeta' ontology for terms belonging to the RDF
-    class given by ``term``, i.e. are connected to it by a path of ``rdf:type`` predicates, and
-    return variables annotated with those terms.
-
-    :param term: the ontology term to search for. Can be anything suitable as input to
-        :meth:`create_rdf_node`, typically a :class:`rdflib.term.Node` or ``(ns_uri, local_name)`` pair.
-    :return: a list of :class:`VariableDummy` symbols, sorted by order added to the model.
-    """
-    global _ONTOLOGY
-
-    if _ONTOLOGY is None:
-        # Load oxmeta ontology
-        g = _ONTOLOGY = rdflib.Graph()
-        oxmeta_ttl = pkg_resources.resource_stream('fc', 'ontologies/oxford-metadata.ttl')
-        g.parse(oxmeta_ttl, format='turtle')
-
-    term = create_rdf_node(term)
-    pred_is = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'is'))
-    pred_is_ver = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
-
-    cmeta_ids = set()
-    for annotation in _ONTOLOGY.transitive_subjects(rdflib.RDF.type, term):
-        cmeta_ids.update(model.rdf.subjects(pred_is, annotation))
-        cmeta_ids.update(model.rdf.subjects(pred_is_ver, annotation))
-    symbols = []
-    for cmeta_id in cmeta_ids:
-        symbols.append(model.get_symbol_by_cmeta_id(cmeta_id))
-    return sorted(symbols, key=lambda sym: sym.order_added)
-
-
 def create_weblab_model(path, class_name, model, outputs, parameters, vector_orderings={}):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
@@ -213,9 +173,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     # subset. But until that happens, users just have to make sure not to use
     # the same local name in different namespaces.
 
-    # Oxmeta namespace
-    oxmeta = 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata'
-
     # Get unique names for all symbols
     unames = get_unique_names(model)
 
@@ -242,7 +199,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
             'var_name': symbol_name(state),
             'deriv_name': derivative_name(state),
             'initial_value': state.initial_value,
-            'var_names': model.get_ontology_terms_by_symbol(state, oxmeta),
+            'var_names': model.get_ontology_terms_by_symbol(state, OXMETA_NS),
         })
 
     # Create parameter information dicts, and map of parameter symbols to their indices

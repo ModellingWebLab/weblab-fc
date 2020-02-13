@@ -10,14 +10,13 @@ import pyparsing as p
 import sympy
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.parser import UNIT_PREFIXES
-from cellmlmanip.rdf import create_rdf_node
 
-import fc.language.expressions as E
-import fc.language.statements as S
-import fc.language.values as V
-from fc.code_generation import get_variables_transitively
-from fc.locatable import Locatable
-from fc.simulations import model, modifiers, ranges, simulations
+from ..language import expressions as E
+from ..language import statements as S
+from ..language import values as V
+from ..locatable import Locatable
+from ..simulations import model, modifiers, ranges, simulations
+from .rdf import OXMETA_NS, PRED_IS_VERSION_OF, create_rdf_node, get_variables_transitively
 
 
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
@@ -888,16 +887,14 @@ class ModelInterface(BaseGroupAction):
 
     def _annotate_state_variables(self):
         """Annotate all state variables with the 'magic' oxmeta:state_variable term."""
-        from cellmlmanip.rdf import create_rdf_node
-        is_version_of = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
-        state_annotation = ('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#', 'state_variable')
+        state_annotation = (OXMETA_NS, 'state_variable')
         state_annotation_term = create_rdf_node(state_annotation)
         self.vector_orderings[state_annotation] = {}
         for i, state_var in enumerate(self.model.get_state_symbols()):
             if not state_var.cmeta_id:
                 state_var.cmeta_id = self.model.get_unique_cmeta_id(state_var.name.replace('$', '__'))
             subject = state_var.rdf_identity
-            self.model.rdf.add((subject, is_version_of, state_annotation_term))
+            self.model.rdf.add((subject, PRED_IS_VERSION_OF, state_annotation_term))
             self.vector_orderings[state_annotation][state_var.cmeta_id] = i
 
     def _convert_output_units(self):
