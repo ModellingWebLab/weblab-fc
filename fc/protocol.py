@@ -591,19 +591,9 @@ class Protocol(object):
             # Do all the transformations specified by the protocol
             self.model_interface.modify_model(model, self.units)
 
-            # Create a list of model outputs (as ontology terms) for code generation
-            # TODO: Handle optionality
-            outputs = [(var.ns_uri, var.local_name) for var in self.model_interface.outputs]
-
-            # Create a list of parameters (as ontology terms). Parameters are inputs that are constants.
-            parameters = []
-            for var in self.model_interface.inputs:
-                # TODO: Check if a constant, if so add to parameter list
-                pass
-
             # Create weblab model at path
             create_weblab_model(
-                path, class_name, model, outputs, parameters,
+                path, class_name, model, self.model_interface.outputs, self.model_interface.parameters,
                 vector_orderings=self.model_interface.vector_orderings)
 
             self.log_progress('Compiling pyx model code...')

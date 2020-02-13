@@ -557,6 +557,16 @@ class VariableReference:
         """The RDF term annotating this variable."""
         return create_rdf_node((self.ns_uri, self.local_name))
 
+    @classmethod
+    def create(cls, prefix, uri, local_name):
+        """Helper method to create fake references for testing."""
+        ref = cls()
+        ref.prefixed_name = '{}:{}'.format(prefix, local_name)
+        ref.ns_prefix = prefix
+        ref.ns_uri = uri
+        ref.local_name = local_name
+        return ref
+
 
 class InputVariable(BaseGroupAction, VariableReference):
     """
@@ -745,6 +755,10 @@ class ModelInterface(BaseGroupAction):
     ``sympy_equations``
         Once :meth:`associate_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
         versions of ``self.equations``.
+    ``vector_orderings``
+        Used for consistent code generation of vector outputs.
+    ``parameters``
+        Those model inputs that are constants (unless the protocol changes them while running).
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
@@ -760,7 +774,8 @@ class ModelInterface(BaseGroupAction):
         self.units = None  # Will be the protocol's UnitStore
         self.model = None  # The model to be modified
         self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
-        self.vector_orderings = {}  # Used for consistent code generation of vector outputs
+        self.parameters = []
+        self.vector_orderings = {}
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -804,6 +819,7 @@ class ModelInterface(BaseGroupAction):
         self._annotate_state_variables()
         output_symbols = self._convert_output_units()
         self._purge_unused_mathematics(output_symbols)
+        # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
         # TODO: Any final consistency checks on the model?
 
     def _symbol_generator(self, name):
@@ -887,14 +903,12 @@ class ModelInterface(BaseGroupAction):
 
     def _annotate_state_variables(self):
         """Annotate all state variables with the 'magic' oxmeta:state_variable term."""
-        state_annotation = (OXMETA_NS, 'state_variable')
-        state_annotation_term = create_rdf_node(state_annotation)
+        state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
         self.vector_orderings[state_annotation] = {}
         for i, state_var in enumerate(self.model.get_state_symbols()):
             if not state_var.cmeta_id:
                 state_var.cmeta_id = self.model.get_unique_cmeta_id(state_var.name.replace('$', '__'))
-            subject = state_var.rdf_identity
-            self.model.rdf.add((subject, PRED_IS_VERSION_OF, state_annotation_term))
+            self.model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
             self.vector_orderings[state_annotation][state_var.cmeta_id] = i
 
     def _convert_output_units(self):

@@ -7,6 +7,8 @@ import os
 import re
 
 import fc.code_generation as cg
+from fc.parsing.actions import VariableReference
+from fc.parsing.rdf import OXMETA_NS, PRED_IS_VERSION_OF, create_rdf_node
 
 
 # Show more logging output
@@ -50,36 +52,31 @@ def test_generate_weblab_model(tmp_path):
     model = os.path.join('test', 'models', 'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
     model = cellmlmanip.load_model(model)
 
-    # Select model outputs (as qualified names)
-    oxmeta = 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#'
+    # Select model outputs
     outputs = [
-        (oxmeta, 'membrane_fast_sodium_current'),
-        (oxmeta, 'membrane_voltage'),
-        (oxmeta, 'time'),
-        (oxmeta, 'state_variable'),
+        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_fast_sodium_current'),
+        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_voltage'),
+        VariableReference.create('oxmeta', OXMETA_NS, 'time'),
+        VariableReference.create('oxmeta', OXMETA_NS, 'state_variable'),
     ]
 
-    # Select model parameters (as qualified names)
+    # Select model parameters
     parameters = [
-        (oxmeta, 'membrane_fast_sodium_current_conductance'),
-        (oxmeta, 'membrane_potassium_current_conductance'),
+        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_fast_sodium_current_conductance'),
+        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_potassium_current_conductance'),
     ]
 
     # Annotate state variables with the magic oxmeta:state_variable term
-    from cellmlmanip.rdf import create_rdf_node, rdflib
-    is_version_of = create_rdf_node(('http://biomodels.net/biology-qualifiers/', 'isVersionOf'))
-    state_annotation = ('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#', 'state_variable')
-    state_annotation_term = create_rdf_node(state_annotation)
+    state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
     vector_orderings = {state_annotation: {}}
     for i, state_var in enumerate(model.get_state_symbols()):
         if not state_var.cmeta_id:
-            state_var.cmeta_id = state_var.name.replace('$', '__')  # TODO: Check for uniqueness!
-        subject = rdflib.term.URIRef('#' + state_var.cmeta_id)
-        model.rdf.add((subject, is_version_of, state_annotation_term))
+            state_var.cmeta_id = model.get_unique_cmeta_id(state_var.name.replace('$', '__'))
+        model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
         vector_orderings[state_annotation][state_var.cmeta_id] = i
 
     # Create weblab model at path
-    cg.create_weblab_model(str(path), class_name, model, outputs, parameters)
+    cg.create_weblab_model(str(path), class_name, model, outputs, parameters, vector_orderings)
 
     # Read expected output from file
     expected = os.path.join('test', 'code_generation', 'weblab_model.pyx')
