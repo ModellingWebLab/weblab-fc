@@ -1,25 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-This CellML file was generated on 06/05/2009 at 19:30:26 using:
-
-COR (0.9.31.1207)
-Copyright 2002-2009 Dr Alan Garny
-http://COR.physiol.ox.ac.uk/ - COR@physiol.ox.ac.uk
-
-CellML 1.0 was used to generate this model
-http://www.CellML.org/
--->
-<model name="fink_noble_giles_model_2008" cmeta:id="fink_noble_giles_model_2008" xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
-   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-      <rdf:Description rdf:about="#fink_noble_giles_model_2008"> 
-	     <named-attribute xmlns="https://chaste.comlab.ox.ac.uk/cellml/ns/pycml#"> 
-	        <rdf:Description> 
-	           <name rdf:datatype="http://www.w3.org/2000/10/XMLSchema#string">SuggestedForwardEulerTimestep</name> 
-	           <value rdf:datatype="http://www.w3.org/2000/10/XMLSchema#double">0.001</value> 
-	        </rdf:Description> 
-	     </named-attribute> 
-	  </rdf:Description> 
-   </rdf:RDF>
+<model xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#" name="fink_noble_giles_model_2008" cmeta:id="fink_noble_giles_model_2008">
    <units name="nanolitre">
       <unit units="litre" prefix="nano"/>
    </units>
@@ -96,23 +75,29 @@ http://www.CellML.org/
       <unit units="per_millisecond"/>
    </units>
    <component name="Environment">
-      <variable name="time" units="millisecond" public_interface="out"/>
-      <variable name="R" units="millijoule_per_mole_kelvin" initial_value="8314.472" public_interface="out"/>
-      <variable name="T" units="kelvin" initial_value="310" public_interface="out"/>
-      <variable name="F" units="coulomb_per_mole" initial_value="96485.3415" public_interface="out"/>
-      <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out"/>
-      <variable name="Ca_o" units="millimolar" initial_value="2" public_interface="out"/>
-      <variable name="Na_o" units="millimolar" initial_value="140" public_interface="out"/>
+      <variable name="time" public_interface="out" units="millisecond" cmeta:id="time">
+         
+      </variable>
+      <variable name="R" units="millijoule_per_mole_kelvin" initial_value="8314.472" public_interface="out" cmeta:id="Environment_R"/>
+      <variable name="T" units="kelvin" initial_value="310" public_interface="out" cmeta:id="Environment_T"/>
+      <variable name="F" units="coulomb_per_mole" initial_value="96485.3415" public_interface="out" cmeta:id="Environment_F"/>
+	  <variable name="K_o" units="millimolar" initial_value="5.4" public_interface="out" cmeta:id="extracellular_potassium_concentration">
+         
+      </variable>		  
+      <variable name="Ca_o" units="millimolar" initial_value="2" public_interface="out" cmeta:id="extracellular_calcium_concentration">
+         
+      </variable>
+      <variable name="Na_o" units="millimolar" initial_value="140" public_interface="out" cmeta:id="extracellular_sodium_concentration">
+         
+      </variable>
    </component>
    <component name="cell">
-      <variable name="V" units="millivolt" initial_value="-86.45" public_interface="out" cmeta:id="membrane_voltage">
-         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-            <rdf:Description rdf:about="#membrane_voltage">
-               <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/>
-            </rdf:Description>
-         </rdf:RDF>
+	  <variable name="V" units="millivolt" initial_value="-86.45" public_interface="out" cmeta:id="membrane_voltage">
+         
       </variable>
-      <variable name="Cm" units="nanoF" initial_value="0.115" public_interface="out"/>
+      <variable name="Cm" units="nanoF" initial_value="0.115" public_interface="out" cmeta:id="membrane_capacitance">
+         
+      </variable>
       <variable name="Vol_c" units="nanolitre" initial_value="0.016404" public_interface="out"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="i_K1" units="nanoA_per_nanoF" public_interface="in"/>
@@ -127,61 +112,41 @@ http://www.CellML.org/
       <variable name="i_b_Ca" units="nanoA_per_nanoF" public_interface="in"/>
       <variable name="i_p_K" units="nanoA_per_nanoF" public_interface="in"/>
       <variable name="i_p_Ca" units="nanoA_per_nanoF" public_interface="in"/>
-      <variable name="i_tot" units="nanoA_per_nanoF"/>
       <variable name="i_Stim" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_stimulus_current">
-	  	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-			<rdf:Description rdf:about="#membrane_stimulus_current">
-				<bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current"/>
-			</rdf:Description>
-		</rdf:RDF>
-	  </variable>
-      <variable name="i_Stim_Start" units="millisecond" initial_value="10" cmeta:id="membrane_stimulus_current_offset">
-	  	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-			<rdf:Description rdf:about="#membrane_stimulus_current_offset">
-				<bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_offset"/>
-			</rdf:Description>
-		</rdf:RDF>
-	  </variable>
-      <variable name="i_Stim_End" units="millisecond" initial_value="100000"/>
-      <variable name="i_Stim_Amplitude" units="nanoA_per_nanoF" initial_value="-52" cmeta:id="membrane_stimulus_current_amplitude">
-	  	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-			<rdf:Description rdf:about="#membrane_stimulus_current_amplitude">
-				<bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/>
-			</rdf:Description>
-		</rdf:RDF>
-	  </variable>
-      <variable name="i_Stim_Period" units="millisecond" initial_value="1000" cmeta:id="membrane_stimulus_current_period">
-	  	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-			<rdf:Description rdf:about="#membrane_stimulus_current_period">
-				<bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_period"/>
-			</rdf:Description>
-		</rdf:RDF>
-	  </variable>
-      <variable name="i_Stim_PulseDuration" units="millisecond" initial_value="1" cmeta:id="membrane_stimulus_current_duration">
-	  	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-			<rdf:Description rdf:about="#membrane_stimulus_current_duration">
-				<bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_duration"/>
-			</rdf:Description>
-		</rdf:RDF>
-	  </variable>
+         
+      </variable>
+      <variable name="i_tot" units="nanoA_per_nanoF"/>
+	  <variable name="stim_start" units="millisecond" initial_value="100" cmeta:id="membrane_stimulus_current_offset">
+         
+      </variable>	  
+      <variable name="stim_end" units="millisecond" initial_value="100000"/>
+	  <variable name="stim_period" units="millisecond" initial_value="1000" cmeta:id="membrane_stimulus_current_period">
+         
+      </variable>	  
+	  <variable name="stim_duration" units="millisecond" initial_value="3" cmeta:id="membrane_stimulus_current_duration">
+         
+      </variable>	  
+	  <variable name="stim_amplitude" units="nanoA_per_nanoF" initial_value="-12" cmeta:id="membrane_stimulus_current_amplitude">
+         
+      </variable>	  
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
             <ci>i_Stim</ci>
             <piecewise>
                <piece>
-                  <ci>i_Stim_Amplitude</ci>
+                  <ci>stim_amplitude</ci>
                   <apply>
                      <and/>
                      <apply>
                         <geq/>
                         <ci>time</ci>
-                        <ci>i_Stim_Start</ci>
+                        <ci>stim_start</ci>
                      </apply>
                      <apply>
                         <leq/>
                         <ci>time</ci>
-                        <ci>i_Stim_End</ci>
+                        <ci>stim_end</ci>
                      </apply>
                      <apply>
                         <leq/>
@@ -190,7 +155,7 @@ http://www.CellML.org/
                            <apply>
                               <minus/>
                               <ci>time</ci>
-                              <ci>i_Stim_Start</ci>
+                              <ci>stim_start</ci>
                            </apply>
                            <apply>
                               <times/>
@@ -201,15 +166,15 @@ http://www.CellML.org/
                                     <apply>
                                        <minus/>
                                        <ci>time</ci>
-                                       <ci>i_Stim_Start</ci>
+                                       <ci>stim_start</ci>
                                     </apply>
-                                    <ci>i_Stim_Period</ci>
+                                    <ci>stim_period</ci>
                                  </apply>
                               </apply>
-                              <ci>i_Stim_Period</ci>
+                              <ci>stim_period</ci>
                            </apply>
                         </apply>
-                        <ci>i_Stim_PulseDuration</ci>
+                        <ci>stim_duration</ci>
                      </apply>
                   </apply>
                </piece>
@@ -387,8 +352,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="IK1">
-      <variable name="i_K1" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="g_K1_0" units="microS_per_nanoF" initial_value="0.6821"/>
+	  <variable name="i_K1" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_inward_rectifier_potassium_current">
+         
+      </variable>		  
+      <variable name="g_K1_0" units="microS_per_nanoF" initial_value="0.6821" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
+         
+      </variable>	 
       <variable name="time" units="millisecond" public_interface="in" private_interface="out"/>
       <variable name="E_K" units="millivolt" public_interface="in" private_interface="out"/>
       <variable name="V" units="millivolt" public_interface="in" private_interface="out"/>
@@ -652,8 +621,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="IKr">
-      <variable name="i_Kr" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="g_Kr_0" units="microS_per_nanoF" initial_value="0.024"/>
+	  <variable name="i_Kr" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current">
+         
+      </variable>
+      <variable name="g_Kr_0" units="microS_per_nanoF" initial_value="0.024" cmeta:id="membrane_rapid_delayed_rectifier_potassium_current_conductance">
+         
+      </variable>
       <variable name="time" units="millisecond" public_interface="in" private_interface="out"/>
       <variable name="T" units="kelvin" public_interface="in" private_interface="out"/>
       <variable name="K_o" units="millimolar" public_interface="in" private_interface="out"/>
@@ -1422,8 +1395,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="IKs">
-      <variable name="i_Ks" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="g_Ks" units="microS_per_nanoF" initial_value="0.0392"/>
+	  <variable name="i_Ks" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_slow_delayed_rectifier_potassium_current">
+         
+      </variable>		  
+      <variable name="g_Ks" units="microS_per_nanoF" initial_value="0.0392" cmeta:id="membrane_slow_delayed_rectifier_potassium_current_conductance">
+         
+      </variable>	  	 
       <variable name="E_Ks" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in" private_interface="out"/>
       <variable name="V" units="millivolt" public_interface="in" private_interface="out"/>
@@ -1572,8 +1549,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="Ito">
-      <variable name="i_to" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="g_to" units="microS_per_nanoF" initial_value="0.2"/>
+	  <variable name="i_to" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_transient_outward_current">
+         
+      </variable>		  
+      <variable name="g_to" units="microS_per_nanoF" initial_value="0.2" cmeta:id="membrane_transient_outward_current_conductance">
+         
+      </variable>		
       <variable name="E_K" units="millivolt" public_interface="in"/>
       <variable name="V" units="millivolt" public_interface="in" private_interface="out"/>
       <variable name="time" units="millisecond" public_interface="in" private_interface="out"/>
@@ -1784,9 +1765,18 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="INa">
-      <variable name="i_Na" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="g_Na" units="microS_per_nanoF" initial_value="11"/>
-      <variable name="shift_INa_inact" units="millivolt" initial_value="0" private_interface="out"/>
+	  <variable name="i_Na" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_fast_sodium_current">
+         
+      </variable>
+      <variable name="g_Na" units="microS_per_nanoF" initial_value="11" cmeta:id="membrane_fast_sodium_current_conductance">
+         
+      </variable>
+      <variable name="shift_INa_inact" units="millivolt" initial_value="0" private_interface="out" cmeta:id="membrane_fast_sodium_current_shift_inactivation">
+         
+      </variable>
+	  <variable name="perc_reduced_inact_for_IpNa" units="dimensionless" initial_value="0" private_interface="out" cmeta:id="membrane_fast_sodium_current_reduced_inactivation">
+         
+      </variable>
       <variable name="E_Na" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in" private_interface="out"/>
       <variable name="V" units="millivolt" public_interface="in" private_interface="out"/>
@@ -1817,7 +1807,9 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iNa_m_gate">
-      <variable name="m" units="dimensionless" initial_value="0.00132" public_interface="out"/>
+	  <variable name="m" units="dimensionless" initial_value="0.00132" public_interface="out" cmeta:id="membrane_fast_sodium_current_m_gate">
+         
+      </variable>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="m_inf" units="dimensionless"/>
@@ -1962,44 +1954,69 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iNa_h_gate">
-      <variable name="h" units="dimensionless" initial_value="0.7768" public_interface="out"/>
+	  <variable name="h" units="dimensionless" initial_value="0.7768" public_interface="out" cmeta:id="membrane_fast_sodium_current_h_gate">
+         
+      </variable>
       <variable name="shift_INa_inact" units="millivolt" public_interface="in"/>
+	  <variable name="perc_reduced_inact_for_IpNa" units="dimensionless" public_interface="in"/>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="h_inf" units="dimensionless"/>
       <variable name="alpha_h" units="per_millisecond"/>
       <variable name="beta_h" units="per_millisecond"/>
-      <variable name="tau_h" units="millisecond"/>
+	  <variable name="tau_h" units="millisecond" cmeta:id="membrane_fast_sodium_current_h_gate_tau">
+         
+      </variable>	  	  
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
             <ci>h_inf</ci>
             <apply>
-               <divide/>
-               <cn cellml:units="dimensionless">1</cn>
+               <plus/>
                <apply>
-                  <power/>
+                  <divide/>
                   <apply>
-                     <plus/>
+                     <times/>
                      <cn cellml:units="dimensionless">1</cn>
                      <apply>
-                        <exp/>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
                         <apply>
                            <divide/>
-                           <apply>
-                              <minus/>
-                              <apply>
-                                 <plus/>
-                                 <ci>V</ci>
-                                 <cn cellml:units="millivolt">71.55</cn>
-                              </apply>
-                              <ci>shift_INa_inact</ci>
-                           </apply>
-                           <cn cellml:units="millivolt">7.43</cn>
+                           <ci>perc_reduced_inact_for_IpNa</ci>
+                           <cn cellml:units="dimensionless">100</cn>
                         </apply>
                      </apply>
                   </apply>
-                  <cn cellml:units="dimensionless">2</cn>
+                  <apply>
+                     <power/>
+                     <apply>
+                        <plus/>
+                        <cn cellml:units="dimensionless">1</cn>
+                        <apply>
+                           <exp/>
+                           <apply>
+                              <divide/>
+                              <apply>
+                                 <minus/>
+                                 <apply>
+                                    <plus/>
+                                    <ci>V</ci>
+                                    <cn cellml:units="millivolt">71.55</cn>
+                                 </apply>
+                                 <ci>shift_INa_inact</ci>
+                              </apply>
+                              <cn cellml:units="millivolt">7.43</cn>
+                           </apply>
+                        </apply>
+                     </apply>
+                     <cn cellml:units="dimensionless">2</cn>
+                  </apply>
+               </apply>
+               <apply>
+                  <divide/>
+                  <ci>perc_reduced_inact_for_IpNa</ci>
+                  <cn cellml:units="dimensionless">100</cn>
                </apply>
             </apply>
          </apply>
@@ -2172,44 +2189,69 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iNa_j_gate">
-      <variable name="j" units="dimensionless" initial_value="0.7766" public_interface="out"/>
+	  <variable name="j" units="dimensionless" initial_value="0.7766" public_interface="out" cmeta:id="membrane_fast_sodium_current_j_gate">
+         
+      </variable>
       <variable name="shift_INa_inact" units="millivolt" public_interface="in"/>
+	  <variable name="perc_reduced_inact_for_IpNa" units="dimensionless" public_interface="in"/>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="j_inf" units="dimensionless"/>
       <variable name="alpha_j" units="per_millisecond"/>
       <variable name="beta_j" units="per_millisecond"/>
-      <variable name="tau_j" units="millisecond"/>
+	  <variable name="tau_j" units="millisecond" cmeta:id="membrane_fast_sodium_current_j_gate_tau">
+         
+      </variable>	
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
             <ci>j_inf</ci>
             <apply>
-               <divide/>
-               <cn cellml:units="dimensionless">1</cn>
+               <plus/>
                <apply>
-                  <power/>
+                  <divide/>
                   <apply>
-                     <plus/>
+                     <times/>
                      <cn cellml:units="dimensionless">1</cn>
                      <apply>
-                        <exp/>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
                         <apply>
                            <divide/>
-                           <apply>
-                              <minus/>
-                              <apply>
-                                 <plus/>
-                                 <ci>V</ci>
-                                 <cn cellml:units="millivolt">71.55</cn>
-                              </apply>
-                              <ci>shift_INa_inact</ci>
-                           </apply>
-                           <cn cellml:units="millivolt">7.43</cn>
+                           <ci>perc_reduced_inact_for_IpNa</ci>
+                           <cn cellml:units="dimensionless">100</cn>
                         </apply>
                      </apply>
                   </apply>
-                  <cn cellml:units="dimensionless">2</cn>
+                  <apply>
+                     <power/>
+                     <apply>
+                        <plus/>
+                        <cn cellml:units="dimensionless">1</cn>
+                        <apply>
+                           <exp/>
+                           <apply>
+                              <divide/>
+                              <apply>
+                                 <minus/>
+                                 <apply>
+                                    <plus/>
+                                    <ci>V</ci>
+                                    <cn cellml:units="millivolt">71.55</cn>
+                                 </apply>
+                                 <ci>shift_INa_inact</ci>
+                              </apply>
+                              <cn cellml:units="millivolt">7.43</cn>
+                           </apply>
+                        </apply>
+                     </apply>
+                     <cn cellml:units="dimensionless">2</cn>
+                  </apply>
+               </apply>
+               <apply>
+                  <divide/>
+                  <ci>perc_reduced_inact_for_IpNa</ci>
+                  <cn cellml:units="dimensionless">100</cn>
                </apply>
             </apply>
          </apply>
@@ -2479,8 +2521,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="ICaL">
-      <variable name="i_CaL" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="g_CaL" units="litre_per_farad_millisecond" initial_value="2e-5"/>
+	  <variable name="i_CaL" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_L_type_calcium_current">
+         
+      </variable>
+      <variable name="g_CaL" units="litre_per_farad_millisecond" initial_value="2e-5" cmeta:id="membrane_L_type_calcium_current_conductance">
+         
+      </variable>
       <variable name="Ca_o" units="millimolar" public_interface="in"/>
       <variable name="Ca_ss" units="millimolar" public_interface="in" private_interface="out"/>
       <variable name="R" units="millijoule_per_mole_kelvin" public_interface="in"/>
@@ -2593,7 +2639,9 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iCaL_d_gate">
-      <variable name="d" units="dimensionless" initial_value="5.06e-6" public_interface="out"/>
+	  <variable name="d" units="dimensionless" initial_value="5.06e-6" public_interface="out" cmeta:id="membrane_L_type_calcium_current_d_gate">
+         
+      </variable>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="d_inf" units="dimensionless"/>
@@ -2742,11 +2790,15 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iCaL_f_gate">
-      <variable name="f" units="dimensionless" initial_value="0.9999" public_interface="out"/>
+	  <variable name="f" units="dimensionless" initial_value="0.9999" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f_gate">
+         
+      </variable>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="f_inf" units="dimensionless"/>
-      <variable name="tau_f" units="millisecond"/>
+	  <variable name="tau_f" units="millisecond" cmeta:id="membrane_L_type_calcium_current_f_gate_tau">
+         
+      </variable>	  	
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -2869,11 +2921,15 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iCaL_f2_gate">
-      <variable name="f2" units="dimensionless" initial_value="0.9995" public_interface="out"/>
+	  <variable name="f2" units="dimensionless" initial_value="0.9995" public_interface="out" cmeta:id="membrane_L_type_calcium_current_f2_gate">
+         
+      </variable>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="f2_inf" units="dimensionless"/>
-      <variable name="tau_f2" units="millisecond"/>
+	  <variable name="tau_f2" units="millisecond" cmeta:id="membrane_L_type_calcium_current_f2_gate_tau">
+         
+      </variable>		
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -2999,12 +3055,16 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="iCaL_fCass_gate">
-      <variable name="fCass" units="dimensionless" initial_value="1" public_interface="out"/>
+	  <variable name="fCass" units="dimensionless" initial_value="1" public_interface="out" cmeta:id="membrane_L_type_calcium_current_fCa_gate">
+         
+      </variable>
       <variable name="Ca_ss" units="millimolar" public_interface="in"/>
       <variable name="V" units="millivolt" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="fCass_inf" units="dimensionless"/>
-      <variable name="tau_fCass" units="millisecond"/>
+	  <variable name="tau_fCass" units="millisecond" cmeta:id="membrane_L_type_calcium_current_fCa_gate_tau">
+         
+      </variable>			  
       <math xmlns="http://www.w3.org/1998/Math/MathML">
          <apply>
             <eq/>
@@ -3100,7 +3160,7 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="IpCa">
-      <variable name="i_p_Ca" units="nanoA_per_nanoF" public_interface="out"/>
+      <variable name="i_p_Ca" units="nanoA_per_nanoF" public_interface="out" xmlns:ns4166699="http://www.cellml.org/metadata/1.0#" ns4166699:id="IpCa_i_p_Ca"/>
       <variable name="g_pCa" units="nanoA_per_nanoF" initial_value="0.0619"/>
       <variable name="K_pCa" units="millimolar" initial_value="0.0005"/>
       <variable name="Ca_i" units="millimolar" public_interface="in"/>
@@ -3263,8 +3323,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="INaCa">
-      <variable name="i_NaCa" units="nanoA_per_nanoF" public_interface="out"/>
-      <variable name="K_NaCa" units="nanoA_per_nanoF" initial_value="200"/>
+	  <variable name="i_NaCa" units="nanoA_per_nanoF" public_interface="out" cmeta:id="membrane_sodium_calcium_exchanger_current">
+         
+      </variable>
+      <variable name="K_NaCa" units="nanoA_per_nanoF" initial_value="200" cmeta:id="membrane_sodium_calcium_exchanger_current_conductance">
+         
+      </variable>
       <variable name="K_sat" units="dimensionless" initial_value="0.1"/>
       <variable name="alpha" units="dimensionless" initial_value="2.5"/>
       <variable name="gamma" units="dimensionless" initial_value="0.35"/>
@@ -3404,9 +3468,15 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="Ca">
-      <variable name="Ca_i" units="millimolar" initial_value="1.092e-4" public_interface="out" private_interface="out"/>
-      <variable name="Ca_SR" units="millimolar" initial_value="2.7656" private_interface="out"/>
-      <variable name="Ca_ss" units="millimolar" initial_value="1.893e-4" public_interface="out" private_interface="out"/>
+	  <variable name="Ca_i" units="millimolar" initial_value="1.092e-4" public_interface="out" private_interface="out" cmeta:id="cytosolic_calcium_concentration">
+         
+      </variable>
+	  <variable name="Ca_SR" units="millimolar" initial_value="2.7656" public_interface="out" private_interface="out" cmeta:id="JSR_calcium_concentration">
+         
+      </variable>	 	  
+	  <variable name="Ca_ss" units="millimolar" initial_value="1.893e-4" public_interface="out" private_interface="out" cmeta:id="dyadic_space_calcium_concentration">
+         
+      </variable>
       <variable name="Ca_i_bufc" units="dimensionless" private_interface="in"/>
       <variable name="Ca_sr_bufsr" units="dimensionless" private_interface="in"/>
       <variable name="Ca_ss_bufss" units="dimensionless" private_interface="in"/>
@@ -3568,13 +3638,17 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="Ileak_Iup_Ixfer">
-      <variable name="i_up" units="millimolar_per_millisecond" public_interface="out"/>
-      <variable name="i_leak" units="millimolar_per_millisecond" public_interface="out"/>
+      <variable name="i_up" units="millimolar_per_millisecond" public_interface="out" cmeta:id="Ileak_Iup_Ixfer_i_up"/>
+      <variable name="i_leak" units="millimolar_per_millisecond" public_interface="out" cmeta:id="Ileak_Iup_Ixfer_i_leak"/>
       <variable name="i_xfer" units="millimolar_per_millisecond" public_interface="out"/>
       <variable name="Vol_xfer" units="per_millisecond" initial_value="0.0038"/>
       <variable name="K_up" units="millimolar" initial_value="0.00025"/>
-      <variable name="Vol_leak" units="per_millisecond" initial_value="0.00036"/>
-      <variable name="Vmax_up" units="millimolar_per_millisecond" initial_value="0.006375"/>
+	  <variable name="Vol_leak" initial_value="0.00036" units="per_millisecond" cmeta:id="SR_leak_current_max">
+         
+      </variable>		  
+	  <variable name="Vmax_up" units="millimolar_per_millisecond" initial_value="0.006375" cmeta:id="SR_uptake_current_max">
+         
+      </variable>		  
       <variable name="Ca_i" units="millimolar" public_interface="in"/>
       <variable name="Ca_ss" units="millimolar" public_interface="in"/>
       <variable name="Ca_SR" units="millimolar" public_interface="in"/>
@@ -3633,7 +3707,9 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="Irel">
-      <variable name="i_rel" units="millimolar_per_millisecond" public_interface="out"/>
+	  <variable name="i_rel" units="millimolar_per_millisecond" public_interface="out" cmeta:id="SR_release_current">
+         
+      </variable>	  	  
       <variable name="R_prime" units="dimensionless" initial_value="0.9864"/>
       <variable name="k1_prime" units="per_millimolar2_per_millisecond" initial_value="0.15"/>
       <variable name="k2_prime" units="per_millimolar_per_millisecond" initial_value="0.045"/>
@@ -3642,7 +3718,9 @@ http://www.CellML.org/
       <variable name="min_sr" units="dimensionless" initial_value="1"/>
       <variable name="k3" units="per_millisecond" initial_value="0.06"/>
       <variable name="k4" units="per_millisecond" initial_value="0.005"/>
-      <variable name="Vol_rel" units="per_millisecond" initial_value="0.306"/>
+	  <variable name="Vol_rel" units="per_millisecond" initial_value="0.306" cmeta:id="SR_release_current_max">
+         
+      </variable>	  
       <variable name="Ca_ss" units="millimolar" public_interface="in"/>
       <variable name="Ca_SR" units="millimolar" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
@@ -3776,9 +3854,9 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="Ca_buffer">
-      <variable name="Ca_i_bufc" units="dimensionless" public_interface="out"/>
+      <variable xmlns:ns4166699="http://www.cellml.org/metadata/1.0#" name="Ca_i_bufc" units="dimensionless" public_interface="out" ns4166699:id="Ca_buffer_Ca_i_bufc"/>
       <variable name="Ca_sr_bufsr" units="dimensionless" public_interface="out"/>
-      <variable name="Ca_ss_bufss" units="dimensionless" public_interface="out"/>
+      <variable xmlns:ns4166699="http://www.cellml.org/metadata/1.0#" name="Ca_ss_bufss" units="dimensionless" public_interface="out" ns4166699:id="Ca_buffer_Ca_ss_bufss"/>
       <variable name="Ca_i" units="millimolar" public_interface="in"/>
       <variable name="Ca_ss" units="millimolar" public_interface="in"/>
       <variable name="Ca_SR" units="millimolar" public_interface="in"/>
@@ -3879,7 +3957,12 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="Na">
-      <variable name="Na_i" units="millimolar" initial_value="7.940167" public_interface="out"/>
+	  <variable name="Na_i" units="millimolar" initial_value="7.940167" public_interface="out" cmeta:id="cytosolic_sodium_concentration">
+         
+      </variable>
+	  <variable name="conc_clamp" units="dimensionless" initial_value="1" public_interface="out" cmeta:id="concentration_clamp_onoff">
+         
+      </variable>		  
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="F" units="coulomb_per_mole" public_interface="in"/>
       <variable name="Cm" units="nanoF" public_interface="in"/>
@@ -3904,20 +3987,21 @@ http://www.CellML.org/
                   <times/>
                   <apply>
                      <minus/>
+                     <ci>conc_clamp</ci>
+                  </apply>
+                  <apply>
+                     <plus/>
+                     <ci>i_Na</ci>
+                     <ci>i_b_Na</ci>
                      <apply>
-                        <plus/>
-                        <ci>i_Na</ci>
-                        <ci>i_b_Na</ci>
-                        <apply>
-                           <times/>
-                           <cn cellml:units="dimensionless">3</cn>
-                           <ci>i_NaK</ci>
-                        </apply>
-                        <apply>
-                           <times/>
-                           <cn cellml:units="dimensionless">3</cn>
-                           <ci>i_NaCa</ci>
-                        </apply>
+                        <times/>
+                        <cn cellml:units="dimensionless">3</cn>
+                        <ci>i_NaK</ci>
+                     </apply>
+                     <apply>
+                        <times/>
+                        <cn cellml:units="dimensionless">3</cn>
+                        <ci>i_NaCa</ci>
                      </apply>
                   </apply>
                   <ci>Cm</ci>
@@ -3932,7 +4016,10 @@ http://www.CellML.org/
       </math>
    </component>
    <component name="K">
-      <variable name="K_i" units="millimolar" initial_value="141.0167" public_interface="out"/>
+	  <variable name="K_i" units="millimolar" initial_value="141.0167" public_interface="out" cmeta:id="cytosolic_potassium_concentration">
+         
+      </variable>
+	  <variable name="conc_clamp" units="dimensionless" public_interface="in"/>
       <variable name="time" units="millisecond" public_interface="in"/>
       <variable name="F" units="coulomb_per_mole" public_interface="in"/>
       <variable name="Cm" units="nanoF" public_interface="in"/>
@@ -3959,7 +4046,11 @@ http://www.CellML.org/
                <apply>
                   <divide/>
                   <apply>
-                     <minus/>
+                     <times/>
+                     <apply>
+                        <minus/>
+                        <ci>conc_clamp</ci>
+                     </apply>
                      <apply>
                         <minus/>
                         <apply>
@@ -4383,6 +4474,7 @@ http://www.CellML.org/
       <map_variables variable_1="time" variable_2="time"/>
       <map_variables variable_1="V" variable_2="V"/>
       <map_variables variable_1="shift_INa_inact" variable_2="shift_INa_inact"/>
+      <map_variables variable_1="perc_reduced_inact_for_IpNa" variable_2="perc_reduced_inact_for_IpNa"/>
    </connection>
    <connection>
       <map_components component_1="INa" component_2="iNa_j_gate"/>
@@ -4390,6 +4482,7 @@ http://www.CellML.org/
       <map_variables variable_1="time" variable_2="time"/>
       <map_variables variable_1="V" variable_2="V"/>
       <map_variables variable_1="shift_INa_inact" variable_2="shift_INa_inact"/>
+      <map_variables variable_1="perc_reduced_inact_for_IpNa" variable_2="perc_reduced_inact_for_IpNa"/>
    </connection>
    <connection>
       <map_components component_1="ICaL" component_2="iCaL_d_gate"/>
@@ -4461,4 +4554,8 @@ http://www.CellML.org/
       <map_variables variable_1="Ca_ss" variable_2="Ca_ss"/>
       <map_variables variable_1="Ca_SR" variable_2="Ca_SR"/>
    </connection>
-</model>
+   <connection>
+      <map_components component_1="Na" component_2="K"/>
+	  <map_variables variable_2="conc_clamp" variable_1="conc_clamp"/>
+   </connection>   
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"><rdf:Description rdf:about="#time"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/></rdf:Description><rdf:Description rdf:about="#extracellular_potassium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_sodium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/></rdf:Description><rdf:Description rdf:about="#membrane_voltage"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/></rdf:Description><rdf:Description rdf:about="#membrane_capacitance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_offset"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_offset"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_period"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_period"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_duration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_duration"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_amplitude"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/></rdf:Description><rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_rapid_delayed_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_slow_delayed_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_slow_delayed_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_transient_outward_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current"/></rdf:Description><rdf:Description rdf:about="#membrane_transient_outward_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_transient_outward_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_shift_inactivation"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_shift_inactivation"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_reduced_inactivation"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_reduced_inactivation"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_m_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_m_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_h_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_h_gate_tau"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate_tau"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_j_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_j_gate_tau"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate_tau"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_d_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_d_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_f_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_f_gate_tau"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f_gate_tau"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_f2_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f2_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_f2_gate_tau"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_f2_gate_tau"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_fCa_gate"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_fCa_gate"/></rdf:Description><rdf:Description rdf:about="#membrane_L_type_calcium_current_fCa_gate_tau"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_fCa_gate_tau"/></rdf:Description><rdf:Description rdf:about="#membrane_sodium_calcium_exchanger_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_calcium_exchanger_current"/></rdf:Description><rdf:Description rdf:about="#membrane_sodium_calcium_exchanger_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_calcium_exchanger_current_conductance"/></rdf:Description><rdf:Description rdf:about="#cytosolic_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#JSR_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#dyadic_space_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#dyadic_space_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#SR_leak_current_max"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/></rdf:Description><rdf:Description rdf:about="#SR_uptake_current_max"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/></rdf:Description><rdf:Description rdf:about="#SR_release_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current"/></rdf:Description><rdf:Description rdf:about="#SR_release_current_max"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/></rdf:Description><rdf:Description rdf:about="#cytosolic_sodium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/></rdf:Description><rdf:Description rdf:about="#concentration_clamp_onoff"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#concentration_clamp_onoff"/></rdf:Description><rdf:Description rdf:about="#cytosolic_potassium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/></rdf:Description><rdf:Description rdf:about="#Ileak_Iup_Ixfer_i_up"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current"/></rdf:Description><rdf:Description rdf:about="#Ileak_Iup_Ixfer_i_leak"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current"/></rdf:Description><rdf:Description rdf:about="#Environment_F"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#faraday_constant"/></rdf:Description><rdf:Description rdf:about="#Environment_R"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#gas_constant"/></rdf:Description><rdf:Description rdf:about="#Environment_T"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#temperature"/></rdf:Description><rdf:Description rdf:about="#Ca_buffer_Ca_i_bufc"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_flux_scaling_from_intrinsic_buffers"/></rdf:Description><rdf:Description rdf:about="#Ca_buffer_Ca_ss_bufss"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#dyadic_space_calcium_flux_scaling_from_intrinsic_buffers"/></rdf:Description><rdf:Description rdf:about="#IpCa_i_p_Ca"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_calcium_pump_current"/></rdf:Description></rdf:RDF></model>
