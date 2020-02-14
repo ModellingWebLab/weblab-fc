@@ -631,18 +631,21 @@ class DeclareVariable(BaseGroupAction):
 
 
 class ClampVariable(BaseGroupAction):
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    assert 1 <= len(self.tokens) <= 2
-    #    name = self.tokens[0]
-    #    if len(self.tokens) == 1:
-    #        value = name
-    #    else:
-    #        value = self.tokens[1]
-    #    return self.delegate('ModelEquation', [[name, value]]).xml()
-    pass
+    """Parse action for ``clamp`` declarations in the model interface.
 
-# TODO: Rename to class DefineVariable ?
+    ``clamp <prefix:term> [to <simple_expr>]``
+
+    Implemented as syntactic sugar for :class:`ModelEquation`.
+    """
+    def _expr(self):
+        print(self.tokens)
+        assert 1 <= len(self.tokens) <= 2
+        name = self.tokens[0]
+        if len(self.tokens) == 1:
+            value = name
+        else:
+            value = self.tokens[1]
+        return self.delegate('ModelEquation', [[name, value]]).expr()
 
 
 class ModelEquation(BaseGroupAction):
