@@ -870,9 +870,10 @@ class ModelInterface(BaseGroupAction):
 
     def _convert_time_if_needed(self):
         """Units-convert the time variable if not in the protocol's units."""
-        time_units = self.units.get_unit(self.time_units)
-        time_var = self.model.get_free_variable_symbol()
-        time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
+        if self.time_units:
+            time_units = self.units.get_unit(self.time_units)
+            time_var = self.model.get_free_variable_symbol()
+            time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
 
     def _add_input_variables(self):
         """Ensure input variables exist in the desired units.
