@@ -638,7 +638,6 @@ class ClampVariable(BaseGroupAction):
     Implemented as syntactic sugar for :class:`ModelEquation`.
     """
     def _expr(self):
-        print(self.tokens)
         assert 1 <= len(self.tokens) <= 2
         name = self.tokens[0]
         if len(self.tokens) == 1:
