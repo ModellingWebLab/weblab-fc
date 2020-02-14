@@ -171,8 +171,7 @@ cdef class {{ class_name }}(CvodeSolver):
         self.output_names.append('{{ output.local_name }}')
         {%- endfor %}
 
-        # Create and cache list of arrays, to avoid constant list/array
-        # creation
+        # Create and cache list of arrays, to avoid constant list/array creation
         self._outputs = []
         {%- for output in outputs %}
         {%- if output.length is none %}
@@ -181,7 +180,6 @@ cdef class {{ class_name }}(CvodeSolver):
         self._outputs.append(np.zeros({{ output.length }}))
         {%- endif %}
         {%- endfor %}
-        # TODO Handle vector outputs other than state_variable
 
         self.state = self.initial_state.copy()
         self.saved_states = {}
