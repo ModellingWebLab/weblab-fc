@@ -189,14 +189,12 @@ cdef class TestModel(CvodeSolver):
         self.output_names.append('time')
         self.output_names.append('state_variable')
 
-        # Create and cache list of arrays, to avoid constant list/array
-        # creation
+        # Create and cache list of arrays, to avoid constant list/array creation
         self._outputs = []
         self._outputs.append(np.array(0.0))
         self._outputs.append(np.array(0.0))
         self._outputs.append(np.array(0.0))
         self._outputs.append(np.zeros(4))
-        # TODO Handle vector outputs other than state_variable
 
         self.state = self.initial_state.copy()
         self.saved_states = {}
