@@ -546,10 +546,14 @@ class VariableReference:
         The RDF term that annotates variable(s) we reference.
 
     """
-    def _expr(self):
-        name = self.prefixed_name = self.get_named_token_as_string('name')
+    def set_name(self, name):
+        """Set the name used for this reference. For use by subclasses."""
+        self.prefixed_name = name
         self.ns_prefix, self.local_name = name.split(':', 1)
         self.ns_uri = None  # Will be set later using protocol's namespace mapping
+
+    def _expr(self):
+        self.set_name(self.get_named_token_as_string('name'))
         return self
 
     @property
@@ -630,21 +634,24 @@ class DeclareVariable(BaseGroupAction):
     pass
 
 
-class ClampVariable(BaseGroupAction):
+class ClampVariable(BaseGroupAction, VariableReference):
     """Parse action for ``clamp`` declarations in the model interface.
 
     ``clamp <prefix:term> [to <simple_expr>]``
 
-    Implemented as syntactic sugar for :class:`ModelEquation`.
+    With a 'to' clause this is implemented as syntactic sugar for :class:`ModelEquation`.
+
+    Clamping to the initial value in the model is handled specially; we just record the variable reference.
     """
     def _expr(self):
         assert 1 <= len(self.tokens) <= 2
         name = self.tokens[0]
         if len(self.tokens) == 1:
-            value = name
+            self.set_name(name.tokens)
+            return self
         else:
             value = self.tokens[1]
-        return self.delegate('ModelEquation', [[name, value]]).expr()
+            return self.delegate('ModelEquation', [[name, value]]).expr()
 
 
 class ModelEquation(BaseGroupAction):
@@ -772,6 +779,7 @@ class ModelInterface(BaseGroupAction):
         self.outputs = []
         self.optional_decls = []
         self.equations = []
+        self._clamps = []  # ClampVariable instances
         self._sympy_equations = None
         self.units = None  # Will be the protocol's UnitStore
         self.model = None  # The model to be modified
@@ -786,6 +794,7 @@ class ModelInterface(BaseGroupAction):
         self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
         self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
         self.equations = [a for a in actions if isinstance(a, ModelEquation)]
+        self._clamps = [a for a in actions if isinstance(a, ClampVariable)]
 
         # Some basic semantics checking
         if len(self._time_units) > 1:
@@ -804,7 +813,7 @@ class ModelInterface(BaseGroupAction):
         :param ns_map: mapping from NS prefix to URI.
         """
         self._ns_map = ns_map
-        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
+        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls, self._clamps):
             item.ns_uri = ns_map[item.ns_prefix]
 
     def modify_model(self, model, units):
@@ -818,6 +827,7 @@ class ModelInterface(BaseGroupAction):
         self._convert_time_if_needed()
         self._add_input_variables()
         self._add_or_replace_equations()
+        self._handle_clamping()
         self._annotate_state_variables()
         output_symbols = self._convert_output_units()
         self._purge_unused_mathematics(output_symbols)
@@ -903,6 +913,20 @@ class ModelInterface(BaseGroupAction):
                 self.model.remove_equation(defn)
             self.model.add_equation(eq)
         # TODO: Check units of newly added equations; apply conversions where needed?
+
+    def _handle_clamping(self):
+        """Clamp requested variables to their initial values."""
+        for clamp in self._clamps:
+            var = self.model.get_symbol_by_ontology_term(clamp.rdf_term)
+            defn = self.model.get_definition(var)
+            if var.initial_value is None:
+                value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
+            else:
+                value = var.initial_value
+            new_defn = sympy.Eq(var, self.model.add_number(value, var.units))
+            if defn is not None:
+                self.model.remove_equation(defn)
+            self.model.add_equation(new_defn)
 
     def _annotate_state_variables(self):
         """Annotate all state variables with the 'magic' oxmeta:state_variable term."""
