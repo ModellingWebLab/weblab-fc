@@ -939,6 +939,9 @@ class ModelInterface(BaseGroupAction):
         import networkx as nx
         graph = self.model.graph_with_sympy_numbers
         required_symbols = set(output_symbols)
+        # Time is always needed, even if there are no state variables!
+        time_symbol = self.model.get_free_variable_symbol()
+        required_symbols.add(time_symbol)
         # Symbols used directly in equations computing outputs
         for symbol in output_symbols:
             required_symbols.update(nx.ancestors(graph, symbol))
@@ -958,6 +961,9 @@ class ModelInterface(BaseGroupAction):
         # Remove them and their definitions
         for symbol in unused_symbols:
             self.model.remove_variable(symbol)
+        # Add time back in to the graph if needed
+        if time_symbol not in self.model.graph.nodes:
+            self.model.graph.add_node(time_symbol, equation=None, variable_type='free')
 
 
 ######################################################################
