@@ -763,7 +763,7 @@ class ModelInterface(BaseGroupAction):
         A list of :class:`ModelEquation` objects specifying equations to be added to the model, possibly replacing
         existing equations defining the same variable(s).
     ``sympy_equations``
-        Once :meth:`associate_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
+        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
         versions of ``self.equations``.
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
@@ -827,9 +827,12 @@ class ModelInterface(BaseGroupAction):
         self.units = units
         self._convert_time_if_needed()
         self._add_input_variables()
+        # TODO: Add variables defined by DeclareVariable
         self._add_or_replace_equations()
         self._handle_clamping()
         self._annotate_state_variables()
+        # TODO: Resolve initial_values on non-states, maybe using Model.transform_constants
+        # TODO: Apply units conversions for inputs where needed
         output_symbols = self._convert_output_units()
         self._purge_unused_mathematics(output_symbols)
         # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
@@ -850,7 +853,7 @@ class ModelInterface(BaseGroupAction):
             ns_uri = self._ns_map[prefix]
             return self.model.get_symbol_by_ontology_term((ns_uri, local_name))
         else:
-            # DeclareVariable not yet done
+            # TODO: DeclareVariable not yet done
             raise NotImplementedError
 
     def _number_generator(self, value, units):
@@ -867,12 +870,16 @@ class ModelInterface(BaseGroupAction):
     def sympy_equations(self):
         """The equations defined by the interface in Sympy form.
 
-        Requires :meth:`associate_model` to have been called.
+        Requires :meth:`modify_model` to have been called.
         """
         if self._sympy_equations is None:
             # Do the transformation
             self._sympy_equations = eqs = []
             for eq in self.equations:
+                # TODO: Check whether lhs exists in the model; if not, and it is an output or optional, add it.
+                # Units should be taken from the output spec (if present) or the RHS.
+                # TODO: If there are variables on the RHS that don't exist, this is an error unless both the
+                # missing variable and LHS are optional. In which case, just skip the equation (but log it).
                 eqs.append(eq.to_sympy(self._symbol_generator, self._number_generator))
         return self._sympy_equations
 
@@ -936,7 +943,7 @@ class ModelInterface(BaseGroupAction):
             if defn is not None:
                 self.model.remove_equation(defn)
             self.model.add_equation(eq)
-        # TODO: Check units of newly added equations; apply conversions where needed?
+        # TODO: Check units of newly added equations; apply conversions where needed now or later?
 
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
