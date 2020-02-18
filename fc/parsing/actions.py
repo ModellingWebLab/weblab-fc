@@ -543,7 +543,7 @@ class VariableReference:
         Once namespace prefixes have been resolved, the namespace URI corresponding to ``ns_prefix``.
 
     ``rdf_term``
-        The RDF term that annotates variable(s) we reference.
+        Once namespace prefixes have been resolved, the RDF term that annotates variable(s) we reference.
 
     """
     def _expr(self):
