@@ -820,6 +820,23 @@ class ModelInterface(BaseGroupAction):
     def modify_model(self, model, units):
         """Use the definitions in this interface to transform the provided model.
 
+        This calls various internal helper methods to do the modifications, in an order orchestrated to
+        follow the principle of least surprise for protocol authors. It attempts to produce results that
+        most probably match what they expect to happen, without creating an inconsistent model.
+
+        Key steps are:
+        - Adding/checking variables defined as model inputs (setable by the protocol). See
+          :meth:`_add_input_variables`.
+        - Adding or replacing equations in the model's mathematics (:meth:`_add_or_replace_equations`).
+        - Clamping variables to their initial value (:meth:`_handle_clamping`).
+        - Annotating the variables now comprising the state variable vector so they are recognised by
+          the oxmeta:state_variable 'magic' ontology term (:meth:`_annotate_state_variables`).
+        - Units conversions are applied where appropriate on model inputs and outputs, and on added/changed
+          equations, so the protocol sees quantities in the units it requested.
+          See e.g. :meth:`_convert_time_if_needed`, :meth:`_convert_output_units`.
+        - Model variables and equations not needed to compute the requested outputs are removed. See
+          :meth:`_purge_unused_mathematics`.
+
         :param cellmlmanip.model.Model model: the model to manipulate
         :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
         """
