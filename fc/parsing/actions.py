@@ -11,12 +11,13 @@ import sympy
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.parser import UNIT_PREFIXES
 
+from ..error_handling import ProtocolError
 from ..language import expressions as E
 from ..language import statements as S
 from ..language import values as V
 from ..locatable import Locatable
 from ..simulations import model, modifiers, ranges, simulations
-from .rdf import OXMETA_NS, PRED_IS_VERSION_OF, create_rdf_node, get_variables_transitively
+from .rdf import OXMETA_NS, PRED_IS, PRED_IS_VERSION_OF, create_rdf_node, get_variables_transitively
 
 
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
@@ -886,16 +887,34 @@ class ModelInterface(BaseGroupAction):
             time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
 
     def _add_input_variables(self):
-        """Ensure input variables exist in the desired units.
+        """Ensure requested input variables exist, unless they are optional.
 
-        TODO: At present this just checks they exist; no units conversion or initial_value handling.
-        TODO: If an input doesn't exist but has units & initial_value here, or is defined via
-        an equation, then add a new variable to the model.
+        Note that units conversions are not done yet. If the variable exists in the model, we do nothing.
+
+        If it doesn't exist but is marked as optional, nothing is done.
+
+        If it doesn't exist and is *not* optional, then it needs to be created here, which requires that
+        units are given. If not, an error is raised.
         """
         for var in self.inputs:
-            assert var.units is None
-            assert var.initial_value is None
-            self.model.get_symbol_by_ontology_term(var.rdf_term)
+            try:
+                symbol = self.model.get_symbol_by_ontology_term(var.rdf_term)
+            except KeyError:
+                # TODO: Check if variable is optional; skip if so. Add a helper method is_optional that
+                # compares var.prefixed_name against self.optional_decls?
+                if var.units is None:
+                    raise ProtocolError(
+                        'Units must be specified for input variables not appearing in the model;'
+                        ' none are given for ' + var.prefixed_name
+                    )
+                # Add the new input variable, with ontology annotation
+                # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
+                name = self.model._get_unique_name('protocol__' + var.local_name)  # TODO: Make method public
+                cmeta_id = self.model.get_unique_cmeta_id('protocol__' + var.local_name)
+                units = self.units.get_unit(var.units)
+                symbol = self.model.add_variable(name, units, cmeta_id=cmeta_id)
+                self.model.rdf.add((symbol.rdf_term, PRED_IS, var.rdf_term))
+            # TODO: Set initial_value on symbol if given?
 
     def _add_or_replace_equations(self):
         """Process define statements and modify the model's equations accordingly."""
@@ -903,7 +922,12 @@ class ModelInterface(BaseGroupAction):
             lhs = eq.lhs
             if lhs.is_Derivative:
                 var = lhs.args[0]
-                assert var.initial_value is not None  # TODO: Maybe throw ProtocolError instead?
+                if var.initial_value is None:
+                    raise ProtocolError(
+                        'Variable {} is being set as a state variable but has no initial value'.format(
+                            self.model.get_ontology_terms_by_symbol(var)[0]
+                        )
+                    )
             else:
                 var = lhs
                 var.initial_value = None  # In case it was a state variable previously
