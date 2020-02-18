@@ -550,12 +550,13 @@ class VariableReference:
         name = self.prefixed_name = self.get_named_token_as_string('name')
         self.ns_prefix, self.local_name = name.split(':', 1)
         self.ns_uri = None  # Will be set later using protocol's namespace mapping
+        self.rdf_term = None  # Ditto
         return self
 
-    @property
-    def rdf_term(self):
-        """The RDF term annotating this variable."""
-        return create_rdf_node((self.ns_uri, self.local_name))
+    def set_namespace(self, ns_uri):
+        """Set the full namespace URI for this reference, and hence the RDF term."""
+        self.ns_uri = ns_uri
+        self.rdf_term = create_rdf_node((self.ns_uri, self.local_name))
 
     @classmethod
     def create(cls, prefix, uri, local_name):
@@ -563,8 +564,8 @@ class VariableReference:
         ref = cls()
         ref.prefixed_name = '{}:{}'.format(prefix, local_name)
         ref.ns_prefix = prefix
-        ref.ns_uri = uri
         ref.local_name = local_name
+        ref.set_namespace(uri)
         return ref
 
 
@@ -803,7 +804,7 @@ class ModelInterface(BaseGroupAction):
         """
         self._ns_map = ns_map
         for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
-            item.ns_uri = ns_map[item.ns_prefix]
+            item.set_namespace(ns_map[item.ns_prefix])
 
     def modify_model(self, model, units):
         """Use the definitions in this interface to transform the provided model.
