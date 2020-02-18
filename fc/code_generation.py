@@ -1,13 +1,16 @@
 """
 Methods for code generation (using jinja2 templates).
 """
-import jinja2
 import posixpath
-import sympy
 import time
+
+import jinja2
+import sympy
 
 from cellmlmanip import transpiler
 from cellmlmanip.printer import Printer
+
+from .parsing.rdf import OXMETA_NS, get_variables_transitively
 
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
@@ -131,7 +134,7 @@ def get_unique_names(model):
     return symbols
 
 
-def create_weblab_model(path, class_name, model, outputs, parameters):
+def create_weblab_model(path, class_name, model, outputs, parameters, vector_orderings={}):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
     the Web Lab, and stores it at ``path``.
@@ -145,19 +148,16 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
     ``model``
         A :class:`cellmlmanip.Model` object.
     ``outputs``
-        An ordered list of annotations ``(namespace_uri, local_name)`` for the
-        variables to use as model outputs.
+        An ordered list of :class:`VariableReference`s for the variables to use as model outputs.
     ``parameters``
-        An ordered list of annotations ``(namespace_uri, local_name)`` for the
-        variables to use as model parameters. All variables used as parameters
-        must be literal constants.
+        An ordered list of :class:`VariableReference`s for the variables to use as model parameters.
+        All variables used as parameters must be literal constants.
+    ``vector_orderings``
+        An optional mapping defining custom orderings for vector outputs, instead of the default
+        ``symbol.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings
+        from cmeta_id to order index.
 
     """
-    # TODO: Jon's comment on the outputs/parameters being annotations:
-    # IIRC the pycml code basically says you can use anything that's a valid
-    # input to create_rdf_node. So we might eventually want to avoid all the
-    # *parameter unpacking when passing around, but I don't think it's urgent.
-
     # TODO: About the outputs:
     # WL1 uses just the local names here, without the base URI part. What we
     # should do eventually is update the ModelWrapperEnvironment so we can use
@@ -165,9 +165,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
     # we can use longer names here and let each environment wrap its respective
     # subset. But until that happens, users just have to make sure not to use
     # the same local name in different namespaces.
-
-    # Oxmeta namespace
-    oxmeta = 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata'
 
     # Get unique names for all symbols
     unames = get_unique_names(model)
@@ -195,45 +192,47 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
             'var_name': symbol_name(state),
             'deriv_name': derivative_name(state),
             'initial_value': state.initial_value,
-            'var_names': model.get_ontology_terms_by_symbol(state, oxmeta),
+            'var_names': model.get_ontology_terms_by_symbol(state, OXMETA_NS),
         })
 
     # Create parameter information dicts, and map of parameter symbols to their indices
     parameter_info = []
     parameter_symbols = {}
     for i, parameter in enumerate(parameters):
-        symbol = model.get_symbol_by_ontology_term(*parameter)
+        symbol = model.get_symbol_by_ontology_term(parameter.rdf_term)
         parameter_info.append({
             'index': i,
-            'annotation': parameter,
+            'local_name': parameter.local_name,
             'var_name': symbol_name(symbol),
             'initial_value': model.get_value(symbol),
         })
         parameter_symbols[symbol] = i
 
     # Create output information dicts
-    # Each output is associated either with a symbol or a parameter.
+    # Each output is associated either with a symbol or a list thereof.
     output_info = []
+    output_symbols = set()
     for i, output in enumerate(outputs):
-
-        # Allow special output value 'state_variable'
-        # TODO Replace this with a more generic implementation
-        if output[1] == 'state_variable':
-            var_name = [{'index': x['index'], 'var_name': x['var_name']}
-                        for x in state_info]
-            parameter_index = None
-            length = len(state_info)
+        term = output.rdf_term
+        symbols = get_variables_transitively(model, term)
+        output_symbols.update(symbols)
+        if len(symbols) == 0:
+            raise ValueError('No variable annotated as {} found'.format(term))
+        elif len(symbols) == 1:
+            length = None  # Not a vector output
+            var_name = symbol_name(symbols[0])
         else:
-            symbol = model.get_symbol_by_ontology_term(*output)
-            var_name = symbol_name(symbol)
-            parameter_index = parameter_symbols.get(symbol, None)
-            length = None
+            # Vector output
+            if term in vector_orderings:
+                order = vector_orderings[term]
+                symbols.sort(key=lambda s: order[s.cmeta_id])
+            length = len(symbols)
+            var_name = [{'index': i, 'var_name': symbol_name(s)} for i, s in enumerate(symbols)]
 
         output_info.append({
             'index': i,
-            'annotation': output,
+            'local_name': output.local_name,
             'var_name': var_name,
-            'parameter_index': parameter_index,
             'length': length,
         })
 
@@ -250,8 +249,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters):
 
     # Create output equation information dicts
     output_equations = []
-    output_symbols = [model.get_symbol_by_ontology_term(*x) for x in outputs
-                      if x[1] != 'state_variable']
     for eq in model.get_equations_for(output_symbols):
         output_equations.append({
             'lhs': printer.doprint(eq.lhs),

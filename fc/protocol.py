@@ -8,7 +8,6 @@ import tables
 import tempfile
 import time
 
-from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.units import UnitStore
 
 import fc
@@ -588,94 +587,14 @@ class Protocol(object):
             # Load cellml model
             import cellmlmanip
             model = cellmlmanip.load_model(model, self.units)
-            self.model_interface.associate_model(model, self.units)
 
-            # Convert time units if required
-            if self.model_interface.time_units:
-                time_units = self.units.get_unit(self.model_interface.time_units)
-                time_var = model.get_free_variable_symbol()
-                time_var = model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
-
-            # Add input variables in correct units
-            for var in self.model_interface.inputs:
-                # Just check the variable exists for now; no units or initial_value handling!
-                assert var.units is None
-                assert var.initial_value is None
-                model.get_symbol_by_ontology_term(var.ns_uri, var.local_name)
-                # TODO: Check if inputs are of allowed types, i.e. states or parameters
-                # TODO Add input variables to cellmlmanip model
-                pass
-
-            # Add output variables in correct units
-            for var in self.model_interface.outputs:
-                # TODO: Ask cellmlmanip to check if var has one of the allowed types: states, parameters, or derived
-                #       quantities.
-                # TODO: Handle units
-                pass
-
-            # Create a list of model outputs (as ontology terms) for code generation
-            # TODO: Handle units
-            # TODO: Handle optionality
-            outputs = [(var.ns_uri, var.local_name) for var in self.model_interface.outputs]
-
-            # Create a list of parameters (as ontology terms). Parameters are inputs that are constants.
-            parameters = []
-            for var in self.model_interface.inputs:
-                # TODO: Check if a constant, if so add to parameter list
-                pass
-
-            # Handle define statements
-            for eq in self.model_interface.sympy_equations:
-                lhs = eq.lhs
-                if lhs.is_Derivative:
-                    var = lhs.free_symbols.pop()
-                    assert var.initial_value is not None
-                else:
-                    var = lhs
-                    var.initial_value = None  # In case it was a state variable previously
-                # Figure out if this is a replace or add
-                defn = model.get_definition(var)
-                if defn is not None:
-                    model.remove_equation(defn)
-                model.add_equation(eq)
-            # TODO: Check units of newly added equations; apply conversions where needed?
-
-            # Finally, remove equations & variables not needed for generating model outputs
-            # TODO: stop handling state_variable specially
-            output_symbols = {model.get_symbol_by_ontology_term(*x) for x in outputs
-                              if x[1] != 'state_variable'}
-            for x in outputs:
-                if x[1] == 'state_variable':
-                    output_symbols.update(model.get_state_symbols())
-            import networkx as nx
-            graph = model.graph_with_sympy_numbers
-            required_symbols = set(output_symbols)
-            # Symbols used directly in equations computing outputs
-            for symbol in output_symbols:
-                required_symbols.update(nx.ancestors(graph, symbol))
-            # Symbols used indirectly to compute state variables referenced in equations
-            derivatives = model.get_derivative_symbols()
-            old_len = 0
-            while old_len != len(required_symbols):
-                old_len = len(required_symbols)
-                for deriv in derivatives:
-                    if deriv.args[0] in required_symbols:
-                        required_symbols.update(nx.ancestors(graph, deriv))
-                        # And we also need time...
-                        required_symbols.add(deriv.args[1])
-            # Now figure out which symbols *aren't* used
-            all_symbols = set(model.variables())
-            unused_symbols = all_symbols - required_symbols
-            # Remove their definitions
-            for symbol in unused_symbols:
-                defn = model.get_definition(symbol)
-                print('Unused symbol', symbol, defn)
-                if defn is not None:
-                    model.remove_equation(defn)
+            # Do all the transformations specified by the protocol
+            self.model_interface.modify_model(model, self.units)
 
             # Create weblab model at path
             create_weblab_model(
-                path, class_name, model, outputs, parameters)
+                path, class_name, model, self.model_interface.outputs, self.model_interface.parameters,
+                vector_orderings=self.model_interface.vector_orderings)
 
             self.log_progress('Compiling pyx model code...')
 

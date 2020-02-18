@@ -156,7 +156,7 @@ cdef class {{ class_name }}(CvodeSolver):
         # Mapping of parameter qualified names to parameter array indices
         self.parameter_map = {}
         {%- for parameter in parameters %}
-        self.parameter_map['{{ parameter.annotation[1] }}'] = {{ parameter.index }}
+        self.parameter_map['{{ parameter.local_name }}'] = {{ parameter.index }}
         {%- endfor %}
 
         # Initial parameter values
@@ -168,11 +168,10 @@ cdef class {{ class_name }}(CvodeSolver):
         # Local names of output variables
         self.output_names = []
         {%- for output in outputs %}
-        self.output_names.append('{{ output.annotation[1] }}')
+        self.output_names.append('{{ output.local_name }}')
         {%- endfor %}
 
-        # Create and cache list of arrays, to avoid constant list/array
-        # creation
+        # Create and cache list of arrays, to avoid constant list/array creation
         self._outputs = []
         {%- for output in outputs %}
         {%- if output.length is none %}
@@ -181,7 +180,6 @@ cdef class {{ class_name }}(CvodeSolver):
         self._outputs.append(np.zeros({{ output.length }}))
         {%- endif %}
         {%- endfor %}
-        # TODO Handle vector outputs other than state_variable
 
         self.state = self.initial_state.copy()
         self.saved_states = {}
@@ -266,7 +264,6 @@ cdef class {{ class_name }}(CvodeSolver):
         # Update output vector and return
         outputs = self._outputs
         {%- for output in outputs %}
-        {%- if output.parameter_index is none %}
         {%-   if output.length is none %}
         outputs[{{ output.index }}][()] = {{ output.var_name }}
         {%-   else %}
@@ -274,9 +271,6 @@ cdef class {{ class_name }}(CvodeSolver):
         outputs[{{ output.index }}][{{ sub_output.index }}] = {{ sub_output.var_name }}
         {%-     endfor %}
         {%-   endif %}
-        {%- else %}
-        outputs[{{ output.index }}][()] = parameters[{{ output.parameter_index }}]
-        {%- endif %}
         {%- endfor %}
         return outputs
 
