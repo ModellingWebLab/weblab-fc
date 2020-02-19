@@ -27,6 +27,14 @@ def get_variables_transitively(model, term):
     class given by ``term``, i.e. are connected to it by a path of ``rdf:type`` predicates, and
     return variables annotated with those terms.
 
+    For example, the oxmeta ontology has a term ``oxmeta:ExtracellularConcentration``, and triples:
+    - ``oxmeta:extracellular_calcium_concentration rdf:type oxmeta:ExtracellularConcentration``
+    - ``oxmeta:extracellular_sodium_concentration rdf:type oxmeta:ExtracellularConcentration``
+    So if you have variables ``Ca_o`` annotated with ``oxmeta:extracellular_calcium_concentration``
+    and ``Na_o`` annotated with ``oxmeta:extracellular_sodium_concentration``, then calling
+    ``get_variables_transitively(model, oxmeta:ExtracellularConcentration)`` would give you the list
+    ``[Ca_o, Na_o]``.
+
     :param term: the ontology term to search for. Can be anything suitable as input to
         :meth:`create_rdf_node`, typically a :class:`rdflib.term.Node` or ``(ns_uri, local_name)`` pair.
     :return: a list of :class:`VariableDummy` symbols, sorted by order added to the model.

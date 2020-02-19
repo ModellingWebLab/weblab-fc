@@ -7,6 +7,9 @@ from .error_handling import ProtocolError
 
 class OutputFolder(object):
     """
+    Manages creation and safe clean-up of folders for protocol output to be written to, in a central location defined by
+    the environment variable ``CHASTE_TEST_OUTPUT``.
+
     This class contains routines providing the key functionality of the C++ classes OutputFileHandler and FileFinder.
     In particular, it allows the creation of output folders within the location set for Chaste output, and safe deletion
     of such folders, without risk of wiping a user's drive due to coding error or dodgy path settings.
