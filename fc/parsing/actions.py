@@ -11,12 +11,13 @@ import sympy
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.parser import UNIT_PREFIXES
 
+from ..error_handling import ProtocolError
 from ..language import expressions as E
 from ..language import statements as S
 from ..language import values as V
 from ..locatable import Locatable
 from ..simulations import model, modifiers, ranges, simulations
-from .rdf import OXMETA_NS, PRED_IS_VERSION_OF, create_rdf_node, get_variables_transitively
+from .rdf import OXMETA_NS, PRED_IS, PRED_IS_VERSION_OF, create_rdf_node, get_variables_transitively
 
 
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
@@ -546,11 +547,15 @@ class VariableReference:
         Once namespace prefixes have been resolved, the RDF term that annotates variable(s) we reference.
 
     """
-    def _expr(self):
-        name = self.prefixed_name = self.get_named_token_as_string('name')
+    def set_name(self, name):
+        """Set the name used for this reference. For use by subclasses."""
+        self.prefixed_name = name
         self.ns_prefix, self.local_name = name.split(':', 1)
         self.ns_uri = None  # Will be set later using protocol's namespace mapping
         self.rdf_term = None  # Ditto
+
+    def _expr(self):
+        self.set_name(self.get_named_token_as_string('name'))
         return self
 
     def set_namespace(self, ns_uri):
@@ -631,19 +636,24 @@ class DeclareVariable(BaseGroupAction):
     pass
 
 
-class ClampVariable(BaseGroupAction):
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    assert 1 <= len(self.tokens) <= 2
-    #    name = self.tokens[0]
-    #    if len(self.tokens) == 1:
-    #        value = name
-    #    else:
-    #        value = self.tokens[1]
-    #    return self.delegate('ModelEquation', [[name, value]]).xml()
-    pass
+class ClampVariable(BaseGroupAction, VariableReference):
+    """Parse action for ``clamp`` declarations in the model interface.
 
-# TODO: Rename to class DefineVariable ?
+    ``clamp <prefix:term> [to <simple_expr>]``
+
+    With a 'to' clause this is implemented as syntactic sugar for :class:`ModelEquation`.
+
+    Clamping to the initial value in the model is handled specially; we just record the variable reference.
+    """
+    def _expr(self):
+        assert 1 <= len(self.tokens) <= 2
+        name = self.tokens[0]
+        if len(self.tokens) == 1:
+            self.set_name(name.tokens)
+            return self
+        else:
+            value = self.tokens[1]
+            return self.delegate('ModelEquation', [[name, value]]).expr()
 
 
 class ModelEquation(BaseGroupAction):
@@ -754,7 +764,7 @@ class ModelInterface(BaseGroupAction):
         A list of :class:`ModelEquation` objects specifying equations to be added to the model, possibly replacing
         existing equations defining the same variable(s).
     ``sympy_equations``
-        Once :meth:`associate_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
+        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
         versions of ``self.equations``.
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
@@ -771,6 +781,7 @@ class ModelInterface(BaseGroupAction):
         self.outputs = []
         self.optional_decls = []
         self.equations = []
+        self._clamps = []  # ClampVariable instances
         self._sympy_equations = None
         self.units = None  # Will be the protocol's UnitStore
         self.model = None  # The model to be modified
@@ -785,6 +796,7 @@ class ModelInterface(BaseGroupAction):
         self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
         self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
         self.equations = [a for a in actions if isinstance(a, ModelEquation)]
+        self._clamps = [a for a in actions if isinstance(a, ClampVariable)]
 
         # Some basic semantics checking
         if len(self._time_units) > 1:
@@ -803,11 +815,28 @@ class ModelInterface(BaseGroupAction):
         :param ns_map: mapping from NS prefix to URI.
         """
         self._ns_map = ns_map
-        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls):
+        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls, self._clamps):
             item.set_namespace(ns_map[item.ns_prefix])
 
     def modify_model(self, model, units):
         """Use the definitions in this interface to transform the provided model.
+
+        This calls various internal helper methods to do the modifications, in an order orchestrated to
+        follow the principle of least surprise for protocol authors. It attempts to produce results that
+        most probably match what they expect to happen, without creating an inconsistent model.
+
+        Key steps are:
+        - Adding/checking variables defined as model inputs (setable by the protocol). See
+          :meth:`_add_input_variables`.
+        - Adding or replacing equations in the model's mathematics (:meth:`_add_or_replace_equations`).
+        - Clamping variables to their initial value (:meth:`_handle_clamping`).
+        - Annotating the variables now comprising the state variable vector so they are recognised by
+          the oxmeta:state_variable 'magic' ontology term (:meth:`_annotate_state_variables`).
+        - Units conversions are applied where appropriate on model inputs and outputs, and on added/changed
+          equations, so the protocol sees quantities in the units it requested.
+          See e.g. :meth:`_convert_time_if_needed`, :meth:`_convert_output_units`.
+        - Model variables and equations not needed to compute the requested outputs are removed. See
+          :meth:`_purge_unused_mathematics`.
 
         :param cellmlmanip.model.Model model: the model to manipulate
         :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
@@ -816,8 +845,12 @@ class ModelInterface(BaseGroupAction):
         self.units = units
         self._convert_time_if_needed()
         self._add_input_variables()
+        # TODO: Add variables defined by DeclareVariable
         self._add_or_replace_equations()
+        self._handle_clamping()
         self._annotate_state_variables()
+        # TODO: Resolve initial_values on non-states, maybe using Model.transform_constants
+        # TODO: Apply units conversions for inputs where needed
         output_symbols = self._convert_output_units()
         self._purge_unused_mathematics(output_symbols)
         # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
@@ -838,7 +871,7 @@ class ModelInterface(BaseGroupAction):
             ns_uri = self._ns_map[prefix]
             return self.model.get_symbol_by_ontology_term((ns_uri, local_name))
         else:
-            # DeclareVariable not yet done
+            # TODO: DeclareVariable not yet done
             raise NotImplementedError
 
     def _number_generator(self, value, units):
@@ -855,12 +888,16 @@ class ModelInterface(BaseGroupAction):
     def sympy_equations(self):
         """The equations defined by the interface in Sympy form.
 
-        Requires :meth:`associate_model` to have been called.
+        Requires :meth:`modify_model` to have been called.
         """
         if self._sympy_equations is None:
             # Do the transformation
             self._sympy_equations = eqs = []
             for eq in self.equations:
+                # TODO: Check whether lhs exists in the model; if not, and it is an output or optional, add it.
+                # Units should be taken from the output spec (if present) or the RHS.
+                # TODO: If there are variables on the RHS that don't exist, this is an error unless both the
+                # missing variable and LHS are optional. In which case, just skip the equation (but log it).
                 eqs.append(eq.to_sympy(self._symbol_generator, self._number_generator))
         return self._sympy_equations
 
@@ -869,21 +906,40 @@ class ModelInterface(BaseGroupAction):
 
     def _convert_time_if_needed(self):
         """Units-convert the time variable if not in the protocol's units."""
-        time_units = self.units.get_unit(self.time_units)
-        time_var = self.model.get_free_variable_symbol()
-        time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
+        if self.time_units:
+            time_units = self.units.get_unit(self.time_units)
+            time_var = self.model.get_free_variable_symbol()
+            time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
 
     def _add_input_variables(self):
-        """Ensure input variables exist in the desired units.
+        """Ensure requested input variables exist, unless they are optional.
 
-        TODO: At present this just checks they exist; no units conversion or initial_value handling.
-        TODO: If an input doesn't exist but has units & initial_value here, or is defined via
-        an equation, then add a new variable to the model.
+        Note that units conversions are not done yet. If the variable exists in the model, we do nothing.
+
+        If it doesn't exist but is marked as optional, nothing is done.
+
+        If it doesn't exist and is *not* optional, then it needs to be created here, which requires that
+        units are given. If not, an error is raised.
         """
         for var in self.inputs:
-            assert var.units is None
-            assert var.initial_value is None
-            self.model.get_symbol_by_ontology_term(var.rdf_term)
+            try:
+                symbol = self.model.get_symbol_by_ontology_term(var.rdf_term)
+            except KeyError:
+                # TODO: Check if variable is optional; skip if so. Add a helper method is_optional that
+                # compares var.prefixed_name against self.optional_decls?
+                if var.units is None:
+                    raise ProtocolError(
+                        'Units must be specified for input variables not appearing in the model;'
+                        ' none are given for ' + var.prefixed_name
+                    )
+                # Add the new input variable, with ontology annotation
+                # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
+                name = self.model._get_unique_name('protocol__' + var.local_name)  # TODO: Make method public
+                cmeta_id = self.model.get_unique_cmeta_id('protocol__' + var.local_name)
+                units = self.units.get_unit(var.units)
+                symbol = self.model.add_variable(name, units, cmeta_id=cmeta_id)
+                self.model.rdf.add((symbol.rdf_term, PRED_IS, var.rdf_term))
+            # TODO: Set initial_value on symbol if given?
 
     def _add_or_replace_equations(self):
         """Process define statements and modify the model's equations accordingly."""
@@ -891,7 +947,12 @@ class ModelInterface(BaseGroupAction):
             lhs = eq.lhs
             if lhs.is_Derivative:
                 var = lhs.args[0]
-                assert var.initial_value is not None  # TODO: Maybe throw ProtocolError instead?
+                if var.initial_value is None:
+                    raise ProtocolError(
+                        'Variable {} is being set as a state variable but has no initial value'.format(
+                            self.model.get_ontology_terms_by_symbol(var)[0]
+                        )
+                    )
             else:
                 var = lhs
                 var.initial_value = None  # In case it was a state variable previously
@@ -900,7 +961,21 @@ class ModelInterface(BaseGroupAction):
             if defn is not None:
                 self.model.remove_equation(defn)
             self.model.add_equation(eq)
-        # TODO: Check units of newly added equations; apply conversions where needed?
+        # TODO: Check units of newly added equations; apply conversions where needed now or later?
+
+    def _handle_clamping(self):
+        """Clamp requested variables to their initial values."""
+        for clamp in self._clamps:
+            var = self.model.get_symbol_by_ontology_term(clamp.rdf_term)
+            defn = self.model.get_definition(var)
+            if var.initial_value is None:
+                value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
+            else:
+                value = var.initial_value
+            new_defn = sympy.Eq(var, self.model.add_number(value, var.units))
+            if defn is not None:
+                self.model.remove_equation(defn)
+            self.model.add_equation(new_defn)
 
     def _annotate_state_variables(self):
         """Annotate all state variables with the 'magic' oxmeta:state_variable term."""
@@ -937,6 +1012,9 @@ class ModelInterface(BaseGroupAction):
         import networkx as nx
         graph = self.model.graph_with_sympy_numbers
         required_symbols = set(output_symbols)
+        # Time is always needed, even if there are no state variables!
+        time_symbol = self.model.get_free_variable_symbol()
+        required_symbols.add(time_symbol)
         # Symbols used directly in equations computing outputs
         for symbol in output_symbols:
             required_symbols.update(nx.ancestors(graph, symbol))
@@ -956,6 +1034,9 @@ class ModelInterface(BaseGroupAction):
         # Remove them and their definitions
         for symbol in unused_symbols:
             self.model.remove_variable(symbol)
+        # Add time back in to the graph if needed
+        if time_symbol not in self.model.graph.nodes:
+            self.model.graph.add_node(time_symbol, equation=None, variable_type='free')
 
 
 ######################################################################

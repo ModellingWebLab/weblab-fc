@@ -1,38 +1,4 @@
-<?xml version="1.0"?>
-<!--  FILE :  LR_II_model_1994.xml
-
-CREATED :  28th March 2002
-
-LAST MODIFIED : 30th July 2003
-
-AUTHOR :  Catherine Lloyd
-          The Bioengineering Institute
-          The University of Auckland
-          
-MODEL STATUS :  This model conforms to the CellML 1.0 Specification released on
-10th August 2001, and the CellML Metadata 1.0 Specification released on 16th
-January, 2002.
-
-DESCRIPTION :  This file contains a CellML description of the mammalian
-ventricular action potential based on the Luo-Rudy II model, 1994.  This model
-is a development of the LR-I model.  In particular, the LR-II model describes
-the processes which regulate [Ca]i (intracellular Calcium concentration), and
-the movement of calcium ions through the cell and to and from the sarcoplasmic
-reticulum. 
-
-CHANGES: 
-  18/07/2002 - CML - Added more metadata.
-  09/04/2003 - AAC - Added publication date information.  
-  05/06/2003 - CML - Fixed MathML in a few components.
-  30/07/2003 - CML - Fixed MathML in a few components.
--->
-
-<model xmlns="http://www.cellml.org/cellml/1.0#"   
-  xmlns:cellml="http://www.cellml.org/cellml/1.0#"   
-  xmlns:cmeta="http://www.cellml.org/metadata/1.0#"
-  xmlns:bqs="http://www.cellml.org/bqs/1.0#" 
-  xmlns:ns7="http://www.cellml.org/metadata/simulation/1.0#" 
-  cmeta:id="luo_rudy_1994" name="luo_rudy_1994">
+<model xmlns="http://www.cellml.org/cellml/1.0#" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#" xmlns:bqs="http://www.cellml.org/bqs/1.0#" xmlns:ns7="http://www.cellml.org/metadata/simulation/1.0#" cmeta:id="luo_rudy_1994" name="luo_rudy_1994">
   
 <documentation xmlns="http://cellml.org/tmp-documentation">
 <article>
@@ -160,40 +126,24 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
  
   <component cmeta:id="environment" name="environment">
     <variable cmeta:id="environment_time" name="time" public_interface="out" units="ms">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#environment_time">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
   </component>
   
   <component cmeta:id="membrane" name="membrane">
     <variable cmeta:id="membrane_V" initial_value="-84.624" name="V" public_interface="out" units="mV">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_V">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
-    <variable initial_value="8.3145e3" name="R" public_interface="out" units="gas_constant_units"/>
-    <variable initial_value="310.0" name="T" public_interface="out" units="kelvin"/>
-    <variable initial_value="96845.0" name="F" public_interface="out" units="faradays_constant_units"/>
+    <variable initial_value="8.3145e3" name="R" public_interface="out" units="gas_constant_units" cmeta:id="membrane_R"/>
+    <variable initial_value="310.0" name="T" public_interface="out" units="kelvin" cmeta:id="membrane_T"/>
+    <variable initial_value="96845.0" name="F" public_interface="out" units="faradays_constant_units" cmeta:id="membrane_F"/>
     <variable name="dV_dt" public_interface="out" units="mV_per_ms"/>
     
     <variable initial_value="0.01" name="Cm" units="uF_per_mm2" cmeta:id="membrane_capacitance">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_capacitance">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
     <variable name="I_st" units="uA_per_mm2" cmeta:id="membrane_stimulus_current">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_stimulus_current">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
     
     <variable name="time" public_interface="in" units="ms"/>
@@ -239,25 +189,13 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
     </math>
      
     <variable initial_value="1e3" name="stimPeriod" units="ms" cmeta:id="membrane_stimulus_current_period">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_stimulus_current_period">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_period"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
-    <variable initial_value="0.5" name="stimDuration" units="ms" cmeta:id="membrane_stimulus_current_duration">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_stimulus_current_duration">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_duration"/>
-        </rdf:Description>
-      </rdf:RDF>
+    <variable initial_value="2.0" name="stimDuration" units="ms" cmeta:id="membrane_stimulus_current_duration">
+      
     </variable>
     <variable initial_value="0.5" name="stimCurrent" units="uA_per_mm2" cmeta:id="membrane_stimulus_current_amplitude">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_stimulus_current_amplitude">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
     <math xmlns="http://www.w3.org/1998/Math/MathML" id="Istim_calculation">
       <apply><eq/>
@@ -298,20 +236,12 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   
   <component cmeta:id="fast_sodium_current" name="fast_sodium_current">
     <variable name="i_Na" public_interface="out" units="uA_per_mm2" cmeta:id="membrane_fast_sodium_current">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_fast_sodium_current">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
-    <variable name="E_Na" public_interface="out" units="mV"/>
+    <variable name="E_Na" public_interface="out" units="mV" cmeta:id="fast_sodium_current_E_Na"/>
     
     <variable initial_value="0.16" name="g_Na" units="mS_per_mm2" cmeta:id="membrane_fast_sodium_current_conductance">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_fast_sodium_current_conductance">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
     
     <variable name="time" private_interface="out" public_interface="in" units="ms"/>
@@ -378,7 +308,7 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   </component>
   
   <component cmeta:id="fast_sodium_current_m_gate" name="fast_sodium_current_m_gate">
-    <variable initial_value="0.0" name="m" public_interface="out" units="dimensionless"/>
+    <variable initial_value="0.0" name="m" public_interface="out" units="dimensionless" cmeta:id="fast_sodium_current_m_gate_m"/>
         
     <variable name="alpha_m" units="per_ms"/>
     <variable name="beta_m" units="per_ms"/>
@@ -475,7 +405,7 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   </component>
   
   <component cmeta:id="fast_sodium_current_h_gate" name="fast_sodium_current_h_gate">
-    <variable initial_value="1.0" name="h" public_interface="out" units="dimensionless"/>
+    <variable initial_value="1.0" name="h" public_interface="out" units="dimensionless" cmeta:id="fast_sodium_current_h_gate_h"/>
         
     <variable name="alpha_h" units="per_ms"/>
     <variable name="beta_h" units="per_ms"/>
@@ -619,7 +549,7 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   </component>
   
   <component cmeta:id="fast_sodium_current_j_gate" name="fast_sodium_current_j_gate">
-    <variable initial_value="1.0" name="j" public_interface="out" units="dimensionless"/>
+    <variable initial_value="1.0" name="j" public_interface="out" units="dimensionless" cmeta:id="fast_sodium_current_j_gate_j"/>
         
     <variable name="alpha_j" units="per_ms"/>
     <variable name="beta_j" units="per_ms"/>
@@ -812,10 +742,10 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   </component>
   
   <component cmeta:id="L_type_Ca_channel" name="L_type_Ca_channel">
-    <variable name="i_Ca_L" public_interface="out" units="uA_per_mm2"/>
+    <variable name="i_Ca_L" public_interface="out" units="uA_per_mm2" cmeta:id="L_type_Ca_channel_i_Ca_L"/>
     <variable name="i_CaCa" public_interface="out" units="uA_per_mm2"/>
-    <variable name="i_CaK" public_interface="out" units="uA_per_mm2"/>
-    <variable name="i_CaNa" public_interface="out" units="uA_per_mm2"/>
+    <variable name="i_CaK" public_interface="out" units="uA_per_mm2" cmeta:id="L_type_Ca_channel_i_CaK"/>
+    <variable name="i_CaNa" public_interface="out" units="uA_per_mm2" cmeta:id="L_type_Ca_channel_i_CaNa"/>
     <variable initial_value="0.75" name="gamma_Nai" public_interface="out" units="dimensionless"/>
     <variable initial_value="0.75" name="gamma_Nao" public_interface="out" units="dimensionless"/>
     <variable initial_value="0.75" name="gamma_Ki" public_interface="out" units="dimensionless"/>
@@ -824,9 +754,9 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
     <variable name="I_CaCa" units="uA_per_mm2"/>
     <variable name="I_CaK" units="uA_per_mm2"/>
     <variable name="I_CaNa" units="uA_per_mm2"/>
-    <variable initial_value="5.4e-6" name="P_Ca" units="mm_per_ms"/>
-    <variable initial_value="6.75e-9" name="P_Na" units="mm_per_ms"/>
-    <variable initial_value="1.93e-9" name="P_K" units="mm_per_ms"/>
+    <variable initial_value="5.4e-6" name="P_Ca" units="mm_per_ms" cmeta:id="L_type_Ca_channel_P_Ca"/>
+    <variable initial_value="6.75e-9" name="P_Na" units="mm_per_ms" cmeta:id="L_type_Ca_channel_P_Na"/>
+    <variable initial_value="1.93e-9" name="P_K" units="mm_per_ms" cmeta:id="L_type_Ca_channel_P_K"/>
     <variable initial_value="1.0" name="gamma_Cai" units="dimensionless"/>
     <variable initial_value="0.34" name="gamma_Cao" units="dimensionless"/>
    
@@ -1748,19 +1678,11 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   
   <component cmeta:id="time_independent_potassium_current" name="time_independent_potassium_current">
     <variable name="i_K1" public_interface="out" units="uA_per_mm2" cmeta:id="membrane_inward_rectifier_potassium_current">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>
     <variable name="E_K1" private_interface="out" public_interface="out" units="mV"/>    
     <variable initial_value="7.5e-3" name="g_K1_max" units="mS_per_mm2" cmeta:id="membrane_inward_rectifier_potassium_current_conductance">
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-        <rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance">
-          <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/>
-        </rdf:Description>
-      </rdf:RDF>
+      
     </variable>       
     <variable name="g_K1" units="mS_per_mm2"/>
     
@@ -2627,7 +2549,7 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   <component cmeta:id="Na_Ca_exchanger" name="Na_Ca_exchanger">
     <variable name="i_NaCa" public_interface="out" units="uA_per_mm2"/>
     
-    <variable initial_value="20.0" name="K_NaCa" units="uA_per_mm2"/>
+    <variable initial_value="20.0" name="K_NaCa" units="uA_per_mm2" cmeta:id="Na_Ca_exchanger_K_NaCa"/>
     <variable initial_value="87.5" name="K_mNa" units="mM"/>
     <variable initial_value="1.38" name="K_mCa" units="mM"/>
     <variable initial_value="0.1" name="K_sat" units="dimensionless"/>
@@ -2774,22 +2696,22 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   </component>
   
   <component cmeta:id="calcium_fluxes_in_the_SR" name="calcium_fluxes_in_the_SR">
-    <variable name="i_rel" public_interface="out" units="mM_per_ms"/>
-    <variable name="i_up" public_interface="out" units="mM_per_ms"/>
-    <variable name="i_leak" public_interface="out" units="mM_per_ms"/>  
+    <variable name="i_rel" public_interface="out" units="mM_per_ms" cmeta:id="calcium_fluxes_in_the_SR_i_rel"/>
+    <variable name="i_up" public_interface="out" units="mM_per_ms" cmeta:id="calcium_fluxes_in_the_SR_i_up"/>
+    <variable name="i_leak" public_interface="out" units="mM_per_ms" cmeta:id="calcium_fluxes_in_the_SR_i_leak"/>  
     <variable name="i_tr" public_interface="out" units="mM_per_ms"/>
                             
     <variable name="G_rel" units="per_ms"/>
     <variable name="G_rel_peak" units="per_ms"/>
-    <variable initial_value="60.0" name="G_rel_max" units="per_ms"/>
+    <variable initial_value="60.0" name="G_rel_max" units="per_ms" cmeta:id="calcium_fluxes_in_the_SR_G_rel_max"/>
     <variable initial_value="2.0" name="tau_on" units="ms"/>
     <variable initial_value="2.0" name="tau_off" units="ms"/>
     <variable initial_value="0.0" name="t_CICR" units="ms"/>
     <variable initial_value="180.0" name="tau_tr" units="ms"/>
     <variable initial_value="0.8e-3" name="K_mrel" units="mM"/>
     <variable initial_value="0.92e-3" name="K_mup" units="mM"/>
-    <variable name="K_leak" units="per_ms"/>
-    <variable initial_value="0.005" name="I_up" units="mM_per_ms"/>
+    <variable name="K_leak" units="per_ms" cmeta:id="calcium_fluxes_in_the_SR_K_leak"/>
+    <variable initial_value="0.005" name="I_up" units="mM_per_ms" cmeta:id="calcium_fluxes_in_the_SR_I_up"/>
     <variable initial_value="15.0" name="Ca_NSR_max" units="mM"/>
     
     <variable initial_value="0.0" name="delta_Ca_i2" units="mM"/>
@@ -2953,60 +2875,28 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
   
    <component cmeta:id="ionic_concentrations" name="ionic_concentrations">
     <variable initial_value="10.0" name="Nai" public_interface="out" units="mM" cmeta:id="cytosolic_sodium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#cytosolic_sodium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
     </variable>
     <variable initial_value="140.0" name="Nao" public_interface="out" units="mM" cmeta:id="extracellular_sodium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#extracellular_sodium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
     </variable>
      <variable initial_value="0.12e-3" name="Cai" public_interface="out" units="mM" cmeta:id="cytosolic_calcium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#cytosolic_calcium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
      </variable>
     <variable initial_value="1.8" name="Cao" public_interface="out" units="mM" cmeta:id="extracellular_calcium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#extracellular_calcium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
     </variable>
     <variable initial_value="145.0" name="Ki" public_interface="out" units="mM" cmeta:id="cytosolic_potassium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#cytosolic_potassium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
     </variable>
     <variable initial_value="5.4" name="Ko" public_interface="out" units="mM" cmeta:id="extracellular_potassium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#extracellular_potassium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
     </variable>
      <variable initial_value="1.8" name="Ca_JSR" public_interface="out" units="mM" cmeta:id="JSR_calcium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#JSR_calcium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
      </variable>
      <variable initial_value="1.8" name="Ca_NSR" public_interface="out" units="mM" cmeta:id="NSR_calcium_concentration">
-       <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
-         <rdf:Description rdf:about="#NSR_calcium_concentration">
-           <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#NSR_calcium_concentration"/>
-         </rdf:Description>
-       </rdf:RDF>
+       
      </variable>
     
     <variable initial_value="200" name="Am" units="per_mm"/>
@@ -3656,4 +3546,4 @@ A dynamic model of the cardiac ventricular action potential. I. Simulations of i
     <map_variables variable_1="V" variable_2="V"/>
   </connection>
   
-</model>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:oxmeta="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"><rdf:Description rdf:about="#environment_time"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/></rdf:Description><rdf:Description rdf:about="#membrane_V"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/></rdf:Description><rdf:Description rdf:about="#membrane_capacitance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_period"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_period"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_duration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_duration"/></rdf:Description><rdf:Description rdf:about="#membrane_stimulus_current_amplitude"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_stimulus_current_amplitude"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_fast_sodium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current"/></rdf:Description><rdf:Description rdf:about="#membrane_inward_rectifier_potassium_current_conductance"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_inward_rectifier_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#cytosolic_sodium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_sodium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/></rdf:Description><rdf:Description rdf:about="#cytosolic_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#cytosolic_potassium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/></rdf:Description><rdf:Description rdf:about="#extracellular_potassium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/></rdf:Description><rdf:Description rdf:about="#JSR_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#JSR_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#NSR_calcium_concentration"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#NSR_calcium_concentration"/></rdf:Description><rdf:Description rdf:about="#L_type_Ca_channel_i_Ca_L"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current"/></rdf:Description><rdf:Description rdf:about="#L_type_Ca_channel_i_CaK"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_channel_potassium_current"/></rdf:Description><rdf:Description rdf:about="#L_type_Ca_channel_i_CaNa"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_channel_sodium_current"/></rdf:Description><rdf:Description rdf:about="#L_type_Ca_channel_P_K"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_channel_potassium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#L_type_Ca_channel_P_Na"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_channel_sodium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#L_type_Ca_channel_P_Ca"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_L_type_calcium_current_conductance"/></rdf:Description><rdf:Description rdf:about="#Na_Ca_exchanger_K_NaCa"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_sodium_calcium_exchanger_current_conductance"/></rdf:Description><rdf:Description rdf:about="#calcium_fluxes_in_the_SR_G_rel_max"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current_max"/></rdf:Description><rdf:Description rdf:about="#membrane_T"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#temperature"/></rdf:Description><rdf:Description rdf:about="#fast_sodium_current_E_Na"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#sodium_reversal_potential"/></rdf:Description><rdf:Description rdf:about="#membrane_R"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#gas_constant"/></rdf:Description><rdf:Description rdf:about="#membrane_F"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#faraday_constant"/></rdf:Description><rdf:Description rdf:about="#calcium_fluxes_in_the_SR_i_up"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current"/></rdf:Description><rdf:Description rdf:about="#calcium_fluxes_in_the_SR_I_up"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_uptake_current_max"/></rdf:Description><rdf:Description rdf:about="#calcium_fluxes_in_the_SR_i_rel"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_release_current"/></rdf:Description><rdf:Description rdf:about="#calcium_fluxes_in_the_SR_i_leak"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current"/></rdf:Description><rdf:Description rdf:about="#calcium_fluxes_in_the_SR_K_leak"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#SR_leak_current_max"/></rdf:Description><rdf:Description rdf:about="#fast_sodium_current_m_gate_m"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_m_gate"/></rdf:Description><rdf:Description rdf:about="#fast_sodium_current_h_gate_h"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_h_gate"/></rdf:Description><rdf:Description rdf:about="#fast_sodium_current_j_gate_j"><bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current_j_gate"/></rdf:Description></rdf:RDF></model>
