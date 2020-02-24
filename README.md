@@ -39,12 +39,9 @@ requirements/cellmlmanip.sh
 
 The ontologies used are in a separate module, to install this run
 
-```git submodule init
-```
-
-followed by
-
-```git submodule update
+```sh
+git submodule init
+git submodule update
 ```
 
 You also need to have CVODE (from Sundials) installed. If you do this with your system package
