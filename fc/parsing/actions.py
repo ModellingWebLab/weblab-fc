@@ -982,10 +982,10 @@ class ModelInterface(BaseGroupAction):
         state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
         self.vector_orderings[state_annotation] = {}
         for i, state_var in enumerate(self.model.get_state_symbols()):
-            if not state_var.cmeta_id:
-                state_var.cmeta_id = self.model.get_unique_cmeta_id(state_var.name.replace('$', '__'))
+            if not state_var.rdf_identity:
+                self.model.add_cmeta_id(state_var)
             self.model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
-            self.vector_orderings[state_annotation][state_var.cmeta_id] = i
+            self.vector_orderings[state_annotation][state_var.rdf_identity] = i
 
     def _convert_output_units(self):
         """Convert units for all outputs if needed.
