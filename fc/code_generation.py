@@ -155,7 +155,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     ``vector_orderings``
         An optional mapping defining custom orderings for vector outputs, instead of the default
         ``symbol.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings
-        from cmeta_id to order index.
+        from ``rdf_identity`` to order index.
 
     """
     # TODO: About the outputs:
@@ -225,7 +225,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
             # Vector output
             if term in vector_orderings:
                 order = vector_orderings[term]
-                symbols.sort(key=lambda s: order[s.cmeta_id])
+                symbols.sort(key=lambda s: order[s.rdf_identity])
             length = len(symbols)
             var_name = [{'index': i, 'var_name': symbol_name(s)} for i, s in enumerate(symbols)]
 
