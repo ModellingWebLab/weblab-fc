@@ -37,6 +37,13 @@ For the temporary cellmlmanip stuff, also run
 requirements/cellmlmanip.sh
 ```
 
+The ontologies used are in a separate module, to install this run
+
+```sh
+git submodule init
+git submodule update
+```
+
 You also need to have CVODE (from Sundials) installed. If you do this with your system package
 manager no further setup is (probably) needed. Alternatively you can install it using `conda`:
 ```sh
