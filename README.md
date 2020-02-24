@@ -59,7 +59,7 @@ pip install -e .[dev,test]
 
 Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.
 
-## Full installation steps on Jonathan's Macbook (slight out of date)
+## Full installation steps on Jonathan's Macbook (slightly out of date)
 
 ```sh
 export CONDA_ENV=weblab-fc-py36
