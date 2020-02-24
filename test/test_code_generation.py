@@ -73,7 +73,7 @@ def test_generate_weblab_model(tmp_path):
         if not state_var.rdf_identity:
             model.add_cmeta_id(state_var)
         model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
-        vector_orderings[state_annotation][state_var.cmeta_id] = i
+        vector_orderings[state_annotation][state_var.rdf_identity] = i
 
     # Create weblab model at path
     cg.create_weblab_model(str(path), class_name, model, outputs, parameters, vector_orderings)
