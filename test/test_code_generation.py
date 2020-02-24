@@ -70,8 +70,7 @@ def test_generate_weblab_model(tmp_path):
     state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
     vector_orderings = {state_annotation: {}}
     for i, state_var in enumerate(model.get_state_symbols()):
-        if not state_var.rdf_identity:
-            model.add_cmeta_id(state_var)
+        model.add_cmeta_id(state_var)
         model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
         vector_orderings[state_annotation][state_var.rdf_identity] = i
 
