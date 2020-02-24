@@ -32,9 +32,9 @@ In order to build the package you need Cython and numpy. These can be installed 
 pip install -r requirements/setup.txt
 ```
 
-For the temporary weblab_cg stuff, also run
+For the temporary cellmlmanip stuff, also run
 ```sh
-requirements/weblab_cg.sh
+requirements/cellmlmanip.sh
 ```
 
 You also need to have CVODE (from Sundials) installed. If you do this with your system package
@@ -59,7 +59,7 @@ pip install -e .[dev,test]
 
 Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.
 
-## Full installation steps on Jonathan's Macbook
+## Full installation steps on Jonathan's Macbook (slightly out of date)
 
 ```sh
 export CONDA_ENV=weblab-fc-py36
