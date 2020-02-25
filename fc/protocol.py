@@ -74,10 +74,12 @@ class Protocol(object):
     from file and running it on a given model.
     """
 
-    def __init__(self, proto_file, indent_level=0):
+    def __init__(self, proto_file, indent_level=0, parser=None):
         """Construct a new protocol by parsing the description in the given file.
 
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
+
+        :param parser: optional :class:`CompactSyntaxParser` instance; one wil be created if not given.
         """
         # if the filename passed as argument to CompactSyntaxParser is not found
         # it tries to read it before checking it exists
@@ -201,23 +203,21 @@ class Protocol(object):
         self.plots = []
 
         # Parse, and fill section information objects defined above
-        self._parse()
+        self._parse(parser=parser)
+        print()
 
-    def _parse(self):
+    def _parse(self, parser):
         """
         Parses the protocol, and fills in this object's fields.
         """
-
-        # Parse the protocol file and fill in the structures declared above
-        self.parser = None
-        self.parsed_protocol = None
-
         start = time.time()
 
-        import fc.parsing.CompactSyntaxParser as CSP
-        parser = self.parser = CSP.CompactSyntaxParser()
-        generator = self.parsed_protocol = parser.try_parse(
-            CSP.CompactSyntaxParser.protocol.parseFile,
+        # Parse the protocol file and extract relevant details
+        if parser is None:
+            import fc.parsing.CompactSyntaxParser as CSP
+            parser = CSP.CompactSyntaxParser()
+        generator = parser.try_parse(
+            parser.protocol.parseFile,
             self.proto_file,
             parseAll=True
         )[0]
@@ -256,7 +256,7 @@ class Protocol(object):
         # Store information from imported protocols
         for prefix, path, set_inputs in details.get('imports', []):
             self.log_progress('Importing', path, 'as', prefix, 'in', self.proto_name)
-            imported_proto = Protocol(self.get_path(self.proto_file, path), self.indent_level + 1)
+            imported_proto = Protocol(self.get_path(self.proto_file, path), self.indent_level + 1, parser=parser)
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
             else:
