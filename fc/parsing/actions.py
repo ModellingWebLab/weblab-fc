@@ -115,8 +115,7 @@ class BaseAction(object):
 
     def delegate_symbol(self, symbol, content=None):
         """
-        Create a Symbol parse action, used e.g. for the ``null`` symbol in the protocol
-        language.
+        Create a Symbol parse action, used e.g. for the ``null`` symbol in the protocol language.
         """
         if content is None:
             content = list()
@@ -129,12 +128,12 @@ class BaseAction(object):
             result.location = self.source_location
         return result
 
-    def to_sympy(self, symbol_generator, number_generator):
+    def to_sympy(self, variable_generator, number_generator):
         """Convert this parse tree to a Sympy expression.
 
         May be implemented by subclasses if the operation makes sense, i.e. they represent (part of) an expression.
 
-        :param symbol_generator: Method to create expressions for symbols.
+        :param variable_generator: Method to create expressions for symbols.
             Must have signature ``f(name) -> sympy.Basic``.
         :param number_generator: Method to create expressions for numbers with units.
             Must have signature ``f(value, unit) -> sympy.Basic`` where ``value`` is a ``float`` or ``str``.
@@ -178,7 +177,7 @@ class Number(BaseGroupAction):
     def _expr(self):
         return E.Const(V.Simple(self.tokens))
 
-    def to_sympy(self, symbol_generator, number_generator):
+    def to_sympy(self, variable_generator, number_generator):
         number = self.tokens
         if self._units is None:
             raise ValueError('Numbers in the model interface must have units attached; %s does not' % number)
@@ -203,8 +202,8 @@ class Variable(BaseGroupAction):
     def names(self):
         return [str(self.tokens)]
 
-    def to_sympy(self, symbol_generator, number_generator):
-        return symbol_generator(self.tokens)
+    def to_sympy(self, variable_generator, number_generator):
+        return variable_generator(self.tokens)
 
 
 class Operator(BaseGroupAction):
@@ -694,22 +693,22 @@ class ModelEquation(BaseGroupAction):
 
         return self
 
-    def to_sympy(self, symbol_generator, number_generator):
+    def to_sympy(self, variable_generator, number_generator):
         """Convert this equation to Sympy.
 
         Typically this will be called via :meth:`ModelInterface.sympy_equations` which sets up appropriate
         generators.
 
-        :param symbol_generator: a function to resolve a name reference within the equation to a symbol in the model.
+        :param variable_generator: a function to resolve a name reference within the equation to a model variable.
         :param number_generator: converts a number with units to a Sympy entity.
         """
-        var = self.var.to_sympy(symbol_generator, number_generator)
+        var = self.var.to_sympy(variable_generator, number_generator)
         if self.is_ode:
-            bvar = self.bvar.to_sympy(symbol_generator, number_generator)
+            bvar = self.bvar.to_sympy(variable_generator, number_generator)
             lhs = sympy.Derivative(var, bvar, evaluate=False)
         else:
             lhs = var
-        rhs = self.rhs.to_sympy(symbol_generator, number_generator)
+        rhs = self.rhs.to_sympy(variable_generator, number_generator)
         return sympy.Eq(lhs, rhs)
 
 
@@ -851,25 +850,25 @@ class ModelInterface(BaseGroupAction):
         self._annotate_state_variables()
         # TODO: Resolve initial_values on non-states, maybe using Model.transform_constants
         # TODO: Apply units conversions for inputs where needed
-        output_symbols = self._convert_output_units()
-        self._purge_unused_mathematics(output_symbols)
+        output_variables = self._convert_output_units()
+        self._purge_unused_mathematics(output_variables)
         # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
         # TODO: Any final consistency checks on the model?
 
-    def _symbol_generator(self, name):
-        """Resolve a name reference within a model interface equation to a symbol in the model.
+    def _variable_generator(self, name):
+        """Resolve a name reference within a model interface equation to a variable in the model.
 
         Used by :meth:`sympy_equations`.
 
-        :param str name: a name reference. If it contains a ':' then it is treated as a prefix:local_name
-            ontology term reference. The prefix is looked up in our namespace URI map, and the symbol then
-            found with :meth:`cellmlmanip.model.Model.get_symbol_by_ontology_term`. Otherwise we look for
-            a variable defined within the protocol's model interface using :class:`DeclareVariable`.
+        :param str name: a name reference. If it contains a ':' then it is treated as a prefix:local_name ontology term
+            reference. The prefix is looked up in our namespace URI map, and the variable then found with
+            :meth:`cellmlmanip.model.Model.get_variable_by_ontology_term`. Otherwise we look for a variable defined
+            within the protocol's model interface using :class:`DeclareVariable`.
         """
         if ':' in name:
             prefix, local_name = name.split(':', 1)
             ns_uri = self._ns_map[prefix]
-            return self.model.get_symbol_by_ontology_term((ns_uri, local_name))
+            return self.model.get_variable_by_ontology_term((ns_uri, local_name))
         else:
             # TODO: DeclareVariable not yet done
             raise NotImplementedError
@@ -898,7 +897,7 @@ class ModelInterface(BaseGroupAction):
                 # Units should be taken from the output spec (if present) or the RHS.
                 # TODO: If there are variables on the RHS that don't exist, this is an error unless both the
                 # missing variable and LHS are optional. In which case, just skip the equation (but log it).
-                eqs.append(eq.to_sympy(self._symbol_generator, self._number_generator))
+                eqs.append(eq.to_sympy(self._variable_generator, self._number_generator))
         return self._sympy_equations
 
     #######################################
@@ -908,7 +907,7 @@ class ModelInterface(BaseGroupAction):
         """Units-convert the time variable if not in the protocol's units."""
         if self.time_units:
             time_units = self.units.get_unit(self.time_units)
-            time_var = self.model.get_free_variable_symbol()
+            time_var = self.model.get_free_variable()
             time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
 
     def _add_input_variables(self):
@@ -923,7 +922,7 @@ class ModelInterface(BaseGroupAction):
         """
         for var in self.inputs:
             try:
-                symbol = self.model.get_symbol_by_ontology_term(var.rdf_term)
+                variable = self.model.get_variable_by_ontology_term(var.rdf_term)
             except KeyError:
                 # TODO: Check if variable is optional; skip if so. Add a helper method is_optional that
                 # compares var.prefixed_name against self.optional_decls?
@@ -937,9 +936,9 @@ class ModelInterface(BaseGroupAction):
                 name = self.model._get_unique_name('protocol__' + var.local_name)  # TODO: Make method public
                 cmeta_id = self.model.get_unique_cmeta_id('protocol__' + var.local_name)
                 units = self.units.get_unit(var.units)
-                symbol = self.model.add_variable(name, units, cmeta_id=cmeta_id)
-                self.model.rdf.add((symbol.rdf_term, PRED_IS, var.rdf_term))
-            # TODO: Set initial_value on symbol if given?
+                variable = self.model.add_variable(name, units, cmeta_id=cmeta_id)
+                self.model.rdf.add((variable.rdf_term, PRED_IS, var.rdf_term))
+            # TODO: Set initial_value on variable if given?
 
     def _add_or_replace_equations(self):
         """Process define statements and modify the model's equations accordingly."""
@@ -950,7 +949,7 @@ class ModelInterface(BaseGroupAction):
                 if var.initial_value is None:
                     raise ProtocolError(
                         'Variable {} is being set as a state variable but has no initial value'.format(
-                            self.model.get_ontology_terms_by_symbol(var)[0]
+                            self.model.get_ontology_terms_by_variable(var)[0]
                         )
                     )
             else:
@@ -966,7 +965,7 @@ class ModelInterface(BaseGroupAction):
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
         for clamp in self._clamps:
-            var = self.model.get_symbol_by_ontology_term(clamp.rdf_term)
+            var = self.model.get_variable_by_ontology_term(clamp.rdf_term)
             defn = self.model.get_definition(var)
             if var.initial_value is None:
                 value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
@@ -981,7 +980,7 @@ class ModelInterface(BaseGroupAction):
         """Annotate all state variables with the 'magic' oxmeta:state_variable term."""
         state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
         self.vector_orderings[state_annotation] = {}
-        for i, state_var in enumerate(self.model.get_state_symbols()):
+        for i, state_var in enumerate(self.model.get_state_variables()):
             self.model.add_cmeta_id(state_var)
             self.model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
             self.vector_orderings[state_annotation][state_var.rdf_identity] = i
@@ -989,53 +988,53 @@ class ModelInterface(BaseGroupAction):
     def _convert_output_units(self):
         """Convert units for all outputs if needed.
 
-        :return: the set of symbols appearing in outputs, either directly or as part of a vector,
-            in the desired units
+        :return: The set of variables appearing in outputs, either directly or as part of a vector, in the desired
+            units.
         """
-        output_symbols = set()
+        output_variables = set()
         for output in self.outputs:
-            symbols = get_variables_transitively(self.model, output.rdf_term)
+            variables = get_variables_transitively(self.model, output.rdf_term)
             if output.units is not None:
                 desired_units = self.units.get_unit(output.units)
-                for i, symbol in enumerate(symbols):
-                    symbols[i] = self.model.convert_variable(
-                        symbol, desired_units, DataDirectionFlow.OUTPUT)
-            output_symbols.update(symbols)
-        return output_symbols
+                for i, variable in enumerate(variables):
+                    variables[i] = self.model.convert_variable(
+                        variable, desired_units, DataDirectionFlow.OUTPUT)
+            output_variables.update(variables)
+        return output_variables
 
-    def _purge_unused_mathematics(self, output_symbols):
+    def _purge_unused_mathematics(self, output_variables):
         """Remove model equations and variables not needed for generating desired outputs.
 
-        :param output_symbols: the set of symbols appearing in outputs, either directly or as part of a vector
+        :param output_variables: the set of variables appearing in outputs, either directly or as part of a vector
         """
         import networkx as nx
         graph = self.model.graph_with_sympy_numbers
-        required_symbols = set(output_symbols)
+        required_variables = set(output_variables)
         # Time is always needed, even if there are no state variables!
-        time_symbol = self.model.get_free_variable_symbol()
-        required_symbols.add(time_symbol)
+        time_variable = self.model.get_free_variable()
+        required_variables.add(time_variable)
         # Symbols used directly in equations computing outputs
-        for symbol in output_symbols:
-            required_symbols.update(nx.ancestors(graph, symbol))
+        for variable in output_variables:
+            required_variables.update(nx.ancestors(graph, variable))
         # Symbols used indirectly to compute state variables referenced in equations
-        derivatives = self.model.get_derivative_symbols()
+        derivatives = self.model.get_derivatives()
         old_len = 0
-        while old_len != len(required_symbols):
-            old_len = len(required_symbols)
+        while old_len != len(required_variables):
+            old_len = len(required_variables)
             for deriv in derivatives:
-                if deriv.args[0] in required_symbols:
-                    required_symbols.update(nx.ancestors(graph, deriv))
+                if deriv.args[0] in required_variables:
+                    required_variables.update(nx.ancestors(graph, deriv))
                     # And we also need time...
-                    required_symbols.add(deriv.args[1])
-        # Now figure out which symbols *aren't* used
-        all_symbols = set(self.model.variables())
-        unused_symbols = all_symbols - required_symbols
+                    required_variables.add(deriv.args[1])
+        # Now figure out which variables *aren't* used
+        all_variables = set(self.model.variables())
+        unused_variables = all_variables - required_variables
         # Remove them and their definitions
-        for symbol in unused_symbols:
-            self.model.remove_variable(symbol)
+        for variable in unused_variables:
+            self.model.remove_variable(variable)
         # Add time back in to the graph if needed
-        if time_symbol not in self.model.graph.nodes:
-            self.model.graph.add_node(time_symbol, equation=None, variable_type='free')
+        if time_variable not in self.model.graph.nodes:
+            self.model.graph.add_node(time_variable, equation=None, variable_type='free')
 
 
 ######################################################################
