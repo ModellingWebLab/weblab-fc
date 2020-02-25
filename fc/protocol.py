@@ -225,7 +225,10 @@ class Protocol(object):
         # containing parsed information about the protocol
         assert isinstance(generator, actions.Protocol)
 
+        orig_source_file = actions.source_file
+        actions.source_file = self.proto_file
         details = generator.expr()
+        actions.source_file = orig_source_file
         assert isinstance(details, dict)
         del(generator)
 
