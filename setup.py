@@ -95,6 +95,7 @@ setup(
             'flake8>=3.6',
             'pytest>=3.6',
             'pytest-cov',
+            'pytest-profiling',
         ],
     },
     entry_points={

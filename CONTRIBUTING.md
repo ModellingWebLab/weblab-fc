@@ -28,6 +28,15 @@ Python 3.6 only.
 
 Currently migrating to [pytest](https://docs.pytest.org/en/latest/), see [README.md](./README.md)
 
+## Profiling performance
+
+Performance tests can be run using [pytest-profiling](https://pypi.org/project/pytest-profiling/).
+For example
+```sh
+pytest --profile-svg test/test_algebraic_models.py
+```
+will show profiling output for the algebraic models test, and create an SVG file in the `prof` directory.
+
 ## Documentation
 
 [Docstrings](https://www.python.org/dev/peps/pep-0257/) are written in [reStructuredText](http://docutils.sourceforge.net/docs/user/rst/quickref.html), a markup language designed specifically for writing [technical documentation](https://en.wikipedia.org/wiki/ReStructuredText).
