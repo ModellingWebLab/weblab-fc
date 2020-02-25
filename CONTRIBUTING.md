@@ -35,7 +35,7 @@ For example
 ```sh
 pytest --profile-svg test/test_algebraic_models.py
 ```
-will show profiling output for the algebraid models test, and create an SVG file in the `prof` directory.
+will show profiling output for the algebraic models test, and create an SVG file in the `prof` directory.
 
 ## Documentation
 
