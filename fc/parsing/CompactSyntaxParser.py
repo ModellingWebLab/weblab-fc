@@ -547,7 +547,8 @@ class CompactSyntaxParser(object):
         # basis that if one expression needs to, several are likely to.
         self._stack_depth_factor = 1
         self._original_stack_limit = sys.getrecursionlimit()
-        self.increase_stack_depth_limit()
+        print('Original stack limit:', self._original_stack_limit, file=sys.stderr)
+        self.increase_stack_depth_limit(step=1.0)
 
     def __del__(self):
         """Reset the stack limit if it changed."""
@@ -555,7 +556,7 @@ class CompactSyntaxParser(object):
 
     def increase_stack_depth_limit(self, step=0.5):
         """Increase the limit by the given factor of the original."""
-        self._stack_depth_factor += 0.5
+        self._stack_depth_factor += step
         new_limit = int(
             self._stack_depth_factor * self._original_stack_limit)
         print('Increasing recursion limit to', new_limit,
@@ -582,6 +583,8 @@ class CompactSyntaxParser(object):
             raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         actions.source_file = orig_source_file
+        print('Packrat stats: hits={} misses={}'.format(*p.ParserElement.packrat_cache_stats), file=sys.stderr)
+        p.ParserElement.resetCache()
         return r
 
 ################################################################################
