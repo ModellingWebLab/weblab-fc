@@ -37,7 +37,7 @@ def get_variables_transitively(model, term):
 
     :param term: the ontology term to search for. Can be anything suitable as input to
         :meth:`create_rdf_node`, typically a :class:`rdflib.term.Node` or ``(ns_uri, local_name)`` pair.
-    :return: a list of :class:`VariableDummy` symbols, sorted by order added to the model.
+    :return: a list of :class:`VariableDummy` objects, sorted by order added to the model.
     """
     global _ONTOLOGY
 
@@ -53,8 +53,8 @@ def get_variables_transitively(model, term):
     for annotation in _ONTOLOGY.transitive_subjects(rdflib.RDF.type, term):
         cmeta_ids.update(model.rdf.subjects(PRED_IS, annotation))
         cmeta_ids.update(model.rdf.subjects(PRED_IS_VERSION_OF, annotation))
-    symbols = []
+    variables = []
     for cmeta_id in cmeta_ids:
-        symbols.append(model.get_symbol_by_cmeta_id(cmeta_id))
-    return sorted(symbols, key=lambda sym: sym.order_added)
+        variables.append(model.get_variable_by_cmeta_id(cmeta_id))
+    return sorted(variables, key=lambda sym: sym.order_added)
 

@@ -76,15 +76,15 @@ class WebLabPrinter(Printer):
 
 def get_unique_names(model):
     """
-    Creates unique names for all symbols in a CellML model.
+    Creates unique names for all variables in a CellML model.
     """
     # Component variable separator
     # Note that variables are free to use __ in their names too, it makes the
     # produced code less readable but doesn't break anything.
     sep = '__'
 
-    # Create a symbol => name mapping, and a reverse name => symbol mapping
-    symbols = {}
+    # Create a variable => name mapping, and a reverse name => variable mapping
+    variables = {}
     reverse = {}
 
     def uname(name):
@@ -96,12 +96,12 @@ def get_unique_names(model):
             name = root + str(i)
         return name
 
-    # Get sorted list of symbols for consistent output
-    sorted_symbols = [v for v in model.graph_with_sympy_numbers]
-    sorted_symbols.sort(key=str)
+    # Get sorted list of variables for consistent output
+    sorted_variables = [v for v in model.graph_with_sympy_numbers]
+    sorted_variables.sort(key=str)
 
     # Generate names
-    for v in sorted_symbols:
+    for v in sorted_variables:
         if isinstance(v, sympy.Derivative):
             continue
 
@@ -117,21 +117,21 @@ def get_unique_names(model):
             other = reverse[name]
 
             # Check it hasn't been renamed already
-            if symbols[other] == name:
+            if variables[other] == name:
                 oparts = other.name.split('$')
                 assert len(oparts) == 2
                 oname = uname(oparts[0] + sep + oparts[1])
-                symbols[other] = oname
+                variables[other] = oname
                 reverse[oname] = other
 
             # Get new name for v
             name = uname(parts[0] + sep + parts[1])
 
-        # Store symbol name
-        symbols[v] = name
+        # Store variable name
+        variables[v] = name
         reverse[name] = v
 
-    return symbols
+    return variables
 
 
 def create_weblab_model(path, class_name, model, outputs, parameters, vector_orderings={}):
@@ -154,7 +154,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
         All variables used as parameters must be literal constants.
     ``vector_orderings``
         An optional mapping defining custom orderings for vector outputs, instead of the default
-        ``symbol.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings
+        ``variable.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings
         from ``rdf_identity`` to order index.
 
     """
@@ -166,12 +166,12 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     # subset. But until that happens, users just have to make sure not to use
     # the same local name in different namespaces.
 
-    # Get unique names for all symbols
+    # Get unique names for all variables
     unames = get_unique_names(model)
 
-    # Symbol naming function
-    def symbol_name(symbol):
-        return 'var_' + unames[symbol]
+    # Variable naming function
+    def variable_name(variable):
+        return 'var_' + unames[variable]
 
     # Derivative naming function
     def derivative_name(deriv):
@@ -179,55 +179,55 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
         return 'd_dt_' + unames[var]
 
     # Create expression printer
-    printer = WebLabPrinter(symbol_name, derivative_name)
+    printer = WebLabPrinter(variable_name, derivative_name)
 
     # Create free variable name
-    free_name = symbol_name(model.get_free_variable_symbol())
+    free_name = variable_name(model.get_free_variable())
 
     # Create state information dicts
     state_info = []
-    for i, state in enumerate(model.get_state_symbols()):
+    for i, state in enumerate(model.get_state_variables()):
         state_info.append({
             'index': i,
-            'var_name': symbol_name(state),
+            'var_name': variable_name(state),
             'deriv_name': derivative_name(state),
             'initial_value': state.initial_value,
-            'var_names': model.get_ontology_terms_by_symbol(state, OXMETA_NS),
+            'var_names': model.get_ontology_terms_by_variable(state, OXMETA_NS),
         })
 
-    # Create parameter information dicts, and map of parameter symbols to their indices
+    # Create parameter information dicts, and map of parameter variables to their indices
     parameter_info = []
-    parameter_symbols = {}
+    parameter_variables = {}
     for i, parameter in enumerate(parameters):
-        symbol = model.get_symbol_by_ontology_term(parameter.rdf_term)
+        variable = model.get_variable_by_ontology_term(parameter.rdf_term)
         parameter_info.append({
             'index': i,
             'local_name': parameter.local_name,
-            'var_name': symbol_name(symbol),
-            'initial_value': model.get_value(symbol),
+            'var_name': variable_name(variable),
+            'initial_value': model.get_value(variable),
         })
-        parameter_symbols[symbol] = i
+        parameter_variables[variable] = i
 
     # Create output information dicts
-    # Each output is associated either with a symbol or a list thereof.
+    # Each output is associated either with a variable or a list thereof.
     output_info = []
-    output_symbols = set()
+    output_variables = set()
     for i, output in enumerate(outputs):
         term = output.rdf_term
-        symbols = get_variables_transitively(model, term)
-        output_symbols.update(symbols)
-        if len(symbols) == 0:
+        variables = get_variables_transitively(model, term)
+        output_variables.update(variables)
+        if len(variables) == 0:
             raise ValueError('No variable annotated as {} found'.format(term))
-        elif len(symbols) == 1:
+        elif len(variables) == 1:
             length = None  # Not a vector output
-            var_name = symbol_name(symbols[0])
+            var_name = variable_name(variables[0])
         else:
             # Vector output
             if term in vector_orderings:
                 order = vector_orderings[term]
-                symbols.sort(key=lambda s: order[s.rdf_identity])
-            length = len(symbols)
-            var_name = [{'index': i, 'var_name': symbol_name(s)} for i, s in enumerate(symbols)]
+                variables.sort(key=lambda s: order[s.rdf_identity])
+            length = len(variables)
+            var_name = [{'index': i, 'var_name': variable_name(s)} for i, s in enumerate(variables)]
 
         output_info.append({
             'index': i,
@@ -238,22 +238,22 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
 
     # Create RHS equation information dicts
     rhs_equations = []
-    for eq in model.get_equations_for(model.get_derivative_symbols()):
+    for eq in model.get_equations_for(model.get_derivatives()):
         # TODO: Parameters should never appear as the left-hand side of an
         # equation (cellmlmanip should already have filtered these out).
         rhs_equations.append({
             'lhs': printer.doprint(eq.lhs),
             'rhs': printer.doprint(eq.rhs),
-            'parameter_index': parameter_symbols.get(eq.lhs, None),
+            'parameter_index': parameter_variables.get(eq.lhs, None),
         })
 
     # Create output equation information dicts
     output_equations = []
-    for eq in model.get_equations_for(output_symbols):
+    for eq in model.get_equations_for(output_variables):
         output_equations.append({
             'lhs': printer.doprint(eq.lhs),
             'rhs': printer.doprint(eq.rhs),
-            'parameter_index': parameter_symbols.get(eq.lhs, None),
+            'parameter_index': parameter_variables.get(eq.lhs, None),
         })
 
     # Generate model

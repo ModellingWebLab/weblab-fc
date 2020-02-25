@@ -10,7 +10,7 @@ Documentation on FC can be found [here](https://chaste.cs.ox.ac.uk/trac/wiki/Fun
 
 An ongoing attempt to document the Web Lab and all its interconnected technologies can be viewed in the [weblab docs repository](https://github.com/ModellingWebLab/weblab_docs).
 
-## No windows support
+## No Windows support
 
 **FC is tested/developed on Linux and OS/X. There are no plans to run it work on Windows**.
 

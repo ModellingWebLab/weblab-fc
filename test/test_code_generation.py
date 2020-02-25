@@ -25,18 +25,18 @@ def test_unique_name_generation():
     # Test unique names
     unames = cg.get_unique_names(model)
     assert len(unames) == 9
-    symbols = [v for v in model.graph]
-    symbols.sort(key=str)
+    variables = [v for v in model.graph]
+    variables.sort(key=str)
 
-    assert unames[symbols[0]] == 'time'         # env.time
-    assert unames[symbols[1]] == 'x__a'         # x.a
-    assert unames[symbols[2]] == 'b'            # x.b
-    assert unames[symbols[3]] == 'x__y__z_1'    # x.y__z
-    assert unames[symbols[4]] == 'x__y__a'      # x__y.a
-    assert unames[symbols[5]] == 'x__y__z'      # x__y.x__y__z
-    assert unames[symbols[6]] == 'z'            # x__y.z
-    assert unames[symbols[7]] == 'z__a'         # z.a
-    assert unames[symbols[8]] == 'z__y__z'      # z.y__z
+    assert unames[variables[0]] == 'time'         # env.time
+    assert unames[variables[1]] == 'x__a'         # x.a
+    assert unames[variables[2]] == 'b'            # x.b
+    assert unames[variables[3]] == 'x__y__z_1'    # x.y__z
+    assert unames[variables[4]] == 'x__y__a'      # x__y.a
+    assert unames[variables[5]] == 'x__y__z'      # x__y.x__y__z
+    assert unames[variables[6]] == 'z'            # x__y.z
+    assert unames[variables[7]] == 'z__a'         # z.a
+    assert unames[variables[8]] == 'z__y__z'      # z.y__z
 
 
 def test_generate_weblab_model(tmp_path):
@@ -69,7 +69,7 @@ def test_generate_weblab_model(tmp_path):
     # Annotate state variables with the magic oxmeta:state_variable term
     state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
     vector_orderings = {state_annotation: {}}
-    for i, state_var in enumerate(model.get_state_symbols()):
+    for i, state_var in enumerate(model.get_state_variables()):
         model.add_cmeta_id(state_var)
         model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
         vector_orderings[state_annotation][state_var.rdf_identity] = i
