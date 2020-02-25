@@ -9,7 +9,10 @@ from . import actions
 __all__ = ['CompactSyntaxParser']
 
 # Necessary for reasonable speed when using infixNotation
-p.ParserElement.enablePackrat()
+# Also, we force re-enable packrat, because matplotlib can have done it already with different settings!
+p.ParserElement._packratEnabled = False
+p.ParserElement.resetCache()
+p.ParserElement.enablePackrat(None)
 
 
 ################################################################################
@@ -583,7 +586,8 @@ class CompactSyntaxParser(object):
             raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         actions.source_file = orig_source_file
-        print('Packrat stats: hits={} misses={}'.format(*p.ParserElement.packrat_cache_stats), file=sys.stderr)
+        print('Packrat stats: len={}, hits={}, misses={}'.format(
+            p.ParserElement.packrat_cache.__len__(), *p.ParserElement.packrat_cache_stats), file=sys.stderr)
         p.ParserElement.resetCache()
         return r
 
