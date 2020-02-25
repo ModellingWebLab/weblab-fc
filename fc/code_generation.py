@@ -107,7 +107,6 @@ def get_unique_names(model):
 
         # Try simple name
         parts = v.name.split('$')
-        assert len(parts) == 2
         name = parts[-1]
 
         # If already taken, rename _both_ variables using component name
@@ -259,7 +258,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
     # Generate model
     template = load_template('weblab_model.pyx')
     with open(path, 'w') as f:
-        f.write(template.render({
+        code = template.render({
             'class_name': class_name,
             'free_variable': free_name,
             'generation_date': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -269,4 +268,6 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
             'parameters': parameter_info,
             'rhs_equations': rhs_equations,
             'states': state_info,
-        }))
+        })
+        print(code)
+        f.write(code)
