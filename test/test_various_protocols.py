@@ -10,7 +10,6 @@ from fc.simulations.model import TestOdeModel
 class TestVariousProtocols(unittest.TestCase):
     """Test that various test protocols are executed correctly."""
 
-    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def test_nested_protocols(self):
         proto_file = 'test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
