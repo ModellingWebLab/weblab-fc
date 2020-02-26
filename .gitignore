@@ -68,3 +68,6 @@ src/pip-delete*
 
 # files created for linked code
 src/*
+
+# Profiling info
+prof/*
