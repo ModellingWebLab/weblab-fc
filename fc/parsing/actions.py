@@ -762,15 +762,15 @@ class ModelInterface(BaseGroupAction):
         A list of :class:`ModelEquation` objects specifying equations to be added to the model, possibly replacing
         existing equations defining the same variable(s).
     ``sympy_equations``
-        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
-        versions of ``self.equations``.
+        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy versions of
+        ``self.equations``.
+    ``initial_values``
+        Initial values for constants or state variables, defined by the inputs. Stored in a map from variable (as a
+        sympy variable) to value (as a float).
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
     ``parameters``
         Those model inputs that are constants (unless the protocol changes them while running).
-    ``initial_values``
-        Initial values for constants or state variables, defined by the inputs. Stored in a map from variable (as an
-        RDF term) to value (as a float).
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
@@ -784,12 +784,12 @@ class ModelInterface(BaseGroupAction):
         self.equations = []
         self._clamps = []  # ClampVariable instances
         self._sympy_equations = None
+        self.initial_values = {}
         self.units = None  # Will be the protocol's UnitStore
         self.model = None  # The model to be modified
         self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
         self.parameters = []
         self.vector_orderings = {}
-        self.initial_values = {}
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -857,7 +857,6 @@ class ModelInterface(BaseGroupAction):
 
         self._handle_clamping()
         self._annotate_state_variables()
-        # TODO: Resolve initial_values on non-states, maybe using Model.transform_constants
         # TODO: Apply units conversions for inputs where needed
         output_variables = self._convert_output_units()
         self._purge_unused_mathematics(output_variables)
@@ -932,7 +931,7 @@ class ModelInterface(BaseGroupAction):
         for var in self.inputs:
 
             # Find variable symbol or create a new one
-            symbol = None
+            variable = None
             try:
                 variable = self.model.get_variable_by_ontology_term(var.rdf_term)
             except KeyError:
@@ -953,7 +952,7 @@ class ModelInterface(BaseGroupAction):
 
             # Store initial value if given
             if variable is not None and var.initial_value is not None:
-                self.initial_values[var.rdf_term] = var.initial_value
+                self.initial_values[variable] = var.initial_value
 
     def _add_or_replace_equations(self):
         """
@@ -965,19 +964,18 @@ class ModelInterface(BaseGroupAction):
             lhs = eq.lhs
             if lhs.is_Derivative:
                 var = lhs.args[0]
-                term = self.model.get_ontology_terms_by_variable(var)[0]
 
                 # Initial value must be set via inputs, or already be set (if this was already a state variable)
-                if var.initial_value is None and term not in initial_values:
+                if var.initial_value is None and var not in initial_values:
+                    term = self.model.get_ontology_terms_by_variable(var)[0]
                     raise ProtocolError(
                         'Variable {} is being set as a state variable but has no initial value (this can be set using'
                         '  an `input` statement)'.format(term))
             else:
                 var = lhs
-                term = self.model.get_ontology_terms_by_variable(var)[0]
 
                 # Check that this variable isn't doubly defined
-                if term in self.initial_values:
+                if var in self.initial_values:
                     raise ProtocolError(
                         'Overdefined variable. An initial value was given for {} via an input statement, but a new'
                         ' equation was also set via a define statement.')
@@ -994,8 +992,7 @@ class ModelInterface(BaseGroupAction):
             self.model.add_equation(eq)
 
         # Apply all initial values set in the inputs
-        for term, value in self.initial_values.items():
-            var = self.model.get_variable_by_ontology_term(term)
+        for var, value in self.initial_values.items():
             if self.model.is_state(var):
                 # Set initial value
                 var.initial_value = value
