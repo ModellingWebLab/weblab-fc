@@ -7,16 +7,15 @@ import time
 import jinja2
 import sympy
 
-from cellmlmanip import transpiler
 from cellmlmanip.printer import Printer
+from cellmlmanip.transpiler import Transpiler
 
 from .parsing.rdf import OXMETA_NS, get_variables_transitively
 
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
 # models.
-setattr(sympy, '_exp', sympy.Function('_exp'))
-transpiler.SIMPLE_MATHML_TO_SYMPY_NAMES['exp'] = '_exp'
+Transpiler.set_mathml_handler('_exp', sympy.Function('_exp'))
 
 
 # Shared Jinja environment
