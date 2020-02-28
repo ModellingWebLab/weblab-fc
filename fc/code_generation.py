@@ -15,7 +15,7 @@ from .parsing.rdf import OXMETA_NS, get_variables_transitively
 # Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
 # This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
 # models.
-Transpiler.set_mathml_handler('_exp', sympy.Function('_exp'))
+Transpiler.set_mathml_handler('exp', sympy.Function('_exp'))
 
 
 # Shared Jinja environment
