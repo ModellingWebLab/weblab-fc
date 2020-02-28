@@ -1,11 +1,8 @@
 import os
 
-import pytest
-
 import fc
 
 
-@pytest.mark.xfail(strict=True, reason='implementation not yet finished')
 def test_sim_environments():
     """Run the test_sim_environments.txt test protocol."""
     proto = fc.Protocol('test/protocols/test_sim_environments.txt')

@@ -9,6 +9,7 @@ import os
 import pyparsing as p
 import sympy
 from cellmlmanip.model import DataDirectionFlow
+from cellmlmanip.model import VariableDummy
 from cellmlmanip.parser import UNIT_PREFIXES
 
 from ..error_handling import ProtocolError
@@ -657,8 +658,7 @@ class ClampVariable(BaseGroupAction, VariableReference):
 
 class ModelEquation(BaseGroupAction):
     """
-    Parse action for ``define`` declarations in the model interface, that
-    add or replace model variable's equations.
+    Parse action for ``define`` declarations in the model interface, that add or replace model variable's equations.
 
     ``define diff(<prefix:term>;<prefix:term>) | <prefix:term> = <simple_expr>``
 
@@ -763,12 +763,16 @@ class ModelInterface(BaseGroupAction):
         A list of :class:`ModelEquation` objects specifying equations to be added to the model, possibly replacing
         existing equations defining the same variable(s).
     ``sympy_equations``
-        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy
-        versions of ``self.equations``.
+        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy versions of
+        ``self.equations``.
+    ``initial_values``
+        Initial values for constants or state variables, defined by the inputs. Stored in a map from variable (as an
+        RDF term) to value (as a float).
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
     ``parameters``
-        Those model inputs that are constants (unless the protocol changes them while running).
+        Once :meth:`modify_model` has been called, this property gives a list of those model inputs (as
+        :class:`InputVariable` objects) that are constants (unless the protocol changes them while running).
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
@@ -782,6 +786,7 @@ class ModelInterface(BaseGroupAction):
         self.equations = []
         self._clamps = []  # ClampVariable instances
         self._sympy_equations = None
+        self.initial_values = {}
         self.units = None  # Will be the protocol's UnitStore
         self.model = None  # The model to be modified
         self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
@@ -842,17 +847,31 @@ class ModelInterface(BaseGroupAction):
         """
         self.model = model
         self.units = units
+
+        # Convert free variable units
         self._convert_time_if_needed()
+
+        # Ensure inputs exists, adding them if needed, and storing initial values set by user
         self._add_input_variables()
-        # TODO: Add variables defined by DeclareVariable
+
+        # TODO: Add variables defined with ``var`` statements
+
+        # Process ``define`` statements, adding or replacing equations where needed,
+        # and setting any initial values defined through inputs.
         self._add_or_replace_equations()
+
         self._handle_clamping()
         self._annotate_state_variables()
-        # TODO: Resolve initial_values on non-states, maybe using Model.transform_constants
+
         # TODO: Apply units conversions for inputs where needed
+
+        # Convert units for output variables
         output_variables = self._convert_output_units()
+
+        # Populate list of input parameters
+        self._list_parameters()
+
         self._purge_unused_mathematics(output_variables)
-        # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
         # TODO: Any final consistency checks on the model?
 
     def _variable_generator(self, name):
@@ -921,6 +940,9 @@ class ModelInterface(BaseGroupAction):
         units are given. If not, an error is raised.
         """
         for var in self.inputs:
+
+            # Find variable symbol or create a new one
+            variable = None
             try:
                 variable = self.model.get_variable_by_ontology_term(var.rdf_term)
             except KeyError:
@@ -931,35 +953,71 @@ class ModelInterface(BaseGroupAction):
                         'Units must be specified for input variables not appearing in the model;'
                         ' none are given for ' + var.prefixed_name
                     )
+
                 # Add the new input variable, with ontology annotation
                 # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
                 name = self.model._get_unique_name('protocol__' + var.local_name)  # TODO: Make method public
-                cmeta_id = self.model.get_unique_cmeta_id('protocol__' + var.local_name)
                 units = self.units.get_unit(var.units)
-                variable = self.model.add_variable(name, units, cmeta_id=cmeta_id)
-                self.model.rdf.add((variable.rdf_term, PRED_IS, var.rdf_term))
-            # TODO: Set initial_value on variable if given?
+                variable = self.model.add_variable(name, units)
+                self.model.add_cmeta_id(variable)
+                self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
+
+            # Store initial value if given
+            if variable is not None and var.initial_value is not None:
+                self.initial_values[var.rdf_term] = var.initial_value
 
     def _add_or_replace_equations(self):
-        """Process define statements and modify the model's equations accordingly."""
+        """
+        Modify the model by adding and/or replacing equations and setting initial values according to the specified
+        inputs and define statements.
+        """
+        # Create map from model variables to initial values
+        initial_values = {self.model.get_variable_by_ontology_term(k): v for k, v in self.initial_values.items()}
+
+        # Apply all modifications (sympy_equations contains _only_ equations from define statements)
         for eq in self.sympy_equations:
             lhs = eq.lhs
             if lhs.is_Derivative:
                 var = lhs.args[0]
-                if var.initial_value is None:
+
+                # Initial value must be set via inputs, or already be set (if this was already a state variable)
+                if var.initial_value is None and var not in initial_values:
+                    terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
                     raise ProtocolError(
-                        'Variable {} is being set as a state variable but has no initial value'.format(
-                            self.model.get_ontology_terms_by_variable(var)[0]
-                        )
-                    )
+                        'Variable {} is being set as a state variable but has no initial value (this can be set using'
+                        '  an `input` statement)'.format(terms))
             else:
                 var = lhs
-                var.initial_value = None  # In case it was a state variable previously
-            # Figure out if this is a replace or add
-            defn = self.model.get_definition(var)
-            if defn is not None:
-                self.model.remove_equation(defn)
+
+                # Check that this variable isn't doubly defined
+                if var in initial_values:
+                    raise ProtocolError(
+                        'Overdefined variable. An initial value was given for {} via an input statement, but a new'
+                        ' equation was also set via a define statement.')
+
+                # Unset initial value, in case it was a state variable previously
+                var.initial_value = None
+
+            # Remove existing equation if needed
+            old_eq = self.model.get_definition(var)
+            if old_eq is not None:
+                self.model.remove_equation(old_eq)
+
+            # Add new equation
             self.model.add_equation(eq)
+
+        # Apply all initial values set in the inputs
+        for var, value in initial_values.items():
+            if self.model.is_state(var):
+                # Set initial value
+                var.initial_value = value
+            else:
+                # Replace equation
+                old_eq = self.model.get_definition(var)
+                if old_eq is not None:
+                    self.model.remove_equation(old_eq)
+                self.model.add_equation(sympy.Eq(var, self.model.add_number(value, var.units)))
+
         # TODO: Check units of newly added equations; apply conversions where needed now or later?
 
     def _handle_clamping(self):
@@ -1001,6 +1059,21 @@ class ModelInterface(BaseGroupAction):
                         variable, desired_units, DataDirectionFlow.OUTPUT)
             output_variables.update(variables)
         return output_variables
+
+    def _list_parameters(self):
+        """Populates the list of model parameters (inputs with a constant RHS)."""
+
+        for var in self.inputs:
+            try:
+                variable = self.model.get_variable_by_ontology_term(var.rdf_term)
+            except KeyError:
+                # Skip optional variables
+                continue
+
+            # Parameters are inputs that aren't states, and have a constant RHS
+            eq = self.model.get_definition(variable)
+            if isinstance(eq.lhs, VariableDummy) and len(eq.rhs.atoms(VariableDummy)) == 0:
+                self.parameters.append(var)
 
     def _purge_unused_mathematics(self, output_variables):
         """Remove model equations and variables not needed for generating desired outputs.
