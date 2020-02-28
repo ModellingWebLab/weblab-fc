@@ -985,7 +985,7 @@ class ModelInterface(BaseGroupAction):
                     terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
                     raise ProtocolError(
                         'Variable {} is being set as a state variable but has no initial value (this can be set using'
-                        '  an `input` statement)'.format(term))
+                        '  an `input` statement)'.format(terms))
             else:
                 var = lhs
 
