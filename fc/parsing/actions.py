@@ -9,6 +9,7 @@ import os
 import pyparsing as p
 import sympy
 from cellmlmanip.model import DataDirectionFlow
+from cellmlmanip.model import VariableDummy
 from cellmlmanip.parser import UNIT_PREFIXES
 
 from ..error_handling import ProtocolError
@@ -770,7 +771,8 @@ class ModelInterface(BaseGroupAction):
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
     ``parameters``
-        Those model inputs that are constants (unless the protocol changes them while running).
+        Once :meth:`modify_model` has been called, this property gives a list of those model inputs (as
+        :class:`InputVariable` objects) that are constants (unless the protocol changes them while running).
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
@@ -866,8 +868,10 @@ class ModelInterface(BaseGroupAction):
         # Convert units for output variables
         output_variables = self._convert_output_units()
 
+        # Populate list of input parameters
+        self._list_parameters()
+
         self._purge_unused_mathematics(output_variables)
-        # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
         # TODO: Any final consistency checks on the model?
 
     def _variable_generator(self, name):
@@ -964,8 +968,8 @@ class ModelInterface(BaseGroupAction):
 
     def _add_or_replace_equations(self):
         """
-        Process define statements and modify the model's equations accordingly. Also sets initial values determined in
-        input statements.
+        Modify the model by adding and/or replacing equations and setting initial values according to the specified
+        inputs and define statements.
         """
         # Create map from model variables to initial values
         initial_values = {self.model.get_variable_by_ontology_term(k): v for k, v in self.initial_values.items()}
@@ -1055,6 +1059,21 @@ class ModelInterface(BaseGroupAction):
                         variable, desired_units, DataDirectionFlow.OUTPUT)
             output_variables.update(variables)
         return output_variables
+
+    def _list_parameters(self):
+        """Populates the list of model parameters (inputs with a constant RHS)."""
+
+        for var in self.inputs:
+            try:
+                variable = self.model.get_variable_by_ontology_term(var.rdf_term)
+            except KeyError:
+                # Skip optional variables
+                continue
+
+            # Parameters are inputs that aren't states, and have a constant RHS
+            eq = self.model.get_definition(variable)
+            if isinstance(eq.lhs, VariableDummy) and len(eq.rhs.atoms(VariableDummy)) == 0:
+                self.parameters.append(var)
 
     def _purge_unused_mathematics(self, output_variables):
         """Remove model equations and variables not needed for generating desired outputs.
