@@ -765,8 +765,8 @@ class ModelInterface(BaseGroupAction):
         Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy versions of
         ``self.equations``.
     ``initial_values``
-        Initial values for constants or state variables, defined by the inputs. Stored in a map from variable (as a
-        sympy variable) to value (as a float).
+        Initial values for constants or state variables, defined by the inputs. Stored in a map from variable (as an
+        RDF term) to value (as a float).
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
     ``parameters``
@@ -845,20 +845,27 @@ class ModelInterface(BaseGroupAction):
         """
         self.model = model
         self.units = units
+
+        # Convert free variable units
         self._convert_time_if_needed()
 
         # Ensure inputs exists, adding them if needed, and storing initial values set by user
         self._add_input_variables()
-        # TODO: Add variables defined by DeclareVariable
 
-        # Process define statements, adding or replacing equations where needed, and setting any initial values defined
-        # through inputs.
+        # TODO: Add variables defined with ``var`` statements
+
+        # Process ``define`` statements, adding or replacing equations where needed,
+        # and setting any initial values defined through inputs.
         self._add_or_replace_equations()
 
         self._handle_clamping()
         self._annotate_state_variables()
+
         # TODO: Apply units conversions for inputs where needed
+
+        # Convert units for output variables
         output_variables = self._convert_output_units()
+
         self._purge_unused_mathematics(output_variables)
         # TODO: Fill in self.parameters with those self.inputs that have constant defining equations
         # TODO: Any final consistency checks on the model?
@@ -942,6 +949,7 @@ class ModelInterface(BaseGroupAction):
                         'Units must be specified for input variables not appearing in the model;'
                         ' none are given for ' + var.prefixed_name
                     )
+
                 # Add the new input variable, with ontology annotation
                 # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
                 name = self.model._get_unique_name('protocol__' + var.local_name)  # TODO: Make method public
@@ -952,13 +960,16 @@ class ModelInterface(BaseGroupAction):
 
             # Store initial value if given
             if variable is not None and var.initial_value is not None:
-                self.initial_values[variable] = var.initial_value
+                self.initial_values[var.rdf_term] = var.initial_value
 
     def _add_or_replace_equations(self):
         """
         Process define statements and modify the model's equations accordingly. Also sets initial values determined in
         input statements.
         """
+        # Create map from model variables to initial values
+        initial_values = {self.model.get_variable_by_ontology_term(k): v for k, v in self.initial_values.items()}
+
         # Apply all modifications (sympy_equations contains _only_ equations from define statements)
         for eq in self.sympy_equations:
             lhs = eq.lhs
@@ -967,7 +978,7 @@ class ModelInterface(BaseGroupAction):
 
                 # Initial value must be set via inputs, or already be set (if this was already a state variable)
                 if var.initial_value is None and var not in initial_values:
-                    term = self.model.get_ontology_terms_by_variable(var)[0]
+                    terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
                     raise ProtocolError(
                         'Variable {} is being set as a state variable but has no initial value (this can be set using'
                         '  an `input` statement)'.format(term))
@@ -975,7 +986,7 @@ class ModelInterface(BaseGroupAction):
                 var = lhs
 
                 # Check that this variable isn't doubly defined
-                if var in self.initial_values:
+                if var in initial_values:
                     raise ProtocolError(
                         'Overdefined variable. An initial value was given for {} via an input statement, but a new'
                         ' equation was also set via a define statement.')
@@ -992,7 +1003,7 @@ class ModelInterface(BaseGroupAction):
             self.model.add_equation(eq)
 
         # Apply all initial values set in the inputs
-        for var, value in self.initial_values.items():
+        for var, value in initial_values.items():
             if self.model.is_state(var):
                 # Set initial value
                 var.initial_value = value
