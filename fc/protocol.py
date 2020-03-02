@@ -241,10 +241,15 @@ class Protocol(object):
             self.units.add_unit(units.name, units.pint_expression)
 
         # Create model interface
-        def process_interface(interface):
+        def process_interface(interface, simulations):
             """ Process a protocol's model interface. """
-            self.model_interface = interface  # TODO: Merging!
-
+            self.model_interface = interface
+            # for any nested simulations merge the model interface from
+            # the nested simulation to this outer model interface
+            for simulation in simulations:
+                if isinstance(simulation, fc.simulations.simulations.Nested):
+                    self.model_interface.merge(simulation.nested_sim.model.proto.model_interface)
+ 
         # Update namespace map
         def process_ns_map(ns_map):
             """ Merge the items from ``ns_map`` with this protocol's prefix to namespace mapping. """
@@ -297,7 +302,10 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
 
         # Store information from the model interface section
-        process_interface(details.get('model_interface', actions.ModelInterface()))
+        # need to pass simulations so that any nested simulations
+        # can add variables etc. to the outer model interface
+        simulations = details.get('simulations', [])
+        process_interface(details.get('model_interface', actions.ModelInterface()), simulations)
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))
