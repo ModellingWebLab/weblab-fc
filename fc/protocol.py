@@ -240,6 +240,15 @@ class Protocol(object):
         for units in details.get('units', []):
             self.units.add_unit(units.name, units.pint_expression)
 
+        # check simulation has a model interface
+        def has_model_interface(simulation):
+            try:
+                simulation.nested_sim.model.proto.model_interface
+            except AttributeError:
+                return False
+            else:
+                return True
+
         # Create model interface
         def process_interface(interface, simulations):
             """ Process a protocol's model interface. """
@@ -248,7 +257,9 @@ class Protocol(object):
             # the nested simulation to this outer model interface
             for simulation in simulations:
                 if isinstance(simulation, fc.simulations.simulations.Nested):
-                    self.model_interface.merge(simulation.nested_sim.model.proto.model_interface)
+                    # if the simulation has its own protocol merge
+                    if has_model_interface(simulation):
+                        self.model_interface.merge(simulation.nested_sim.model.proto.model_interface)
 
         # Update namespace map
         def process_ns_map(ns_map):
