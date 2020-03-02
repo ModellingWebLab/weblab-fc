@@ -74,6 +74,8 @@ class Protocol(object):
     from file and running it on a given model.
     """
 
+    units_list = []
+
     def __init__(self, proto_file, indent_level=0):
         """Construct a new protocol by parsing the description in the given file.
 
@@ -238,10 +240,12 @@ class Protocol(object):
 
         # Store unit definitions
         for units in details.get('units', []):
+            Protocol.units_list.append(units)
             self.units.add_unit(units.name, units.pint_expression)
 
         # check simulation has a model interface
         def has_model_interface(simulation):
+            """ Check wether the simulation has a model interface """
             try:
                 simulation.nested_sim.model.proto.model_interface
             except AttributeError:
@@ -257,9 +261,25 @@ class Protocol(object):
             # the nested simulation to this outer model interface
             for simulation in simulations:
                 if isinstance(simulation, fc.simulations.simulations.Nested):
-                    # if the simulation has its own protocol merge
+                    # if the simulation has its own protocol add units
+                    # and merge model interface
                     if has_model_interface(simulation):
                         self.model_interface.merge(simulation.nested_sim.model.proto.model_interface)
+
+                        # need to add units from inner protocol
+
+                        # this doesnt work as the unit store names the units from
+                        # the nested protocol as e.g. 'store1_ms' and so when later
+                        # the model is set and _convert_time_if_needed is used it doesnt find time units e.g. 'ms'
+
+                        # self.units = UnitStore(simulation.nested_sim.model.proto.units)
+
+                        # this is horrible hacky and not sure a nested nested protocol would work
+                        for units in Protocol.units_list:
+                            try:
+                                self.units.add_unit(units.name, units.pint_expression)
+                            except ValueError:
+                                continue
 
         # Update namespace map
         def process_ns_map(ns_map):
