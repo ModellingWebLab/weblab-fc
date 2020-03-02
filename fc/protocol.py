@@ -249,7 +249,7 @@ class Protocol(object):
             for simulation in simulations:
                 if isinstance(simulation, fc.simulations.simulations.Nested):
                     self.model_interface.merge(simulation.nested_sim.model.proto.model_interface)
- 
+
         # Update namespace map
         def process_ns_map(ns_map):
             """ Merge the items from ``ns_map`` with this protocol's prefix to namespace mapping. """
