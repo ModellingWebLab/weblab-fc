@@ -7,16 +7,15 @@ import time
 import jinja2
 import sympy
 
-from cellmlmanip import transpiler
+from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER
 from cellmlmanip.printer import Printer
+from cellmlmanip.transpiler import Transpiler
 
 from .parsing.rdf import OXMETA_NS, get_variables_transitively
 
-# Add an `_exp` method to sympy, and tell cellmlmanip to create _exp objects instead of exp objects.
-# This prevents Sympy doing simplification (or canonicalisation) resulting in weird errors with exps in some cardiac
-# models.
-setattr(sympy, '_exp', sympy.Function('_exp'))
-transpiler.SIMPLE_MATHML_TO_SYMPY_NAMES['exp'] = '_exp'
+# Tell cellmlmanip to create _exp objects instead of exp objects. This prevents Sympy doing simplification (or
+# canonicalisation) resulting in weird errors with exps in some cardiac models.
+Transpiler.set_mathml_handler('exp', sympy.Function('_exp'))
 
 
 # Shared Jinja environment
@@ -105,10 +104,8 @@ def get_unique_names(model):
         if isinstance(v, sympy.Derivative):
             continue
 
-        # Try simple name
-        parts = v.name.split('$')
-        assert len(parts) == 2
-        name = parts[-1]
+        # Split off component name (if present, which it might not be for FC created variables)
+        name = v.name.split(SYMPY_SYMBOL_DELIMITER)[-1]
 
         # If already taken, rename _both_ variables using component name
         if name in reverse:
@@ -118,14 +115,14 @@ def get_unique_names(model):
 
             # Check it hasn't been renamed already
             if variables[other] == name:
-                oparts = other.name.split('$')
-                assert len(oparts) == 2
-                oname = uname(oparts[0] + sep + oparts[1])
+                # Try adding component name, and ensure uniqueness with uname()
+                oname = uname(other.name.replace(SYMPY_SYMBOL_DELIMITER, sep))
+
                 variables[other] = oname
                 reverse[oname] = other
 
-            # Get new name for v
-            name = uname(parts[0] + sep + parts[1])
+            # Try adding component name, and ensure uniqueness with uname()
+            name = uname(v.name.replace(SYMPY_SYMBOL_DELIMITER, sep))
 
         # Store variable name
         variables[v] = name
