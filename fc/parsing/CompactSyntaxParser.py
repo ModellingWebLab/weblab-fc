@@ -567,21 +567,19 @@ class CompactSyntaxParser(object):
         Try calling the given parse command, increasing the stack depth limit
         if needed.
         """
-        orig_source_file = actions.source_file
-        actions.source_file = source_file
         r = None  # Result
-        while self._stack_depth_factor < 3:
-            try:
-                r = callable(source_file, *args, **kwargs)
-            except RuntimeError as msg:
-                print('Got RuntimeError:', msg, file=sys.stderr)
-                self.increase_stack_depth_limit()
-            else:
-                break  # Parsed OK
-        if not r:
-            raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
-                               % (int(self._stack_depth_factor * self._original_stack_limit),))
-        actions.source_file = orig_source_file
+        with actions.set_reference_source(source_file):
+            while self._stack_depth_factor < 3:
+                try:
+                    r = callable(source_file, *args, **kwargs)
+                except RuntimeError as msg:
+                    print('Got RuntimeError:', msg, file=sys.stderr)
+                    self.increase_stack_depth_limit()
+                else:
+                    break  # Parsed OK
+            if not r:
+                raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
+                                   % (int(self._stack_depth_factor * self._original_stack_limit),))
         return r
 
 ################################################################################
