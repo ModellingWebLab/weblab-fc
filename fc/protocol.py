@@ -74,8 +74,6 @@ class Protocol(object):
     from file and running it on a given model.
     """
 
-    units_list = []
-
     def __init__(self, proto_file, indent_level=0):
         """Construct a new protocol by parsing the description in the given file.
 
@@ -202,6 +200,12 @@ class Protocol(object):
         # - key (optional): name of the key variable; should be a protocol output.
         self.plots = []
 
+        # 12. The ``unit definitions section
+        # A list of the units listed explicitly in this protocol.
+        # This allows for the lists to be merged from nested protocols without the need
+        # to reconcile unit registries and exact unit names
+        self.unit_definitions = []
+
         # Parse, and fill section information objects defined above
         self._parse()
 
@@ -238,10 +242,10 @@ class Protocol(object):
         self.inputs = details.get('inputs', [])
         self.input_env.execute_statements(self.inputs)
 
-        # Store unit definitions
+        # Store unit definitions and add these to protocol
         for units in details.get('units', []):
-            Protocol.units_list.append(units)
             self.units.add_unit(units.name, units.pint_expression)
+        self.unit_definitions = details.get('units', [])
 
         # check simulation has a model interface
         def has_model_interface(simulation):
@@ -254,32 +258,24 @@ class Protocol(object):
                 return True
 
         # Create model interface
-        def process_interface(interface, simulations):
-            """ Process a protocol's model interface. """
+        def process_interface_and_units(interface, simulations):
+            """ Process a protocol's model interface and add any unit definitions"""
             self.model_interface = interface
             # for any nested simulations merge the model interface from
             # the nested simulation to this outer model interface
+            # and add any units to the outer protocol
             for simulation in simulations:
-                if isinstance(simulation, fc.simulations.simulations.Nested):
-                    # if the simulation has its own protocol add units
-                    # and merge model interface
-                    if has_model_interface(simulation):
-                        self.model_interface.merge(simulation.nested_sim.model.proto.model_interface)
+                try:
+                    nested_proto = simulation.nested_sim.model.proto
+                    nested_interface = nested_proto.model_interface
+                except AttributeError:
+                    pass  # no interface on nested protocol
+                else:
+                    self.model_interface.merge(nested_interface)
 
-                        # need to add units from inner protocol
-
-                        # this doesnt work as the unit store names the units from
-                        # the nested protocol as e.g. 'store1_ms' and so when later
-                        # the model is set and _convert_time_if_needed is used it doesnt find time units e.g. 'ms'
-
-                        # self.units = UnitStore(simulation.nested_sim.model.proto.units)
-
-                        # this is horrible hacky and not sure a nested nested protocol would work
-                        for units in Protocol.units_list:
-                            try:
-                                self.units.add_unit(units.name, units.pint_expression)
-                            except ValueError:
-                                continue
+                    self.unit_definitions.extend(nested_proto.unit_definitions)
+                    for units in nested_proto.unit_definitions:
+                        self.units.add_unit(units.name, units.pint_expression)
 
         # Update namespace map
         def process_ns_map(ns_map):
@@ -335,8 +331,8 @@ class Protocol(object):
         # Store information from the model interface section
         # need to pass simulations so that any nested simulations
         # can add variables etc. to the outer model interface
-        simulations = details.get('simulations', [])
-        process_interface(details.get('model_interface', actions.ModelInterface()), simulations)
+        local_simulations = details.get('simulations', [])
+        process_interface_and_units(details.get('model_interface', actions.ModelInterface()), local_simulations)
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))

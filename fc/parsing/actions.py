@@ -821,30 +821,21 @@ class ModelInterface(BaseGroupAction):
         add_unique(self.optional_decls, interface.optional_decls)
         add_unique(self.equations, interface.equations)
         add_unique(self._clamps, interface._clamps)
-        add_unique(self.parameters, interface.parameters)
-        add_unique(self.tokens, interface.tokens)
-
-        # check for time units
-        def has_time_unit_attribute(this_object):
-            if this_object._time_units:
-                if len(this_object._time_units) == 1:
-                    return True
-            return False
 
         # need to be careful with time units
         # add from nested protocol if there are no time units in outer protocol
         # if outer and inner have time units these should be the same
-        if not has_time_unit_attribute(self):
+        if not self._time_units:
             # only add if interface actually has an entry in _time_units
-            if has_time_unit_attribute(interface):
+            if interface._time_units:
                 self._time_units.append(interface._time_units[0])
-        elif has_time_unit_attribute(interface):
-            if self._time_units[0].time_units != interface._time_units[0].time_units:
+        elif interface._time_units:
+            if self.units.get_unit(self.time_units) != interface.units.get_unit(interface.time_units):
                 raise ValueError('Mismatch in the units for time in nested protocols')
 
     @property
     def time_units(self):
-        if self._time_units and len(self._time_units) > 0:
+        if self._time_units:
             return self._time_units[0].time_units
         return None
 
