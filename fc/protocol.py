@@ -243,19 +243,9 @@ class Protocol(object):
         self.input_env.execute_statements(self.inputs)
 
         # Store unit definitions and add these to protocol
-        for units in details.get('units', []):
-            self.units.add_unit(units.name, units.pint_expression)
         self.unit_definitions = details.get('units', [])
-
-        # check simulation has a model interface
-        def has_model_interface(simulation):
-            """ Check wether the simulation has a model interface """
-            try:
-                simulation.nested_sim.model.proto.model_interface
-            except AttributeError:
-                return False
-            else:
-                return True
+        for units in self.unit_definitions:
+            self.units.add_unit(units.name, units.pint_expression)
 
         # Create model interface
         def process_interface_and_units(interface, simulations):
