@@ -584,7 +584,8 @@ class CompactSyntaxParser(object):
             pass
 
         # Try returning disk-cached file
-        cache_file = source_file + '.cache'
+        cache_file = os.path.split(source_file)
+        cache_file = os.path.join(cache_file[0], '.' + cache_file[1] + '.cache')
         if os.path.exists(cache_file):
             if os.path.getmtime(source_file) < os.path.getmtime(cache_file):
                 with open(cache_file, 'rb') as f:
