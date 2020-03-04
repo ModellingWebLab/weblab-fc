@@ -807,6 +807,32 @@ class ModelInterface(BaseGroupAction):
             raise ValueError('The units for time cannot be set multiple times')
         return self
 
+    def merge(self, interface):
+
+        # only append unique entries
+        def add_unique(list1, list2):
+            for l in list2:
+                if l not in list1:
+                    list1.append(l)
+
+        # append lists from interface to those already in this interface
+        add_unique(self.inputs, interface.inputs)
+        add_unique(self.outputs, interface.outputs)
+        add_unique(self.optional_decls, interface.optional_decls)
+        add_unique(self.equations, interface.equations)
+        add_unique(self._clamps, interface._clamps)
+
+        # need to be careful with time units
+        # add from nested protocol if there are no time units in outer protocol
+        # if outer and inner have time units these should be the same
+        if not self._time_units:
+            # only add if interface actually has an entry in _time_units
+            if interface._time_units:
+                self._time_units.append(interface._time_units[0])
+        elif interface._time_units:
+            if self.units.get_unit(self.time_units) != interface.units.get_unit(interface.time_units):
+                raise ValueError('Mismatch in the units for time in nested protocols')
+
     @property
     def time_units(self):
         if self._time_units:
