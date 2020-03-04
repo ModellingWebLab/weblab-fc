@@ -785,13 +785,6 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = []
         self.equations = []
         self._clamps = []  # ClampVariable instances
-        self._sympy_equations = None
-        self.initial_values = {}
-        self.units = None  # Will be the protocol's UnitStore
-        self.model = None  # The model to be modified
-        self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
-        self.parameters = []
-        self.vector_orderings = {}
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -805,6 +798,17 @@ class ModelInterface(BaseGroupAction):
         # Some basic semantics checking
         if len(self._time_units) > 1:
             raise ValueError('The units for time cannot be set multiple times')
+
+        # The variables below are used when this interface is coupled to a Protocol.
+        # They are reset here, so that a ModelInterface can be reused after its _expr() has been called.
+        self._sympy_equations = None
+        self.initial_values = {}
+        self.units = None  # Will be the protocol's UnitStore
+        self.model = None  # The model to be modified
+        self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
+        self.parameters = []
+        self.vector_orderings = {}
+
         return self
 
     def merge(self, interface):
