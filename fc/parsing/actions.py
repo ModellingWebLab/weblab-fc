@@ -1107,7 +1107,7 @@ class ModelInterface(BaseGroupAction):
         :param output_variables: the set of variables appearing in outputs, either directly or as part of a vector
         """
         import networkx as nx
-        graph = self.model.graph_with_sympy_numbers
+        graph = self.model.graph
         required_variables = set(output_variables)
         # Time is always needed, even if there are no state variables!
         time_variable = self.model.get_free_variable()
