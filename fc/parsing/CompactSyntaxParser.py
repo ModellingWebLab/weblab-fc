@@ -1,5 +1,8 @@
 
+import os
+import pickle
 import sys
+import time
 
 import pyparsing as p
 
@@ -540,6 +543,10 @@ class CompactSyntaxParser(object):
             plots,
         ]))).setName('Protocol').setParseAction(actions.Protocol)
 
+    # Caching of parsed files
+    # This maps source file names to a tuple (date_read, result)
+    _cache = {}
+
     def __init__(self):
         """Initialise the parser."""
         # We just store the original stack limit here, so we can increase
@@ -564,9 +571,39 @@ class CompactSyntaxParser(object):
 
     def try_parse(self, callable, source_file, *args, **kwargs):
         """
-        Try calling the given parse command, increasing the stack depth limit
-        if needed.
+        Try calling the given parse command, increasing the stack depth limit if needed.
         """
+        # Try returning in-memory cached file
+        now = time.time()
+        try:
+            date_read, r = self._cache[source_file]
+            if os.path.getmtime(source_file) < date_read:
+                print('Using mem-cached protocol for ' + source_file)
+                return r
+        except KeyError:
+            pass
+
+        # Try returning disk-cached file
+        cache_file = os.path.split(source_file)
+        cache_file = os.path.join(cache_file[0], '.' + cache_file[1] + '.cache')
+        if os.path.exists(cache_file):
+            if os.path.getmtime(source_file) < os.path.getmtime(cache_file):
+                with open(cache_file, 'rb') as f:
+                    try:
+                        print('Reading disk-cached protocol from ' + cache_file)
+                        r = pickle.load(f)
+
+                        # Store parse result in memory cache and return
+                        self._cache[source_file] = (now, r)
+                        return r
+                    except:
+                        pass
+            try:
+                os.remove(cache_file)
+            except:
+                pass
+
+        # Read file
         orig_source_file = actions.source_file
         actions.source_file = source_file
         r = None  # Result
@@ -582,6 +619,16 @@ class CompactSyntaxParser(object):
             raise RuntimeError("Failed to parse expression even with a recursion limit of %d; giving up!"
                                % (int(self._stack_depth_factor * self._original_stack_limit),))
         actions.source_file = orig_source_file
+
+        # Store parse result in memory cache
+        self._cache[source_file] = (now, r)
+
+        # Store parse result in disk cache
+        with open(cache_file, 'wb') as f:
+            print('Caching protocol to ' + cache_file)
+            pickle.dump(r, f)
+
+        # Return
         return r
 
 ################################################################################
