@@ -785,6 +785,13 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = []
         self.equations = []
         self._clamps = []  # ClampVariable instances
+
+        # Initialise
+        self._reinit()
+
+    def _reinit(self):
+        """(Re-)initialise this interface, so that it can be re-used."""
+
         self._sympy_equations = None
         self.initial_values = {}
         self.units = None  # Will be the protocol's UnitStore
@@ -805,6 +812,10 @@ class ModelInterface(BaseGroupAction):
         # Some basic semantics checking
         if len(self._time_units) > 1:
             raise ValueError('The units for time cannot be set multiple times')
+
+        # (Re-)initialise this interface (so that cached interface objects can be re-used)
+        self._reinit()
+
         return self
 
     def merge(self, interface):
