@@ -786,6 +786,20 @@ class ModelInterface(BaseGroupAction):
         self.equations = []
         self._clamps = []  # ClampVariable instances
 
+        # Initialise
+        self._reinit()
+
+    def _reinit(self):
+        """(Re-)initialise this interface, so that it can be re-used."""
+
+        self._sympy_equations = None
+        self.initial_values = {}
+        self.units = None  # Will be the protocol's UnitStore
+        self.model = None  # The model to be modified
+        self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
+        self.parameters = []
+        self.vector_orderings = {}
+
     def _expr(self):
         actions = self.get_children_expr()
         self._time_units = [a for a in actions if isinstance(a, SetTimeUnits)]
@@ -799,15 +813,8 @@ class ModelInterface(BaseGroupAction):
         if len(self._time_units) > 1:
             raise ValueError('The units for time cannot be set multiple times')
 
-        # The variables below are used when this interface is coupled to a Protocol.
-        # They are reset here, so that a ModelInterface can be reused after its _expr() has been called.
-        self._sympy_equations = None
-        self.initial_values = {}
-        self.units = None  # Will be the protocol's UnitStore
-        self.model = None  # The model to be modified
-        self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
-        self.parameters = []
-        self.vector_orderings = {}
+        # (Re-)initialise this interface (so that cached interface objects can be re-used)
+        self._reinit()
 
         return self
 
