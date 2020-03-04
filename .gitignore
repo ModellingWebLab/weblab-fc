@@ -70,3 +70,6 @@ src/*
 
 # Profiling info
 prof/*
+
+# Cached protocol file
+*.cache
