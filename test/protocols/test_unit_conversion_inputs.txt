@@ -1,0 +1,33 @@
+# This protocol is used to test unit conversion on inputs
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    V = volt
+    mV = milli volt
+}
+
+model interface {
+    # Change the initial value of V to 10 V
+    input oxmeta:membrane_voltage units V = 10
+    output oxmeta:membrane_voltage units V
+}
+
+tasks {
+    # Simulate for 10 seconds, storing only the first and last points
+    simulation sim = timecourse {
+        range time units ms uniform 0:5:5
+    }
+}
+
+post-processing {
+    # Check dimensions of output
+    assert sim:membrane_voltage.NUM_DIMS == 1
+    assert sim:membrane_voltage.SHAPE[0] == 2
+}
+
+outputs {
+    membrane_voltage = sim:membrane_voltage
+}
