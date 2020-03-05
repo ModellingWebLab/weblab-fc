@@ -8,7 +8,7 @@ from fc.simulations.model import TestOdeModel
 
 
 class TestVariousProtocols(unittest.TestCase):
-    """Test that various test protocols are executed correctly."""
+    """Test that various test protocols are executed correctly, using a TestOdeModel."""
 
     def test_nested_protocols(self):
         proto_file = 'test/protocols/test_nested_protocol.txt'

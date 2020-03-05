@@ -9,17 +9,18 @@ import fc
 from fc import test_support
 
 
-def test_generated_model_graphstate():
+def test_graphstate():
+    """ Tests the graph state protocol. """
+
     # Create protocol
-    proto = fc.Protocol(os.path.join(
-        'test', 'protocols', 'generated_model_graphstate.txt'))
+    proto = fc.Protocol(os.path.join('protocols', 'GraphState.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
     proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
 
     # Run protocol
-    proto.set_output_folder('test_generated_model_graphstate')
+    proto.set_output_folder('test_graphstate')
     proto.run()
     # Some test assertions are within the protocol itself
 
@@ -37,9 +38,10 @@ def test_generated_model_graphstate():
 
 
 def test_graphstate_time_conversion():
+    """ Tests the graph state protocol in a model requiring time units conversion. """
+
     # Create protocol
-    proto = fc.Protocol(os.path.join(
-        'test', 'protocols', 'generated_model_graphstate.txt'))
+    proto = fc.Protocol(os.path.join('protocols', 'GraphState.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
@@ -64,9 +66,10 @@ def test_graphstate_time_conversion():
 
 
 def test_graphstate_voltage_conversion():
+    """ Tests the graph state protocol in a model requiring state variable units conversion. """
+
     # Create protocol
-    proto = fc.Protocol(os.path.join(
-        'test', 'protocols', 'generated_model_graphstate.txt'))
+    proto = fc.Protocol(os.path.join('protocols', 'GraphState.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'paci_hyttinen_aaltosetala_severi_ventricularVersion'  # has voltage in volt, not millivolt
