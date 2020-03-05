@@ -6,7 +6,7 @@
     xmlns:cellml="http://www.cellml.org/cellml/1.0#"
     xmlns:cmeta="http://www.cellml.org/metadata/1.0#"
     cmeta:id="simple_ode" name="simple_ode">
-    
+
     <units name="ms">
         <unit prefix="milli" units="second"/>
     </units>
@@ -24,12 +24,12 @@
         <unit prefix="milli" units="mole"/>
         <unit units="litre" exponent="-1"/>
     </units>
-    
+
     <units name="mM_per_ms">
         <unit units="mM"/>
         <unit units="ms" exponent="-1"/>
     </units>
-    
+
     <component name="main">
         <variable name="time" units="ms" cmeta:id="time"/>
         <variable name="V" units="mV" cmeta:id="V" initial_value="0"/>
@@ -37,11 +37,11 @@
         <variable name="b" units="mV_per_ms" cmeta:id="b"/>
         <variable name="Na" units="mM" cmeta:id="Na" initial_value="0"/>
         <variable name="n" units="mM_per_ms" initial_value="1" cmeta:id="n"/>
-        <math xmlns="http://www.w3.org/1998/Math/MathML"> 
-            <apply><eq/> 
-                <apply><diff/> 
-                    <bvar><ci>time</ci></bvar> 
-                    <ci>V</ci> 
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply><eq/>
+                <apply><diff/>
+                    <bvar><ci>time</ci></bvar>
+                    <ci>V</ci>
                 </apply>
                 <ci>a</ci>
             </apply>
@@ -51,16 +51,16 @@
                 <cn cellml:units="mV_per_ms">-1</cn>
             </apply>
             <!-- A second ODE, only used in some tests -->
-            <apply><eq/> 
-                <apply><diff/> 
-                    <bvar><ci>time</ci></bvar> 
-                    <ci>Na</ci> 
+            <apply><eq/>
+                <apply><diff/>
+                    <bvar><ci>time</ci></bvar>
+                    <ci>Na</ci>
                 </apply>
                 <ci>n</ci>
             </apply>
         </math>
     </component>
-    
+
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
              xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
         <rdf:Description rdf:about="#time">
@@ -82,5 +82,5 @@
             <bqbiol:is rdf:resource="urn:test-ns#parameter_n"/>
         </rdf:Description>
     </rdf:RDF>
-    
+
 </model>

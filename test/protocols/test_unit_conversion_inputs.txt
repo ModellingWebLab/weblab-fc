@@ -1,18 +1,27 @@
 # This protocol is used to test unit conversion on inputs
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace test = "urn:test-ns#"
 
 import std = "BasicLibrary.txt"
 
 units {
     V = volt
     mV = milli volt
+    M = mole . litre^-1
+    mM = milli M
+    ms = milli second
+    M_per_ms = M . ms^-1
 }
 
 model interface {
     # Change the initial value of V to 10 V
     input oxmeta:membrane_voltage units V = 10
     output oxmeta:membrane_voltage units V
+
+    # Change the initial value of n to 3M/ms
+    input test:parameter_n units M_per_ms = 3
+    output oxmeta:cytosolic_sodium_concentration
 }
 
 tasks {
@@ -30,4 +39,5 @@ post-processing {
 
 outputs {
     membrane_voltage = sim:membrane_voltage
+    cytosolic_sodium_concentration = sim:cytosolic_sodium_concentration
 }
