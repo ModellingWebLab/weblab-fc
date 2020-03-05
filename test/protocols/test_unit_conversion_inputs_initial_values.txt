@@ -1,4 +1,4 @@
-# This protocol is used to test unit conversion on inputs
+# This protocol is used to test unit conversion on inputs, when making changes to initial values
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 namespace test = "urn:test-ns#"
@@ -21,7 +21,7 @@ model interface {
 
     # Change the initial value of n to 3M/ms
     input test:parameter_n units M_per_ms = 3
-    output oxmeta:cytosolic_sodium_concentration
+    output oxmeta:cytosolic_sodium_concentration mM
 }
 
 tasks {
