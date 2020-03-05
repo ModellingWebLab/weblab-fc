@@ -1,0 +1,22 @@
+# Specifies an invalid interface: input and output units must be the same
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    V = volt
+    mV = milli volt
+}
+
+model interface {
+    input oxmeta:membrane_voltage units V
+    output oxmeta:membrane_voltage units mV
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:5:5
+    }
+}
+
