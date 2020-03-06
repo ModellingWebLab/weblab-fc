@@ -1,0 +1,49 @@
+# This protocol is used to test unit conversion on inputs, when making changes using define statements
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace test = "urn:test-ns#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    V = volt
+    mV = milli volt
+    M = mole . litre^-1
+    mM = milli M
+    ms = milli second
+    V_per_ms = V . ms^-1
+    M_per_ms = M . ms^-1
+}
+
+model interface {
+    # Change the ODE for V to be 3V/ms
+    independent var units ms
+    input oxmeta:membrane_voltage units V
+    output oxmeta:membrane_voltage units V
+    define diff(oxmeta:membrane_voltage; oxmeta:time) = 3 :: V_per_ms
+
+    # Change the value of n to 5M/ms
+    input test:parameter_n units M_per_ms
+    define test:parameter_n = 5 :: M_per_ms
+    output oxmeta:cytosolic_sodium_concentration units mM
+}
+
+tasks {
+    # Simulate for 5ms, storing only the first and last points
+    simulation sim = timecourse {
+        range time units ms uniform 0:5:5
+    }
+}
+
+post-processing {
+    # Check dimensions of output
+    assert sim:membrane_voltage.NUM_DIMS == 1
+    assert sim:membrane_voltage.SHAPE[0] == 2
+
+    # The actual output values are model-dependent, and will be checked in Python.
+}
+
+outputs {
+    membrane_voltage = sim:membrane_voltage
+    cytosolic_sodium_concentration = sim:cytosolic_sodium_concentration
+}
