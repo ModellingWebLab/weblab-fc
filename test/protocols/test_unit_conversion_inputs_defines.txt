@@ -16,7 +16,7 @@ units {
 }
 
 model interface {
-    # Change the ODE for V to be in 3V/ms
+    # Change the ODE for V to be 3V/ms
     independent var units ms
     input oxmeta:membrane_voltage units V
     output oxmeta:membrane_voltage units V
@@ -29,7 +29,7 @@ model interface {
 }
 
 tasks {
-    # Simulate for 10 seconds, storing only the first and last points
+    # Simulate for 5ms, storing only the first and last points
     simulation sim = timecourse {
         range time units ms uniform 0:5:5
     }
@@ -39,6 +39,8 @@ post-processing {
     # Check dimensions of output
     assert sim:membrane_voltage.NUM_DIMS == 1
     assert sim:membrane_voltage.SHAPE[0] == 2
+
+    # The actual output values are model-dependent, and will be checked in Python.
 }
 
 outputs {
