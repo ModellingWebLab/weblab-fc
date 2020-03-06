@@ -7,7 +7,6 @@ import pytest
 import fc
 
 
-@pytest.mark.xfail(strict=True, reason='Unit conversion not implemented yet.')
 def test_unit_conversion_inputs_initial_values():
     # Test unit conversion for initial values of states and constants.
 
@@ -21,13 +20,17 @@ def test_unit_conversion_inputs_initial_values():
     # The model has Na in mM with Na(0)=0 mM, and dNa/dt=n, where n has initial value 1 mM/ms
     # The protocol will change n's initial value to 3 M/ms, and then run for 5 ms
     Na = proto.output_env.look_up('cytosolic_sodium_concentration').array
-    assert list(Na) == [0, 15000]
+    assert len(Na) == 2
+    assert Na[0] == 0
+    assert Na[1] == pytest.approx(15000, rel=1e-15)
 
     # Check initial value of state was set correctly
     # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2 mV
     # The protocol will change v's units to volts, set initial value v(0)=10 V, and then run for 5 ms
     v = proto.output_env.look_up('membrane_voltage').array
-    assert list(v) == [10, 10.005]
+    assert len(v) == 2
+    assert v[0] == 10
+    assert v[1] == pytest.approx(10.005, rel=1e-15)
 
 
 @pytest.mark.xfail(strict=True, reason='Unit conversion not implemented yet.')
@@ -44,11 +47,16 @@ def test_unit_conversion_inputs_defines():
     # The model has Na in mM with Na(0)=0 mM, and dNa/dt=n, where n has initial value 1 mM/ms
     # The protocol will define n=5 M/ms, and then run for 5 ms
     Na = proto.output_env.look_up('cytosolic_sodium_concentration').array
-    assert list(Na) == [0, 25000]
+    assert len(Na) == 2
+    assert Na[0] == 0
+    assert Na[1] == pytest.approx(15000, rel=1e-15)
+
 
     # Check initial value of state was set correctly
     # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2 mV
     # The protocol will change v's units to volts, define dv/dt=3 V/ms, and then run for 5 ms
     v = proto.output_env.look_up('membrane_voltage').array
-    assert list(v) == [0, 15]
+    assert len(v) == 2
+    assert v[0] == 10
+    assert v[1] == pytest.approx(10.005, rel=1e-15)
 
