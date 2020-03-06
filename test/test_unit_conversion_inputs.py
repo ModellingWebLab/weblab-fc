@@ -18,14 +18,14 @@ def test_unit_conversion_inputs_initial_values():
     proto.run()
 
     # Check initial value of constant was set correctly
-    # The model has Na in mM with Na(0)=0mM, and dNa/dt=n, where n has initial value 1 mM/ms
-    # The protocol will change n's initial value to 3 M/ms, and then run for 5ms
+    # The model has Na in mM with Na(0)=0 mM, and dNa/dt=n, where n has initial value 1 mM/ms
+    # The protocol will change n's initial value to 3 M/ms, and then run for 5 ms
     Na = proto.output_env.look_up('cytosolic_sodium_concentration').array
     assert list(Na) == [0, 15000]
 
     # Check initial value of state was set correctly
-    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2mV
-    # The protocol will change V's units to volts, set v(0)=10 V, and then run for 5ms
+    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2 mV
+    # The protocol will change v's units to volts, set initial value v(0)=10 V, and then run for 5 ms
     v = proto.output_env.look_up('membrane_voltage').array
     assert list(v) == [10, 10.005]
 
@@ -41,14 +41,14 @@ def test_unit_conversion_inputs_defines():
     proto.run()
 
     # Check RHS of constant was set correctly
-    # The model has Na in mM with Na(0)=0mM, and dNa/dt=n, where n has initial value 1 mM/ms
-    # The protocol will define n=5M/ms, and then run for 5ms
+    # The model has Na in mM with Na(0)=0 mM, and dNa/dt=n, where n has initial value 1 mM/ms
+    # The protocol will define n=5 M/ms, and then run for 5 ms
     Na = proto.output_env.look_up('cytosolic_sodium_concentration').array
     assert list(Na) == [0, 25000]
 
     # Check initial value of state was set correctly
-    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2mV
-    # The protocol will change V's units to volts, define dV/dt=3V/ms, and then run for 5ms
+    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2 mV
+    # The protocol will change v's units to volts, define dv/dt=3 V/ms, and then run for 5 ms
     v = proto.output_env.look_up('membrane_voltage').array
     assert list(v) == [0, 15]
 
