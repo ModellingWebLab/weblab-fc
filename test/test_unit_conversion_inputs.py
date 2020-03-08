@@ -25,7 +25,7 @@ def test_unit_conversion_inputs_initial_values():
     assert Na[1] == pytest.approx(15000, rel=1e-15)
 
     # Check initial value of state was set correctly
-    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2 mV
+    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=0 mV
     # The protocol will change v's units to volts, set initial value v(0)=10 V, and then run for 5 ms
     v = proto.output_env.look_up('membrane_voltage').array
     assert len(v) == 2
@@ -33,7 +33,6 @@ def test_unit_conversion_inputs_initial_values():
     assert v[1] == pytest.approx(10.005, rel=1e-15)
 
 
-@pytest.mark.xfail(strict=True, reason='Unit conversion not implemented yet.')
 def test_unit_conversion_inputs_defines():
     # Test unit conversion for input variables (states and constants) modified with define statements.
 
@@ -49,14 +48,13 @@ def test_unit_conversion_inputs_defines():
     Na = proto.output_env.look_up('cytosolic_sodium_concentration').array
     assert len(Na) == 2
     assert Na[0] == 0
-    assert Na[1] == pytest.approx(15000, rel=1e-15)
-
+    assert Na[1] == pytest.approx(25000, rel=1e-15)
 
     # Check initial value of state was set correctly
-    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=2 mV
+    # The model has v in mV, with dv/dt=1 mV/ms, and v(0)=0 mV
     # The protocol will change v's units to volts, define dv/dt=3 V/ms, and then run for 5 ms
     v = proto.output_env.look_up('membrane_voltage').array
     assert len(v) == 2
-    assert v[0] == 10
-    assert v[1] == pytest.approx(10.005, rel=1e-15)
+    assert v[0] == 0
+    assert v[1] == pytest.approx(15, rel=1e-15)
 

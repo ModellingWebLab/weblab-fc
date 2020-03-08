@@ -968,6 +968,8 @@ class ModelInterface(BaseGroupAction):
     def _add_input_variables(self):
         """Ensure requested input variables exist, unless they are optional.
 
+        If the variable exists its units are checked and converted if needed.
+
         If it doesn't exist but is marked as optional, nothing is done.
 
         If it doesn't exist and is *not* optional, then it needs to be created here, which requires that
@@ -1000,17 +1002,17 @@ class ModelInterface(BaseGroupAction):
                 variable = self.model.add_variable(name, units)
                 self.model.add_cmeta_id(variable)
                 self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
-            else:
-                # Convert units if needed
-                if var.units is not None:
-                    units = self.units.get_unit(var.units)
-                    if units != variable.units:
-                        print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
-                        variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
 
             # Store initial value if given
-            if variable is not None and var.initial_value is not None:
+            if var.initial_value is not None:
                 self.initial_values[var.rdf_term] = var.initial_value
+
+            # Convert units if needed
+            if var.units is not None:
+                units = self.units.get_unit(var.units)
+                if units != variable.units:
+                    print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
+                    variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
 
     def _add_or_replace_equations(self):
         """
