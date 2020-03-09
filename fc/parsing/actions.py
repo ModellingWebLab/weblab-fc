@@ -888,7 +888,7 @@ class ModelInterface(BaseGroupAction):
         # Convert free variable units
         self._convert_time_if_needed()
 
-        # Ensure inputs exists, adding them if needed, and storing initial values set by user.
+        # Ensure inputs exist, adding them if needed, and storing initial values set by user.
         # This also performs unit conversion where needed for existing input variables.
         self._add_input_variables()
 
