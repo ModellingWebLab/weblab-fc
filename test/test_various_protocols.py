@@ -53,3 +53,10 @@ class TestVariousProtocols(unittest.TestCase):
         proto.set_model(TestOdeModel(1))
         proto.set_input('num_iters', E.N(10))
         proto.run()
+
+    def test_nested_protocol_example(self):
+        proto_file = 'test/protocols/test_IK1_block.txt'
+        proto = fc.Protocol(proto_file)
+        proto.set_output_folder('TestVariousProtocols_TestNestedExampleProtocols')
+        proto.set_model('test/models/luo_rudy_1991.cellml')
+        proto.run()
