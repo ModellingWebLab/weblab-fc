@@ -12,7 +12,7 @@ def test_duplicate_input():
 
     proto_file = 'test/protocols/test_bad_interface_duplicate_input.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_invalid_interface')
+    proto.set_output_folder('test_bad_interface_duplicate_input')
     with pytest.raises(ProtocolError, match='as an input twice'):
         proto.set_model('test/models/single_ode.cellml')
         proto.run()
@@ -23,7 +23,7 @@ def test_duplicate_output():
 
     proto_file = 'test/protocols/test_bad_interface_duplicate_output.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_invalid_interface')
+    proto.set_output_folder('test_bad_interface_duplicate_output')
     with pytest.raises(ProtocolError, match='as an output twice'):
         proto.set_model('test/models/single_ode.cellml')
         proto.run()
@@ -34,7 +34,7 @@ def test_input_output_units_mismatch():
 
     proto_file = 'test/protocols/test_bad_interface_unit_mismatch.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_invalid_interface')
+    proto.set_output_folder('test_bad_interface_unit_mismatch')
     with pytest.raises(ProtocolError, match='different unit'):
         proto.set_model('test/models/single_ode.cellml')
         proto.run()
