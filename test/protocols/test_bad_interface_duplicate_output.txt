@@ -1,8 +1,6 @@
-# Specifies an invalid interface: input and output units must be the same
+# Specifies an invalid interface: output can't be specified twice
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
-
-import std = "BasicLibrary.txt"
 
 units {
     V = volt
@@ -10,8 +8,8 @@ units {
 }
 
 model interface {
-    input oxmeta:membrane_voltage units V
-    output oxmeta:membrane_voltage units mV
+    output oxmeta:membrane_voltage units V
+    output oxmeta:membrane_voltage units V
 }
 
 tasks {

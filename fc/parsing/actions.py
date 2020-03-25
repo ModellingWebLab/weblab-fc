@@ -885,6 +885,9 @@ class ModelInterface(BaseGroupAction):
         self.model = model
         self.units = units
 
+        # Perform initial sanity checks
+        self._sanity_check()
+
         # Convert free variable units
         self._convert_time_if_needed()
 
@@ -909,6 +912,26 @@ class ModelInterface(BaseGroupAction):
 
         self._purge_unused_mathematics(output_variables)
         # TODO: Any final consistency checks on the model?
+
+    def _sanity_check(self):
+        """Perform initial sanity checks on the protocol interface."""
+
+        # Variables can only appear as input or output once
+        # If a variable appears as an input and an ouput, both must have the same units
+        input_units = {}
+        output_units = {}
+        for var in self.inputs:
+            if var.rdf_term in input_units:
+                raise ProtocolError('The variable ' + str(var.rdf_term) + ' was specified as an input twice.')
+            input_units[var.rdf_term] = var.units
+        for var in self.outputs:
+            if var.rdf_term in output_units:
+                raise ProtocolError('The variable ' + str(var.rdf_term) + ' was specified as an output twice.')
+            output_units[var.rdf_term] = var.units
+            units = input_units.get(var.rdf_term)
+            if var.units is not None and units is not None and var.units != units:
+                raise ProtocolError(
+                    'The variable ' + str(var.rdf_term) + ' appears as input and output, but with different units.')
 
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.
@@ -1099,8 +1122,6 @@ class ModelInterface(BaseGroupAction):
         for output in self.outputs:
             variables = get_variables_transitively(self.model, output.rdf_term)
             if output.units is not None:
-                # TODO: Check if this variable is also listed in the inputs, if so, it must have the same unit set
-                #       there.
                 desired_units = self.units.get_unit(output.units)
                 for i, variable in enumerate(variables):
                     variables[i] = self.model.convert_variable(
