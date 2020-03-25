@@ -1,14 +1,10 @@
 """
 Tests processing of the model interface section.
 """
-import os
-
 import pytest
 
 import fc
-from fc import data_loading
 from fc.error_handling import ProtocolError
-from fc.simulations import model
 
 
 def test_duplicate_input():
