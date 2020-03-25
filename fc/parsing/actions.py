@@ -933,6 +933,9 @@ class ModelInterface(BaseGroupAction):
                 raise ProtocolError(
                     'The variable ' + str(var.rdf_term) + ' appears as input and output, but with different units.')
 
+        # TODO Check defines
+        # TODO Check clamps
+
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.
 
