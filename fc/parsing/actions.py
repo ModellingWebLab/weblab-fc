@@ -901,7 +901,9 @@ class ModelInterface(BaseGroupAction):
         # and setting any initial values defined through inputs.
         self._add_or_replace_equations()
 
+        # Process ``clamp`` statements
         self._handle_clamping()
+
         self._annotate_state_variables()
 
         # Convert units for output variables
@@ -918,12 +920,15 @@ class ModelInterface(BaseGroupAction):
 
         # Variables can only appear as input or output once
         # If a variable appears as an input and an ouput, both must have the same units
-        input_units = {}
-        output_units = {}
+        input_units = {}            # To check input vs output units
+        output_units = {}           # To check input vs output units
+        initial_values = set()      # To check against overdefinedness
         for var in self.inputs:
             if var.rdf_term in input_units:
                 raise ProtocolError('The variable ' + str(var.rdf_term) + ' was specified as an input twice.')
             input_units[var.rdf_term] = var.units
+            if var.initial_value is not None:
+                initial_values.add(var.rdf_term)
         for var in self.outputs:
             if var.rdf_term in output_units:
                 raise ProtocolError('The variable ' + str(var.rdf_term) + ' was specified as an output twice.')
@@ -933,8 +938,30 @@ class ModelInterface(BaseGroupAction):
                 raise ProtocolError(
                     'The variable ' + str(var.rdf_term) + ' appears as input and output, but with different units.')
 
-        # TODO Check defines
-        # TODO Check clamps
+        # Clamped variables can't also have an initial value
+        clamped = set()         # To check against overdefinedness
+        print('='*40)
+        for var in self._clamps:
+            print(var, var.rdf_term)
+            if var.rdf_term in initial_values:
+                raise ProtocolError(
+                    'The variable ' + str(var.rdf_term) + ' is clamped, but was also given an initial value in an'
+                    ' input.')
+            clamped.add(var.rdf_term)
+        print('='*40)
+
+        # Variables set with `define` can't also be clamped
+        for eq in self.sympy_equations:
+            var = eq.lhs.args[0] if eq.is_Derivative else eq.lhs
+            for rdf_term in self.model.get_ontology_terms_by_variable(var):
+                if rdf_term in clamped:
+                    raise ProtocolError(
+                        'The variable ' + str(var.rdf_term) + ' is clamped, but also set with a define statement.')
+
+        # Note: Variables set with `define` may have an initial value (if they are defined through their derivatives),
+        # this is checked later.
+
+        # TODO: What about the `default` part of an `optional` statement?
 
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.

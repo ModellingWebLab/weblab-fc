@@ -1,0 +1,19 @@
+# Specifies an invalid interface: clamped variable can't have an initial value
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    V = volt
+}
+
+model interface {
+    input oxmeta:membrane_voltage units V = 1
+    clamp oxmeta:membrane_voltage to 2 :: V
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1
+    }
+}
+
