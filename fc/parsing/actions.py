@@ -936,37 +936,38 @@ class ModelInterface(BaseGroupAction):
         input_units = {}            # To check input vs output units
         output_units = {}           # To check input vs output units
         initial_values = set()      # To check against overdefinedness
-        for var in self.inputs:
-            if var.rdf_term in input_units:
-                raise ProtocolError('The variable ' + str(var.rdf_term) + ' was specified as an input twice.')
-            input_units[var.rdf_term] = var.units
-            if var.initial_value is not None:
-                initial_values.add(var.rdf_term)
-        for var in self.outputs:
-            if var.rdf_term in output_units:
-                raise ProtocolError('The variable ' + str(var.rdf_term) + ' was specified as an output twice.')
-            output_units[var.rdf_term] = var.units
-            units = input_units.get(var.rdf_term)
-            if var.units is not None and units is not None and var.units != units:
+        for ref in self.inputs:
+            var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            if var in input_units:
+                raise ProtocolError('The variable ' + str(var) + ' was specified as an input twice.')
+            input_units[var] = ref.units
+            if ref.initial_value is not None:
+                initial_values.add(var)
+        for ref in self.outputs:
+            var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            if var in output_units:
+                raise ProtocolError('The variable ' + str(var) + ' was specified as an output twice.')
+            output_units[var] = ref.units
+            units = input_units.get(var)
+            if ref.units is not None and units is not None and ref.units != units:
                 raise ProtocolError(
-                    'The variable ' + str(var.rdf_term) + ' appears as input and output, but with different units.')
+                    'The variable ' + str(var) + ' appears as input and output, but with different units.')
 
         # Check against overdefinedness: Variables cannot appear as an LHS of an equation more than once (e.g. used in
         # two defines, or used in a ``clamp x to 1`` and a define), and variables clamped to their current value can not
         # also be defined.
         seen = set()
-        for var in self.clamps:
-            if var.rdf_term in seen:
-                raise ProtocolError(
-                    'The variable ' + str(var.rdf_term) + ' appears in multiple clamp statements.')
-            seen.add(var.rdf_term)
+        for ref in self.clamps:
+            var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            if var in seen:
+                raise ProtocolError('The variable ' + str(var) + ' is set by multiple clamp statements.')
+            seen.add(var)
         for eq in self.sympy_equations:
             var = eq.lhs.args[0] if eq.is_Derivative else eq.lhs
-            for rdf_term in self.model.get_ontology_terms_by_variable(var):
-                if rdf_term in seen:
-                    raise ProtocolError(
-                        'The variable ' + str(rdf_term) + ' is set by more than one clamp and/or define statement.')
-                seen.add(rdf_term)
+            if var in seen:
+                raise ProtocolError(
+                    'The variable ' + str(var) + ' is set by more than one clamp and/or define statement.')
+            seen.add(var)
 
         # Note: Variables set with `define` may have an initial value (if they are defined through their derivatives),
         # this is checked later.
@@ -1073,7 +1074,7 @@ class ModelInterface(BaseGroupAction):
             if var.units is not None:
                 units = self.units.get_unit(var.units)
                 if units != variable.units:
-                    print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
+                    # print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
                     variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
 
     def _add_or_replace_equations(self):

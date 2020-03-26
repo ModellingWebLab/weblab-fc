@@ -64,7 +64,7 @@ def test_clamp_and_define_1():
     proto_file = 'test/protocols/test_bad_interface_clamp_and_define_1.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_bad_interface_clamp_and_define_1')
-    with pytest.raises(ProtocolError, match='blooooooooooooooep'):
+    with pytest.raises(ProtocolError, match='more than one clamp and/or define'):
         proto.set_model('test/models/single_ode.cellml')
 
 
