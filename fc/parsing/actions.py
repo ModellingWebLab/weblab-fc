@@ -1070,12 +1070,19 @@ class ModelInterface(BaseGroupAction):
             if var.initial_value is not None:
                 self.initial_values[var.rdf_term] = var.initial_value
 
+            # Maintain link to time variable, if needed
+            is_time = variable is self.time_variable
+
             # Convert units if needed
             if var.units is not None:
                 units = self.units.get_unit(var.units)
                 if units != variable.units:
                     # print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
                     variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
+
+                    # Update cached time variable
+                    if is_time:
+                        self.time_variable = variable
 
     def _add_or_replace_equations(self):
         """
