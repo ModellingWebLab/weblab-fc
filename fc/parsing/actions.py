@@ -1278,12 +1278,11 @@ class NestedProtocol(BaseGroupAction):
         if self.trace:
             tokens[0] = tokens[0][:-1]
         super(NestedProtocol, self).__init__(s, loc, tokens)
+        # Resolve any relative path to the nested protocol
+        self.proto_path = os.path.join(os.path.dirname(source_file), self.tokens[0])
 
     def _expr(self):
-        args = []
-        proto_file = self.tokens[0]
-        proto_file = os.path.join(os.path.dirname(source_file), proto_file)
-        args.append(proto_file)
+        args = [self.proto_path]
         inputs = {}
         assert isinstance(self.tokens[1], StatementList)
         for assignment in self.tokens[1]:
