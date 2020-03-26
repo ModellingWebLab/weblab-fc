@@ -1,4 +1,5 @@
-# Specifies an invalid interface: clamped variable can't have an initial value
+# Specifies an invalid interface: a variable can't appear in both a clamp and a define
+# This version tests without an RHS on the clamp statement
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
@@ -7,8 +8,8 @@ units {
 }
 
 model interface {
-    input oxmeta:membrane_voltage units V = 1
     define oxmeta:membrane_voltage = 2 :: V
+    clamp oxmeta:membrane_voltage
 }
 
 tasks {
