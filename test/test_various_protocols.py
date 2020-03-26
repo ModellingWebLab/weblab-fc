@@ -8,14 +8,13 @@ from fc.simulations.model import TestOdeModel
 
 
 class TestVariousProtocols(unittest.TestCase):
-    """Test that various test protocols are executed correctly."""
+    """Test that various test protocols are executed correctly, using a TestOdeModel."""
 
-    @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
     def test_nested_protocols(self):
         proto_file = 'test/protocols/test_nested_protocol.txt'
         proto = fc.Protocol(proto_file)
         proto.set_output_folder('TestVariousProtocols_TestNestedProtocols')
-        proto.set_model('cellml/luo_rudy_1991.cellml')
+        proto.set_model('test/models/luo_rudy_1991.cellml')
         proto.run()
         self.assertNotIn('always_missing', proto.output_env)
         self.assertNotIn('first_missing', proto.output_env)

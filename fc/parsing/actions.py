@@ -802,6 +802,13 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = []
         self.equations = []
         self._clamps = []  # ClampVariable instances
+
+        # Initialise
+        self._reinit()
+
+    def _reinit(self):
+        """(Re-)initialise this interface, so that it can be re-used."""
+
         self._sympy_equations = None
         self.initial_values = {}
         self.units = None  # Will be the protocol's UnitStore
@@ -822,7 +829,37 @@ class ModelInterface(BaseGroupAction):
         # Some basic semantics checking
         if len(self._time_units) > 1:
             raise ValueError('The units for time cannot be set multiple times')
+
+        # (Re-)initialise this interface (so that cached interface objects can be re-used)
+        self._reinit()
+
         return self
+
+    def merge(self, interface):
+
+        # only append unique entries
+        def add_unique(list1, list2):
+            for l in list2:
+                if l not in list1:
+                    list1.append(l)
+
+        # append lists from interface to those already in this interface
+        add_unique(self.inputs, interface.inputs)
+        add_unique(self.outputs, interface.outputs)
+        add_unique(self.optional_decls, interface.optional_decls)
+        add_unique(self.equations, interface.equations)
+        add_unique(self._clamps, interface._clamps)
+
+        # need to be careful with time units
+        # add from nested protocol if there are no time units in outer protocol
+        # if outer and inner have time units these should be the same
+        if not self._time_units:
+            # only add if interface actually has an entry in _time_units
+            if interface._time_units:
+                self._time_units.append(interface._time_units[0])
+        elif interface._time_units:
+            if self.units.get_unit(self.time_units) != interface.units.get_unit(interface.time_units):
+                raise ValueError('Mismatch in the units for time in nested protocols')
 
     @property
     def time_units(self):
@@ -868,7 +905,8 @@ class ModelInterface(BaseGroupAction):
         # Convert free variable units
         self._convert_time_if_needed()
 
-        # Ensure inputs exists, adding them if needed, and storing initial values set by user
+        # Ensure inputs exist, adding them if needed, and storing initial values set by user.
+        # This also performs unit conversion where needed for existing input variables.
         self._add_input_variables()
 
         # TODO: Add variables defined with ``var`` statements
@@ -879,8 +917,6 @@ class ModelInterface(BaseGroupAction):
 
         self._handle_clamping()
         self._annotate_state_variables()
-
-        # TODO: Apply units conversions for inputs where needed
 
         # Convert units for output variables
         output_variables = self._convert_output_units()
@@ -949,7 +985,7 @@ class ModelInterface(BaseGroupAction):
     def _add_input_variables(self):
         """Ensure requested input variables exist, unless they are optional.
 
-        Note that units conversions are not done yet. If the variable exists in the model, we do nothing.
+        If the variable exists its units are checked and converted if needed.
 
         If it doesn't exist but is marked as optional, nothing is done.
 
@@ -965,6 +1001,11 @@ class ModelInterface(BaseGroupAction):
             except KeyError:
                 # TODO: Check if variable is optional; skip if so. Add a helper method is_optional that
                 # compares var.prefixed_name against self.optional_decls?
+                optional = False
+                if optional:
+                    continue
+
+                # Check units are given for new variable
                 if var.units is None:
                     raise ProtocolError(
                         'Units must be specified for input variables not appearing in the model;'
@@ -980,8 +1021,15 @@ class ModelInterface(BaseGroupAction):
                 self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
 
             # Store initial value if given
-            if variable is not None and var.initial_value is not None:
+            if var.initial_value is not None:
                 self.initial_values[var.rdf_term] = var.initial_value
+
+            # Convert units if needed
+            if var.units is not None:
+                units = self.units.get_unit(var.units)
+                if units != variable.units:
+                    print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
+                    variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
 
     def _add_or_replace_equations(self):
         """
@@ -1035,8 +1083,6 @@ class ModelInterface(BaseGroupAction):
                     self.model.remove_equation(old_eq)
                 self.model.add_equation(sympy.Eq(var, self.model.add_number(value, var.units)))
 
-        # TODO: Check units of newly added equations; apply conversions where needed now or later?
-
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
         for clamp in self._clamps:
@@ -1070,6 +1116,8 @@ class ModelInterface(BaseGroupAction):
         for output in self.outputs:
             variables = get_variables_transitively(self.model, output.rdf_term)
             if output.units is not None:
+                # TODO: Check if this variable is also listed in the inputs, if so, it must have the same unit set
+                #       there.
                 desired_units = self.units.get_unit(output.units)
                 for i, variable in enumerate(variables):
                     variables[i] = self.model.convert_variable(
@@ -1098,7 +1146,7 @@ class ModelInterface(BaseGroupAction):
         :param output_variables: the set of variables appearing in outputs, either directly or as part of a vector
         """
         import networkx as nx
-        graph = self.model.graph_with_sympy_numbers
+        graph = self.model.graph
         required_variables = set(output_variables)
         # Time is always needed, even if there are no state variables!
         time_variable = self.model.get_free_variable()

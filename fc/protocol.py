@@ -200,6 +200,12 @@ class Protocol(object):
         # - key (optional): name of the key variable; should be a protocol output.
         self.plots = []
 
+        # 12. The ``unit definitions section
+        # A list of the units listed explicitly in this protocol.
+        # This allows for the lists to be merged from nested protocols without the need
+        # to reconcile unit registries and exact unit names
+        self.unit_definitions = []
+
         # Parse, and fill section information objects defined above
         self._parse()
 
@@ -225,7 +231,10 @@ class Protocol(object):
         # containing parsed information about the protocol
         assert isinstance(generator, actions.Protocol)
 
+        orig_source_file = actions.source_file
+        actions.source_file = self.proto_file
         details = generator.expr()
+        actions.source_file = orig_source_file
         assert isinstance(details, dict)
         del(generator)
 
@@ -233,14 +242,30 @@ class Protocol(object):
         self.inputs = details.get('inputs', [])
         self.input_env.execute_statements(self.inputs)
 
-        # Store unit definitions
-        for units in details.get('units', []):
+        # Store unit definitions and add these to protocol
+        self.unit_definitions = details.get('units', [])
+        for units in self.unit_definitions:
             self.units.add_unit(units.name, units.pint_expression)
 
         # Create model interface
-        def process_interface(interface):
-            """ Process a protocol's model interface. """
-            self.model_interface = interface  # TODO: Merging!
+        def process_interface_and_units(interface, simulations):
+            """ Process a protocol's model interface and add any unit definitions"""
+            self.model_interface = interface
+            # for any nested simulations merge the model interface from
+            # the nested simulation to this outer model interface
+            # and add any units to the outer protocol
+            for simulation in simulations:
+                try:
+                    nested_proto = simulation.nested_sim.model.proto
+                    nested_interface = nested_proto.model_interface
+                except AttributeError:
+                    pass  # no interface on nested protocol
+                else:
+                    self.model_interface.merge(nested_interface)
+
+                    self.unit_definitions.extend(nested_proto.unit_definitions)
+                    for units in nested_proto.unit_definitions:
+                        self.units.add_unit(units.name, units.pint_expression)
 
         # Update namespace map
         def process_ns_map(ns_map):
@@ -294,7 +319,10 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
 
         # Store information from the model interface section
-        process_interface(details.get('model_interface', actions.ModelInterface()))
+        # need to pass simulations so that any nested simulations
+        # can add variables etc. to the outer model interface
+        local_simulations = details.get('simulations', [])
+        process_interface_and_units(details.get('model_interface', actions.ModelInterface()), local_simulations)
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))

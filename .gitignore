@@ -45,6 +45,7 @@ pip-log.txt
 nosetests.xml
 coverage.xml
 htmlcov
+test/testoutput
 
 #Pycharm IDE
 .idea/
@@ -70,3 +71,6 @@ src/*
 
 # Profiling info
 prof/*
+
+# Cached protocol file
+*.cache
