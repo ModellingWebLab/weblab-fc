@@ -5,6 +5,7 @@ Parse actions that can generate Python implementation objects
 import itertools
 import math
 import os
+from contextlib import contextmanager
 
 import pyparsing as p
 import sympy
@@ -35,7 +36,23 @@ VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)),
           'infinity': E.Const(V.Simple(float('inf'))),
           'pi': E.Const(V.Simple(math.pi)), 'notanumber': E.Const(V.Simple(float('nan')))}
 
-source_file = ""  # Will be filled in CompactSyntaxParser.try_parse
+source_file = ""  # Will be filled in by set_reference_source, e.g. in CompactSyntaxParser.try_parse
+
+
+@contextmanager
+def set_reference_source(reference_path):
+    """Set ``reference_path`` as the base for resolving inputs in a ``with:`` block.
+
+    Use like::
+
+        with set_reference_source(source_file):
+            parse_nested_protocol()
+    """
+    global source_file
+    orig_source_file = source_file
+    source_file = reference_path
+    yield
+    source_file = orig_source_file
 
 
 class BaseAction(object):
@@ -1261,12 +1278,11 @@ class NestedProtocol(BaseGroupAction):
         if self.trace:
             tokens[0] = tokens[0][:-1]
         super(NestedProtocol, self).__init__(s, loc, tokens)
+        # Resolve any relative path to the nested protocol
+        self.proto_path = os.path.join(os.path.dirname(source_file), self.tokens[0])
 
     def _expr(self):
-        args = []
-        proto_file = self.tokens[0]
-        proto_file = os.path.join(os.path.dirname(source_file), proto_file)
-        args.append(proto_file)
+        args = [self.proto_path]
         inputs = {}
         assert isinstance(self.tokens[1], StatementList)
         for assignment in self.tokens[1]:
