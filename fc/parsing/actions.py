@@ -905,11 +905,11 @@ class ModelInterface(BaseGroupAction):
         # This also performs unit conversion where needed for existing input variables.
         self._add_input_variables()
 
+        # TODO: Add variables defined with ``var`` statements
+
         # Now that all variables are in place, perform sanity checks on model-protocol combination before making any
         # modifications
         self._sanity_check()
-
-        # TODO: Add variables defined with ``var`` statements
 
         # Process ``define`` statements, adding or replacing equations where needed,
         # and setting any initial values defined through inputs.
