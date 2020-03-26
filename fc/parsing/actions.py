@@ -837,7 +837,7 @@ class ModelInterface(BaseGroupAction):
         add_unique(self.outputs, interface.outputs)
         add_unique(self.optional_decls, interface.optional_decls)
         add_unique(self.equations, interface.equations)
-        add_unique(self.clamps, interface._clamps)
+        add_unique(self.clamps, interface.clamps)
 
         # need to be careful with time units
         # add from nested protocol if there are no time units in outer protocol
@@ -898,15 +898,16 @@ class ModelInterface(BaseGroupAction):
             # TODO: Look for variable annotated as time instead?
             raise ProtocolError('Model must contain at least one ODE.')
 
-        # Perform initial sanity checks
-        self._sanity_check()
-
         # Convert free variable units
         self._convert_time_if_needed()
 
         # Ensure inputs exist, adding them if needed, and storing initial values set by user.
         # This also performs unit conversion where needed for existing input variables.
         self._add_input_variables()
+
+        # Now that all variables are in place, perform sanity checks on model-protocol combination before making any
+        # modifications
+        self._sanity_check()
 
         # TODO: Add variables defined with ``var`` statements
 
@@ -937,14 +938,20 @@ class ModelInterface(BaseGroupAction):
         output_units = {}           # To check input vs output units
         initial_values = set()      # To check against overdefinedness
         for ref in self.inputs:
-            var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            try:
+                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            except KeyError:
+                continue
             if var in input_units:
                 raise ProtocolError('The variable ' + str(var) + ' was specified as an input twice.')
             input_units[var] = ref.units
             if ref.initial_value is not None:
                 initial_values.add(var)
         for ref in self.outputs:
-            var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            try:
+                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            except KeyError:
+                continue
             if var in output_units:
                 raise ProtocolError('The variable ' + str(var) + ' was specified as an output twice.')
             output_units[var] = ref.units
