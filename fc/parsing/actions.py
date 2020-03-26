@@ -801,6 +801,7 @@ class ModelInterface(BaseGroupAction):
         self.initial_values = {}
         self.units = None   # Will be the protocol's UnitStore
         self.model = None   # The model to be modified
+        self.time_variable = None   # The model's time (free) variable
         self.ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
         self.parameters = []
         self.vector_orderings = {}
@@ -889,6 +890,13 @@ class ModelInterface(BaseGroupAction):
         """
         self.model = model
         self.units = units
+
+        # Models in FC must always have a time variable
+        try:
+            self.time_variable = self.model.get_free_variable()
+        except ValueError:
+            # TODO: Look for variable annotated as time instead?
+            raise ProtocolError('Model must contain at least one ODE.')
 
         # Perform initial sanity checks
         self._sanity_check()
@@ -1017,8 +1025,7 @@ class ModelInterface(BaseGroupAction):
         """Units-convert the time variable if not in the protocol's units."""
         if self.time_units:
             time_units = self.units.get_unit(self.time_units)
-            time_var = self.model.get_free_variable()
-            time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
+            self.time_variable = self.model.convert_variable(self.time_variable, time_units, DataDirectionFlow.INPUT)
 
     def _add_input_variables(self):
         """Ensure requested input variables exist, unless they are optional.
@@ -1121,6 +1128,8 @@ class ModelInterface(BaseGroupAction):
                     self.model.remove_equation(old_eq)
                 self.model.add_equation(sympy.Eq(var, self.model.add_number(value, var.units)))
 
+        # TODO: Check that all/any _new_ derivatives are w.r.t. self.time_variable?
+
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
         for clamp in self.clamps:
@@ -1186,8 +1195,7 @@ class ModelInterface(BaseGroupAction):
         required_variables = set(output_variables)
 
         # Time is always needed, even if there are no state variables!
-        time_variable = self.model.get_free_variable()
-        required_variables.add(time_variable)
+        required_variables.add(self.time_variable)
 
         # Symbols used directly in equations computing outputs
         for variable in output_variables:
@@ -1213,8 +1221,8 @@ class ModelInterface(BaseGroupAction):
             self.model.remove_variable(variable)
 
         # Add time back in to the graph if needed
-        if time_variable not in self.model.graph.nodes:
-            self.model.graph.add_node(time_variable, equation=None, variable_type='free')
+        if self.time_variable not in self.model.graph.nodes:
+            self.model.graph.add_node(self.time_variable, equation=None, variable_type='free')
 
 
 ######################################################################

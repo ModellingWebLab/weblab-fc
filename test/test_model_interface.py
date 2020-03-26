@@ -67,6 +67,7 @@ def test_clamp_and_define_1():
     with pytest.raises(ProtocolError, match='blooooooooooooooep'):
         proto.set_model('test/models/single_ode.cellml')
 
+
 def test_clamp_and_define_2():
     # Tests if an error is raised when a variable is clamped and set in a define statement
     # Clamp with an RHS
