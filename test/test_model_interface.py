@@ -33,7 +33,7 @@ def test_input_output_units_mismatch():
     proto_file = 'test/protocols/test_bad_interface_unit_mismatch.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_bad_interface_unit_mismatch')
-    with pytest.raises(ProtocolError, match='different unit'):
+    with pytest.raises(ProtocolError, match='with different units'):
         proto.set_model('test/models/single_ode.cellml')
 
 

@@ -915,7 +915,7 @@ class ModelInterface(BaseGroupAction):
         # and setting any initial values defined through inputs.
         self._add_or_replace_equations()
 
-        # Process ``clamp`` statements
+        # Process ``clamp`` statements with an RHS
         self._handle_clamping()
 
         self._annotate_state_variables()
@@ -930,7 +930,15 @@ class ModelInterface(BaseGroupAction):
         # TODO: Any final consistency checks on the model?
 
     def _sanity_check(self):
-        """Perform initial sanity checks on the protocol interface."""
+        """
+        Performs some initial sanity checks on the (protocol interface + model) combination.
+
+        - Variables can only appear as an input once.
+        - Variables can only appear as an output once.
+        - Variables appearing as input and output must have the same units (if set).
+        - Variables can only bet set by a single clamp statement or define.
+
+        """
 
         # Variables can only appear as input or output once
         # If a variable appears as an input and an ouput, both must have the same units
@@ -943,7 +951,8 @@ class ModelInterface(BaseGroupAction):
             except KeyError:
                 continue
             if var in input_units:
-                raise ProtocolError('The variable ' + str(var) + ' was specified as an input twice.')
+                raise ProtocolError(
+                    f'The variable {var} (referenced by {ref.rdf_term}) was specified as an input twice.')
             input_units[var] = ref.units
             if ref.initial_value is not None:
                 initial_values.add(var)
@@ -953,27 +962,31 @@ class ModelInterface(BaseGroupAction):
             except KeyError:
                 continue
             if var in output_units:
-                raise ProtocolError('The variable ' + str(var) + ' was specified as an output twice.')
+                raise ProtocolError(
+                    f'The variable {var} (referenced by {ref.rdf_term}) was specified as an output twice.')
             output_units[var] = ref.units
             units = input_units.get(var)
             if ref.units is not None and units is not None and ref.units != units:
-                raise ProtocolError(
-                    'The variable ' + str(var) + ' appears as input and output, but with different units.')
+                raise ProtocolError(f'The variable {var} (referenced by {ref.rdf_term}) appears as input and output,'
+                                    ' but with different units.')
 
         # Check against overdefinedness: Variables cannot appear as an LHS of an equation more than once (e.g. used in
         # two defines, or used in a ``clamp x to 1`` and a define), and variables clamped to their current value can not
         # also be defined.
         seen = set()
         for ref in self.clamps:
-            var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            try:
+                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            except KeyError:
+                continue
             if var in seen:
-                raise ProtocolError('The variable ' + str(var) + ' is set by multiple clamp statements.')
+                raise ProtocolError(
+                    f'The variable {var} (referenced by {ref.rdf_term}) is set by multiple clamp statements.')
             seen.add(var)
         for eq in self.sympy_equations:
             var = eq.lhs.args[0] if eq.is_Derivative else eq.lhs
             if var in seen:
-                raise ProtocolError(
-                    'The variable ' + str(var) + ' is set by more than one clamp and/or define statement.')
+                raise ProtocolError(f'The variable {var} is set by more than one clamp and/or define statement.')
             seen.add(var)
 
         # Note: Variables set with `define` may have an initial value (if they are defined through their derivatives),
@@ -1061,9 +1074,8 @@ class ModelInterface(BaseGroupAction):
                 # Check units are given for new variable
                 if var.units is None:
                     raise ProtocolError(
-                        'Units must be specified for input variables not appearing in the model;'
-                        ' none are given for ' + var.prefixed_name
-                    )
+                        f'Units must be specified for input variables not appearing in the model;'
+                        ' none are given for {var.prefixed_name}.')
 
                 # Add the new input variable, with ontology annotation
                 # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
@@ -1084,7 +1096,6 @@ class ModelInterface(BaseGroupAction):
             if var.units is not None:
                 units = self.units.get_unit(var.units)
                 if units != variable.units:
-                    # print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
                     variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
 
                     # Update cached time variable
@@ -1108,17 +1119,15 @@ class ModelInterface(BaseGroupAction):
                 # Initial value must be set via inputs, or already be set (if this was already a state variable)
                 if var.initial_value is None and var not in initial_values:
                     terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
-                    raise ProtocolError(
-                        'Variable {} is being set as a state variable but has no initial value (this can be set using'
-                        '  an `input` statement)'.format(terms))
+                    raise ProtocolError(f'Variable {terms} is being set as a state variable but has no initial value'
+                                        ' (this can be set using an `input` statement)')
             else:
                 var = lhs
 
                 # Check that this variable isn't doubly defined
                 if var in initial_values:
-                    raise ProtocolError(
-                        'Overdefined variable. An initial value was given for {} via an input statement, but a new'
-                        ' equation was also set via a define statement.')
+                    raise ProtocolError(f'Overdefined variable. An initial value was given for {var} via an input'
+                                        ' statement, but a new equation was also set via a define statement.')
 
                 # Unset initial value, in case it was a state variable previously
                 var.initial_value = None
