@@ -953,7 +953,7 @@ class ModelInterface(BaseGroupAction):
         - Variables can only appear as an input once.
         - Variables can only appear as an output once.
         - Variables appearing as input and output must have the same units (if set).
-        - Variables can only bet set by a single clamp statement or define.
+        - Variables can only be set by a single clamp statement or define.
 
         """
 
