@@ -1,0 +1,19 @@
+# Specifies an invalid interface: duplicate clamp definition (both without an RHS)
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    V = volt
+}
+
+model interface {
+    clamp oxmeta:membrane_voltage
+    clamp oxmeta:membrane_voltage
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1
+    }
+}
+

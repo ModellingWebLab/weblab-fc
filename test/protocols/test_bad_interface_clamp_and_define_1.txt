@@ -1,0 +1,20 @@
+# Specifies an invalid interface: a variable can't appear in both a clamp and a define
+# This version tests without an RHS on the clamp statement
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    V = volt
+}
+
+model interface {
+    define oxmeta:membrane_voltage = 2 :: V
+    clamp oxmeta:membrane_voltage
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1
+    }
+}
+

@@ -779,6 +779,11 @@ class ModelInterface(BaseGroupAction):
     ``equations``
         A list of :class:`ModelEquation` objects specifying equations to be added to the model, possibly replacing
         existing equations defining the same variable(s).
+        New definitions set with ``define`` end up here, as do statements such as ``clamp x to 1``.
+    ``clamps``
+        A list of :class:`ClampVariable` instances. These are created for e.g. ``clamp x``, while statements with an RHS
+        such as ``clamp x to 1`` are treated as an alias of ``define x = 1`` and do not lead to creation of a
+        ``ClampVariable`` object.
     ``sympy_equations``
         Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy versions of
         ``self.equations``.
@@ -801,7 +806,7 @@ class ModelInterface(BaseGroupAction):
         self.outputs = []
         self.optional_decls = []
         self.equations = []
-        self._clamps = []  # ClampVariable instances
+        self.clamps = []
 
         # Initialise
         self._reinit()
@@ -811,9 +816,10 @@ class ModelInterface(BaseGroupAction):
 
         self._sympy_equations = None
         self.initial_values = {}
-        self.units = None  # Will be the protocol's UnitStore
-        self.model = None  # The model to be modified
-        self._ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
+        self.units = None   # Will be the protocol's UnitStore
+        self.model = None   # The model to be modified
+        self.time_variable = None   # The model's time (free) variable
+        self.ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
         self.parameters = []
         self.vector_orderings = {}
 
@@ -824,7 +830,7 @@ class ModelInterface(BaseGroupAction):
         self.outputs = [a for a in actions if isinstance(a, OutputVariable)]
         self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
         self.equations = [a for a in actions if isinstance(a, ModelEquation)]
-        self._clamps = [a for a in actions if isinstance(a, ClampVariable)]
+        self.clamps = [a for a in actions if isinstance(a, ClampVariable)]
 
         # Some basic semantics checking
         if len(self._time_units) > 1:
@@ -848,7 +854,7 @@ class ModelInterface(BaseGroupAction):
         add_unique(self.outputs, interface.outputs)
         add_unique(self.optional_decls, interface.optional_decls)
         add_unique(self.equations, interface.equations)
-        add_unique(self._clamps, interface._clamps)
+        add_unique(self.clamps, interface.clamps)
 
         # need to be careful with time units
         # add from nested protocol if there are no time units in outer protocol
@@ -872,8 +878,8 @@ class ModelInterface(BaseGroupAction):
 
         :param ns_map: mapping from NS prefix to URI.
         """
-        self._ns_map = ns_map
-        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls, self._clamps):
+        self.ns_map = ns_map
+        for item in itertools.chain(self.inputs, self.outputs, self.optional_decls, self.clamps):
             item.set_namespace(ns_map[item.ns_prefix])
 
     def modify_model(self, model, units):
@@ -902,6 +908,13 @@ class ModelInterface(BaseGroupAction):
         self.model = model
         self.units = units
 
+        # Models in FC must always have a time variable
+        try:
+            self.time_variable = self.model.get_free_variable()
+        except ValueError:
+            # TODO: Look for variable annotated as time instead?
+            raise ProtocolError('Model must contain at least one ODE.')
+
         # Convert free variable units
         self._convert_time_if_needed()
 
@@ -911,11 +924,17 @@ class ModelInterface(BaseGroupAction):
 
         # TODO: Add variables defined with ``var`` statements
 
+        # Now that all variables are in place, perform sanity checks on model-protocol combination before making any
+        # modifications
+        self._sanity_check()
+
         # Process ``define`` statements, adding or replacing equations where needed,
         # and setting any initial values defined through inputs.
         self._add_or_replace_equations()
 
+        # Process ``clamp`` statements with an RHS
         self._handle_clamping()
+
         self._annotate_state_variables()
 
         # Convert units for output variables
@@ -926,6 +945,71 @@ class ModelInterface(BaseGroupAction):
 
         self._purge_unused_mathematics(output_variables)
         # TODO: Any final consistency checks on the model?
+
+    def _sanity_check(self):
+        """
+        Performs some initial sanity checks on the (protocol interface + model) combination.
+
+        - Variables can only appear as an input once.
+        - Variables can only appear as an output once.
+        - Variables appearing as input and output must have the same units (if set).
+        - Variables can only bet set by a single clamp statement or define.
+
+        """
+
+        # Variables can only appear as input or output once
+        # If a variable appears as an input and an ouput, both must have the same units
+        input_units = {}            # To check input vs output units
+        output_units = {}           # To check input vs output units
+        initial_values = set()      # To check against overdefinedness
+        for ref in self.inputs:
+            try:
+                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            except KeyError:
+                continue
+            if var in input_units:
+                raise ProtocolError(
+                    f'The variable {var} (referenced by {ref.rdf_term}) was specified as an input twice.')
+            input_units[var] = ref.units
+            if ref.initial_value is not None:
+                initial_values.add(var)
+        for ref in self.outputs:
+            try:
+                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            except KeyError:
+                continue
+            if var in output_units:
+                raise ProtocolError(
+                    f'The variable {var} (referenced by {ref.rdf_term}) was specified as an output twice.')
+            output_units[var] = ref.units
+            units = input_units.get(var)
+            if ref.units is not None and units is not None and ref.units != units:
+                raise ProtocolError(f'The variable {var} (referenced by {ref.rdf_term}) appears as input and output,'
+                                    ' but with different units.')
+
+        # Check against overdefinedness: Variables cannot appear as an LHS of an equation more than once (e.g. used in
+        # two defines, or used in a ``clamp x to 1`` and a define), and variables clamped to their current value can not
+        # also be defined.
+        seen = set()
+        for ref in self.clamps:
+            try:
+                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
+            except KeyError:
+                continue
+            if var in seen:
+                raise ProtocolError(
+                    f'The variable {var} (referenced by {ref.rdf_term}) is set by multiple clamp statements.')
+            seen.add(var)
+        for eq in self.sympy_equations:
+            var = eq.lhs.args[0] if eq.is_Derivative else eq.lhs
+            if var in seen:
+                raise ProtocolError(f'The variable {var} is set by more than one clamp and/or define statement.')
+            seen.add(var)
+
+        # Note: Variables set with `define` may have an initial value (if they are defined through their derivatives),
+        # this is checked later.
+
+        # TODO: What about the `default` part of an `optional` statement?
 
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.
@@ -939,7 +1023,7 @@ class ModelInterface(BaseGroupAction):
         """
         if ':' in name:
             prefix, local_name = name.split(':', 1)
-            ns_uri = self._ns_map[prefix]
+            ns_uri = self.ns_map[prefix]
             return self.model.get_variable_by_ontology_term((ns_uri, local_name))
         else:
             # TODO: DeclareVariable not yet done
@@ -979,8 +1063,7 @@ class ModelInterface(BaseGroupAction):
         """Units-convert the time variable if not in the protocol's units."""
         if self.time_units:
             time_units = self.units.get_unit(self.time_units)
-            time_var = self.model.get_free_variable()
-            time_var = self.model.convert_variable(time_var, time_units, DataDirectionFlow.INPUT)
+            self.time_variable = self.model.convert_variable(self.time_variable, time_units, DataDirectionFlow.INPUT)
 
     def _add_input_variables(self):
         """Ensure requested input variables exist, unless they are optional.
@@ -1008,9 +1091,8 @@ class ModelInterface(BaseGroupAction):
                 # Check units are given for new variable
                 if var.units is None:
                     raise ProtocolError(
-                        'Units must be specified for input variables not appearing in the model;'
-                        ' none are given for ' + var.prefixed_name
-                    )
+                        f'Units must be specified for input variables not appearing in the model;'
+                        ' none are given for {var.prefixed_name}.')
 
                 # Add the new input variable, with ontology annotation
                 # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
@@ -1024,12 +1106,18 @@ class ModelInterface(BaseGroupAction):
             if var.initial_value is not None:
                 self.initial_values[var.rdf_term] = var.initial_value
 
+            # Maintain link to time variable, if needed
+            is_time = variable is self.time_variable
+
             # Convert units if needed
             if var.units is not None:
                 units = self.units.get_unit(var.units)
                 if units != variable.units:
-                    print('Converting input ' + str(var.rdf_term) + ' to units ' + str(units))
                     variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
+
+                    # Update cached time variable
+                    if is_time:
+                        self.time_variable = variable
 
     def _add_or_replace_equations(self):
         """
@@ -1048,17 +1136,15 @@ class ModelInterface(BaseGroupAction):
                 # Initial value must be set via inputs, or already be set (if this was already a state variable)
                 if var.initial_value is None and var not in initial_values:
                     terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
-                    raise ProtocolError(
-                        'Variable {} is being set as a state variable but has no initial value (this can be set using'
-                        '  an `input` statement)'.format(terms))
+                    raise ProtocolError(f'Variable {terms} is being set as a state variable but has no initial value'
+                                        ' (this can be set using an `input` statement)')
             else:
                 var = lhs
 
                 # Check that this variable isn't doubly defined
                 if var in initial_values:
-                    raise ProtocolError(
-                        'Overdefined variable. An initial value was given for {} via an input statement, but a new'
-                        ' equation was also set via a define statement.')
+                    raise ProtocolError(f'Overdefined variable. An initial value was given for {var} via an input'
+                                        ' statement, but a new equation was also set via a define statement.')
 
                 # Unset initial value, in case it was a state variable previously
                 var.initial_value = None
@@ -1083,9 +1169,11 @@ class ModelInterface(BaseGroupAction):
                     self.model.remove_equation(old_eq)
                 self.model.add_equation(sympy.Eq(var, self.model.add_number(value, var.units)))
 
+        # TODO: Check that all/any _new_ derivatives are w.r.t. self.time_variable?
+
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
-        for clamp in self._clamps:
+        for clamp in self.clamps:
             var = self.model.get_variable_by_ontology_term(clamp.rdf_term)
             defn = self.model.get_definition(var)
             if var.initial_value is None:
@@ -1116,8 +1204,6 @@ class ModelInterface(BaseGroupAction):
         for output in self.outputs:
             variables = get_variables_transitively(self.model, output.rdf_term)
             if output.units is not None:
-                # TODO: Check if this variable is also listed in the inputs, if so, it must have the same unit set
-                #       there.
                 desired_units = self.units.get_unit(output.units)
                 for i, variable in enumerate(variables):
                     variables[i] = self.model.convert_variable(
@@ -1148,12 +1234,14 @@ class ModelInterface(BaseGroupAction):
         import networkx as nx
         graph = self.model.graph
         required_variables = set(output_variables)
+
         # Time is always needed, even if there are no state variables!
-        time_variable = self.model.get_free_variable()
-        required_variables.add(time_variable)
+        required_variables.add(self.time_variable)
+
         # Symbols used directly in equations computing outputs
         for variable in output_variables:
             required_variables.update(nx.ancestors(graph, variable))
+
         # Symbols used indirectly to compute state variables referenced in equations
         derivatives = self.model.get_derivatives()
         old_len = 0
@@ -1164,15 +1252,18 @@ class ModelInterface(BaseGroupAction):
                     required_variables.update(nx.ancestors(graph, deriv))
                     # And we also need time...
                     required_variables.add(deriv.args[1])
+
         # Now figure out which variables *aren't* used
         all_variables = set(self.model.variables())
         unused_variables = all_variables - required_variables
+
         # Remove them and their definitions
         for variable in unused_variables:
             self.model.remove_variable(variable)
+
         # Add time back in to the graph if needed
-        if time_variable not in self.model.graph.nodes:
-            self.model.graph.add_node(time_variable, equation=None, variable_type='free')
+        if self.time_variable not in self.model.graph.nodes:
+            self.model.graph.add_node(self.time_variable, equation=None, variable_type='free')
 
 
 ######################################################################
