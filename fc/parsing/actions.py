@@ -36,6 +36,84 @@ VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)),
           'infinity': E.Const(V.Simple(float('inf'))),
           'pi': E.Const(V.Simple(math.pi)), 'notanumber': E.Const(V.Simple(float('nan')))}
 
+SYMPY_OPERATORS = {
+    '+': sympy.Add,
+    '-': lambda x, y: x - y,
+    '*': sympy.Mul,
+    '/': lambda x, y: x / y,
+    '^': sympy.Pow,
+    '==': sympy.Eq,
+    '!=': sympy.Ne,
+    '<': sympy.Lt,
+    '>': sympy.Gt,
+    '<=': sympy.Le,
+    '>=': sympy.Ge,
+    'not': sympy.Not,
+    '&&': sympy.And,
+    '||': sympy.Or,
+}
+SYMPY_MATHML = {
+    E.Log: sympy.log,
+    E.Ln: sympy.ln,
+    E.Exp: sympy.exp,
+    E.Abs: sympy.Abs,
+    E.Ceiling: sympy.ceiling,
+    E.Floor: sympy.floor,
+    E.Max: sympy.Max,
+    E.Min: sympy.Min,
+    E.Rem: sympy.mod,
+    E.Root: sympy.sqrt,
+    E.Power: sympy.Pow,
+    E.Plus: sympy.Add,
+    E.Minus: lambda x, y: x - y,
+    E.Times: sympy.Mul,
+    E.Divide: lambda x, y: x / y,
+    E.Eq: sympy.Eq,
+    E.Neq: sympy.Ne,
+    E.Lt: sympy.Lt,
+    E.Gt: sympy.Gt,
+    E.Leq: sympy.Le,
+    E.Geq: sympy.Ge,
+    E.Not: sympy.Not,
+    E.And: sympy.And,
+    E.Or: sympy.Or,
+}
+
+
+'''
+    'arccos': sympy.acos,
+    'arccosh': sympy.acosh,
+    'arccot': sympy.acot,
+    'arccoth': sympy.acoth,
+    'arccsc': sympy.acsc,
+    'arccsch': sympy.acsch,
+    'arcsec': sympy.asec,
+    'arcsech': sympy.asech,
+    'arcsin': sympy.asin,
+    'arcsinh': sympy.asinh,
+    'arctan': sympy.atan,
+    'arctanh': sympy.atanh,
+    'cos': sympy.cos,
+    'cosh': sympy.cosh,
+    'cot': sympy.cot,
+    'coth': sympy.coth,
+    'csc': sympy.csc,
+    'csch': sympy.csch,
+    'exponentiale': sympy.E,
+    'false': sympy.false,
+    'infinity': sympy.oo,
+    'notanumber': sympy.nan,
+    'pi': sympy.pi,
+    'sec': sympy.sec,
+    'sech': sympy.sech,
+    'sin': sympy.sin,
+    'sinh': sympy.sinh,
+    'tan': sympy.tan,
+    'tanh': sympy.tanh,
+    'true': sympy.true,
+    'xor': sympy.Xor,
+'''
+
 source_file = ""  # Will be filled in by set_reference_source, e.g. in CompactSyntaxParser.try_parse
 
 
@@ -156,7 +234,7 @@ class BaseAction(object):
         :param number_generator: Method to create expressions for numbers with units.
             Must have signature ``f(value, unit) -> sympy.Basic`` where ``value`` is a ``float`` or ``str``.
         """
-        raise NotImplementedError
+        raise NotImplementedError(str(type(self)))
 
 
 class BaseGroupAction(BaseAction):
@@ -217,6 +295,10 @@ class Variable(BaseGroupAction):
             result = E.NameLookUp(var_name)
         return result
 
+    def name(self):
+        """Returns the name of the variable being referenced."""
+        return self.tokens
+
     def names(self):
         return [str(self.tokens)]
 
@@ -252,6 +334,23 @@ class Operator(BaseGroupAction):
             result = self.tokens[0].expr()
             for operator, operand in self.operator_operands():
                 result = OPERATORS[operator](result, operand.expr())
+        return result
+
+    def to_sympy(self, variable_generator, number_generator):
+        if self.rightAssoc:
+            # The only right-associative operators are also unary
+            result = self.tokens[-1].to_sympy(variable_generator, number_generator)
+            for operator in self.tokens[-2:-1:]:
+                if operator == '+':
+                    pass
+                elif operator == '-':
+                    result = -result
+                else:
+                    raise NotImplementedError
+        else:
+            result = self.tokens[0].to_sympy(variable_generator, number_generator)
+            for operator, operand in self.operator_operands():
+                result = SYMPY_OPERATORS[operator](result, operand.to_sympy(variable_generator, number_generator))
         return result
 
 
@@ -349,6 +448,22 @@ class FunctionCall(BaseGroupAction):
         else:
             result = E.FunctionCall(func, args)
         return result
+
+    def to_sympy(self, variable_generator, number_generator):
+        # Only supported for simple expressions (as used in the model interface)
+
+        assert len(self.tokens) == 2
+        assert isinstance(self.tokens[0], Variable)
+
+        # Get callable that creates sympy object
+        func = self.tokens[0].expr()
+        try:
+            func = SYMPY_MATHML[func]
+        except KeyError:
+            raise NotImplementedError('Sympy conversion not supported for: ' + str(func))
+
+        # Parse operands, create and return
+        return func(*[token.to_sympy(variable_generator, number_generator) for token in self.tokens[1]])
 
 
 class _Symbol(BaseGroupAction):
@@ -922,7 +1037,11 @@ class ModelInterface(BaseGroupAction):
         # This also performs unit conversion where needed for existing input variables.
         self._add_input_variables()
 
-        # TODO: Add variables defined with ``var`` statements
+        # Add variables created by ``define`` statements - must also be listed as output or optional input
+        self._add_define_variables()
+
+        # TODO: Add variables created by ``optional`` statements (must also be listed as input or output)
+        # TODO: Add variables created by ``var`` statements
 
         # Now that all variables are in place, perform sanity checks on model-protocol combination before making any
         # modifications
@@ -1096,7 +1215,7 @@ class ModelInterface(BaseGroupAction):
 
                 # Add the new input variable, with ontology annotation
                 # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
-                name = self.model._get_unique_name('protocol__' + var.local_name)  # TODO: Make method public
+                name = self.model.get_unique_name('protocol__' + var.local_name)
                 units = self.units.get_unit(var.units)
                 variable = self.model.add_variable(name, units)
                 self.model.add_cmeta_id(variable)
@@ -1118,6 +1237,34 @@ class ModelInterface(BaseGroupAction):
                     # Update cached time variable
                     if is_time:
                         self.time_variable = variable
+
+    def _add_define_variables(self):
+        """
+        Modify the model by adding any unknown variables appearing on the LHS of a ``define`` statement (or an
+        equivalent clamp-to statement), that are also listed as an output or optional input.
+        """
+        # Get all variables named by inputs and outputs
+        # Note: Don't worry about clashes here, this is checked later in self._sanity_check
+        variables = {var.prefixed_name: var for var in self.inputs + self.outputs if var.units is not None}
+
+        for eq in self.equations:
+            try:
+                # Check if left-hand side exists in model
+                eq.var.to_sympy(self._variable_generator, self._number_generator)
+            except KeyError:
+
+                # Find variable in input or output declarations
+                try:
+                    var = variables[eq.var.name()]
+                except KeyError:
+                    continue
+
+                # Add the new variable, with ontology annotation
+                name = self.model.get_unique_name('protocol__' + var.local_name)
+                units = self.units.get_unit(var.units)
+                variable = self.model.add_variable(name, units)
+                self.model.add_cmeta_id(variable)
+                self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
 
     def _add_or_replace_equations(self):
         """
