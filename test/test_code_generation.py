@@ -75,7 +75,15 @@ def test_generate_weblab_model(tmp_path):
         vector_orderings[state_annotation][state_var.rdf_identity] = i
 
     # Create weblab model at path
-    cg.create_weblab_model(str(path), class_name, model, outputs, parameters, vector_orderings)
+    cg.create_weblab_model(
+        str(path),
+        class_name,
+        model,
+        ns_map={'oxmeta': OXMETA_NS},
+        outputs=outputs,
+        parameters=parameters,
+        vector_orderings=vector_orderings,
+    )
 
     # Read expected output from file
     expected = os.path.join('test', 'code_generation', 'weblab_model.pyx')

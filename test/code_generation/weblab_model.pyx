@@ -213,19 +213,16 @@ cdef class TestModel(CvodeSolver):
 
     def get_environment_map(self):
         """
-        Get a map from ontology prefix to the environment containing model
-        variables annotated with that ontology.
+        Get a map from ontology prefix to the environment containing model variables annotated with that ontology.
 
         See :meth:`fc.simulations.AbstractOdeModel.get_environment_map()`.
         """
-        # TODO Some part of this might need to be generated
         return {
             'pycml': self.env,
             'cmeta': self.env,
             'cg': self.env,
             'csub': self.env,
             'cs': self.env,
-            'oxmeta': self.env,
             'lut': self.env,
             'proto': self.env,
             'None': self.env,
@@ -242,6 +239,7 @@ cdef class TestModel(CvodeSolver):
             'rdf': self.env,
             'cellml': self.env,
             'vCard': self.env,
+            'oxmeta': self.env,
         }
 
     cpdef get_outputs(self):
