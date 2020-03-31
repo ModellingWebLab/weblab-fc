@@ -1040,7 +1040,7 @@ class ModelInterface(BaseGroupAction):
         # Add variables created by ``define`` statements - must also be listed as output or optional input
         self._add_define_variables()
 
-        # TODO: Add variables created by ``optional`` statements (must also be listed as input or output)
+        # TODO: Add variables created by ``optional`` statements with a ``default`` clause
         # TODO: Add variables created by ``var`` statements
 
         # Now that all variables are in place, perform sanity checks on model-protocol combination before making any
@@ -1184,6 +1184,16 @@ class ModelInterface(BaseGroupAction):
             time_units = self.units.get_unit(self.time_units)
             self.time_variable = self.model.convert_variable(self.time_variable, time_units, DataDirectionFlow.INPUT)
 
+    def _create_variable(self, var):
+        """Creates and returns an annotated variable based on the given :class:`VariableReference`."""
+
+        name = self.model.get_unique_name('protocol__' + var.local_name)
+        units = self.units.get_unit(var.units)
+        variable = self.model.add_variable(name, units)
+        self.model.add_cmeta_id(variable)
+        self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
+        return variable
+
     def _add_input_variables(self):
         """Ensure requested input variables exist, unless they are optional.
 
@@ -1214,12 +1224,7 @@ class ModelInterface(BaseGroupAction):
                         ' none are given for {var.prefixed_name}.')
 
                 # Add the new input variable, with ontology annotation
-                # TODO: Extract this into a helper method that DeclareVariable processing etc can also use
-                name = self.model.get_unique_name('protocol__' + var.local_name)
-                units = self.units.get_unit(var.units)
-                variable = self.model.add_variable(name, units)
-                self.model.add_cmeta_id(variable)
-                self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
+                variable = self._create_variable(var)
 
             # Store initial value if given
             if var.initial_value is not None:
@@ -1241,7 +1246,7 @@ class ModelInterface(BaseGroupAction):
     def _add_define_variables(self):
         """
         Modify the model by adding any unknown variables appearing on the LHS of a ``define`` statement (or an
-        equivalent clamp-to statement), that are also listed as an output or optional input.
+        equivalent clamp-to statement), that are also listed as an output or optional input, and have units defined.
         """
         # Get all variables named by inputs and outputs
         # Note: Don't worry about clashes here, this is checked later in self._sanity_check
@@ -1253,18 +1258,14 @@ class ModelInterface(BaseGroupAction):
                 eq.var.to_sympy(self._variable_generator, self._number_generator)
             except KeyError:
 
-                # Find variable in input or output declarations
+                # Find variable reference in input or output declarations
                 try:
                     var = variables[eq.var.name()]
                 except KeyError:
                     continue
 
-                # Add the new variable, with ontology annotation
-                name = self.model.get_unique_name('protocol__' + var.local_name)
-                units = self.units.get_unit(var.units)
-                variable = self.model.add_variable(name, units)
-                self.model.add_cmeta_id(variable)
-                self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
+                # Create annotated variable
+                self._create_variable(var)
 
     def _add_or_replace_equations(self):
         """

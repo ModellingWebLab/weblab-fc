@@ -1,7 +1,8 @@
-"""Test implementation of voltage clamps.
-
-Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
-"""
+#
+# Test implementation of voltage clamps.
+#
+# Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
+#
 import os
 
 import fc
