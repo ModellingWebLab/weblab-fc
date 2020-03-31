@@ -218,27 +218,6 @@ cdef class TestModel(CvodeSolver):
         See :meth:`fc.simulations.AbstractOdeModel.get_environment_map()`.
         """
         return {
-            'pycml': self.env,
-            'cmeta': self.env,
-            'cg': self.env,
-            'csub': self.env,
-            'cs': self.env,
-            'lut': self.env,
-            'proto': self.env,
-            'None': self.env,
-            'bqs': self.env,
-            'pe': self.env,
-            'dcterms': self.env,
-            'xml': self.env,
-            'dc': self.env,
-            'bqbiol': self.env,
-            'cml': self.env,
-            'solver': self.env,
-            'doc': self.env,
-            'm': self.env,
-            'rdf': self.env,
-            'cellml': self.env,
-            'vCard': self.env,
             'oxmeta': self.env,
         }
 
