@@ -1,11 +1,17 @@
-"""
-
-Run the `test_while_loop` protocol on a generated model.
-
-"""
+"""Test while loop support."""
+import os
 import fc
 import fc.language.expressions as E
-import os
+from fc.simulations.model import TestOdeModel
+
+
+def test_while_loop_txt():
+    proto_file = 'test/protocols/test_while_loop.txt'
+    proto = fc.Protocol(proto_file)
+    proto.set_output_folder('TestVariousProtocols_TestWhileLoopTxt')
+    proto.set_model(TestOdeModel(1))
+    proto.set_input('num_iters', E.N(10))
+    proto.run()
 
 
 def test_while_loop_on_hh_model():
