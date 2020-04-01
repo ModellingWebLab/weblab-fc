@@ -1,4 +1,4 @@
-"""Test that various test protocols are executed correctly, using a TestOdeModel."""
+"""Tests protocols that use nesting."""
 import fc
 from fc.simulations.model import TestOdeModel
 
