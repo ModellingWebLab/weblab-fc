@@ -265,7 +265,7 @@ class Number(BaseGroupAction):
     def __init__(self, s, loc, tokens):
         super(Number, self).__init__(s, loc, tokens)
         if len(tokens) == 2:
-            # We have a units annotation
+            # We have a units annotation (can be a name or a string ``units_of(variable)``)
             self._units = str(tokens[1])
         else:
             self._units = None
@@ -1155,8 +1155,19 @@ class ModelInterface(BaseGroupAction):
 
         :param value: the numerical value
         :param units: the *name* of the units for this quantity. Will be looked up from the protocol's definitions.
+            Alternatively, this can be a string ``units_of(variable)`` where ``variable`` is an ontology term for a
+            variable in this model.
         """
-        return self.model.add_number(value, self.units.get_unit(units))
+        if units.startswith('units_of('):
+            name = units[9:-1]
+            try:
+                var = self._variable_generator(name)
+            except KeyError:
+                raise ProtocolError(f'Unknown variable referenced in units_of(): {name}.')
+            units = var.units
+        else:
+            units = self.units.get_unit(units)
+        return self.model.add_number(value, units)
 
     @property
     def sympy_equations(self):
