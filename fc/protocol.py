@@ -619,7 +619,12 @@ class Protocol(object):
 
             # Create weblab model at path
             create_weblab_model(
-                path, class_name, model, self.model_interface.outputs, self.model_interface.parameters,
+                path,
+                class_name,
+                model,
+                ns_map=self.ns_map,
+                outputs=self.model_interface.outputs,
+                parameters=self.model_interface.parameters,
                 vector_orderings=self.model_interface.vector_orderings)
 
             self.log_progress('Compiling pyx model code...')

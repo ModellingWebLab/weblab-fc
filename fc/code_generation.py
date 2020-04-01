@@ -131,7 +131,7 @@ def get_unique_names(model):
     return variables
 
 
-def create_weblab_model(path, class_name, model, outputs, parameters, vector_orderings={}):
+def create_weblab_model(path, class_name, model, ns_map, outputs, parameters, vector_orderings={}):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
     the Web Lab, and stores it at ``path``.
@@ -144,6 +144,8 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
         A name for the generated class.
     ``model``
         A :class:`cellmlmanip.Model` object.
+    ``ns_map``
+        A dict mapping namespace prefixes to namespace URIs.
     ``outputs``
         An ordered list of :class:`VariableReference`s for the variables to use as model outputs.
     ``parameters``
@@ -261,6 +263,7 @@ def create_weblab_model(path, class_name, model, outputs, parameters, vector_ord
             'free_variable': free_name,
             'generation_date': time.strftime('%Y-%m-%d %H:%M:%S'),
             'model_name': model.name,
+            'ns_map': ns_map,
             'outputs': output_info,
             'output_equations': output_equations,
             'parameters': parameter_info,
