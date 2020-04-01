@@ -828,7 +828,7 @@ class ModelEquation(BaseGroupAction):
     def to_sympy(self, variable_generator, number_generator):
         """Convert this equation to Sympy.
 
-        Typically this will be called via :meth:`ModelInterface.sympy_equations` which sets up appropriate
+        Typically this will be called via :meth:`ModelInterface.convert_equations_to_sympy` which sets up appropriate
         generators.
 
         :param variable_generator: a function to resolve a name reference within the equation to a model variable.
@@ -929,7 +929,7 @@ class ModelInterface(BaseGroupAction):
     def _reinit(self):
         """(Re-)initialise this interface, so that it can be re-used."""
 
-        self._sympy_equations = None
+        self.sympy_equations = None
         self.initial_values = {}
         self.units = None   # Will be the protocol's UnitStore
         self.model = None   # The model to be modified
@@ -1043,8 +1043,11 @@ class ModelInterface(BaseGroupAction):
         # TODO: Add variables created by ``optional`` statements with a ``default`` clause
         # TODO: Add variables created by ``var`` statements
 
-        # Now that all variables are in place, perform sanity checks on model-protocol combination before making any
-        # modifications
+        # Now that all variables are in place, it's possible to create the sympy equations
+        self._convert_equations_to_sympy()
+
+        # With variables and equations in place, we can perform sanity checks on model-protocol combination before
+        # making any modifications
         self._sanity_check()
 
         # Process ``define`` statements, adding or replacing equations where needed,
@@ -1133,7 +1136,7 @@ class ModelInterface(BaseGroupAction):
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.
 
-        Used by :meth:`sympy_equations`.
+        Used by :meth:`convert_equations_to_sympy`.
 
         :param str name: a name reference. If it contains a ':' then it is treated as a prefix:local_name ontology term
             reference. The prefix is looked up in our namespace URI map, and the variable then found with
@@ -1151,7 +1154,7 @@ class ModelInterface(BaseGroupAction):
     def _number_generator(self, value, units):
         """Convert a number with units in an equation to a :class:`cellmlmanip.model.NumberDummy`.
 
-        Used by :meth:`sympy_equations`.
+        Used by :meth:`convert_equations_to_sympy`.
 
         :param value: the numerical value
         :param units: the *name* of the units for this quantity. Will be looked up from the protocol's definitions.
@@ -1169,22 +1172,15 @@ class ModelInterface(BaseGroupAction):
             units = self.units.get_unit(units)
         return self.model.add_number(value, units)
 
-    @property
-    def sympy_equations(self):
-        """The equations defined by the interface in Sympy form.
-
-        Requires :meth:`modify_model` to have been called.
-        """
-        if self._sympy_equations is None:
-            # Do the transformation
-            self._sympy_equations = eqs = []
-            for eq in self.equations:
-                # TODO: Check whether lhs exists in the model; if not, and it is an output or optional, add it.
-                # Units should be taken from the output spec (if present) or the RHS.
-                # TODO: If there are variables on the RHS that don't exist, this is an error unless both the
-                # missing variable and LHS are optional. In which case, just skip the equation (but log it).
-                eqs.append(eq.to_sympy(self._variable_generator, self._number_generator))
-        return self._sympy_equations
+    def _convert_equations_to_sympy(self):
+        """Convert all equations from defines and clamp-tos to sympy format."""
+        eqs = []
+        for eq in self.equations:
+            # Units should be taken from the output spec (if present) or the RHS.
+            # TODO: If there are variables on the RHS that don't exist, this is an error unless both the
+            # missing variable and LHS are optional. In which case, just skip the equation (but log it).
+            eqs.append(eq.to_sympy(self._variable_generator, self._number_generator))
+        self.sympy_equations = eqs
 
     #######################################
     # Helper methods for model manipulation
