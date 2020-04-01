@@ -8,11 +8,10 @@ import pytest
 import fc
 
 
-@pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 def test_clamping_with_variable_units():
     proto = fc.Protocol('test/protocols/test_clamping3.txt')
     proto.set_output_folder('Py_TestClamping_TestClampingWithVariableUnits')
-    proto.set_model('cellml/beeler_reuter_model_1977.cellml')
+    proto.set_model('test/models/beeler_reuter_model_1977.cellml')
     proto.run()
     # Test assertions are within the protocol itself
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
