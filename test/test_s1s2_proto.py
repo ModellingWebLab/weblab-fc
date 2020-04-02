@@ -11,9 +11,8 @@ from fc.simulations.solvers import CvodeSolver
 @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 def test_s1_s2():
     proto = fc.Protocol('protocols/S1S2.txt')
-    proto.set_output_folder('Py_TestS1S2Proto')
-    proto.set_model('cellml/courtemanche_ramirez_nattel_1998.cellml')
-    proto.model.set_solver(CvodeSolver())
+    proto.set_output_folder('test_s1_s2')
+    proto.set_model('test/models/courtemanche_ramirez_nattel_model_1998.cellml')
     proto.run()
     data_folder = 'test/data/TestSpeedRealProto/S1S2'
     test_support.check_results(
@@ -23,19 +22,29 @@ def test_s1_s2():
     )
 
 
-def test_s1s2_lr91():
+def test_s1_s2_lr91():
+
+    # // Don't do too many runs
+    # std::vector<AbstractExpressionPtr> s2_intervals
+    #         = EXPR_LIST(CONST(1000))(CONST(900))(CONST(800))(CONST(700))(CONST(600))(CONST(500));
+    # DEFINE(s2_intervals_expr, boost::make_shared<ArrayCreate>(s2_intervals));
+    # runner.GetProtocol()->SetInput("s2_intervals", s2_intervals_expr);
+
+    # s1_s2_intervals = [1000, 900, 800, 700, 600, 500]
+
     proto = fc.Protocol('test/protocols/test_S1S2.txt')
-    proto.set_output_folder('test_S1S2_lr91')
+    proto.set_output_folder('test_s1_s2_lr91')
     proto.set_model('test/models/luo_rudy_1991.cellml')
     proto.run()
+    data_folder = '/test/data/historic/luo_rudy_1991/S1S2'
     test_support.check_results(
         proto,
-        {'max_S1S2_slope': 0.212},
+        {'APD90': 1, 'DI': 1, 'S1S2_slope': 1},   # Name and dimension of output to check
         data_folder
     )
 
 
-def test_s1s2_noble():
+def test_s1_s2_noble():
     """This model has time units in seconds, so we're checking that conversion works."""
     # std::string dirname = "TestS1S2ProtocolOutputs_EarmNobleModel";
     # FileFinder cellml_file("projects/FunctionalCuration/cellml/earm_noble_model_1990.cellml", RelativeTo::ChasteSourceRoot);
@@ -50,11 +59,7 @@ def do_test(rDirName,rProtocolFile, rCellmlFile, expectedSlope):
     """
         ProtocolRunner runner(rCellmlFile, rProtocolFile, rDirName, true);
 
-        // Don't do too many runs
-        std::vector<AbstractExpressionPtr> s2_intervals
-            = EXPR_LIST(CONST(1000))(CONST(900))(CONST(800))(CONST(700))(CONST(600))(CONST(500));
-        DEFINE(s2_intervals_expr, boost::make_shared<ArrayCreate>(s2_intervals));
-        runner.GetProtocol()->SetInput("s2_intervals", s2_intervals_expr);
+
 
         // Run
         runner.RunProtocol();
