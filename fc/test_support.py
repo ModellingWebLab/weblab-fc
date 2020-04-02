@@ -85,20 +85,18 @@ def within_any_tolerance(arr1, arr2, rel_tol=None, abs_tol=None):
 def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0, messages=None):
     """Check protocol results against saved values.
 
-    Note that if the protocol is missing expected results, this is only an error if
-    reference results are actually present on disk.  If no reference results are
-    available for an 'expected' output, this indicates that the protocol is expected
-    to fail (or at least, not produce this output).  Similarly, it is not an error
-    if the protocol produces results but no reference results are available, although
-    we do add a warning to messages (if supplied) in this case.
+    Note that if the protocol is missing expected results, this is only an error if reference results are actually
+    present on disk. If no reference results are available for an 'expected' output, this indicates that the protocol is
+    expected to fail (or at least, not produce this output). Similarly, it is not an error if the protocol produces
+    results but no reference results are available, although we do add a warning to messages (if supplied) in this case.
 
     :param proto: an instance of fc.Protocol that (hopefully) has results available to check
-    :param expected_spec: a dictionary mapping result name to number of dimensions,
-        so we can use the correct load* method
+    :param expected_spec: a dictionary mapping result name to number of dimensions, so we can use the correct load*
+        method
     :param rel_tol: relative tolerance
     :param abs_tol: absolute tolerance
-    :param messages: if provided, should be a list to which failure reports will be appended.
-        Otherwise any failure will raise AssertionError.
+    :param messages: if provided, should be a list to which failure reports will be appended. Otherwise any failure will
+        raise AssertionError.
     :returns: a boolean indicating whether the results matched to within tolerances, or None if failure was expected.
     """
     results_ok = True
