@@ -375,6 +375,11 @@ class Piecewise(BaseGroupAction):
         if_, then_, else_ = self.get_children_expr()
         return E.If(if_, then_, else_)
 
+    def to_sympy(self, variable_generator, number_generator):
+        assert len(self.tokens) == 3
+        if_, then_, else_ = [t.to_sympy(variable_generator, number_generator) for t in self.tokens]
+        return sympy.Piecewise((then_, if_), (else_, True))
+
 
 class MaybeTuple(BaseGroupAction):
     """Parse action for elements that may be grouped into a tuple, or might be a single item."""
