@@ -9,7 +9,7 @@ import fc
 import fc.test_support
 
 
-def test_graphstate_time_conversion():
+def test_unit_conversion_time():
     """ Tests the graph state protocol in a model requiring time units conversion. """
 
     # Create protocol
@@ -37,7 +37,7 @@ def test_graphstate_time_conversion():
     )
 
 
-def test_graphstate_voltage_conversion():
+def test_unit_conversion_state_variable():
     """ Tests the graph state protocol in a model requiring state variable units conversion. """
 
     # Create protocol
