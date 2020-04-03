@@ -573,8 +573,8 @@ class Protocol(object):
     def set_input(self, name, value_expr):
         """Overwrite the value of a protocol input.
 
-        The value may be given either as an actual value, or as an expression which will be evaluated in
-        the context of the existing inputs.
+        The value may be given either as an actual value (any object extending ``AbstractValue``), or as an expression
+        (extending ``AbstractExpression``) which will be evaluated in the context of the existing inputs.
         """
         if isinstance(value_expr, V.AbstractValue):
             value = value_expr
