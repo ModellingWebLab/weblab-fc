@@ -46,7 +46,6 @@ class Array(AbstractValue):
     """Class in the protocol language for arrays."""
 
     def __init__(self, array):
-        assert isinstance(array, (np.ndarray, np.float))
         self.array = np.array(array, dtype=float, copy=False)
 
     @property
