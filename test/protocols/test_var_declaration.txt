@@ -23,13 +23,13 @@ model interface {
     # Constant, defined here
     var a units mV = 5
     output local:a units mV
-    define local:a = a
+    define local:a = x + a
 
     # Constant, defined with define
     var b units mV
     define b = 12 :: mV
     output local:bb units mV
-    define local:bb = b
+    define local:bb = x + b
 }
 
 tasks {
@@ -41,12 +41,12 @@ tasks {
 post-processing {
     # Check types is an array
     assert sim:x.IS_ARRAY
-    assert sim:a.IS_SIMPLE_VALUE
-    assert sim:bb.IS_SIMPLE_VALUE
+    assert sim:a.IS_ARRAY
+    assert sim:bb.IS_ARRAY
 
     # Check values
     assert sim:x[0] == 10
     assert sim:x[-1] == 30
-    assert sim:a == 5
-    assert sim:bb == 12
+    assert sim:a[-1] == 35
+    assert sim:bb[-1] == 42
 }
