@@ -1,0 +1,52 @@
+documentation {
+Tests the ``var`` construct to define variables.
+}
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace local = "urn:fc:local#"
+
+units {
+    ms = milli second
+    mV = milli volt
+    mV_per_ms = mV . ms^-1
+}
+
+model interface {
+    independent var units ms
+
+    # ODE, defined here and in define, plus an output to read its value
+    var x units mV = 10
+    define diff(x; oxmeta:time) = 2 :: mV_per_ms
+    output local:x units mV
+    define local:x = x
+
+    # Constant, defined here
+    var a units mV = 5
+    output local:a units mV
+    define local:a = a
+
+    # Constant, defined with define
+    var b units mV
+    define b = 12 :: mV
+    output local:bb units mV
+    define local:bb = b
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:10
+    }
+}
+
+post-processing {
+    # Check types is an array
+    assert sim:x.IS_ARRAY
+    assert sim:a.IS_SIMPLE_VALUE
+    assert sim:bb.IS_SIMPLE_VALUE
+
+    # Check values
+    assert sim:x[0] == 10
+    assert sim:x[-1] == 30
+    assert sim:a == 5
+    assert sim:bb == 12
+}
