@@ -1205,7 +1205,7 @@ class ModelInterface(BaseGroupAction):
                     variable = self.model.get_variable_by_ontology_term(output.rdf_term)
                 except KeyError:
                     continue
-                
+
                 if variable is self.time_variable and output.units is not None:
                     units = self.units.get_unit(output.units)
                     self.time_variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
