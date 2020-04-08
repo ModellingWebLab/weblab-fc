@@ -1195,6 +1195,21 @@ class ModelInterface(BaseGroupAction):
         if self.time_units:
             time_units = self.units.get_unit(self.time_units)
             self.time_variable = self.model.convert_variable(self.time_variable, time_units, DataDirectionFlow.INPUT)
+        else:
+            # Time units can also be set by an input specification, which will be handled correctly by the input
+            # handling code.
+            # If time units are set as an output, we need to handle it here: because time can be set from the protocol
+            # it is always an input, and so should follow the "input" rules for unit conversion.
+            for output in self.outputs:
+                try:
+                    variable = self.model.get_variable_by_ontology_term(output.rdf_term)
+                except KeyError:
+                    continue
+                
+                if variable is self.time_variable and output.units is not None:
+                    units = self.units.get_unit(output.units)
+                    self.time_variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
+                    break
 
     def _create_variable(self, var):
         """Creates and returns an annotated variable based on the given :class:`VariableReference`."""
