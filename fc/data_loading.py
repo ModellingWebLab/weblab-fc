@@ -37,7 +37,7 @@ def load(file_path):
     else:
         f = open(real_path, 'r')
     f.readline()  # strip comment line
-    dims = map(int, f.readline().split(','))[1:]
+    dims = list(map(int, f.readline().split(',')))[1:]
     array = np.loadtxt(f, dtype=float)
     f.close()
     return V.Array(array.reshape(tuple(dims)))

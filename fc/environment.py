@@ -11,14 +11,13 @@ class Environment(object):
     """
     Base class for environments in the protocol language.
 
-    Environments hold variables. For example, there's an environment holding
-    the protocol inputs and each simulation runs in its own environment.
+    Environments hold variables. For example, there's an environment holding the protocol inputs and each simulation
+    runs in its own environment.
 
-    Environments can refer to variables in other environments, by associating
-    the other environment with a particular prefix.
+    Environments can refer to variables in other environments, by associating the other environment with a particular
+    prefix.
 
-    Variables not found within the environment are looked up in its "default
-    delegatee".
+    Variables not found within the environment are looked up in its "default delegatee".
 
     For more information, see
     https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Identifiersandnameresolution

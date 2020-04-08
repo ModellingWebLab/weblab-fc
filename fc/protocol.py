@@ -245,26 +245,6 @@ class Protocol(object):
         for units in self.unit_definitions:
             self.units.add_unit(units.name, units.pint_expression)
 
-        # Create model interface
-        def process_interface_and_units(interface, simulations):
-            """ Process a protocol's model interface and add any unit definitions"""
-            self.model_interface = interface
-            # for any nested simulations merge the model interface from
-            # the nested simulation to this outer model interface
-            # and add any units to the outer protocol
-            for simulation in simulations:
-                try:
-                    nested_proto = simulation.nested_sim.model.proto
-                    nested_interface = nested_proto.model_interface
-                except AttributeError:
-                    pass  # no interface on nested protocol
-                else:
-                    self.model_interface.merge(nested_interface)
-
-                    self.unit_definitions.extend(nested_proto.unit_definitions)
-                    for units in nested_proto.unit_definitions:
-                        self.units.add_unit(units.name, units.pint_expression)
-
         # Update namespace map
         def process_ns_map(ns_map):
             """ Merge the items from ``ns_map`` with this protocol's prefix to namespace mapping. """
@@ -302,8 +282,13 @@ class Protocol(object):
                 self.outputs.extend(imported_proto.outputs)
                 self.plots.extend(imported_proto.plots)
 
-                # Process interface
-                # process_interface(imported_proto.model_interface)
+                # Merge model interface
+                self.model_interface.merge(imported_proto.model_interface)
+
+                # Add units
+                self.unit_definitions.extend(imported_proto.unit_definitions)
+                for units in imported_proto.unit_definitions:
+                    self.units.add_unit(units.name, units.pint_expression)
 
                 # Process namespace mapping
                 process_ns_map(imported_proto.ns_map)
@@ -317,10 +302,25 @@ class Protocol(object):
         self.plots.extend(details.get('plots', []))
 
         # Store information from the model interface section
-        # need to pass simulations so that any nested simulations
-        # can add variables etc. to the outer model interface
-        local_simulations = details.get('simulations', [])
-        process_interface_and_units(details.get('model_interface', actions.ModelInterface()), local_simulations)
+        interface = details.get('model_interface', None)
+        if interface is not None:
+            self.model_interface.merge(interface)
+
+        # Process information from nested simulations
+        for simulation in details.get('simulations', []):
+            try:
+                nested_proto = simulation.nested_sim.model.proto
+                nested_interface = nested_proto.model_interface
+            except AttributeError:
+                continue
+
+            # Merge interface
+            self.model_interface.merge(nested_interface)
+
+            # Add units
+            self.unit_definitions.extend(nested_proto.unit_definitions)
+            for units in nested_proto.unit_definitions:
+                self.units.add_unit(units.name, units.pint_expression)
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))
@@ -573,8 +573,8 @@ class Protocol(object):
     def set_input(self, name, value_expr):
         """Overwrite the value of a protocol input.
 
-        The value may be given either as an actual value, or as an expression which will be evaluated in
-        the context of the existing inputs.
+        The value may be given either as an actual value (any object extending ``AbstractValue``), or as an expression
+        (extending ``AbstractExpression``) which will be evaluated in the context of the existing inputs.
         """
         if isinstance(value_expr, V.AbstractValue):
             value = value_expr

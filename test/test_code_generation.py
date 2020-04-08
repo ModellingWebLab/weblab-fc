@@ -6,7 +6,9 @@ import logging
 import os
 import re
 
-import fc.code_generation as cg
+import fc
+import fc.code_generation
+import fc.test_support
 from fc.parsing.actions import VariableReference
 from fc.parsing.rdf import OXMETA_NS, PRED_IS_VERSION_OF, create_rdf_node
 
@@ -23,7 +25,7 @@ def test_unique_name_generation():
         os.path.join('test', 'models', 'conflicting_names.cellml'))
 
     # Test unique names
-    unames = cg.get_unique_names(model)
+    unames = fc.code_generation.get_unique_names(model)
     assert len(unames) == 9
     variables = [v for v in model.graph]
     variables.sort(key=str)
@@ -75,7 +77,7 @@ def test_generate_weblab_model(tmp_path):
         vector_orderings[state_annotation][state_var.rdf_identity] = i
 
     # Create weblab model at path
-    cg.create_weblab_model(
+    fc.code_generation.create_weblab_model(
         str(path),
         class_name,
         model,
@@ -107,3 +109,30 @@ def test_generate_weblab_model(tmp_path):
     # Now they should match
     assert generated == expected
 
+
+def test_graphstate():
+    """ Tests the graph state protocol on a generated model. """
+
+    # Create protocol
+    proto = fc.Protocol(os.path.join('protocols', 'GraphState.txt'))
+
+    # Set model (generates & compiles model)
+    model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
+    proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
+
+    # Run protocol
+    proto.set_output_folder('test_graphstate')
+    proto.run()
+    # Some test assertions are within the protocol itself
+
+    # Check output exists
+    assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
+
+    # Check output is correct
+    assert fc.test_support.check_results(
+        proto,
+        {'state': 2},   # Name and dimension of output to check
+        os.path.join('test', 'data', 'historic', model_name, 'GraphState'),
+        rel_tol=0.005,
+        abs_tol=2.5e-4
+    )
