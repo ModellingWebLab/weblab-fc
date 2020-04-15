@@ -8,7 +8,7 @@ addons:
       - libsundials-serial-dev
 install:
   # Needed to run setup.py
-  - pip install -e git://github.com/ModellingWebLab/cellmlmanip.git#egg=cellmlmanip
+  - pip install -e git://github.com/ModellingWebLab/cellmlmanip.git@convert-equations#egg=cellmlmanip
   - pip install cython numpy
   - pip install -e .[test]
   # Needed to upload coverage results
