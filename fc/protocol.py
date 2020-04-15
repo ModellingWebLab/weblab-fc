@@ -159,6 +159,10 @@ class Protocol(object):
 
         # 6. The ``units`` section
         # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Physicalunitdefinitions
+        # We store the definitions as well as the resolved units to allow for merging definitions from
+        # imported protocols or nested protocols without the need to reconcile unit registries and exact
+        # unit names.
+        self.unit_definitions = {}
         self.units = UnitStore()
 
         # 7. The ``model interface`` section.
@@ -200,12 +204,6 @@ class Protocol(object):
         # - key (optional): name of the key variable; should be a protocol output.
         self.plots = []
 
-        # 12. The ``unit definitions section
-        # A list of the units listed explicitly in this protocol.
-        # This allows for the lists to be merged from nested protocols without the need
-        # to reconcile unit registries and exact unit names
-        self.unit_definitions = []
-
         # Parse, and fill section information objects defined above
         self._parse()
 
@@ -241,9 +239,31 @@ class Protocol(object):
         self.input_env.execute_statements(self.inputs)
 
         # Store unit definitions and add these to protocol
-        self.unit_definitions = details.get('units', [])
-        for units in self.unit_definitions:
-            self.units.add_unit(units.name, units.pint_expression)
+        self.unit_definitions = {udef.name: udef for udef in details.get('units', [])}
+        for name, udef in self.unit_definitions.items():
+            self.units.add_unit(name, udef.pint_expression)
+
+        def merge_unit_definitions(unit_definitions):
+            """Merge ``unit_definitions`` from a nested/imported protocol with ours.
+
+            Duplicate names are OK if the definitions are the same.
+            """
+            for name, udef in unit_definitions.items():
+                if name in self.unit_definitions:
+                    # Just check the definitions match, and complain if not
+                    our_udef = self.unit_definitions[name]
+                    if our_udef.pint_expression != udef.pint_expression:
+                        raise ProtocolError(
+                            f'Imported or nested protocol redefines units {name} as '
+                            f'{udef.pint_expression} not {our_udef.pint_expression}')
+                    if our_udef.description != udef.description:
+                        raise ProtocolError(
+                            f'Imported or nested protocol redefines units {name} with '
+                            f'description "{udef.description}" not "{our_udef.description}"')
+                else:
+                    # Include this new definition
+                    self.unit_definitions[name] = udef
+                    self.units.add_unit(name, udef.pint_expression)
 
         # Update namespace map
         def process_ns_map(ns_map):
@@ -286,9 +306,7 @@ class Protocol(object):
                 self.model_interface.merge(imported_proto.model_interface)
 
                 # Add units
-                self.unit_definitions.extend(imported_proto.unit_definitions)
-                for units in imported_proto.unit_definitions:
-                    self.units.add_unit(units.name, units.pint_expression)
+                merge_unit_definitions(imported_proto.unit_definitions)
 
                 # Process namespace mapping
                 process_ns_map(imported_proto.ns_map)
@@ -318,9 +336,7 @@ class Protocol(object):
             self.model_interface.merge(nested_interface)
 
             # Add units
-            self.unit_definitions.extend(nested_proto.unit_definitions)
-            for units in nested_proto.unit_definitions:
-                self.units.add_unit(units.name, units.pint_expression)
+            merge_unit_definitions(nested_proto.unit_definitions)
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))
