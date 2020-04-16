@@ -7,7 +7,7 @@ import math
 import os
 from contextlib import contextmanager
 
-import pyparsing as p
+import pyparsing
 import sympy
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.model import VariableDummy
@@ -148,7 +148,7 @@ class BaseAction(object):
             self.source_location = loc
         else:
             self.source_location = "%s:%d:%d\t%s" % (
-                source_file, p.lineno(loc, s), p.col(loc, s), p.line(loc, s))
+                source_file, pyparsing.lineno(loc, s), pyparsing.col(loc, s), pyparsing.line(loc, s))
 
     def __eq__(self, other):
         """Comparison of these parse results to another instance or a list."""
@@ -194,14 +194,6 @@ class BaseAction(object):
         if not isinstance(value, str) and value is not None:
             value = value[0]
         return value
-
-    def get_attribute_dict(self, *attrNames):
-        """Create an attribute dictionary from named parse results."""
-        attrs = {}
-        for key in attrNames:
-            if key in self.tokens:
-                attrs[key] = self.get_named_token_as_string(key)
-        return attrs
 
     def delegate(self, action, tokens):
         """Create another parse action to process the given tokens for us."""
@@ -662,9 +654,11 @@ class SetTimeUnits(BaseAction):
 
 
 class VariableReference:
-    """Mixin providing properties for resolving variable references.
+    """
+    Mixin providing properties for resolving references to variables specified via RDF terms (references to local
+    variables do not use the VariableReference class).
 
-    Used by input & output variable specifications, inter alia.
+    Used by input & output variable specifications, amongst others.
 
     Properties:
 
@@ -684,16 +678,16 @@ class VariableReference:
         Once namespace prefixes have been resolved, the RDF term that annotates variable(s) we reference.
 
     """
+    def _expr(self):
+        self.set_name(self.get_named_token_as_string('name'))
+        return self
+
     def set_name(self, name):
         """Set the name used for this reference. For use by subclasses."""
         self.prefixed_name = name
         self.ns_prefix, self.local_name = name.split(':', 1)
         self.ns_uri = None  # Will be set later using protocol's namespace mapping
         self.rdf_term = None  # Ditto
-
-    def _expr(self):
-        self.set_name(self.get_named_token_as_string('name'))
-        return self
 
     def set_namespace(self, ns_uri):
         """Set the full namespace URI for this reference, and hence the RDF term."""
@@ -767,10 +761,20 @@ class OptionalVariable(BaseGroupAction, VariableReference):
 
 
 class DeclareVariable(BaseGroupAction):
-    # Leaving old XML method in to document existing properties.
-    # def _xml(self):
-    #    return P.declareNewVariable(**self.get_attribute_dict('name', 'units', 'initial_value'))
-    pass
+    """
+    Parse action for ``var`` declarations in the model interface.
+
+    ``var <name> units <uname> [= <initial_value>]``
+
+    These variables have no rdf term (but just a simple name).
+    They can get their value from the initial value specified on the same line, or through a ``define`` statement.
+    """
+
+    def _expr(self):
+        self.name = self.get_named_token_as_string('name')
+        self.units = self.get_named_token_as_string('units')
+        self.initial_value = self.get_named_token_as_string('initial_value', default=None)
+        return self
 
 
 class ClampVariable(BaseGroupAction, VariableReference):
@@ -866,12 +870,16 @@ class Interpolate(BaseGroupAction):
 
 
 class UnitsConversion(BaseGroupAction):
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    attrs = self.get_attribute_dict('desiredDimensions', 'actualDimensions')
-    #    rule = self.tokens[-1].xml()
-    #    return P.unitsConversionRule(rule, **attrs)
-    pass
+    """
+    Parse action for a units conversion rule.
+
+    ``convert <uname> to <uname> by <simple_lambda_expr>``
+    """
+
+    def _expr(self):
+        self.actual = self.get_named_token_as_string('actualDimensions')
+        self.desired = self.get_named_token_as_string('desiredDimensions')
+        self.rule = self.tokens[-1]
 
 
 class ModelInterface(BaseGroupAction):
@@ -904,6 +912,11 @@ class ModelInterface(BaseGroupAction):
         A list of :class:`ClampVariable` instances. These are created for e.g. ``clamp x``, while statements with an RHS
         such as ``clamp x to 1`` are treated as an alias of ``define x = 1`` and do not lead to creation of a
         ``ClampVariable`` object.
+    ``local_var_declarations``
+        A list of :class:`DeclareVariable` instances. These are created for ``var x`` statements.
+    ``local_vars``
+        Once :meth:`modify_model` has been called, this property gives a dict mapping names of local variables (created
+        with ``var``) to model variables.
     ``sympy_equations``
         Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy versions of
         ``self.equations``.
@@ -927,6 +940,7 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = []
         self.equations = []
         self.clamps = []
+        self.local_var_declarations = []
 
         # Initialise
         self._reinit()
@@ -942,6 +956,7 @@ class ModelInterface(BaseGroupAction):
         self.ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
         self.parameters = []
         self.vector_orderings = {}
+        self.local_vars = {}
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -951,6 +966,7 @@ class ModelInterface(BaseGroupAction):
         self.optional_decls = [a for a in actions if isinstance(a, OptionalVariable)]
         self.equations = [a for a in actions if isinstance(a, ModelEquation)]
         self.clamps = [a for a in actions if isinstance(a, ClampVariable)]
+        self.local_var_declarations = [a for a in actions if isinstance(a, DeclareVariable)]
 
         # Some basic semantics checking
         if len(self._time_units) > 1:
@@ -975,6 +991,7 @@ class ModelInterface(BaseGroupAction):
         add_unique(self.optional_decls, interface.optional_decls)
         add_unique(self.equations, interface.equations)
         add_unique(self.clamps, interface.clamps)
+        add_unique(self.local_var_declarations, interface.local_var_declarations)
 
         # need to be careful with time units
         # add from nested protocol if there are no time units in outer protocol
@@ -1042,11 +1059,13 @@ class ModelInterface(BaseGroupAction):
         # This also performs unit conversion where needed for existing input variables.
         self._add_input_variables()
 
+        # Add variables created by ``var`` statements
+        self._add_local_variables()
+
         # Add variables created by ``define`` statements - must also be listed as output or optional input
         self._add_define_variables()
 
         # TODO: Add variables created by ``optional`` statements with a ``default`` clause
-        # TODO: Add variables created by ``var`` statements
 
         # Now that all variables are in place, it's possible to create the sympy equations
         self._convert_equations_to_sympy()
@@ -1148,13 +1167,17 @@ class ModelInterface(BaseGroupAction):
             :meth:`cellmlmanip.model.Model.get_variable_by_ontology_term`. Otherwise we look for a variable defined
             within the protocol's model interface using :class:`DeclareVariable`.
         """
+        # Annotation
         if ':' in name:
             prefix, local_name = name.split(':', 1)
             ns_uri = self.ns_map[prefix]
             return self.model.get_variable_by_ontology_term((ns_uri, local_name))
-        else:
-            # TODO: DeclareVariable not yet done
-            raise NotImplementedError
+
+        # Local variable
+        try:
+            return self.local_vars[name]
+        except KeyError:
+            raise ProtocolError(f'Unknown variable "{name}".')
 
     def _number_generator(self, value, units):
         """Convert a number with units in an equation to a :class:`cellmlmanip.model.NumberDummy`.
@@ -1270,6 +1293,21 @@ class ModelInterface(BaseGroupAction):
                     if is_time:
                         self.time_variable = variable
 
+    def _add_local_variables(self):
+        """
+        Modify the model by adding any variables defined in ``var`` statements.
+        """
+        for var in self.local_var_declarations:
+
+            # Variable names must be unique (can't even be re-used in imported/nested protocols)
+            if var.name in self.local_vars:
+                raise ProtocolError(f'Variable "{var.name}" was defined by more than one var statement.')
+
+            # Create and store variable
+            name = self.model.get_unique_name('protocol__' + var.name)
+            units = self.units.get_unit(var.units)
+            self.local_vars[var.name] = self.model.add_variable(name, units, initial_value=var.initial_value)
+
     def _add_define_variables(self):
         """
         Modify the model by adding any unknown variables appearing on the LHS of a ``define`` statement (or an
@@ -1302,24 +1340,29 @@ class ModelInterface(BaseGroupAction):
         # Create map from model variables to initial values
         initial_values = {self.model.get_variable_by_ontology_term(k): v for k, v in self.initial_values.items()}
 
+        # Add initial values from local variables
+        for var in self.local_vars.values():
+            if var.initial_value is not None:
+                initial_values[var] = var.initial_value
+
         # Apply all modifications (sympy_equations contains _only_ equations from define statements)
         for eq in self.sympy_equations:
             lhs = eq.lhs
             if lhs.is_Derivative:
                 var = lhs.args[0]
 
-                # Initial value must be set via inputs, or already be set (if this was already a state variable)
+                # Initial value must be set via input or var, or already be set (if this was already a state variable)
                 if var.initial_value is None and var not in initial_values:
                     terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
                     raise ProtocolError(f'Variable {terms} is being set as a state variable but has no initial value'
-                                        ' (this can be set using an `input` statement)')
+                                        ' (this can be set using an `input` or `var` statement)')
             else:
                 var = lhs
 
                 # Check that this variable isn't doubly defined
                 if var in initial_values:
-                    raise ProtocolError(f'Overdefined variable. An initial value was given for {var} via an input'
-                                        ' statement, but a new equation was also set via a define statement.')
+                    raise ProtocolError(f'Overdefined variable. An initial value was given for {var} via an input or'
+                                        ' var statement, but a new equation was also set via a define statement.')
 
                 # Unset initial value, in case it was a state variable previously
                 var.initial_value = None
@@ -1343,6 +1386,13 @@ class ModelInterface(BaseGroupAction):
                 if old_eq is not None:
                     self.model.remove_equation(old_eq)
                 self.model.add_equation(sympy.Eq(var, self.model.add_number(value, var.units)))
+
+        # Check for undefined local variables
+        for name, var in self.local_vars.items():
+            old_eq = self.model.get_definition(var)
+            if old_eq is None:
+                raise ProtocolError(f'Underdefined variable. A new variable {name} was created in a var statement, but'
+                                    ' no initial value or equation was assigned.')
 
         # TODO: Check that all/any _new_ derivatives are w.r.t. self.time_variable?
 
@@ -1450,7 +1500,7 @@ class Range(BaseGroupAction):
     """Parse action for all the kinds of range supported."""
 
     def _expr(self):
-        attrs = self.get_attribute_dict('name', 'units')
+        name = self.get_named_token_as_string('name', None)
         if 'uniform' in self.tokens:
             tokens = self.tokens['uniform'][0]
             start = tokens[0].expr()
@@ -1459,13 +1509,13 @@ class Range(BaseGroupAction):
                 step = tokens[1].expr()
             else:
                 step = E.Const(V.Simple(1))
-            range_ = ranges.UniformRange(attrs['name'], start, stop, step)
+            range_ = ranges.UniformRange(name, start, stop, step)
         elif 'vector' in self.tokens:
             expr = self.tokens['vector'][0].expr()
-            range_ = ranges.VectorRange(attrs['name'], expr)
+            range_ = ranges.VectorRange(name, expr)
         elif 'while' in self.tokens:
             cond = self.tokens['while'][0].expr()
-            range_ = ranges.While(attrs['name'], cond)
+            range_ = ranges.While(name, cond)
         return range_
 
 

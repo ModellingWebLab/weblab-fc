@@ -1,0 +1,19 @@
+documentation {
+Tests an illegal ``var`` construct, which gives the var two values.
+}
+
+units {
+    ms = milli second
+    mV = milli volt
+}
+
+model interface {
+    var x units mV = 10
+    define x = 10 :: mV
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1
+    }
+}
