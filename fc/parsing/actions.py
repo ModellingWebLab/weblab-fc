@@ -913,7 +913,7 @@ class ModelInterface(BaseGroupAction):
         such as ``clamp x to 1`` are treated as an alias of ``define x = 1`` and do not lead to creation of a
         ``ClampVariable`` object.
     ``local_var_declarations``
-        A list of :class:`DeclareVariable` instances. The are created for ``var x`` statements.
+        A list of :class:`DeclareVariable` instances. These are created for ``var x`` statements.
     ``local_vars``
         Once :meth:`modify_model` has been called, this property gives a dict mapping names of local variables (created
         with ``var``) to model variables.
