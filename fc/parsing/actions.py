@@ -12,7 +12,6 @@ import sympy
 from cellmlmanip.model import DataDirectionFlow
 from cellmlmanip.model import VariableDummy
 from cellmlmanip.parser import UNIT_PREFIXES
-from cellmlmanip.units import UnitCalculator
 
 from ..error_handling import ProtocolError
 from ..language import expressions as E
@@ -1303,9 +1302,6 @@ class ModelInterface(BaseGroupAction):
         # Create map from model variables to initial values
         initial_values = {self.model.get_variable_by_ontology_term(k): v for k, v in self.initial_values.items()}
 
-        # Prepare to convert units within equations where necessary
-        unit_converter = UnitCalculator(self.units)
-
         # Apply all modifications (sympy_equations contains _only_ equations from define statements)
         for eq in self.sympy_equations:
             lhs = eq.lhs
@@ -1334,7 +1330,7 @@ class ModelInterface(BaseGroupAction):
                 self.model.remove_equation(old_eq)
 
             # Convert units if required
-            eq = unit_converter.convert_expr_recursively(eq, None)
+            eq = self.units.convert_expression_recursively(eq, None)
 
             # Add new equation
             self.model.add_equation(eq)
