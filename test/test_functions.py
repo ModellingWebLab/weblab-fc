@@ -58,6 +58,7 @@ def test_nested_function():
     result = nested_call.evaluate(env)
     assert result.value == 1
 
+
 def test_functions_with_defaults_used():
     # Function has default which is used
     env = Env.Environment()

@@ -54,10 +54,12 @@ def test_max():
     assert E.Max(
         E.Const(V.Simple(6)), E.Const(V.Simple(12)), E.Const(V.Simple(2))).evaluate(env).value == pytest.approx(12)
 
+
 def test_min():
     env = Env.Environment()
     assert E.Min(
         E.Const(V.Simple(6)), E.Const(V.Simple(2)), E.Const(V.Simple(12))).evaluate(env).value == pytest.approx(2)
+
 
 def test_rem():
     env = Env.Environment()

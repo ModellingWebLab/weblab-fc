@@ -2,8 +2,6 @@
 Test behaviour on models with no ODEs; based on TestClamping.hpp
 """
 
-import unittest
-
 import fc
 
 

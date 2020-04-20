@@ -1,9 +1,5 @@
-import difflib
-import filecmp
-import os
 import pytest
 import sys
-import time
 
 # Import the module to test
 # The default for this module now is to assume the Python implementation,
@@ -16,7 +12,7 @@ csp = CSP.CompactSyntaxParser
 strict_string_end = CSP.p.StringEnd().leaveWhitespace()
 
 
-def check_parse_results( actual, expected):
+def check_parse_results(actual, expected):
     """Compare parse results to expected strings.
 
     The expected results may be given as a (nested) list or a dictionary, depending
@@ -50,20 +46,6 @@ def assert_does_not_parse(grammar, input):
     with pytest.raises(CSP.p.ParseBaseException):
         strict_grammar.parseString(input)
 
-'''
-def assert_files_match(new_file_path, ref_file_path):
-    """Utility method to check that two files have matching contents."""
-    if not filecmp.cmp(new_file_path, ref_file_path):
-        # Matching failed, so print something informative
-        context_lines = 3
-        from_date = time.ctime(os.stat(ref_file_path).st_mtime)
-        to_date = time.ctime(os.stat(new_file_path).st_mtime)
-        for line in difflib.unified_diff(open(ref_file_path).readlines(), open(new_file_path).readlines(),
-                                         ref_file_path, new_file_path,
-                                         from_date, to_date, n=context_lines):
-            print(line, end=' ')
-        assert False, "Output file '%s' does not match reference file '%s'" % (new_file_path, ref_file_path)
-'''
 
 def test_parsing_identifiers():
     assert_does_not_parse(csp.nc_ident, 'abc:def')
@@ -75,6 +57,7 @@ def test_parsing_identifiers():
     assert_parses(csp.ident, '_abc', ['_abc'])
     assert_parses(csp.ident_as_var, 'abc:def', ['abc:def'])
     assert_does_not_parse(csp.ident, '123')
+
 
 def test_parsing_numbers():
     assert_parses(csp.number, '123', ['123'])
@@ -92,6 +75,7 @@ def test_parsing_numbers():
     assert_does_not_parse(csp.number, '+123')
     assert_does_not_parse(csp.number, '1E3')
 
+
 def test_parsing_numbers_with_units():
     assert_parses(csp.number, '123 :: dimensionless', ['123', 'dimensionless'])
     assert_parses(csp.number, '-4e5::mA', ['-4e5', 'mA'])
@@ -100,9 +84,11 @@ def test_parsing_numbers_with_units():
     assert_does_not_parse(csp.number, '123 :: ')
     assert_does_not_parse(csp.number, '123 :: prefix:units')
 
+
 def test_parsing_comments():
     assert_parses(csp.comment, '# blah blah', [])
     assert_does_not_parse(csp.comment, '# blah blah\n')
+
 
 def test_parsing_simple_expressions():
     assert_parses(csp.expr, '1', ['1'])
@@ -126,7 +112,8 @@ def test_parsing_simple_expressions():
     assert_parses(csp.expr, 'A + B || C * D', [[['A', '+', 'B'], '||', ['C', '*', 'D']]])
     assert_parses(csp.expr, 'if 1 then 2 else 3', [['1', '2', '3']])
     assert_parses(csp.expr, 'if 1 < 2 then 3 + 4 else 5 * 6',
-                      [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
+                  [[['1', '<', '2'], ['3', '+', '4'], ['5', '*', '6']]])
+
 
 def test_parsing_trace():
     assert_parses(csp.expr, '1?', [['1']])
@@ -140,6 +127,7 @@ def test_parsing_trace():
     action = csp.expr.parseString('var', parseAll=True)
     assert not action[0].expr().trace
 
+
 def test_parsing_multi_line_expressions():
     assert_parses(csp.expr, '(1 + 2) * 3', [[['1', '+', '2'], '*', '3']])
     assert_parses(csp.expr, '((1 + 2)\\\n * 3)', [[['1', '+', '2'], '*', '3']])
@@ -150,6 +138,7 @@ def test_parsing_multi_line_expressions():
     # the above to work.
     assert_parses(csp.expr, '(1 + 2)\n * 3', [[['1', '+', '2'], '*', '3']])
 
+
 def test_parsing_simple_assignments():
     assert_parses(csp.simple_assign, 'var = value', [['var', 'value']])
     assert_parses(csp.simple_assign, 'var = pre:value', [['var', 'pre:value']])
@@ -158,13 +147,15 @@ def test_parsing_simple_assignments():
     assert_parses(csp.simple_assign_list, 'v1 = 1\nv2=2', [[['v1', '1'], ['v2', '2']]])
     assert_parses(csp.simple_assign_list, '', [[]])
 
+
 def test_parsing_namespaces():
     assert_parses(csp.ns_decl, 'namespace prefix = "urn:test"', [{'prefix': 'prefix', 'uri': 'urn:test'}])
     assert_parses(csp.ns_decl, "namespace prefix='urn:test'", [{'prefix': 'prefix', 'uri': 'urn:test'}])
     assert_parses(csp.ns_decls, 'namespace n1="urn:t1"#test ns\nnamespace n2 = "urn:t2"',
-                      [{'prefix': 'n1', 'uri': 'urn:t1'}, {'prefix': 'n2', 'uri': 'urn:t2'}])
+                  [{'prefix': 'n1', 'uri': 'urn:t1'}, {'prefix': 'n2', 'uri': 'urn:t2'}])
     assert_parses(csp.ns_decls, '', [])
     assert_does_not_parse(csp.ns_decls, 'namespace n="uri"\n')
+
 
 def test_parsing_inputs():
     mls = """inputs {
@@ -178,6 +169,7 @@ def test_parsing_inputs():
     assert_parses(csp.inputs, 'inputs {}', [[[]]])
     assert_parses(csp.inputs, 'inputs\n{\n}\n', [[[]]])
     assert_parses(csp.inputs, 'inputs{X=1}', [[[['X', '1']]]])
+
 
 def test_parsing_imports():
     assert_parses(
@@ -196,6 +188,7 @@ def test_parsing_imports():
     assert_parses(csp.imports, '', [])
     assert_does_not_parse(csp.imports, 'import "file"\n')
 
+
 def test_parsing_imports_with_set_input():
     mls = """import "S1S2.txt" {
     steady_state_beats = 10
@@ -208,6 +201,7 @@ def test_parsing_imports_with_set_input():
     )
     assert_parses(csp.import_stmt, 'import "file.txt" { }', [['', 'file.txt', []]])
     assert_does_not_parse(csp.import_stmt, 'import "file.txt" { } \n')
+
 
 def test_parsing_model_interface():
     assert_parses(csp.set_time_units, 'independent var units u', [['u']])
@@ -289,6 +283,7 @@ def test_parsing_model_interface():
     assert_parses(csp.model_interface, 'model interface#comment\n{output test:time\n}', [[['test:time']]])
     assert_parses(csp.model_interface, 'model interface {output test:time }', [[['test:time']]])
 
+
 def test_parsing_uniform_range():
     assert_parses(csp.range, 'range time units ms uniform 0:1:1000', [['time', 'ms', ['0', '1', '1000']]])
     assert_parses(csp.range, 'range time units ms uniform 0:1000', [['time', 'ms', ['0', '1000']]])
@@ -302,16 +297,19 @@ def test_parsing_uniform_range():
     assert_parses(csp.range, 'range t units s uniform start:(step):end', [['t', 's', ['start', 'step', 'end']]])
     assert_does_not_parse(csp.range, 'range t units s uniform start:step:end')
 
+
 def test_parsing_vector_range():
     assert_parses(
         csp.range,
         'range run units dimensionless vector [1, 2, 3, 4]',
         [['run', 'dimensionless', ['1', '2', '3', '4']]])
 
+
 def test_parsing_while_range():
     assert_parses(
         csp.range, 'range rpt units dimensionless while rpt < 5',
         [['rpt', 'dimensionless', ['rpt', '<', '5']]])
+
 
 def test_parsing_modifiers():
     assert_parses(csp.modifier_when, 'at start', ['start'])
@@ -343,6 +341,7 @@ def test_parsing_modifiers():
         [[['start', []], ['each', ['model:input', 'loopVariable']], ['end', ['savedState']]]])
     assert_parses(csp.modifiers, 'modifiers {at start reset}', [[['start', []]]])
 
+
 def test_parsing_timecourse_simulations():
     assert_parses(
         csp.simulation,
@@ -358,8 +357,9 @@ range time units U while time < 100
 modifiers { at end save as prelim }
 }"""
     assert_parses(csp.simulation, mls,
-                      [['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]]])
+                  [['sim', [['time', 'U', ['time', '<', '100']], [['end', ['prelim']]]]]])
     assert_does_not_parse(csp.simulation, 'simulation sim = timecourse {}')
+
 
 def test_parsing_one_step_simulations():
     assert_parses(csp.simulation, 'simulation oneStep', [['', []]])
@@ -370,6 +370,7 @@ def test_parsing_one_step_simulations():
         csp.simulation,
         'simulation oneStep { modifiers { at start set a = 1 } }',
         [['', [[['start', ['a', '1']]]]]])
+
 
 def test_parsing_nested_simulations():
     assert_parses(
@@ -384,7 +385,7 @@ range R units U uniform 3:5
 modifiers { at each loop reset to prelim }
 nests sim
 }""",
-            [['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]]])
+        [['', [['R', 'U', ['3', '5']], [['each', ['prelim']]], ['sim']]]])
 
     assert_parses(
         csp.simulation,
@@ -395,6 +396,7 @@ nests simulation timecourse { range t units u uniform 1:100 } }""",
     assert_does_not_parse(
         csp.simulation,
         'simulation rpt = nested { range run units U while 1 }')
+
 
 def test_parsing_nested_protocol():
     assert_parses(
@@ -431,6 +433,7 @@ def test_parsing_nested_protocol():
         'simulation nested { range iter units D vector [0, 1]\n nests protocol "P" { }? }',
         [['', [['iter', 'D', ['0', '1']], [['P', []]]]]])
 
+
 def test_parsing_tasks():
     assert_parses(
         csp.tasks,
@@ -451,12 +454,13 @@ def test_parsing_tasks():
             ]
         ]])
 
+
 def test_parsing_output_specifications():
     assert_parses(csp.output_spec, 'name = model:var "Description"', [['name', 'model:var', 'Description']])
     assert_parses(csp.output_spec, r'name = ref:var units U "Description \"quotes\""',
-                      [['name', 'ref:var', 'U', 'Description "quotes"']])
+                  [['name', 'ref:var', 'U', 'Description "quotes"']])
     assert_parses(csp.output_spec, "name = ref:var units U 'Description \\'quotes\\' \"too\"'",
-                      [['name', 'ref:var', 'U', 'Description \'quotes\' "too"']])
+                  [['name', 'ref:var', 'U', 'Description \'quotes\' "too"']])
     assert_parses(csp.output_spec, 'varname units UU', [['varname', 'UU']])
     assert_parses(csp.output_spec, 'varname units UU "desc"', [['varname', 'UU', 'desc']])
     assert_parses(csp.output_spec, 'optional varname units UU', [['optional', 'varname', 'UU']])
@@ -472,6 +476,7 @@ def test_parsing_output_specifications():
 } #cpc
 """, [[['n1', 'n2', 'u1'], ['n3', 'p:m', 'd1'], ['n4', 'u2', 'd2'], ['optional', 'n5', 'u3']]])
     assert_parses(csp.outputs, "outputs {}", [[]])
+
 
 def test_parsing_plot_specifications():
     assert_parses(csp.plot_curve, 'y against x', [['y', 'x']])
@@ -491,6 +496,7 @@ def test_parsing_plot_specifications():
 }""", [[['t1', ['v1', 'v2', 'vk']], ['t1', ['v3', 'v4', 'v5']]]])
     assert_parses(csp.plots, 'plots {}', [[]])
 
+
 def test_parsing_function_calls():
     assert_parses(csp.function_call, 'noargs()', [['noargs', []]])
     assert_parses(csp.function_call, 'swap(a, b)', [['swap', ['a', 'b']]])
@@ -499,6 +505,7 @@ def test_parsing_function_calls():
     assert_parses(csp.function_call, 'std:max(A)', [['std:max', ['A']]])
     assert_does_not_parse(csp.function_call, 'spaced (param)')
     assert_parses(csp.expr, 'func(a,b, 3)', [['func', ['a', 'b', '3']]])
+
 
 def test_parsing_mathml_operators():
     # MathML that doesn't have a special operator is represented as a normal function call,
@@ -512,7 +519,8 @@ def test_parsing_mathml_operators():
     for op in 'quotient rem max min root xor abs floor ceiling exp ln log'.split():
         assert op in csp.mathml_operators
     assert_parses(csp.expr, 'MathML:exp(MathML:floor(MathML:exponentiale))',
-                      [['MathML:exp', [['MathML:floor', ['MathML:exponentiale']]]]])
+                  [['MathML:exp', [['MathML:floor', ['MathML:exponentiale']]]]])
+
 
 def test_parsing_assign_statements():
     assert_parses(csp.assign_stmt, 'var = value', [[['var'], ['value']]])
@@ -526,6 +534,7 @@ def test_parsing_assign_statements():
     assert_does_not_parse(csp.assign_stmt, 'p:a, p:b = e')
     assert_does_not_parse(csp.assign_stmt, '')
 
+
 def test_parsing_optional_assignments():
     assert_parses(
         csp.assign_stmt, 'optional var = value', [[['var'], ['value']]])
@@ -534,6 +543,7 @@ def test_parsing_optional_assignments():
     assert_parses(
         csp.assign_stmt, 'optional = expr', [[['optional'], ['expr']]])
 
+
 def test_parsing_return_statements():
     assert_parses(csp.return_stmt, 'return 2 * a', [[['2', '*', 'a']]])
     assert_parses(csp.return_stmt, 'return (3 - 4)', [[['3', '-', '4']]])
@@ -541,10 +551,12 @@ def test_parsing_return_statements():
     assert_parses(csp.return_stmt, 'return a + 1, b - 1', [[['a', '+', '1'], ['b', '-', '1']]])
     assert_parses(csp.return_stmt, 'return (a, b)', [[['a', 'b']]])
 
+
 def test_parsing_assert_statements():
     assert_parses(csp.assert_stmt, 'assert a + b', [[['a', '+', 'b']]])
     assert_parses(csp.assert_stmt, 'assert (a + b)', [[['a', '+', 'b']]])
     assert_parses(csp.assert_stmt, 'assert 1', [['1']])
+
 
 def test_parsing_statement_lists():
     assert_parses(csp.stmt_list, "b=-a\nassert 1", [[[['b'], [['-', 'a']]], ['1']]])
@@ -567,6 +579,7 @@ return c, d"""
             ['c', 'd']
         ]])
     assert_does_not_parse(csp.stmt_list, '')
+
 
 def test_parsing_lambda_expressions():
     assert_parses(csp.lambda_expr, 'lambda a: a + 1', [[[['a']], ['a', '+', '1']]])
@@ -594,6 +607,7 @@ return c
     assert_parses(csp.expr, 'lambda { return 1 }', [[[], [['1']]]])
     assert_parses(csp.expr, 'lambda: 1', [[[], '1']])
 
+
 def test_parsing_function_definitions():
     assert_parses(
         csp.function_defn,
@@ -613,8 +627,11 @@ def test_parsing_function_definitions():
     assert_parses(
         csp.function_defn, 'def noargs(): 1', [['noargs', [], '1']])
 
+
 def test_parsing_nested_functions():
-    assert_parses(csp.function_defn, """def outer()
+    assert_parses(
+        csp.function_defn,
+        """def outer()
 {
     def inner1(a): a/2
     inner2 = lambda { return 5 }
@@ -622,10 +639,18 @@ def test_parsing_nested_functions():
         return b*2
     }
     return inner1(1) + inner2() + inner3(2)
-}""", [['outer', [], [['inner1', [['a']], ['a', '/', '2']],
-                  [['inner2'], [[[], [['5']]]]],
-                  ['inner3', [['b']], [[['b', '*', '2']]]],
-                  [[['inner1', ['1']], '+', ['inner2', []], '+', ['inner3', ['2']]]]]]])
+}""",
+        [[
+            'outer',
+            [],
+            [
+                ['inner1', [['a']], ['a', '/', '2']],
+                [['inner2'], [[[], [['5']]]]],
+                ['inner3', [['b']], [[['b', '*', '2']]]],
+                [[['inner1', ['1']], '+', ['inner2', []], '+', ['inner3', ['2']]]]
+            ]
+        ]])
+
 
 def test_parsing_tuples():
     assert_parses(csp.tuple, '(1,2)', [['1', '2']])
@@ -637,6 +662,7 @@ def test_parsing_tuples():
     assert_parses(csp.assign_stmt, 't = (1,2)', [[['t'], [['1', '2']]]])
     assert_parses(csp.assign_stmt, 'a, b = (1,2)', [[['a', 'b'], [['1', '2']]]])
 
+
 def test_parsing_arrays():
     assert_parses(csp.expr, '[1, 2, 3]', [['1', '2', '3']])
     assert_parses(csp.array, '[[a, b], [c, d]]', [[['a', 'b'], ['c', 'd']]])
@@ -645,13 +671,14 @@ def test_parsing_arrays():
         '[ [ [1+2,a,b]],[[3/4,c,d] ]]',
         [[[[['1', '+', '2'], 'a', 'b']], [[['3', '/', '4'], 'c', 'd']]]])
 
+
 def test_parsing_array_comprehensions():
     assert_parses(csp.array, '[i for i in 0:N]', [['i', ['i', ['0', 'N']]]])
 
     assert_parses(csp.expr, '[i*2 for i in 0:2:4]', [[['i', '*', '2'], ['i', ['0', '2', '4']]]])
 
     assert_parses(csp.array, '[i+j*5 for i in 1:3 for j in 2:4]',
-                      [[['i', '+', ['j', '*', '5']], ['i', ['1', '3']], ['j', ['2', '4']]]])
+                  [[['i', '+', ['j', '*', '5']], ['i', ['1', '3']], ['j', ['2', '4']]]])
 
     assert_parses(csp.array, '[block for 1$i in 2:10]', [['block', ['1', 'i', ['2', '10']]]])
     assert_parses(
@@ -669,6 +696,7 @@ def test_parsing_array_comprehensions():
         '[i for 1+2$i in 2:4]',
         [['i', [['1', '+', '2'], 'i', ['2', '4']]]])
     assert_does_not_parse(csp.expr, '[i for 1 $i in 2:4]')
+
 
 def test_parsing_views():
     assert_parses(csp.expr, 'A[1:3:7]', [['A', ['1', '3', '7']]])
@@ -699,12 +727,13 @@ def test_parsing_views():
     )
     assert_parses(csp.expr, 'dimspec[dim$0:2]', [['dimspec', ['dim', '0', '2']]])
     assert_parses(csp.expr, 'okspace[ 0$ (1+2) : a+b : 50 ]',
-                      [['okspace', ['0', ['1', '+', '2'], ['a', '+', 'b'], '50']]])
+                  [['okspace', ['0', ['1', '+', '2'], ['a', '+', 'b'], '50']]])
 
     # Some spaces aren't allowed
     assert_does_not_parse(csp.expr, 'arr [1]')
     assert_does_not_parse(csp.expr, 'arr[1] [3]')
     assert_does_not_parse(csp.expr, 'arr[1 $ 2]')
+
 
 def test_parsing_find_and_index():
     # Curly braces represent index, with optional pad or shrink argument.  Find is a function call.
@@ -728,6 +757,7 @@ def test_parsing_find_and_index():
         'A{find(A), 0, pad:-1=1+2}',
         [['A', [['find', ['A']], '0', ['-', '1'], ['1', '+', '2']]]]
     )
+
 
 def test_parsing_units_definitions():
     # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
@@ -768,6 +798,7 @@ rate_const_2 = nM^-1 . hour^-1 # Second order
         ['rate_const_2', ['nM', '-1'], ['hour', '-1']]]],
     )
 
+
 def test_parsing_accessors():
     for accessor in ['NUM_DIMS', 'SHAPE', 'NUM_ELEMENTS']:
         assert_parses(csp.accessor, '.' + accessor, [accessor])
@@ -780,24 +811,27 @@ def test_parsing_accessors():
     assert_parses(csp.expr, 'A.SHAPE.IS_ARRAY', [['A', 'SHAPE', 'IS_ARRAY']])
     assert_does_not_parse(csp.expr, 'arr .SHAPE')
 
+
 def test_parsing_map():
     assert_parses(csp.expr, 'map(func, a1, a2)', [['map', ['func', 'a1', 'a2']]])
     assert_parses(csp.expr, 'map(lambda a, b: a+b, A, B)',
-                      [['map', [[[['a'], ['b']], ['a', '+', 'b']], 'A', 'B']]])
+                  [['map', [[[['a'], ['b']], ['a', '+', 'b']], 'A', 'B']]])
     assert_parses(csp.expr, 'map(id, a)', [['map', ['id', 'a']]])
     assert_parses(csp.expr, 'map(hof(arg), a, b, c, d, e)',
-                      [['map', [['hof', ['arg']], 'a', 'b', 'c', 'd', 'e']]])
+                  [['map', [['hof', ['arg']], 'a', 'b', 'c', 'd', 'e']]])
     # assert_does_not_parse(csp.expr, 'map(f)') # At present implemented just as a function call with special name
+
 
 def test_parsing_fold():
     assert_parses(csp.expr, 'fold(func, array, init, dim)', [['fold', ['func', 'array', 'init', 'dim']]])
     assert_parses(csp.expr, 'fold(lambda a, b: a - b, f(), 1, 2)',
-                      [['fold', [[[['a'], ['b']], ['a', '-', 'b']], ['f', []], '1', '2']]])
+                  [['fold', [[[['a'], ['b']], ['a', '-', 'b']], ['f', []], '1', '2']]])
     assert_parses(csp.expr, 'fold(f, A)', [['fold', ['f', 'A']]])
     assert_parses(csp.expr, 'fold(f, A, 0)', [['fold', ['f', 'A', '0']]])
     assert_parses(csp.expr, 'fold(f, A, default, 1)', [['fold', ['f', 'A', [], '1']]])
     # assert_does_not_parse(csp, expr, 'fold()')
     # assert_does_not_parse(csp, expr, 'fold(f, A, i, d, extra)')
+
 
 def test_parsing_wrapped_mathml_operators():
     assert_parses(csp.expr, '@3:+', [['3', '+']])
@@ -810,9 +844,11 @@ def test_parsing_wrapped_mathml_operators():
     assert_does_not_parse(csp.expr, '@1:--')
     assert_does_not_parse(csp.expr, '@N:+')
 
+
 def test_parsing_null_and_default():
     assert_parses(csp.expr, 'null', [[]])
     assert_parses(csp.expr, 'default', [[]])
+
 
 def test_parsing_library():
     assert_parses(csp.library, 'library {}', [[]])
@@ -833,6 +869,7 @@ def test_parsing_library():
     ]]]
     assert_parses(csp.library, mls, out)
 
+
 def test_parsing_post_processing():
     mls = """post-processing
 {
@@ -842,6 +879,7 @@ def test_parsing_post_processing():
 """
     out = [[[['a'], [['check', ['sim:result']]]], [['a', '>', '5']]]]
     assert_parses(csp.post_processing, mls, out)
+
 
 def test_zzz_packrat_was_used():
     # Method name ensures this runs last!
