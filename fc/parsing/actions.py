@@ -1372,6 +1372,9 @@ class ModelInterface(BaseGroupAction):
             if old_eq is not None:
                 self.model.remove_equation(old_eq)
 
+            # Convert units if required
+            eq = self.units.convert_expression_recursively(eq, None)
+
             # Add new equation
             self.model.add_equation(eq)
 

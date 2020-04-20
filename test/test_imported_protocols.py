@@ -25,7 +25,6 @@ def test_s1_s2_lr91():
     assert v.shape == (len(intervals), 2001)
 
 
-@pytest.mark.xfail(strict=True, reason='No unit conversion within equations yet')
 def test_s1_s2_noble():
     """ This model has time units in seconds, so we're checking that conversion works too. """
 
