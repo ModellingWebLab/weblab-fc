@@ -239,9 +239,9 @@ class Protocol(object):
         self.input_env.execute_statements(self.inputs)
 
         # Store unit definitions and add these to protocol
-        self.unit_definitions = {udef.name: udef for udef in details.get('units', [])}
-        for name, udef in self.unit_definitions.items():
-            self.units.add_unit(name, udef.pint_expression)
+        for udef in details.get('units', []):
+            self.unit_definitions[udef.name] = udef
+            self.units.add_unit(udef.name, udef.pint_expression)
 
         def merge_unit_definitions(unit_definitions):
             """Merge ``unit_definitions`` from a nested/imported protocol with ours.
