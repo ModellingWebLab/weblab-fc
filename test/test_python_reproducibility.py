@@ -28,6 +28,8 @@ class RedirectStdStreams(object):
 
     TODO: Consider if we can redirect for child processes (model compilation) too.
     It's trickier as they write to os-level file handles.
+
+    Michael: See e.g. https://github.com/MichaelClerx/myokit/blob/master/myokit/_aux.py#L265
     """
 
     def __init__(self, stdout=None, stderr=None):
