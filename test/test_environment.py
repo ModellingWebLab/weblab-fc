@@ -12,7 +12,7 @@ from fc.simulations.model import TestOdeModel
 def test_sim_env_txt():
     proto_file = 'test/protocols/test_sim_environments.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('TestVariousProtocols_TestSimEnv')
+    proto.set_output_folder('test_sim_env_txt')
     proto.set_model(TestOdeModel(1))
     proto.run()
 

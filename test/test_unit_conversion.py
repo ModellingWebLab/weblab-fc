@@ -20,7 +20,7 @@ def test_unit_conversion_time():
     proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
 
     # Run protocol
-    proto.set_output_folder('test_graphstate_time_conversion')
+    proto.set_output_folder('test_unit_conversion_time')
     proto.run()
     # Some test assertions are within the protocol itself
 
@@ -48,7 +48,7 @@ def test_unit_conversion_state_variable():
     proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
 
     # Run protocol
-    proto.set_output_folder('test_graphstate_voltage_conversion')
+    proto.set_output_folder('test_unit_conversion_state_variable')
     proto.run()
     # Some test assertions are within the protocol itself
 

@@ -21,6 +21,6 @@ def test_core_post_proc_txt():
 def test_graph_txt():
     proto_file = 'protocols/GraphState.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('TestSyntaxInterface_TestGraphTxt')
+    proto.set_output_folder('test_graph_txt')
     proto.set_model(model.TestOdeModel(1))
     proto.run()
