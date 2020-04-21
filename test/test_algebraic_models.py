@@ -1,5 +1,5 @@
 """
-Test behaviour on models with no ODEs; based on TestClamping.hpp
+Test behaviour on models with no ODEs.
 """
 
 import fc
