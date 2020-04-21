@@ -22,7 +22,7 @@ def test_merging_interfaces():
     # Checks that merging model interface sections from nested protocols works
     proto_file = 'protocols/IK1_block.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_nested_protocols_merging_interfaces')
+    proto.set_output_folder('test_merging_interfaces')
     proto.set_model('test/models/luo_rudy_1991.cellml')
 
     # Make the run shorter for testing

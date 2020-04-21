@@ -1,7 +1,4 @@
-"""Test implementation of voltage clamps in the Python code.
-
-Note that the first two cases in TestClamping.hpp are covered in TestAlgebraicModels.py!
-"""
+"""Test implementation of voltage clamps in the Python code."""
 import os
 import pytest
 
@@ -10,7 +7,7 @@ import fc
 
 def test_clamping_with_variable_units():
     proto = fc.Protocol('test/protocols/test_clamping3.txt')
-    proto.set_output_folder('Py_TestClamping_TestClampingWithVariableUnits')
+    proto.set_output_folder('test_clamping_with_variable_units')
     proto.set_model('test/models/beeler_reuter_model_1977.cellml')
     proto.run()
     # Test assertions are within the protocol itself
@@ -21,7 +18,7 @@ def test_clamping_with_variable_units():
 def test_clamp_to_data_file():
     proto_file = 'protocols/timecourse_voltage_clamp.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('Py_TestClamping_TestClampToDataFile')
+    proto.set_output_folder('test_clamp_to_data_file')
     proto.set_model('cellml/ten_tusscher_model_2004_epi.cellml')
     proto.run()
     # Test assertions are within the protocol itself
@@ -32,7 +29,7 @@ def test_clamp_to_data_file():
 def test_interpolation_clamp():
     proto_file = 'test/protocols/test_model_interpolation.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('Py_TestClamping_TestInterpolationClamp')
+    proto.set_output_folder('test_interpolation_clamp')
     proto.set_model('test/data/simple_ode.cellml')
     proto.run()
     # Test assertions are within the protocol itself

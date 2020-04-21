@@ -8,7 +8,7 @@ from fc.simulations.model import TestOdeModel
 def test_while_loop_txt():
     proto_file = 'test/protocols/test_while_loop.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('TestVariousProtocols_TestWhileLoopTxt')
+    proto.set_output_folder('test_while_loop_txt')
     proto.set_model(TestOdeModel(1))
     proto.set_input('num_iters', E.N(10))
     proto.run()
@@ -28,6 +28,6 @@ def test_while_loop_on_hh_model():
 
     # Run protocol
     # Test assertions are within the protocol itself
-    proto.set_output_folder('test_generated_model_while_loop')
+    proto.set_output_folder('test_while_loop_on_hh_model')
     proto.run()
 
