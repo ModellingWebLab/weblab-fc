@@ -1,0 +1,19 @@
+# Specifies an invalid interface: inconsistent defines on the same variable
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    V = volt
+}
+
+model interface {
+    define oxmeta:membrane_voltage = 1 :: V
+    define oxmeta:membrane_voltage = 2 :: V
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1
+    }
+}
+

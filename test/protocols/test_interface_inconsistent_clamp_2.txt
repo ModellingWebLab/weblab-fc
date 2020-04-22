@@ -1,14 +1,15 @@
-# Specifies an invalid interface: multiple defines on the same variable
+# Specifies an invalid interface: clamp to different values
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 units {
     V = volt
+    mV = milli volt
 }
 
 model interface {
-    define oxmeta:membrane_voltage = 1 :: V
-    define oxmeta:membrane_voltage = 1 :: V
+    clamp oxmeta:membrane_voltage to 1 :: mV
+    clamp oxmeta:membrane_voltage to 2 :: mV
 }
 
 tasks {

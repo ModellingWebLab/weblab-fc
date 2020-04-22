@@ -34,7 +34,7 @@ def test_var_declaration_underdefined():
 
     proto = fc.Protocol('test/protocols/test_var_declaration_underdefined.txt')
     proto.set_output_folder('test_var_declaration_underdefined')
-    with pytest.raises(ProtocolError, match='nderdefined'):
+    with pytest.raises(ProtocolError, match='No definition given for local variable'):
         proto.set_model('test/models/beeler_reuter_model_1977.cellml')
 
 
@@ -43,6 +43,6 @@ def test_var_declaration_overdefined():
 
     proto = fc.Protocol('test/protocols/test_var_declaration_overdefined.txt')
     proto.set_output_folder('test_var_declaration_overdefined')
-    with pytest.raises(ProtocolError, match='verdefined'):
+    with pytest.raises(ProtocolError, match='which is not a state variable'):
         proto.set_model('test/models/beeler_reuter_model_1977.cellml')
 

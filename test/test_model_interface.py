@@ -7,74 +7,81 @@ import fc
 from fc.error_handling import ProtocolError
 
 
-def test_duplicate_input():
-    # Tests if an error is raised when a variable is specified as input twice.
+def test_interface_inconsistent_input():
+    # Tests if an error is raised when a variable is specified as input twice, with inconsistent information.
 
-    proto_file = 'test/protocols/test_bad_interface_duplicate_input.txt'
+    proto_file = 'test/protocols/test_interface_inconsistent_input.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_duplicate_input')
-    with pytest.raises(ProtocolError, match='as an input twice'):
+    proto.set_output_folder('test_interface_inconsistent_input')
+    with pytest.raises(ProtocolError, match='Multiple initial values'):
         proto.set_model('test/models/single_ode.cellml')
 
 
-def test_duplicate_output():
-    # Tests if an error is raised when a variable is specified as output twice.
+def test_interface_inconsistent_output():
+    # Tests if an error is raised when a variable is specified as input twice, with inconsistent information.
 
-    proto_file = 'test/protocols/test_bad_interface_duplicate_output.txt'
+    proto_file = 'test/protocols/test_interface_inconsistent_output.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_duplicate_output')
-    with pytest.raises(ProtocolError, match='as an output twice'):
+    proto.set_output_folder('test_interface_inconsistent_output')
+    with pytest.raises(ProtocolError, match='Inconsistent units'):
         proto.set_model('test/models/single_ode.cellml')
 
 
-def test_input_output_units_mismatch():
+def test_interface_inconsistent_input_output():
     # Tests if an error is raised when a variable is specified as input and output but with different units.
 
-    proto_file = 'test/protocols/test_bad_interface_unit_mismatch.txt'
+    proto_file = 'test/protocols/test_interface_inconsistent_input_output.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_unit_mismatch')
-    with pytest.raises(ProtocolError, match='with different units'):
+    proto.set_output_folder('test_interface_inconsistent_input_output')
+    with pytest.raises(ProtocolError, match='Inconsistent units'):
         proto.set_model('test/models/single_ode.cellml')
 
 
-def test_duplicate_clamp():
-    # Tests if an error is raised when a variable is clamped twice
+def test_interface_inconsistent_clamp_1():
+    # Tests if an error is raised when a variable is clamped in different ways
 
-    proto_file = 'test/protocols/test_bad_interface_duplicate_clamp.txt'
+    proto_file = 'test/protocols/test_interface_inconsistent_clamp_1.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_duplicate_clamp')
-    with pytest.raises(ProtocolError, match='multiple clamp statements'):
-        proto.set_model('test/models/single_ode.cellml')
-
-
-def test_duplicate_define():
-    # Tests if an error is raised when a variable is redefined twice
-
-    proto_file = 'test/protocols/test_bad_interface_duplicate_define.txt'
-    proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_duplicate_define')
+    proto.set_output_folder('test_interface_inconsistent_clamp_1')
     with pytest.raises(ProtocolError, match='more than one clamp and/or define'):
         proto.set_model('test/models/single_ode.cellml')
 
+def test_interface_inconsistent_clamp_2():
+    # Tests if an error is raised when a variable is clamped in different ways
 
-def test_clamp_and_define_1():
+    proto_file = 'test/protocols/test_interface_inconsistent_clamp_2.txt'
+    proto = fc.Protocol(proto_file)
+    proto.set_output_folder('test_interface_inconsistent_clamp_2')
+    with pytest.raises(ProtocolError, match='Multiple equations'):
+        proto.set_model('test/models/single_ode.cellml')
+
+def test_interface_inconsistent_define():
+    # Tests if an error is raised when a variable is redefined in different ways
+
+    proto_file = 'test/protocols/test_interface_inconsistent_define.txt'
+    proto = fc.Protocol(proto_file)
+    proto.set_output_folder('test_interface_duplicate_define')
+    with pytest.raises(ProtocolError, match='Multiple equations'):
+        proto.set_model('test/models/single_ode.cellml')
+
+
+def test_interface_clamp_and_define_1():
     # Tests if an error is raised when a variable is clamped and set in a define statement
-    # Clamp without an RHS
+    # Tests with clamp-to-initial-value
 
-    proto_file = 'test/protocols/test_bad_interface_clamp_and_define_1.txt'
+    proto_file = 'test/protocols/test_interface_clamp_and_define_1.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_clamp_and_define_1')
+    proto.set_output_folder('test_interface_clamp_and_define_1')
     with pytest.raises(ProtocolError, match='more than one clamp and/or define'):
         proto.set_model('test/models/single_ode.cellml')
 
-
-def test_clamp_and_define_2():
+def test_interface_clamp_and_define_2():
     # Tests if an error is raised when a variable is clamped and set in a define statement
-    # Clamp with an RHS
+    # Tests with clamp-to
 
-    proto_file = 'test/protocols/test_bad_interface_clamp_and_define_2.txt'
+    proto_file = 'test/protocols/test_interface_clamp_and_define_2.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_bad_interface_clamp_and_define_2')
-    with pytest.raises(ProtocolError, match='more than one clamp and/or define'):
+    proto.set_output_folder('test_interface_clamp_and_define_2')
+    with pytest.raises(ProtocolError, match='Multiple equations'):
         proto.set_model('test/models/single_ode.cellml')
 
