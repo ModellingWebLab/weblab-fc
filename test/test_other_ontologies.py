@@ -3,8 +3,6 @@ Test annotating with other ontologies than oxmeta.
 
 Also tests annotating a category of outputs.
 """
-import pytest
-
 import fc
 
 
