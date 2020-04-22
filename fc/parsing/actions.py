@@ -1365,7 +1365,9 @@ class ModelInterface(BaseGroupAction):
                 pvar = varmap[self.model.get_variable_by_ontology_term(ref.rdf_term)]
             except KeyError:
                 continue
-            raise ProtocolError(f'The variable {pvar.long_name} is set by more than one clamp and/or define statement.')
+            if pvar.equation:
+                raise ProtocolError(
+                    f'The variable {pvar.long_name} is set by more than one clamp and/or define statement.')
 
     def _convert_time_if_needed(self):
         """Check the units of the time variable and convert if needed."""
