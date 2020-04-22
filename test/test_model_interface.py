@@ -46,6 +46,7 @@ def test_interface_inconsistent_clamp_1():
     with pytest.raises(ProtocolError, match='more than one clamp and/or define'):
         proto.set_model('test/models/single_ode.cellml')
 
+
 def test_interface_inconsistent_clamp_2():
     # Tests if an error is raised when a variable is clamped in different ways
 
@@ -54,6 +55,7 @@ def test_interface_inconsistent_clamp_2():
     proto.set_output_folder('test_interface_inconsistent_clamp_2')
     with pytest.raises(ProtocolError, match='Multiple equations'):
         proto.set_model('test/models/single_ode.cellml')
+
 
 def test_interface_inconsistent_define():
     # Tests if an error is raised when a variable is redefined in different ways
@@ -74,6 +76,7 @@ def test_interface_clamp_and_define_1():
     proto.set_output_folder('test_interface_clamp_and_define_1')
     with pytest.raises(ProtocolError, match='more than one clamp and/or define'):
         proto.set_model('test/models/single_ode.cellml')
+
 
 def test_interface_clamp_and_define_2():
     # Tests if an error is raised when a variable is clamped and set in a define statement

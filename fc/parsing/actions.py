@@ -1521,7 +1521,6 @@ class ModelInterface(BaseGroupAction):
                     # Add or replace equation
                     # If required, convert units within RHS to make it consistent and match the LHS units
                     eq = sympy.Eq(lhs, rhs)
-                    print(eq)
                     eq = self.units.convert_expression_recursively(eq, None)
                     self.model.add_equation(eq)
 
