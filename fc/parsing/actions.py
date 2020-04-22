@@ -1382,7 +1382,6 @@ class ModelInterface(BaseGroupAction):
                     units = pvar.units
                 elif pvar.units is not None and pvar.units != units:
                     raise ProtocolError(f'Inconsistent units specified for the time variable {pvar.long_name}.')
-            break
 
         # Convert if required and possible
         if units is not None:
