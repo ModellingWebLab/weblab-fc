@@ -289,7 +289,7 @@ class Variable(BaseGroupAction):
 
     def name(self):
         """Returns the name of the variable being referenced."""
-        return self.tokens
+        return str(self.tokens)
 
     def names(self):
         return [str(self.tokens)]
@@ -762,7 +762,7 @@ class OptionalVariable(BaseGroupAction, VariableReference):
 
 class DeclareVariable(BaseGroupAction):
     """
-    Parse action for ``var`` declarations in the model interface.
+    Parse action for local ``var`` declarations in the model interface.
 
     ``var <name> units <uname> [= <initial_value>]``
 
@@ -843,14 +843,17 @@ class ModelEquation(BaseGroupAction):
         :param variable_generator: a function to resolve a name reference within the equation to a model variable.
         :param number_generator: converts a number with units to a Sympy entity.
         """
+        lhs = self.lhs_to_sympy(variable_generator, number_generator)
+        rhs = self.rhs.to_sympy(variable_generator, number_generator)
+        return sympy.Eq(lhs, rhs)
+
+    def lhs_to_sympy(self, variable_generator, number_generator):
+        """Converts only this equation's LHS to sympy."""
         var = self.var.to_sympy(variable_generator, number_generator)
         if self.is_ode:
             bvar = self.bvar.to_sympy(variable_generator, number_generator)
-            lhs = sympy.Derivative(var, bvar, evaluate=False)
-        else:
-            lhs = var
-        rhs = self.rhs.to_sympy(variable_generator, number_generator)
-        return sympy.Eq(lhs, rhs)
+            return sympy.Derivative(var, bvar, evaluate=False)
+        return var
 
 
 class Interpolate(BaseGroupAction):
@@ -882,6 +885,134 @@ class UnitsConversion(BaseGroupAction):
         self.rule = self.tokens[-1]
 
 
+class MissingVariableError(ProtocolError):
+    """
+    Raised if a variable is referenced but cannot be found.
+    """
+    def __init__(self, variable_name):
+        self.name = variable_name
+        super(MissingVariableError, self).__init__(f'Reference to unknown variable "{variable_name}".')
+
+
+class ProtocolVariable():
+    """
+    Collates information about a variable used as in a protocol.
+
+    Arguments and properties:
+
+    ``name``
+        A prefixed variable name for inputs/outputs, or a local variable name.
+    ``long_name``
+        This variable's name plus any known aliases.
+    ``input``
+        ``True`` iff this variable is used as an input.
+    ``output``
+        ``True`` iff this variable is used as an output.
+    ``optional``
+        ``True`` iff this variable is an optional input/output.
+    ``local``
+        ``True`` iff this is a local variable.
+    ``units``
+        The string name of the units specified for this variable (or ``None``).
+    ``initial_value``
+        An initial value (float) for this variable or ``None``, if given as part of an ``input`` clause.
+    ``default_expr``
+        An expression for this variable's default value, if given as part of an ``optional`` clause.
+    ``equation``
+        An equation for this variable, set using a ``define`` or a ``clamp`` clause.
+    ``model_variable``
+        A :class:`VariableDummy` instance that this protocol variable refers to (note that this may change during the
+        lifetime of a :class:`ProtocolVariable`, e.g. through unit conversion.
+
+    """
+    def __init__(self, name):
+        self.name = name
+        self._aliases = []
+        self.input = False
+        self.output = False
+        self.optional = False
+        self.local = False
+        self.units = None
+        self.initial_value = None
+        self.default_expr = None
+        self.equation = None
+        self.model_variable = None
+
+    @property
+    def long_name(self):
+        if self._aliases:
+            return self.name + '(aka ' + ', '.join(self._aliases) + ')'
+        else:
+            return self.name
+
+    def merge_units(self, units):
+        """
+        Sets the units for this variable: does nothing if ``units=None``, raises a ProtocolError if different units have
+        already been specified.
+        """
+        if self.units is None:
+            self.units = units
+        elif units is not None and units != self.units:
+            raise ProtocolError(f'Inconsistent units specified for {self.long_name}.')
+
+    def merge_initial_value(self, value):
+        """
+        Sets an initial value for this variable: does nothing if ``value=None``, raises a ProtocolError if a different
+        value has already been specified.
+        """
+        if self.initial_value is None:
+            self.initial_value = value
+        elif value is not None and value != self.initial_value:
+            raise ProtocolError(f'Multiple initial values specified for {self.long_name}.')
+
+    def merge_default_expr(self, expr):
+        """
+        Sets a default expression for this variable: does nothing if ``expr=None``, raises a ProtocolError if a
+        different expression has already been specified.
+        """
+        if self.default_expr is None:
+            self.default_expr = expr
+        elif expr is not None and expr != self.default_expr:
+            raise ProtocolError(f'Multiple default expressions specified for {self.long_name}.')
+
+    def merge_equation(self, equation):
+        """
+        Sets an equation for this variable: does nothing if ``equation=None``, raises a ProtocolError if a different
+        equation has already been specified.
+        """
+        if self.equation is None:
+            self.equation = equation
+        elif equation is not None and equation != self.equation:
+            raise ProtocolError(f'Multiple equations specified for {self.long_name}.')
+
+    def merge(self, pvar):
+        """
+        Merges the information from another protocol variable (``pvar``) into this one: raises a ProtocolError if any
+        conflicts are found.
+        """
+        # Store name
+        if pvar.name not in self.aliases:
+            self.aliases.append(pvar.name)
+
+        # Merge type information
+        self.input = self.input or pvar.input
+        self.output = self.output or pvar.output
+        self.optional = self.optional or pvar.optional
+        self.local = self.local or pvar.local
+
+        # Check type information isn't conflicting
+        assert not self.local and (self.input or self.output), f'{self.long_name} is local AND input/output'
+
+        # Merge remaining information
+        self.merge_units(pvar.units)
+        self.merge_initial_value(pvar.initial_value)
+        self.merge_default_expression(pvar.default_expression)
+        self.merge_equation(pvar.equation)
+
+        # Ignoring model_variable for now (assuming this is the reason for merging)
+        assert self.model_variable == pvar.model_variable, 'Not implemented'
+
+
 class ModelInterface(BaseGroupAction):
     """Parse action for the model interface section of a protocol.
 
@@ -890,7 +1021,7 @@ class ModelInterface(BaseGroupAction):
 
     Includes helper methods for merging model interfaces, e.g. when one protocol imports another.
 
-    Properties:
+    Properties set after :meth:`_expr` has been called (and finalised after merging):
 
     ``time_units``
         Either None, or the name of the units to use for time.
@@ -914,20 +1045,30 @@ class ModelInterface(BaseGroupAction):
         ``ClampVariable`` object.
     ``local_var_declarations``
         A list of :class:`DeclareVariable` instances. These are created for ``var x`` statements.
+
+    Properties set after :meth:`resolve_namespaces` has been called:
+
+    ``ns_map``
+        A dict mapping prefixes to URIs, as defined by the protocol.
+
+    Properties set after :meth:`modify_model` has been called:
+
+    ``units``
+        A unit store.
+    ``model``
+        A model.
+    ``time_variable``
+        The model variable (``VariableDummy``) representing time.
+    ``protocol_variables``
+        A mapping from variable names (prefixed or local) to :class:`ProtocolVariable` objects.
     ``local_vars``
-        Once :meth:`modify_model` has been called, this property gives a dict mapping names of local variables (created
-        with ``var``) to model variables.
-    ``sympy_equations``
-        Once :meth:`modify_model` and :meth:`resolve_namespaces` have been called, this property gives Sympy versions of
-        ``self.equations``.
-    ``initial_values``
-        Initial values for constants or state variables, defined by the inputs. Stored in a map from variable (as an
-        RDF term) to value (as a float).
+        A dict mapping names of local variables (created with ``var`` / ``DeclareVariable``) to model variables.
     ``vector_orderings``
         Used for consistent code generation of vector outputs.
     ``parameters``
-        Once :meth:`modify_model` has been called, this property gives a list of those model inputs (as
-        :class:`InputVariable` objects) that are constants (unless the protocol changes them while running).
+        A list of those model inputs (as :class:`InputVariable` objects) that are constants (unless the protocol changes
+        them while running).
+
     """
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
@@ -948,15 +1089,14 @@ class ModelInterface(BaseGroupAction):
     def _reinit(self):
         """(Re-)initialise this interface, so that it can be re-used."""
 
-        self.sympy_equations = None
-        self.initial_values = {}
-        self.units = None   # Will be the protocol's UnitStore
-        self.model = None   # The model to be modified
-        self.time_variable = None   # The model's time (free) variable
-        self.ns_map = None  # Map NS prefixes to URIs, as defined by the protocol
-        self.parameters = []
-        self.vector_orderings = {}
+        self.ns_map = None
+        self.units = None
+        self.model = None
+        self.time_variable = None
+        self.protocol_variables = {}
         self.local_vars = {}
+        self.vector_orderings = {}
+        self.parameters = []
 
     def _expr(self):
         actions = self.get_children_expr()
@@ -1019,25 +1159,22 @@ class ModelInterface(BaseGroupAction):
         for item in itertools.chain(self.inputs, self.outputs, self.optional_decls, self.clamps):
             item.set_namespace(ns_map[item.ns_prefix])
 
+    #######################################
+    # Model manipulation and helper methods
+
     def modify_model(self, model, units):
         """Use the definitions in this interface to transform the provided model.
 
-        This calls various internal helper methods to do the modifications, in an order orchestrated to
-        follow the principle of least surprise for protocol authors. It attempts to produce results that
-        most probably match what they expect to happen, without creating an inconsistent model.
+        This calls various internal helper methods to do the modifications, in an order orchestrated to follow the
+        principle of least surprise for protocol authors. It attempts to produce results that most probably match what
+        they expect to happen, without creating an inconsistent model.
 
         Key steps are:
-        - Adding/checking variables defined as model inputs (setable by the protocol). See
-          :meth:`_add_input_variables`.
-        - Adding or replacing equations in the model's mathematics (:meth:`_add_or_replace_equations`).
-        - Clamping variables to their initial value (:meth:`_handle_clamping`).
+        - Adding new variables and updating equations.
+        - Clamping variables to their initial value.
         - Annotating the variables now comprising the state variable vector so they are recognised by
-          the oxmeta:state_variable 'magic' ontology term (:meth:`_annotate_state_variables`).
-        - Units conversions are applied where appropriate on model inputs and outputs, and on added/changed
-          equations, so the protocol sees quantities in the units it requested.
-          See e.g. :meth:`_convert_time_if_needed`, :meth:`_convert_output_units`.
-        - Model variables and equations not needed to compute the requested outputs are removed. See
-          :meth:`_purge_unused_mathematics`.
+          the oxmeta:state_variable 'magic' ontology term.
+        - Model variables and equations not needed to compute the requested outputs are removed.
 
         :param cellmlmanip.model.Model model: the model to manipulate
         :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
@@ -1052,110 +1189,36 @@ class ModelInterface(BaseGroupAction):
             # TODO: Look for variable annotated as time instead?
             raise ProtocolError('Model must contain at least one ODE.')
 
-        # Convert free variable units
+        # Collate information about variables mentioned in protocol.
+        self._collate_variable_information()
+
+        # Convert units of model variables, where needed. Conversion of outputs is delayed (see below)
         self._convert_time_if_needed()
+        self._convert_input_units()
 
-        # Ensure inputs exist, adding them if needed, and storing initial values set by user.
-        # This also performs unit conversion where needed for existing input variables.
-        self._add_input_variables()
-
-        # Add variables created by ``var`` statements
-        self._add_local_variables()
-
-        # Add variables created by ``define`` statements - must also be listed as output or optional input
-        self._add_define_variables()
-
-        # TODO: Add variables created by ``optional`` statements with a ``default`` clause
-
-        # Now that all variables are in place, it's possible to create the sympy equations
-        self._convert_equations_to_sympy()
-
-        # With variables and equations in place, we can perform sanity checks on model-protocol combination before
-        # making any modifications
-        self._sanity_check()
-
-        # Process ``define`` statements, adding or replacing equations where needed,
-        # and setting any initial values defined through inputs.
-        self._add_or_replace_equations()
+        # Processes the variables used by the protocol, creating variables if needed and updating model equations.
+        self._process_protocol_variables()
 
         # Process ``clamp`` statements with an RHS
         self._handle_clamping()
 
-        self._annotate_state_variables()
-
-        # Convert units for output variables
-        output_variables = self._convert_output_units()
-
         # Populate list of input parameters
         self._list_parameters()
 
+        # Annotate all state variables with the magic `oxmeta:state_variable` term. This is done _after_ updating the
+        # equations, so that newly-created states show up (but 'demoted' variables don't). It's done _before_ converting
+        # the units of outputs, so that annotations on states used as outputs get transferred to the unit-converted
+        # version.
+        self._annotate_state_variables()
+
+        # Convert units for output variables.
+        # Output conversion is done "transitively", allowing e.g. categories of variables to be marked as outputs.
+        # This also gathers a list of output variables, which should be maintained when purging unused model parts.
+        output_variables = self._convert_output_units()
+
         self._purge_unused_mathematics(output_variables)
+
         # TODO: Any final consistency checks on the model?
-
-    def _sanity_check(self):
-        """
-        Performs some initial sanity checks on the (protocol interface + model) combination.
-
-        - Variables can only appear as an input once.
-        - Variables can only appear as an output once.
-        - Variables appearing as input and output must have the same units (if set).
-        - Variables can only be set by a single clamp statement or define.
-
-        """
-
-        # Variables can only appear as input or output once
-        # If a variable appears as an input and an ouput, both must have the same units
-        input_units = {}            # To check input vs output units
-        output_units = {}           # To check input vs output units
-        initial_values = set()      # To check against overdefinedness
-        for ref in self.inputs:
-            try:
-                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
-            except KeyError:
-                continue
-            if var in input_units:
-                raise ProtocolError(
-                    f'The variable {var} (referenced by {ref.rdf_term}) was specified as an input twice.')
-            input_units[var] = ref.units
-            if ref.initial_value is not None:
-                initial_values.add(var)
-        for ref in self.outputs:
-            try:
-                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
-            except KeyError:
-                continue
-            if var in output_units:
-                raise ProtocolError(
-                    f'The variable {var} (referenced by {ref.rdf_term}) was specified as an output twice.')
-            output_units[var] = ref.units
-            units = input_units.get(var)
-            if ref.units is not None and units is not None and ref.units != units:
-                raise ProtocolError(f'The variable {var} (referenced by {ref.rdf_term}) appears as input and output,'
-                                    ' but with different units.')
-
-        # Check against overdefinedness: Variables cannot appear as an LHS of an equation more than once (e.g. used in
-        # two defines, or used in a ``clamp x to 1`` and a define), and variables clamped to their current value can not
-        # also be defined.
-        seen = set()
-        for ref in self.clamps:
-            try:
-                var = self.model.get_variable_by_ontology_term(ref.rdf_term)
-            except KeyError:
-                continue
-            if var in seen:
-                raise ProtocolError(
-                    f'The variable {var} (referenced by {ref.rdf_term}) is set by multiple clamp statements.')
-            seen.add(var)
-        for eq in self.sympy_equations:
-            var = eq.lhs.args[0] if eq.is_Derivative else eq.lhs
-            if var in seen:
-                raise ProtocolError(f'The variable {var} is set by more than one clamp and/or define statement.')
-            seen.add(var)
-
-        # Note: Variables set with `define` may have an initial value (if they are defined through their derivatives),
-        # this is checked later.
-
-        # TODO: What about the `default` part of an `optional` statement?
 
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.
@@ -1171,13 +1234,16 @@ class ModelInterface(BaseGroupAction):
         if ':' in name:
             prefix, local_name = name.split(':', 1)
             ns_uri = self.ns_map[prefix]
-            return self.model.get_variable_by_ontology_term((ns_uri, local_name))
+            try:
+                return self.model.get_variable_by_ontology_term((ns_uri, local_name))
+            except KeyError:
+                raise MissingVariableError(name)
 
         # Local variable
         try:
             return self.local_vars[name]
         except KeyError:
-            raise ProtocolError(f'Unknown variable "{name}".')
+            raise MissingVariableError(name)
 
     def _number_generator(self, value, units):
         """Convert a number with units in an equation to a :class:`cellmlmanip.model.NumberDummy`.
@@ -1200,204 +1266,301 @@ class ModelInterface(BaseGroupAction):
             units = self.units.get_unit(units)
         return self.model.add_number(value, units)
 
-    def _convert_equations_to_sympy(self):
-        """Convert all equations from defines and clamp-tos to sympy format."""
-        eqs = []
-        for eq in self.equations:
-            # Units should be taken from the output spec (if present) or the RHS.
-            # TODO: If there are variables on the RHS that don't exist, this is an error unless both the
-            # missing variable and LHS are optional. In which case, just skip the equation (but log it).
-            eqs.append(eq.to_sympy(self._variable_generator, self._number_generator))
-        self.sympy_equations = eqs
+    def _collate_variable_information(self):
+        """Collates information from different variable defining clauses, and stores it in ProtocolVariable objects."""
 
-    #######################################
-    # Helper methods for model manipulation
-
-    def _convert_time_if_needed(self):
-        """Units-convert the time variable if not in the protocol's units."""
-        if self.time_units:
-            time_units = self.units.get_unit(self.time_units)
-            self.time_variable = self.model.convert_variable(self.time_variable, time_units, DataDirectionFlow.INPUT)
-        else:
-            # Time units can also be set by an input specification, which will be handled correctly by the input
-            # handling code.
-            # If time units are set as an output, we need to handle it here: because time can be set from the protocol
-            # it is always an input, and so should follow the "input" rules for unit conversion.
-            for output in self.outputs:
-                try:
-                    variable = self.model.get_variable_by_ontology_term(output.rdf_term)
-                except KeyError:
-                    continue
-
-                if variable is self.time_variable and output.units is not None:
-                    units = self.units.get_unit(output.units)
-                    self.time_variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
-                    break
-
-    def _create_variable(self, var):
-        """Creates and returns an annotated variable based on the given :class:`VariableReference`."""
-
-        name = self.model.get_unique_name('protocol__' + var.local_name)
-        units = self.units.get_unit(var.units)
-        variable = self.model.add_variable(name, units)
-        self.model.add_cmeta_id(variable)
-        self.model.rdf.add((variable.rdf_identity, PRED_IS, var.rdf_term))
-        return variable
-
-    def _add_input_variables(self):
-        """Ensure requested input variables exist, unless they are optional.
-
-        If the variable exists its units are checked and converted if needed.
-
-        If it doesn't exist but is marked as optional, nothing is done.
-
-        If it doesn't exist and is *not* optional, then it needs to be created here, which requires that
-        units are given. If not, an error is raised.
-        """
-        for var in self.inputs:
-
-            # Find variable symbol or create a new one
-            variable = None
+        def get(name):
             try:
-                variable = self.model.get_variable_by_ontology_term(var.rdf_term)
+                var = self.protocol_variables[ref.prefixed_name]
             except KeyError:
-                # TODO: Check if variable is optional; skip if so. Add a helper method is_optional that
-                # compares var.prefixed_name against self.optional_decls?
-                optional = False
-                if optional:
-                    continue
+                var = self.protocol_variables[ref.prefixed_name] = ProtocolVariable(name)
+            return var
 
-                # Check units are given for new variable
-                if var.units is None:
-                    raise ProtocolError(
-                        f'Units must be specified for input variables not appearing in the model;'
-                        ' none are given for {var.prefixed_name}.')
+        # Add inputs
+        #   input <prefix:term> [units <uname>] [= <initial_value>]
+        for ref in self.inputs:
+            pvar = get(ref.prefixed_name)
+            pvar.input = True
+            pvar.merge_units(ref.units)
+            pvar.merge_initial_value(ref.initial_value)
 
-                # Add the new input variable, with ontology annotation
-                variable = self._create_variable(var)
+        # Add outputs
+        #   output <prefix:term> [units <uname>]
+        for ref in self.outputs:
+            if ref.prefixed_name == 'oxmeta:state_variable':    # Skip 'magic' oxmeta:state_variable term
+                continue
+            pvar = get(ref.prefixed_name)
+            pvar.output = True
+            pvar.merge_units(ref.units)
 
-            # Store initial value if given
-            if var.initial_value is not None:
-                self.initial_values[var.rdf_term] = var.initial_value
+        # Add optional declarations
+        #   optional <prefix:term> [default <simple_expr>]
+        for ref in self.optional_decls:
+            pvar = get(ref.prefixed_name)
+            pvar.optional = True
+            pvar.merge_default_expr(ref.default_expr)
 
-            # Maintain link to time variable, if needed
-            is_time = variable is self.time_variable
-
-            # Convert units if needed
-            if var.units is not None:
-                units = self.units.get_unit(var.units)
-                if units != variable.units:
-                    variable = self.model.convert_variable(variable, units, DataDirectionFlow.INPUT)
-
-                    # Update cached time variable
-                    if is_time:
-                        self.time_variable = variable
-
-    def _add_local_variables(self):
-        """
-        Modify the model by adding any variables defined in ``var`` statements.
-        """
-        for var in self.local_var_declarations:
-
-            # Variable names must be unique (can't even be re-used in imported/nested protocols)
-            if var.name in self.local_vars:
-                raise ProtocolError(f'Variable "{var.name}" was defined by more than one var statement.')
+        # Add local variables
+        #   var <name> units <uname> [= <initial_value>]
+        for ref in self.local_var_declarations:
+            # Local variable names must be unique, and can't even be re-used in imported/nested protocols
+            if ref.name in self.protocol_variables:
+                raise ProtocolError(f'Variable "{ref.name}" was defined by more than one var statement.')
 
             # Create and store variable
-            name = self.model.get_unique_name('protocol__' + var.name)
-            units = self.units.get_unit(var.units)
-            self.local_vars[var.name] = self.model.add_variable(name, units, initial_value=var.initial_value)
+            pvar = self.protocol_variables[ref.name] = ProtocolVariable(ref.name)
+            pvar.local = True
+            pvar.units = ref.units
+            pvar.initial_value = ref.initial_value
 
-    def _add_define_variables(self):
-        """
-        Modify the model by adding any unknown variables appearing on the LHS of a ``define`` statement (or an
-        equivalent clamp-to statement), that are also listed as an output or optional input, and have units defined.
-        """
-        # Get all variables named by inputs and outputs
-        # Note: Don't worry about clashes here, this is checked later in self._sanity_check
-        variables = {var.prefixed_name: var for var in self.inputs + self.outputs if var.units is not None}
-
+        # Store equations from define and clamp statements
         for eq in self.equations:
+            name = eq.var.name()
             try:
-                # Check if left-hand side exists in model
-                eq.var.to_sympy(self._variable_generator, self._number_generator)
+                pvar = self.protocol_variables[name]
             except KeyError:
-
-                # Find variable reference in input or output declarations
+                # Variable not found: Still OK, as long as it refers to an existing model variable
                 try:
-                    var = variables[eq.var.name()]
-                except KeyError:
-                    continue
+                    self._variable_generator(name)
+                except MissingVariableError:
+                    raise ProtocolError(f'Define or clamp statement found for unknown variable: {name}.')
 
-                # Create annotated variable
-                self._create_variable(var)
+                # Create new protocol variable to store info
+                pvar = self.protocol_variables[name] = ProtocolVariable(name)
 
-    def _add_or_replace_equations(self):
+            # Any variable that is redefined by an equation is treated as an input
+            pvar.input = True
+
+            # Store equation
+            pvar.merge_equation(eq)
+
+        # Resolve references to model variables
+        # If multiple references point to the same model variable, merge them
+        varmap = {}
+        aliases = []
+        for pvar in self.protocol_variables.values():
+            try:
+                pvar.model_variable = self._variable_generator(pvar.name)
+            except MissingVariableError:
+                continue
+
+            # Check if another reference already points to this model variable
+            try:
+                partner = varmap[pvar.model_variable]
+            except KeyError:
+                varmap[pvar.model_variable] = pvar
+                continue
+
+            # Merge, and mark pvar for removal
+            partner.merge(pvar)
+            aliases.add(pvar)
+
+        # Remove 'alias' references
+        for pvar in aliases:
+            del(self.protocol_variables[pvar.name])
+
+        # Check against overdefinedness through clamp-to-initial-value plus an equation
+        for ref in self.clamps:
+            try:
+                pvar = varmap[self.model.get_variable_by_ontology_term(ref.rdf_term)]
+            except KeyError:
+                continue
+            raise ProtocolError(f'The variable {pvar.long_name} is set by more than one clamp and/or define statement.')
+
+    def _convert_time_if_needed(self):
+        """Check the units of the time variable and convert if needed."""
+
+        # Try getting units from independent var clause
+        units = self.time_units
+
+        # Check if the units are set by an input or output instead or in addition to the independent var clause
+        for pvar in self.protocol_variables.values():
+            if pvar.model_variable is self.time_variable:
+                if units is None:
+                    units = pvar.units
+                elif pvar.units is not None and pvar.units != units:
+                    raise ProtocolError(f'Inconsistent units specified for the time variable {pvar.long_name}.')
+            break
+
+        # Convert if required and possible
+        if units is not None:
+            units = self.units.get_unit(units)
+            self.time_variable = self.model.convert_variable(self.time_variable, units, DataDirectionFlow.INPUT)
+
+    def _convert_input_units(self):
+        """Checks the units of model variables against protocol variables (inputs only), and converts them if needed."""
+
+        # Check and convert inputs
+        for pvar in self.protocol_variables.values():
+            # Only consider cases that specify a unit, and resolve to an existing model variable
+            if pvar.model_variable is None or pvar.units is None or not pvar.input:
+                continue
+
+            # Get units object
+            units = self.units.get_unit(pvar.units)
+            if pvar.model_variable.units != units:
+                pvar.model_variable = self.model.convert_variable(pvar.model_variable, units, DataDirectionFlow.INPUT)
+
+        # Note: this code assumes that the time variable has already been converted, so no provision is made to ensure
+        # that self.time_variable still points at the correct variable, or that time is converted as an input.
+
+    def _process_protocol_variables(self):
         """
-        Modify the model by adding and/or replacing equations and setting initial values according to the specified
-        inputs and define statements.
+        Processes the list of protocol variables and:
+
+        - adds variables where needed;
+        - updates model equations (e.g. set by defines amd clamp-tos);
+        - updates model initial values.
+
+        To create a variable, it may be necessary to infer its units from an RHS specified by the user. This requires
+        the RHS to be available as a sympy expression where all variables have known units. Because the RHS can include
+        references to other variables yet to be created, these operations cannot be separated so must all be handled
+        here at once.
         """
-        # Create map from model variables to initial values
-        initial_values = {self.model.get_variable_by_ontology_term(k): v for k, v in self.initial_values.items()}
+        todo = set(self.protocol_variables.values())
+        while todo:
 
-        # Add initial values from local variables
-        for var in self.local_vars.values():
-            if var.initial_value is not None:
-                initial_values[var] = var.initial_value
+            # A potential MissingVariableError encountered in this pass
+            error = None
 
-        # Apply all modifications (sympy_equations contains _only_ equations from define statements)
-        for eq in self.sympy_equations:
-            lhs = eq.lhs
-            if lhs.is_Derivative:
-                var = lhs.args[0]
+            done = set()
+            for pvar in todo:
 
-                # Initial value must be set via input or var, or already be set (if this was already a state variable)
-                if var.initial_value is None and var not in initial_values:
-                    terms = '/'.join(str(x) for x in self.model.get_ontology_terms_by_variable(var))
-                    raise ProtocolError(f'Variable {terms} is being set as a state variable but has no initial value'
-                                        ' (this can be set using an `input` or `var` statement)')
-            else:
-                var = lhs
+                # RHS to set in this iteration
+                rhs = None
 
-                # Check that this variable isn't doubly defined
-                if var in initial_values:
-                    raise ProtocolError(f'Overdefined variable. An initial value was given for {var} via an input or'
-                                        ' var statement, but a new equation was also set via a define statement.')
+                # Add variable if required
+                if pvar.model_variable is None:
 
-                # Unset initial value, in case it was a state variable previously
-                var.initial_value = None
+                    # Check if there's enough information to define the variable's RHS
+                    if pvar.equation is None and pvar.initial_value is None and pvar.default_expr is None:
+                        # No definition given for variable, this is OK only if it's optional
+                        if pvar.optional:
+                            done.add(pvar)
+                            continue
+                        elif pvar.local:
+                            raise ProtocolError(f'No definition given for local variable {pvar.long_name}.')
+                        else:
+                            raise ProtocolError(f'No definition given for non-optional variable {pvar.long_name}.')
 
-            # Remove existing equation if needed
-            old_eq = self.model.get_definition(var)
-            if old_eq is not None:
-                self.model.remove_equation(old_eq)
+                    # Get units to create variable with
+                    if pvar.units is not None:
+                        units = self.units.get_unit(pvar.units)
+                    else:
+                        # No units specified, try getting from RHS
+                        rhs = pvar.default_expr if pvar.equation is None else pvar.equation.rhs
+                        if rhs is None:
+                            # Not enough information to create, OK if optional, but otherwise an error
+                            if pvar.optional:
+                                done.add(pvar)
+                                continue
+                            else:
+                                raise ProtocolError(f'No units specified for non-optional variable {pvar.long_name}.')
 
-            # Convert units if required
-            eq = self.units.convert_expression_recursively(eq, None)
+                        # Try getting sympy RHS
+                        # TODO: There's probably a faster way to check if we can resolve all variables in the RHS
+                        try:
+                            rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
+                        except MissingVariableError as e:
+                            # Unable to create at this time, but may be able to at a next pass
+                            error = e
+                            continue
 
-            # Add new equation
-            self.model.add_equation(eq)
+                        # Set units based on RHS
+                        units = self.units.evaluate_units(rhs)
 
-        # Apply all initial values set in the inputs
-        for var, value in initial_values.items():
-            if self.model.is_state(var):
-                # Set initial value
-                var.initial_value = value
-            else:
-                # Replace equation
-                old_eq = self.model.get_definition(var)
-                if old_eq is not None:
-                    self.model.remove_equation(old_eq)
-                self.model.add_equation(sympy.Eq(var, self.model.add_number(value, var.units)))
+                    # Create variable, and annotate if possible
+                    name = pvar.name
+                    rdf_term = None
+                    if ':' in name:
+                        prefix, name = name.split(':', 1)
+                        rdf_term = create_rdf_node((self.ns_map[prefix], name))
+                    name = self.model.get_unique_name('protocol__' + name)
 
-        # Check for undefined local variables
-        for name, var in self.local_vars.items():
-            old_eq = self.model.get_definition(var)
-            if old_eq is None:
-                raise ProtocolError(f'Underdefined variable. A new variable {name} was created in a var statement, but'
-                                    ' no initial value or equation was assigned.')
+                    pvar.model_variable = self.model.add_variable(name, units)
 
-        # TODO: Check that all/any _new_ derivatives are w.r.t. self.time_variable?
+                    if rdf_term:
+                        self.model.add_cmeta_id(pvar.model_variable)
+                        self.model.rdf.add((pvar.model_variable.rdf_identity, PRED_IS, rdf_term))
+
+                    # Store local variables
+                    if pvar.local:
+                        self.local_vars[pvar.name] = pvar.model_variable
+
+                # At this point the model variable is guaranteed to exist (and be in the right units)
+
+                # Add or replace equation, if required
+                eq = self.model.get_definition(pvar.model_variable)
+                if pvar.equation is not None or (pvar.default_expr is not None and eq is None):
+
+                    # Get sympy RHS (or re-use one we just created)
+                    if rhs is None:
+                        rhs = pvar.default_expr if pvar.equation is None else pvar.equation.rhs
+                        try:
+                            rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
+                        except MissingVariableError as e:
+                            # Unable to create at this time, but may be able to at a next pass
+                            error = e
+                            continue
+
+                    # Get sympy lhs
+                    if pvar.equation is not None:
+                        lhs = pvar.equation.lhs_to_sympy(self._variable_generator, self._number_generator)
+                    else:
+                        lhs = pvar.model_variable
+
+                    # Setting as state variable? Then make sure an initial value exists
+                    if lhs.is_Derivative and pvar.model_variable.initial_value is None and pvar.initial_value is None:
+                        raise ProtocolError(f'The variable {pvar.long_name} is being set as a state variable but has no'
+                                            ' initial value (this can be set using an `input` or `var` statement).')
+
+                    # Remove existing equation
+                    if eq is not None:
+                        self.model.remove_equation(eq)
+
+                    # Add or replace equation
+                    # If required, convert units within RHS to make it consistent and match the LHS units
+                    eq = sympy.Eq(lhs, rhs)
+                    print(eq)
+                    eq = self.units.convert_expression_recursively(eq, None)
+                    self.model.add_equation(eq)
+
+                # Set initial value, if required
+                if pvar.initial_value is not None:
+
+                    # Initial value used as short-hand for constant variable
+                    # This is allowed if:
+                    #   We're defining a new variable (CellML style!)
+                    #   We're replacing a constant variable, that's not also set by a `define` or `clamp`
+                    if eq is None or (not eq.lhs.is_Derivative and pvar.equation is None):
+                        lhs = pvar.model_variable
+                        rhs = self.model.add_number(pvar.initial_value, pvar.model_variable.units)
+                        if eq is not None:
+                            self.model.remove_equation(eq)
+                        eq = sympy.Eq(lhs, rhs)
+                        self.model.add_equation(eq)
+
+                    # Initial value for state
+                    elif eq.lhs.is_Derivative:
+                        pvar.model_variable.initial_value = pvar.initial_value
+
+                    # Overdefined model
+                    else:
+                        raise ProtocolError(
+                            f'Initial value provided for {pvar.long_name}, which is not a state variable.')
+
+                # Nothing left to be done
+                done.add(pvar)
+
+            if not done:
+                # No changes in iteration implies there are missing variables in the RHS of at least one variable.
+                # Create a ProtocolError based on the last MissingVariableError
+                assert error is not None, 'No changes made when resolving equations, but no error set'
+                raise ProtocolError(
+                    'Unable to resolve all references in the protocol equations: ' + str(error)
+                ) from error
+
+            todo -= done
 
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
@@ -1442,6 +1605,8 @@ class ModelInterface(BaseGroupAction):
     def _list_parameters(self):
         """Populates the list of model parameters (inputs with a constant RHS)."""
 
+        # TODO: Is it OK if this list includes multiple ontology terms mapped to the same variable? If not, then
+        #       iterate over ProtocolVariables with input=True instead.
         for var in self.inputs:
             try:
                 variable = self.model.get_variable_by_ontology_term(var.rdf_term)
@@ -1451,7 +1616,7 @@ class ModelInterface(BaseGroupAction):
 
             # Parameters are inputs that aren't states, and have a constant RHS
             eq = self.model.get_definition(variable)
-            if isinstance(eq.lhs, VariableDummy) and len(eq.rhs.atoms(VariableDummy)) == 0:
+            if not eq.lhs.is_Derivative and len(eq.rhs.atoms(VariableDummy)) == 0:
                 self.parameters.append(var)
 
     def _purge_unused_mathematics(self, output_variables):
@@ -1758,7 +1923,7 @@ class PostProcessing(BaseAction):
 
 
 class Output(BaseGroupAction):
-    """Parse action for an output specification."""
+    """Parse action for a protocol output specification."""
 
     def _expr(self):
         output = {}
