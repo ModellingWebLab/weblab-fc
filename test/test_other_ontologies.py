@@ -4,7 +4,6 @@ import pytest
 import fc
 
 
-@pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 def test_annotating_with_other_ontologies():
     proto_file = 'test/protocols/test_other_ontologies.txt'
     proto = fc.Protocol(proto_file)
