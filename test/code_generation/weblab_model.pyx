@@ -172,7 +172,7 @@ cdef class TestModel(CvodeSolver):
         self.initial_state[2] = 0.6
         self.initial_state[3] = 0.325
 
-        # Mapping of parameter qualified names to parameter array indices
+        # Mapping of parameter local names to parameter array indices
         self.parameter_map = {}
         self.parameter_map['membrane_fast_sodium_current_conductance'] = 0
         self.parameter_map['membrane_potassium_current_conductance'] = 1
