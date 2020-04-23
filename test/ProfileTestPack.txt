@@ -1,3 +1,0 @@
-test_python_reproducibility.py
-test_s1s2_proto.py
-test_ical_proto.py
