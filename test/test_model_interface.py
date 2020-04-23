@@ -18,7 +18,7 @@ def test_interface_inconsistent_input():
 
 
 def test_interface_inconsistent_output():
-    # Tests if an error is raised when a variable is specified as input twice, with inconsistent information.
+    # Tests if an error is raised when a variable is specified as output twice, with inconsistent information.
 
     proto_file = 'test/protocols/test_interface_inconsistent_output.txt'
     proto = fc.Protocol(proto_file)
