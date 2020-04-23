@@ -1460,7 +1460,7 @@ class ModelInterface(BaseGroupAction):
         Processes the list of protocol variables and:
 
         - adds variables where needed;
-        - updates model equations (e.g. set by defines amd clamp-tos);
+        - updates model equations (e.g. set by defines and clamp-tos);
         - updates model initial values.
 
         To create a variable, it may be necessary to infer its units from an RHS specified by the user. This requires
@@ -1524,8 +1524,8 @@ class ModelInterface(BaseGroupAction):
                             error = e
                             continue
 
-                        # Set units based on RHS
-                        units = self.units.evaluate_units(rhs)
+                        # Units unknown! Will be set later based on RHS.
+                        units = None
 
                     # Create variable, and annotate if possible
                     name = self.model.get_unique_name('protocol__' + pvar.local_name)
@@ -1569,6 +1569,10 @@ class ModelInterface(BaseGroupAction):
                     # If required, convert units within RHS to make it consistent and match the LHS units
                     new_eq = sympy.Eq(lhs, rhs)
                     new_eq = self.units.convert_expression_recursively(new_eq, None)
+                    if not lhs.is_Derivative and lhs.units is None:
+                        new_eq = self.units.set_lhs_units_from_rhs(new_eq)
+                    else:
+                        new_eq = self.units.convert_expression_recursively(new_eq, None)
 
                     # Remove existing equation
                     if eq is not None:
