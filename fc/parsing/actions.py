@@ -697,16 +697,6 @@ class VariableReference:
         self.ns_uri = ns_uri
         self.rdf_term = create_rdf_node((self.ns_uri, self.local_name))
 
-    @classmethod
-    def create(cls, prefix, uri, local_name):
-        """Helper method to create fake references for testing."""
-        ref = cls()
-        ref.prefixed_name = '{}:{}'.format(prefix, local_name)
-        ref.ns_prefix = prefix
-        ref.local_name = local_name
-        ref.set_namespace(uri)
-        return ref
-
 
 class InputVariable(BaseGroupAction, VariableReference):
     """

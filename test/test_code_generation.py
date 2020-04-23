@@ -65,14 +65,14 @@ def test_generate_weblab_model(tmp_path):
     ]
     for input, output, name in variables:
         rdf_term = create_rdf_node((OXMETA_NS, name))
-        pvar = ProtocolVariable(OXMETA_NS + ':' + name, name, rdf_term)
+        pvar = ProtocolVariable('oxmeta:' + name, name, rdf_term)
         pvar.update(input=input, output=output)
         pvar.update(model_variable=model.get_variable_by_ontology_term(rdf_term))
         protocol_variables.append(pvar)
 
     # State variable output
     rdf_term = create_rdf_node((OXMETA_NS, 'state_variable'))
-    pvar = ProtocolVariable(OXMETA_NS + ':' + 'state_variable', 'state_variable', rdf_term)
+    pvar = ProtocolVariable('oxmeta:state_variable', 'state_variable', rdf_term)
     pvar.update(output=True, output_category=True, transitive_variables=model.get_state_variables())
     protocol_variables.append(pvar)
 

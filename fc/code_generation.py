@@ -221,7 +221,6 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
             output_variables.add(pvar.model_variable)
         elif pvar.output_category and pvar.transitive_variables:
             # Vector output
-            # TODO: Can a variable be both?
             variables = list(pvar.transitive_variables)
             if pvar.rdf_term in vector_orderings:
                 order = vector_orderings[pvar.rdf_term]
