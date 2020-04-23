@@ -225,12 +225,6 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
             variables = list(pvar.transitive_variables)
             if pvar.rdf_term in vector_orderings:
                 order = vector_orderings[pvar.rdf_term]
-                print(order)
-                print(variables)
-                for var in variables:
-                    print('  ', var)
-                    print('      ', var.rdf_identity)
-
                 variables.sort(key=lambda s: order[s.rdf_identity])
             length = len(variables)
             var_name = [{'index': i, 'var_name': variable_name(s)} for i, s in enumerate(variables)]
