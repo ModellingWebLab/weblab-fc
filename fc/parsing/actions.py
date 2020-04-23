@@ -1393,7 +1393,7 @@ class ModelInterface(BaseGroupAction):
 
         # Remove 'alias' references
         for pvar in aliases:
-            del(name_to_pvar[pvar.name])
+            del name_to_pvar[pvar.name]
 
         # Check against overdefinedness through clamp-to-initial-value plus an equation
         for ref in self.clamps:
