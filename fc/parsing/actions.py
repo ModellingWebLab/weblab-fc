@@ -4,6 +4,7 @@ Parse actions that can generate Python implementation objects
 
 import itertools
 import math
+import networkx
 import os
 from collections import deque
 from contextlib import contextmanager
@@ -1201,7 +1202,7 @@ class ModelInterface(BaseGroupAction):
         # Annotate all state variables with the magic `oxmeta:state_variable` term. This is done before unit conversion
         # so that annotations are transferred where needed. The original order in which state variables were defined is
         # stored.
-        original_order = self._annotate_state_variables()
+        original_state_order = self._annotate_state_variables()
 
         # Collate information about variables mentioned in protocol.
         self._collate_variable_information()
@@ -1217,7 +1218,7 @@ class ModelInterface(BaseGroupAction):
         self._handle_clamping()
 
         # Gather state variables, store vector ordering and add to ProtocolVariable if requested
-        self._gather_state_variables(original_order)
+        self._gather_state_variables(original_state_order)
 
         self._purge_unused_mathematics()
 
@@ -1629,7 +1630,7 @@ class ModelInterface(BaseGroupAction):
                 self.model.remove_equation(defn)
             self.model.add_equation(new_defn)
 
-    def _gather_state_variables(self, original_ordering):
+    def _gather_state_variables(self, original_state_order):
         """
         Gather all variables annotated as states, and create a vector ordering. If required, update the ProtocolVariable
         for the oxmeta:state_variable annotation.
@@ -1643,7 +1644,7 @@ class ModelInterface(BaseGroupAction):
         # Create and store ordering, preserving original ordering as much as possible
         order = []
         todo = set([var.rdf_identity for var in states])
-        for rdf_identity in original_ordering:
+        for rdf_identity in original_state_order:
             try:
                 todo.remove(rdf_identity)
             except KeyError:
@@ -1659,33 +1660,31 @@ class ModelInterface(BaseGroupAction):
     def _purge_unused_mathematics(self):
         """Remove model equations and variables not needed for generating desired outputs."""
 
-        # Output variables
+        # Create set of required variables
         required_variables = set()
-        for pvar in self.protocol_variables:
-            if pvar.output or pvar.output_category:
-                if pvar.model_variable is not None:
-                    required_variables.add(pvar.model_variable)
-                required_variables.update(pvar.transitive_variables)
-
-        # Symbols used directly in equations computing outputs
-        import networkx as nx
-        graph = self.model.graph
-        for variable in list(required_variables):
-            required_variables.update(nx.ancestors(graph, variable))
 
         # Time is always needed, even if there are no state variables!
         required_variables.add(self.time_variable)
 
-        # Symbols used indirectly to compute state variables referenced in equations
+        # All protocol variables are required.
+        for pvar in self.protocol_variables:
+            if pvar.model_variable is not None:
+                required_variables.add(pvar.model_variable)
+            required_variables.update(pvar.transitive_variables)
+
+        # Add all variables used to compute the required variables.
+        for variable in list(required_variables):
+            required_variables.update(networkx.ancestors(self.model.graph, variable))
+
+        # State variables don't have ancestors, but their derivative equations might. So loop over these and add any new
+        # requirements. Do this iteratively in case the new dependencies on derivatives are introduced in the process.
         derivatives = self.model.get_derivatives()
         old_len = 0
         while old_len != len(required_variables):
             old_len = len(required_variables)
             for deriv in derivatives:
                 if deriv.args[0] in required_variables:
-                    required_variables.update(nx.ancestors(graph, deriv))
-                    # And we also need time...
-                    required_variables.add(deriv.args[1])
+                    required_variables.update(networkx.ancestors(self.model.graph, deriv))
 
         # Now figure out which variables *aren't* used
         all_variables = set(self.model.variables())
