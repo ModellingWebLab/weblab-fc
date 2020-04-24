@@ -1356,10 +1356,6 @@ class ModelInterface(BaseGroupAction):
             # Store equation
             pvar.update(equation=eq)
 
-            # Any model variable that is redefined by an equation is treated as an input
-            if not pvar.local:
-                pvar.update(input=True)
-
         # Resolve references to model variables
         # If multiple references point to the same model variable, merge them
         var_to_pvar = {}
