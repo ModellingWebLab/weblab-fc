@@ -5,6 +5,7 @@ Parse actions that can generate Python implementation objects
 import itertools
 import math
 import os
+from collections import deque
 from contextlib import contextmanager
 
 import pyparsing
@@ -1456,14 +1457,16 @@ class ModelInterface(BaseGroupAction):
         """
         # Create set of variables, and process them in one or more passes, until all are done or the situation is
         # unresolvable.
-        todo = set(self.protocol_variables)
+        todo = deque(self.protocol_variables)
         while todo:
 
             # A potential MissingVariableError encountered in this pass
             error = None
 
-            done = set()
-            for pvar in todo:
+            # Perform a single pass over the todo-variables, and check that at least one gets done
+            done = False
+            for i in range(len(todo)):
+                pvar = todo.popleft()
 
                 # RHS to set in this iteration
                 rhs = None
@@ -1475,11 +1478,11 @@ class ModelInterface(BaseGroupAction):
                     if pvar.equation is None and pvar.initial_value is None and pvar.default_expr is None:
                         # No definition given for variable, this is OK if it's optional
                         if pvar.optional:
-                            done.add(pvar)
+                            done = True
                             continue
                         # Or if it's an output category with at least one variable (or magic)
                         elif pvar.output_category and (pvar.transitive_variables or pvar is self.magic_pvar):
-                            done.add(pvar)
+                            done = True
                             continue
                         # But otherwise an error
                         elif pvar.local:
@@ -1496,7 +1499,7 @@ class ModelInterface(BaseGroupAction):
                         if rhs is None:
                             # Not enough information to create, OK if optional, but otherwise an error
                             if pvar.optional:
-                                done.add(pvar)
+                                done = True
                                 continue
                             else:
                                 raise ProtocolError(f'No units specified for non-optional variable {pvar.long_name}.')
@@ -1507,6 +1510,7 @@ class ModelInterface(BaseGroupAction):
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
                         except MissingVariableError as e:
                             # Unable to create at this time, but may be able to at a next pass
+                            todo.append(pvar)
                             error = e
                             continue
 
@@ -1537,6 +1541,7 @@ class ModelInterface(BaseGroupAction):
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
                         except MissingVariableError as e:
                             # Unable to create at this time, but may be able to at a next pass
+                            todo.append(pvar)
                             error = e
                             continue
 
@@ -1599,8 +1604,8 @@ class ModelInterface(BaseGroupAction):
                         raise ProtocolError(
                             f'Initial value provided for {pvar.long_name}, which is not a state variable.')
 
-                # Nothing left to be done
-                done.add(pvar)
+                # Variable handled OK
+                done = True
 
             if not done:
                 # No changes in iteration implies there are missing variables in the RHS of at least one variable.
@@ -1609,8 +1614,6 @@ class ModelInterface(BaseGroupAction):
                 raise ProtocolError(
                     'Unable to resolve all references in the protocol equations: ' + str(error)
                 ) from error
-
-            todo -= done
 
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
@@ -1649,7 +1652,7 @@ class ModelInterface(BaseGroupAction):
         order.extend(todo)
         self.vector_orderings[STATE_ANNOTATION] = {rdf_identity: i for i, rdf_identity in enumerate(order)}
 
-        # Set transitive variables for `state_variable` output, if present
+        # Set transitive variables for `state_variable` term, if it's present in the protocol
         if self.magic_pvar is not None:
             self.magic_pvar.transitive_variables = set(states)
 
