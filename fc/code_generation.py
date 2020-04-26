@@ -237,6 +237,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
         else:
             continue
 
+        # TODO: Add an output for each rdf term pointing to the same variable. Might require a better naming
         output_info.append({
             'index': len(output_info),
             'local_name': pvar.short_name,

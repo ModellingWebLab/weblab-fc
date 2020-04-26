@@ -950,9 +950,10 @@ class ProtocolVariable():
         incompatible with what is already stored.
         """
         # Add name
+        # TODO: Determine this based on input and output terms?
         if name is not None and name != self.name and name not in self._aliases:
             self._aliases.append(name)
-            self.long_name = 'name (aka ' + ', '.join(aliases) + ')'
+            self.long_name = 'name (aka ' + ', '.join(self._aliases) + ')'
 
         # Add rdf terms
         if input_term is not None and input_term not in self.input_terms:
@@ -1666,7 +1667,7 @@ class ModelInterface(BaseGroupAction):
                     continue
 
                 # Get transitive variables
-                variables = get_variables_transitively(self.model, term)
+                variables = get_variables_transitively(self.model, pvar.output_terms[0])    # TODO: Ensure max 1 term
                 if variables:
 
                     # Convert units
