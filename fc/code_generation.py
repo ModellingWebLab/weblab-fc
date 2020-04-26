@@ -197,13 +197,13 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     parameter_info = []
     parameter_variables = {}
     for pvar in protocol_variables:
-        if pvar.input and pvar.model_variable is not None:
+        if pvar.is_input and pvar.model_variable is not None:
             eq = model.get_definition(pvar.model_variable)
             if eq is not None and not eq.lhs.is_Derivative and len(eq.rhs.atoms(VariableDummy)) == 0:
                 i = len(parameter_info)
                 parameter_info.append({
                     'index': i,
-                    'local_name': pvar.local_name,
+                    'local_name': pvar.short_name,
                     'var_name': variable_name(pvar.model_variable),
                     'initial_value': model.get_value(pvar.model_variable),
                 })
@@ -214,17 +214,23 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     output_info = []
     output_variables = set()
     for pvar in protocol_variables:
-        if pvar.output and pvar.model_variable is not None:
+        if not pvar.is_output:
+            continue
+        elif pvar.model_variable is not None:
             # Single variable output
             var_name = variable_name(pvar.model_variable)
             length = None
             output_variables.add(pvar.model_variable)
-        elif pvar.output_category and pvar.transitive_variables:
+        elif pvar.vector_variables:
             # Vector output
-            variables = list(pvar.transitive_variables)
-            if pvar.rdf_term in vector_orderings:
-                order = vector_orderings[pvar.rdf_term]
+            variables = list(pvar.vector_variables)
+            rdf_term = pvar.output_terms[0]
+            if rdf_term in vector_orderings:
+                order = vector_orderings[rdf_term]
                 variables.sort(key=lambda s: order[s.rdf_identity])
+            else:
+                pass
+                # TODO: Add some default ordering for consistent output?
             length = len(variables)
             var_name = [{'index': i, 'var_name': variable_name(s)} for i, s in enumerate(variables)]
             output_variables.update(variables)
@@ -233,7 +239,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
 
         output_info.append({
             'index': len(output_info),
-            'local_name': pvar.local_name,
+            'local_name': pvar.short_name,
             'var_name': var_name,
             'length': length,
         })
