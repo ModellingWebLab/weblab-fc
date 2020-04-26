@@ -63,17 +63,20 @@ def test_generate_weblab_model(tmp_path):
         (False, True, 'membrane_voltage'),
         (False, True, 'time'),
     ]
-    for input, output, name in variables:
+    for is_input, is_output, name in variables:
         rdf_term = create_rdf_node((OXMETA_NS, name))
-        pvar = ProtocolVariable('oxmeta:' + name, name, rdf_term)
-        pvar.update(input=input, output=output)
+        pvar = ProtocolVariable('oxmeta:' + name)
+        if is_input:
+            pvar.update(input_term=rdf_term)
+        elif is_output:
+            pvar.update(output_term=rdf_term)
         pvar.update(model_variable=model.get_variable_by_ontology_term(rdf_term))
         protocol_variables.append(pvar)
 
     # State variable output
     rdf_term = create_rdf_node((OXMETA_NS, 'state_variable'))
-    pvar = ProtocolVariable('oxmeta:state_variable', 'state_variable', rdf_term)
-    pvar.update(output=True, output_category=True, transitive_variables=model.get_state_variables())
+    pvar = ProtocolVariable('oxmeta:state_variable')
+    pvar.update(output_term=rdf_term, is_vector=True, vector_variables=model.get_state_variables())
     protocol_variables.append(pvar)
 
     # Annotate state variables with the magic oxmeta:state_variable term

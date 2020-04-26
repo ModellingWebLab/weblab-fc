@@ -1342,7 +1342,7 @@ class ModelInterface(BaseGroupAction):
         #   optional <prefix:term> [default <simple_expr>]
         for ref in self.optional_decls:
             pvar = get(ref)
-            pvar.update(optional=True, default_expr=ref.default_expr)
+            pvar.update(is_optional=True, default_expr=ref.default_expr)
 
         # Add local variables
         #   var <name> units <uname> [= <initial_value>]
@@ -1353,7 +1353,7 @@ class ModelInterface(BaseGroupAction):
 
             # Create and store variable
             pvar = name_to_pvar[ref.name] = ProtocolVariable(ref.name)
-            pvar.update(local=True, units=ref.units, initial_value=ref.initial_value)
+            pvar.update(is_local=True, units=ref.units, initial_value=ref.initial_value)
 
         # Store equations from define and clamp statements
         for eq in self.equations:
@@ -1534,9 +1534,11 @@ class ModelInterface(BaseGroupAction):
                     # Create variable, and annotate if possible
                     name = self.model.get_unique_name('protocol__' + pvar.short_name)
                     pvar.model_variable = self.model.add_variable(name, units)
-                    if pvar.rdf_term is not None:
+                    rdf_terms = pvar.input_terms + pvar.output_terms
+                    if rdf_terms:
                         self.model.add_cmeta_id(pvar.model_variable)
-                        self.model.rdf.add((pvar.model_variable.rdf_identity, PRED_IS, pvar.rdf_term))
+                        for rdf_term in rdf_terms:
+                            self.model.rdf.add((pvar.model_variable.rdf_identity, PRED_IS, rdf_term))
 
                     # Store local variables
                     if pvar.is_local:
