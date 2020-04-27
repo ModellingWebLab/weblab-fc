@@ -65,7 +65,11 @@ class MissingVariableError(ProtocolError):
     """
     def __init__(self, variable_name):
         self.name = variable_name
-        super(MissingVariableError, self).__init__(f'Reference to unknown variable "{variable_name}".')
+        if ':' in self.name:
+            msg = f'Reference to unknown variable "{variable_name}" (not found in model or protocol).'
+        else:
+            msg = f'Reference to unknown local variable "{variable_name}" (not found in protocol).'
+        super(MissingVariableError, self).__init__(msg)
 
 
 class ErrorRecorder(ProtocolError):
