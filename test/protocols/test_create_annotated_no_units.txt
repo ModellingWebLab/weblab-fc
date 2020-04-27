@@ -1,0 +1,48 @@
+#
+# Tests adding annotated variable with the "default expression" of an optionan and with a define, and with units derived
+# from the RHS.
+#
+# Designed to run with simple_ode.cellml
+#
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    molar = mole . litre^-1
+    millimolar = milli molar
+    ms = milli second
+}
+
+model interface {
+    independent var units ms
+
+    # Get a variable guaranteed to exist, and fix it to its intial value
+    input oxmeta:cytosolic_sodium_concentration units millimolar = 10
+    clamp oxmeta:cytosolic_sodium_concentration
+    output oxmeta:cytosolic_sodium_concentration
+
+    # Define a new variable, with units derived from the RHS
+    output oxmeta:extracellular_chloride_concentration
+    optional oxmeta:extracellular_chloride_concentration default 2 :: dimensionless * oxmeta:cytosolic_sodium_concentration
+
+    # Define a new state variable, with units derived from the RHS
+    input oxmeta:cytosolic_chloride_concentration = 30
+    define diff(oxmeta:cytosolic_chloride_concentration; oxmeta:time) = oxmeta:cytosolic_sodium_concentration / 2 :: ms
+    output oxmeta:cytosolic_chloride_concentration
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+
+post-processing {
+    # Output vectors should be ordered in model order by default
+
+    assert sim:cytosolic_sodium_concentration[0] == 10
+    assert sim:extracellular_chloride_concentration[0] == 20
+    assert sim:cytosolic_chloride_concentration[0] == 30
+    assert sim:cytosolic_chloride_concentration[1] == 35
+}
+

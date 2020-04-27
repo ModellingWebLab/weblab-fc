@@ -1532,8 +1532,13 @@ class ModelInterface(BaseGroupAction):
                             error = e
                             continue
 
-                        # Units unknown! Will be set later based on RHS.
-                        units = None
+                        # Get units for the variable to create from its RHS, fixing inconsistencies if required
+                        units, rhs = self.units.evaluate_units_and_fix(rhs)
+
+                        # If an LHS is provided, the new variable could be a state variable, and so we'll need to
+                        # multiply the RHS units by the time units to get the variable units.
+                        if pvar.equation is not None and pvar.equation.is_ode:
+                            units *= self.time_variable.units
 
                     # Create variable, and annotate if possible
                     name = self.model.get_unique_name('protocol__' + pvar.short_name)
@@ -1580,10 +1585,6 @@ class ModelInterface(BaseGroupAction):
                     # If required, convert units within RHS to make it consistent and match the LHS units
                     new_eq = sympy.Eq(lhs, rhs)
                     new_eq = self.units.convert_expression_recursively(new_eq, None)
-                    if not lhs.is_Derivative and lhs.units is None:
-                        new_eq = self.units.set_lhs_units_from_rhs(new_eq)
-                    else:
-                        new_eq = self.units.convert_expression_recursively(new_eq, None)
 
                     # Remove existing equation
                     if eq is not None:
