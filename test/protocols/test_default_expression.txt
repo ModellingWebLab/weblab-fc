@@ -1,0 +1,36 @@
+#
+# Tests adding a variable with a default expression.
+#
+# Designed to run with simple_ode.cellml
+#
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    molar = mole . litre^-1
+    millimolar = milli molar
+}
+
+model interface {
+
+    # Get a variable guaranteed to exist
+    input oxmeta:cytosolic_sodium_concentration units millimolar = 10
+
+    # Define a new variable
+    output oxmeta:cytosolic_chloride_concentration units millimolar
+    optional oxmeta:cytosolic_chloride_concentration default 1000 :: millimolar + cytosolic_sodium_concentration
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+
+post-processing {
+    # Output vectors should be ordered in model order by default
+
+    assert sim:cytosolic_sodium_concentration[0] == 10
+    assert sim:cytosolic_chloride_concentration[0] == 11
+}
+
