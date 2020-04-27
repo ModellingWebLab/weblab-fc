@@ -1534,7 +1534,7 @@ class ModelInterface(BaseGroupAction):
                         # Get units for the variable to create from its RHS, fixing inconsistencies if required
                         units, rhs = self.units.evaluate_units_and_fix(rhs)
 
-                        # If an LHS is provided, the new variable could be a state variable, and so we'll need to
+                        # If an LHS is provided the new variable could be a state variable; if so, we'll need to
                         # multiply the RHS units by the time units to get the variable units.
                         if pvar.equation is not None and pvar.equation.is_ode:
                             units *= self.time_variable.units

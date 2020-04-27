@@ -189,29 +189,27 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
             'var_names': model.get_ontology_terms_by_variable(state, OXMETA_NS),
         })
 
-    # Create parameter information dicts, and map of parameter variables to their indices
-    # Parameters are inputs that aren't states, and have a constant RHS
+    # Create parameter information dicts, and map of parameter variables to their indices.
+    # Parameters are all inputs that are constant w.r.t. time
     parameter_info = []
     parameter_variables = {}
     todo_use_qualified_names = set()    # TODO: Remove this. See above.
     for pvar in protocol_variables:
-        if pvar.is_input and pvar.model_variable is not None:
-            eq = model.get_definition(pvar.model_variable)
-            if eq is not None and not eq.lhs.is_Derivative and model.is_constant(pvar.model_variable):
+        if pvar.is_input and pvar.model_variable is not None and model.is_constant(pvar.model_variable):
 
-                # TODO: Remove this. See above.
-                if pvar.short_name in todo_use_qualified_names:
-                    raise NotImplementedError('Need to convert parameter maps to use qualified instead of local names.')
-                todo_use_qualified_names.add(pvar.short_name)
+            # TODO: Remove this. See above.
+            if pvar.short_name in todo_use_qualified_names:
+                raise NotImplementedError('Need to convert parameter maps to use qualified instead of local names.')
+            todo_use_qualified_names.add(pvar.short_name)
 
-                i = len(parameter_info)
-                parameter_info.append({
-                    'index': i,
-                    'local_name': pvar.short_name,
-                    'var_name': variable_name(pvar.model_variable),
-                    'initial_value': model.get_value(pvar.model_variable),
-                })
-                parameter_variables[pvar.model_variable] = i
+            i = len(parameter_info)
+            parameter_info.append({
+                'index': i,
+                'local_name': pvar.short_name,
+                'var_name': variable_name(pvar.model_variable),
+                'initial_value': model.get_value(pvar.model_variable),
+            })
+            parameter_variables[pvar.model_variable] = i
 
     # Create output information dicts
     # Each output is associated either with a variable or a list thereof.
