@@ -1408,7 +1408,7 @@ class ModelInterface(BaseGroupAction):
             if len(pvar.input_terms) > 1:
                 raise ProtocolVariable(
                     f'The mode variable {pvar.model_variable} is specified as a protocol input by more than one'
-                    'ontology term {pvar.long_name}.')
+                    f'ontology term {pvar.long_name}.')
 
         # Check against overdefinedness through clamp-to-initial-value plus an equation
         for ref in self.clamps:
@@ -1661,8 +1661,14 @@ class ModelInterface(BaseGroupAction):
         # moment there's no checking that e.g. inputs don't have transitive variables, or that resolved outputs are not
         # somehow vector outputs at the same time.
 
-        # TODO: We don't check that transitive variable unit conversion doesn't override previous unit conversions
+        # Create a mapping from model variables to a ProtocolVariable that sets a unit, to check for clashes between
+        # units set by scalar and vector annotations, or between two vector annotations.
+        varmap = {}
+        for pvar in self.protocol_variables:
+            if pvar.units is not None and pvar.model_variable is not None:
+                varmap[pvar.model_variable] = pvar
 
+        # Check all outputs, see if unresolved ones are vector variables
         for pvar in self.protocol_variables:
 
             # Check that this is an unresolved output
@@ -1678,6 +1684,28 @@ class ModelInterface(BaseGroupAction):
 
                     # Convert units
                     if pvar.units is not None:
+
+                        # Check if any variables will cause a clash with previously set units
+                        for var in variables:
+                            # Get pvar that set a unit, or store this one as the unit-setting pvar
+                            try:
+                                other = varmap[var]
+                            except KeyError:
+                                varmap[var] = pvar
+                                continue
+
+                            # Check if the units match
+                            if other.units != pvar.units:
+                                if other.is_vector:
+                                    raise ProtocolError(
+                                        f'Conflicting units set for items that are both in vector output {pvar.name}'
+                                        f' ({pvar.units}) and {other.name} ({other.units}).')
+                                else:
+                                    raise ProtocolError(
+                                        f'Conflicting units set for item in vector output {pvar.name} ({pvar.units})'
+                                        f' that is set individually as {other.long_name} ({other.units}).')
+
+                        # Convert all variables
                         units = self.units.get_unit(pvar.units)
                         converted = []
                         for var in variables:
