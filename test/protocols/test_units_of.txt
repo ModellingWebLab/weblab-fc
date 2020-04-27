@@ -1,0 +1,71 @@
+#
+# Tests using units_of
+#
+# Designed to run with simple_ode.cellml, which contains only three annotations:
+#  - cytosolic_sodium_concentration
+#  - membrane_voltage
+#  - time
+#
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    molar = mole . litre^-1
+    millimolar = milli molar
+    ms = milli second
+    MV = mega volt
+}
+
+model interface {
+    independent var units ms
+
+    # Don't redefine units of cytosolic_sodium_concentration
+    input oxmeta:cytosolic_sodium_concentration = 1
+    output oxmeta:cytosolic_sodium_concentration
+
+    # Create a variable in the units of yet-to-be created variables (mM)
+    define oxmeta:extracellular_potassium_concentration = 100 :: units_of(oxmeta:extracellular_calcium_concentration) + 200 :: units_of(oxmeta:extracellular_sodium_concentration)
+    output oxmeta:extracellular_potassium_concentration
+
+    # Create a variable in the units of yet-to-be created variables (mM)
+    define oxmeta:extracellular_calcium_concentration = 20 :: units_of(oxmeta:extracellular_sodium_concentration)
+    output oxmeta:extracellular_calcium_concentration
+
+    # Create a variable in the original units of an existing model variable (4 mM)
+    define oxmeta:extracellular_sodium_concentration = 4 :: units_of(oxmeta:cytosolic_sodium_concentration)
+    output oxmeta:extracellular_sodium_concentration
+
+    # Create a variable so that we can read the output (M)
+    define oxmeta:extracellular_chloride_concentration = oxmeta:extracellular_potassium_concentration + oxmeta:extracellular_calcium_concentration + oxmeta:extracellular_sodium_concentration
+    output oxmeta:extracellular_chloride_concentration units molar
+
+    # Create a variable in converted units of existing variable
+    define oxmeta:sodium_reversal_potential = 1 :: units_of(oxmeta:membrane_voltage)
+    output oxmeta:sodium_reversal_potential
+
+    # Convert units of membrane voltage to mega volts
+    input oxmeta:membrane_voltage = 0.1
+    output oxmeta:membrane_voltage units MV
+
+    # Create another variable in mV, to read out the value
+    define oxmeta:potassium_reversal_potential = oxmeta:sodium_reversal_potential
+    output oxmeta:potassium_reversal_potential units volt
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+
+post-processing {
+    assert sim:cytosolic_sodium_concentration[0] == 1
+    assert sim:extracellular_potassium_concentration[0] == 300
+    assert sim:extracellular_calcium_concentration[0] == 20
+    assert sim:extracellular_sodium_concentration[0] == 4
+    assert sim:extracellular_chloride_concentration[0] == 0.324
+    assert sim:sodium_reversal_potential[0] == 1
+    assert sim:membrane_voltage[0] == 0.1
+    assert sim:potassium_reversal_potential[0] == 1000000
+}
+
