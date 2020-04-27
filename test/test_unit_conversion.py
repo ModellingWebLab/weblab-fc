@@ -117,7 +117,7 @@ def test_unit_conversion_inputs_defines():
     assert v[1] == pytest.approx(15, rel=1e-15)
 
 
-#@pytest.mark.skipif(True, reason='Default expressions for optional variables not yet implemented')
+@pytest.mark.skipif(True, reason='Default expressions for optional variables not yet implemented')
 def test_unit_conversion_transitive_and_within_equations():
     # Test unit conversion for transitive variables and within equations (with define statements)
 

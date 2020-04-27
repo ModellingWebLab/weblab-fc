@@ -745,10 +745,8 @@ class OptionalVariable(BaseGroupAction, VariableReference):
     """
     def __init__(self, s, loc, tokens):
         super().__init__(s, loc, tokens)
-        if 'default' in self.tokens:
-            self.default_expr = s[self.tokens['default_start']:self.tokens['default_end']]
-        else:
-            self.default_expr = ''
+
+        self.default_expr = self.tokens.get('default', None)
 
 
 class DeclareVariable(BaseGroupAction):
@@ -781,9 +779,11 @@ class ClampVariable(BaseGroupAction, VariableReference):
         assert 1 <= len(self.tokens) <= 2
         name = self.tokens[0]
         if len(self.tokens) == 1:
+            # Clamp to initial value
             self.set_name(name.tokens)
             return self
         else:
+            # Clamp to simple expression: delegated to ModelEquation using lhs = name, rhs = simple expression
             value = self.tokens[1]
             return self.delegate('ModelEquation', [[name, value]]).expr()
 

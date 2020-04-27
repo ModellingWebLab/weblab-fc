@@ -15,10 +15,11 @@ model interface {
 
     # Get a variable guaranteed to exist
     input oxmeta:cytosolic_sodium_concentration units millimolar = 10
+    output oxmeta:cytosolic_sodium_concentration
 
     # Define a new variable
     output oxmeta:cytosolic_chloride_concentration units millimolar
-    optional oxmeta:cytosolic_chloride_concentration default 1000 :: millimolar + cytosolic_sodium_concentration
+    optional oxmeta:cytosolic_chloride_concentration default 1 :: millimolar + oxmeta:cytosolic_sodium_concentration
 }
 
 tasks {
