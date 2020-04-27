@@ -1526,7 +1526,7 @@ class ModelInterface(BaseGroupAction):
                         # Both will raise a MissingVariableError if they can't be resolved.
                         try:
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
-                        except MissingVariableError as e:
+                        except MissingVariableError:
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
                             continue
@@ -1563,7 +1563,7 @@ class ModelInterface(BaseGroupAction):
                         rhs = pvar.default_expr if pvar.equation is None else pvar.equation.rhs
                         try:
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
-                        except MissingVariableError as e:
+                        except MissingVariableError:
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
                             continue
