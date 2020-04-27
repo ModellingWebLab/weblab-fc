@@ -7,7 +7,6 @@ import time
 import jinja2
 import sympy
 
-from cellmlmanip.model import VariableDummy
 from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER
 from cellmlmanip.printer import Printer
 from cellmlmanip.transpiler import Transpiler
