@@ -271,6 +271,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
         })
 
     # Write debug output about the created model
+    # TODO Add code to write this to file (see #172)
     if True:
         print('=== STATES ' + '=' * 68)
         for i in sorted(state_info, key=lambda x: x['index']):
