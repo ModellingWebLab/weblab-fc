@@ -56,7 +56,7 @@ def get_variables_transitively(model, term):
     variables = []
     for cmeta_id in cmeta_ids:
         variables.append(model.get_variable_by_cmeta_id(cmeta_id))
-    return sorted(variables, key=lambda sym: sym.order_added)
+    return sorted(variables, key=lambda var: model.display_name(var))
 
 
 def get_variables_that_are_version_of(model, term):
