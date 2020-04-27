@@ -173,6 +173,12 @@ class Environment(object):
         return list(self.bindings.keys())
 
     def execute_statements(self, statements, return_allowed=False):
+        """
+        Executes a series of statements. Called to handle the input, library, and post-processing sections of a
+        protocol.
+
+        See ``fc.language.statements`` for the statements that can be executed.
+        """
         result = V.Null()
         for statement in statements:
             result = statement.evaluate(self)
