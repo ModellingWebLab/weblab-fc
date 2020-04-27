@@ -116,3 +116,15 @@ def test_unit_conversion_inputs_defines():
     assert v[0] == 0
     assert v[1] == pytest.approx(15, rel=1e-15)
 
+
+#@pytest.mark.skipif(True, reason='Default expressions for optional variables not yet implemented')
+def test_unit_conversion_transitive_and_within_equations():
+    # Test unit conversion for transitive variables and within equations (with define statements)
+
+    proto_file = 'test/protocols/test_transitive_variables.txt'
+    proto = fc.Protocol(proto_file)
+    proto.set_output_folder('test_unit_conversion_transitive_and_within_equations')
+    proto.set_model('test/models/transitive_variables.cellml')
+    proto.run()
+    # Assertions are within the protocol itself
+

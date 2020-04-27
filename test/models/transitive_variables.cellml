@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.cellml.org/cellml/1.0#" name="transitive_variable_test">
+  <units name="mM">
+    <unit units="metre" exponent="-3"/>
+    <unit units="mole"/>
+  </units>
+  <units name="mM_per_ms">
+    <unit units="metre" exponent="-3" multiplier="1000"/>
+    <unit units="second" exponent="-1"/>
+    <unit units="mole"/>
+  </units>
+  <units name="mM_times_1e_minus_6">
+    <unit units="metre" exponent="-3" multiplier="1e-06"/>
+    <unit units="mole"/>
+  </units>
+  <units name="mV">
+    <unit units="gram"/>
+    <unit units="metre" exponent="2"/>
+    <unit units="second" exponent="-3"/>
+    <unit units="ampere" exponent="-1"/>
+  </units>
+  <units name="mol_per_m3_per_s">
+    <unit units="metre" exponent="-3"/>
+    <unit units="second" exponent="-1"/>
+    <unit units="mole"/>
+  </units>
+  <units name="mol_per_m3_per_s_times_1e_minus_3">
+    <unit units="metre" exponent="-3" multiplier="0.001"/>
+    <unit units="second" exponent="-1"/>
+    <unit units="mole"/>
+  </units>
+  <units name="ms">
+    <unit units="second" multiplier="0.001"/>
+  </units>
+  <units name="uA">
+    <unit units="ampere" multiplier="1e-06"/>
+  </units>
+  <units name="uF">
+    <unit units="gram" exponent="-1" multiplier="1e-09"/>
+    <unit units="metre" exponent="-2"/>
+    <unit units="second" exponent="4"/>
+    <unit units="ampere" exponent="2"/>
+  </units>
+  <units name="uM">
+    <unit units="metre" exponent="-3" multiplier="0.001"/>
+    <unit units="mole"/>
+  </units>
+  <component name="currents">
+    <variable name="ikr" units="uA" public_interface="out" initial_value="4.0" cmeta:id="ikr"/>
+    <variable name="ina" units="uA" public_interface="out" initial_value="1.0" cmeta:id="ina"/>
+    <variable name="inab" units="uA" public_interface="out" initial_value="3.0" cmeta:id="inab"/>
+    <variable name="inal" units="uA" public_interface="out" initial_value="2.0" cmeta:id="inal"/>
+  </component>
+  <component name="environment">
+    <variable name="time" units="ms" public_interface="out"/>
+  </component>
+  <component name="external">
+    <variable name="cao" units="uM" initial_value="0.0" cmeta:id="cao"/>
+    <variable name="ko" units="mM_times_1e_minus_6" initial_value="0.0" cmeta:id="ko"/>
+    <variable name="nao" units="mM" initial_value="0.0" cmeta:id="nao"/>
+    <variable name="time" units="ms" public_interface="in"/>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar>
+            <ci>time</ci>
+          </bvar>
+          <ci>cao</ci>
+        </apply>
+        <cn cellml:units="mol_per_m3_per_s">1.0</cn>
+      </apply>
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar>
+            <ci>time</ci>
+          </bvar>
+          <ci>ko</ci>
+        </apply>
+        <cn cellml:units="mol_per_m3_per_s_times_1e_minus_3">3.0</cn>
+      </apply>
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar>
+            <ci>time</ci>
+          </bvar>
+          <ci>nao</ci>
+        </apply>
+        <cn cellml:units="mM_per_ms">2.0</cn>
+      </apply>
+    </math>
+  </component>
+  <component name="internal">
+    <variable name="cai" units="uM" initial_value="1.0" cmeta:id="cai"/>
+    <variable name="ki" units="mM_times_1e_minus_6" initial_value="3.0" cmeta:id="ki"/>
+    <variable name="nai" units="mM" initial_value="2.0" cmeta:id="nai"/>
+  </component>
+  <component name="membrane">
+    <variable name="C" units="uF" initial_value="10.0" cmeta:id="C"/>
+    <variable name="V" units="mV" initial_value="0.0"/>
+    <variable name="ikr" units="uA" public_interface="in"/>
+    <variable name="ina" units="uA" public_interface="in"/>
+    <variable name="inab" units="uA" public_interface="in"/>
+    <variable name="inal" units="uA" public_interface="in"/>
+    <variable name="time" units="ms" public_interface="in"/>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar>
+            <ci>time</ci>
+          </bvar>
+          <ci>V</ci>
+        </apply>
+        <apply>
+          <divide/>
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <plus/>
+                  <ci>ina</ci>
+                  <ci>inal</ci>
+                </apply>
+                <ci>inab</ci>
+              </apply>
+              <ci>ikr</ci>
+            </apply>
+          </apply>
+          <ci>C</ci>
+        </apply>
+      </apply>
+    </math>
+  </component>
+  <connection>
+    <map_components component_1="currents" component_2="membrane"/>
+    <map_variables variable_1="ikr" variable_2="ikr"/>
+    <map_variables variable_1="ina" variable_2="ina"/>
+    <map_variables variable_1="inab" variable_2="inab"/>
+    <map_variables variable_1="inal" variable_2="inal"/>
+  </connection>
+  <connection>
+    <map_components component_1="environment" component_2="external"/>
+    <map_variables variable_1="time" variable_2="time"/>
+  </connection>
+  <connection>
+    <map_components component_1="environment" component_2="membrane"/>
+    <map_variables variable_1="time" variable_2="time"/>
+  </connection>
+  <rdf:RDF>
+    <rdf:Description rdf:about="#C">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance%20units"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#cai">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#cao">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#ikr">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current%20units"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#ina">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#inab">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_background_sodium_current%20units"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#inal">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_persistent_sodium_current%20units"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#ki">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#ko">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_potassium_concentration"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#nai">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_sodium_concentration"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#nao">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_sodium_concentration"/>
+    </rdf:Description>
+  </rdf:RDF>
+</model>
