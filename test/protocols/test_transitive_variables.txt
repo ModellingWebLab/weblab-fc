@@ -32,9 +32,6 @@ model interface {
     output oxmeta:ExtracellularConcentration units micromolar
     output oxmeta:CytosolicConcentration
 
-    # This one we might prefer to raise a sensible error message rather than be legal!
-    output oxmeta:extracellular_potassium_concentration units millimolar
-
     # Use both types of modification on variables appearing in a vector output
     clamp oxmeta:extracellular_calcium_concentration to 5000 :: nanomolar
     clamp oxmeta:extracellular_sodium_concentration
