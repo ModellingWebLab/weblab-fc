@@ -1,4 +1,9 @@
+"""
+Protocol language statements: statements that can appear in certain parts of a protocol, e.g. assignments and
+assertions.
+"""
 
+from . import expressions as E
 from . import values as V
 from .. import locatable
 from ..error_handling import ProtocolError
@@ -37,6 +42,9 @@ class Assign(AbstractStatement):
 
 
 class Assert(AbstractStatement):
+    """
+    Assertion used within a protocol.
+    """
     def __init__(self, expr):
         super(Assert, self).__init__()
         self.expr = expr
@@ -44,10 +52,17 @@ class Assert(AbstractStatement):
     def evaluate(self, env):
         result = self.expr.evaluate(env)
         try:
-            if not result.value:
-                raise ProtocolError("Assertion failed.")
+            ok = result.value
         except AttributeError:
             raise ProtocolError("Assertion did not yield a Simple value or 0-d Array.")
+        if not ok:
+            # TODO: Add more conditional types here (see #170)
+            if isinstance(self.expr, E.Eq):
+                operands = self.expr.evaluate_children(env)
+                lhs = operands[0].value
+                rhs = operands[1].value
+                raise ProtocolError(f'Assertion failed: {lhs} != {rhs}.')
+            raise ProtocolError("Assertion failed.")
         return V.Null()
 
 
