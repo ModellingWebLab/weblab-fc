@@ -135,6 +135,6 @@ def test_unit_conversion_transitive_and_within_equations_clash():
     proto_file = 'test/protocols/test_transitive_variables_clash.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_unit_conversion_transitive_and_within_equations')
-    with pytest.raises(fc.ProtocolError, 'Transitive vector blah'):
+    with pytest.raises(ProtocolError, 'Transitive vector blah'):
         proto.set_model('test/models/transitive_variables.cellml')
 
