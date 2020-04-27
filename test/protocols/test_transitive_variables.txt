@@ -47,7 +47,6 @@ model interface {
     output oxmeta:membrane_fast_sodium_current
     define oxmeta:membrane_fast_sodium_current = 11 :: milliamps / 1000 :: dimensionless
 
-    # Redefine INaL in different units (should be converted back to make dot(V) equation work)
     output oxmeta:membrane_persistent_sodium_current units nanoamps
     define oxmeta:membrane_persistent_sodium_current = 22000 :: nanoamps
 

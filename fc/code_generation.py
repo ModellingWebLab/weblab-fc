@@ -198,7 +198,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     for pvar in protocol_variables:
         if pvar.is_input and pvar.model_variable is not None:
             eq = model.get_definition(pvar.model_variable)
-            if eq is not None and not eq.lhs.is_Derivative and len(eq.rhs.atoms(VariableDummy)) == 0:
+            if eq is not None and not eq.lhs.is_Derivative and model.is_constant(pvar.model_variable):
 
                 # TODO: Remove this. See above.
                 if pvar.short_name in todo_use_qualified_names:
@@ -277,7 +277,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
             'parameter_index': parameter_variables.get(eq.lhs, None),
         })
 
-    # Debug output
+    # Write debug output about the created model
     if True:
         print('=== STATES ' + '=' * 68)
         for i in sorted(state_info, key=lambda x: x['index']):

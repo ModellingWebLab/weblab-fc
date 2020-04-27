@@ -38,7 +38,9 @@ tasks {
 }
 
 post-processing {
-    # Output vectors should be ordered in model order by default
+    assert sim:cytosolic_sodium_concentration.SHAPE[0] == 2
+    assert sim:extracellular_chloride_concentration.SHAPE[0] == 2
+    assert sim:cytosolic_chloride_concentration.SHAPE[0] == 2
 
     assert sim:cytosolic_sodium_concentration[0] == 10
     assert sim:extracellular_chloride_concentration[0] == 20

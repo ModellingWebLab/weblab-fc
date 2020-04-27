@@ -779,7 +779,7 @@ class ClampVariable(BaseGroupAction, VariableReference):
         assert 1 <= len(self.tokens) <= 2
         name = self.tokens[0]
         if len(self.tokens) == 1:
-            # Clamp to initial value
+            # Clamp to initial value, whatever that happens to evaluate as
             self.set_name(name.tokens)
             return self
         else:
@@ -897,9 +897,9 @@ class ProtocolVariable():
     ``vector_output_terms``
         A list of rdf terms by which this variable is known as a vector output. This is typically zero or one term.
     ``is_input``
-        ``True`` iff the associated model variable will be set as a protocol input.
+        ``True`` iff the associated model variable is set as a model input by the protocol
     ``is_output``
-        ``True`` iff the associated model variable(s) will be read as a protocol output.
+        ``True`` iff the associated model variable is read as a model output by the protocol.
     ``is_optional``
         ``True`` iff this variable is allowed *not* to exist in the (original or modified) model.
     ``is_vector``
@@ -950,7 +950,6 @@ class ProtocolVariable():
         incompatible with what is already stored.
         """
         # Add name
-        # TODO: Determine this based on input and output terms?
         if name is not None and name != self.name and name not in self._aliases:
             self._aliases.append(name)
             self.long_name = 'name (aka ' + ', '.join(self._aliases) + ')'
@@ -1020,7 +1019,7 @@ class ProtocolVariable():
         same model variable: raises a ProtocolError if any conflicts are found.
         """
         if self.model_variable is None or self.model_variable is not pvar.model_variable:
-            raise RuntimeError(
+            raise ValueError(
                 'Merge() should only be used to merge protocol variables referencing the same model variable.')
 
         # Update list properties
