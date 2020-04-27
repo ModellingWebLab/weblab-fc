@@ -1712,6 +1712,12 @@ class ModelInterface(BaseGroupAction):
                             converted.append(self.model.convert_variable(var, units, DataDirectionFlow.OUTPUT))
                         variables = converted
 
+                    # Create and store vector ordering (sort by display name)
+                    variables.sort(key=lambda var: self.model.get_display_name(var))
+                    order = {var.rdf_identity: i for i, var in enumerate(variables)}
+                    for rdf_term in pvar.output_terms:
+                        self.vector_orderings[rdf_term] = dict(order)
+
                     # Update ProtocolVariable object
                     pvar.update(is_vector=True, vector_variables=variables)
 
@@ -1743,7 +1749,7 @@ class ModelInterface(BaseGroupAction):
 
         # Set transitive variables for `state_variable` term, if it's present in the protocol
         if self.magic_pvar is not None:
-            self.magic_pvar.vector_variables = set(states)
+            self.magic_pvar.vector_variables = order
 
     def _purge_unused_mathematics(self):
         """Remove model equations and variables not needed for generating desired outputs."""

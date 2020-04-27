@@ -230,11 +230,8 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
             # Vector output
             variables = list(pvar.vector_variables)
             rdf_term = pvar.output_terms[0]
-            if rdf_term in vector_orderings:
-                order = vector_orderings[rdf_term]
-                variables.sort(key=lambda v: order[v.rdf_identity])
-            else:
-                variables.sort(key=lambda v: model.get_display_name(v))
+            order = vector_orderings[rdf_term]
+            variables.sort(key=lambda v: order[v.rdf_identity])
             length = len(variables)
             var_name = [{'index': i, 'var_name': variable_name(s)} for i, s in enumerate(variables)]
             output_variables.update(variables)
