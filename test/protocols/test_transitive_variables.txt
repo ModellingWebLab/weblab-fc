@@ -63,7 +63,9 @@ tasks {
 }
 
 post-processing {
-    # Output vectors should be ordered in model order by default
+    def Close(a1, a2, tol=1e-9) {
+        return MathML:abs(a1 - a2) < tol
+    }
 
     # These are read in model units: micro, milli, nano
     assert sim:CytosolicConcentration.SHAPE[0] == 2 # Time
@@ -77,23 +79,24 @@ post-processing {
     assert sim:ExtracellularConcentration.SHAPE[1] == 4  # Num vars
     # Order set alphabetically: calcium, chloride, potassium, sodium
     # Read in micromolar; original (model) vars in micro, (-), milli, nano
-    assert sim:ExtracellularConcentration[0][0] == 5  # cai, Clamped to 5000 nanomolar
-    assert sim:ExtracellularConcentration[0][1] == 6  # cli, Clamped to 1 + cai
-    assert sim:ExtracellularConcentration[0][2] == 0  # ki, Unchanged
-    assert sim:ExtracellularConcentration[0][3] == 0  # nai, unchanged
-    assert sim:ExtracellularConcentration[1][0] == 5
-    assert sim:ExtracellularConcentration[1][1] == 6
-    assert sim:ExtracellularConcentration[1][2] == 0.003  # d/dt = 3 nanomolar/ms
-    assert sim:ExtracellularConcentration[1][3] == 0      # clamped to initial value
+    assert Close(sim:ExtracellularConcentration[0][0], 5)   # Clamped to 5000 nanomolar
+    assert Close(sim:ExtracellularConcentration[0][1], 6)   # Clamped to 1 + cai
+    assert Close(sim:ExtracellularConcentration[0][2], 0)   # Unchanged
+    assert Close(sim:ExtracellularConcentration[0][3], 0)   # unchanged
+    assert Close(sim:ExtracellularConcentration[1][0], 5)
+    assert Close(sim:ExtracellularConcentration[1][1], 6)
+    assert Close(sim:ExtracellularConcentration[1][2], 0.003)   # d/dt = 3 nanomolar/ms
+    assert Close(sim:ExtracellularConcentration[1][3], 0)       # clamped to initial value
 
     # Test normal unit conversion
-    assert sim:membrane_fast_sodium_current[0] == 11            # 11 microamps (units are the model default)
-    assert sim:membrane_persistent_sodium_current[0] == 22000   # nanoamps (=22 microamps)
-    assert sim:membrane_background_sodium_current[0] == 3       # microamps (units & value are model default)
-    assert sim:membrane_rapid_delayed_rectifier_potassium_current[0] == 14  # 0.014 milliamps, shown in microamps
+    assert Close(sim:membrane_fast_sodium_current[0], 11)           # 11 microamps (units are the model default)
+    assert Close(sim:membrane_persistent_sodium_current[0], 22000)  # nanoamps (=22 microamps)
+    assert Close(sim:membrane_background_sodium_current[0], 3)       # microamps (units & value are model default)
+    assert Close(sim:membrane_rapid_delayed_rectifier_potassium_current[0], 0.014)  # milliamps (=15 microamps)
 
-    # With the above, dV/dt = 50 microamps / 10 microfarad = 5 mV/ms
-    assert sim:membrane_voltage[0] == 0  # mV
-    assert sim:membrane_voltage[1] == 5
+    # With the above, dV/dt = -50 microamps / 10 microfarad = -5 mV/ms
+    assert sim:membrane_voltage.SHAPE[0] == 2
+    assert Close(sim:membrane_voltage[0], 0)
+    assert Close(sim:membrane_voltage[1], -3)
 }
 

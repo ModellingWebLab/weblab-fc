@@ -102,7 +102,7 @@
   </component>
   <component name="membrane">
     <variable name="C" units="uF" initial_value="10.0" cmeta:id="C"/>
-    <variable name="V" units="mV" initial_value="0.0"/>
+    <variable name="V" units="mV" initial_value="0.0" cmeta:id="V"/>
     <variable name="ikr" units="uA" public_interface="in"/>
     <variable name="ina" units="uA" public_interface="in"/>
     <variable name="inab" units="uA" public_interface="in"/>
@@ -159,6 +159,9 @@
   <rdf:RDF>
     <rdf:Description rdf:about="#C">
       <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#V">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/>
     </rdf:Description>
     <rdf:Description rdf:about="#cai">
       <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
