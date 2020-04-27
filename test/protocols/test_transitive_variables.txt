@@ -67,10 +67,12 @@ post-processing {
     # Output vectors should be ordered in model order by default
 
     # These are read in model units: micro, milli, nano
-    assert sim:CytosolicConcentration.SHAPE[0] == 3
-    assert sim:CytosolicConcentration[0] == 1
-    assert sim:CytosolicConcentration[1] == 2
-    assert sim:CytosolicConcentration[2] == 3
+    assert sim:CytosolicConcentration.SHAPE[0] == 2 # Time
+    assert sim:CytosolicConcentration.SHAPE[1] == 3 # Num vars
+    # Order set alphabetically: calcium, potassium, sodium
+    assert sim:CytosolicConcentration[0][0] == 1
+    assert sim:CytosolicConcentration[0][1] == 3
+    assert sim:CytosolicConcentration[0][2] == 2
 
     assert sim:ExtracellularConcentration.SHAPE[0] == 2  # Time
     assert sim:ExtracellularConcentration.SHAPE[1] == 4  # Num vars

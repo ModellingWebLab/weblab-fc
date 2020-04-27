@@ -129,12 +129,12 @@ def test_unit_conversion_transitive_and_within_equations():
     # Assertions are within the protocol itself
 
 
-def test_unit_conversion_transitive_and_within_equations_clash():
+def test_unit_conversion_transitive_variables_clash():
     # Tests an error is raised if units from a direct and transitive annotation clash
 
     proto_file = 'test/protocols/test_transitive_variables_clash.txt'
     proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_unit_conversion_transitive_and_within_equations')
+    proto.set_output_folder('test_unit_conversion_transitive_variables_clash')
     with pytest.raises(ProtocolError, 'Transitive vector blah'):
         proto.set_model('test/models/transitive_variables.cellml')
 

@@ -151,17 +151,15 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
         A list of :class:`ProtocolVariable` objects representing variables used by the protocol.
     ``vector_orderings``
         An optional mapping defining custom orderings for vector outputs, instead of the default
-        ``variable.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings
-        from ``rdf_identity`` to order index.
+        ``variable.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings from
+        ``rdf_identity`` to order index.
 
     """
     # TODO: About the outputs:
-    # WL1 uses just the local names here, without the base URI part. What we
-    # should do eventually is update the ModelWrapperEnvironment so we can use
-    # a separate instance for each namespace defined by the protocol, and then
-    # we can use longer names here and let each environment wrap its respective
-    # subset. But until that happens, users just have to make sure not to use
-    # the same local name in different namespaces.
+    # WL1 uses just the local names here, without the base URI part. What we should do eventually is update the
+    # ModelWrapperEnvironment so we can use a separate instance for each namespace defined by the protocol, and then we
+    # can use longer names here and let each environment wrap its respective subset. But until that happens, users just
+    # have to make sure not to use the same local name in different namespaces.
 
     # Get unique names for all variables
     unames = get_unique_names(model)
@@ -196,13 +194,13 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     # Parameters are inputs that aren't states, and have a constant RHS
     parameter_info = []
     parameter_variables = {}
-    todo_use_qualified_names = set()
+    todo_use_qualified_names = set()    # TODO: Remove this. See above.
     for pvar in protocol_variables:
         if pvar.is_input and pvar.model_variable is not None:
             eq = model.get_definition(pvar.model_variable)
             if eq is not None and not eq.lhs.is_Derivative and len(eq.rhs.atoms(VariableDummy)) == 0:
 
-                # TODO: Use qualified names instead of `local_name`
+                # TODO: Remove this. See above.
                 if pvar.short_name in todo_use_qualified_names:
                     raise NotImplementedError('Need to convert parameter maps to use qualified instead of local names.')
                 todo_use_qualified_names.add(pvar.short_name)
@@ -220,7 +218,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     # Each output is associated either with a variable or a list thereof.
     output_info = []
     output_variables = set()
-    todo_use_qualified_names = set()
+    todo_use_qualified_names = set()    # TODO: Remove this. See above.
     for pvar in protocol_variables:
         if not pvar.is_output:
             continue
@@ -247,7 +245,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
 
         # TODO: Add an output for each rdf term pointing to the same variable.
 
-        # TODO: Use qualified names instead of `local_name`
+        # TODO: Remove this. See above.
         if pvar.short_name in todo_use_qualified_names:
             raise NotImplementedError('Need to convert output maps to use qualified instead of local names.')
         todo_use_qualified_names.add(pvar.short_name)
@@ -278,6 +276,43 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
             'rhs': printer.doprint(eq.rhs),
             'parameter_index': parameter_variables.get(eq.lhs, None),
         })
+
+    # Debug output
+    if True:
+        print('=== STATES ' + '=' * 68)
+        for i in sorted(state_info, key=lambda x: x['index']):
+            print(f"{i['index']} {i['var_name']}, {i['deriv_name']}, init {i['initial_value']}")
+            for name in i['var_names']:
+                print(f"  {name}")
+
+        print('=== PARAMETERS ' + '=' * 64)
+        for i in sorted(parameter_info, key=lambda x: x['index']):
+            print(f"{i['index']} {i['var_name']}, init {i['initial_value']}")
+            print(f"  {i['local_name']}")
+
+        print('=== OUTPUTS ' + '=' * 67)
+        for i in sorted(output_info, key=lambda x: x['index']):
+            if i['length'] is None:
+                print(f"{i['index']} {i['var_name']}")
+                print(f"  {i['local_name']}")
+            else:
+                print(f"{i['index']} vector: ")
+                for var in sorted(i['var_name'], key=lambda x: x['index']):
+                    print(f"    {var['index']} {var['var_name']}")
+
+                print(f"  {i['local_name']}")
+
+        print('=== OUTPUT EQUATIONS ' + '=' * 58)
+        for e in output_equations:
+            print(f"{e['lhs']} = {e['rhs']}")
+            if e['parameter_index'] is not None:
+                print(f"  Parameter index {e['parameter_index']}")
+
+        print('=== RHS EQUATIONS ' + '=' * 61)
+        for e in rhs_equations:
+            print(f"{e['lhs']} = {e['rhs']}")
+            if e['parameter_index'] is not None:
+                print(f"  Parameter index {e['parameter_index']}")
 
     # Generate model
     template = load_template('weblab_model.pyx')

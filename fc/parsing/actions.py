@@ -1241,6 +1241,9 @@ class ModelInterface(BaseGroupAction):
         # Process ``clamp`` statements with an RHS
         self._handle_clamping()
 
+        # Process vector outputs
+        self._process_transitive_variables()
+
         # Gather state variables, store vector ordering and add to ProtocolVariable if requested
         self._gather_state_variables(original_state_order)
 
@@ -1650,6 +1653,9 @@ class ModelInterface(BaseGroupAction):
         """
         Searches for transitive variables (for vector outputs), converts their units if needed, and updates the
         information stored in the ProtocolVariable objects.
+
+        This is also the first time we can check that all outputs are specified correctly, so errors will be raised here
+        if protocol variables are not found.
         """
         # TODO: We only check transitive variables for outputs that have not been resolved to model variables. At the
         # moment there's no checking that e.g. inputs don't have transitive variables, or that resolved outputs are not
@@ -1672,9 +1678,10 @@ class ModelInterface(BaseGroupAction):
 
                     # Convert units
                     if pvar.units is not None:
+                        units = self.units.get_unit(pvar.units)
                         converted = []
                         for var in variables:
-                            converted.add(self.model.convert_variable(var, pvar.units, DataDirectionFlow.OUTPUT))
+                            converted.append(self.model.convert_variable(var, units, DataDirectionFlow.OUTPUT))
                         variables = converted
 
                     # Update ProtocolVariable object
