@@ -196,10 +196,17 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     # Parameters are inputs that aren't states, and have a constant RHS
     parameter_info = []
     parameter_variables = {}
+    todo_use_qualified_names = set()
     for pvar in protocol_variables:
         if pvar.is_input and pvar.model_variable is not None:
             eq = model.get_definition(pvar.model_variable)
             if eq is not None and not eq.lhs.is_Derivative and len(eq.rhs.atoms(VariableDummy)) == 0:
+
+                # TODO: Use qualified names instead of `local_name`
+                if pvar.short_name in todo_use_qualified_names:
+                    raise NotImplementedError('Need to convert parameter maps to use qualified instead of local names.')
+                todo_use_qualified_names.add(pvar.short_name)
+
                 i = len(parameter_info)
                 parameter_info.append({
                     'index': i,
@@ -213,6 +220,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     # Each output is associated either with a variable or a list thereof.
     output_info = []
     output_variables = set()
+    todo_use_qualified_names = set()
     for pvar in protocol_variables:
         if not pvar.is_output:
             continue
@@ -237,7 +245,13 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
         else:
             continue
 
-        # TODO: Add an output for each rdf term pointing to the same variable. Might require a better naming
+        # TODO: Add an output for each rdf term pointing to the same variable.
+
+        # TODO: Use qualified names instead of `local_name`
+        if pvar.short_name in todo_use_qualified_names:
+            raise NotImplementedError('Need to convert output maps to use qualified instead of local names.')
+        todo_use_qualified_names.add(pvar.short_name)
+
         output_info.append({
             'index': len(output_info),
             'local_name': pvar.short_name,
