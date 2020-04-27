@@ -158,7 +158,7 @@
   </connection>
   <rdf:RDF>
     <rdf:Description rdf:about="#C">
-      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance%20units"/>
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_capacitance"/>
     </rdf:Description>
     <rdf:Description rdf:about="#cai">
       <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_calcium_concentration"/>
@@ -167,16 +167,16 @@
       <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#extracellular_calcium_concentration"/>
     </rdf:Description>
     <rdf:Description rdf:about="#ikr">
-      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current%20units"/>
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
     </rdf:Description>
     <rdf:Description rdf:about="#ina">
       <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_fast_sodium_current"/>
     </rdf:Description>
     <rdf:Description rdf:about="#inab">
-      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_background_sodium_current%20units"/>
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_background_sodium_current"/>
     </rdf:Description>
     <rdf:Description rdf:about="#inal">
-      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_persistent_sodium_current%20units"/>
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_persistent_sodium_current"/>
     </rdf:Description>
     <rdf:Description rdf:about="#ki">
       <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#cytosolic_potassium_concentration"/>
