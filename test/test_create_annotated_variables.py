@@ -1,10 +1,7 @@
 """
 Tests creating new annotated variables with optional+default, or via define
 """
-import pytest
-
 import fc
-from fc.error_handling import ProtocolError
 
 
 def test_create_annotated():
