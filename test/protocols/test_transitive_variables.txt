@@ -37,7 +37,7 @@ model interface {
     clamp oxmeta:extracellular_sodium_concentration
 
     # Optional concentration to be created, that will be a transitive variable
-    output oxmeta:extracellular_chloride_concentration units nanomolar
+    output oxmeta:extracellular_chloride_concentration units micromolar
     optional oxmeta:extracellular_chloride_concentration default 1000 :: nanomolar + oxmeta:extracellular_calcium_concentration
 
     # Redefine currents in different units (should be converted back to make dot(V) equation work)
