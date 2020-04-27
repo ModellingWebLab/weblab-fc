@@ -1723,7 +1723,7 @@ class ModelInterface(BaseGroupAction):
         Gather all variables annotated as states, and create a vector ordering. If required, update the ProtocolVariable
         for the oxmeta:state_variable annotation.
 
-        :param original_ordering: An list containing the rdf identities of the variables as they originally appeared
+        :param original_state_order: An list containing the rdf identities of the variables as they originally appeared
             (before any model manipulation).
         """
         # Gather state variables
