@@ -1733,7 +1733,7 @@ class ModelInterface(BaseGroupAction):
             (before any model manipulation).
         """
         # Gather state variables
-        states = get_variables_that_are_version_of(self.model, STATE_ANNOTATION)
+        states = list(get_variables_that_are_version_of(self.model, STATE_ANNOTATION))
 
         # Create and store ordering, preserving original ordering as much as possible
         order = []
@@ -1749,7 +1749,8 @@ class ModelInterface(BaseGroupAction):
 
         # Set transitive variables for `state_variable` term, if it's present in the protocol
         if self.magic_pvar is not None:
-            self.magic_pvar.vector_variables = order
+            states.sort(key=lambda var: self.vector_orderings[STATE_ANNOTATION][var.rdf_identity])
+            self.magic_pvar.vector_variables = states
 
     def _purge_unused_mathematics(self):
         """Remove model equations and variables not needed for generating desired outputs."""
