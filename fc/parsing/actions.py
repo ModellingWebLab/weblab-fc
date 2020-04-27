@@ -1478,9 +1478,6 @@ class ModelInterface(BaseGroupAction):
         todo = deque(self.protocol_variables)
         while todo:
 
-            # A potential MissingVariableError encountered in this pass
-            error = None
-
             # Perform a single pass over the todo-variables, and check that at least one gets done
             done = False
             for i in range(len(todo)):
@@ -1532,7 +1529,6 @@ class ModelInterface(BaseGroupAction):
                         except MissingVariableError as e:
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
-                            error = e
                             continue
 
                         # Get units for the variable to create from its RHS, fixing inconsistencies if required
@@ -1570,7 +1566,6 @@ class ModelInterface(BaseGroupAction):
                         except MissingVariableError as e:
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
-                            error = e
                             continue
 
                     # Get sympy lhs
@@ -1634,10 +1629,10 @@ class ModelInterface(BaseGroupAction):
             if not done:
                 # No changes in iteration implies there are missing variables in the RHS of at least one variable.
                 # Create a ProtocolError based on the last MissingVariableError
-                assert error is not None, 'No changes made when resolving equations, but no error set'
+                todo = ', '.join([pvar.name for pvar in todo])
                 raise ProtocolError(
-                    'Unable to resolve all references in the protocol equations: ' + str(error)
-                ) from error
+                    f'Unable to create or set equations for {todo}: Please check model interface for units information'
+                    f' or unknown references in these variables right-hand side.')
 
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
