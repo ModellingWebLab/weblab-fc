@@ -215,18 +215,17 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
     for pvar in protocol_variables:
         if not pvar.is_output:
             continue
-        elif pvar.model_variable is not None:
+        assert pvar.model_variable is not None or pvar.vector_variables
+        if pvar.model_variable is not None:
             # Single variable output
             length = None
             var_name = variable_name(pvar.model_variable)
             output_variables.add(pvar.model_variable)
-        elif pvar.vector_variables:
+        else:
             # Vector output
             length = len(pvar.vector_variables)
             var_name = [{'index': i, 'var_name': variable_name(v)} for i, v in enumerate(pvar.vector_variables)]
             output_variables.update(pvar.vector_variables)
-        else:
-            continue
 
         # TODO: Add an output for each rdf term pointing to the same variable.
 
