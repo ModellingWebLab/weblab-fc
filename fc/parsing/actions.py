@@ -1609,13 +1609,13 @@ class ModelInterface(BaseGroupAction):
                         # Note that we use pvar.original_definition here, because `eq` can contain references to unit
                         # converted variables (in that case, pvar.original_definition will still refer to the original
                         # unconverted ones).
-                        org_eq = pvar.original_definition
-                        org_def = self.model.add_variable(
+                        orig_eq = pvar.original_definition
+                        orig_def = self.model.add_variable(
                             name=self.model.get_unique_name('original_rhs_of__' + pvar.short_name),
-                            units=self.units.evaluate_units(org_eq.lhs),
+                            units=self.units.evaluate_units(orig_eq.lhs),
                         )
-                        self.model.add_equation(sympy.Eq(org_def, org_eq.rhs))
-                        rhs = rhs.xreplace({ORIGINAL_DEFINITION: org_def})
+                        self.model.add_equation(sympy.Eq(orig_def, orig_eq.rhs))
+                        rhs = rhs.xreplace({ORIGINAL_DEFINITION: orig_def})
 
                     # Get sympy lhs
                     if pvar.equation is not None:
