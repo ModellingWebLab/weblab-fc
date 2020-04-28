@@ -1278,6 +1278,9 @@ class ModelInterface(BaseGroupAction):
 
         Used by :meth:`convert_equations_to_sympy`.
 
+        May raise a :class:`MissingVariableError` if the number's units are set with ``units_of(x)`` where ``x`` is a
+        variable not (yet) known to the model.
+
         :param value: the numerical value
         :param units: the *name* of the units for this quantity. Will be looked up from the protocol's definitions.
             Alternatively, this can be a string ``units_of(variable)`` where ``variable`` is an ontology term for a
@@ -1285,10 +1288,8 @@ class ModelInterface(BaseGroupAction):
         """
         if units.startswith('units_of('):
             name = units[9:-1]
-            try:
-                var = self._variable_generator(name)
-            except KeyError:
-                raise ProtocolError(f'Unknown variable referenced in units_of(): {name}.')
+            # Get variable. This may trigger a MissingVariableError.
+            var = self._variable_generator(name)
             units = var.units
         else:
             units = self.units.get_unit(units)
@@ -1518,7 +1519,10 @@ class ModelInterface(BaseGroupAction):
                                 raise ProtocolError(f'No units specified for non-optional variable {pvar.long_name}.')
 
                         # Try getting sympy RHS
-                        # TODO: There's probably a faster way to check if we can resolve all variables in the RHS
+                        # Note: This involves checking both variable dependencies, and dependencies on units of
+                        # variables via numbers in ``units_of(..)``. So it's not enough at this point that all variables
+                        # we depend on are resolved, we also need all variables mentioned in units_of() to be resolved.
+                        # Both will raise a MissingVariableError if they can't be resolved.
                         try:
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
                         except MissingVariableError as e:
