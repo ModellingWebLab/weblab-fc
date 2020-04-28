@@ -26,6 +26,9 @@ from .rdf import create_rdf_node, get_variables_transitively, get_variables_that
 # Magic state annotation
 STATE_ANNOTATION = create_rdf_node((OXMETA_NS, 'state_variable'))
 
+# Sympy symbol for "original_definition" construct
+ORIGINAL_DEFINITION = sympy.Symbol('original_definition')
+
 # Operators, sympy operators, etc.
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
              '==': E.Eq, '!=': E.Neq, '<': E.Lt, '>': E.Gt, '<=': E.Leq, '>=': E.Geq,
@@ -840,11 +843,12 @@ class ModelEquation(BaseGroupAction):
 
     def lhs_to_sympy(self, variable_generator, number_generator):
         """Converts only this equation's LHS to sympy."""
-        var = self.var.to_sympy(variable_generator, number_generator)
+
+        lhs = self.var.to_sympy(variable_generator, number_generator)
         if self.is_ode:
             bvar = self.bvar.to_sympy(variable_generator, number_generator)
-            return sympy.Derivative(var, bvar, evaluate=False)
-        return var
+            lhs = sympy.Derivative(lhs, bvar, evaluate=False)
+        return lhs
 
 
 class Interpolate(BaseGroupAction):
@@ -1258,6 +1262,10 @@ class ModelInterface(BaseGroupAction):
             :meth:`cellmlmanip.model.Model.get_variable_by_ontology_term`. Otherwise we look for a variable defined
             within the protocol's model interface using :class:`DeclareVariable`.
         """
+        # Reference to original definition: return a simple Sympy symbol to be substituted at a later stage.
+        if name == 'original_definition':
+            return ORIGINAL_DEFINITION
+
         # Annotation
         if ':' in name:
             prefix, local_name = name.split(':', 1)
@@ -1531,6 +1539,12 @@ class ModelInterface(BaseGroupAction):
                             todo.append(pvar)
                             continue
 
+                        # New variable, can't contain an `original_definition` in its RHS
+                        if ORIGINAL_DEFINITION in rhs.atoms():
+                            raise ProtocolError(
+                                'The "original_definition" construct can only be used when redefining an existing'
+                                ' variable. Found it when creating variable for {pvar.long_name}.')
+
                         # Get units for the variable to create from its RHS, fixing inconsistencies if required
                         units, rhs = self.units.evaluate_units_and_fix(rhs)
 
@@ -1568,6 +1582,22 @@ class ModelInterface(BaseGroupAction):
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
                             continue
+
+                    # Check if the RHS for this variable contains a reference to ``original_definition``
+                    if ORIGINAL_DEFINITION in rhs.atoms():
+                        if eq is None:
+                            raise ProtocolError(
+                                'The "original_definition" construct can only be used when redefining an existing'
+                                ' variable. Found it when creating variable for {pvar.long_name}.')
+
+                        # Create a new variable with the original equation for this variable, and replace the
+                        # original_definition symbol in the equation.
+                        org_def = self.model.add_variable(
+                            name=self.model.get_unique_name('original_rhs_of__' + pvar.short_name),
+                            units=self.units.evaluate_units(eq.lhs),
+                        )
+                        self.model.add_equation(sympy.Eq(org_def, eq.rhs))
+                        rhs = rhs.xreplace({ORIGINAL_DEFINITION: org_def})
 
                     # Get sympy lhs
                     if pvar.equation is not None:
