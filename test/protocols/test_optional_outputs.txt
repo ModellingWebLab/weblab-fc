@@ -1,0 +1,32 @@
+# Test having optional protocol outputs that do and do not resolve.
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    mV = milli volt
+    ms = milli second
+    mM = milli mole . litre^-1
+}
+
+model interface {
+    independent var units ms
+
+    # Optional output that is resolved
+    output oxmeta:membrane_voltage units mV
+    optional oxmeta:membrane_voltage
+
+    # Optional output that isn't resolved
+    output oxmeta:extracellular_chloride_concentration units mM
+    optional oxmeta:extracellular_chloride_concentration
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+
+outputs {
+    optional V = sim:membrane_voltage
+    optional Cl_e = sim:extracellular_chloride_concentration
+}
