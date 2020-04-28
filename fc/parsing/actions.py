@@ -906,6 +906,9 @@ class ProtocolVariable():
         ``True`` iff this variable is a vector output.
     ``is_local``
         ``True`` iff this is a local variable (i.e. defined within the protocol).
+    ``is_clamped_to_initial``
+        ``True`` iff this variable is clamped to its initial value (clamping to an explicit value is treated as a
+        shorthand for a `define` clause).
     ``units``
         The string name of the units specified for this variable (or ``None``).
     ``initial_value``
@@ -935,6 +938,7 @@ class ProtocolVariable():
         self.is_optional = False
         self.is_vector = False
         self.is_local = False
+        self.is_clamped_to_initial = False
         self.units = None
         self.initial_value = None
         self.default_expr = None
@@ -943,8 +947,8 @@ class ProtocolVariable():
         self.vector_variables = []
 
     def update(self, name=None, input_term=None, output_term=None, is_optional=False, is_vector=False, is_local=False,
-               units=None, initial_value=None, default_expr=None, equation=None, model_variable=None,
-               vector_variables=None):
+               is_clamped_to_initial=False, units=None, initial_value=None, default_expr=None, equation=None,
+               model_variable=None, vector_variables=None):
         """
         Merges new information into this :class:`ProtocolVariable`, raises a ProtocolError if new information is
         incompatible with what is already stored.
@@ -966,6 +970,7 @@ class ProtocolVariable():
         self.is_optional = self.is_optional or is_optional
         self.is_vector = self.is_vector or is_vector
         self.is_local = self.is_local or is_local
+        self.is_clamped_to_initial = self.is_clamped_to_initial or is_clamped_to_initial
 
         # Merge units
         if self.units is None:
@@ -978,20 +983,24 @@ class ProtocolVariable():
             self.initial_value = initial_value
         elif initial_value is not None and initial_value != self.initial_value:
             raise ProtocolError(f'Multiple initial values specified for {self.long_name} ({self.initial_value} and'
-                                ' {initial_value}).')
+                                f' {initial_value}).')
 
         # Merge default expression
         if self.default_expr is None:
             self.default_expr = default_expr
         elif default_expr is not None and default_expr != self.default_expr:
             raise ProtocolError(f'Multiple default expressions specified for {self.long_name} ({self.default_expr} and'
-                                ' {default_expr}).')
+                                f' {default_expr}).')
 
-        # Merge equation
+        # Merge equation, check it's not also clamped to initial value
         if self.equation is None:
             self.equation = equation
         elif equation is not None and equation != self.equation:
             raise ProtocolError(f'Multiple equations specified for {self.long_name}.')
+        if self.equation is not None and self.is_clamped_to_initial:
+            raise ProtocolError(
+                f'Multiple definitions given for {self.long_name}: this variable is both clamped to its initial value'
+                f' and redefined with a define or additional clamp statement.')
 
         # Set model variable
         if model_variable is not None:
@@ -1005,11 +1014,14 @@ class ProtocolVariable():
             # At the moment this isn't used: vectors are only set post-modifications
             self.vector_variables.extend(vector_variables)
 
-        # Check type information isn't conflicting (shouldn't be possible unless code/logic is wrong)
+        # Check type information isn't conflicting (mostly shouldn't be possible unless code/logic is wrong)
         assert not (self.is_local and (self.is_input or self.is_output)), f'{self.long_name} is local AND input/output'
+        assert not (self.is_local and self.is_clamped_to_initial), f'{self.long_name} is local AND init-clamped'
         if self.is_vector:
             assert self.model_variable is None, f'{self.long_name} is a vector, but has a scalar variable'
             assert not self.is_input, f'{self.long_name} is an input AND a vector output'
+            assert self.equation is None, f'{self.long_name} is a vector output but sets a new equation'
+            assert not self.is_clamped_to_initial, f'{self.long_name} is a vector output and clamped to initial'
             assert len(self.output_terms) == 1, f'{self.long_name} is a vector with multiple output terms'
         else:
             assert not self.vector_variables, f'{self.long_name} is not a vector, but has vector variables'
@@ -1039,6 +1051,7 @@ class ProtocolVariable():
         self.update(
             name=pvar.name,
             is_local=pvar.local,
+            is_clamped_to_initial=pvar.is_clamped_to_initial,
             units=pvar.units,
             initial_value=pvar.initial_value,
             default_expr=pvar.default_expr,
@@ -1357,6 +1370,11 @@ class ModelInterface(BaseGroupAction):
             pvar = name_to_pvar[ref.name] = ProtocolVariable(ref.name)
             pvar.update(is_local=True, units=ref.units, initial_value=ref.initial_value)
 
+        # Add clamp-to-initial-value statements.
+        for ref in self.clamps:
+            pvar = get(ref)
+            pvar.update(is_clamped_to_initial=True)
+
         # Store equations from define and clamp statements
         for eq in self.equations:
             name = eq.var.name()
@@ -1408,16 +1426,6 @@ class ModelInterface(BaseGroupAction):
                 raise ProtocolVariable(
                     f'The model variable {pvar.model_variable} is specified as a protocol input by more than one'
                     f'ontology term {pvar.long_name}.')
-
-        # Check against overdefinedness through clamp-to-initial-value plus an equation
-        for ref in self.clamps:
-            try:
-                pvar = var_to_pvar[self.model.get_variable_by_ontology_term(ref.rdf_term)]
-            except KeyError:
-                continue
-            if pvar.equation:
-                raise ProtocolError(
-                    f'The variable {pvar.long_name} is set by more than one clamp and/or define statement.')
 
         # Store all protocol variables
         self.protocol_variables = list(name_to_pvar.values())
@@ -1578,7 +1586,7 @@ class ModelInterface(BaseGroupAction):
                     # Setting as state variable? Then make sure an initial value exists
                     if lhs.is_Derivative and pvar.model_variable.initial_value is None and pvar.initial_value is None:
                         raise ProtocolError(f'The variable {pvar.long_name} is being set as a state variable but has no'
-                                            ' initial value (this can be set using an `input` or `var` statement).')
+                                            f' initial value (this can be set using an `input` or `var` statement).')
 
                     # Create new equation
                     # If required, convert units within RHS to make it consistent and match the LHS units
@@ -1637,17 +1645,28 @@ class ModelInterface(BaseGroupAction):
 
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
-        for clamp in self.clamps:
-            var = self.model.get_variable_by_ontology_term(clamp.rdf_term)
-            defn = self.model.get_definition(var)
-            if var.initial_value is None:
-                value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
-            else:
-                value = var.initial_value
-            new_defn = sympy.Eq(var, self.model.add_number(value, var.units))
-            if defn is not None:
-                self.model.remove_equation(defn)
-            self.model.add_equation(new_defn)
+
+        for pvar in self.protocol_variables:
+            if pvar.is_clamped_to_initial:
+
+                # Get model variable
+                var = pvar.model_variable
+                if var is None:
+                    if pvar.is_optional:
+                        continue
+                    else:
+                        raise ProtocolError(f'Clamp-to-initial-value set for unknown variable {pvar.long_name}.')
+
+                # Evaluate and update equation
+                defn = self.model.get_definition(var)
+                if defn.lhs.is_Derivative:
+                    value = var.initial_value
+                else:
+                    value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
+                new_defn = sympy.Eq(var, self.model.add_number(value, var.units))
+                if defn is not None:
+                    self.model.remove_equation(defn)
+                self.model.add_equation(new_defn)
 
     def _process_transitive_variables(self):
         """
