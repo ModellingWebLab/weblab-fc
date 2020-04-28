@@ -11,8 +11,6 @@ from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER
 from cellmlmanip.printer import Printer
 from cellmlmanip.transpiler import Transpiler
 
-from .parsing.rdf import OXMETA_NS
-
 # Tell cellmlmanip to create _exp objects instead of exp objects. This prevents Sympy doing simplification (or
 # canonicalisation) resulting in weird errors with exps in some cardiac models.
 Transpiler.set_mathml_handler('exp', sympy.Function('_exp'))
@@ -182,7 +180,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
             'var_name': variable_name(state),
             'deriv_name': derivative_name(state),
             'initial_value': state.initial_value,
-            'var_names': model.get_ontology_terms_by_variable(state, OXMETA_NS),
+            'var_names': model.get_ontology_terms_by_variable(state),
         })
 
     # Create parameter information dicts, and map of parameter variables to their indices.
