@@ -1444,16 +1444,6 @@ class ModelInterface(BaseGroupAction):
                     f'The model variable {pvar.model_variable} is specified as a protocol input by more than one'
                     f'ontology term {pvar.long_name}.')
 
-        # Check against overdefinedness through clamp-to-initial-value plus an equation
-        for ref in self.clamps:
-            try:
-                pvar = var_to_pvar[self.model.get_variable_by_ontology_term(ref.rdf_term)]
-            except KeyError:
-                continue
-            if pvar.equation:
-                raise ProtocolError(
-                    f'The variable {pvar.long_name} is set by more than one clamp and/or define statement.')
-
         # Store the original equations for any variable that will be redefined with an equation
         for pvar in name_to_pvar.values():
             if pvar.equation is not None and pvar.model_variable is not None:
