@@ -284,7 +284,7 @@ class CompactSyntaxParser(object):
                                     ])
     simple_param_list = p.Group(optional_delimited_list(p.Group(nc_ident_as_var), comma))
     simple_lambda_expr = p.Group(make_kw('lambda') - simple_param_list + colon -
-                               expr).setName('SimpleLambda').setParseAction(actions.Lambda)
+                                 simple_expr).setName('SimpleLambda').setParseAction(actions.Lambda)
 
     # Newlines in expressions may be escaped with a backslash
     expr.ignore('\\' + p.LineEnd())
