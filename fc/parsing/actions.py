@@ -1476,12 +1476,9 @@ class ModelInterface(BaseGroupAction):
         # unresolvable.
         todo = deque(self.protocol_variables)
         while todo:
-
-            # A potential MissingVariableError encountered in this pass
-            error = None
-
             # Perform a single pass over the todo-variables, and check that at least one gets done
             done = False
+            missing_variables = set()
             for i in range(len(todo)):
                 pvar = todo.popleft()
 
@@ -1526,9 +1523,9 @@ class ModelInterface(BaseGroupAction):
                         try:
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
                         except MissingVariableError as e:
+                            missing_variables.add(e.name)
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
-                            error = e
                             continue
 
                         # Get units for the variable to create from its RHS, fixing inconsistencies if required
@@ -1564,9 +1561,9 @@ class ModelInterface(BaseGroupAction):
                         try:
                             rhs = rhs.to_sympy(self._variable_generator, self._number_generator)
                         except MissingVariableError as e:
+                            missing_variables.add(e.name)
                             # Unable to create at this time, but may be able to at a next pass
                             todo.append(pvar)
-                            error = e
                             continue
 
                     # Get sympy lhs
@@ -1628,12 +1625,12 @@ class ModelInterface(BaseGroupAction):
                 done = True
 
             if not done:
-                # No changes in iteration implies there are missing variables in the RHS of at least one variable.
-                # Create a ProtocolError based on the last MissingVariableError
-                assert error is not None, 'No changes made when resolving equations, but no error set'
+                # No changes in pass implies there are missing variables in the RHS of at least one variable.
+                todo = ', '.join([pvar.name for pvar in todo])
+                unknown = ', '.join(['"' + x + '"' for x in missing_variables])
                 raise ProtocolError(
-                    'Unable to resolve all references in the protocol equations: ' + str(error)
-                ) from error
+                    f'Unable to create or set equations for {todo}.'
+                    f' References found to unknown variable(s): {unknown}.')
 
     def _handle_clamping(self):
         """Clamp requested variables to their initial values."""
