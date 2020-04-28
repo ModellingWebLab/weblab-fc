@@ -13,10 +13,14 @@ units {
 model interface {
     independent var units ms
 
+    # Clamp a variable that's know to exist
     output oxmeta:membrane_voltage units mV
+    optional oxmeta:membrane_voltage
     clamp oxmeta:membrane_voltage
 
+    # Clamp a variable that's known not to exist (in simple_ode.cellml)
     output oxmeta:extracellular_chloride_concentration units mM
+    optional oxmeta:extracellular_chloride_concentration
     clamp oxmeta:extracellular_chloride_concentration
 }
 
