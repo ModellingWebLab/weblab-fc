@@ -47,7 +47,7 @@ model interface {
     input oxmeta:membrane_voltage = 0.1
     output oxmeta:membrane_voltage units MV
 
-    # Create another variable in mV, to read out the value
+    # Create another variable in volts, to read out the value
     define oxmeta:potassium_reversal_potential = oxmeta:sodium_reversal_potential
     output oxmeta:potassium_reversal_potential units volt
 }
@@ -68,4 +68,3 @@ post-processing {
     assert sim:membrane_voltage[0] == 0.1
     assert sim:potassium_reversal_potential[0] == 1000000
 }
-
