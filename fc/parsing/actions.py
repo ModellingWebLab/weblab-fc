@@ -1399,6 +1399,7 @@ class ModelInterface(BaseGroupAction):
         # Remove 'alias' references
         for pvar in aliases:
             del name_to_pvar[pvar.name]
+        del aliases
 
         # Raise error if a variable is specified as an input using two different ontology terms
         for pvar in name_to_pvar.values():
@@ -2144,4 +2145,3 @@ class Protocol(BaseAction):
         d['ns_map'] = ns_map
 
         return d
-
