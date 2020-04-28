@@ -227,7 +227,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
             output_variables.update(pvar.vector_variables)
         else:
             # Optional, unresolved output
-            assert pvar.is_optional
+            assert pvar.is_optional, 'Unresolved non-optional variable ' + pvar.long_name
             continue
 
         # TODO: Add an output for each rdf term pointing to the same variable.

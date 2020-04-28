@@ -1750,6 +1750,7 @@ class ModelInterface(BaseGroupAction):
         # Order states and store
         states.sort(key=lambda var: order[var.rdf_identity])
         self.magic_pvar.vector_variables = states
+        self.magic_pvar.update(is_vector=True)
 
     def _purge_unused_mathematics(self):
         """Remove model equations and variables not needed for generating desired outputs."""
