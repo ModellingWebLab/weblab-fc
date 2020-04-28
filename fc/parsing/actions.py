@@ -940,7 +940,7 @@ class ProtocolVariable():
         self.default_expr = None
         self.equation = None
         self.model_variable = None
-        self.vector_variables = set()
+        self.vector_variables = []
 
     def update(self, name=None, input_term=None, output_term=None, is_optional=False, is_vector=False, is_local=False,
                units=None, initial_value=None, default_expr=None, equation=None, model_variable=None,
@@ -1002,7 +1002,8 @@ class ProtocolVariable():
 
         # Add vector variables
         if vector_variables:
-            self.vector_variables.update(vector_variables)
+            # At the moment this isn't used: vectors are only set post-modifications
+            self.vector_variables.extend(vector_variables)
 
         # Check type information isn't conflicting (shouldn't be possible unless code/logic is wrong)
         assert not (self.is_local and (self.is_input or self.is_output)), f'{self.long_name} is local AND input/output'
@@ -1097,8 +1098,6 @@ class ModelInterface(BaseGroupAction):
         A list of :class:`ProtocolVariable` objects.
     ``local_vars``
         A dict mapping names of local variables (created with ``var`` / ``DeclareVariable``) to model variables.
-    ``vector_orderings``
-        Used for consistent code generation of vector outputs.
     ``magic_pvar``
         A :class:`ProtocolVariable` for the magic annotation ``oxmeta:state_variable``, or ``None``.
 
@@ -1128,7 +1127,6 @@ class ModelInterface(BaseGroupAction):
         self.time_variable = None
         self.protocol_variables = []
         self.local_vars = {}
-        self.vector_orderings = {}
         self.magic_pvar = None
 
     def _expr(self):
@@ -1709,11 +1707,8 @@ class ModelInterface(BaseGroupAction):
                             converted.append(self.model.convert_variable(var, units, DataDirectionFlow.OUTPUT))
                         variables = converted
 
-                    # Create and store vector ordering (sort by display name)
+                    # Order variables by display name
                     variables.sort(key=lambda var: self.model.get_display_name(var))
-                    order = {var.rdf_identity: i for i, var in enumerate(variables)}
-                    for rdf_term in pvar.output_terms:
-                        self.vector_orderings[rdf_term] = dict(order)
 
                     # Update ProtocolVariable object
                     pvar.update(is_vector=True, vector_variables=variables)
@@ -1723,16 +1718,19 @@ class ModelInterface(BaseGroupAction):
 
     def _gather_state_variables(self, original_state_order):
         """
-        Gather all variables annotated as states, and create a vector ordering. If required, update the ProtocolVariable
-        for the oxmeta:state_variable annotation.
+        Gather all variables annotated as states and store them in the the ProtocolVariable for the
+        ``oxmeta:state_variable annotation`` (if used by the protocol).
 
         :param original_state_order: An list containing the rdf identities of the variables as they originally appeared
             (before any model manipulation).
         """
+        if self.magic_pvar is None:
+            return
+
         # Gather state variables
         states = list(get_variables_that_are_version_of(self.model, STATE_ANNOTATION))
 
-        # Create and store ordering, preserving original ordering as much as possible
+        # Create ordering, preserving original order as much as possible
         order = []
         todo = set([var.rdf_identity for var in states])
         for rdf_identity in original_state_order:
@@ -1742,12 +1740,11 @@ class ModelInterface(BaseGroupAction):
                 continue
             order.append(rdf_identity)
         order.extend(todo)
-        self.vector_orderings[STATE_ANNOTATION] = {rdf_identity: i for i, rdf_identity in enumerate(order)}
+        order = {rdf_identity: i for i, rdf_identity in enumerate(order)}
 
-        # Set transitive variables for `state_variable` term, if it's present in the protocol
-        if self.magic_pvar is not None:
-            states.sort(key=lambda var: self.vector_orderings[STATE_ANNOTATION][var.rdf_identity])
-            self.magic_pvar.vector_variables = states
+        # Order states and store
+        states.sort(key=lambda var: order[var.rdf_identity])
+        self.magic_pvar.vector_variables = states
 
     def _purge_unused_mathematics(self):
         """Remove model equations and variables not needed for generating desired outputs."""
