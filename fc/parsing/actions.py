@@ -918,7 +918,9 @@ class ProtocolVariable():
         An expression (``fc.language.AbstractExpression``) for this variable's default value. Set if given as part of an
         ``optional`` clause, else ``None``.
     ``equation``
-        An equation for this variable, set using a ``define`` or a ``clamp`` clause.
+        An FC equation for this variable, set using a ``define`` or a ``clamp`` clause.
+    ``original_definition``
+        The Sympy equation for this variable, before any modifications were made.
     ``model_variable``
         A :class:`VariableDummy` instance that this protocol variable refers to (note that this may change during the
         lifetime of a :class:`ProtocolVariable`, e.g. through unit conversion.
@@ -943,12 +945,13 @@ class ProtocolVariable():
         self.initial_value = None
         self.default_expr = None
         self.equation = None
+        self.original_definition = None
         self.model_variable = None
         self.vector_variables = []
 
     def update(self, name=None, input_term=None, output_term=None, is_optional=False, is_vector=False, is_local=False,
-               units=None, initial_value=None, default_expr=None, equation=None, model_variable=None,
-               vector_variables=None):
+               units=None, initial_value=None, default_expr=None, equation=None, original_definition=None,
+               model_variable=None, vector_variables=None):
         """
         Merges new information into this :class:`ProtocolVariable`, raises a ProtocolError if new information is
         incompatible with what is already stored.
@@ -996,6 +999,12 @@ class ProtocolVariable():
             self.equation = equation
         elif equation is not None and equation != self.equation:
             raise ProtocolError(f'Multiple equations specified for {self.long_name}.')
+
+        # Merge original definition
+        if self.original_definition is None:
+            self.original_definition = original_definition
+        elif original_definition is not None and original_definition != self.original_definition:
+            raise ProtocolError(f'Multiple original definitions specified for {self.long_name}.')
 
         # Set model variable
         if model_variable is not None:
@@ -1389,7 +1398,7 @@ class ModelInterface(BaseGroupAction):
         aliases = []
         for pvar in name_to_pvar.values():
             try:
-                pvar.model_variable = self._variable_generator(pvar.name)
+                pvar.update(model_variable=self._variable_generator(pvar.name))
             except MissingVariableError:
                 # Could be optional, or vector output (which we can only determine post model modifications)
                 continue
@@ -1401,7 +1410,7 @@ class ModelInterface(BaseGroupAction):
                 var_to_pvar[pvar.model_variable] = pvar
                 continue
 
-            # Merge, and mark pvar for removal
+            # Merge into partner, and mark this pvar for removal
             partner.merge(pvar)
             aliases.add(pvar)
 
@@ -1426,6 +1435,11 @@ class ModelInterface(BaseGroupAction):
             if pvar.equation:
                 raise ProtocolError(
                     f'The variable {pvar.long_name} is set by more than one clamp and/or define statement.')
+
+        # Store the original equations for any variable that will be redefined with an equation
+        for pvar in name_to_pvar.values():
+            if pvar.equation is not None and pvar.model_variable is not None:
+                pvar.update(original_definition=self.model.get_definition(pvar.model_variable))
 
         # Store all protocol variables
         self.protocol_variables = list(name_to_pvar.values())
@@ -1592,11 +1606,15 @@ class ModelInterface(BaseGroupAction):
 
                         # Create a new variable with the original equation for this variable, and replace the
                         # original_definition symbol in the equation.
+                        # Note that we use par.original_definition here, because `eq` can contain references to unit
+                        # converted variables (in that case, pvar.original_definition will still refer to the original
+                        # unconverted ones).
+                        org_eq = pvar.original_definition
                         org_def = self.model.add_variable(
                             name=self.model.get_unique_name('original_rhs_of__' + pvar.short_name),
-                            units=self.units.evaluate_units(eq.lhs),
+                            units=self.units.evaluate_units(org_eq.lhs),
                         )
-                        self.model.add_equation(sympy.Eq(org_def, eq.rhs))
+                        self.model.add_equation(sympy.Eq(org_def, org_eq.rhs))
                         rhs = rhs.xreplace({ORIGINAL_DEFINITION: org_def})
 
                     # Get sympy lhs
