@@ -1,0 +1,37 @@
+# Test clamping an optional (but unresolved) state variable to its initial value
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    mV = milli volt
+    ms = milli second
+    mM = milli mole . litre^-1
+}
+
+model interface {
+    independent var units ms
+
+    output oxmeta:membrane_voltage units mV
+    clamp oxmeta:membrane_voltage
+
+    output oxmeta:extracellular_chloride_concentration units mM
+    clamp oxmeta:extracellular_chloride_concentration
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:5
+    }
+}
+
+post-processing {
+    assert std:Close(sim:membrane_voltage, [-85.0 for i in 0:6], 5.0)
+    assert std:Close(sim:time, [i for i in 0:6])
+}
+
+outputs {
+    V = sim:membrane_voltage
+    optional Cl = sim:extracellular_chloride_concentration
+}
