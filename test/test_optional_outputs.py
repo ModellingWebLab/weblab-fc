@@ -11,11 +11,11 @@ def test_optional_outputs():
     proto.set_output_folder('test_optional_outputs')
     proto.set_model('test/data/simple_ode.cellml')
     proto.run()
-    assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
 
-    # Voltage should be present
-    v = proto.output_env.look_up('V').array
+    # Voltage should be present, and can be looked up without error
+    proto.output_env.look_up('V')
 
     # Chloride should not: this should fail
-    cle_e = proto.output_env.look_up('Cl_e')
+    with pytest.raises(KeyError, match='Cl_e is not defined'):
+        proto.output_env.look_up('Cl_e')
 
