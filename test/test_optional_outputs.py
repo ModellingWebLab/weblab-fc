@@ -13,15 +13,9 @@ def test_optional_outputs():
     proto.run()
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
 
-    #TODO: Check outputs?
-    '''
+    # Voltage should be present
+    v = proto.output_env.look_up('V').array
 
-    # Check the max slope
-    slope = proto.output_env.look_up('max_S1S2_slope').array
-    assert len(slope) == 1
-    assert slope[0] == pytest.approx(0.212, abs=1e-3)
+    # Chloride should not: this should fail
+    cle_e = proto.output_env.look_up('Cl_e')
 
-    # Check we did the right number of timesteps (overridden protocol input)
-    v = proto.output_env.look_up('membrane_voltage').array
-    assert v.shape == (len(intervals), 2001)
-    '''
