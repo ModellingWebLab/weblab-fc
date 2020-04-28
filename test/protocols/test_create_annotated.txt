@@ -1,5 +1,5 @@
 #
-# Tests adding annotated variable with the "default expression" of an optionan and with a define, with explicitly
+# Tests adding annotated variable with the "default expression" of an optional and with a define, with explicitly
 # defined units.
 #
 # Designed to run with simple_ode.cellml
@@ -47,4 +47,3 @@ post-processing {
     assert sim:cytosolic_chloride_concentration[0] == 30
     assert sim:cytosolic_chloride_concentration[1] == 35
 }
-
