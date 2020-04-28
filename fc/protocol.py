@@ -640,7 +640,7 @@ class Protocol(object):
                 model,
                 ns_map=self.ns_map,
                 protocol_variables=self.model_interface.protocol_variables,
-                vector_orderings=self.model_interface.vector_orderings)
+            )
 
             self.log_progress('Compiling pyx model code...')
 
