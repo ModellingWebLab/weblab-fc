@@ -1606,7 +1606,7 @@ class ModelInterface(BaseGroupAction):
 
                         # Create a new variable with the original equation for this variable, and replace the
                         # original_definition symbol in the equation.
-                        # Note that we use par.original_definition here, because `eq` can contain references to unit
+                        # Note that we use pvar.original_definition here, because `eq` can contain references to unit
                         # converted variables (in that case, pvar.original_definition will still refer to the original
                         # unconverted ones).
                         org_eq = pvar.original_definition
