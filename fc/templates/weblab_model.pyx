@@ -153,7 +153,7 @@ cdef class {{ class_name }}(CvodeSolver):
         self.initial_state[{{ state.index }}] = {{ state.initial_value }}
         {%- endfor %}
 
-        # Mapping of parameter qualified names to parameter array indices
+        # Mapping of parameter local names to parameter array indices
         self.parameter_map = {}
         {%- for parameter in parameters %}
         self.parameter_map['{{ parameter.local_name }}'] = {{ parameter.index }}

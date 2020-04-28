@@ -58,3 +58,15 @@ def get_variables_transitively(model, term):
         variables.append(model.get_variable_by_cmeta_id(cmeta_id))
     return sorted(variables, key=lambda sym: sym.order_added)
 
+
+def get_variables_that_are_version_of(model, term):
+    """
+    Return a list of variables annotated as bqbiol:isVersionOf the given ontology term.
+
+    :return: a list of :class:`VariableDummy` objects, sorted by order added to the model.
+    """
+    term = create_rdf_node(term)
+    cmeta_ids = model.rdf.subjects(PRED_IS_VERSION_OF, term)
+    variables = [model.get_variable_by_cmeta_id(cmeta_id) for cmeta_id in cmeta_ids]
+    return sorted(variables, key=lambda sym: sym.order_added)
+

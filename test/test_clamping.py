@@ -6,6 +6,8 @@ import fc
 
 
 def test_clamping_with_variable_units():
+    # Test clamping state variables to a fixed value, with units taken from another model variable (units_of construct)
+
     proto = fc.Protocol('test/protocols/test_clamping3.txt')
     proto.set_output_folder('test_clamping_with_variable_units')
     proto.set_model('test/models/beeler_reuter_model_1977.cellml')

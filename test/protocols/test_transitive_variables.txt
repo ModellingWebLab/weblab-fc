@@ -1,0 +1,102 @@
+#
+# Test transitive variables are picked up correctly.
+#
+# Designed to run with test_transitive_variables.cellml
+#
+# This test protocol is run on a model containing intra and extracellular concentrations in different units. It then
+# specifies an output category with and without units (ExtracellularConcentration and CytosolicConcentration
+# respectively).
+# These category-level annotations have the individual concentration annotations as their "transitive" terms, which
+# should end up pointing to the "transitive" variables representing the concentrations themselves. Each category-level
+# annotation defines a vector output.
+#
+# The interface also redefines some current variables, using different units than the original ones,
+# which tests the unit conversion within define equations functionality.
+#
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    molar = mole . litre^-1
+    millimolar = milli molar
+    micromolar = micro molar
+    nanomolar = nano molar
+    milliamps = milli ampere
+    nanoamps = nano ampere
+    millivolt = milli volt
+}
+
+model interface {
+
+    # Define vector outputs, with and without units
+    output oxmeta:ExtracellularConcentration units micromolar
+    output oxmeta:CytosolicConcentration
+
+    # Use both types of modification on variables appearing in a vector output
+    clamp oxmeta:extracellular_calcium_concentration to 5000 :: nanomolar
+    clamp oxmeta:extracellular_sodium_concentration
+
+    # Optional concentration to be created, that will be a transitive variable
+    output oxmeta:extracellular_chloride_concentration units micromolar
+    optional oxmeta:extracellular_chloride_concentration default 1000 :: nanomolar + oxmeta:extracellular_calcium_concentration
+
+    # Redefine currents in different units (should be converted back to make dot(V) equation work)
+    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current
+    input oxmeta:membrane_rapid_delayed_rectifier_potassium_current units milliamps = 0.014
+
+    output oxmeta:membrane_fast_sodium_current
+    define oxmeta:membrane_fast_sodium_current = 11 :: milliamps / 1000 :: dimensionless
+
+    output oxmeta:membrane_persistent_sodium_current units nanoamps
+    define oxmeta:membrane_persistent_sodium_current = 22000 :: nanoamps
+
+    input oxmeta:membrane_voltage units millivolt = 0
+    output oxmeta:membrane_voltage
+
+    output oxmeta:membrane_background_sodium_current
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+
+post-processing {
+    def Close(a1, a2, tol=1e-9) {
+        return MathML:abs(a1 - a2) < tol
+    }
+
+    # These are read in model units: micro, milli, nano
+    assert sim:CytosolicConcentration.SHAPE[0] == 2 # Time
+    assert sim:CytosolicConcentration.SHAPE[1] == 3 # Num vars
+    # Order set alphabetically: calcium, potassium, sodium
+    assert sim:CytosolicConcentration[0][0] == 1
+    assert sim:CytosolicConcentration[0][1] == 3
+    assert sim:CytosolicConcentration[0][2] == 2
+
+    assert sim:ExtracellularConcentration.SHAPE[0] == 2  # Time
+    assert sim:ExtracellularConcentration.SHAPE[1] == 4  # Num vars
+    # Order set alphabetically: calcium, chloride, potassium, sodium
+    # Read in micromolar; original (model) vars in micro, (-), milli, nano
+    assert Close(sim:ExtracellularConcentration[0][0], 5)   # Clamped to 5000 nanomolar
+    assert Close(sim:ExtracellularConcentration[0][1], 6)   # Clamped to 1 + cai
+    assert Close(sim:ExtracellularConcentration[0][2], 0)   # Unchanged
+    assert Close(sim:ExtracellularConcentration[0][3], 0)   # unchanged
+    assert Close(sim:ExtracellularConcentration[1][0], 5)
+    assert Close(sim:ExtracellularConcentration[1][1], 6)
+    assert Close(sim:ExtracellularConcentration[1][2], 0.003)   # d/dt = 3 nanomolar/ms
+    assert Close(sim:ExtracellularConcentration[1][3], 0)       # clamped to initial value
+
+    # Test normal unit conversion
+    assert Close(sim:membrane_fast_sodium_current[0], 11)           # 11 microamps (units are the model default)
+    assert Close(sim:membrane_persistent_sodium_current[0], 22000)  # nanoamps (=22 microamps)
+    assert Close(sim:membrane_background_sodium_current[0], 3)       # microamps (units & value are model default)
+    assert Close(sim:membrane_rapid_delayed_rectifier_potassium_current[0], 0.014)  # milliamps (=15 microamps)
+
+    # With the above, dV/dt = -50 microamps / 10 microfarad = -5 mV/ms
+    assert sim:membrane_voltage.SHAPE[0] == 2
+    assert Close(sim:membrane_voltage[0], 0)
+    assert Close(sim:membrane_voltage[1], -3)
+}
+

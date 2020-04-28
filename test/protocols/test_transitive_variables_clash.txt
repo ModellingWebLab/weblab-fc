@@ -1,0 +1,28 @@
+#
+# In this test, we have a clash between units defined on a variable directly, and units defined via a transitive
+# annotation.
+#
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    molar = mole . litre^-1
+    millimolar = milli molar
+    micromolar = micro molar
+
+}
+
+model interface {
+    # Define vector output with units
+    output oxmeta:ExtracellularConcentration units micromolar
+
+    # Add an output definition that clashes with the units set on ExtracellularConcentration
+    output oxmeta:extracellular_potassium_concentration units millimolar
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+

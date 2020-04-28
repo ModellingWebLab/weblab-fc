@@ -1,13 +1,13 @@
-# Specifies an invalid interface: duplicate clamp definition (both without an RHS)
+# Specifies an invalid interface: clamp to value and clamp to initial value
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 units {
-    V = volt
+    mV = milli volt
 }
 
 model interface {
-    clamp oxmeta:membrane_voltage
+    clamp oxmeta:membrane_voltage to 1 :: mV
     clamp oxmeta:membrane_voltage
 }
 

@@ -1,12 +1,13 @@
 """
-Tests for unit conversion of inputs and defines.
-For further unit conversion tests see test_graphstate.py
+Tests for unit conversion.
+For further unit conversion tests see the GraphState test in test_code_generation.py
 """
 import os
 import pytest
 
 import fc
 import fc.test_support
+from fc.error_handling import ProtocolError
 
 
 def test_unit_conversion_time():
@@ -115,4 +116,25 @@ def test_unit_conversion_inputs_defines():
     assert len(v) == 2
     assert v[0] == 0
     assert v[1] == pytest.approx(15, rel=1e-15)
+
+
+def test_unit_conversion_transitive_and_within_equations():
+    # Test unit conversion for transitive variables and within equations (with define statements)
+
+    proto_file = 'test/protocols/test_transitive_variables.txt'
+    proto = fc.Protocol(proto_file)
+    proto.set_output_folder('test_unit_conversion_transitive_and_within_equations')
+    proto.set_model('test/models/transitive_variables.cellml')
+    proto.run()
+    # Assertions are within the protocol itself
+
+
+def test_unit_conversion_transitive_variables_clash():
+    # Tests an error is raised if units are set from a direct annotation and a vector annotation
+
+    proto_file = 'test/protocols/test_transitive_variables_clash.txt'
+    proto = fc.Protocol(proto_file)
+    proto.set_output_folder('test_unit_conversion_transitive_variables_clash')
+    with pytest.raises(ProtocolError, match='set individually as'):
+        proto.set_model('test/models/transitive_variables.cellml')
 

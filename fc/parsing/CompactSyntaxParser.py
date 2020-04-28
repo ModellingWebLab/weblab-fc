@@ -270,18 +270,17 @@ class CompactSyntaxParser(object):
     simple_arg_list = p.Group(optional_delimited_list(simple_expr, comma))
     simple_function_call = p.Group(ident_as_var + adjacent(oparen) - simple_arg_list +
                                  cparen).setName('SimpleFnCall').setParseAction(actions.FunctionCall)
-    simple_expr <<= p.infixNotation(number.copy().setParseAction(actions.Number) |
-                                   simple_if_expr | simple_function_call | ident_as_var,
-                                   [('^', 2, p.opAssoc.LEFT, actions.Operator),
-                                    ('-', 1, p.opAssoc.RIGHT,
-                                        lambda *args: actions.Operator(*args, rightAssoc=True)),
-                                    (p.oneOf('* /'), 2, p.opAssoc.LEFT, actions.Operator),
-                                    (p.oneOf('+ -'), 2, p.opAssoc.LEFT, actions.Operator),
-                                    (p.Keyword('not'), 1, p.opAssoc.RIGHT,
-                                     lambda *args: actions.Operator(*args, rightAssoc=True)),
-                                    (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, actions.Operator),
-                                    (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, actions.Operator)
-                                    ])
+    simple_expr <<= p.infixNotation(
+        number.copy().setParseAction(actions.Number) | simple_if_expr | simple_function_call | ident_as_var,
+        [
+            ('^', 2, p.opAssoc.LEFT, actions.Operator),
+            ('-', 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
+            (p.oneOf('* /'), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.oneOf('+ -'), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.Keyword('not'), 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
+            (p.oneOf('== != <= >= < >'), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.oneOf('&& ||'), 2, p.opAssoc.LEFT, actions.Operator)
+        ])
     simple_param_list = p.Group(optional_delimited_list(p.Group(nc_ident_as_var), comma))
     simple_lambda_expr = p.Group(make_kw('lambda') - simple_param_list + colon -
                                expr).setName('SimpleLambda').setParseAction(actions.Lambda)

@@ -59,6 +59,19 @@ class ProtocolError(Exception):
         super(ProtocolError, self).__init__(msg)
 
 
+class MissingVariableError(ProtocolError):
+    """
+    Raised if a variable is referenced but cannot be found.
+    """
+    def __init__(self, variable_name):
+        self.name = variable_name
+        if ':' in self.name:
+            msg = f'Reference to unknown variable "{variable_name}" (not found in model or protocol).'
+        else:
+            msg = f'Reference to unknown local variable "{variable_name}" (not found in protocol).'
+        super(MissingVariableError, self).__init__(msg)
+
+
 class ErrorRecorder(ProtocolError):
     """A context manager for recording protocol errors that arise within a block of code.
 

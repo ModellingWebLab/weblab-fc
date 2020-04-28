@@ -9,7 +9,7 @@ import re
 import fc
 import fc.code_generation
 import fc.test_support
-from fc.parsing.actions import VariableReference
+from fc.parsing.actions import ProtocolVariable
 from fc.parsing.rdf import OXMETA_NS, PRED_IS_VERSION_OF, create_rdf_node
 
 
@@ -54,27 +54,36 @@ def test_generate_weblab_model(tmp_path):
     model = os.path.join('test', 'models', 'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
     model = cellmlmanip.load_model(model)
 
-    # Select model outputs
-    outputs = [
-        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_fast_sodium_current'),
-        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_voltage'),
-        VariableReference.create('oxmeta', OXMETA_NS, 'time'),
-        VariableReference.create('oxmeta', OXMETA_NS, 'state_variable'),
+    # Combined output and parameter information
+    protocol_variables = []
+    variables = [
+        (True, False, 'membrane_fast_sodium_current_conductance'),
+        (True, False, 'membrane_potassium_current_conductance'),
+        (False, True, 'membrane_fast_sodium_current'),
+        (False, True, 'membrane_voltage'),
+        (False, True, 'time'),
     ]
+    for is_input, is_output, name in variables:
+        rdf_term = create_rdf_node((OXMETA_NS, name))
+        pvar = ProtocolVariable('oxmeta:' + name)
+        if is_input:
+            pvar.update(input_term=rdf_term)
+        elif is_output:
+            pvar.update(output_term=rdf_term)
+        pvar.update(model_variable=model.get_variable_by_ontology_term(rdf_term))
+        protocol_variables.append(pvar)
 
-    # Select model parameters
-    parameters = [
-        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_fast_sodium_current_conductance'),
-        VariableReference.create('oxmeta', OXMETA_NS, 'membrane_potassium_current_conductance'),
-    ]
+    # State variable output
+    rdf_term = create_rdf_node((OXMETA_NS, 'state_variable'))
+    pvar = ProtocolVariable('oxmeta:state_variable')
+    pvar.update(output_term=rdf_term, is_vector=True, vector_variables=model.get_state_variables())
+    protocol_variables.append(pvar)
 
     # Annotate state variables with the magic oxmeta:state_variable term
     state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
-    vector_orderings = {state_annotation: {}}
-    for i, state_var in enumerate(model.get_state_variables()):
-        model.add_cmeta_id(state_var)
-        model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
-        vector_orderings[state_annotation][state_var.rdf_identity] = i
+    for var in model.get_state_variables():
+        model.add_cmeta_id(var)
+        model.rdf.add((var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
 
     # Create weblab model at path
     fc.code_generation.create_weblab_model(
@@ -82,9 +91,7 @@ def test_generate_weblab_model(tmp_path):
         class_name,
         model,
         ns_map={'oxmeta': OXMETA_NS},
-        outputs=outputs,
-        parameters=parameters,
-        vector_orderings=vector_orderings,
+        protocol_variables=protocol_variables,
     )
 
     # Read expected output from file

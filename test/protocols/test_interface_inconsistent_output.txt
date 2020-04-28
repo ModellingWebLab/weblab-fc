@@ -1,14 +1,15 @@
-# Specifies an invalid interface: input can't be specified twice
+# Specifies an invalid interface: outputs on the same variable must be consistent
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 units {
     V = volt
+    mV = milli volt
 }
 
 model interface {
-    input oxmeta:membrane_voltage units V
-    input oxmeta:membrane_voltage units V
+    output oxmeta:membrane_voltage units V
+    output oxmeta:membrane_voltage units mV
 }
 
 tasks {
