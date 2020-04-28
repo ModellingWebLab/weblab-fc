@@ -1,11 +1,11 @@
 """
-Tests creating new annotated variables with optional+default, or via define
+Tests creating new annotated variables with optional+default, or via define.
 """
 import fc
 
 
 def test_create_annotated():
-    # Test creating an optional variable with a default expression
+    # Test creating variables with optional+default and with define, with explicit unit
 
     proto_file = 'test/protocols/test_create_annotated.txt'
     proto = fc.Protocol(proto_file)
