@@ -4,7 +4,7 @@ Tests the units_of() construct when giving units to numbers.
 import fc
 
 
-def test_unit_of():
+def test_units_of():
     # Tests the units_of construct
 
     proto_file = 'test/protocols/test_units_of.txt'
