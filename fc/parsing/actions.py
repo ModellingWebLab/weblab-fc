@@ -1405,7 +1405,7 @@ class ModelInterface(BaseGroupAction):
         for pvar in name_to_pvar.values():
             if len(pvar.input_terms) > 1:
                 raise ProtocolVariable(
-                    f'The mode variable {pvar.model_variable} is specified as a protocol input by more than one'
+                    f'The model variable {pvar.model_variable} is specified as a protocol input by more than one'
                     f'ontology term {pvar.long_name}.')
 
         # Check against overdefinedness through clamp-to-initial-value plus an equation
