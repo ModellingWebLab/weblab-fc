@@ -129,7 +129,7 @@ def get_unique_names(model):
     return variables
 
 
-def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vector_orderings={}):
+def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
     the Web Lab, and stores it at ``path``.
@@ -146,10 +146,6 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
         A dict mapping namespace prefixes to namespace URIs.
     ``protocol_variables``
         A list of :class:`ProtocolVariable` objects representing variables used by the protocol.
-    ``vector_orderings``
-        An optional mapping defining custom orderings for vector outputs, instead of the default
-        ``variable.order_added`` ordering. Keys are annotations (RDF nodes), and values are mappings from
-        ``rdf_identity`` to order index.
 
     """
     # TODO: About the outputs:
@@ -217,21 +213,19 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables, vec
     for pvar in protocol_variables:
         if not pvar.is_output:
             continue
-        elif pvar.model_variable is not None:
+        if pvar.model_variable is not None:
             # Single variable output
-            var_name = variable_name(pvar.model_variable)
             length = None
+            var_name = variable_name(pvar.model_variable)
             output_variables.add(pvar.model_variable)
-        elif pvar.vector_variables:
+        elif pvar.is_vector:
             # Vector output
-            variables = list(pvar.vector_variables)
-            rdf_term = pvar.output_terms[0]
-            order = vector_orderings[rdf_term]
-            variables.sort(key=lambda v: order[v.rdf_identity])
-            length = len(variables)
-            var_name = [{'index': i, 'var_name': variable_name(s)} for i, s in enumerate(variables)]
-            output_variables.update(variables)
+            length = len(pvar.vector_variables)
+            var_name = [{'index': i, 'var_name': variable_name(v)} for i, v in enumerate(pvar.vector_variables)]
+            output_variables.update(pvar.vector_variables)
         else:
+            # Optional, unresolved output
+            assert pvar.is_optional, 'Unresolved non-optional variable ' + pvar.long_name
             continue
 
         # TODO: Add an output for each rdf term pointing to the same variable.

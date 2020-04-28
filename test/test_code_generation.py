@@ -81,11 +81,9 @@ def test_generate_weblab_model(tmp_path):
 
     # Annotate state variables with the magic oxmeta:state_variable term
     state_annotation = create_rdf_node((OXMETA_NS, 'state_variable'))
-    vector_orderings = {state_annotation: {}}
-    for i, state_var in enumerate(model.get_state_variables()):
-        model.add_cmeta_id(state_var)
-        model.rdf.add((state_var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
-        vector_orderings[state_annotation][state_var.rdf_identity] = i
+    for var in model.get_state_variables():
+        model.add_cmeta_id(var)
+        model.rdf.add((var.rdf_identity, PRED_IS_VERSION_OF, state_annotation))
 
     # Create weblab model at path
     fc.code_generation.create_weblab_model(
@@ -94,7 +92,6 @@ def test_generate_weblab_model(tmp_path):
         model,
         ns_map={'oxmeta': OXMETA_NS},
         protocol_variables=protocol_variables,
-        vector_orderings=vector_orderings,
     )
 
     # Read expected output from file
