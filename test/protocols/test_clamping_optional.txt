@@ -13,7 +13,7 @@ units {
 model interface {
     independent var units ms
 
-    # Clamp a variable that's know to exist
+    # Clamp a variable that's known to exist
     output oxmeta:membrane_voltage units mV
     optional oxmeta:membrane_voltage
     clamp oxmeta:membrane_voltage
