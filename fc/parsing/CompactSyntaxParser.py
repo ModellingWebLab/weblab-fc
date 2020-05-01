@@ -410,9 +410,11 @@ class CompactSyntaxParser(object):
             eq +
             plain_number)("initial_value")).setName('NewVariable').setParseAction(
         actions.DeclareVariable)
+
     # Adding or replacing equations in the model
-    clamp_variable = p.Group(make_kw('clamp') - ident_as_var + Optional(make_kw('to') - simple_expr)
-                            ).setName('ClampVariable').setParseAction(actions.ClampVariable)
+    clamp_variable = p.Group(
+        make_kw('clamp') - ident_as_var + Optional(make_kw('to') - simple_expr)
+    ).setName('ClampVariable').setParseAction(actions.ClampVariable)
     interpolate = p.Group(
         make_kw('interpolate') -
         oparen -
@@ -425,31 +427,27 @@ class CompactSyntaxParser(object):
         nc_ident -
         cparen).setName('Interpolate').setParseAction(
         actions.Interpolate)
-    model_equation = p.Group(make_kw('define') -
-                            (p.Group(make_kw('diff') +
-                                     adjacent(oparen) -
-                                     ident_as_var +
-                                     p.Suppress(';') +
-                                     ident_as_var +
-                                     cparen) | ident_as_var) +
-                            eq +
-                            (interpolate | simple_expr)
-                            ).setName('AddOrReplaceEquation').setParseAction(actions.ModelEquation)
+    model_equation = p.Group(
+        make_kw('define') - (
+            p.Group(make_kw('diff') + adjacent(oparen) - ident_as_var + p.Suppress(';') + ident_as_var + cparen)
+            | ident_as_var
+        ) + eq + (interpolate | simple_expr)
+    ).setName('AddOrReplaceEquation').setParseAction(actions.ModelEquation)
+
     # Units conversion rules
     units_conversion = p.Group(
-        make_kw('convert') -
-        nc_ident("actualDimensions") +
-        make_kw('to') +
-        nc_ident("desiredDimensions") +
-        make_kw('by') -
-        simple_lambda_expr).setName('UnitsConversion').setParseAction(
-        actions.UnitsConversion)
+        make_kw('convert') - nc_ident("actualDimensions") +
+        make_kw('to') + nc_ident("desiredDimensions") +
+        make_kw('by') - simple_lambda_expr
+    ).setName('UnitsConversion').setParseAction(actions.UnitsConversion)
 
-    model_interface = p.Group(make_kw('model') - make_kw('interface') - obrace -
-                             Optional(set_time_units - nl) +
-                             optional_delimited_list((input_variable | output_variable | optional_variable | new_variable |
-                                                    clamp_variable | model_equation | units_conversion), nl) +
-                             cbrace).setName('ModelInterface').setParseAction(actions.ModelInterface)
+    model_interface = p.Group(
+        make_kw('model') - make_kw('interface') - obrace - Optional(set_time_units - nl) +
+        optional_delimited_list((
+            input_variable | output_variable | optional_variable | new_variable | clamp_variable | model_equation
+            | units_conversion
+        ), nl) + cbrace
+    ).setName('ModelInterface').setParseAction(actions.ModelInterface)
 
     # Simulation definitions
     ########################

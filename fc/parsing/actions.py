@@ -4,11 +4,12 @@ Parse actions that can generate Python implementation objects
 
 import itertools
 import math
-import networkx
 import os
 from collections import deque
 from contextlib import contextmanager
 
+import networkx
+import pint
 import pyparsing
 import sympy
 from cellmlmanip.model import DataDirectionFlow
@@ -28,6 +29,9 @@ STATE_ANNOTATION = create_rdf_node((OXMETA_NS, 'state_variable'))
 
 # Sympy symbol for "original_definition" construct
 ORIGINAL_DEFINITION = sympy.Symbol('original_definition')
+
+# Sympy symbol for free variable in a unit conversion lambda
+UNIT_LAMBDA_SYMBOL = sympy.Symbol('rhs')
 
 # Operators, sympy operators, etc.
 OPERATORS = {'+': E.Plus, '-': E.Minus, '*': E.Times, '/': E.Divide, '^': E.Power,
@@ -408,10 +412,13 @@ class Tuple(BaseGroupAction):
 class Lambda(BaseGroupAction):
     """Parse action for lambda expressions."""
 
-    def _expr(self):
+    def __init__(self, s, loc, tokens):
+        super(Lambda, self).__init__(s, loc, tokens)
+
         assert len(self.tokens) == 2
+
+        # Parameters and default parameters
         param_list = self.tokens[0]
-        body = self.tokens[1].expr()  # expr
         children = []
         default_params = []
         for param_decl in param_list:
@@ -422,13 +429,23 @@ class Lambda(BaseGroupAction):
             else:  # Default value case
                 default_params.append(param_decl[1].expr().value)
                 children.append(param_bvar)
-        lambda_params = [[var for each in children for var in each]]
+
+        # Body
+        body = self.tokens[1]
+
+        # Store
+        self.formal_parameters = [var for each in children for var in each]
+        self.default_parameters = default_params
+        self.body = body
+
+    def _expr(self):
+        body = self.body.expr()
         if not isinstance(body, list):
             ret = S.Return(body)
             ret.location = body.location
             body = [ret]
-        lambda_params.extend([body, default_params])
-        return E.LambdaExpression(*lambda_params)
+
+        return E.LambdaExpression(self.formal_parameters, body, self.default_parameters)
 
 
 class FunctionCall(BaseGroupAction):
@@ -877,7 +894,8 @@ class UnitsConversion(BaseGroupAction):
     def _expr(self):
         self.actual = self.get_named_token_as_string('actualDimensions')
         self.desired = self.get_named_token_as_string('desiredDimensions')
-        self.rule = self.tokens[-1]
+        self.lambda_function = self.tokens[-1]
+        return self
 
 
 class ProtocolVariable():
@@ -1106,6 +1124,8 @@ class ModelInterface(BaseGroupAction):
         ``ClampVariable`` object.
     ``local_var_declarations``
         A list of :class:`DeclareVariable` instances. These are created for ``var x`` statements.
+    ``unit_conversion_rules``
+        A list of :class:`UnitsConversion` instances. These are created for ``convert`` statements.
 
     Properties set after :meth:`resolve_namespaces` has been called:
 
@@ -1140,6 +1160,7 @@ class ModelInterface(BaseGroupAction):
         self.equations = []
         self.clamps = []
         self.local_var_declarations = []
+        self.unit_conversion_rules = []
 
         # Initialise
         self._reinit()
@@ -1164,6 +1185,7 @@ class ModelInterface(BaseGroupAction):
         self.equations = [a for a in actions if isinstance(a, ModelEquation)]
         self.clamps = [a for a in actions if isinstance(a, ClampVariable)]
         self.local_var_declarations = [a for a in actions if isinstance(a, DeclareVariable)]
+        self.unit_conversion_rules = [a for a in actions if isinstance(a, UnitsConversion)]
 
         # Some basic semantics checking
         if len(self._time_units) > 1:
@@ -1189,6 +1211,7 @@ class ModelInterface(BaseGroupAction):
         add_unique(self.equations, interface.equations)
         add_unique(self.clamps, interface.clamps)
         add_unique(self.local_var_declarations, interface.local_var_declarations)
+        add_unique(self.unit_conversion_rules, interface.unit_conversion_rules)
 
         # need to be careful with time units
         # add from nested protocol if there are no time units in outer protocol
@@ -1251,6 +1274,9 @@ class ModelInterface(BaseGroupAction):
 
         # Collate information about variables mentioned in protocol.
         self._collate_variable_information()
+
+        # Parse unit conversion rules
+        self._parse_unit_conversion_rules()
 
         # Convert units of model variables, where needed.
         self._convert_time_unit_if_needed()
@@ -1452,6 +1478,113 @@ class ModelInterface(BaseGroupAction):
 
         # Store all protocol variables
         self.protocol_variables = list(name_to_pvar.values())
+
+    def _parse_unit_conversion_rules(self):
+        """Parses the unit conversion rules."""
+
+        # Create pint 'context'
+        context = pint.Context('fc')
+
+        # Create mapping from model and local variables to ProtocolVariable objects
+        model_var_to_pvar = {}
+        local_var_to_pvar = {}
+        for pvar in self.protocol_variables:
+            if pvar.is_local:
+                local_var_to_pvar[pvar.name] = pvar
+            elif pvar.model_variable is not None:
+                model_var_to_pvar[pvar.model_variable] = pvar
+
+        # Define a custom number generator that creates pint.Quantity objects
+        def number_generator(self, value, units):
+            if units.startswith('units_of('):
+                raise ProtocolError('The units_of() function cannot be used in unit conversion rules.')
+            return self.units.Quantity(value, self.units.get_unit(units))
+
+        # Define a custom variable generator that will create local variables if possible (but not assign them their
+        # values yet), and that will check suitability of variables used in the conversion rule.
+        def variable_generator(name, free_variable_name):
+            # Reference to original definition: not allowed here
+            if name == 'original_definition':
+                raise ProtocolError('The original_definition keyword cannot be used in unit conversion rules.')
+
+            # Reference to free variable
+            if name == free_variable_name:
+                return UNIT_LAMBDA_SYMBOL
+
+            # Model variable
+            if ':' in name:
+                prefix, local_name = name.split(':', 1)
+                ns_uri = self.ns_map[prefix]
+                try:
+                    var = self.model.get_variable_by_ontology_term((ns_uri, local_name))
+                except KeyError:
+                    raise ProtocolError(
+                        'Variables appearing in unit conversion rules must be either local variables or annotated'
+                        ' variables that already exist in the model.')
+
+                # Check that this variable won't be unit converted
+                pvar = model_var_to_pvar.get(var, None)
+                if pvar is not None and pvar.units is not None:
+                    units = self.units.get_unit(pvar.units)
+                    if units != var.units:
+                        raise ProtocolError(
+                            f'Variables appearing in unit conversion rules cannot themselves be unit-converted'
+                            f' ({pvar.long_name} is not currently in {pvar.units}).')
+
+                # Create and return pint quantity
+                return self.units.Quantity(var, var.units)
+
+            # Local variable
+            try:
+                return self.local_vars[name]
+            except KeyError:
+
+                # Try creating: must have explicit units
+                units = None
+                pvar = local_var_to_pvar.get(name, None)
+                if pvar is None or pvar.units is None:
+                    raise ProtocolError(
+                        'Local variables appearing in unit conversion rules must explicitly define their units.')
+
+                # Create, store, and return
+                units = self.units.get_unit(pvar.units)
+                name = self.model.get_unique_name('protocol__' + pvar.short_name)
+                pvar.model_variable = self.model.add_variable(name, units)
+                self.local_vars[pvar.name] = pvar.model_variable
+
+                # Create and return pint quantity
+                return self.units.Quantity(pvar.model_variable, units)
+
+        for rule in self.unit_conversion_rules:
+
+            # Get from and to units
+            u1 = self.units.get_unit(rule.actual)
+            u2 = self.units.get_unit(rule.desired)
+
+            # Get argument name and lambda expression
+            f = rule.lambda_function
+            if len(f.formal_parameters) != 1:
+                raise ProtocolError('A unit conversion rule must be a lambda function with a single argument.')
+            expr = f.body
+            free = f.formal_parameters[0]
+
+            # Convert expression to sympy
+            try:
+                expr = expr.to_sympy(lambda x: variable_generator(x, free), self._number_generator)
+            except ProtocolError as e:
+                print('  _[]_')
+                print('W (")')
+                print('|-(:\')-<')
+                print('|(\'  )')
+                print('JON HOW DO I RAISE A WARNING? ' + e.short_message)
+                continue
+
+            # Add transformation to pint context
+            context.add_transformation(u1, u2, lambda ureg, rhs: expr.xreplace({UNIT_LAMBDA_SYMBOL: rhs}).evalf())
+
+        # Store and enable context
+        self.units._registry.add_context(context)
+        self.units._registry.enable_contexts('fc')
 
     def _convert_time_unit_if_needed(self):
         """Check the units of the time variable and convert if needed."""
