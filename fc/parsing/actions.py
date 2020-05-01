@@ -1576,7 +1576,22 @@ class ModelInterface(BaseGroupAction):
                 continue
 
             # Add transformation to pint context
-            context.add_transformation(u1, u2, lambda ureg, rhs: expr.subs({UNIT_LAMBDA_SYMBOL: rhs}).evalf())
+            def debug(ureg, rhs):
+                rhs = pint.Quantity(rhs, u1)
+                print(expr)
+                print(rhs, type(rhs))
+                e = expr.subs(UNIT_LAMBDA_SYMBOL, rhs)
+                print()
+                print(e)
+                print()
+                print(e.eval())
+
+                return e.evalf()
+
+
+            #context.add_transformation(u1, u2, lambda ureg, rhs: expr.subs(UNIT_LAMBDA_SYMBOL, rhs).evalf())
+
+            context.add_transformation(u1, u2, debug)
 
         # Store and enable context
         self.units._registry.add_context(context)
