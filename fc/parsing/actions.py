@@ -430,13 +430,10 @@ class Lambda(BaseGroupAction):
                 default_params.append(param_decl[1].expr().value)
                 children.append(param_bvar)
 
-        # Body
-        body = self.tokens[1]
-
         # Store
         self.formal_parameters = [var for each in children for var in each]
         self.default_parameters = default_params
-        self.body = body
+        self.body = self.tokens[1]
 
     def _expr(self):
         body = self.body.expr()
@@ -444,7 +441,6 @@ class Lambda(BaseGroupAction):
             ret = S.Return(body)
             ret.location = body.location
             body = [ret]
-
         return E.LambdaExpression(self.formal_parameters, body, self.default_parameters)
 
 
