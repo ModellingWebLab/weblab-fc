@@ -1566,7 +1566,7 @@ class ModelInterface(BaseGroupAction):
 
             # Convert expression to sympy
             try:
-                expr = expr.to_sympy(lambda x: variable_generator(x, free), self._number_generator)
+                expr = expr.to_sympy(lambda x: variable_generator(x, free), number_generator)
             except ProtocolError as e:
                 print('  _[]_')
                 print('W (")')
@@ -1576,7 +1576,7 @@ class ModelInterface(BaseGroupAction):
                 continue
 
             # Add transformation to pint context
-            context.add_transformation(u1, u2, lambda ureg, rhs: expr.xreplace({UNIT_LAMBDA_SYMBOL: rhs}).evalf())
+            context.add_transformation(u1, u2, lambda ureg, rhs: expr.subs({UNIT_LAMBDA_SYMBOL: rhs}).evalf())
 
         # Store and enable context
         self.units._registry.add_context(context)
