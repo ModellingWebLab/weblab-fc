@@ -1,0 +1,95 @@
+#
+# Test for unit conversion rules.
+# Designed to work with unit_conversion_rules.cellml
+#
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    ms = milli second
+    uF_per_cm2 = micro farad . centi metre^-2
+    A_per_F = ampere . farad^-1
+    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
+    uA = micro ampere
+    pA = pico ampere
+}
+
+model interface {
+    independent var units ms
+
+    # Local capacitance-per-area contant
+    var chaste_membrane_capacitance units uF_per_cm2 = 1.1
+
+    # Conversion from per-farad to per-area
+    convert A_per_F to uA_per_cm2 by lambda rhs: rhs * chaste_membrane_capacitance
+    convert uA_per_cm2 to A_per_F by lambda rhs: rhs / chaste_membrane_capacitance
+
+    # Conversion from per-area to un-normalised
+    convert uA to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * chaste_membrane_capacitance
+    convert uA_per_cm2 to uA by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
+
+    # Stimulus is an ODE in pA (per ms), convert
+    output oxmeta:stimulus_current units A_per_F
+
+    # Sodium currents are all in [A] or compatible, convert
+    output oxmeta:membrane_fast_sodium_current units pA
+    output oxmeta:membrane_persistent_sodium_current units A_per_F
+    output oxmeta:membrane_background_sodium_current units uA_per_cm2
+
+    # Potassium currents are all in [A/F] or compatible, convert
+    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units pA
+    output oxmeta:membrane_slow_delayed_rectifier_potassium_current units A_per_F
+    output oxmeta:membrane_inward_rectifier_potassium_current units uA_per_cm2
+
+    # Calcium currents are all in [uA/cm^2] or compatible, convert
+    output oxmeta:membrane_L_type_calcium_current units pA
+    output oxmeta:membrane_background_calcium_current units A_per_F
+    output oxmeta:SR_release_current units uA_per_cm2
+}
+
+tasks {
+    simulation sim = timecourse {
+        range t units ms uniform 0:1
+    }
+}
+
+post-processing {
+    def Close(a1, a2, tol=1e-9) {
+        return MathML:abs(a1 - a2) < tol
+    }
+
+    # Using capacitance = 1.2uF
+
+    # A/F --> uA/cm^2 : *1.1
+    # uA/cm^2 --> uA  : *1.2 / 1.1
+    # A/F --> uA      : *1.2
+
+    # From pA to A/F  : / 1.2e6 pF
+    # 1 pA + 2 pA/ms * 1 ms = 3 pA
+    assert sim:stimulus_current.SHAPE[0] == 2
+    assert Close(sim:stimulus_current[0], 1 / 1.2e6)
+    assert Close(sim:stimulus_current[1], 3 / 1.2e6)
+
+    # From 2 pA to 2 pA
+    assert Close(oxmeta:membrane_fast_sodium_current, 2)
+    # From 3 nA to A/F
+    # 3 nA = 3e-3 uA / 1.2
+    assert Close(oxmeta:membrane_persistent_sodium_current, 3e-3 / 1.2)
+    # From 4 uA to uA/cm^2
+    assert Close(oxmeta:membrane_background_sodium_current, 4 / 1.1 * 1.2)
+
+    # From 40 pA/pF to pA
+    assert Close(oxmeta:membrane_rapid_delayed_rectifier_potassium_current, 40 * 1.2e6)
+    # From 20 A/F to A/F
+    assert Close(oxmeta:membrane_slow_delayed_rectifier_potassium_current, 20)
+    # From 60 uA/uF to uA/cm^2
+    assert Close(oxmeta:membrane_inward_rectifier_potassium_current, 60 * 1.1)
+
+    # From 111 uA/cm^2 to pA
+    assert Close(oxmeta:membrane_L_type_calcium_current, 111 * 1.2e6 / 1.1)
+    # From 222 uA/cm^2 to A/F
+    assert Close(oxmeta:membrane_background_calcium_current, 222 / 1.1)
+    # From 333 uA/cm^2 to uA/cm^2
+    assert Close(oxmeta:SR_release_current, 333)
+}
+
