@@ -29,7 +29,7 @@ model interface {
     convert uA_per_cm2 to uA by lambda rhs: (rhs * oxmeta:membrane_capacitance) / chaste_membrane_capacitance
 
     # Stimulus is an ODE in pA (per ms), convert
-    output oxmeta:stimulus_current units A_per_F
+    output oxmeta:membrane_stimulus_current units A_per_F
 
     # Sodium currents are all in [A] or compatible, convert
     output oxmeta:membrane_fast_sodium_current units pA
@@ -66,9 +66,9 @@ post-processing {
 
     # From pA to A/F  : / 1.2e6 pF
     # 1 pA + 2 pA/ms * 1 ms = 3 pA
-    assert sim:stimulus_current.SHAPE[0] == 2
-    assert Close(sim:stimulus_current[0], 1 / 1.2e6)
-    assert Close(sim:stimulus_current[1], 3 / 1.2e6)
+    assert sim:membrane_stimulus_current.SHAPE[0] == 2
+    assert Close(sim:membrane_stimulus_current[0], 1 / 1.2e6)
+    assert Close(sim:membrane_stimulus_current[1], 3 / 1.2e6)
 
     # From 2 pA to 2 pA
     assert Close(oxmeta:membrane_fast_sodium_current, 2)

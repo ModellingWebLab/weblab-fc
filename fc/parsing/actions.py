@@ -12,8 +12,9 @@ import networkx
 import pint
 import pyparsing
 import sympy
-from cellmlmanip.model import DataDirectionFlow
+from cellmlmanip.model import DataDirectionFlow, VariableDummy
 from cellmlmanip.parser import UNIT_PREFIXES
+from cellmlmanip.units import UnitConversionError
 
 from ..error_handling import ProtocolError, MissingVariableError
 from ..language import expressions as E
@@ -1496,9 +1497,18 @@ class ModelInterface(BaseGroupAction):
                 raise ProtocolError('The units_of() function cannot be used in unit conversion rules.')
             return self.units.Quantity(value, self.units.get_unit(units))
 
-        # Define a custom variable generator that will create local variables if possible (but not assign them their
-        # values yet), and that will check suitability of variables used in the conversion rule.
+        def error_generator(name):
+            """Variable generator used to convert constant expressions."""
+            raise MissingVariableError(name)
+
         def variable_generator(name, free_variable_name):
+            """
+            Variable generator that will check all variables used are either constant model variables or local variables
+            defined as literal constants, and will return NumberDummy objects instead of variables.
+
+            Checks for ``free_variable_name`` and will return ``UNIT_LAMBDA_SYMBOL`` if found.
+            """
+
             # Reference to original definition: not allowed here
             if name == 'original_definition':
                 raise ProtocolError('The original_definition keyword cannot be used in unit conversion rules.')
@@ -1515,42 +1525,79 @@ class ModelInterface(BaseGroupAction):
                     var = self.model.get_variable_by_ontology_term((ns_uri, local_name))
                 except KeyError:
                     raise ProtocolError(
-                        'Variables appearing in unit conversion rules must be either local variables or annotated'
-                        ' variables that already exist in the model.')
+                        f'Variable appearing in unit conversion rules must be either local variables or annotated'
+                        f' variables that already exist in the model, unable to find variable {name}.')
 
-                # Check that this variable won't be unit converted
+                # Check that this variable is constant
+                if not self.model.is_constant(var):
+                    raise ProtocolError(f'Variables appearing in unit conversion rules must be constant, got {name}.')
+
+                # Check that this variable won't be modified
                 pvar = model_var_to_pvar.get(var, None)
-                if pvar is not None and pvar.units is not None:
-                    units = self.units.get_unit(pvar.units)
-                    if units != var.units:
+                if pvar is not None:
+                    if pvar.is_input or pvar.equation is not None or pvar.initial_value is not None:
                         raise ProtocolError(
-                            f'Variables appearing in unit conversion rules cannot themselves be unit-converted'
-                            f' ({pvar.long_name} is not currently in {pvar.units}).')
+                            f'Variables appearing in unit conversion rules cannot be inputs or be redefined by the'
+                            f' protocol, got {name}.')
 
-                # Create and return pint quantity
-                return self.units.Quantity(var, var.units)
+                    if pvar.units is not None and var.units != self.units.get_unit(pvar.units):
+                        raise ProtocolError(
+                            f'Variables appearing in unit conversion rules cannot themselves be unit-converted,'
+                            f' {name} is not currently in {pvar.units}.')
+
+                # Return value of this variable
+                return self.model.add_number(self.model.get_value(var), var.units)
 
             # Local variable
             try:
                 return self.local_vars[name]
             except KeyError:
 
-                # Try creating: must have explicit units
+                # Get units (must be explicitly defined)
                 units = None
                 pvar = local_var_to_pvar.get(name, None)
                 if pvar is None or pvar.units is None:
                     raise ProtocolError(
-                        'Local variables appearing in unit conversion rules must explicitly define their units.')
-
-                # Create, store, and return
+                        f'Local variables appearing in unit conversion rules must explicitly define their units,'
+                        f' no units found for {name}.')
                 units = self.units.get_unit(pvar.units)
-                name = self.model.get_unique_name('protocol__' + pvar.short_name)
-                pvar.model_variable = self.model.add_variable(name, units)
-                self.local_vars[pvar.name] = pvar.model_variable
 
-                # Create and return pint quantity
-                return self.units.Quantity(pvar.model_variable, units)
+                # Get value (must be a constant)
+                if pvar.initial_value is not None:
+                    value = float(pvar.initial_value)
+                elif pvar.equation is not None:
+                    try:
+                        rhs = pvar.equation.rhs.to_sympy(error_generator, self._number_generator)
+                    except MissingVariableError as e:
+                        raise ProtocolError(
+                            f'Local variables appearing in unit conversion rules must be constants, found reference to'
+                            f' {e.name} in definition of {name}.')
 
+                    # Fix unit inconsistencies in RHS if needed
+                    try:
+                        rhs = self.units.convert_expression_recursively(rhs, units)
+                    except UnitConversionError:
+                        raise ProtocolError(
+                            f'Expression for local variable {name}, used in unit conversion rule, does not evaluate to'
+                            f' (units compatible with) {units}.')
+
+                    # Evaluate
+                    value = rhs.evalf()
+                else:
+                    raise ProtocolError(f'Local variable {name} appearing in unit conversion rule has no value.')
+
+                # Return the value of this variable
+                return self.model.add_number(value, units)
+
+        # Output a warning when a rule can't be parsed
+        def warn(u1, u2, msg):
+            print('  _[]_')
+            print('W (")')
+            print('|-(:\')-<')
+            print('|(\'  )')
+            print(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
+
+        # Parse all rules
         for rule in self.unit_conversion_rules:
 
             # Get from and to units
@@ -1560,7 +1607,8 @@ class ModelInterface(BaseGroupAction):
             # Get argument name and lambda expression
             f = rule.lambda_function
             if len(f.formal_parameters) != 1:
-                raise ProtocolError('A unit conversion rule must be a lambda function with a single argument.')
+                warn(u1, u2, 'A unit conversion rule must be a lambda function with a single argument.')
+                continue
             expr = f.body
             free = f.formal_parameters[0]
 
@@ -1568,30 +1616,27 @@ class ModelInterface(BaseGroupAction):
             try:
                 expr = expr.to_sympy(lambda x: variable_generator(x, free), number_generator)
             except ProtocolError as e:
-                print('  _[]_')
-                print('W (")')
-                print('|-(:\')-<')
-                print('|(\'  )')
-                print('JON HOW DO I RAISE A WARNING? ' + e.short_message)
+                warn(u1, u2, e.short_message)
                 continue
 
-            # Add transformation to pint context
-            def debug(ureg, rhs):
-                rhs = pint.Quantity(rhs, u1)
-                print(expr)
-                print(rhs, type(rhs))
-                e = expr.subs(UNIT_LAMBDA_SYMBOL, rhs)
-                print()
-                print(e)
-                print()
-                print(e.eval())
+            # Check that the lambda was really just a multiplication
+            expr /= UNIT_LAMBDA_SYMBOL
+            if expr.atoms(VariableDummy) or UNIT_LAMBDA_SYMBOL in expr.atoms():
+                warn(u1, u2, 'Conversion rule lambda must simplify to a simple multiplication.')
+                continue
 
-                return e.evalf()
+            # Convert expression to correct units, if needed
+            units = u2 / u1
+            try:
+                expr = self.units.convert_expression_recursively(expr, units)
+            except UnitConversionError:
+                warn(u1, u2, 'The lambda expression does not result in units compatible with {units}.')
 
+            # Create pint conversion factor
+            factor = self.units.Quantity(expr.evalf(), units)
 
-            #context.add_transformation(u1, u2, lambda ureg, rhs: expr.subs(UNIT_LAMBDA_SYMBOL, rhs).evalf())
-
-            context.add_transformation(u1, u2, debug)
+            # Add transformation rule
+            context.add_transformation(u1, u2, lambda ureg, rhs: rhs * units)
 
         # Store and enable context
         self.units._registry.add_context(context)
