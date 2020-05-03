@@ -414,12 +414,14 @@ class Tuple(BaseGroupAction):
 class Lambda(BaseGroupAction):
     """Parse action for lambda expressions."""
 
-    def __init__(self, s, loc, tokens):
-        super(Lambda, self).__init__(s, loc, tokens)
+    def lambda_body(self):
+        """Return the body (expression) for this lambda function."""
+        return self.tokens[1]
 
-        assert len(self.tokens) == 2
-
-        # Parameters and default parameters
+    def lambda_parameters(self):
+        """
+        Returns a tuple ``(formal_parameters, default_parameters)`` for this lambda function, where both are lists.
+        """
         param_list = self.tokens[0]
         children = []
         default_params = []
@@ -431,19 +433,18 @@ class Lambda(BaseGroupAction):
             else:  # Default value case
                 default_params.append(param_decl[1].expr().value)
                 children.append(param_bvar)
+        formal_parameters = [var for each in children for var in each]
 
-        # Store
-        self.formal_parameters = [var for each in children for var in each]
-        self.default_parameters = default_params
-        self.body = self.tokens[1]
+        return formal_parameters, default_params
 
     def _expr(self):
-        body = self.body.expr()
+        body = self.lambda_body().expr()
         if not isinstance(body, list):
             ret = S.Return(body)
             ret.location = body.location
             body = [ret]
-        return E.LambdaExpression(self.formal_parameters, body, self.default_parameters)
+        formal, default = self.lambda_parameters()
+        return E.LambdaExpression(formal, body, default)
 
 
 class FunctionCall(BaseGroupAction):
@@ -1609,11 +1610,12 @@ class ModelInterface(BaseGroupAction):
 
             # Get argument name and lambda expression
             f = rule.lambda_function
-            if len(f.formal_parameters) != 1:
+            expr = f.lambda_body()
+            formal_parameters, default_parameters = f.lambda_parameters()
+            if len(formal_parameters) != 1:
                 warn(u1, u2, 'A unit conversion rule must be a lambda function with a single argument.')
                 continue
-            expr = f.body
-            free = f.formal_parameters[0]
+            free = formal_parameters[0]
 
             # Convert expression to sympy
             try:
