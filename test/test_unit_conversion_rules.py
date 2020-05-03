@@ -2,8 +2,6 @@
 Tests for unit conversion rules.
 """
 import fc
-import pint
-import pytest
 
 
 def test_unit_conversion_rules():
