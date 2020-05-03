@@ -1241,6 +1241,9 @@ class ModelInterface(BaseGroupAction):
         self.time_variable = time_variable
         self.units = units
 
+        # Time variable may be replaced, so delete this reference just to be safe
+        del(time_variable)
+
         # Annotate all state variables with the magic `oxmeta:state_variable` term. This is done before unit conversion
         # so that annotations are transferred where needed. The original order in which state variables were defined is
         # stored.
@@ -1268,6 +1271,9 @@ class ModelInterface(BaseGroupAction):
         self._purge_unused_mathematics()
 
         # TODO: Any final consistency checks on the model?
+
+        # Return new time variable
+        return self.time_variable
 
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.

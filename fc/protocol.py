@@ -638,7 +638,7 @@ class Protocol(object):
                 time_variable = model.add_variable(time, self.units.get('seconds'))
 
             # Do all the transformations specified by the protocol
-            self.model_interface.modify_model(model, time_variable, self.units)
+            time_variable = self.model_interface.modify_model(model, time_variable, self.units)
 
             # Create weblab model at path
             create_weblab_model(
