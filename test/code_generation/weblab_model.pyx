@@ -52,7 +52,7 @@ cdef int _evaluate_rhs(Sundials.realtype var_time,
     cdef double var_stim_end = 10000.0
     cdef double var_stim_period = 1000.0
     cdef double var_stim_start = 10.0
-    cdef double var_i_Stim = ((var_stim_amplitude) if (var_time >= var_stim_start and var_time <= var_stim_end and var_stim_duration >= -var_stim_start - var_stim_period * math.floor((-var_stim_start + var_time) / var_stim_period) + var_time) else (0.0))
+    cdef double var_i_Stim = ((var_stim_amplitude) if (var_time >= var_stim_start and var_time <= var_stim_end and var_stim_duration >= -var_stim_start - var_stim_period * math.floor((-var_stim_start + var_time) / var_stim_period) + var_time) else (0))
     cdef double var_E_K = -12.0 + var_E_R
     cdef double var_g_K = parameters[1]
     cdef double var_alpha_n = -0.01 * (65.0 + var_V) / (-1.0 + math.exp(-6.5 - 0.1 * var_V))
