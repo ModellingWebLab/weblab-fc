@@ -1480,9 +1480,6 @@ class ModelInterface(BaseGroupAction):
     def _parse_unit_conversion_rules(self):
         """Parses the unit conversion rules."""
 
-        # Create pint 'context'
-        context = pint.Context('fc')
-
         # Create mapping from model and local variables to ProtocolVariable objects
         model_var_to_pvar = {}
         local_var_to_pvar = {}
@@ -1598,7 +1595,16 @@ class ModelInterface(BaseGroupAction):
             print('|(\'  )')
             print(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
 
-        # Parse all rules
+        # Create callable class that stores a conversion factor (lambdas or local functions cannot be used here).
+        class Rule(object):
+            def __init__(self, factor):
+                self.factor = factor
+
+            def __call__(self, ureg, rhs):
+                return rhs * self.factor
+
+        # Parse all rules, and add then to a pint Context
+        context = pint.Context()
         for rule in self.unit_conversion_rules:
 
             # Get from and to units
@@ -1638,10 +1644,9 @@ class ModelInterface(BaseGroupAction):
 
             # Add transformation rule
             print(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
-            context.add_transformation(u1, u2, lambda ureg, rhs: rhs * factor)
+            context.add_transformation(u1, u2, Rule(factor))
 
         # Store and enable context
-        self.units._registry.add_context(context)
         self.units._registry.enable_contexts(context)
 
     def _convert_time_unit_if_needed(self):
