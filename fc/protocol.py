@@ -630,14 +630,22 @@ class Protocol(object):
             import cellmlmanip
             model = cellmlmanip.load_model(model, self.units)
 
+            # Check whether the model has a time variable. If not, create one
+            try:
+                time_variable = model.get_free_variable()
+            except ValueError:
+                time_variable = model.create_unique_name('time')
+                time_variable = model.add_variable(time, self.units.get('seconds'))
+
             # Do all the transformations specified by the protocol
-            self.model_interface.modify_model(model, self.units)
+            self.model_interface.modify_model(model, time_variable, self.units)
 
             # Create weblab model at path
             create_weblab_model(
                 path,
                 class_name,
                 model,
+                time_variable,
                 ns_map=self.ns_map,
                 protocol_variables=self.model_interface.protocol_variables,
             )
