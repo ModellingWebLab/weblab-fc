@@ -6,7 +6,7 @@ import fc
 import fc.test_support
 
 
-@pytest.mark.skipif(os.getenv('FC_LONG_TESTS', '0') == '0', reason='FC_LONG_TESTS not set to 1')
+# @pytest.mark.skipif(os.getenv('FC_LONG_TESTS', '0') == '0', reason='FC_LONG_TESTS not set to 1')
 def test_s1_s2():
     """Tests running the full S1S2 protocol on the Courtemanche model."""
 
