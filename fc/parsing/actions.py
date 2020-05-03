@@ -15,6 +15,7 @@ import sympy
 from cellmlmanip.model import DataDirectionFlow, VariableDummy
 from cellmlmanip.parser import UNIT_PREFIXES
 from cellmlmanip.units import UnitConversionError
+from pint.errors import DimensionalityError
 
 from ..error_handling import ProtocolError, MissingVariableError
 from ..language import expressions as E
@@ -1636,11 +1637,12 @@ class ModelInterface(BaseGroupAction):
             factor = self.units.Quantity(expr.evalf(), units)
 
             # Add transformation rule
-            context.add_transformation(u1, u2, lambda ureg, rhs: rhs * units)
+            print(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
+            context.add_transformation(u1, u2, lambda ureg, rhs: rhs * factor)
 
         # Store and enable context
         self.units._registry.add_context(context)
-        self.units._registry.enable_contexts('fc')
+        self.units._registry.enable_contexts(context)
 
     def _convert_time_unit_if_needed(self):
         """Check the units of the time variable and convert if needed."""
@@ -1659,7 +1661,12 @@ class ModelInterface(BaseGroupAction):
         # Convert if required and possible
         if units is not None:
             units = self.units.get_unit(units)
-            self.time_variable = self.model.convert_variable(self.time_variable, units, DataDirectionFlow.INPUT)
+            try:
+                self.time_variable = self.model.convert_variable(self.time_variable, units, DataDirectionFlow.INPUT)
+            except DimensionalityError as e:
+                raise ProtocolError(
+                    f'Unable to convert time variable units from {self.time_variable.units} to {units}: {e}.'
+                ) from None
 
     def _convert_units(self):
         """Checks the units of model variables against protocol variables and converts them if needed."""
@@ -1677,7 +1684,13 @@ class ModelInterface(BaseGroupAction):
             if (pvar.is_input or pvar.is_output) and pvar.model_variable is not None:
                 if pvar.model_variable.units != units:
                     direction = DataDirectionFlow.INPUT if pvar.is_input else DataDirectionFlow.OUTPUT
-                    pvar.model_variable = self.model.convert_variable(pvar.model_variable, units, direction)
+                    try:
+                        pvar.model_variable = self.model.convert_variable(pvar.model_variable, units, direction)
+                    except DimensionalityError as e:
+                        raise ProtocolError(
+                            f'Unable to convert variable {pvar.long_name} units from {pvar.model_variable.units} to'
+                            f' {units}: {e}.'
+                        ) from None
 
     def _process_protocol_variables(self):
         """
@@ -1966,7 +1979,12 @@ class ModelInterface(BaseGroupAction):
                         units = self.units.get_unit(pvar.units)
                         converted = []
                         for var in variables:
-                            converted.append(self.model.convert_variable(var, units, DataDirectionFlow.OUTPUT))
+                            try:
+                                converted.append(self.model.convert_variable(var, units, DataDirectionFlow.OUTPUT))
+                            except DimensionalityError as e:
+                                raise ProtocolError(
+                                    f'Unable to convert variable {var} units from {var.units} to {units}: {e}.'
+                                ) from None
                         variables = converted
 
                     # Order variables by display name
