@@ -7,7 +7,6 @@ import pytest
 import fc
 
 
-@pytest.mark.xfail(strict=True, reason='No pycml replacement yet')
 def test_clamping_with_old_model():
 
     proto = fc.Protocol('test/protocols/test_INa_IV_curves.txt')
@@ -22,12 +21,12 @@ def test_clamping_with_old_model():
     assert len(peaks) == len(expected)
     ipeaks = iter(peaks)
     for value in expected:
-        assert pytest.approx(expected) == next(ipeaks)
+        assert pytest.approx(value, 1e-3) == next(ipeaks)
 
 
-@pytest.mark.xfail(strict=True, reason='No pycml replacement yet')
 def test_clamping_with_default_expressions():
 
+    # Note: Difference with test_clamping_with_old_model is the protocol use (test_INa.. vs INa...)
     proto = fc.Protocol('protocols/INa_IV_curves.txt')
     proto.set_output_folder('test_clamping_with_default_expressions')
     proto.set_model('test/models/beeler_reuter_model_1977.cellml')
@@ -40,10 +39,9 @@ def test_clamping_with_default_expressions():
     assert len(peaks) == len(expected)
     ipeaks = iter(peaks)
     for value in expected:
-        assert pytest.approx(expected) == next(ipeaks)
+        assert pytest.approx(value, 1e-3) == next(ipeaks)
 
 
-@pytest.mark.xfail(strict=True, reason='No pycml replacement yet')
 def test_clamping_computed_variable():
 
     proto = fc.Protocol('protocols/INa_IV_curves.txt')
@@ -58,5 +56,5 @@ def test_clamping_computed_variable():
     assert len(peaks) == len(expected)
     ipeaks = iter(peaks)
     for value in expected:
-        assert pytest.approx(expected) == next(ipeaks)
+        assert pytest.approx(value, 1e-3) == next(ipeaks)
 
