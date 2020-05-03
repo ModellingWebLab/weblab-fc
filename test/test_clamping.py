@@ -32,7 +32,6 @@ def test_clamping_optional_variable():
         proto.output_env.look_up('Cl')
 
 
-@pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 def test_clamp_to_data_file():
     proto_file = 'test/protocols/timecourse_voltage_clamp.txt'
     proto = fc.Protocol(proto_file)
@@ -43,7 +42,6 @@ def test_clamp_to_data_file():
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
 
 
-@pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 def test_interpolation_clamp():
     proto_file = 'test/protocols/test_model_interpolation.txt'
     proto = fc.Protocol(proto_file)
