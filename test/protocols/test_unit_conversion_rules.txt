@@ -7,11 +7,14 @@ namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 
 units {
     ms = milli second
-    uF_per_cm2 = micro farad . centi metre^-2
-    A_per_F = ampere . farad^-1
-    uA_per_cm2 = micro ampere . centi metre^-2 "{/Symbol m}A/cm^2" # Desired units of currents
     uA = micro ampere
+    uF = micro farad
     pA = pico ampere
+    cm2 = centi metre^2
+    per_cm2 = cm2^-1
+    uA_per_cm2 = uA . per_cm2
+    uF_per_cm2 = uF . per_cm2
+    A_per_F = ampere . farad^-1
 }
 
 model interface {
