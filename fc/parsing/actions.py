@@ -1589,10 +1589,6 @@ class ModelInterface(BaseGroupAction):
 
         # Output a warning when a rule can't be parsed
         def warn(u1, u2, msg):
-            print('  _[]_')
-            print('W (")')
-            print('|-(:\')-<')
-            print('|(\'  )')
             print(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
 
         # Create callable class that stores a conversion factor (lambdas or local functions cannot be used here).
