@@ -37,7 +37,7 @@ def get_variables_transitively(model, term):
 
     :param term: the ontology term to search for. Can be anything suitable as input to
         :meth:`create_rdf_node`, typically a :class:`rdflib.term.Node` or ``(ns_uri, local_name)`` pair.
-    :return: a list of :class:`VariableDummy` objects, sorted by order added to the model.
+    :return: a list of :class:`cellmlmanip.model.Variable` objects, sorted by order added to the model.
     """
     global _ONTOLOGY
 
@@ -63,7 +63,7 @@ def get_variables_that_are_version_of(model, term):
     """
     Return a list of variables annotated as bqbiol:isVersionOf the given ontology term.
 
-    :return: a list of :class:`VariableDummy` objects, sorted by order added to the model.
+    :return: a list of :class:`cellmlmanip.model.Variable` objects, sorted by order added to the model.
     """
     term = create_rdf_node(term)
     cmeta_ids = model.rdf.subjects(PRED_IS_VERSION_OF, term)
