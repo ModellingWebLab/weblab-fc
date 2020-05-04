@@ -943,11 +943,11 @@ class ProtocolVariable():
     ``original_definition``
         The Sympy equation for this variable, before any modifications were made.
     ``model_variable``
-        A :class:`cellmlmanip.model.Variable` instance that this protocol variable refers to (note that this may change during the
-        lifetime of a :class:`ProtocolVariable`, e.g. through unit conversion.
+        A :class:`cellmlmanip.model.Variable` instance that this protocol variable refers to (note that this may change
+        during the lifetime of a :class:`ProtocolVariable`, e.g. through unit conversion.
     ``vector_variables``
-        A set of :class:`cellmlmanip.model.Variable` objects that this protocol variables refers to indirectly, e.g. if it was derived
-        from an ontology term representing a category of variables.
+        A set of :class:`cellmlmanip.model.Variable` objects that this protocol variables refers to indirectly, e.g. if
+        it was derived from an ontology term representing a category of variables.
 
     """
     def __init__(self, name):
