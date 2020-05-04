@@ -12,7 +12,8 @@ import networkx
 import pint
 import pyparsing
 import sympy
-from cellmlmanip.model import DataDirectionFlow, Variable
+from cellmlmanip.model import DataDirectionFlow
+from cellmlmanip.model import Variable as ModelVariable
 from cellmlmanip.parser import UNIT_PREFIXES
 from cellmlmanip.units import UnitConversionError
 from pint.errors import DimensionalityError
@@ -942,10 +943,10 @@ class ProtocolVariable():
     ``original_definition``
         The Sympy equation for this variable, before any modifications were made.
     ``model_variable``
-        A :class:`Variable` instance that this protocol variable refers to (note that this may change during the
+        A :class:`cellmlmanip.model.Variable` instance that this protocol variable refers to (note that this may change during the
         lifetime of a :class:`ProtocolVariable`, e.g. through unit conversion.
     ``vector_variables``
-        A set of :class:`Variable` objects that this protocol variables refers to indirectly, e.g. if it was derived
+        A set of :class:`cellmlmanip.model.Variable` objects that this protocol variables refers to indirectly, e.g. if it was derived
         from an ontology term representing a category of variables.
 
     """
@@ -1627,7 +1628,7 @@ class ModelInterface(BaseGroupAction):
 
             # Check that the lambda was really just a multiplication
             expr /= UNIT_LAMBDA_SYMBOL
-            if expr.atoms(Variable) or UNIT_LAMBDA_SYMBOL in expr.atoms():
+            if expr.atoms(ModelVariable) or UNIT_LAMBDA_SYMBOL in expr.atoms():
                 warn(u1, u2, 'Conversion rule lambda must simplify to a simple multiplication.')
                 continue
 
