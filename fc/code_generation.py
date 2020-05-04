@@ -129,7 +129,7 @@ def get_unique_names(model):
     return variables
 
 
-def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
+def create_weblab_model(path, class_name, model, time_variable, ns_map, protocol_variables):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
     the Web Lab, and stores it at ``path``.
@@ -141,7 +141,9 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
     ``class_name``
         A name for the generated class.
     ``model``
-        A :class:`cellmlmanip.Model` object.
+        A :class:`cellmlmanip.model.Model` object.
+    ``time_variable``
+        A :class:`cellmlmanip.model.VariableDummy` object representing time.
     ``ns_map``
         A dict mapping namespace prefixes to namespace URIs.
     ``protocol_variables``
@@ -170,7 +172,7 @@ def create_weblab_model(path, class_name, model, ns_map, protocol_variables):
     printer = WebLabPrinter(variable_name, derivative_name)
 
     # Create free variable name
-    free_name = variable_name(model.get_free_variable())
+    free_name = variable_name(time_variable)
 
     # Create state information dicts
     state_info = []

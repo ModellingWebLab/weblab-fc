@@ -1219,7 +1219,7 @@ class ModelInterface(BaseGroupAction):
     #######################################
     # Model manipulation and helper methods
 
-    def modify_model(self, model, units):
+    def modify_model(self, model, time_variable, units):
         """Use the definitions in this interface to transform the provided model.
 
         This calls various internal helper methods to do the modifications, in an order orchestrated to follow the
@@ -1234,17 +1234,15 @@ class ModelInterface(BaseGroupAction):
         - Model variables and equations not needed to compute the requested outputs are removed.
 
         :param cellmlmanip.model.Model model: the model to manipulate
+        :param cellmlmanip.model.VariableDummy time_variable: the model's time variable
         :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
         """
         self.model = model
+        self.time_variable = time_variable
         self.units = units
 
-        # Models in FC must always have a time variable
-        try:
-            self.time_variable = self.model.get_free_variable()
-        except ValueError:
-            # TODO: Look for variable annotated as time instead?
-            raise ProtocolError('Model must contain at least one ODE.')
+        # Time variable may be replaced, so delete this reference just to be safe
+        del(time_variable)
 
         # Annotate all state variables with the magic `oxmeta:state_variable` term. This is done before unit conversion
         # so that annotations are transferred where needed. The original order in which state variables were defined is
@@ -1273,6 +1271,9 @@ class ModelInterface(BaseGroupAction):
         self._purge_unused_mathematics()
 
         # TODO: Any final consistency checks on the model?
+
+        # Return new time variable
+        return self.time_variable
 
     def _variable_generator(self, name):
         """Resolve a name reference within a model interface equation to a variable in the model.

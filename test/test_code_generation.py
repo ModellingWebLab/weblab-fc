@@ -54,6 +54,9 @@ def test_generate_weblab_model(tmp_path):
     model = os.path.join('test', 'models', 'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
     model = cellmlmanip.load_model(model)
 
+    # Time variable
+    time_variable = model.get_free_variable()
+
     # Combined output and parameter information
     protocol_variables = []
     variables = [
@@ -90,6 +93,7 @@ def test_generate_weblab_model(tmp_path):
         str(path),
         class_name,
         model,
+        time_variable,
         ns_map={'oxmeta': OXMETA_NS},
         protocol_variables=protocol_variables,
     )
