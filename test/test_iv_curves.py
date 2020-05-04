@@ -21,7 +21,7 @@ def test_clamping_with_old_model():
     assert len(peaks) == len(expected)
     ipeaks = iter(peaks)
     for value in expected:
-        assert pytest.approx(value, 1e-3) == next(ipeaks)
+        assert next(ipeaks) == pytest.approx(value, 1e-3)
 
 
 def test_clamping_with_default_expressions():
@@ -39,7 +39,7 @@ def test_clamping_with_default_expressions():
     assert len(peaks) == len(expected)
     ipeaks = iter(peaks)
     for value in expected:
-        assert pytest.approx(value, 1e-3) == next(ipeaks)
+        assert next(ipeaks) == pytest.approx(value, 1e-3)
 
 
 def test_clamping_computed_variable():
@@ -56,5 +56,4 @@ def test_clamping_computed_variable():
     assert len(peaks) == len(expected)
     ipeaks = iter(peaks)
     for value in expected:
-        assert pytest.approx(value, 1e-3) == next(ipeaks)
-
+        assert next(ipeaks) == pytest.approx(value, 1e-3)
