@@ -1914,10 +1914,7 @@ class ModelInterface(BaseGroupAction):
                         raise ProtocolError(f'Clamp-to-initial-value set for unknown variable {pvar.long_name}.')
 
                 # Evaluate and update equation
-                if self.model.is_state(var):
-                    value = var.initial_value
-                else:
-                    value = self.model.get_value(var)
+                value = self.model.get_value(var)
                 new_defn = sympy.Eq(var, self.model.create_quantity(value, var.units))
                 old_defn = self.model.get_definition(var)
                 if old_defn is not None:
