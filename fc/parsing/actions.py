@@ -1583,7 +1583,7 @@ class ModelInterface(BaseGroupAction):
                             f' (units compatible with) {units}.')
 
                     # Evaluate
-                    value = rhs.evalf()
+                    value = float(rhs)
                 else:
                     raise ProtocolError(f'Local variable {name} appearing in unit conversion rule has no value.')
 
