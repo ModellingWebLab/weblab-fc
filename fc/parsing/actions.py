@@ -1914,14 +1914,11 @@ class ModelInterface(BaseGroupAction):
                         raise ProtocolError(f'Clamp-to-initial-value set for unknown variable {pvar.long_name}.')
 
                 # Evaluate and update equation
-                defn = self.model.get_definition(var)
-                if defn.lhs.is_Derivative:
-                    value = var.initial_value
-                else:
-                    value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
+                value = self.model.get_value(var)
                 new_defn = sympy.Eq(var, self.model.create_quantity(value, var.units))
-                if defn is not None:
-                    self.model.remove_equation(defn)
+                old_defn = self.model.get_definition(var)
+                if old_defn is not None:
+                    self.model.remove_equation(old_defn)
                 self.model.add_equation(new_defn)
 
     def _process_transitive_variables(self):

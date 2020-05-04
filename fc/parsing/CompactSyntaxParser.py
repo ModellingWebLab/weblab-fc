@@ -551,7 +551,6 @@ class CompactSyntaxParser(object):
         # basis that if one expression needs to, several are likely to.
         self._stack_depth_factor = 1
         self._original_stack_limit = sys.getrecursionlimit()
-        self.increase_stack_depth_limit()
 
     def __del__(self):
         """Reset the stack limit if it changed."""

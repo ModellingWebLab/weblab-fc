@@ -211,16 +211,11 @@ class Protocol(object):
         """
         Parses the protocol, and fills in this object's fields.
         """
-
-        # Parse the protocol file and fill in the structures declared above
-        self.parser = None
-        self.parsed_protocol = None
-
         start = time.time()
 
         import fc.parsing.CompactSyntaxParser as CSP
-        parser = self.parser = CSP.CompactSyntaxParser()
-        generator = self.parsed_protocol = parser.try_parse(
+        parser = CSP.CompactSyntaxParser()
+        generator = parser.try_parse(
             CSP.CompactSyntaxParser.protocol.parseFile,
             self.proto_file,
             parseAll=True
