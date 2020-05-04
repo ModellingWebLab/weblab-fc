@@ -143,7 +143,7 @@ def create_weblab_model(path, class_name, model, time_variable, ns_map, protocol
     ``model``
         A :class:`cellmlmanip.model.Model` object.
     ``time_variable``
-        A :class:`cellmlmanip.model.VariableDummy` object representing time.
+        A :class:`cellmlmanip.model.Variable` object representing time.
     ``ns_map``
         A dict mapping namespace prefixes to namespace URIs.
     ``protocol_variables``

@@ -12,7 +12,7 @@ import networkx
 import pint
 import pyparsing
 import sympy
-from cellmlmanip.model import DataDirectionFlow, VariableDummy
+from cellmlmanip.model import DataDirectionFlow, Variable
 from cellmlmanip.parser import UNIT_PREFIXES
 from cellmlmanip.units import UnitConversionError
 from pint.errors import DimensionalityError
@@ -942,11 +942,11 @@ class ProtocolVariable():
     ``original_definition``
         The Sympy equation for this variable, before any modifications were made.
     ``model_variable``
-        A :class:`VariableDummy` instance that this protocol variable refers to (note that this may change during the
+        A :class:`Variable` instance that this protocol variable refers to (note that this may change during the
         lifetime of a :class:`ProtocolVariable`, e.g. through unit conversion.
     ``vector_variables``
-        A set of :class:`VariableDummy` objects that this protocol variables refers to indirectly, e.g. if it was
-        derived from an ontology term representing a category of variables.
+        A set of :class:`Variable` objects that this protocol variables refers to indirectly, e.g. if it was derived
+        from an ontology term representing a category of variables.
 
     """
     def __init__(self, name):
@@ -1136,9 +1136,9 @@ class ModelInterface(BaseGroupAction):
     ``units``
         A unit store.
     ``model``
-        A model.
+        A :class:`cellmlmanip.model.Model`.
     ``time_variable``
-        The model variable (``VariableDummy``) representing time.
+        The :class:`cellmlmanip.model.Variable` representing time.
     ``protocol_variables``
         A list of :class:`ProtocolVariable` objects.
     ``local_vars``
@@ -1256,7 +1256,7 @@ class ModelInterface(BaseGroupAction):
         - Model variables and equations not needed to compute the requested outputs are removed.
 
         :param cellmlmanip.model.Model model: the model to manipulate
-        :param cellmlmanip.model.VariableDummy time_variable: the model's time variable
+        :param cellmlmanip.model.Variable time_variable: the model's time variable
         :param cellmlmanip.units.UnitStore units: the protocol's unit store, for resolving unit references
         """
         self.model = model
@@ -1330,7 +1330,7 @@ class ModelInterface(BaseGroupAction):
             raise MissingVariableError(name)
 
     def _number_generator(self, value, units):
-        """Convert a number with units in an equation to a :class:`cellmlmanip.model.NumberDummy`.
+        """Convert a number with units in an equation to a :class:`cellmlmanip.model.Quantity`.
 
         Used by :meth:`convert_equations_to_sympy`.
 
@@ -1349,7 +1349,7 @@ class ModelInterface(BaseGroupAction):
             units = var.units
         else:
             units = self.units.get_unit(units)
-        return self.model.add_number(value, units)
+        return self.model.create_quantity(value, units)
 
     def _annotate_state_variables(self):
         """
@@ -1503,7 +1503,8 @@ class ModelInterface(BaseGroupAction):
         def variable_generator(name, free_variable_name):
             """
             Variable generator that will check all variables used are either constant model variables or local variables
-            defined as literal constants, and will return NumberDummy objects instead of variables.
+            defined as literal constants, and will return :class:`cellmlmanip.model.Quantity` objects instead of
+            variables.
 
             Checks for ``free_variable_name`` and will return ``UNIT_LAMBDA_SYMBOL`` if found.
             """
@@ -1545,7 +1546,7 @@ class ModelInterface(BaseGroupAction):
                             f' {name} is not currently in {pvar.units}.')
 
                 # Return value of this variable
-                return self.model.add_number(self.model.get_value(var), var.units)
+                return self.model.create_quantity(self.model.get_value(var), var.units)
 
             # Local variable
             try:
@@ -1586,7 +1587,7 @@ class ModelInterface(BaseGroupAction):
                     raise ProtocolError(f'Local variable {name} appearing in unit conversion rule has no value.')
 
                 # Return the value of this variable
-                return self.model.add_number(value, units)
+                return self.model.create_quantity(value, units)
 
         # Output a warning when a rule can't be parsed
         def warn(u1, u2, msg):
@@ -1626,7 +1627,7 @@ class ModelInterface(BaseGroupAction):
 
             # Check that the lambda was really just a multiplication
             expr /= UNIT_LAMBDA_SYMBOL
-            if expr.atoms(VariableDummy) or UNIT_LAMBDA_SYMBOL in expr.atoms():
+            if expr.atoms(Variable) or UNIT_LAMBDA_SYMBOL in expr.atoms():
                 warn(u1, u2, 'Conversion rule lambda must simplify to a simple multiplication.')
                 continue
 
@@ -1871,7 +1872,7 @@ class ModelInterface(BaseGroupAction):
                     #   We're replacing a constant variable, that's not also set by a `define` or `clamp`
                     if eq is None or (not eq.lhs.is_Derivative and pvar.equation is None):
                         lhs = pvar.model_variable
-                        rhs = self.model.add_number(pvar.initial_value, pvar.model_variable.units)
+                        rhs = self.model.create_quantity(pvar.initial_value, pvar.model_variable.units)
                         if eq is not None:
                             self.model.remove_equation(eq)
                         eq = sympy.Eq(lhs, rhs)
@@ -1917,7 +1918,7 @@ class ModelInterface(BaseGroupAction):
                     value = var.initial_value
                 else:
                     value = defn.rhs.evalf()  # TODO: What if there are variable references in the RHS?
-                new_defn = sympy.Eq(var, self.model.add_number(value, var.units))
+                new_defn = sympy.Eq(var, self.model.create_quantity(value, var.units))
                 if defn is not None:
                     self.model.remove_equation(defn)
                 self.model.add_equation(new_defn)
