@@ -60,7 +60,7 @@ def test_unit_conversion_state_variable():
     assert fc.test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'real' ,'output', model_name, 'GraphState'),
+        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
