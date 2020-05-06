@@ -145,8 +145,8 @@ post-processing {
         else MathML:abs((act-ref)/ref)
 
     # Check against reference data
-    ref_pos = load("../data/mathml_evaluation/outputs_combined_pos.csv")
-    ref_neg = load("../data/mathml_evaluation/outputs_combined_neg.csv")
+    ref_pos = load("../output/mathml_evaluation/outputs_combined_pos.csv")
+    ref_neg = load("../output/mathml_evaluation/outputs_combined_neg.csv")
     err_pos = map(lambda a, b: MathML:abs(a-b), ref_pos, combined_pos)
     err_neg = map(lambda a, b: MathML:abs(a-b), ref_neg, combined_neg)
     rel_err_pos = map(rel_err_fn, ref_pos, combined_pos)

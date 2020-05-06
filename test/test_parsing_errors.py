@@ -6,7 +6,7 @@ import fc
 
 def test_non_existent_protocol():
     # Checks that a missing protocol file is handled cleanly
-    proto_file = 'protocols/not_here.txt'
+    proto_file = 'test/protocols/not_here.txt'
     with pytest.raises(FileNotFoundError):
         fc.Protocol(proto_file)
 

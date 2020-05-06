@@ -10,9 +10,9 @@ import fc.test_support
 def test_s1_s2():
     """Tests running the full S1S2 protocol on the Courtemanche model."""
 
-    proto = fc.Protocol('protocols/S1S2.txt')
+    proto = fc.Protocol('test/real/protocols/S1S2.txt')
     proto.set_output_folder('test_s1_s2')
-    proto.set_model('test/models/courtemanche_ramirez_nattel_model_1998.cellml')
+    proto.set_model('test/real/models/courtemanche_ramirez_nattel_model_1998.cellml')
     proto.run()
     data_folder = 'test/data/TestSpeedRealProto/S1S2'
     fc.test_support.check_results(
