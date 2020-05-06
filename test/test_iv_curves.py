@@ -11,7 +11,7 @@ def test_clamping_with_old_model():
 
     proto = fc.Protocol('test/protocols/test_INa_IV_curves.txt')
     proto.set_output_folder('test_clamping_with_old_model')
-    proto.set_model('test/models/beeler_reuter_model_1977.cellml')
+    proto.set_model('test/real/models/beeler_reuter_model_1977.cellml')
     proto.run()
 
     # Check the key outputs haven't changed.
@@ -27,9 +27,9 @@ def test_clamping_with_old_model():
 def test_clamping_with_default_expressions():
 
     # Note: Difference with test_clamping_with_old_model is the protocol use (test_INa.. vs INa...)
-    proto = fc.Protocol('protocols/INa_IV_curves.txt')
+    proto = fc.Protocol('test/real/protocols/INa_IV_curves.txt')
     proto.set_output_folder('test_clamping_with_default_expressions')
-    proto.set_model('test/models/beeler_reuter_model_1977.cellml')
+    proto.set_model('test/real/models/beeler_reuter_model_1977.cellml')
     proto.run()
 
     # Check the key outputs haven't changed.
@@ -44,9 +44,9 @@ def test_clamping_with_default_expressions():
 
 def test_clamping_computed_variable():
 
-    proto = fc.Protocol('protocols/INa_IV_curves.txt')
+    proto = fc.Protocol('test/real/protocols/INa_IV_curves.txt')
     proto.set_output_folder('test_clamping_computed_variable')
-    proto.set_model('test/models/matsuoka_model_2003.cellml')
+    proto.set_model('test/real/models/matsuoka_model_2003.cellml')
     proto.run()
 
     # Check the key outputs haven't changed.
