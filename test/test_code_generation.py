@@ -21,8 +21,7 @@ def test_unique_name_generation():
     # Tests if unique variable names are generated correctly
 
     # Load cellml model, get unique names
-    model = cellmlmanip.load_model(
-        os.path.join('test', 'models', 'conflicting_names.cellml'))
+    model = cellmlmanip.load_model(os.path.join('test', 'models', 'conflicting_names.cellml'))
 
     # Test unique names
     unames = fc.code_generation.get_unique_names(model)
@@ -51,7 +50,7 @@ def test_generate_weblab_model(tmp_path):
     class_name = 'TestModel'
 
     # Load cellml model
-    model = os.path.join('test', 'models', 'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
+    model = os.path.join('test', 'real', 'models', 'hodgkin_huxley_squid_axon_model_1952_modified.cellml')
     model = cellmlmanip.load_model(model)
 
     # Time variable
@@ -66,6 +65,7 @@ def test_generate_weblab_model(tmp_path):
         (False, True, 'membrane_voltage'),
         (False, True, 'time'),
     ]
+
     for is_input, is_output, name in variables:
         rdf_term = create_rdf_node((OXMETA_NS, name))
         pvar = ProtocolVariable('oxmeta:' + name)
@@ -99,7 +99,7 @@ def test_generate_weblab_model(tmp_path):
     )
 
     # Read expected output from file
-    expected = os.path.join('test', 'code_generation', 'weblab_model.pyx')
+    expected = os.path.join('test', 'output', 'code_generation', 'weblab_model.pyx')
     with open(expected, 'r') as f:
         expected = f.read()
 
@@ -125,11 +125,11 @@ def test_graphstate():
     """ Tests the graph state protocol on a generated model. """
 
     # Create protocol
-    proto = fc.Protocol(os.path.join('protocols', 'GraphState.txt'))
+    proto = fc.Protocol(os.path.join('test', 'real', 'protocols', 'GraphState.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'hodgkin_huxley_squid_axon_model_1952_modified'
-    proto.set_model(os.path.join('test', 'models', model_name + '.cellml'))
+    proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
 
     # Run protocol
     proto.set_output_folder('test_graphstate')
@@ -143,7 +143,7 @@ def test_graphstate():
     assert fc.test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'data', 'historic', model_name, 'GraphState'),
+        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
