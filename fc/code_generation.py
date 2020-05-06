@@ -7,9 +7,8 @@ import time
 import jinja2
 import sympy
 
-from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER
+from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER, Transpiler
 from cellmlmanip.printer import Printer
-from cellmlmanip.transpiler import Transpiler
 
 # Tell cellmlmanip to create _exp objects instead of exp objects. This prevents Sympy doing simplification (or
 # canonicalisation) resulting in weird errors with exps in some cardiac models.
