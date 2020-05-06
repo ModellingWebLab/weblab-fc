@@ -10,18 +10,21 @@ import fc.test_support
 from fc.error_handling import ProtocolError
 
 
-def test_unit_conversion_time():
-    """ Tests the graph state protocol in a model requiring time units conversion. """
+def test_unit_conversion_time_independent_var_units():
+    """
+    Tests the graph state protocol in a model requiring time units conversion, setting time units via
+    ``independent var units``.
+    """
 
     # Create protocol
-    proto = fc.Protocol(os.path.join('test', 'protocols', 'real', 'GraphState.txt'))
+    proto = fc.Protocol(os.path.join('test', 'protocols', 'test_unit_conversion_time_independent_var_units.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
     proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
 
     # Run protocol
-    proto.set_output_folder('test_unit_conversion_time')
+    proto.set_output_folder('test_unit_conversion_time_independent_var_units')
     proto.run()
     # Some test assertions are within the protocol itself
 
@@ -37,6 +40,33 @@ def test_unit_conversion_time():
         abs_tol=2.5e-4
     )
 
+
+def test_unit_conversion_time_input():
+    """ Tests the graph state protocol in a model requiring time units conversion, setting time units via an input. """
+
+    # Create protocol
+    proto = fc.Protocol(os.path.join('test', 'protocols', 'test_unit_conversion_time_input.txt'))
+
+    # Set model (generates & compiles model)
+    model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
+    proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
+
+    # Run protocol
+    proto.set_output_folder('test_unit_conversion_time_input')
+    proto.run()
+    # Some test assertions are within the protocol itself
+
+    # Check output exists
+    assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
+
+    # Check output is correct
+    assert fc.test_support.check_results(
+        proto,
+        {'state': 2},   # Name and dimension of output to check
+        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
+        rel_tol=0.005,
+        abs_tol=2.5e-4
+    )
 
 def test_unit_conversion_state_variable():
     """ Tests the graph state protocol in a model requiring state variable units conversion. """
