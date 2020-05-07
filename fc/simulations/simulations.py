@@ -33,26 +33,6 @@ class AbstractSimulation(Locatable):
         except NameError:
             pass
 
-    def __getstate__(self):
-        # Must remove Model class and regenerate during unpickling
-        # (Pickling errors from nested class structure of ModelWrapperEnvironment)
-
-        # Undo Simulation.set_model
-        if self.model is not None:
-            modelenv = self.model.get_environment_map()
-            for prefix in modelenv:
-                if isinstance(self, Nested):
-                    self.nested_sim.env.clear_delegatee_env(prefix)
-                self.results.clear_delegatee_env(prefix)
-                self.env.clear_delegatee_env(prefix)
-
-        odict = self.__dict__.copy()
-        odict['model'] = None
-        return odict
-
-    def __setstate__(self, dict):
-        self.__dict__.update(dict)
-
     def initialise(self, initialise_range=True):
         if initialise_range:
             self.range_.initialise(self.env)

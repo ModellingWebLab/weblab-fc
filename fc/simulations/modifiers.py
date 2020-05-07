@@ -33,19 +33,6 @@ class SetVariable(AbstractModifier):
         # Save a reference so when an instance is unpickled it can revert to apply
         self._called_once = False
 
-    # Override Object serialization methods to allow pickling with the dill module
-    def __getstate__(self):
-        odict = self.__dict__.copy()
-        # For pickling, simulation modifiers can't save references to model environment
-        if '_evaluate' in odict:
-            del odict['_evaluate']
-            del odict['_bindings']
-        return odict
-
-    def __setstate__(self, dict):
-        self.__dict__.update(dict)
-        self._called_once = False
-
     def apply(self, simul):
         if self._called_once:
             return self.fast_apply(simul)
