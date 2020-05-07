@@ -15,9 +15,6 @@ class AbstractModel(object):
     a Python class.  Thus if you make changes here you must also change the code generation in translators.py.
     """
 
-    def __init__(self):
-        self.indent_level = 0
-
     def simulate(self, end_point):
         """Simulate the model up to the given end point (value of the free variable).
 
@@ -44,10 +41,6 @@ class AbstractModel(object):
             shutil.rmtree(path)
         os.mkdir(path)
         self.output_path = path
-
-    def set_indent_level(self, indent_level):
-        """Set the level of indentation to use for progress output."""
-        self.indent_level = indent_level
 
 
 class AbstractOdeModel(AbstractModel):
@@ -147,11 +140,6 @@ class NestedProtocol(AbstractModel):
         self.input_exprs = input_exprs
         self.output_names = output_names
         self.optional_flags = optional_flags
-
-    def set_indent_level(self, indent_level):
-        """Set the level of indentation to use for progress output."""
-        super(NestedProtocol, self).set_indent_level(indent_level)
-        self.proto.set_indent_level(indent_level)
 
     def get_outputs(self):
         """Return selected outputs from the nested protocol."""

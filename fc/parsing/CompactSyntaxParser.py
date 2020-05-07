@@ -3,6 +3,7 @@ Parsing methods for the protocol language.
 
 The resulting data structure is defined in the :mod:`.actions` module.
 """
+import logging
 import os
 import pickle
 import sys
@@ -18,6 +19,8 @@ __all__ = ['CompactSyntaxParser']
 # Necessary for reasonable speed when using infixNotation
 p.ParserElement.enablePackrat()
 
+# Logging
+log = logging.getLogger(__name__)
 
 ################################################################################
 # Helper methods for defining parsers
@@ -565,8 +568,7 @@ class CompactSyntaxParser(object):
         self._stack_depth_factor += 0.5
         new_limit = int(
             self._stack_depth_factor * self._original_stack_limit)
-        print('Increasing recursion limit to', new_limit,
-              file=sys.stderr)
+        log.info(f'Increasing recursion limit to {new_limit}.')
         sys.setrecursionlimit(new_limit)
 
     def try_parse(self, callable, source_file, *args, **kwargs):
@@ -578,7 +580,7 @@ class CompactSyntaxParser(object):
         try:
             date_read, r = self._cache[source_file]
             if os.path.getmtime(source_file) < date_read:
-                print('Using mem-cached protocol for ' + source_file)
+                log.info(f'Using mem-cached protocol for {source_file}.')
                 return r
         except KeyError:
             pass
@@ -590,7 +592,7 @@ class CompactSyntaxParser(object):
             if os.path.getmtime(source_file) < os.path.getmtime(cache_file):
                 with open(cache_file, 'rb') as f:
                     try:
-                        print('Reading disk-cached protocol from ' + cache_file)
+                        log.info(f'Reading disk-cached protocol from {cache_file}.')
                         r = pickle.load(f)
 
                         # Store parse result in memory cache and return
@@ -610,7 +612,7 @@ class CompactSyntaxParser(object):
                 try:
                     r = callable(source_file, *args, **kwargs)
                 except RuntimeError as msg:
-                    print('Got RuntimeError:', msg, file=sys.stderr)
+                    log.warning(f'Got RuntimeError: {msg}')
                     self.increase_stack_depth_limit()
                 else:
                     break  # Parsed OK
@@ -622,8 +624,8 @@ class CompactSyntaxParser(object):
         self._cache[source_file] = (now, r)
 
         # Store parse result in disk cache
+        log.info(f'Caching protocol to {cache_file}')
         with open(cache_file, 'wb') as f:
-            print('Caching protocol to ' + cache_file)
             pickle.dump(r, f)
 
         # Return
@@ -649,10 +651,10 @@ def enable_debug(grammars=None):
         return " at loc " + str(loc) + "(%d,%d)" % (p.lineno(loc, instring), p.col(loc, instring))
 
     def success_debug_action(instring, startloc, endloc, expr, toks):
-        print("Matched " + str(expr) + " -> " + str(toks.asList()) + display_loc(instring, endloc))
+        log.info(f'Matched {expr} -> {toks.asList()} {display_loc(instring, endloc)}.')
 
     def exception_debug_action(instring, loc, expr, exc):
-        print("Exception raised:" + str(exc) + display_loc(instring, loc))
+        log.warning(f'Exception raised: {exc} {display_loc(instring, loc)}')
 
     for parser in grammars or get_named_grammars():
         parser.setDebugActions(None, success_debug_action, exception_debug_action)

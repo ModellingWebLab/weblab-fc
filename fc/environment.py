@@ -90,10 +90,10 @@ class Environment(object):
 #             self.debug_delegatees('root')
 #             raise
 
-    def debug_delegatees(self, prefix):
-        print('Delegatees in', prefix, '(', len(self), '):', self.delegatees)
-        for p, env in self.delegatees.items():
-            env.debug_delegatees(p)
+#   def debug_delegatees(self, prefix):
+#       print('Delegatees in', prefix, '(', len(self), '):', self.delegatees)
+#       for p, env in self.delegatees.items():
+#           env.debug_delegatees(p)
 
     def set_delegatee_env(self, delegatee, prefix=""):
         if prefix in self.delegatees and self.delegatees[prefix] is not delegatee:

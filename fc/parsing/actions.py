@@ -7,6 +7,7 @@ module. These "actions" contain the parsed information. This includes expression
 """
 
 import itertools
+import logging
 import math
 import os
 from collections import deque
@@ -1157,6 +1158,8 @@ class ModelInterface(BaseGroupAction):
             # This is an empty instance not created by pyparsing. Fake the arguments pyparsing needs.
             args = ('', '', [[]])
         super().__init__(*args, **kwargs)
+        self.log = logging.getLogger(__name__)
+
         self._time_units = []
         self.inputs = []
         self.outputs = []
@@ -1596,7 +1599,7 @@ class ModelInterface(BaseGroupAction):
 
         # Output a warning when a rule can't be parsed
         def warn(u1, u2, msg):
-            print(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
+            self.log.warning(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
 
         # Create callable class that stores a conversion factor (lambdas or local functions cannot be used here).
         class Rule(object):
@@ -1647,7 +1650,7 @@ class ModelInterface(BaseGroupAction):
             factor = self.units.Quantity(expr.evalf(), units)
 
             # Add transformation rule
-            print(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
+            self.log.info(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
             context.add_transformation(u1, u2, Rule(factor))
 
         # Store and enable context

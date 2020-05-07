@@ -28,7 +28,6 @@ class AbstractSimulation(Locatable):
         self.results_list = []  # An ordered view on the unwrapped versions of simulation results
         self.env = Environment()
         self.view_env = None
-        self.indent_level = 0
 
         try:
             line_profile.add_function(self.add_iteration_outputs)
@@ -50,20 +49,6 @@ class AbstractSimulation(Locatable):
         self.results_list[:] = []
         if self.view_env:
             self.view_env.clear()
-
-    def set_indent_level(self, indent_level):
-        """Set the level of indentation to use for progress output."""
-        self.indent_level = indent_level
-        if self.model:
-            self.model.set_indent_level(indent_level)
-
-    def log_progress(self, *args):
-        """Print a progress line showing how far through the simulation we are.
-
-        Arguments are converted to strings and space separated, as for the print builtin.
-        """
-        print('  ' * self.indent_level + ' '.join(map(str, args)))
-        sys.stdout.flush()
 
     def internal_run(self, verbose=True):
         raise NotImplementedError
@@ -116,7 +101,6 @@ class AbstractSimulation(Locatable):
             self.model.proto.set_model(model)
         else:
             self.model = model
-        self.model.set_indent_level(self.indent_level)
         model_env = model.get_environment_map()
         # TODO: This breaks if a model is used in multiple simulations!  Only needed for NestedProtocol?
         model.sim_env = self.env
@@ -231,6 +215,7 @@ class Nested(AbstractSimulation):
     def __init__(self, nested_sim, range_, modifiers=[]):
         self.range_ = range_
         super(Nested, self).__init__()
+        self.log = logging.getLogger(__name__)
         self.nested_sim = nested_sim
         self.modifiers = modifiers
         self.ranges = self.nested_sim.ranges
@@ -238,6 +223,8 @@ class Nested(AbstractSimulation):
         self.results = self.nested_sim.results
         self.results_list = self.nested_sim.results_list
         nested_sim.env.set_delegatee_env(self.env)
+
+
 
     def initialise(self):
         self.range_.initialise(self.env)
@@ -250,21 +237,12 @@ class Nested(AbstractSimulation):
         self.nested_sim.clear()
         super(Nested, self).clear()
 
-    def set_indent_level(self, indent_level):
-        super(Nested, self).set_indent_level(indent_level)
-        self.nested_sim.set_indent_level(indent_level + 1)
-
     def internal_run(self, verbose=True):
         for t in self.range_:
             if verbose:
-                self.log_progress(
-                    'nested simulation',
-                    self.range_.name,
-                    'step',
-                    self.range_.get_current_output_number(),
-                    '(value',
-                    self.range_.get_current_output_point(),
-                    ')')
+                self.log.info(
+                    f'Nested simulation {self.range_.name} step {self.range_.get_current_output_number()}'
+                    f' (value {self.range_.get_current_output_point()}).')
             self.loop_body_start_hook()
             if self.output_folder:
                 self.nested_sim.set_output_folder(self.output_folder.create_subfolder(

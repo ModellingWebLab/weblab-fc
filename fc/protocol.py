@@ -1,6 +1,7 @@
 """
 Contains the main classes representing an FC Protocol.
 """
+import logging
 import os
 import subprocess
 import sys
@@ -74,11 +75,14 @@ class Protocol(object):
     from file and running it on a given model.
     """
 
-    def __init__(self, proto_file, indent_level=0):
+    def __init__(self, proto_file, nesting_level=0):
         """Construct a new protocol by parsing the description in the given file.
 
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
+        # Logging
+        self.log = logging.getLogger(__name__)
+
         # if the filename passed as argument to CompactSyntaxParser is not found
         # it tries to read it before checking it exists
         # and you get a messy exit
@@ -88,16 +92,16 @@ class Protocol(object):
         #     During handling of the above exception, another exception occurred:
         #     E FileNotFoundError: [Errno 2] No such file or directory:
         # throw exception
-
         with open(proto_file) as f:
             f.close()
 
         self.proto_file = proto_file
         self.proto_name = os.path.basename(self.proto_file)
 
-        # Indent level used for progress reporting
-        self.indent_level = indent_level
-        self.log_progress('Constructing', self.proto_name)
+        self.log.info(f'Constructing {self.proto_name}.')
+
+        # Nesting level: Zero for main protocol
+        self.nesting_level = 0
 
         # A dict with benchmarking information
         self.timings = {}
@@ -273,8 +277,8 @@ class Protocol(object):
 
         # Store information from imported protocols
         for prefix, path, set_inputs in details.get('imports', []):
-            self.log_progress('Importing', path, 'as', prefix, 'in', self.proto_name)
-            imported_proto = Protocol(self.get_path(self.proto_file, path), self.indent_level + 1)
+            self.log.info(f'Importing {path} as {prefix} in {self.proto_name}.')
+            imported_proto = Protocol(self.get_path(self.proto_file, path), self.nesting_level + 1)
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
             else:
@@ -358,13 +362,12 @@ class Protocol(object):
     def initialise(self, verbose=True):
         """(Re-)Initialise this protocol, ready to be run on a model."""
         if verbose:
-            self.log_progress('Initialising', self.proto_name)
+            self.log.info('Initialising {self.proto_name}.')
         self.library_env.clear()
         self.post_processing_env.clear()
         self.output_env.clear()
         for sim in self.simulations:
             sim.clear()
-            sim.set_indent_level(self.indent_level + 1)
         for imported_proto in self.imports.values():
             imported_proto.initialise(verbose)
 
@@ -396,7 +399,7 @@ class Protocol(object):
                     output = self.post_processing_env.look_up(output_var)
                 except KeyError:
                     if output_spec['optional']:
-                        self.log_warning("Ignoring missing optional output", output_spec['name'])
+                        self.log.warning(f"Ignoring missing optional output {output_spec['name']}.")
                         continue
                     else:
                         raise
@@ -406,12 +409,12 @@ class Protocol(object):
                     output_spec['description'] = output_spec['name']
                 if output_spec['name'] in plot_vars:
                     plot_descriptions[output_spec['name']] = output_spec['description']
-        if not self.output_folder and verbose and write_out:
-            self.log_warning("Warning: protocol output folder not set, so not writing outputs to file")
+        if (not self.output_folder) and verbose and write_out:
+            self.log.warning('Protocol output folder not set, so not writing outputs to file.')
             return
 
         if verbose:
-            self.log_progress('saving output data to h5 file...')
+            self.log.info('Saving output data to h5 file...')
         start = time.time()
         if write_out:
             with errors:
@@ -430,19 +433,17 @@ class Protocol(object):
         if write_out:  # suppress plotting when performing fitting
             start = time.time()
             for plot in self.plots:
+                if verbose:
+                    self.log.info(
+                        f"Plotting {plot['title']}: "
+                        f"{plot_descriptions[plot['y']]} against {plot_descriptions[plot['x']]}.")
+
                 with errors:
                     path = os.path.join(self.output_folder.path, self.sanitise_file_name(plot['title']) + '.png')
                     x_label = plot_descriptions[plot['x']]
                     y_label = plot_descriptions[plot['y']]
                     x_data = [self.output_env.look_up(plot['x']).array]
                     y_data = [self.output_env.look_up(plot['y']).array]
-
-                    if verbose:
-                        self.log_progress(
-                            'plotting', plot['title'],
-                            'curve:', plot_descriptions[plot['y']],
-                            'against', plot_descriptions[plot['x']]
-                        )
 
                     if 'key' in plot:
                         key_data = self.output_env.look_up(plot['key']).array
@@ -479,7 +480,7 @@ class Protocol(object):
         Locatable.output_folder = self.output_folder
         self.initialise(verbose)
         if verbose:
-            self.log_progress('running protocol', self.proto_name, '...')
+            self.log.info(f'Running protocol {self.proto_name}...')
 
         # Run the statements in our library to build up the library environment
         errors = ErrorRecorder(self.proto_name)
@@ -509,11 +510,11 @@ class Protocol(object):
         self.outputs_and_plots(errors, verbose, write_out)
 
         # Summarise time spent in each protocol section (if we're the main protocol)
-        if verbose and self.indent_level == 0:
-            print('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
+        if verbose and self.nesting_level == 0:
+            self.log.info('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
             max_len = max(len(section) for section in self.timings)
             for section, duration in self.timings.items():
-                print('   ', section, ' ' * (max_len - len(section)), '%.6f' % duration)
+                self.log.info('   ' + section + ' ' * (max_len - len(section)) + '%.6f' % duration)
 
         # Report any errors that occurred
         if errors:
@@ -523,16 +524,16 @@ class Protocol(object):
         """Run the model simulations specified in this protocol."""
         for sim in self.simulations:
             if verbose:
-                self.log_progress('running simulation', sim.prefix)
+                self.log.info(f'Running simulation f{sim.prefix}.')
             sim.initialise()
-            sim.run(verbose)
+            sim.run()
             # Reset trace folder in case a nested protocol changes it
             Locatable.output_folder = self.output_folder
 
     def run_post_processing(self, verbose=True):
         """Run the post-processing section of this protocol."""
         if verbose:
-            self.log_progress('running post processing for', self.proto_name, '...')
+            self.log.info(f'Running post processing for {self.proto_name}...')
         self.post_processing_env.execute_statements(self.post_processing)
 
     def set_input(self, name, value_expr):
@@ -559,7 +560,7 @@ class Protocol(object):
 
         # Compile model from CellML
         if isinstance(model, str) and model.endswith('.cellml'):
-            self.log_progress('Generating model code...')
+            self.log.info('Generating model code...')
 
             # Create output folder
             if self.output_folder:
@@ -598,7 +599,7 @@ class Protocol(object):
                 protocol_variables=self.model_interface.protocol_variables,
             )
 
-            self.log_progress('Compiling pyx model code...')
+            self.log.info('Compiling pyx model code...')
 
             # Get path to root dir of fc module
             fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
@@ -619,9 +620,11 @@ class Protocol(object):
                 cwd=temp_dir,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             )
-            print(result.stdout.decode())
+            for line in result.stdout.decode().splitlines():
+                self.log.info(line)
             if result.returncode != 0:
-                raise ProtocolError('Failed to generate executable model code; see output above for details')
+                self.log.warning('Failed to generate executable model code. See above for details.')
+                raise ProtocolError('Failed to generate executable model code.')
 
             # Create an instance of the model
             self.model_path = temp_dir
@@ -660,24 +663,3 @@ class Protocol(object):
             new_path = os.path.join(library, path)
         return new_path
 
-    def set_indent_level(self, indent_level):
-        """Set the level of indentation to use for progress output."""
-        self.indent_level = indent_level
-
-    def log_progress(self, *args):
-        """Print a progress line showing how far through the protocol we are.
-
-        Arguments are converted to strings and space separated, as for the
-        print builtin.
-        """
-        print('  ' * self.indent_level + ' '.join(map(str, args)))
-        sys.stdout.flush()
-
-    def log_warning(self, *args):
-        """Print a warning message.
-
-        Arguments are converted to strings and space separated, as for the
-        print builtin.
-        """
-        print('  ' * self.indent_level + ' '.join(map(str, args)), file=sys.stderr)
-        sys.stderr.flush()

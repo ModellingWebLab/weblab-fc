@@ -50,7 +50,6 @@ class NewArray(AbstractExpression):
         return result
 
     def develop_result_with_interpret(self, range_dims, range_name, ranges, env, num_gaps, dims):
-        # print('Comprehension', self.location)
         result = None
         for range_spec_indices in itertools.product(*range_dims):
             # Collect everything in range_spec_indices that is a number, not a slice
@@ -217,7 +216,6 @@ class View(AbstractExpression):
         return array.array
 
     def interpret(self, env):
-        # print('View', self.location)
         array = self.array_expression.evaluate(env)
         if len(self.children) > array.array.ndim:
             raise ProtocolError("You entered", len(self.children),

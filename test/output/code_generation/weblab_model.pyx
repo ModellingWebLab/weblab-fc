@@ -133,10 +133,6 @@ cdef class TestModel(CvodeSolver):
     # From: fc.simulations.AbstractModel
     cdef public char* output_path
 
-    # Level of indentation to use for progress output.
-    # From: fc.simulations.AbstractModel
-    cdef public object indent_level
-
     # Link to generated module.
     # Set in: fc.protocol.Protocol
     # Note: Nobody seems to ever access this variable. Seems this is just to
@@ -199,7 +195,6 @@ cdef class TestModel(CvodeSolver):
         self.state = self.initial_state.copy()
         self.saved_states = {}
         self.dirty = False
-        self.indent_level = 0
         self.associate_with_model(self)
         #self._parameters = Sundials.N_VMake_Serial(
         #    len(self.parameters),
@@ -293,14 +288,6 @@ cdef class TestModel(CvodeSolver):
         self.free_variable = t
         CvodeSolver.set_free_variable(self, t)
 
-    def set_indent_level(self, indent_level):
-        """
-        Set the level of indentation to use for progress output.
-
-        See :meth:`fc.simulations.AbstractModel.set_indent_level()`.
-        """
-        self.indent_level = indent_level
-
     def set_output_folder(self, path):
         # TODO This is undocumented in fc
         if os.path.isdir(path) and path.startswith('/tmp'):
@@ -321,5 +308,5 @@ cdef class TestModel(CvodeSolver):
         """
         # TODO Update this (and rest of fc) to Python3
         # TODO Use logging here, or raise an exception
-        print >>sys.stderr, '  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.'
+        print >>sys.stderr, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.'
 
