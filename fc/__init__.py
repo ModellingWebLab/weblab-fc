@@ -8,7 +8,7 @@ The main class is then available as `fc.Protocol`.
 Extensions of Functional Curation can instead import the variable sub-packages and modules directly.
 """
 
-# Configure logging
+# Configure logging: Show info level output
 import logging
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)

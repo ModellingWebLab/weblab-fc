@@ -362,7 +362,7 @@ class Protocol(object):
     def initialise(self, verbose=True):
         """(Re-)Initialise this protocol, ready to be run on a model."""
         if verbose:
-            self.log.info('Initialising {self.proto_name}.')
+            self.log.info(f'Initialising {self.proto_name}.')
         self.library_env.clear()
         self.post_processing_env.clear()
         self.output_env.clear()

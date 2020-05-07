@@ -2,9 +2,9 @@
 Classes for the different supported simulation types (e.g. simulations over a time course, or nested simulations; for
 simulation methods, see :meth:`fc.simulations.solvers`).
 """
-import sys
-import numpy as np
+import logging
 
+import numpy as np
 
 from operator import attrgetter
 
@@ -215,7 +215,6 @@ class Nested(AbstractSimulation):
     def __init__(self, nested_sim, range_, modifiers=[]):
         self.range_ = range_
         super(Nested, self).__init__()
-        self.log = logging.getLogger(__name__)
         self.nested_sim = nested_sim
         self.modifiers = modifiers
         self.ranges = self.nested_sim.ranges
@@ -223,8 +222,6 @@ class Nested(AbstractSimulation):
         self.results = self.nested_sim.results
         self.results_list = self.nested_sim.results_list
         nested_sim.env.set_delegatee_env(self.env)
-
-
 
     def initialise(self):
         self.range_.initialise(self.env)
@@ -238,9 +235,11 @@ class Nested(AbstractSimulation):
         super(Nested, self).clear()
 
     def internal_run(self, verbose=True):
+        if verbose:
+            log = logging.getLogger(__name__)
         for t in self.range_:
             if verbose:
-                self.log.info(
+                log.info(
                     f'Nested simulation {self.range_.name} step {self.range_.get_current_output_number()}'
                     f' (value {self.range_.get_current_output_point()}).')
             self.loop_body_start_hook()
