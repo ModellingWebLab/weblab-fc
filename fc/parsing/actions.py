@@ -1486,6 +1486,7 @@ class ModelInterface(BaseGroupAction):
 
     def _parse_unit_conversion_rules(self):
         """Parses the unit conversion rules."""
+        log = logging.getLogger(__name__)
 
         # Create mapping from model and local variables to ProtocolVariable objects
         model_var_to_pvar = {}
@@ -1596,7 +1597,6 @@ class ModelInterface(BaseGroupAction):
                 return self.model.create_quantity(value, units)
 
         # Output a warning when a rule can't be parsed
-        log = logging.getLogger(__name__)
         def warn(u1, u2, msg):
             log.warning(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
 
