@@ -638,7 +638,7 @@ class Protocol(object):
             # Create weblab model at path
             create_weblab_model(
                 path,
-                self.output_folder or temp_dir,
+                str(self.output_folder) if self.output_folder else str(temp_dir),
                 class_name,
                 model,
                 time_variable,
