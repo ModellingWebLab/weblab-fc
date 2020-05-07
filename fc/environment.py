@@ -1,6 +1,6 @@
-#
-# Contains the Environment class
-#
+"""
+Environment classes, designed to hold protocol variables.
+"""
 import numpy as np
 
 from .error_handling import ProtocolError

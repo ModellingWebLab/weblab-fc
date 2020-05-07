@@ -1,4 +1,6 @@
-
+"""
+Classes for ranges used to indicate which time points are simulated.
+"""
 from ..language import values as V
 
 

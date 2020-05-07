@@ -1,4 +1,7 @@
-
+"""
+Classes for handling "modifiers" in simulations: constructs in the protocol that allow the simulation or model state to
+be modified.
+"""
 from ..error_handling import ProtocolError
 
 

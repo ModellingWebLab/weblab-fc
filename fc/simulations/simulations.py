@@ -1,4 +1,7 @@
-
+"""
+Classes for the different support simulation types (e.g. simulations over a time course, or nested simulations; for
+simulation methods, see :meth:`fc.simulations.solvers`).
+"""
 import sys
 import numpy as np
 

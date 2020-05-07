@@ -1,4 +1,8 @@
+"""
+Parsing methods for the protocol language.
 
+The resulting data structure is defined in the ``actions`` module.
+"""
 import os
 import pickle
 import sys

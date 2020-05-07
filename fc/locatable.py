@@ -1,4 +1,6 @@
-
+"""
+Root for :class:`locatable`.
+"""
 import inspect
 import os
 import sys
