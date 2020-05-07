@@ -80,9 +80,6 @@ class Protocol(object):
 
         The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
         """
-        # Logging
-        self.log = logging.getLogger(__name__)
-
         # if the filename passed as argument to CompactSyntaxParser is not found
         # it tries to read it before checking it exists
         # and you get a messy exit
@@ -98,7 +95,8 @@ class Protocol(object):
         self.proto_file = proto_file
         self.proto_name = os.path.basename(self.proto_file)
 
-        self.log.info(f'Constructing {self.proto_name}.')
+        log = logging.getLogger(__name__)
+        log.info(f'Constructing {self.proto_name}.')
 
         # Nesting level: Zero for main protocol
         self.nesting_level = 0
@@ -276,8 +274,9 @@ class Protocol(object):
                     raise ProtocolError('Prefix ' + str(ns_prefix) + ' is used for multiple URIs.')
 
         # Store information from imported protocols
+        log = logging.getLogger(__name__)
         for prefix, path, set_inputs in details.get('imports', []):
-            self.log.info(f'Importing {path} as {prefix} in {self.proto_name}.')
+            log.info(f'Importing {path} as {prefix} in {self.proto_name}.')
             imported_proto = Protocol(self.get_path(self.proto_file, path), self.nesting_level + 1)
             if prefix:
                 self.add_imported_protocol(imported_proto, prefix)
@@ -362,7 +361,8 @@ class Protocol(object):
     def initialise(self, verbose=True):
         """(Re-)Initialise this protocol, ready to be run on a model."""
         if verbose:
-            self.log.info(f'Initialising {self.proto_name}.')
+            log = logging.getLogger(__name__)
+            log.info(f'Initialising {self.proto_name}.')
         self.library_env.clear()
         self.post_processing_env.clear()
         self.output_env.clear()
@@ -384,6 +384,8 @@ class Protocol(object):
 
     def outputs_and_plots(self, errors, verbose=True, write_out=True):
         """Save the protocol outputs to disk, and generate the requested plots."""
+        log = logging.getLogger(__name__)
+
         # Copy protocol outputs into the self.output_env environment,
         # and capture output descriptions needed by plots in the process.
         plot_vars = []
@@ -399,7 +401,7 @@ class Protocol(object):
                     output = self.post_processing_env.look_up(output_var)
                 except KeyError:
                     if output_spec['optional']:
-                        self.log.warning(f"Ignoring missing optional output {output_spec['name']}.")
+                        log.warning(f"Ignoring missing optional output {output_spec['name']}.")
                         continue
                     else:
                         raise
@@ -410,11 +412,11 @@ class Protocol(object):
                 if output_spec['name'] in plot_vars:
                     plot_descriptions[output_spec['name']] = output_spec['description']
         if (not self.output_folder) and verbose and write_out:
-            self.log.warning('Protocol output folder not set, so not writing outputs to file.')
+            log.warning('Protocol output folder not set, so not writing outputs to file.')
             return
 
         if verbose:
-            self.log.info('Saving output data to h5 file...')
+            log.info('Saving output data to h5 file...')
         start = time.time()
         if write_out:
             with errors:
@@ -434,7 +436,7 @@ class Protocol(object):
             start = time.time()
             for plot in self.plots:
                 if verbose:
-                    self.log.info(
+                    log.info(
                         f"Plotting {plot['title']}: "
                         f"{plot_descriptions[plot['y']]} against {plot_descriptions[plot['x']]}.")
 
@@ -475,12 +477,13 @@ class Protocol(object):
         """
         Run this protocol on the model already specified using set_model.
         """
+        log = logging.getLogger(__name__)
 
         # Initialise
         Locatable.output_folder = self.output_folder
         self.initialise(verbose)
         if verbose:
-            self.log.info(f'Running protocol {self.proto_name}...')
+            log.info(f'Running protocol {self.proto_name}...')
 
         # Run the statements in our library to build up the library environment
         errors = ErrorRecorder(self.proto_name)
@@ -511,10 +514,10 @@ class Protocol(object):
 
         # Summarise time spent in each protocol section (if we're the main protocol)
         if verbose and self.nesting_level == 0:
-            self.log.info('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
+            log.info('Time spent running protocol (s): %.6f' % sum(self.timings.values()))
             max_len = max(len(section) for section in self.timings)
             for section, duration in self.timings.items():
-                self.log.info('   ' + section + ' ' * (max_len - len(section)) + '%.6f' % duration)
+                log.info('   ' + section + ' ' * (max_len - len(section)) + '%.6f' % duration)
 
         # Report any errors that occurred
         if errors:
@@ -522,9 +525,11 @@ class Protocol(object):
 
     def run_simulations(self, verbose=True):
         """Run the model simulations specified in this protocol."""
+        if verbose:
+            log = logging.getLogger(__name__)
         for sim in self.simulations:
             if verbose:
-                self.log.info(f'Running simulation f{sim.prefix}.')
+                log.info(f'Running simulation f{sim.prefix}.')
             sim.initialise()
             sim.run()
             # Reset trace folder in case a nested protocol changes it
@@ -533,7 +538,8 @@ class Protocol(object):
     def run_post_processing(self, verbose=True):
         """Run the post-processing section of this protocol."""
         if verbose:
-            self.log.info(f'Running post processing for {self.proto_name}...')
+            log = logging.getLogger(__name__)
+            log.info(f'Running post processing for {self.proto_name}...')
         self.post_processing_env.execute_statements(self.post_processing)
 
     def set_input(self, name, value_expr):
@@ -559,8 +565,9 @@ class Protocol(object):
         start = time.time()
 
         # Compile model from CellML
+        log = logging.getLogger(__name__)
         if isinstance(model, str) and model.endswith('.cellml'):
-            self.log.info('Generating model code...')
+            log.info('Generating model code...')
 
             # Create output folder
             if self.output_folder:
@@ -599,7 +606,7 @@ class Protocol(object):
                 protocol_variables=self.model_interface.protocol_variables,
             )
 
-            self.log.info('Compiling pyx model code...')
+            log.info('Compiling pyx model code...')
 
             # Get path to root dir of fc module
             fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
@@ -621,9 +628,9 @@ class Protocol(object):
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             )
             for line in result.stdout.decode().splitlines():
-                self.log.info(line)
+                log.info(line)
             if result.returncode != 0:
-                self.log.warning('Failed to generate executable model code. See above for details.')
+                log.warning('Failed to generate executable model code. See above for details.')
                 raise ProtocolError('Failed to generate executable model code.')
 
             # Create an instance of the model
