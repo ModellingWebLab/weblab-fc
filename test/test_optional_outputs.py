@@ -9,7 +9,7 @@ def test_optional_outputs():
     proto_file = 'test/protocols/test_optional_outputs.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_optional_outputs')
-    proto.set_model('test/data/simple_ode.cellml')
+    proto.set_model('test/models/simple_ode.cellml')
     proto.run()
 
     # Voltage should be present, and can be looked up without error

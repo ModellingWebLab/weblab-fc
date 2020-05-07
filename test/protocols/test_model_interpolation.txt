@@ -27,16 +27,16 @@ model interface {
     # - where that table appears later in this section
     # - where the dependent variable appears as an intermediate term in a nested piecewise expression (after partial evaluation)
     var intermediate units ms
-    define intermediate = interpolate("../data/interpolation_test_derived.csv", test:derived2, second, usec)
+    define intermediate = interpolate("../input/interpolation_test_derived.csv", test:derived2, second, usec)
     define test:derived = if test:derived2 < 6.9 :: ms && test:derived2 > 0 :: ms then 0 :: ms else
                             if test:derived2 > 9 :: ms || test:derived2 <= 0 :: ms then 1 :: ms else intermediate
     output test:derived units ms
 
     # This is the 'typical' use case.
-    define oxmeta:membrane_voltage = interpolate("../data/interpolation_test.csv", oxmeta:time, second, uV)
+    define oxmeta:membrane_voltage = interpolate("../input/interpolation_test.csv", oxmeta:time, second, uV)
 
     # This case tests the special case for a regularly spaced independent variable.
-    define oxmeta:cytosolic_sodium_concentration = interpolate("../data/interpolation_test_regular.csv", oxmeta:time, usec, M)
+    define oxmeta:cytosolic_sodium_concentration = interpolate("../input/interpolation_test_regular.csv", oxmeta:time, usec, M)
 
     # This case tests interpolation appearing in a 'then' branch and using a computed variable as the independent.
     # It also checks bounds checks more robustly by including a case where the independent variable is outside the bounds,
@@ -44,7 +44,7 @@ model interface {
     define test:table_key = oxmeta:membrane_voltage + 5 :: mV
     output test:table_key units mV
     var interp units ms
-    define interp = interpolate("../data/interpolation_test_derived.csv", test:table_key, volt, usec)
+    define interp = interpolate("../input/interpolation_test_derived.csv", test:table_key, volt, usec)
     define test:derived2 = if test:table_key > 14 :: mV then -1 :: ms else
                              if test:table_key < 11 :: mV then interp else -2 :: ms
     output test:derived2 units ms
@@ -58,14 +58,14 @@ tasks {
 
 post-processing {
     # Check the input signals are what we expected
-    input = load("../data/interpolation_test.csv")
+    input = load("../input/interpolation_test.csv")
     assert input.NUM_DIMS == 2
     assert input.SHAPE[0] == 2
     assert input.SHAPE[1] == 8
     assert std:ArrayEq(input, [ [0.000, 0.003, 0.006, 0.0075, 0.009, 0.012, 0.012, 0.014],
                                 [0,     3000,  9000,  6000,   6000,  6900,  12000, 14000] ])
 
-    input2 = load("../data/interpolation_test_derived.csv")
+    input2 = load("../input/interpolation_test_derived.csv")
     assert std:ArrayEq(input2, [ [0.000, 0.003, 0.006, 0.009, 0.012, 0.015],
                                  [0,     3000,  9000,  6000,  6900,  6000] ])
 

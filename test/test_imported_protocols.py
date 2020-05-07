@@ -10,7 +10,7 @@ def test_s1_s2_lr91():
 
     proto = fc.Protocol('test/protocols/test_S1S2.txt')
     proto.set_output_folder('test_s1_s2_lr91')
-    proto.set_model('test/models/luo_rudy_1991.cellml')
+    proto.set_model('test/models/real/luo_rudy_1991.cellml')
     intervals = [1000, 900, 800, 700, 600, 500]
     proto.set_input('s2_intervals', V.Array(intervals))
     proto.run()
@@ -30,7 +30,7 @@ def test_s1_s2_noble():
 
     proto = fc.Protocol('test/protocols/test_S1S2.txt')
     proto.set_output_folder('test_s1_s2_noble')
-    proto.set_model('test/models/earm_noble_model_1990.cellml')
+    proto.set_model('test/models/real/earm_noble_model_1990.cellml')
     intervals = [1000, 900, 800, 700, 600, 500]
     proto.set_input('s2_intervals', V.Array(intervals))
     proto.run()

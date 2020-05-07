@@ -10,7 +10,7 @@ def test_clamping_with_variable_units():
 
     proto = fc.Protocol('test/protocols/test_clamping3.txt')
     proto.set_output_folder('test_clamping_with_variable_units')
-    proto.set_model('test/models/beeler_reuter_model_1977.cellml')
+    proto.set_model('test/models/real/beeler_reuter_model_1977.cellml')
     proto.run()
     # Test assertions are within the protocol itself
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
@@ -21,7 +21,7 @@ def test_clamping_optional_variable():
 
     proto = fc.Protocol('test/protocols/test_clamping_optional.txt')
     proto.set_output_folder('test_clamping_optional_variable')
-    proto.set_model('test/data/simple_ode.cellml')
+    proto.set_model('test/models/simple_ode.cellml')
     proto.run()
     # Test assertions are within the protocol itself
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
@@ -34,10 +34,10 @@ def test_clamping_optional_variable():
 
 @pytest.mark.xfail(strict=True, reason='no pycml replacement yet')
 def test_clamp_to_data_file():
-    proto_file = 'protocols/timecourse_voltage_clamp.txt'
+    proto_file = 'test/protocols/timecourse_voltage_clamp.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_clamp_to_data_file')
-    proto.set_model('cellml/ten_tusscher_model_2004_epi.cellml')
+    proto.set_model('test/models/real/ten_tusscher_model_2004_epi.cellml')
     proto.run()
     # Test assertions are within the protocol itself
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
@@ -48,7 +48,7 @@ def test_interpolation_clamp():
     proto_file = 'test/protocols/test_model_interpolation.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_interpolation_clamp')
-    proto.set_model('test/data/simple_ode.cellml')
+    proto.set_model('test/models/simple_ode.cellml')
     proto.run()
     # Test assertions are within the protocol itself
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))

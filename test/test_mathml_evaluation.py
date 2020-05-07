@@ -10,7 +10,7 @@ def test_mathml_operations():
 
     proto = fc.Protocol('test/protocols/test_mathml_evaluation.txt')
     proto.set_output_folder('test_mathml_operations')
-    proto.set_model(os.path.join('test', 'models', 'beeler_reuter_model_1977.cellml'))
+    proto.set_model(os.path.join('test', 'models', 'real', 'beeler_reuter_model_1977.cellml'))
     proto.run()
 
     # Test assertions are within the protocol itself
