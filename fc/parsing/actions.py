@@ -1158,8 +1158,6 @@ class ModelInterface(BaseGroupAction):
             # This is an empty instance not created by pyparsing. Fake the arguments pyparsing needs.
             args = ('', '', [[]])
         super().__init__(*args, **kwargs)
-        self.log = logging.getLogger(__name__)
-
         self._time_units = []
         self.inputs = []
         self.outputs = []
@@ -1598,8 +1596,9 @@ class ModelInterface(BaseGroupAction):
                 return self.model.create_quantity(value, units)
 
         # Output a warning when a rule can't be parsed
+        log = logging.getLogger(__name__)
         def warn(u1, u2, msg):
-            self.log.warning(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
+            log.warning(f'Warning: Unable to process conversion rule from {u1} to {u2}: {msg}')
 
         # Create callable class that stores a conversion factor (lambdas or local functions cannot be used here).
         class Rule(object):
@@ -1650,7 +1649,7 @@ class ModelInterface(BaseGroupAction):
             factor = self.units.Quantity(expr.evalf(), units)
 
             # Add transformation rule
-            self.log.info(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
+            log.info(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
             context.add_transformation(u1, u2, Rule(factor))
 
         # Store and enable context
