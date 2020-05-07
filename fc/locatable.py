@@ -1,4 +1,6 @@
-
+"""
+Root for :class:`Locatable`.
+"""
 import inspect
 import os
 import sys

@@ -1,4 +1,6 @@
-
+"""
+Error handling and various exception types.
+"""
 import inspect
 import operator
 import traceback

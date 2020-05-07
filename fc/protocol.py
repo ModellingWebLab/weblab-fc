@@ -1,6 +1,6 @@
-#
-# Contains the main classes representing an FC Protocol.
-#
+"""
+Contains the main classes representing an FC Protocol.
+"""
 import os
 import subprocess
 import sys

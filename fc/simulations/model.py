@@ -1,4 +1,6 @@
-
+"""
+Classes to represent models used in simulation (e.g. generated code or hard-coded models).
+"""
 import numpy as np
 
 from .solvers import DefaultSolver

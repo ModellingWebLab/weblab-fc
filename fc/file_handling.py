@@ -1,4 +1,6 @@
-
+"""
+Methods for file-based IO.
+"""
 import os
 import shutil
 

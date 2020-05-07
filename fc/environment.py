@@ -1,6 +1,6 @@
-#
-# Contains the Environment class
-#
+"""
+Environment classes, mappings of names to values for variables in different sections of the protocol and model.
+"""
 import numpy as np
 
 from .error_handling import ProtocolError
@@ -378,4 +378,3 @@ class ModelWrapperEnvironment(Environment):
 
     def defined_names(self):
         return self.names
-
