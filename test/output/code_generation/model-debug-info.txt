@@ -1,0 +1,60 @@
+=== STATES ====================================================================
+0 var_V, d_dt_V, init -75.0
+  membrane_voltage
+1 var_m, d_dt_m, init 0.05
+2 var_h, d_dt_h, init 0.6
+3 var_n, d_dt_n, init 0.325
+=== PARAMETERS ================================================================
+0 var_g_Na, init 120.0
+  membrane_fast_sodium_current_conductance
+1 var_g_K, init 36.0
+  membrane_potassium_current_conductance
+=== OUTPUTS ===================================================================
+0 var_i_Na
+  membrane_fast_sodium_current
+1 var_V
+  membrane_voltage
+2 var_time
+  time
+3 vector: 
+    0 var_V
+    1 var_m
+    2 var_h
+    3 var_n
+  state_variable
+=== OUTPUT EQUATIONS ==========================================================
+var_E_R = -75.0
+var_E_Na = 115.0 + var_E_R
+var_g_Na = 120.0
+  Parameter index 0
+var_i_Na = var_m**3.0 * (-var_E_Na + var_V) * var_g_Na * var_h
+=== RHS EQUATIONS =============================================================
+var_g_L = 0.3
+var_Cm = 1.0
+var_E_R = -75.0
+var_E_L = 10.613 + var_E_R
+var_i_L = (-var_E_L + var_V) * var_g_L
+var_stim_amplitude = -20.0
+var_stim_duration = 0.5
+var_stim_end = 10000.0
+var_stim_period = 1000.0
+var_stim_start = 10.0
+var_i_Stim = ((var_stim_amplitude) if (var_time >= var_stim_start and var_time <= var_stim_end and var_stim_duration >= -var_stim_start - var_stim_period * math.floor((-var_stim_start + var_time) / var_stim_period) + var_time) else (0))
+var_E_K = -12.0 + var_E_R
+var_g_K = 36.0
+  Parameter index 1
+var_alpha_n = -0.01 * (65.0 + var_V) / (-1.0 + math.exp(-6.5 - 0.1 * var_V))
+var_beta_n = 0.125 * math.exp(0.9375 + 0.0125 * var_V)
+d_dt_n = (1.0 - var_n) * var_alpha_n - var_beta_n * var_n
+var_i_K = var_n**4.0 * (-var_E_K + var_V) * var_g_K
+var_E_Na = 115.0 + var_E_R
+var_g_Na = 120.0
+  Parameter index 0
+var_alpha_h = 0.07 * math.exp(-3.75 - 0.05 * var_V)
+var_beta_h = 1.0 / (1.0 + math.exp(-4.5 - 0.1 * var_V))
+d_dt_h = (1.0 - var_h) * var_alpha_h - var_beta_h * var_h
+var_alpha_m = -0.1 * (50.0 + var_V) / (-1.0 + math.exp(-5.0 - 0.1 * var_V))
+var_beta_m = 4.0 * math.exp(-4.166666666666667 - 0.05555555555555555 * var_V)
+d_dt_m = (1.0 - var_m) * var_alpha_m - var_beta_m * var_m
+var_i_Na = var_m**3.0 * (-var_E_Na + var_V) * var_g_Na * var_h
+d_dt_V = (-var_i_L - var_i_Stim - var_i_K - var_i_Na) / var_Cm

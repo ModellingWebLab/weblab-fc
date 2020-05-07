@@ -1,6 +1,7 @@
 """
 Methods for code generation (using jinja2 templates).
 """
+import os
 import posixpath
 import time
 
@@ -128,7 +129,7 @@ def get_unique_names(model):
     return variables
 
 
-def create_weblab_model(path, class_name, model, time_variable, ns_map, protocol_variables):
+def create_weblab_model(path, output_dir, class_name, model, time_variable, ns_map, protocol_variables):
     """
     Takes a :class:`cellmlmanip.Model`, generates a ``.pyx`` model for use with
     the Web Lab, and stores it at ``path``.
@@ -137,6 +138,8 @@ def create_weblab_model(path, class_name, model, time_variable, ns_map, protocol
 
     ``path``
         The path to store the generated model code at.
+    ``output_dir``
+        The path to store any extra output at.
     ``class_name``
         A name for the generated class.
     ``model``
@@ -264,42 +267,41 @@ def create_weblab_model(path, class_name, model, time_variable, ns_map, protocol
         })
 
     # Write debug output about the created model
-    # TODO Add code to write this to file (see #172)
-    if True:
-        print('=== STATES ' + '=' * 68)
+    with open(os.path.join(output_dir, 'model-debug-info.txt'), 'w') as f:
+        f.write('=== STATES ' + '=' * 68 + '\n')
         for i in sorted(state_info, key=lambda x: x['index']):
-            print(f"{i['index']} {i['var_name']}, {i['deriv_name']}, init {i['initial_value']}")
+            f.write(f"{i['index']} {i['var_name']}, {i['deriv_name']}, init {i['initial_value']}\n")
             for name in i['var_names']:
-                print(f"  {name}")
+                f.write(f"  {name}\n")
 
-        print('=== PARAMETERS ' + '=' * 64)
+        f.write('=== PARAMETERS ' + '=' * 64 + '\n')
         for i in sorted(parameter_info, key=lambda x: x['index']):
-            print(f"{i['index']} {i['var_name']}, init {i['initial_value']}")
-            print(f"  {i['local_name']}")
+            f.write(f"{i['index']} {i['var_name']}, init {i['initial_value']}\n")
+            f.write(f"  {i['local_name']}\n")
 
-        print('=== OUTPUTS ' + '=' * 67)
+        f.write('=== OUTPUTS ' + '=' * 67 + '\n')
         for i in sorted(output_info, key=lambda x: x['index']):
             if i['length'] is None:
-                print(f"{i['index']} {i['var_name']}")
-                print(f"  {i['local_name']}")
+                f.write(f"{i['index']} {i['var_name']}\n")
+                f.write(f"  {i['local_name']}\n")
             else:
-                print(f"{i['index']} vector: ")
+                f.write(f"{i['index']} vector: \n")
                 for var in sorted(i['var_name'], key=lambda x: x['index']):
-                    print(f"    {var['index']} {var['var_name']}")
+                    f.write(f"    {var['index']} {var['var_name']}\n")
 
-                print(f"  {i['local_name']}")
+                f.write(f"  {i['local_name']}\n")
 
-        print('=== OUTPUT EQUATIONS ' + '=' * 58)
+        f.write('=== OUTPUT EQUATIONS ' + '=' * 58 + '\n')
         for e in output_equations:
-            print(f"{e['lhs']} = {e['rhs']}")
+            f.write(f"{e['lhs']} = {e['rhs']}\n")
             if e['parameter_index'] is not None:
-                print(f"  Parameter index {e['parameter_index']}")
+                f.write(f"  Parameter index {e['parameter_index']}\n")
 
-        print('=== RHS EQUATIONS ' + '=' * 61)
+        f.write('=== RHS EQUATIONS ' + '=' * 61 + '\n')
         for e in rhs_equations:
-            print(f"{e['lhs']} = {e['rhs']}")
+            f.write(f"{e['lhs']} = {e['rhs']}\n")
             if e['parameter_index'] is not None:
-                print(f"  Parameter index {e['parameter_index']}")
+                f.write(f"  Parameter index {e['parameter_index']}\n")
 
     # Generate model
     template = load_template('weblab_model.pyx')
