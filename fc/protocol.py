@@ -617,8 +617,6 @@ class Protocol(object):
             path = os.path.join(temp_dir, 'model.pyx')
 
             # Select class name
-            # Note: Code further down relies on this starting with
-            # 'GeneratedModel'
             class_name = 'GeneratedModel'
 
             # Load cellml model
