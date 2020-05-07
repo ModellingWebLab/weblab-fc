@@ -1,5 +1,5 @@
 """
-Python classes representing the different parts of an FC protocol.
+Python classes representing the different parts of an FC protocol during parsing.
 
 The :class:`CompactSyntaxParser` converts a protocol file into parse actions (see :class:`BaseAction`), defined in this
 module. These "actions" contain the parsed information. This includes expressions, which can be converted into

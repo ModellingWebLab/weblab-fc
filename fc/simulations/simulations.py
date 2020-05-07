@@ -1,5 +1,5 @@
 """
-Classes for the different support simulation types (e.g. simulations over a time course, or nested simulations; for
+Classes for the different supported simulation types (e.g. simulations over a time course, or nested simulations; for
 simulation methods, see :meth:`fc.simulations.solvers`).
 """
 import sys

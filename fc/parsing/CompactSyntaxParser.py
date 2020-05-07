@@ -1,7 +1,7 @@
 """
 Parsing methods for the protocol language.
 
-The resulting data structure is defined in the ``actions`` module.
+The resulting data structure is defined in the :mod:`.actions` module.
 """
 import os
 import pickle
@@ -675,4 +675,3 @@ class Debug(object):
 
     def __exit__(self, type, value, traceback):
         disable_debug(self._grammars)
-

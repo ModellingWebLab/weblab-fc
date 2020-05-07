@@ -1,5 +1,5 @@
 """
-Environment classes, designed to hold protocol variables.
+Environment classes, mappings of names to values for variables in different sections of the protocol and model.
 """
 import numpy as np
 
@@ -378,4 +378,3 @@ class ModelWrapperEnvironment(Environment):
 
     def defined_names(self):
         return self.names
-

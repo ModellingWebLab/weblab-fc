@@ -1,5 +1,5 @@
 """
-Root for :class:`locatable`.
+Root for :class:`Locatable`.
 """
 import inspect
 import os

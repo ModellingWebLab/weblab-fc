@@ -92,7 +92,7 @@ def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0, me
     :param proto: an instance of fc.Protocol that (hopefully) has results available to check
     :param expected_spec: a dictionary mapping result name to number of dimensions, so we can use the correct load*
         method
-    :data_folder: location of the reference data
+    :param data_folder: location of the reference data
     :param rel_tol: relative tolerance
     :param abs_tol: absolute tolerance
     :param messages: if provided, should be a list to which failure reports will be appended. Otherwise any failure will
@@ -148,4 +148,3 @@ def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0, me
                          bad_entries.nonzero()[:10]))
                     results_ok = False
     return results_ok
-
