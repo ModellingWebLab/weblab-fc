@@ -342,52 +342,6 @@ class Protocol(object):
         # Store benchmarking information
         self.timings['parsing'] = time.time() - start
 
-    def __getstate__(self):
-        """
-        Override Object serialization methods to allow pickling with the dill module
-        """
-        # TODO: Original object unusable after serialization.
-        # Should either maintain object state (i.e., remove reference to simulations
-        # in copied dict and re-initialize in __setstate__) or dynamically restore
-        # simulation model state at runtime.
-
-        # Must remove Model class and regenerate during unpickling
-        # (Pickling errors from nested class structure of ModelWrapperEnvironment)
-
-        # If the protocol has been run, remove references to model environment
-        # in the simulations (and un-delegate from library_env)
-        for sim in self.simulations:
-            if sim.model is not None:
-                if "" in sim.env.delegatees:
-                    sim.env.clear_delegatee_env("")
-                if sim.prefix and sim.prefix in self.library_env.delegatees:
-                    self.library_env.clear_delegatee_env(sim.prefix)
-
-        odict = self.__dict__.copy()
-        # Remove Model and CSP from Protocol
-        if 'model' in odict:
-            del odict['model']
-        if 'parser' in odict:
-            del odict['parser']
-            del odict['parsed_protocol']
-        return odict
-
-    def __setstate__(self, dict):
-        """ Set fields of a protocol after unpickling. """
-        self.__dict__.update(dict)
-        # Re-import Model from temporary Python file (if provided)
-        if hasattr(self, 'model_path'):
-            sys.path.insert(0, self.model_path)
-            import model as module
-            for name in module.__dict__.keys():
-                if name.startswith('GeneratedModel'):
-                    model = getattr(module, name)()
-                    model._module = module
-            del sys.modules['model']
-            self.model = model
-            for sim in self.simulations:
-                sim.set_model(model)
-
     def add_imported_protocol(self, proto, prefix):
         """
         Add a protocol imported with a prefix to our collection.

@@ -40,16 +40,6 @@ class Environment(object):
         except NameError:
             pass
 
-    # Python requires __setstate__ (which restores the numpy module untracked by
-    # DelegatingDict.__getstate()) to be paired with a (dummy) __getstate__() method
-    def __getstate__(self):
-        odict = self.__dict__
-        return odict
-
-    def __setstate__(self, dict):
-        self.__dict__.update(dict)
-        self.unwrapped_bindings['___np'] = np
-
     def define_name(self, name, value):
         if ':' in name:
             raise ProtocolError('Names such as', name, 'with a colon are not allowed.')
@@ -215,24 +205,6 @@ class DelegatingDict(dict):
         from .language.expressions import NameLookUp
         self._marker = NameLookUp.PREFIXED_NAME
         self._marker_len = len(self._marker)
-
-    # Have to delete references to modules (numpy) from the dictionary while maintaining
-    # subclassing elements.
-    # Pickling with extended dicts is hard...
-    def __getstate__(self):
-        odict = self.copy()
-        if '___np' in odict:
-            del odict['___np']
-        return (self.__dict__, odict)
-
-    # Separately update the state of dict (superclass) and DelegatingDict (subclass) components
-    def __setstate__(self, state):
-        self.__dict__.update(state[0])
-        self.update(state[1])
-
-    # IMPORTANT: Informs compiler of changes to pickling state enforced above
-    def __reduce__(self):
-        return (DelegatingDict, (), self.__getstate__())
 
     def __missing__(self, key):
         if key.startswith(self._marker):
