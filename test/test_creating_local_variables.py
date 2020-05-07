@@ -13,7 +13,7 @@ def test_var_declarations():
 
     proto = fc.Protocol('test/protocols/test_var_declaration.txt')
     proto.set_output_folder('test_var_declarations')
-    proto.set_model('test/real/models/beeler_reuter_model_1977.cellml')
+    proto.set_model('test/models/real/beeler_reuter_model_1977.cellml')
     proto.run()
 
     # Test assertions are within the protocol itself
@@ -26,7 +26,7 @@ def test_var_declaration_redefined():
     proto = fc.Protocol('test/protocols/test_var_declaration_redefined.txt')
     proto.set_output_folder('test_var_declaration_redefined')
     with pytest.raises(ProtocolError, match='more than one var statement'):
-        proto.set_model('test/real/models/beeler_reuter_model_1977.cellml')
+        proto.set_model('test/models/real/beeler_reuter_model_1977.cellml')
 
 
 def test_var_declaration_underdefined():
@@ -35,7 +35,7 @@ def test_var_declaration_underdefined():
     proto = fc.Protocol('test/protocols/test_var_declaration_underdefined.txt')
     proto.set_output_folder('test_var_declaration_underdefined')
     with pytest.raises(ProtocolError, match='No definition given for local variable'):
-        proto.set_model('test/real/models/beeler_reuter_model_1977.cellml')
+        proto.set_model('test/models/real/beeler_reuter_model_1977.cellml')
 
 
 def test_var_declaration_overdefined():
@@ -44,5 +44,5 @@ def test_var_declaration_overdefined():
     proto = fc.Protocol('test/protocols/test_var_declaration_overdefined.txt')
     proto.set_output_folder('test_var_declaration_overdefined')
     with pytest.raises(ProtocolError, match='which is not a state variable'):
-        proto.set_model('test/real/models/beeler_reuter_model_1977.cellml')
+        proto.set_model('test/models/real/beeler_reuter_model_1977.cellml')
 

@@ -10,7 +10,7 @@ def test_nested_protocols():
     proto_file = 'test/protocols/test_nested_protocol.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_nested_protocols')
-    proto.set_model('test/real/models/luo_rudy_1991.cellml')
+    proto.set_model('test/models/real/luo_rudy_1991.cellml')
     proto.run()
     assert 'always_missing' not in proto.output_env
     assert 'first_missing' not in proto.output_env
@@ -20,10 +20,10 @@ def test_nested_protocols():
 
 def test_merging_interfaces():
     # Checks that merging model interface sections from nested protocols works
-    proto_file = 'test/real/protocols/IK1_block.txt'
+    proto_file = 'test/protocols/real/IK1_block.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_merging_interfaces')
-    proto.set_model('test/real/models/luo_rudy_1991.cellml')
+    proto.set_model('test/models/real/luo_rudy_1991.cellml')
 
     # Make the run shorter for testing
     proto.set_input('block_levels', V.Array([0.0, 0.5]))

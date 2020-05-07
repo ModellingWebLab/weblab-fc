@@ -14,11 +14,11 @@ def test_unit_conversion_time():
     """ Tests the graph state protocol in a model requiring time units conversion. """
 
     # Create protocol
-    proto = fc.Protocol(os.path.join('test', 'real', 'protocols', 'GraphState.txt'))
+    proto = fc.Protocol(os.path.join('test', 'protocols', 'real', 'GraphState.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
-    proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
+    proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
 
     # Run protocol
     proto.set_output_folder('test_unit_conversion_time')
@@ -32,7 +32,7 @@ def test_unit_conversion_time():
     assert fc.test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
+        os.path.join('test', 'output', 'real', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
@@ -42,11 +42,11 @@ def test_unit_conversion_state_variable():
     """ Tests the graph state protocol in a model requiring state variable units conversion. """
 
     # Create protocol
-    proto = fc.Protocol(os.path.join('test', 'real', 'protocols', 'GraphState.txt'))
+    proto = fc.Protocol(os.path.join('test', 'protocols', 'real', 'GraphState.txt'))
 
     # Set model (generates & compiles model)
     model_name = 'paci_hyttinen_aaltosetala_severi_ventricularVersion'  # has voltage in volt, not millivolt
-    proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
+    proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
 
     # Run protocol
     proto.set_output_folder('test_unit_conversion_state_variable')
@@ -60,7 +60,7 @@ def test_unit_conversion_state_variable():
     assert fc.test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
+        os.path.join('test', 'output', 'real', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )

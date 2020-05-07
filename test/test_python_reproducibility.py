@@ -94,7 +94,7 @@ def RunExperiment(modelName, protoName, expectedOutputs):
                 outputs_match = test_support.check_results(
                     proto,
                     expectedOutputs,
-                    'test/suite/historic/%s/%s' % (modelName, protoName),
+                    'test/output/real/%s/%s' % (modelName, protoName),
                     rel_tol=0.005,
                     abs_tol=2.5e-4,
                     messages=messages,
