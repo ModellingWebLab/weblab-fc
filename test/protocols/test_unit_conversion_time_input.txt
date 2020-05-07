@@ -1,0 +1,28 @@
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+import std = "BasicLibrary.txt"
+
+units {
+    ms = milli second
+}
+
+model interface {
+    # We specify the time units using an "input" statement
+    input oxmeta:time units ms
+
+    output oxmeta:state_variable
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1000
+    }
+}
+
+post-processing {
+    state_trans = std:Transpose(sim:state_variable)
+}
+
+outputs {
+    state = state_trans units various "State variables"
+}

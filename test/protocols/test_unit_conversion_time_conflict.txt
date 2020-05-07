@@ -1,0 +1,18 @@
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+
+units {
+    s = second
+    ms = milli second
+}
+
+model interface {
+    # We specify conflicting time variable units using two different constructs
+    independent var units s
+    input oxmeta:time units ms
+}
+
+tasks {
+    simulation sim = timecourse {
+        range time units ms uniform 0:1:1000
+    }
+}
