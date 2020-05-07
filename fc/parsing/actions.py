@@ -2328,6 +2328,7 @@ class Library(BaseAction):
         if len(self.tokens) > 0:
             assert len(self.tokens) == 1
             return self.tokens[0].expr()
+        return []
 
 
 class PostProcessing(BaseAction):
@@ -2336,6 +2337,7 @@ class PostProcessing(BaseAction):
     def _expr(self):
         if len(self.tokens) > 0:
             return self.delegate('StatementList', [self.tokens]).expr()
+        return []
 
 
 class Output(BaseGroupAction):
