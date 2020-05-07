@@ -21,12 +21,11 @@ def test_unit_conversion_time_independent_var_units():
     proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
     proto.set_output_folder('test_unit_conversion_time_independent_var_units')
     proto.run()
-    # Some test assertions are within the protocol itself
 
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
     assert fc.test_support.check_results(
         proto,
-        {'state': 2},   # Name and dimension of output to check
+        {'state': 2},
         os.path.join('test', 'output', 'real', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
@@ -38,16 +37,15 @@ def test_unit_conversion_time_input():
 
     proto = fc.Protocol(os.path.join('test', 'protocols', 'test_unit_conversion_time_input.txt'))
     model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
-    proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
+    proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
     proto.set_output_folder('test_unit_conversion_time_input')
     proto.run()
-    # Some test assertions are within the protocol itself
 
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
     assert fc.test_support.check_results(
         proto,
-        {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
+        {'state': 2},
+        os.path.join('test', 'output', 'real', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
@@ -61,16 +59,15 @@ def test_unit_conversion_time_duplicate():
 
     proto = fc.Protocol(os.path.join('test', 'protocols', 'test_unit_conversion_time_duplicate.txt'))
     model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
-    proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
+    proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
     proto.set_output_folder('test_unit_conversion_time_input')
     proto.run()
-    # Some test assertions are within the protocol itself
 
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
     assert fc.test_support.check_results(
         proto,
-        {'state': 2},   # Name and dimension of output to check
-        os.path.join('test', 'real', 'output', model_name, 'GraphState'),
+        {'state': 2},
+        os.path.join('test', 'output', 'real', model_name, 'GraphState'),
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
@@ -84,7 +81,7 @@ def test_unit_conversion_time_conflict():
     proto = fc.Protocol(os.path.join('test', 'protocols', 'test_unit_conversion_time_conflict.txt'))
     model_name = 'difrancesco_noble_model_1985'  # has time in seconds, not milliseconds
     with pytest.raises(ProtocolError, match='Inconsistent units specified for the time variable'):
-        proto.set_model(os.path.join('test', 'real', 'models', model_name + '.cellml'))
+        proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
 
 
 def test_unit_conversion_state_variable():
