@@ -133,7 +133,7 @@ def test_generate_weblab_model(tmp_path):
     assert generated_info == expected_info
 
 
-def test_graphstate():
+def test_graph_state():
     """ Tests the graph state protocol on a generated model. """
 
     # Create protocol
@@ -144,7 +144,7 @@ def test_graphstate():
     proto.set_model(os.path.join('test', 'models', 'real', model_name + '.cellml'))
 
     # Run protocol
-    proto.set_output_folder('test_graphstate')
+    proto.set_output_folder('test_graph_state')
     proto.run()
     # Some test assertions are within the protocol itself
 
