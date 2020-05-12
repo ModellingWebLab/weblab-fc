@@ -99,7 +99,7 @@ class Protocol(object):
         log.info(f'Constructing {self.proto_name}.')
 
         # Nesting level: Zero for main protocol
-        self.nesting_level = 0
+        self.nesting_level = nesting_level
 
         # A dict with benchmarking information
         self.timings = {}
@@ -669,4 +669,3 @@ class Protocol(object):
                 'library')
             new_path = os.path.join(library, path)
         return new_path
-

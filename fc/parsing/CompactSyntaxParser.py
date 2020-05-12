@@ -651,7 +651,7 @@ def enable_debug(grammars=None):
         return " at loc " + str(loc) + "(%d,%d)" % (p.lineno(loc, instring), p.col(loc, instring))
 
     def success_debug_action(instring, startloc, endloc, expr, toks):
-        log.info(f'Matched {expr} -> {toks.asList()} {display_loc(instring, endloc)}.')
+        log.debug(f'Matched {expr} -> {toks.asList()} {display_loc(instring, endloc)}.')
 
     def exception_debug_action(instring, loc, expr, exc):
         log.warning(f'Exception raised: {exc} {display_loc(instring, loc)}')
