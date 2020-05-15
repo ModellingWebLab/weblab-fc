@@ -13,6 +13,7 @@ from collections import deque
 from contextlib import contextmanager
 
 import networkx
+import numpy
 import pint
 import pyparsing
 import sympy
@@ -873,19 +874,74 @@ class ModelEquation(BaseGroupAction):
 
 
 class Interpolate(BaseGroupAction):
-    # Leaving old XML method in to document existing properties / tokens.
-    # def _xml(self):
-    #    assert len(self.tokens) == 4
-    #    assert isinstance(self.tokens[0], str)
-    #    file_path = self.delegate_symbol('string', self.tokens[0]).xml()
-    #    assert isinstance(self.tokens[1], Variable)
-    #    indep_var = self.tokens[1].xml()
-    #    units = []
-    #    for i in [2, 3]:
-    #        assert isinstance(self.tokens[i], str)
-    #        units.append(M.ci(self.tokens[i]))
-    #    return M.apply(self.delegate_symbol('interpolate').xml(), file_path, indep_var, *units)
-    pass
+    """Parse action for specifying linear interpolation on a data file.
+
+    ``interpolate(file_path, indexing_variable, index_units, data_units)``
+
+    The data file should be a 2-column CSV or similar (anything numpy can load will do). The indexing variable is looked
+    up in the first column, and the result is taken from the corresponding value in the second column, using linear
+    interpolation where an exact match is not found. The first column should therefore contain monotonic values.
+    Repetition of values is allowed, in order to support vertical jumps in voltage-clamp protocols.
+
+    The third and fourth arguments to the call specify the names of the units used for values in the data file columns.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Check syntax is OK - should be ensured by the parser
+        assert len(self.tokens) == 4
+        assert isinstance(self.tokens[0], str)
+        assert isinstance(self.tokens[1], Variable)
+        assert isinstance(self.tokens[2], str)
+        assert isinstance(self.tokens[3], str)
+
+        # Resolve paths relative to the current protocol file
+        self.data_path = os.path.join(os.path.dirname(source_file), self.tokens[0])
+        self.indexing_variable = self.tokens[1]
+        self.index_units = self.tokens[2]
+        self.data_units = self.tokens[3]
+
+    def to_sympy(self, variable_generator, number_generator):
+        """Convert this equation to Sympy.
+
+        Typically this will be called via :meth:`ModelInterface.convert_equations_to_sympy` which sets up appropriate
+        generators.
+
+        :param variable_generator: a function to resolve a name reference within the equation to a model variable.
+        :param number_generator: converts a number with units to a Sympy entity.
+        """
+        # Load the data from file
+        data_file_name = os.path.basename(self.data_path)
+        if not os.path.exists(self.data_path):
+            raise ProtocolError(f'Unable to load data file {self.data_path} for interpolation.')
+        data = numpy.loadtxt(self.data_path, dtype=float, delimiter=',', ndmin=2, unpack=True)
+        assert data.ndim == 2
+        if data.shape[0] != 2:
+            raise ProtocolError(
+                f'The data file for an interpolate() must have 2 columns; file {data_file_name} has {data.shape[0]}')
+        # Check to see whether we can do a special-case optimisation for equally spaced independent variable points
+        steps = numpy.diff(data[0])
+        if abs(numpy.max(steps) - numpy.min(steps)) < 1e-6 * numpy.max(steps):
+            if steps[0] == 0.0:
+                raise ProtocolError(
+                    f'The data file {data_file_name} used in an interpolate() has all zero table steps.')
+            raise NotImplementedError
+        else:
+            # Iterate over data rows to construct a piecewise representation for the interpolation
+            index = self.indexing_variable.to_sympy(variable_generator, number_generator)
+            pieces = []
+            for row in range(data.shape[1] - 1):
+                if data[0, row] == data[0, row + 1]:
+                    # Vertical jumps are allowed in voltage clamp protocols, but trying to interpolate gives you a
+                    # divide by zero. Just skip the jump part, and we'll interpolate correctly at either side.
+                    continue
+                x1 = number_generator(data[0, row], self.index_units)
+                x2 = number_generator(data[0, row + 1], self.index_units)
+                y1 = number_generator(data[1, row], self.data_units)
+                y2 = number_generator(data[1, row + 1], self.data_units)
+                cond = sympy.And(index >= x1, index <= x2)
+                case = y1 + ((y2 - y1) / (x2 - x1)) * (index - x1)
+                pieces.append((case, cond))
+            return sympy.Piecewise(*pieces)
 
 
 class UnitsConversion(BaseGroupAction):
