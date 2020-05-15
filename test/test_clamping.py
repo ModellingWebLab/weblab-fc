@@ -33,7 +33,7 @@ def test_clamping_optional_variable():
 
 
 def test_clamp_to_data_file():
-    proto_file = 'test/protocols/timecourse_voltage_clamp.txt'
+    proto_file = 'test/protocols/real/timecourse_voltage_clamp.txt'
     proto = fc.Protocol(proto_file)
     proto.set_output_folder('test_clamp_to_data_file')
     proto.set_model('test/models/real/ten_tusscher_model_2004_epi.cellml')
