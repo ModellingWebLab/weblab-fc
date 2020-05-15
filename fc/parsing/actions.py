@@ -1257,12 +1257,12 @@ class ModelInterface(BaseGroupAction):
         return self
 
     def merge(self, interface):
-
-        # only append unique entries
+        """Merge definitions from the given :class:`ModelInterface` with this one."""
         def add_unique(list1, list2):
-            for l in list2:
-                if l not in list1:
-                    list1.append(l)
+            """Add to list1 any items from list2 that aren't already there."""
+            for item in list2:
+                if item not in list1:
+                    list1.append(item)
 
         # append lists from interface to those already in this interface
         add_unique(self.inputs, interface.inputs)
