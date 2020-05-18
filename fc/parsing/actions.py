@@ -14,7 +14,6 @@ from contextlib import contextmanager
 
 import networkx
 import numpy
-import pint
 import pyparsing
 import sympy
 from cellmlmanip.model import DataDirectionFlow, VariableType
@@ -1669,8 +1668,7 @@ class ModelInterface(BaseGroupAction):
             def __call__(self, ureg, rhs):
                 return rhs * self.factor
 
-        # Parse all rules, and add then to a pint Context
-        context = pint.Context()
+        # Parse all rules, and add them to our unit store
         for rule in self.unit_conversion_rules:
 
             # Get from and to units
@@ -1711,10 +1709,7 @@ class ModelInterface(BaseGroupAction):
 
             # Add transformation rule
             print(f'Adding units conversion rule: To go from {u1} to {u2}, multiply by {factor}.')
-            context.add_transformation(u1, u2, Rule(factor))
-
-        # Store and enable context
-        self.units._registry.enable_contexts(context)
+            self.units.add_conversion_rule(u1, u2, Rule(factor))
 
     def _convert_time_unit_if_needed(self):
         """Check the units of the time variable and convert if needed."""
