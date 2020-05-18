@@ -19,6 +19,6 @@ install:
   - flake8 --version
 script:
   - flake8
-  - coverage run -m pytest test
+  - pytest --cov --cov-config=.coveragerc
 after_success:
   - codecov
