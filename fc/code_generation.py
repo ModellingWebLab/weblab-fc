@@ -80,7 +80,8 @@ class DataInterpolation(Quantity):
     def __init__(self, name, data, index_variable, units):
         """Create a new interpolation construct.
 
-        :param name: the data file base name
+        :param name: an identifier for the table, e.g. the data file base name. Will be used for documenting the
+            generated code.
         :param data: 2d numpy array containing the column-wise data. The first column is the index data (values to look
             up) and the second column contains the corresponding result values.
         :param index_variable: the :class:`cellmlmanip.model.Variable` used to index the data
