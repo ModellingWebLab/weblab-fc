@@ -8,6 +8,7 @@ import time
 import jinja2
 import sympy
 
+from cellmlmanip.model import Quantity
 from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER, Transpiler
 from cellmlmanip.printer import Printer
 
@@ -57,6 +58,67 @@ def load_template(*name):
 
     env = _jinja_environment()
     return env.get_template(path)
+
+
+class DataInterpolation(Quantity):
+    """Represents linear interpolation on data loaded from file, for code generation."""
+    _next_id = 0  # Used to generate unique table IDs in code
+
+    # Sympy annoyingly overwrites __new__
+    def __new__(cls, name, data, index_variable, *args, **kwargs):
+        print('interp__new__', name)
+        obj = super().__new__(cls, name, real=True)
+
+        # Record a unique ID for this table
+        obj._id = cls._next_id
+        cls._next_id += 1
+
+        # Ensure we depend on the index variable in the model's graph
+        obj._args = [index_variable]
+
+        return obj
+
+    def __init__(self, name, data, index_variable, units):
+        """Create a new interpolation construct.
+
+        :param name: the data file base name
+        :param data: 2d numpy array containing the column-wise data
+        :param index_variable: the :class:`cellmlmanip.model.Variable` used to index the data
+        :param units: the units of the interpolated values (a :class:`~cellmlmanip.units.UnitStore.Unit`)
+        """
+        print('interp__init__', name, index_variable, units)
+        super().__init__(name, units)
+        self.data = data[1]
+        self.index_variable = index_variable
+        self.initial_index = '%.17g' % data[0, 0]
+        self.final_index = '%.17g' % data[0, -1]
+
+        self.table_name = '_data_table_' + str(self._id)
+        self.step_inverse = '%.17g' % (1.0 / (data[0, 1] - data[0, 0]))
+
+        self.index_name = None
+
+    def _eval_evalf(self, prec):
+        """We don't want the model's graph to try replacing this with a number!"""
+        return self
+
+    def set_index_name(self, variable_name_generator):
+        """Set the name used for our index variable in code.
+
+        :param variable_name_generator: function turning our index variable into its name in the code
+        """
+        self.index_name = variable_name_generator(self.index_variable)
+
+    @property
+    def lookup_call(self):
+        """The code for a function call looking up this interpolation table."""
+        assert self.index_name is not None
+        return 'lookup{}({})'.format(self.table_name, self.index_name)
+
+    @property
+    def data_code(self):
+        """The code creating the data array to interpolate over."""
+        return '[{}]'.format(', '.join(map(lambda f: '%.17g' % f, self.data)))
 
 
 class WebLabPrinter(Printer):
@@ -163,6 +225,8 @@ def create_weblab_model(path, output_dir, class_name, model, time_variable, ns_m
 
     # Variable naming function
     def variable_name(variable):
+        if isinstance(variable, DataInterpolation):
+            return variable.lookup_call
         return 'var_' + unames[variable]
 
     # Derivative naming function
@@ -246,9 +310,15 @@ def create_weblab_model(path, output_dir, class_name, model, time_variable, ns_m
             'length': length,
         })
 
+    # Track any data interpolations appearing in equations used
+    data_tables = set()
+
     # Create RHS equation information dicts
     rhs_equations = []
     for eq in model.get_equations_for(model.get_derivatives()):
+        for table in eq.atoms(DataInterpolation):
+            table.set_index_name(variable_name)
+            data_tables.add(table)
         # TODO: Parameters should never appear as the left-hand side of an
         # equation (cellmlmanip should already have filtered these out).
         rhs_equations.append({
@@ -260,6 +330,9 @@ def create_weblab_model(path, output_dir, class_name, model, time_variable, ns_m
     # Create output equation information dicts
     output_equations = []
     for eq in model.get_equations_for(output_variables):
+        for table in eq.atoms(DataInterpolation):
+            table.set_index_name(variable_name)
+            data_tables.add(table)
         output_equations.append({
             'lhs': printer.doprint(eq.lhs),
             'rhs': printer.doprint(eq.rhs),
@@ -317,4 +390,5 @@ def create_weblab_model(path, output_dir, class_name, model, time_variable, ns_m
             'parameters': parameter_info,
             'rhs_equations': rhs_equations,
             'states': state_info,
+            'data_tables': data_tables,
         }))

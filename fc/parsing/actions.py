@@ -17,12 +17,13 @@ import numpy
 import pint
 import pyparsing
 import sympy
-from cellmlmanip.model import DataDirectionFlow
+from cellmlmanip.model import DataDirectionFlow, VariableType
 from cellmlmanip.model import Variable as ModelVariable
 from cellmlmanip.parser import UNIT_PREFIXES
 from cellmlmanip.units import UnitConversionError
 from pint.errors import DimensionalityError
 
+from ..code_generation import DataInterpolation
 from ..error_handling import ProtocolError, MissingVariableError
 from ..language import expressions as E
 from ..language import statements as S
@@ -909,6 +910,7 @@ class Interpolate(BaseGroupAction):
         :param variable_generator: a function to resolve a name reference within the equation to a model variable.
         :param number_generator: converts a number with units to a Sympy entity.
         """
+        index = self.indexing_variable.to_sympy(variable_generator, number_generator)
         # Load the data from file
         data_file_name = os.path.basename(self.data_path)
         if not os.path.exists(self.data_path):
@@ -924,10 +926,15 @@ class Interpolate(BaseGroupAction):
             if steps[0] == 0.0:
                 raise ProtocolError(
                     f'The data file {data_file_name} used in an interpolate() has all zero table steps.')
-            raise NotImplementedError
+            # Unit-convert the indexing variable if required
+            data_index_units = number_generator(1.0, self.index_units).units
+            index = index.model.convert_variable(
+                index, data_index_units, DataDirectionFlow.OUTPUT, move_annotations=False)
+            # Result is a special Symbol that can generate interpolation code
+            data_units = number_generator(1.0, self.data_units).units
+            return DataInterpolation(data_file_name, data, index, data_units)
         else:
             # Iterate over data rows to construct a piecewise representation for the interpolation
-            index = self.indexing_variable.to_sympy(variable_generator, number_generator)
             pieces = []
             for row in range(data.shape[1] - 1):
                 if data[0, row] == data[0, row + 1]:
@@ -2096,6 +2103,7 @@ class ModelInterface(BaseGroupAction):
         required_variables = set()
 
         # Time is always needed, even if there are no state variables!
+        self.time_variable.type = VariableType.FREE
         required_variables.add(self.time_variable)
 
         # All protocol variables are required.
