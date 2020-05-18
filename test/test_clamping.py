@@ -42,16 +42,6 @@ def test_clamp_to_data_file():
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
 
 
-def test_piecewise_interpolation_clamp():
-    proto_file = 'test/protocols/test_piecewise_model_interpolation.txt'
-    proto = fc.Protocol(proto_file)
-    proto.set_output_folder('test_piecewise_interpolation_clamp')
-    proto.set_model('test/models/simple_ode.cellml')
-    proto.run()
-    # Test assertions are within the protocol itself
-    assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
-
-
 def test_interpolation_clamp():
     proto_file = 'test/protocols/test_model_interpolation.txt'
     proto = fc.Protocol(proto_file)
