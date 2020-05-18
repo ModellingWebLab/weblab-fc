@@ -314,3 +314,15 @@ cdef class {{ class_name }}(CvodeSolver):
         # TODO Use logging here, or raise an exception
         print >>sys.stderr, '  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.'
 
+{%- for table in data_tables %}
+cdef np.ndarray {{ table.table_name }} = np.array({{ table.data_code }})
+
+cdef double {{ table.lookup_call }}:
+    """Look up data from {{ table }}."""
+    assert {{ table.index_name }} >= {{ table.initial_index }} and {{ table.index_name }} <= {{ table.final_index }}
+    cdef double offset_over_step = ({{ table.index_name }} - {{ table.initial_index }}) * {{ table.step_inverse }}
+    cdef unsigned index = <unsigned>(offset_over_step)
+    cdef double y1 = {{ table.table_name }}[index]
+    cdef double y2 = {{ table.table_name }}[index + 1]
+    return y1 + (offset_over_step - index) * (y2 - y1)
+{%- endfor %}
