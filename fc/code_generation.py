@@ -66,7 +66,6 @@ class DataInterpolation(Quantity):
 
     # Sympy annoyingly overwrites __new__
     def __new__(cls, name, data, index_variable, *args, **kwargs):
-        print('interp__new__', name)
         obj = super().__new__(cls, name, real=True)
 
         # Record a unique ID for this table
@@ -86,7 +85,6 @@ class DataInterpolation(Quantity):
         :param index_variable: the :class:`cellmlmanip.model.Variable` used to index the data
         :param units: the units of the interpolated values (a :class:`~cellmlmanip.units.UnitStore.Unit`)
         """
-        print('interp__init__', name, index_variable, units)
         super().__init__(name, units)
         self.data = data[1]
         self.index_variable = index_variable
