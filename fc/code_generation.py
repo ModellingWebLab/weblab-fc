@@ -81,7 +81,8 @@ class DataInterpolation(Quantity):
         """Create a new interpolation construct.
 
         :param name: the data file base name
-        :param data: 2d numpy array containing the column-wise data
+        :param data: 2d numpy array containing the column-wise data. The first column is the index data (values to look
+            up) and the second column contains the corresponding result values.
         :param index_variable: the :class:`cellmlmanip.model.Variable` used to index the data
         :param units: the units of the interpolated values (a :class:`~cellmlmanip.units.UnitStore.Unit`)
         """
