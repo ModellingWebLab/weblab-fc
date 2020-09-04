@@ -331,14 +331,15 @@ class CompactSyntaxParser(object):
     ##############################################
 
     # Documentation (Markdown)
-    documentation = p.Group(make_kw('documentation') - obrace - p.Regex("[^}]*") + cbrace)("dox")
+    documentation = p.Group(make_kw('documentation') - obrace - p.Regex("[^}]*") + cbrace).setResultsName("dox")
 
     # Namespace declarations
     ns_decl = p.Group(make_kw('namespace') - nc_ident("prefix") + eq + quoted_uri("uri")).setName('NamespaceDecl')
     ns_decls = optional_delimited_list(ns_decl("namespace*"), nl)
 
     # Protocol input declarations, with default values
-    inputs = (make_kw('inputs') - obrace - simple_assign_list + cbrace).setName('Inputs').setParseAction(actions.Inputs)
+    inputs = (make_kw('inputs') - obrace - simple_assign_list + cbrace
+        ).setResultsName("inputs").setName('Inputs').setParseAction(actions.Inputs)
 
     # Import statements
     import_stmt = p.Group(
@@ -353,17 +354,17 @@ class CompactSyntaxParser(object):
             simple_assign_list +
             embedded_cbrace)).setName('Import').setParseAction(
                 actions.Import)
-    imports = optional_delimited_list(import_stmt, nl).setName('Imports')
+    imports = optional_delimited_list(import_stmt, nl).setResultsName('imports').setName('Imports')
 
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
     library = (make_kw('library') - obrace - Optional(stmt_list) +
-               cbrace).setName('Library').setParseAction(actions.Library)
+               cbrace).setResultsName("library").setName('Library').setParseAction(actions.Library)
 
     # Post-processing
     post_processing = (make_kw('post-processing') + obrace -
                       optional_delimited_list(assert_stmt | return_stmt | function_defn | assign_stmt, nl) +
-                      cbrace).setName('PostProc').setParseAction(actions.PostProcessing)
+                      cbrace).setResultsName("postprocessing").setName('PostProc').setParseAction(actions.PostProcessing)
 
     # Units definitions
     si_prefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
@@ -375,7 +376,7 @@ class CompactSyntaxParser(object):
     units_def = p.Group(nc_ident + eq + p.delimitedList(unit_ref, '.') + Optional(quoted_string)("description")
                        ).setName('UnitsDefinition').setParseAction(actions.UnitsDef)
     units = (make_kw('units') - obrace - optional_delimited_list(units_def, nl) + cbrace
-             ).setName('Units').setParseAction(actions.Units)
+             ).setResultsName("units").setName('Units').setParseAction(actions.Units)
 
     # Model interface section
     #########################
@@ -451,7 +452,7 @@ class CompactSyntaxParser(object):
             input_variable | output_variable | optional_variable | new_variable | clamp_variable | model_equation
             | units_conversion
         ), nl) + cbrace
-    ).setName('ModelInterface').setParseAction(actions.ModelInterface)
+    ).setResultsName("model_interface").setName('ModelInterface').setParseAction(actions.ModelInterface)
 
     # Simulation definitions
     ########################
@@ -495,7 +496,7 @@ class CompactSyntaxParser(object):
                           Optional('?' + nl)).setParseAction(actions.Simulation)
 
     tasks = p.Group(make_kw('tasks') + obrace - p.ZeroOrMore(simulation) +
-                    cbrace).setName('Tasks').setParseAction(actions.Tasks)
+                    cbrace).setResultsName("tasks").setName('Tasks').setParseAction(actions.Tasks)
 
     # Output specifications
     #######################
@@ -509,7 +510,7 @@ class CompactSyntaxParser(object):
                                           Optional(units_ref)("units") +
                                           output_desc))).setName('Output').setParseAction(actions.Output)
     outputs = p.Group(make_kw('outputs') + obrace - optional_delimited_list(output_spec, nl) +
-                      cbrace).setName('Outputs').setParseAction(actions.Outputs)
+                      cbrace).setResultsName("outputs").setName('Outputs').setParseAction(actions.Outputs)
 
     # Plot specifications
     #####################
@@ -523,7 +524,7 @@ class CompactSyntaxParser(object):
     plot_spec = p.Group(make_kw('plot') - quoted_string + Optional(plot_using) - obrace +
                        plot_curve + p.ZeroOrMore(nl + plot_curve) + cbrace).setName('Plot').setParseAction(actions.Plot)
     plots = p.Group(make_kw('plots') + obrace - p.ZeroOrMore(plot_spec) +
-                    cbrace).setName('Plots').setParseAction(actions.Plots)
+                    cbrace).setResultsName("plots").setName('Plots').setParseAction(actions.Plots)
 
     # Parsing a full protocol
     #########################
@@ -568,6 +569,14 @@ class CompactSyntaxParser(object):
         print('Increasing recursion limit to', new_limit,
               file=sys.stderr)
         sys.setrecursionlimit(new_limit)
+
+    def parse_file(self, source_file):
+        """Main entry point to parse a protocol file.
+
+        :param source_file: path to the file to parse
+        :return: a :class:`fc.parsing.actions.Protocol` object, containing parsed information about the protocol
+        """
+        return self.try_parse(self.protocol.parseFile, source_file, parseAll=True)[0]
 
     def try_parse(self, callable, source_file, *args, **kwargs):
         """

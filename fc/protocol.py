@@ -215,11 +215,7 @@ class Protocol(object):
 
         import fc.parsing.CompactSyntaxParser as CSP
         parser = CSP.CompactSyntaxParser()
-        generator = parser.try_parse(
-            CSP.CompactSyntaxParser.protocol.parseFile,
-            self.proto_file,
-            parseAll=True
-        )[0]
+        generator = parser.parse_file(self.proto_file)
         # A :class:`fc.parsing.actions.Protocol` object,
         # containing parsed information about the protocol
         assert isinstance(generator, actions.Protocol)

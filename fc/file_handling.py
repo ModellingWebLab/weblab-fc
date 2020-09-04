@@ -42,8 +42,8 @@ class OutputFolder(object):
     def get_root_output_folder():
         """Get the root location where Chaste output files are stored.
 
-        This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then a folder 'testoutput' in
-        the current working directory is used.
+        This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then '/tmp/chaste_test_output'
+        is used.
         """
         root_folder = os.environ.get('CHASTE_TEST_OUTPUT', '/tmp/chaste_test_output')
         if not os.path.isabs(root_folder):
