@@ -15,7 +15,7 @@ import fc
 from .code_generation import create_weblab_model
 from .environment import Environment
 from .error_handling import ProtocolError, ErrorRecorder
-from .file_handling import OutputFolder
+from .file_handling import OutputFolder, sanitise_file_name
 from .language import values as V
 from .language.statements import Assign
 from .locatable import Locatable
@@ -429,7 +429,7 @@ class Protocol(object):
             start = time.time()
             for plot in self.plots:
                 with errors:
-                    path = os.path.join(self.output_folder.path, self.sanitise_file_name(plot['title']) + '.png')
+                    path = os.path.join(self.output_folder.path, sanitise_file_name(plot['title']) + '.png')
                     x_label = plot_descriptions[plot['x']]
                     y_label = plot_descriptions[plot['y']]
                     x_data = [self.output_env.look_up(plot['x']).array]
@@ -451,12 +451,6 @@ class Protocol(object):
                     create_plot(path, x_data, y_data, x_label, y_label, plot['title'])
 
             self.timings['create plots'] = self.timings.get('plot', 0.0) + (time.time() - start)
-
-    def sanitise_file_name(self, name):
-        """Simply transform a name such as a graph title into a valid file name."""
-        name = name.strip().replace(' ', '_')
-        keep = ('.', '_')
-        return ''.join(c for c in name if c.isalnum() or c in keep)
 
     def execute_library(self):
         """

@@ -4,6 +4,9 @@ Methods for file-based IO.
 import os
 import shutil
 
+import numpy as np
+import tables
+
 from .error_handling import ProtocolError
 
 
@@ -91,3 +94,34 @@ class OutputFolder(object):
         if not abs_path.startswith(OutputFolder.get_root_output_folder()):
             raise ProtocolError('Cannot alter the directory or file in this path.')
         return abs_path
+
+
+def sanitise_file_name(name):
+    """Simply transform a name such as a graph title into a valid file name."""
+    name = name.strip().replace(' ', '_')
+    keep = ('.', '_')
+    return ''.join(c for c in name if c.isalnum() or c in keep)
+
+
+def extract_output(h5_path_or_file, output_name, output_folder=None):
+    """Extract a single protocol output from an HDF5 file to CSV.
+
+    :param h5_path_or_file: either the path to an HDF5 file, or an already open ``tables.File``.
+    :param output_name: the name of the protocol output to extract, which will also be used as the basis for the CSV
+        file name.
+    :param output_folder: if given, the folder to write the CSV in; otherwise it will be written to the same folder
+        as the HDF5 file.
+    """
+    def extract(h5_file, output_folder):
+        if output_folder is None:
+            output_folder = os.path.dirname(h5_file.filename)
+        out_path = os.path.join(output_folder, 'outputs_' + sanitise_file_name(output_name) + '.csv')
+
+        data = h5_file.root.output._f_get_child(output_name).read()
+        np.savetxt(out_path, data.transpose(), delimiter=',')
+
+    if isinstance(h5_path_or_file, tables.File):
+        extract(h5_path_or_file, output_folder)
+    else:
+        with tables.open_file(h5_path_or_file, 'r') as h5_file:
+            extract(h5_file, output_folder)
