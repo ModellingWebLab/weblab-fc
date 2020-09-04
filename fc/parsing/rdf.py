@@ -16,6 +16,9 @@ BQBIOL_NS = 'http://biomodels.net/biology-qualifiers/'
 PRED_IS = create_rdf_node((BQBIOL_NS, 'is'))
 PRED_IS_VERSION_OF = create_rdf_node((BQBIOL_NS, 'isVersionOf'))
 
+# Magic state annotation
+STATE_ANNOTATION = create_rdf_node((OXMETA_NS, 'state_variable'))
+
 
 def get_variables_transitively(model, term):
     """Return a list of variables annotated (directly or otherwise) with the given ontology term.
@@ -57,6 +60,18 @@ def get_variables_transitively(model, term):
     for cmeta_id in cmeta_ids:
         variables.append(model.get_variable_by_cmeta_id(cmeta_id))
     return sorted(variables, key=lambda sym: sym.order_added)
+
+
+def get_used_annotations(model):
+    """Return the set of URIs used to annotate variables in the given model.
+
+    :param model: a :class:`cellmlmanip.model.Model`
+    :return: a set of strings giving full URIs
+    """
+    terms = set(model.rdf.objects(None, PRED_IS))
+    terms.update(model.rdf.objects(None, PRED_IS_VERSION_OF))
+    terms.add(STATE_ANNOTATION)  # Present implicitly
+    return set(map(str, terms))
 
 
 def get_variables_that_are_version_of(model, term):
