@@ -1,6 +1,7 @@
 """
 Contains the main classes representing an FC Protocol.
 """
+import itertools
 import os
 import subprocess
 import sys
@@ -19,6 +20,7 @@ from .language import values as V
 from .language.statements import Assign
 from .locatable import Locatable
 from .parsing import actions
+from .parsing.rdf import get_used_annotations
 from .plotting import create_plot
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
@@ -638,6 +640,101 @@ class Protocol(object):
         # Benchmarking
         self.timings['load model'] = (
             self.timings.get('load model', 0.0) + (time.time() - start))
+
+    def get_required_model_annotations(self):
+        """Get the set of ontology terms referenced by this protocol, recursively processing imports.
+
+        This looks at the combined model interface, and analyses as follows:
+        * Inputs, outputs and clamps all define a single variable that is part of the interface
+        * The tokens tree for equations is walked recursively and any :class:`actions.Variable` instances that reference
+          ontology terms are included
+        * Variables defined directly by an equation are optional; similarly for inputs that give units and initial value
+        * Optional declarations are processed to determine which of the terms found are explicitly optional
+        * Variable references in units conversion rules are considered optional unless they appear elsewhere as required
+
+        :return: a pair (required terms, optional terms) of sets of ontology terms, as full URI strings
+        """
+        iface = self.model_interface
+        maybe_required = set()
+        maybe_optional = set()
+        optional = set()
+
+        def process_var_ref(name, result_set):
+            """Add the given variable to the result set if it is an ontology term reference.
+
+            If the ``name`` has the form ``prefix:local_name`` then look up the prefix in our namespace map to construct
+            the full URI.
+            """
+            if ':' in name:
+                prefix, local_name = name.split(':', 1)
+                ns_uri = iface.ns_map.get(prefix)
+                if ns_uri:
+                    result_set.add(ns_uri + local_name)
+
+        def walk_equation(token, result_set):
+            """Recursively walk an equation token tree looking for variable references, and add them to the set."""
+            if isinstance(token, actions.Variable):
+                process_var_ref(token.name(), result_set)
+            elif hasattr(token, 'tokens'):
+                for t in token.tokens:
+                    walk_equation(t, result_set)
+            elif isinstance(token, actions.pyparsing.ParseResults):
+                for t in token:
+                    walk_equation(t, result_set)
+
+        # Unit conversion rules: maybe optional
+        for rule in iface.unit_conversion_rules:
+            walk_equation(rule.tokens[-1], maybe_optional)
+
+        # Simple references
+        for var in itertools.chain(iface.outputs, iface.clamps):
+            maybe_required.add(var.ns_uri + var.local_name)
+        for var in iface.inputs:
+            if var.units is not None and var.initial_value is not None:
+                optional.add(var.ns_uri + var.local_name)
+            else:
+                maybe_required.add(var.ns_uri + var.local_name)
+
+        # Equation references
+        for eq in iface.equations:
+            walk_equation(eq.rhs, maybe_required)
+            if eq.is_ode:
+                process_var_ref(eq.var.name(), maybe_required)
+                process_var_ref(eq.bvar.name(), maybe_required)
+            else:
+                process_var_ref(eq.var.name(), optional)
+
+        # Optional variables
+        for var in iface.optional_decls:
+            optional.add(var.ns_uri + var.local_name)
+            if var.default_expr is not None:
+                walk_equation(var.default_expr, optional)
+
+        # Figure out which way the 'maybe' references go
+        optional = optional | (maybe_optional - maybe_required)
+        return maybe_required - optional, optional
+
+    def check_model_compatibility(self, model_path):
+        """Determine whether the given model is compatible with this protocol.
+
+        This checks whether the ontology terms accessed by the protocol are present in the model.
+        It returns lists of terms required but not present, and the pair are compatible if the first
+        of these is empty. The second list gives optional terms that aren't in the model, so the
+        protocol should still run but not all outputs may be available.
+
+        :param model_path: the CellML file to check
+        :return: a pair of sorted lists (missing required terms, missing optional terms) as full URI strings
+        """
+        required_terms, optional_terms = self.get_required_model_annotations()
+        import cellmlmanip
+        model = cellmlmanip.load_model(model_path)
+        model_terms = get_used_annotations(model)
+        # Return the mismatch, if any, as sorted lists
+        missing_terms = list(required_terms - model_terms)
+        missing_terms.sort()
+        missing_optional_terms = list(optional_terms - model_terms)
+        missing_optional_terms.sort()
+        return missing_terms, missing_optional_terms
 
     def get_path(self, base_path, path):
         """Determine the full path of an imported protocol file.
