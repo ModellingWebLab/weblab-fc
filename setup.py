@@ -99,5 +99,10 @@ setup(
         ],
     },
     entry_points={
+        'console_scripts': [
+            'fc_run = fc.cli:run_protocol',
+            'fc_extract_outputs = fc.cli:extract_outputs',
+            'fc_check_syntax = fc.cli:check_syntax',
+        ],
     },
 )
