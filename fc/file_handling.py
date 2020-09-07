@@ -1,6 +1,7 @@
 """
 Methods for file-based IO.
 """
+import mimetypes
 import os
 import shutil
 
@@ -101,6 +102,38 @@ def sanitise_file_name(name):
     name = name.strip().replace(' ', '_')
     keep = ('.', '_')
     return ''.join(c for c in name if c.isalnum() or c in keep)
+
+
+def combine_manifest(namelist):
+    """Generate a COMBINE Archive manifest for a given collection of file names.
+
+    This uses Python's mimetypes library to deduce for most extensions, with some COMBINE-specific file types
+    supported specially.
+
+    :param namelist: an iterable of file names
+    :return: the contents of a manifest.xml file, as a string
+    """
+    mimetypes.add_type('text/csv', '.csv')  # Make csv mapping explicit (in Windows, defaults to Excel)
+    manifest = [
+        "<?xml version='1.0' encoding='utf-8'?>",
+        "<omexManifest xmlns='http://identifiers.org/combine.specifications/omex-manifest'>",
+        "    <content location='manifest.xml' format='http://identifiers.org/combine.specifications/omex-manifest'/>",
+    ]
+    for filename in namelist:
+        try:
+            ext = os.path.splitext(filename)[1]
+            combine_type = {
+                '.cellml': 'http://identifiers.org/combine.specifications/cellml',
+            }[ext]
+        except Exception:
+            combine_type = mimetypes.guess_type(filename)[0]
+        if combine_type is None:
+            combine_type = 'application/octet-stream'
+        if not combine_type.startswith('http'):
+            combine_type = 'http://purl.org/NET/mediatypes/' + combine_type
+        manifest.append(f"    <content location='{filename}' format='{combine_type}'/>")
+    manifest.append("</omexManifest>")
+    return '\n'.join(manifest)
 
 
 def extract_output(h5_path_or_file, output_name, output_folder=None):
