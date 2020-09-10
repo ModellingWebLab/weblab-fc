@@ -76,7 +76,7 @@ setup(
     cmdclass={'build_ext': build_ext},
     ext_modules=ext_modules,
     install_requires=[
-        # 'cellmlmanip',    # Add this in when cellmlmanip is ready
+        'cellmlmanip',
         'cython',
         'Jinja2>=2.10',
         'matplotlib',
