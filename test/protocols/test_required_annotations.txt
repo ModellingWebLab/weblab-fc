@@ -1,4 +1,5 @@
-# Tests the logic analysing model annotations required by the protocol
+# Tests the logic analysing model annotations required by the protocol.
+# Also tests analysis of the protocol's own interface (inputs & outputs).
 
 namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
 namespace local = "urn:fc:local#"
@@ -31,7 +32,7 @@ model interface {
     optional oxmeta:cytosolic_calcium_concentration
 
     # Variables used in defaults are also optional
-    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units uA_per_cm2
+    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current
     optional oxmeta:membrane_rapid_delayed_rectifier_potassium_current default oxmeta:membrane_inward_rectifier_potassium_current
 
     # Optional because it's defined by an equation
@@ -46,4 +47,32 @@ model interface {
     convert microamps to uA_per_cm2 by lambda rhs: (rhs / oxmeta:membrane_capacitance) * 1 :: uF_per_cm2
     convert mV to mM by lambda rhs: rhs / 1 :: mV * local:funky_converter
     define oxmeta:extracellular_potassium_concentration = local:funky_converter
+}
+
+tasks {
+    # A fake simulation so we can access model variables later
+    simulation sim = timecourse {
+        range t units ms uniform 0:2
+    }
+}
+
+post-processing {
+    pp_end_time = sim:time[-1]
+}
+
+outputs {
+    # Uses units taken from model interface
+    model_interface_units = sim:time
+
+    # Uses units defined here
+    pp_defined_units units ms
+
+    # Simulation output with units defined here
+    sim_defined_units = sim:time units second
+
+    # Units that aren't defined
+    missing_units = sim:newvar units missing
+
+    # Units not defined in model interface, so unknown until applied to a model
+    unknown_units = sim:membrane_rapid_delayed_rectifier_potassium_current
 }

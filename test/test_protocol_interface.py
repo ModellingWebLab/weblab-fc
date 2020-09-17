@@ -66,3 +66,17 @@ def test_model_compatibility():
         'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current',
         'urn:fc:local#newvar',
     ] == missing_optional_terms
+
+
+def test_protocol_interface():
+    proto = Protocol('test/protocols/test_required_annotations.txt')
+    actual = proto.get_protocol_interface()
+    expected = [
+        {'kind': 'output', 'name': 'missing_units', 'units': ''},
+        {'kind': 'output', 'name': 'model_interface_units', 'units': '0.001 second'},
+        {'kind': 'output', 'name': 'pp_defined_units', 'units': '0.001 second'},
+        {'kind': 'output', 'name': 'sim_defined_units', 'units': '1 second'},
+        {'kind': 'output', 'name': 'unknown_units', 'units': ''},
+    ]
+    actual.sort(key=lambda d: d['name'])
+    assert expected == actual

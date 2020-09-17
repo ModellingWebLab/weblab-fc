@@ -2400,7 +2400,7 @@ class Output(BaseGroupAction):
     def _expr(self):
         output = {}
         if 'units' in self.tokens:
-            output['units'] = str(self.tokens['units'])
+            output['units'] = str(self.tokens['units'][0])
         if 'name' in self.tokens:
             output['name'] = str(self.tokens['name'])
         if 'ref' in self.tokens:

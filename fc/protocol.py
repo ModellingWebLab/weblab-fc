@@ -195,6 +195,7 @@ class Protocol(object):
         # - description (optional): human-readable description of the output; defaults to name.
         #   Used for plot labels.
         # - optional: whether it is an error if the variable referenced doesn't exist.
+        # - units: name of the units this output is measured in, from self.units
         self.outputs = []
 
         # 11. The ``plots`` section
@@ -634,6 +635,44 @@ class Protocol(object):
         # Benchmarking
         self.timings['load model'] = (
             self.timings.get('load model', 0.0) + (time.time() - start))
+
+    def get_protocol_interface(self):
+        """Get the names and units of the inputs to and outputs from this protocol.
+
+        This is used by the Web Lab front-end as part of its protocol analysis phase.
+
+        Returns a list of dictionaries, each with keys 'name', 'units' and 'kind':
+        * ``kind`` is either 'input' or 'output'
+        * ``name`` is the name of the input or output, and is guaranteed unique for a given kind
+        * ``units`` is a pint definition string for the units, as determined by ``self.units``
+        """
+        interface = []
+        for output in self.outputs:
+            units = output.get('units')
+            print('Output units', units)
+            if units is None:
+                # Units are read from the model, and so may be determined by our model interface
+                units = ''  # Default in case we can't figure it out
+                ref = output.get('ref', '')
+                if ':' in ref:
+                    local_name = ref.split(':')[-1]
+                    for model_output in self.model_interface.outputs:
+                        if model_output.local_name == local_name:
+                            units = model_output.units
+                            break
+            if not self.units.is_defined(units):
+                # We don't currently require units taken from the store
+                print('Not defined')
+                units = ''
+            if units != '':
+                print('Defined', self.units.get_unit(units))
+                units = self.units.format(self.units.get_unit(units), base_units=True)
+            interface.append({
+                'kind': 'output',
+                'name': output['name'],
+                'units': units,
+            })
+        return interface
 
     def get_required_model_annotations(self):
         """Get the set of ontology terms referenced by this protocol, recursively processing imports.
