@@ -29,11 +29,8 @@ from ..language import statements as S
 from ..language import values as V
 from ..locatable import Locatable
 from ..simulations import model, modifiers, ranges, simulations
-from .rdf import OXMETA_NS, PRED_IS, PRED_IS_VERSION_OF
+from .rdf import PRED_IS, PRED_IS_VERSION_OF, STATE_ANNOTATION
 from .rdf import create_rdf_node, get_variables_transitively, get_variables_that_are_version_of
-
-# Magic state annotation
-STATE_ANNOTATION = create_rdf_node((OXMETA_NS, 'state_variable'))
 
 # Sympy symbol for "original_definition" construct
 ORIGINAL_DEFINITION = sympy.Symbol('original_definition')
@@ -982,8 +979,6 @@ class ProtocolVariable():
     ``output_terms``
         A list of rdf terms by which this variable is known as a scalar output. This is typically zero or one term, but
         multiple ontology terms may annotate the same output (as long as their units are consistent).
-    ``vector_output_terms``
-        A list of rdf terms by which this variable is known as a vector output. This is typically zero or one term.
     ``is_input``
         ``True`` iff the associated model variable is set as a model input by the protocol
     ``is_output``
@@ -2405,7 +2400,7 @@ class Output(BaseGroupAction):
     def _expr(self):
         output = {}
         if 'units' in self.tokens:
-            output['units'] = str(self.tokens['units'])
+            output['units'] = str(self.tokens['units'][0])
         if 'name' in self.tokens:
             output['name'] = str(self.tokens['name'])
         if 'ref' in self.tokens:

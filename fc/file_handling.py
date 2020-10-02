@@ -1,8 +1,12 @@
 """
 Methods for file-based IO.
 """
+import mimetypes
 import os
 import shutil
+
+import numpy as np
+import tables
 
 from .error_handling import ProtocolError
 
@@ -42,8 +46,8 @@ class OutputFolder(object):
     def get_root_output_folder():
         """Get the root location where Chaste output files are stored.
 
-        This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then a folder 'testoutput' in
-        the current working directory is used.
+        This is read from the environment variable CHASTE_TEST_OUTPUT; if it is not set then '/tmp/chaste_test_output'
+        is used.
         """
         root_folder = os.environ.get('CHASTE_TEST_OUTPUT', '/tmp/chaste_test_output')
         if not os.path.isabs(root_folder):
@@ -91,3 +95,66 @@ class OutputFolder(object):
         if not abs_path.startswith(OutputFolder.get_root_output_folder()):
             raise ProtocolError('Cannot alter the directory or file in this path.')
         return abs_path
+
+
+def sanitise_file_name(name):
+    """Simply transform a name such as a graph title into a valid file name."""
+    name = name.strip().replace(' ', '_')
+    keep = ('.', '_')
+    return ''.join(c for c in name if c.isalnum() or c in keep)
+
+
+def combine_manifest(namelist):
+    """Generate a COMBINE Archive manifest for a given collection of file names.
+
+    This uses Python's mimetypes library to deduce for most extensions, with some COMBINE-specific file types
+    supported specially.
+
+    :param namelist: an iterable of file names
+    :return: the contents of a manifest.xml file, as a string
+    """
+    mimetypes.add_type('text/csv', '.csv')  # Make csv mapping explicit (in Windows, defaults to Excel)
+    manifest = [
+        "<?xml version='1.0' encoding='utf-8'?>",
+        "<omexManifest xmlns='http://identifiers.org/combine.specifications/omex-manifest'>",
+        "    <content location='manifest.xml' format='http://identifiers.org/combine.specifications/omex-manifest'/>",
+    ]
+    for filename in namelist:
+        try:
+            ext = os.path.splitext(filename)[1]
+            combine_type = {
+                '.cellml': 'http://identifiers.org/combine.specifications/cellml',
+            }[ext]
+        except Exception:
+            combine_type = mimetypes.guess_type(filename)[0]
+        if combine_type is None:
+            combine_type = 'application/octet-stream'
+        if not combine_type.startswith('http'):
+            combine_type = 'http://purl.org/NET/mediatypes/' + combine_type
+        manifest.append(f"    <content location='{filename}' format='{combine_type}'/>")
+    manifest.append("</omexManifest>")
+    return '\n'.join(manifest)
+
+
+def extract_output(h5_path_or_file, output_name, output_folder=None):
+    """Extract a single protocol output from an HDF5 file to CSV.
+
+    :param h5_path_or_file: either the path to an HDF5 file, or an already open ``tables.File``.
+    :param output_name: the name of the protocol output to extract, which will also be used as the basis for the CSV
+        file name.
+    :param output_folder: if given, the folder to write the CSV in; otherwise it will be written to the same folder
+        as the HDF5 file.
+    """
+    def extract(h5_file, output_folder):
+        if output_folder is None:
+            output_folder = os.path.dirname(h5_file.filename)
+        out_path = os.path.join(output_folder, 'outputs_' + sanitise_file_name(output_name) + '.csv')
+
+        data = h5_file.root.output._f_get_child(output_name).read()
+        np.savetxt(out_path, data.transpose(), delimiter=',')
+
+    if isinstance(h5_path_or_file, tables.File):
+        extract(h5_path_or_file, output_folder)
+    else:
+        with tables.open_file(h5_path_or_file, 'r') as h5_file:
+            extract(h5_file, output_folder)

@@ -76,7 +76,7 @@ setup(
     cmdclass={'build_ext': build_ext},
     ext_modules=ext_modules,
     install_requires=[
-        # 'cellmlmanip',    # Add this in when cellmlmanip is ready
+        'cellmlmanip',
         'cython',
         'Jinja2>=2.10',
         'matplotlib',
@@ -99,5 +99,10 @@ setup(
         ],
     },
     entry_points={
+        'console_scripts': [
+            'fc_run = fc.cli:run_protocol',
+            'fc_extract_outputs = fc.cli:extract_outputs',
+            'fc_check_syntax = fc.cli:check_syntax',
+        ],
     },
 )

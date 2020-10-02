@@ -131,7 +131,7 @@ class CompactSyntaxParser(object):
     p.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
     # Single-line Python-style comments
-    comment = p.Regex(r'#.*').suppress().setName('Comment')
+    comment = p.Regex(r'#.*').suppress().setName('comment')
 
     # Punctuation etc.
     eq = p.Suppress('=')
@@ -143,15 +143,15 @@ class CompactSyntaxParser(object):
     csquare = p.Suppress(']')
     dollar = p.Suppress('$')
     nl = p.Suppress(p.OneOrMore(Optional(comment) + p.LineEnd())
-                    ).setName('Newline(s)')  # Any line can end with a comment
+                    ).setName('newline(s)')  # Any line can end with a comment
     obrace = (Optional(nl) + p.Suppress('{') + Optional(nl)).setName('{')
     cbrace = (Optional(nl) + p.Suppress('}') + Optional(nl)).setName('}')
     embedded_cbrace = (Optional(nl) + p.Suppress('}')).setName('}')
 
     # Identifiers
-    nc_ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*').setName('ncIdent')
-    c_ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*:[_a-zA-Z][_0-9a-zA-Z]*').setName('cIdent')
-    ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('Ident')
+    nc_ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*').setName('non-prefixed identifier')
+    c_ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*:[_a-zA-Z][_0-9a-zA-Z]*').setName('prefixed identifier')
+    ident = p.Regex('[_a-zA-Z][_0-9a-zA-Z]*(:[_a-zA-Z][_0-9a-zA-Z]*)*').setName('identifier (with or without prefix)')
     nc_ident_as_var = nc_ident.copy().setParseAction(actions.Variable)
     ident_as_var = ident.copy().setParseAction(actions.Variable)
 
@@ -159,71 +159,74 @@ class CompactSyntaxParser(object):
     # Within expressions they may also have units specified, e.g. in the model interface.
     units_ident = p.originalTextFor(p.Literal('units_of(') - adjacent(ident) + adjacent(p.Literal(')'))) | nc_ident
     units_annotation = p.Suppress('::') - units_ident("units")
-    plain_number = p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?').setName('Number')
-    number = (plain_number + Optional(units_annotation)).setName('Number')
+    plain_number = p.Regex(r'-?[0-9]+((\.[0-9]+)?(e[-+]?[0-9]+)?)?').setName('number')
+    number = (plain_number + Optional(units_annotation)).setName('number or quantity')
 
     # Used for descriptive text
-    quoted_string = (p.QuotedString('"', escChar="\\") | p.QuotedString("'", escChar="\\")).setName('QuotedString')
+    quoted_string = (p.QuotedString('"', escChar="\\") | p.QuotedString("'", escChar="\\")).setName('quoted string')
     # This may become more specific in future
-    quoted_uri = quoted_string.copy().setName('QuotedUri')
+    quoted_uri = quoted_string.copy().setName('quoted uri')
 
     # Expressions from the "post-processing" language
     #################################################
 
     # Expressions and statements must be constructed recursively
-    expr = p.Forward().setName('Expression')
-    stmt_list = p.Forward().setName('StatementList')
+    expr = p.Forward().setName('expression')
+    stmt_list = p.Forward().setName('statement list')
 
     # A vector written like 1:2:5 or 1:5 or A:B:C
     numeric_range = p.Group(expr + colon - expr + Optional(colon - expr))
 
     # Creating arrays
     dim_spec = Optional(expr + adjacent(dollar)) + nc_ident
-    comprehension = p.Group(make_kw('for') - dim_spec + make_kw('in') - numeric_range).setParseAction(actions.Comprehension)
+    comprehension = p.Group(
+        make_kw('for') - dim_spec + make_kw('in') - numeric_range).setParseAction(actions.Comprehension)
     array = p.Group(osquare - expr + (p.OneOrMore(comprehension) | p.ZeroOrMore(comma - expr)) + csquare
-                    ).setName('Array').setParseAction(actions.Array)
+                    ).setName('array').setParseAction(actions.Array)
 
     # Array views
     opt_expr = Optional(expr, default='')
-    view_spec = p.Group(adjacent(osquare) - Optional(('*' | expr) + adjacent(dollar))('dimspec') +
-                       opt_expr + Optional(colon - opt_expr + Optional(colon - opt_expr)) + csquare).setName('ViewSpec')
+    view_spec = p.Group(
+        adjacent(osquare) - Optional(('*' | expr) + adjacent(dollar))('dimspec') +
+        opt_expr + Optional(colon - opt_expr + Optional(colon - opt_expr)) + csquare
+    ).setName('view specification on an array')
 
     # If-then-else
     if_expr = p.Group(make_kw('if') - expr + make_kw('then') - expr +
-                     make_kw('else') - expr).setName('IfThenElse').setParseAction(actions.Piecewise)
+                      make_kw('else') - expr).setName('if-then-else expression').setParseAction(actions.Piecewise)
 
     # Lambda definitions
     param_decl = p.Group(nc_ident_as_var + Optional(eq + expr))
     param_list = p.Group(optional_delimited_list(param_decl, comma))
     lambda_expr = p.Group(make_kw('lambda') - param_list + ((colon - expr) | (obrace - stmt_list + embedded_cbrace))
-                         ).setName('Lambda').setParseAction(actions.Lambda)
+                          ).setName('lambda function').setParseAction(actions.Lambda)
 
     # Function calls
     # TODO: Allow lambdas, not just ident?
     arg_list = p.Group(optional_delimited_list(expr, comma))
     function_call = p.Group(ident_as_var + adjacent(oparen) - arg_list +
-                           cparen).setName('FnCall').setParseAction(actions.FunctionCall)
+                            cparen).setName('function call').setParseAction(actions.FunctionCall)
 
     # Tuples
     tuple = p.Group(oparen + expr + comma - optional_delimited_list(expr, comma) +
-                    cparen).setName('Tuple').setParseAction(actions.Tuple)
+                    cparen).setName('tuple').setParseAction(actions.Tuple)
 
     # Accessors
     accessor = p.Combine(adjacent(p.Suppress('.')) -
                          p.oneOf('IS_SIMPLE_VALUE IS_ARRAY IS_STRING IS_TUPLE IS_FUNCTION IS_NULL IS_DEFAULT '
-                                 'NUM_DIMS NUM_ELEMENTS SHAPE')).setName('Accessor')
+                                 'NUM_DIMS NUM_ELEMENTS SHAPE')).setName('.accessor (e.g. .IS_ARRAY)')
 
     # Indexing
     pad = (make_kw('pad') + adjacent(colon) - expr + eq + expr).setResultsName('pad')
     shrink = (make_kw('shrink') + adjacent(colon) - expr).setResultsName('shrink')
     index_dim = expr.setResultsName('dim')
     index = p.Group(adjacent(p.Suppress('{')) - expr +
-                    p.ZeroOrMore(comma - (pad | shrink | index_dim)) + p.Suppress('}')).setName('Index')
+                    p.ZeroOrMore(comma - (pad | shrink | index_dim)) + p.Suppress('}')).setName('index expression')
 
     # Special values
-    null_value = p.Group(make_kw('null')).setName('Null').setParseAction(actions.Symbol('null'))
-    default_value = p.Group(make_kw('default')).setName('Default').setParseAction(actions.Symbol('defaultParameter'))
-    string_value = quoted_string.copy().setName('String').setParseAction(actions.Symbol('string'))
+    null_value = p.Group(make_kw('null')).setName('null').setParseAction(actions.Symbol('null'))
+    default_value = p.Group(make_kw('default')).setName('default').setParseAction(actions.Symbol('defaultParameter'))
+    string_value = quoted_string.copy().setName('string').setParseAction(actions.Symbol('string'))
 
     # Recognised MathML operators
     mathml_operators = set('''
@@ -243,15 +246,17 @@ class CompactSyntaxParser(object):
         p.oneOf('^ * / + - not == != <= >= < > && ||') |
         p.Combine('MathML:' + p.oneOf(' '.join(mathml_operators))))
     wrap = p.Group(
-            p.Suppress('@') - adjacent(p.Word(p.nums)) + adjacent(colon) + mathml_operator
-        ).setName('WrapMathML').setParseAction(actions.Wrap)
+        p.Suppress('@') - adjacent(p.Word(p.nums)) + adjacent(colon) + mathml_operator
+    ).setName('MathML lambda "@" syntax').setParseAction(actions.Wrap)
 
     # Turning on tracing for debugging protocols
     trace = adjacent(p.Suppress('?'))
 
     # The main expression grammar.  Atoms are ordered according to rough speed of detecting mis-match.
-    atom = (array | wrap | number.copy().setParseAction(actions.Number) | string_value |
-            if_expr | null_value | default_value | lambda_expr | function_call | ident_as_var | tuple).setName('Atom')
+    atom = (
+        array | wrap | number.copy().setParseAction(actions.Number) | string_value |
+        if_expr | null_value | default_value | lambda_expr | function_call | ident_as_var | tuple
+    ).setName('atomic expression')
     expr <<= p.infixNotation(atom, [(accessor, 1, p.opAssoc.LEFT, actions.Accessor),
                                     (view_spec, 1, p.opAssoc.LEFT, actions.View),
                                     (index, 1, p.opAssoc.LEFT, actions.Index),
@@ -268,12 +273,13 @@ class CompactSyntaxParser(object):
                                     ])
 
     # Simpler expressions containing no arrays, functions, etc. Used in the model interface.
-    simple_expr = p.Forward().setName('SimpleExpression')
-    simple_if_expr = p.Group(make_kw('if') - simple_expr + make_kw('then') - simple_expr +
-                           make_kw('else') - simple_expr).setName('SimpleIfThenElse').setParseAction(actions.Piecewise)
+    simple_expr = p.Forward().setName('simple expression')
+    simple_if_expr = p.Group(
+        make_kw('if') - simple_expr + make_kw('then') - simple_expr + make_kw('else') - simple_expr
+    ).setName('simple if-then-else').setParseAction(actions.Piecewise)
     simple_arg_list = p.Group(optional_delimited_list(simple_expr, comma))
     simple_function_call = p.Group(ident_as_var + adjacent(oparen) - simple_arg_list +
-                                 cparen).setName('SimpleFnCall').setParseAction(actions.FunctionCall)
+                                   cparen).setName('simple function call').setParseAction(actions.FunctionCall)
     simple_expr <<= p.infixNotation(
         number.copy().setParseAction(actions.Number) | simple_if_expr | simple_function_call | ident_as_var,
         [
@@ -287,7 +293,7 @@ class CompactSyntaxParser(object):
         ])
     simple_param_list = p.Group(optional_delimited_list(p.Group(nc_ident_as_var), comma))
     simple_lambda_expr = p.Group(make_kw('lambda') - simple_param_list + colon -
-                                 simple_expr).setName('SimpleLambda').setParseAction(actions.Lambda)
+                                 simple_expr).setName('simple lambda function').setParseAction(actions.Lambda)
 
     # Newlines in expressions may be escaped with a backslash
     expr.ignore('\\' + p.LineEnd())
@@ -306,23 +312,26 @@ class CompactSyntaxParser(object):
     ################################################
 
     # Simple assignment (i.e. not to a tuple)
-    simple_assign = p.Group(nc_ident_as_var + eq - expr).setName('SimpleAssign').setParseAction(actions.Assignment)
+    simple_assign = p.Group(
+        nc_ident_as_var + eq - expr).setName('simple assignment').setParseAction(actions.Assignment)
     simple_assign_list = p.Group(optional_delimited_list(simple_assign, nl)).setParseAction(actions.StatementList)
 
     # Assertions and function returns
-    assert_stmt = p.Group(make_kw('assert') - expr).setName('AssertStmt').setParseAction(actions.Assert)
-    return_stmt = p.Group(make_kw('return') - p.delimitedList(expr)).setName('ReturnStmt').setParseAction(actions.Return)
+    assert_stmt = p.Group(make_kw('assert') - expr).setName('assert statement').setParseAction(actions.Assert)
+    return_stmt = p.Group(
+        make_kw('return') - p.delimitedList(expr)).setName('return statement').setParseAction(actions.Return)
 
     # Full assignment, to a tuple of names or single name
     _idents = p.Group(p.delimitedList(nc_ident_as_var)).setParseAction(actions.MaybeTuple)
-    assign_stmt = p.Group(((make_kw('optional', suppress=False)("optional") + _idents) | _idents) + eq -
-                         p.Group(p.delimitedList(expr)).setParseAction(actions.MaybeTuple))   \
-        .setName('AssignStmt').setParseAction(actions.Assignment)
+    assign_stmt = p.Group(
+        ((make_kw('optional', suppress=False)("optional") + _idents) | _idents) + eq -
+        p.Group(p.delimitedList(expr)).setParseAction(actions.MaybeTuple)
+    ).setName('assignment statement').setParseAction(actions.Assignment)
 
     # Function definition
     function_defn = p.Group(make_kw('def') - nc_ident_as_var + oparen + param_list + cparen -
-                           ((colon - expr) | (obrace - stmt_list + Optional(nl) + p.Suppress('}')))
-                           ).setName('FunctionDef').setParseAction(actions.FunctionDef)
+                            ((colon - expr) | (obrace - stmt_list + Optional(nl) + p.Suppress('}')))
+                            ).setName('function definition').setParseAction(actions.FunctionDef)
 
     stmt_list << p.Group(p.delimitedList(assert_stmt | return_stmt | function_defn | assign_stmt, nl))
     stmt_list.setParseAction(actions.StatementList)
@@ -331,14 +340,17 @@ class CompactSyntaxParser(object):
     ##############################################
 
     # Documentation (Markdown)
-    documentation = p.Group(make_kw('documentation') - obrace - p.Regex("[^}]*") + cbrace)("dox")
+    documentation = p.Group(make_kw('documentation') - obrace - p.Regex("[^}]*") + cbrace).setResultsName("dox")
 
     # Namespace declarations
-    ns_decl = p.Group(make_kw('namespace') - nc_ident("prefix") + eq + quoted_uri("uri")).setName('NamespaceDecl')
+    ns_decl = p.Group(
+        make_kw('namespace') - nc_ident("prefix") + eq + quoted_uri("uri")).setName('namespace declaration')
     ns_decls = optional_delimited_list(ns_decl("namespace*"), nl)
 
     # Protocol input declarations, with default values
-    inputs = (make_kw('inputs') - obrace - simple_assign_list + cbrace).setName('Inputs').setParseAction(actions.Inputs)
+    inputs = (
+        make_kw('inputs') - obrace - simple_assign_list + cbrace
+    ).setResultsName("inputs").setName('protocol inputs').setParseAction(actions.Inputs)
 
     # Import statements
     import_stmt = p.Group(
@@ -351,31 +363,33 @@ class CompactSyntaxParser(object):
         Optional(
             obrace -
             simple_assign_list +
-            embedded_cbrace)).setName('Import').setParseAction(
+            embedded_cbrace)).setName('protocol import').setParseAction(
                 actions.Import)
-    imports = optional_delimited_list(import_stmt, nl).setName('Imports')
+    imports = optional_delimited_list(import_stmt, nl).setResultsName('imports').setName('protocol imports')
 
     # Library, globals defined using post-processing language.
     # Strictly speaking returns aren't allowed, but that gets picked up later.
     library = (make_kw('library') - obrace - Optional(stmt_list) +
-               cbrace).setName('Library').setParseAction(actions.Library)
+               cbrace).setResultsName("library").setName('library section').setParseAction(actions.Library)
 
     # Post-processing
-    post_processing = (make_kw('post-processing') + obrace -
-                      optional_delimited_list(assert_stmt | return_stmt | function_defn | assign_stmt, nl) +
-                      cbrace).setName('PostProc').setParseAction(actions.PostProcessing)
+    post_processing = (
+        make_kw('post-processing') + obrace -
+        optional_delimited_list(assert_stmt | return_stmt | function_defn | assign_stmt, nl) +
+        cbrace
+    ).setResultsName("postprocessing").setName('post-processing section').setParseAction(actions.PostProcessing)
 
     # Units definitions
     si_prefix = p.oneOf('deka hecto kilo mega giga tera peta exa zetta yotta'
-                       'deci centi milli micro nano pico femto atto zepto yocto')
+                        'deci centi milli micro nano pico femto atto zepto yocto')
     _num_or_expr = p.originalTextFor(plain_number | (oparen + expr + cparen))
     unit_ref = p.Group(Optional(_num_or_expr)("multiplier") + Optional(si_prefix)("prefix") + nc_ident("units") +
-                      Optional(p.Suppress('^') + plain_number)("exponent") +
-                      Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(actions.UnitRef)
+                       Optional(p.Suppress('^') + plain_number)("exponent") +
+                       Optional(p.Group(p.oneOf('- +') + _num_or_expr))("offset")).setParseAction(actions.UnitRef)
     units_def = p.Group(nc_ident + eq + p.delimitedList(unit_ref, '.') + Optional(quoted_string)("description")
-                       ).setName('UnitsDefinition').setParseAction(actions.UnitsDef)
+                        ).setName('units definition').setParseAction(actions.UnitsDef)
     units = (make_kw('units') - obrace - optional_delimited_list(units_def, nl) + cbrace
-             ).setName('Units').setParseAction(actions.Units)
+             ).setResultsName("units").setName('units section').setParseAction(actions.Units)
 
     # Model interface section
     #########################
@@ -390,20 +404,21 @@ class CompactSyntaxParser(object):
         c_ident('name') +
         Optional(units_ref)('units') +
         Optional(eq + plain_number)('initial_value')
-    ).setName('InputVariable').setParseAction(actions.InputVariable)
+    ).setName('input variable declaration').setParseAction(actions.InputVariable)
 
     # Model outputs of interest, with optional units
     output_variable = p.Group(
         make_kw('output') -
         c_ident("name") +
         Optional(units_ref("units"))
-    ).setName('OutputVariable').setParseAction(actions.OutputVariable)
+    ).setName('output variable declaration').setParseAction(actions.OutputVariable)
 
     # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
     locator = p.Empty().leaveWhitespace().setParseAction(lambda s, l, t: l)
     var_default = make_kw('default') - locator("default_start") + simple_expr("default")
-    optional_variable = p.Group(make_kw('optional') - c_ident("name") + Optional(var_default) + locator("default_end")
-                               ).setName('OptionalVar').setParseAction(actions.OptionalVariable)
+    optional_variable = p.Group(
+        make_kw('optional') - c_ident("name") + Optional(var_default) + locator("default_end")
+    ).setName('optional variable declaration').setParseAction(actions.OptionalVariable)
 
     # New variables added to the model, with optional initial value
     new_variable = p.Group(
@@ -412,13 +427,13 @@ class CompactSyntaxParser(object):
         units_ref("units") +
         Optional(
             eq +
-            plain_number)("initial_value")).setName('NewVariable').setParseAction(
-        actions.DeclareVariable)
+            plain_number)("initial_value")
+    ).setName('new variable declaration').setParseAction(actions.DeclareVariable)
 
     # Adding or replacing equations in the model
     clamp_variable = p.Group(
         make_kw('clamp') - ident_as_var + Optional(make_kw('to') - simple_expr)
-    ).setName('ClampVariable').setParseAction(actions.ClampVariable)
+    ).setName('clamp variable declaration').setParseAction(actions.ClampVariable)
     interpolate = p.Group(
         make_kw('interpolate') -
         oparen -
@@ -429,21 +444,21 @@ class CompactSyntaxParser(object):
         nc_ident -
         comma -
         nc_ident -
-        cparen).setName('Interpolate').setParseAction(
+        cparen).setName('interpolate').setParseAction(
         actions.Interpolate)
     model_equation = p.Group(
         make_kw('define') - (
             p.Group(make_kw('diff') + adjacent(oparen) - ident_as_var + p.Suppress(';') + ident_as_var + cparen)
             | ident_as_var
         ) + eq + (interpolate | simple_expr)
-    ).setName('AddOrReplaceEquation').setParseAction(actions.ModelEquation)
+    ).setName('model equation definition').setParseAction(actions.ModelEquation)
 
     # Units conversion rules
     units_conversion = p.Group(
         make_kw('convert') - nc_ident("actualDimensions") +
         make_kw('to') + nc_ident("desiredDimensions") +
         make_kw('by') - simple_lambda_expr
-    ).setName('UnitsConversion').setParseAction(actions.UnitsConversion)
+    ).setName('units conversion rule').setParseAction(actions.UnitsConversion)
 
     model_interface = p.Group(
         make_kw('model') - make_kw('interface') - obrace - Optional(set_time_units - nl) +
@@ -451,7 +466,7 @@ class CompactSyntaxParser(object):
             input_variable | output_variable | optional_variable | new_variable | clamp_variable | model_equation
             | units_conversion
         ), nl) + cbrace
-    ).setName('ModelInterface').setParseAction(actions.ModelInterface)
+    ).setResultsName("model_interface").setName('model interface section').setParseAction(actions.ModelInterface)
 
     # Simulation definitions
     ########################
@@ -462,68 +477,76 @@ class CompactSyntaxParser(object):
     while_range = make_kw('while') + expr
     range = p.Group(make_kw('range') + nc_ident("name") + units_ref("units") +
                     (uniform_range("uniform") | vector_range("vector") | while_range("while"))
-                    ).setName('Range').setParseAction(actions.Range)
+                    ).setName('range').setParseAction(actions.Range)
 
     # Modifiers
     modifier_when = make_kw('at') - (make_kw('start', False) |
-                                   (make_kw('each', False) - make_kw('loop')) |
-                                   make_kw('end', False)).setParseAction(actions.ModifierWhen)
+                                     (make_kw('each', False) - make_kw('loop')) |
+                                     make_kw('end', False)).setParseAction(actions.ModifierWhen)
     set_variable = make_kw('set') - ident + eq + expr
     save_state = make_kw('save') - make_kw('as') - nc_ident
     reset_state = make_kw('reset') - Optional(make_kw('to') + nc_ident)
     modifier = p.Group(modifier_when + p.Group(set_variable("set") | save_state("save") | reset_state("reset"))
-                       ).setName('Modifier').setParseAction(actions.Modifier)
+                       ).setName('modifier').setParseAction(actions.Modifier)
     modifiers = p.Group(make_kw('modifiers') + obrace - optional_delimited_list(modifier, nl) + cbrace
-                        ).setName('Modifiers').setParseAction(actions.Modifiers)
+                        ).setName('modifiers').setParseAction(actions.Modifiers)
 
     # The simulations themselves
-    simulation = p.Forward().setName('Simulation')
-    _select_output = p.Group(make_kw('select') - Optional(make_kw('optional', suppress=False)) -
-                            make_kw('output') - nc_ident).setName('SelectOutput')
-    nested_protocol = p.Group(make_kw('protocol') - quoted_uri + obrace +
-                             simple_assign_list + Optional(nl) + optional_delimited_list(_select_output, nl) +
-                             cbrace + Optional('?')).setName('NestedProtocol').setParseAction(actions.NestedProtocol)
-    timecourse_sim = p.Group(make_kw('timecourse') - obrace - range + Optional(nl + modifiers) + cbrace
-                            ).setName('TimecourseSim').setParseAction(actions.TimecourseSimulation)
-    nested_sim = p.Group(make_kw('nested') - obrace - range + nl + Optional(modifiers) +
-                        p.Group(make_kw('nests') + (simulation | nested_protocol | ident)) +
-                        cbrace).setName('NestedSim').setParseAction(actions.NestedSimulation)
-    one_step_sim = p.Group(make_kw('oneStep') - Optional(p.originalTextFor(expr))("step") +
-                         Optional(obrace - modifiers + cbrace)("modifiers")).setParseAction(actions.OneStepSimulation)
+    simulation = p.Forward().setName('simulation')
+    _select_output = p.Group(
+        make_kw('select') - Optional(make_kw('optional', suppress=False)) - make_kw('output') - nc_ident
+    ).setName('SelectOutput')
+    nested_protocol = p.Group(
+        make_kw('protocol') - quoted_uri + obrace + simple_assign_list + Optional(nl) +
+        optional_delimited_list(_select_output, nl) + cbrace + Optional('?')
+    ).setName('nested protocol').setParseAction(actions.NestedProtocol)
+    timecourse_sim = p.Group(
+        make_kw('timecourse') - obrace - range + Optional(nl + modifiers) + cbrace
+    ).setName('timecourse simulation').setParseAction(actions.TimecourseSimulation)
+    nested_sim = p.Group(
+        make_kw('nested') - obrace - range + nl + Optional(modifiers) +
+        p.Group(make_kw('nests') + (simulation | nested_protocol | ident)) + cbrace
+    ).setName('nested simulation').setParseAction(actions.NestedSimulation)
+    one_step_sim = p.Group(
+        make_kw('oneStep') - Optional(p.originalTextFor(expr))("step") +
+        Optional(obrace - modifiers + cbrace)("modifiers")
+    ).setParseAction(actions.OneStepSimulation)
     simulation << p.Group(make_kw('simulation') - Optional(nc_ident + eq, default='') +
                           (timecourse_sim | nested_sim | one_step_sim) -
                           Optional('?' + nl)).setParseAction(actions.Simulation)
 
     tasks = p.Group(make_kw('tasks') + obrace - p.ZeroOrMore(simulation) +
-                    cbrace).setName('Tasks').setParseAction(actions.Tasks)
+                    cbrace).setResultsName("tasks").setName('tasks section').setParseAction(actions.Tasks)
 
     # Output specifications
     #######################
 
     output_desc = Optional(quoted_string)("description")
-    output_spec = p.Group(Optional(make_kw('optional', suppress=False))("optional") +
-                         nc_ident("name") +
-                         ((units_ref("units") +
-                           output_desc) | (eq +
-                                          ident("ref") +
-                                          Optional(units_ref)("units") +
-                                          output_desc))).setName('Output').setParseAction(actions.Output)
+    output_spec = p.Group(
+        Optional(make_kw('optional', suppress=False))("optional") +
+        nc_ident("name") +
+        ((units_ref("units") + output_desc) | (eq + ident("ref") + Optional(units_ref)("units") + output_desc))
+    ).setName('protocol output specification').setParseAction(actions.Output)
     outputs = p.Group(make_kw('outputs') + obrace - optional_delimited_list(output_spec, nl) +
-                      cbrace).setName('Outputs').setParseAction(actions.Outputs)
+                      cbrace).setResultsName("outputs").setName('outputs section').setParseAction(actions.Outputs)
 
     # Plot specifications
     #####################
 
-    plot_curve = p.Group(p.delimitedList(nc_ident, ',') +
-                        make_kw('against') - nc_ident +
-                        Optional(make_kw('key') - nc_ident("key"))).setName('Curve')
+    plot_curve = p.Group(
+        p.delimitedList(nc_ident, ',') +
+        make_kw('against') - nc_ident +
+        Optional(make_kw('key') - nc_ident("key"))
+    ).setName('Curve')
     plot_using = (make_kw('using') - (make_kw('lines', suppress=False) |
-                                    make_kw('points', suppress=False) |
-                                    make_kw('linespoints', suppress=False)))("using")
-    plot_spec = p.Group(make_kw('plot') - quoted_string + Optional(plot_using) - obrace +
-                       plot_curve + p.ZeroOrMore(nl + plot_curve) + cbrace).setName('Plot').setParseAction(actions.Plot)
+                                      make_kw('points', suppress=False) |
+                                      make_kw('linespoints', suppress=False)))("using")
+    plot_spec = p.Group(
+        make_kw('plot') - quoted_string + Optional(plot_using) - obrace +
+        plot_curve + p.ZeroOrMore(nl + plot_curve) + cbrace
+    ).setName('plot specification').setParseAction(actions.Plot)
     plots = p.Group(make_kw('plots') + obrace - p.ZeroOrMore(plot_spec) +
-                    cbrace).setName('Plots').setParseAction(actions.Plots)
+                    cbrace).setResultsName("plots").setName('plots section').setParseAction(actions.Plots)
 
     # Parsing a full protocol
     #########################
@@ -569,6 +592,14 @@ class CompactSyntaxParser(object):
               file=sys.stderr)
         sys.setrecursionlimit(new_limit)
 
+    def parse_file(self, source_file):
+        """Main entry point to parse a protocol file.
+
+        :param source_file: path to the file to parse
+        :return: a :class:`fc.parsing.actions.Protocol` object, containing parsed information about the protocol
+        """
+        return self.try_parse(self.protocol.parseFile, source_file, parseAll=True)[0]
+
     def try_parse(self, callable, source_file, *args, **kwargs):
         """
         Try calling the given parse command, increasing the stack depth limit if needed.
@@ -596,11 +627,11 @@ class CompactSyntaxParser(object):
                         # Store parse result in memory cache and return
                         self._cache[source_file] = (now, r)
                         return r
-                    except:
+                    except Exception:
                         pass
             try:
                 os.remove(cache_file)
-            except:
+            except OSError:
                 pass
 
         # Read file
@@ -632,6 +663,7 @@ class CompactSyntaxParser(object):
 ################################################################################
 # Parser debugging support
 ################################################################################
+
 
 def get_named_grammars(obj=CompactSyntaxParser):
     """Get a list of all the named grammars in the given object."""
