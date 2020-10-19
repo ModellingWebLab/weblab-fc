@@ -649,7 +649,6 @@ class Protocol(object):
         interface = []
         for output in self.outputs:
             units = output.get('units')
-            print('Output units', units)
             if units is None:
                 # Units are read from the model, and so may be determined by our model interface
                 units = ''  # Default in case we can't figure it out
@@ -662,10 +661,8 @@ class Protocol(object):
                             break
             if not self.units.is_defined(units):
                 # We don't currently require units taken from the store
-                print('Not defined')
                 units = ''
             if units != '':
-                print('Defined', self.units.get_unit(units))
                 units = self.units.format(self.units.get_unit(units), base_units=True)
             interface.append({
                 'kind': 'output',
