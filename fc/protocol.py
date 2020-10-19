@@ -251,7 +251,7 @@ class Protocol(object):
                             f'Imported or nested protocol redefines units {name} as '
                             f'{udef.pint_expression} not {our_udef.pint_expression}')
                     if our_udef.description != udef.description:
-                        raise ProtocolError(
+                        self.log_warning(
                             f'Imported or nested protocol redefines units {name} with '
                             f'description "{udef.description}" not "{our_udef.description}"')
                 else:

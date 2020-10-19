@@ -1708,7 +1708,8 @@ class ModelInterface(BaseGroupAction):
             try:
                 expr = self.units.convert_expression_recursively(expr, units)
             except UnitConversionError:
-                warn(u1, u2, 'The lambda expression does not result in units compatible with {units}.')
+                warn(u1, u2, f'The lambda expression {expr} does not result in units compatible with {units}.')
+                continue
 
             # Create pint conversion factor
             factor = self.units.Quantity(expr.evalf(), units)
