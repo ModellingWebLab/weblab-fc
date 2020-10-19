@@ -332,6 +332,9 @@ class Protocol(object):
             # Add units
             merge_unit_definitions(nested_proto.unit_definitions)
 
+            # Process namespace mapping
+            process_ns_map(nested_proto.ns_map)
+
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))
 
