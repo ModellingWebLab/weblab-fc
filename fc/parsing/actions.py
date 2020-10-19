@@ -973,6 +973,8 @@ class ProtocolVariable():
         A short name (no prefixes) that can be used for this variable.
     ``long_name``
         This variable's name plus any known aliases.
+    ``rdf_terms``
+        A list of rdf terms by which this variable is known in the model interface.
     ``input_terms``
         A list of rdf terms by which this variable is known as an input. This is typically zero or one term, but could
         end up being more if two ontology terms specify the same model variables. For inputs this is an error.
@@ -1016,6 +1018,7 @@ class ProtocolVariable():
         self.short_name = name if ':' not in name else name[1 + name.index(':'):]
         self.long_name = name
         self._aliases = []
+        self.rdf_terms = set()
         self.input_terms = []
         self.output_terms = []
         self.is_input = False
@@ -1032,9 +1035,9 @@ class ProtocolVariable():
         self.model_variable = None
         self.vector_variables = []
 
-    def update(self, name=None, input_term=None, output_term=None, is_optional=False, is_vector=False, is_local=False,
-               is_clamped_to_initial=False, units=None, initial_value=None, default_expr=None, equation=None,
-               original_definition=None, model_variable=None, vector_variables=None):
+    def update(self, name=None, rdf_term=None, input_term=None, output_term=None, is_optional=False, is_vector=False,
+               is_local=False, is_clamped_to_initial=False, units=None, initial_value=None, default_expr=None,
+               equation=None, original_definition=None, model_variable=None, vector_variables=None):
         """
         Merges new information into this :class:`ProtocolVariable`, raises a ProtocolError if new information is
         incompatible with what is already stored.
@@ -1045,10 +1048,14 @@ class ProtocolVariable():
             self.long_name = 'name (aka ' + ', '.join(self._aliases) + ')'
 
         # Add rdf terms
+        if rdf_term is not None and rdf_term not in self.rdf_terms:
+            self.rdf_terms.add(rdf_term)
         if input_term is not None and input_term not in self.input_terms:
             self.input_terms.append(input_term)
+            self.rdf_terms.add(input_term)
         if output_term is not None and output_term not in self.output_terms:
             self.output_terms.append(output_term)
+            self.rdf_terms.add(output_term)
 
         # Update type information
         self.is_input = bool(self.input_terms)
@@ -1128,12 +1135,16 @@ class ProtocolVariable():
                 'Merge() should only be used to merge protocol variables referencing the same model variable.')
 
         # Update list properties
+        for term in pvar.rdf_terms:
+            self.rdf_terms.add(term)
         for term in pvar.input_terms:
             if term not in self.input_terms:
                 self.input_terms.append(term)
+                self.rdf_terms.add(term)
         for term in pvar.output_terms:
             if term not in self.output_terms:
                 self.output_terms.append(term)
+                self.rdf_terms.add(term)
 
         # Update optional indicator: If the same model variable is known by multiple rdf terms, they must _all_ be
         # optional for the variable to be optional.
@@ -1462,7 +1473,7 @@ class ModelInterface(BaseGroupAction):
         #   optional <prefix:term> [default <simple_expr>]
         for ref in self.optional_decls:
             pvar = get(ref)
-            pvar.update(is_optional=True, default_expr=ref.default_expr)
+            pvar.update(is_optional=True, default_expr=ref.default_expr, rdf_term=ref.rdf_term)
 
         # Add local variables
         #   var <name> units <uname> [= <initial_value>]
@@ -1843,10 +1854,9 @@ class ModelInterface(BaseGroupAction):
                     # Create variable, and annotate if possible
                     name = self.model.get_unique_name('protocol__' + pvar.short_name)
                     pvar.model_variable = self.model.add_variable(name, units)
-                    rdf_terms = pvar.input_terms + pvar.output_terms
-                    if rdf_terms:
+                    if pvar.rdf_terms:
                         self.model.add_cmeta_id(pvar.model_variable)
-                        for rdf_term in rdf_terms:
+                        for rdf_term in pvar.rdf_terms:
                             self.model.rdf.add((pvar.model_variable.rdf_identity, PRED_IS, rdf_term))
 
                     # Store local variables
