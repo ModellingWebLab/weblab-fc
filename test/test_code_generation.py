@@ -152,7 +152,7 @@ def test_graphstate():
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
 
     # Check output is correct
-    assert fc.test_support.check_results(
+    fc.test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
         os.path.join('test', 'output', 'real', model_name, 'GraphState'),
