@@ -52,7 +52,6 @@ def proto_id_fn(protocol_settings):
         ('S1S2', {'S1S2_slope': 1}),
         ('SteadyStateRestitution', {'APD': 2, 'restitution_slope': 1}),
         ('SteadyStateRunner', {'num_paces': 0, 'detailed_voltage': 1}),
-        ('SteadyStateRunner0_5Hz', {'num_paces': 0, 'detailed_voltage': 1}),
         ('SteadyStateRunner4Hz', {'num_paces': 0, 'detailed_voltage': 1}),
     ],
     ids=proto_id_fn
