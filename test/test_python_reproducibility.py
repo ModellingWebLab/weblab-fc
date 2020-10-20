@@ -89,18 +89,12 @@ def test_fc_experiment(model_name, protocol_settings, tmpdir, request):
     proto.run()
 
     if expected_outputs:
-        messages = []
-        outputs_match = test_support.check_results(
+        print('Checking results against reference data')
+        test_support.check_results(
             proto,
             expected_outputs,
             data_folder,
             rel_tol=0.005,
             abs_tol=2.5e-4,
-            messages=messages,
         )
-        for msg in messages:
-            print(msg)
-        if outputs_match is None:
-            print('Experiment succeeded but produced no results, and this was expected!')
-        else:
-            assert outputs_match
+    print(f'Protocol {proto_name} succeeded on {model_name} and results match where available')
