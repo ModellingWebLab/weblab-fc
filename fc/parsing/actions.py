@@ -379,6 +379,8 @@ class Wrap(BaseGroupAction):
 
 class Piecewise(BaseGroupAction):
     """Parse action for if-then-else."""
+    # Note: This is called Piecewise for historical reasons, but was never intended to be a multi-condition MathML style
+    # piecewise operation.
 
     def _expr(self):
         if_, then_, else_ = self.get_children_expr()
