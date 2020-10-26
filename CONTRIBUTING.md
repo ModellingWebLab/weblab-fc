@@ -22,7 +22,7 @@ The order of ``import`` statements is checked by [isort](https://pypi.org/projec
 
 ### Python versions
 
-Python 3.6 only.
+Python 3.6+ only.
 
 ## Testing
 
