@@ -1,0 +1,314 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:cellml="http://www.cellml.org/cellml/1.0#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.cellml.org/cellml/1.0#" name="Beattie_2017_IKr_HH">
+  <units name="mS_per_uF">
+    <unit units="second" exponent="-1.0" multiplier="1000"/>
+  </units>
+  <units name="mV">
+    <unit units="gram"/>
+    <unit units="metre" exponent="2.0"/>
+    <unit units="second" exponent="-3.0"/>
+    <unit units="ampere" exponent="-1.0"/>
+  </units>
+  <units name="ms">
+    <unit units="second" multiplier="0.001"/>
+  </units>
+  <units name="nA">
+    <unit units="ampere" multiplier="1e-09"/>
+  </units>
+  <units name="per_mV">
+    <unit units="gram" exponent="-1.0"/>
+    <unit units="metre" exponent="-2.0"/>
+    <unit units="second" exponent="3.0"/>
+    <unit units="ampere"/>
+  </units>
+  <units name="uS">
+    <unit units="gram" exponent="-1.0" multiplier="1e-09"/>
+    <unit units="metre" exponent="-2.0"/>
+    <unit units="second" exponent="3.0"/>
+    <unit units="ampere" exponent="2.0"/>
+  </units>
+  <component name="engine">
+    <variable name="time" units="ms" public_interface="out" cmeta:id="time"/>
+  </component>
+  <component name="ikr">
+    <variable name="EK" units="mV" public_interface="in"/>
+    <variable name="IKr" units="nA" cmeta:id="IKr"/>
+    <variable name="V" units="mV" public_interface="in"/>
+    <variable name="act" units="mS_per_uF" initial_value="0.0"/>
+    <variable name="ikr_act_inf" units="dimensionless"/>
+    <variable name="ikr_act_tau" units="ms"/>
+    <variable name="ikr_rec_inf" units="dimensionless"/>
+    <variable name="ikr_rec_tau" units="ms"/>
+    <variable name="k1" units="mS_per_uF" cmeta:id="k1"/>
+    <variable name="k2" units="mS_per_uF" cmeta:id="k2"/>
+    <variable name="k3" units="mS_per_uF" cmeta:id="k3"/>
+    <variable name="k4" units="mS_per_uF" cmeta:id="k4"/>
+    <variable name="p1" units="mS_per_uF" initial_value="0.000226" cmeta:id="p1"/>
+    <variable name="p2" units="per_mV" initial_value="0.0699" cmeta:id="p2"/>
+    <variable name="p3" units="mS_per_uF" initial_value="3.45e-05" cmeta:id="p3"/>
+    <variable name="p4" units="per_mV" initial_value="0.05462" cmeta:id="p4"/>
+    <variable name="p5" units="mS_per_uF" initial_value="0.0873" cmeta:id="p5"/>
+    <variable name="p6" units="per_mV" initial_value="0.00891" cmeta:id="p6"/>
+    <variable name="p7" units="mS_per_uF" initial_value="0.00515" cmeta:id="p7"/>
+    <variable name="p8" units="per_mV" initial_value="0.03158" cmeta:id="p8"/>
+    <variable name="p9" units="uS" initial_value="0.1524" cmeta:id="p9"/>
+    <variable name="rec" units="mS_per_uF" initial_value="1.0"/>
+    <variable name="time" units="ms" public_interface="in"/>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <apply>
+        <eq/>
+        <ci>IKr</ci>
+        <apply>
+          <times/>
+          <apply>
+            <times/>
+            <apply>
+              <times/>
+              <ci>p9</ci>
+              <ci>act</ci>
+            </apply>
+            <ci>rec</ci>
+          </apply>
+          <apply>
+            <minus/>
+            <ci>V</ci>
+            <ci>EK</ci>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar>
+            <ci>time</ci>
+          </bvar>
+          <ci>act</ci>
+        </apply>
+        <apply>
+          <divide/>
+          <apply>
+            <minus/>
+            <ci>ikr_act_inf</ci>
+            <ci>act</ci>
+          </apply>
+          <ci>ikr_act_tau</ci>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>ikr_act_inf</ci>
+        <apply>
+          <times/>
+          <ci>k1</ci>
+          <ci>ikr_act_tau</ci>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>ikr_act_tau</ci>
+        <apply>
+          <divide/>
+          <cn cellml:units="dimensionless">1.0</cn>
+          <apply>
+            <plus/>
+            <ci>k1</ci>
+            <ci>k2</ci>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>ikr_rec_inf</ci>
+        <apply>
+          <times/>
+          <ci>k4</ci>
+          <ci>ikr_rec_tau</ci>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>ikr_rec_tau</ci>
+        <apply>
+          <divide/>
+          <cn cellml:units="dimensionless">1.0</cn>
+          <apply>
+            <plus/>
+            <ci>k3</ci>
+            <ci>k4</ci>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>k1</ci>
+        <apply>
+          <times/>
+          <ci>p1</ci>
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <ci>p2</ci>
+              <ci>V</ci>
+            </apply>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>k2</ci>
+        <apply>
+          <times/>
+          <ci>p3</ci>
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci>p4</ci>
+              </apply>
+              <ci>V</ci>
+            </apply>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>k3</ci>
+        <apply>
+          <times/>
+          <ci>p5</ci>
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <ci>p6</ci>
+              <ci>V</ci>
+            </apply>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <ci>k4</ci>
+        <apply>
+          <times/>
+          <ci>p7</ci>
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci>p8</ci>
+              </apply>
+              <ci>V</ci>
+            </apply>
+          </apply>
+        </apply>
+      </apply>
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar>
+            <ci>time</ci>
+          </bvar>
+          <ci>rec</ci>
+        </apply>
+        <apply>
+          <divide/>
+          <apply>
+            <minus/>
+            <ci>ikr_rec_inf</ci>
+            <ci>rec</ci>
+          </apply>
+          <ci>ikr_rec_tau</ci>
+        </apply>
+      </apply>
+    </math>
+  </component>
+  <component name="membrane">
+    <variable name="V" units="mV" public_interface="out" initial_value="0.0" cmeta:id="V"/>
+  </component>
+  <component name="nernst">
+    <variable name="EK" units="mV" public_interface="out" cmeta:id="EK"/>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <apply>
+        <eq/>
+        <ci>EK</ci>
+        <apply>
+          <minus/>
+          <cn cellml:units="mV">88.0</cn>
+        </apply>
+      </apply>
+    </math>
+  </component>
+  <connection>
+    <map_components component_1="engine" component_2="ikr"/>
+    <map_variables variable_1="time" variable_2="time"/>
+  </connection>
+  <connection>
+    <map_components component_1="ikr" component_2="membrane"/>
+    <map_variables variable_1="V" variable_2="V"/>
+  </connection>
+  <connection>
+    <map_components component_1="ikr" component_2="nernst"/>
+    <map_variables variable_1="EK" variable_2="EK"/>
+  </connection>
+  <rdf:RDF>
+    <rdf:Description rdf:about="#EK">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#potassium_reversal_potential"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#IKr">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#V">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_voltage"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#k1">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_V_positive_rate"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#k2">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_V_negative_rate"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#k3">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_V_positive_rate"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#k4">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_V_negative_rate"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p1">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_a_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p2">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_b_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p3">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_a_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p4">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_b_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p5">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_a_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p6">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_b_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p7">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_a_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p8">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#exp2_b_parameter"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#p9">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#membrane_rapid_delayed_rectifier_potassium_current_conductance"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="#time">
+      <bqbiol:is rdf:resource="https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#time"/>
+    </rdf:Description>
+  </rdf:RDF>
+</model>

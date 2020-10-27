@@ -1,0 +1,190 @@
+documentation {
+This protocol implements the sine-wave voltage clamp protocol used in Beattie et al. 2017.
+
+Parameters:
+ * **holding\_potential** The potential to hold cell at before applying voltage clamp.
+ * **holding\_time** The time to stay at the holding potential to reach steady state before applying the sine wave protocol.
+
+It requires models to provide variables with the annotations:
+ * **oxmeta:membrane\_voltage**
+ * **oxmeta:time**
+ * **oxmeta:membrane\_rapid\_delayed\_rectifier\_potassium\_current**
+
+ * **oxmeta:membrane\_rapid\_delayed\_rectifier\_potassium\_current\_conductance**
+ * **oxmeta:potassium\_reversal\_potential** and if E_Kr != E_K then also **oxmeta:rapid\_delayed\_rectifier\_potassium\_reversal\_potential**
+
+}
+
+namespace oxmeta = "https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#"
+namespace pinput = "ThisIsVeryTemporary"
+
+inputs {
+    # Holding phase
+    holding_potential = -80
+    holding_time = 100000
+
+    # Reversal potential
+    reversal_potential = -85
+
+    # Sine waves: s(t) = amplitude * sin(period * (time - offset))
+    amplitudes = [54, 26, 10]
+    periods = [0.007, 0.037, 0.19]
+    offsets = [2500.1, 2500.1, 2500.1]
+
+    # Voltage steps: duration and voltage
+    tstep = [250.1, 300.1, 500.1, 1500.1, 2000.1, 3000.1, 6500.1, 7000.1, 100000]
+    vstep = [  -80,  -120,   -80,     40,   -120,    -80,    -30,   -120,    -80]
+
+    # Sampling times - can be set from outside to match experiments
+    sampling_times = [t*0.1 for t in 0:80000]
+}
+
+units {
+    mV = milli volt
+    ms = milli second
+    nA = nano ampere
+    A_per_F = ampere . farad^-1
+    A = ampere
+    F = farad
+    S = ampere . volt^-1
+    uS = nA . mV^-1
+    S_per_F = S . farad^-1
+}
+
+model interface {
+    # Current units conversion
+    var default_membrane_capacitance units F = 150e-12
+    convert A_per_F to A by lambda rhs: rhs * default_membrane_capacitance
+    convert A to A_per_F by lambda rhs: rhs / default_membrane_capacitance
+    convert S_per_F to S by lambda rhs: rhs * default_membrane_capacitance
+    convert S to S_per_F by lambda rhs: rhs / default_membrane_capacitance
+
+    input oxmeta:potassium_reversal_potential units mV
+    clamp oxmeta:potassium_reversal_potential to pinput:E
+    optional oxmeta:rapid_delayed_rectifier_potassium_reversal_potential
+    input oxmeta:rapid_delayed_rectifier_potassium_reversal_potential units mV
+    clamp oxmeta:rapid_delayed_rectifier_potassium_reversal_potential to pinput:E
+
+    # Unpack the protocol inputs into variables, so that the model can access them
+
+    # Holding potential
+    input pinput:V_hold units mV = 0
+
+    # Reversal potential
+    input pinput:E units mV = 0
+
+    # Sine amplitudes, periods, and offsets
+    input pinput:a0 units mV = 0
+    input pinput:a1 units mV = 0
+    input pinput:a2 units mV = 0
+    input pinput:p0 units dimensionless = 0
+    input pinput:p1 units dimensionless = 0
+    input pinput:p2 units dimensionless = 0
+    input pinput:o0 units dimensionless = 0
+    input pinput:o1 units dimensionless = 0
+    input pinput:o2 units dimensionless = 0
+
+    # Step times (end of step)
+    input pinput:t0 units ms = 0
+    input pinput:t1 units ms = 0
+    input pinput:t2 units ms = 0
+    input pinput:t3 units ms = 0
+    input pinput:t4 units ms = 0
+    input pinput:t5 units ms = 0
+    input pinput:t6 units ms = 0
+    input pinput:t7 units ms = 0
+    input pinput:t8 units ms = 0
+
+    input pinput:v0 units mV = 0
+    input pinput:v1 units mV = 0
+    input pinput:v2 units mV = 0
+    input pinput:v3 units mV = 0
+    input pinput:v4 units mV = 0
+    input pinput:v5 units mV = 0
+    input pinput:v6 units mV = 0
+    input pinput:v7 units mV = 0
+    input pinput:v8 units mV = 0
+
+    # Redefine the membrane potential holding, step, or sine wave
+    define oxmeta:membrane_voltage = \
+        if (oxmeta:time >= 0::ms && oxmeta:time < pinput:t0) then pinput:v0 \
+        else if (oxmeta:time >= pinput:t0 && oxmeta:time < pinput:t1) then pinput:v1 \
+        else if (oxmeta:time >= pinput:t1 && oxmeta:time < pinput:t2) then pinput:v2 \
+        else if (oxmeta:time >= pinput:t2 && oxmeta:time < pinput:t3) then pinput:v3 \
+        else if (oxmeta:time >= pinput:t3 && oxmeta:time < pinput:t4) then pinput:v4 \
+        else if (oxmeta:time >= pinput:t4 && oxmeta:time < pinput:t5) then pinput:v5 \
+        else if (oxmeta:time >= pinput:t5 && oxmeta:time < pinput:t6) then pinput:v6 + \
+        pinput:a0*MathML:sin(pinput:p0*((oxmeta:time/1::ms)-pinput:o0)) + \
+        pinput:a1*MathML:sin(pinput:p1*((oxmeta:time/1::ms)-pinput:o1)) + \
+        pinput:a2*MathML:sin(pinput:p2*((oxmeta:time/1::ms)-pinput:o2)) \
+        else if (oxmeta:time >= pinput:t6 && oxmeta:time < pinput:t7) then pinput:v7 \
+        else if (oxmeta:time >= pinput:t7 && oxmeta:time < pinput:t8) then pinput:v8 \
+        else pinput:V_hold
+
+    # Outputs are time, applied voltage, and measured current
+    output oxmeta:time units ms
+    output oxmeta:membrane_voltage units mV
+    output oxmeta:membrane_rapid_delayed_rectifier_potassium_current units nA
+}
+
+tasks {
+    # Task 1: Simulate at holding potential for a while, hopefully reaching a steady state.
+    simulation timecourse {
+        range time units ms vector [-holding_time, 0]
+        modifiers {
+            # Pass inputs to model variables
+            at start set pinput:V_hold = holding_potential
+            at start set pinput:E = reversal_potential
+        }
+    }
+
+    # Task 2: Simulate sine-wave protocol.
+    simulation sim = timecourse {
+        range time units ms vector sampling_times
+        modifiers {
+            # Pass inputs to model variables
+            at start set pinput:E = reversal_potential
+
+            at start set pinput:a0 = amplitudes[0]
+            at start set pinput:a1 = amplitudes[1]
+            at start set pinput:a2 = amplitudes[2]
+            at start set pinput:p0 = periods[0]
+            at start set pinput:p1 = periods[1]
+            at start set pinput:p2 = periods[2]
+            at start set pinput:o0 = offsets[0]
+            at start set pinput:o1 = offsets[1]
+            at start set pinput:o2 = offsets[2]
+
+            at start set pinput:t0 = tstep[0]
+            at start set pinput:t1 = tstep[1]
+            at start set pinput:t2 = tstep[2]
+            at start set pinput:t3 = tstep[3]
+            at start set pinput:t4 = tstep[4]
+            at start set pinput:t5 = tstep[5]
+            at start set pinput:t6 = tstep[6]
+            at start set pinput:t7 = tstep[7]
+            at start set pinput:t8 = tstep[8]
+
+            at start set pinput:v0 = vstep[0]
+            at start set pinput:v1 = vstep[1]
+            at start set pinput:v2 = vstep[2]
+            at start set pinput:v3 = vstep[3]
+            at start set pinput:v4 = vstep[4]
+            at start set pinput:v5 = vstep[5]
+            at start set pinput:v6 = vstep[6]
+            at start set pinput:v7 = vstep[7]
+            at start set pinput:v8 = vstep[8]
+        }
+    }
+}
+
+outputs {
+    t = sim:time units ms "Time (ms)"
+    V = sim:membrane_voltage units mV "Membrane potential (mV)"
+    IKr = sim:membrane_rapid_delayed_rectifier_potassium_current "hERG Channel Current"
+}
+
+plots {
+    plot "Current" using lines { IKr against t }
+    plot "Membrane potential" using lines { V against t }
+}
