@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# flake8: noqa
 import numpy as np
 
 plus = lambda a: a + a
@@ -62,22 +63,45 @@ ops = [
     log,        # 14
     log1p,      # 15
 
-    abs,
+    abs,        # 16
     floor,
     ceiling,
 
-    np.sin, np.cos, np.tan,
-    sec, csc, cot,
-    np.sinh, np.cosh, np.tanh,
-    sech, csch, coth,
-    np.arcsin, np.arccos, np.arctan,
-    arcsec, arccsc, arccot,
-    np.arcsinh, np.arccosh, np.arctanh,
-    arcsech, arccsch, arccoth,
+    np.sin,     # 19
+    np.cos,
+    np.tan,
+
+    sec,        # 22
+    csc,
+    cot,
+
+    np.sinh,    # 25
+    np.cosh,
+    np.tanh,
+
+    sech,       # 28
+    csch,
+    coth,
+
+    np.arcsin,  # 31
+    np.arccos,
+    np.arctan,
+
+    arcsec,     # 34
+    arccsc,
+    arccot,
+
+    np.arcsinh, # 37
+    np.arccosh,
+    np.arctanh,
+
+    arcsech,    # 40
+    arccsch,    # 41
+    arccoth,    # 42
 ]
 
 # Stop after abs
-ops = ops[:16]
+#ops = ops[:16]
 
 np.seterr(all='ignore')
 

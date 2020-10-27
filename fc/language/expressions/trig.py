@@ -7,6 +7,7 @@ from .. import values as V
 
 
 class TrigExpression(AbstractExpression):
+    """Base class for (univariate) trigonometric expressions."""
     _op = None
     _ex = None
 
