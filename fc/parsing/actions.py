@@ -49,14 +49,14 @@ MATHML = {'log': E.Log, 'ln': E.Ln, 'exp': E.Exp, 'abs': E.Abs, 'ceiling': E.Cei
           'eq': E.Eq, 'neq': E.Neq, 'lt': E.Lt, 'gt': E.Gt, 'leq': E.Leq, 'geq': E.Geq,
           'not': E.Not, 'and': E.And, 'or': E.Or,
           'sin': E.Sin, 'cos': E.Cos, 'tan': E.Tan,
-          'arcsin': E.ArcSin,  'arccos': E.ArcCos, 'arctan': E.ArcTan,
+          'arcsin': E.ArcSin, 'arccos': E.ArcCos, 'arctan': E.ArcTan,
           'sinh': E.Sinh, 'cosh': E.Cosh, 'tanh': E.Tanh,
           'arcsinh': E.ArcSinh, 'arccosh': E.ArcCosh, 'arctanh': E.ArcTanh,
           'sec': E.Sec, 'csc': E.Csc, 'cot': E.Cot,
           'arcsec': E.ArcSec, 'arccsc': E.ArcCsc, 'arccot': E.ArcCot,
           'sech': E.Sech, 'csch': E.Csch, 'coth': E.Coth,
           'arcsech': E.ArcSech, 'arccsch': E.ArcCsch, 'arccoth': E.ArcCoth,
-         }
+          }
 VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)),
           'exponentiale': E.Const(V.Simple(math.e)),
           'infinity': E.Const(V.Simple(float('inf'))),
