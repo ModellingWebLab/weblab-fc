@@ -52,19 +52,19 @@ class Tan(TrigExpression):
 
 class ArcSin(TrigExpression):
     """Inverse sine."""
-    _op = 'arcsin'
+    _op = 'asin'
     _ex = math.asin
 
 
 class ArcCos(TrigExpression):
     """Inverse cosine."""
-    _op = 'arccos'
+    _op = 'acos'
     _ex = math.acos
 
 
 class ArcTan(TrigExpression):
     """Inverse tangent."""
-    _op = 'arctan'
+    _op = 'atan'
     _ex = math.atan
 
 
@@ -88,19 +88,19 @@ class Tanh(TrigExpression):
 
 class ArcSinh(TrigExpression):
     """Inverse hyperbolic sine."""
-    _op = 'arcsinh'
+    _op = 'asinh'
     _ex = math.asinh
 
 
 class ArcCosh(TrigExpression):
     """Inverse hyperbolic cosine."""
-    _op = 'arccosh'
+    _op = 'acosh'
     _ex = math.acosh
 
 
 class ArcTanh(TrigExpression):
     """Inverse hyperbolic tangent."""
-    _op = 'arctanh'
+    _op = 'atanh'
     _ex = math.atanh
 
 
@@ -130,7 +130,7 @@ class Cot(TrigExpression):
 
 class ArcSec(TrigExpression):
     """Inverse secant."""
-    _op = 'sec'
+    _op = 'asec'
 
     def _ex(self, a):
         return math.acos(1 / a)
@@ -138,7 +138,7 @@ class ArcSec(TrigExpression):
 
 class ArcCsc(TrigExpression):
     """Inverse cosecant."""
-    _op = 'csc'
+    _op = 'acsc'
 
     def _ex(self, a):
         return math.asin(1 / a)
@@ -146,7 +146,7 @@ class ArcCsc(TrigExpression):
 
 class ArcCot(TrigExpression):
     """Inverse cotangent."""
-    _op = 'cot'
+    _op = 'acot'
 
     def _ex(self, a):
         return math.atan(1 / a)
@@ -154,7 +154,7 @@ class ArcCot(TrigExpression):
 
 class Sech(TrigExpression):
     """Hyperbolic secant."""
-    _op = 'sec'
+    _op = 'sech'
 
     def _ex(self, a):
         return 1 / math.cosh(a)
@@ -162,7 +162,7 @@ class Sech(TrigExpression):
 
 class Csch(TrigExpression):
     """Hyperbolic cosecant."""
-    _op = 'csc'
+    _op = 'csch'
 
     def _ex(self, a):
         return 1 / math.sinh(a)
@@ -170,7 +170,7 @@ class Csch(TrigExpression):
 
 class Coth(TrigExpression):
     """Hyperbolic cotangent."""
-    _op = 'cot'
+    _op = 'coth'
 
     def _ex(self, a):
         return 1 / math.tanh(a)
@@ -178,7 +178,7 @@ class Coth(TrigExpression):
 
 class ArcSech(TrigExpression):
     """Inverse hyperbolic secant."""
-    _op = 'sec'
+    _op = 'asech'
 
     def _ex(self, a):
         return math.acosh(1 / a)
@@ -186,7 +186,7 @@ class ArcSech(TrigExpression):
 
 class ArcCsch(TrigExpression):
     """Inverse hyperbolic cosecant."""
-    _op = 'csc'
+    _op = 'acsch'
 
     def _ex(self, a):
         return math.asinh(1 / a)
@@ -194,7 +194,7 @@ class ArcCsch(TrigExpression):
 
 class ArcCoth(TrigExpression):
     """Inverse hyperbolic cotangent."""
-    _op = 'cot'
+    _op = 'acoth'
 
     def _ex(self, a):
         return math.atanh(1 / a)
