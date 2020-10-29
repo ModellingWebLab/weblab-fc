@@ -72,15 +72,18 @@ setup(
 class Protocol(object):
     """This class represents a protocol in the functional curation 'virtual experiment' language.
 
-    It gives the central interface to functional curation, handling parsing a protocol description
-    from file and running it on a given model.
+    It gives the central interface to functional curation, handling parsing a protocol description from file and running
+    it on a given model.
+
+    A protocol can be run multiple times, but can only be associated with a single model. This can be set using either a
+    single call to :meth:`set_abstract_model` or a call to :meth:`set_
+
+
+    A protocol is constructed by parsing the description in the given ``proto_file``.
+    The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
     """
 
     def __init__(self, proto_file, indent_level=0):
-        """Construct a new protocol by parsing the description in the given file.
-
-        The protocol must be specified using the textual syntax, as defined by the CompactSyntaxParser module.
-        """
         # if the filename passed as argument to CompactSyntaxParser is not found
         # it tries to read it before checking it exists
         # and you get a messy exit
@@ -543,101 +546,149 @@ class Protocol(object):
             value = value_expr.evaluate(self.input_env)
         self.input_env.overwrite_definition(name, value)
 
-    def set_model(self, model):
+    def prepare_cellmlmanip_model(self, path):
         """
-        Specify the model this protocol is to be run on.
+        Parses a CellML model stored at ``path`` using cellmlmanip, then modifies it according to the protocol
+        instructions, and finally returns a :class:`cellmlmanip.Model` object that can be passed to
+        :meth:`set_cellmlmanip_model`.
 
-        The ``model`` can be given as a Model object or a string.
+
+        """
+        # Load cellml model
+        import cellmlmanip
+        model = cellmlmanip.load_model(model, self.units)
+
+        # Check whether the model has a time variable. If not, create one
+        try:
+            time_variable = model.get_free_variable()
+        except ValueError:
+            time_variable = model.create_unique_name('time')
+            time_variable = model.add_variable(time, self.units.get('seconds'))
+
+        # Do all the transformations specified by the protocol
+        time_variable = self.model_interface.modify_model(model, time_variable, self.units)
+
+    def compile_cellmlmanip_model(self, model):
+        """
+        Specify the model this protocol is to be run on, using a :class:`cellmlmanip.Model` prepared by
+        :class:`prepare_cellml_model`.
+
+        Users are free to inspect the cellmlmanip model, but may not modify it in the meantime.
         """
 
-        # Benchmark model creation time
+        self.log_progress('Generating model code...')
+
+        # Create output folder
+        if self.output_folder:
+            temp_dir = tempfile.mkdtemp(dir=self.output_folder.path)
+        else:
+            temp_dir = tempfile.mkdtemp()
+
+        # Select output path (in temporary dir)
+        path = os.path.join(temp_dir, 'model.pyx')
+
+        # Select class name
+        class_name = 'GeneratedModel'
+
+        # Load cellml model
+        '''
+        import cellmlmanip
+        model = cellmlmanip.load_model(model, self.units)
+
+        # Check whether the model has a time variable. If not, create one
+        try:
+            time_variable = model.get_free_variable()
+        except ValueError:
+            time_variable = model.create_unique_name('time')
+            time_variable = model.add_variable(time, self.units.get('seconds'))
+
+        # Do all the transformations specified by the protocol
+        time_variable = self.model_interface.modify_model(model, time_variable, self.units)
+        '''
+
+        # Benchmark model compilation time
         start = time.time()
 
-        # Compile model from CellML
-        if isinstance(model, str) and model.endswith('.cellml'):
-            self.log_progress('Generating model code...')
+        # Create weblab model at path
+        create_weblab_model(
+            path,
+            self.output_folder.path if self.output_folder else temp_dir,
+            class_name,
+            model,
+            time_variable,
+            ns_map=self.ns_map,
+            protocol_variables=self.model_interface.protocol_variables,
+        )
 
-            # Create output folder
-            if self.output_folder:
-                temp_dir = tempfile.mkdtemp(dir=self.output_folder.path)
-            else:
-                temp_dir = tempfile.mkdtemp()
+        self.log_progress('Compiling pyx model code...')
 
-            # Select output path (in temporary dir)
-            path = os.path.join(temp_dir, 'model.pyx')
+        # Get path to root dir of fc module
+        fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
 
-            # Select class name
-            class_name = 'GeneratedModel'
+        # Write setup.py
+        setup_file = os.path.join(temp_dir, 'setup.py')
+        template_strings = {
+            'module_name': 'model',
+            'model_file': 'model.pyx',
+            'fcpath': fcpath,
+        }
+        with open(setup_file, 'w') as f:
+            f.write(SETUP_PY % template_strings)
 
-            # Load cellml model
-            import cellmlmanip
-            model = cellmlmanip.load_model(model, self.units)
+        # Compile the extension module
+        result = subprocess.run(
+            ['python', 'setup.py', 'build_ext', '--inplace'],
+            cwd=temp_dir,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        )
+        print(result.stdout.decode())
+        if result.returncode != 0:
+            raise ProtocolError('Failed to generate executable model code; see output above for details')
 
-            # Check whether the model has a time variable. If not, create one
-            try:
-                time_variable = model.get_free_variable()
-            except ValueError:
-                time_variable = model.create_unique_name('time')
-                time_variable = model.add_variable(time, self.units.get('seconds'))
+        # Create an instance of the model
+        self.model_path = temp_dir
+        sys.path.insert(0, temp_dir)
+        import model as module
+        for name in module.__dict__.keys():
+            if name.startswith(class_name):     # Note: This bit!
+                model = getattr(module, name)()
+                model._module = module
+                break
+        del sys.modules['model']
 
-            # Do all the transformations specified by the protocol
-            time_variable = self.model_interface.modify_model(model, time_variable, self.units)
+        # Benchmarking
+        self.timings['load model'] = (
+            self.timings.get('load model', 0.0) + (time.time() - start))
 
-            # Create weblab model at path
-            create_weblab_model(
-                path,
-                self.output_folder.path if self.output_folder else temp_dir,
-                class_name,
-                model,
-                time_variable,
-                ns_map=self.ns_map,
-                protocol_variables=self.model_interface.protocol_variables,
-            )
 
-            self.log_progress('Compiling pyx model code...')
+    def set_abstract_model(self, model):
+        """
+        Specify the model this protocol is to be run on, using an :class:`fc.simulations.AbstractModel` instance.
+        """
+        self._set_model(model)
 
-            # Get path to root dir of fc module
-            fcpath = os.path.abspath(os.path.join(fc.MODULE_DIR, '..'))
+    def set_cellml_model(self, model):
+        """
+        Specify the model this protocol is to be run on, using the path to a CellML file.
 
-            # Write setup.py
-            setup_file = os.path.join(temp_dir, 'setup.py')
-            template_strings = {
-                'module_name': 'model',
-                'model_file': 'model.pyx',
-                'fcpath': fcpath,
-            }
-            with open(setup_file, 'w') as f:
-                f.write(SETUP_PY % template_strings)
+        Calling this method is equivalent to::
 
-            # Compile the extension module
-            result = subprocess.run(
-                ['python', 'setup.py', 'build_ext', '--inplace'],
-                cwd=temp_dir,
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            )
-            print(result.stdout.decode())
-            if result.returncode != 0:
-                raise ProtocolError('Failed to generate executable model code; see output above for details')
+            protocol.compile_cellmlmanip_model(protocol.prepare_cellmlmanip_model(path))
 
-            # Create an instance of the model
-            self.model_path = temp_dir
-            sys.path.insert(0, temp_dir)
-            import model as module
-            for name in module.__dict__.keys():
-                if name.startswith(class_name):     # Note: This bit!
-                    model = getattr(module, name)()
-                    model._module = module
-                    break
-            del sys.modules['model']
+        """
+        protocol.compile_cellmlmanip_model(protocol.prepare_cellmlmanip_model(path))
+
+    def _set_model(self, model):
+        """
+        Internal ``set_model()`` method used by :meth:`set_abstract_model` and :meth:`compile_cellmlmanip_model`.
+        """
+        if self.model is not None:
+            raise ValueError('Model already set.')
 
         # Set model
         self.model = model
         for sim in self.simulations:
             sim.set_model(model)
-
-        # Benchmarking
-        self.timings['load model'] = (
-            self.timings.get('load model', 0.0) + (time.time() - start))
 
     def get_protocol_interface(self):
         """Get the names and units of the inputs to and outputs from this protocol.

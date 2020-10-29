@@ -7,7 +7,9 @@ import fc
 import fc.test_support
 
 
+'''
 def test_sine_wave():
+    """Test running a sine wave protocol, comparing the output to a reference trace."""
 
     proto = fc.Protocol('test/protocols/test_sine_wave.txt')
     proto.set_output_folder('test_sine_wave')
@@ -22,19 +24,9 @@ def test_sine_wave():
         rel_tol=0.005,
         abs_tol=2.5e-4
     )
-
-
-
-
-
-
-
-
-
-
-
-
 '''
+
+
 class FittingSpec(object):
     """
     Interface for fitting experiment specifications.
@@ -86,43 +78,50 @@ class Exp2RateIKrFit(FittingSpec):
     If no parameters can be found an error is returned.
 
     """
-    self._annot_output = 'oxmeta:membrane_rapid_delayed_rectifier_potassium_current'
-    self._annot_pos_rate = 'oxmeta:exp2_V_positive_rate'
-    self._annot_neg_rate = 'oxmeta:exp2_V_negative_rate'
-    self._annot_a_param = 'oxmeta:exp2_a_parameter'
-    self._annot_b_param = 'oxmeta:exp2_b_parameter'
-    self._annot_g_param = 'oxmeta:membrane_rapid_delayed_rectifier_potassium_current_conductance'
+    _annot_output = 'oxmeta:membrane_rapid_delayed_rectifier_potassium_current'
+    _annot_pos_rate = 'oxmeta:exp2_V_positive_rate'
+    _annot_neg_rate = 'oxmeta:exp2_V_negative_rate'
+    _annot_a_param = 'oxmeta:exp2_a_parameter'
+    _annot_b_param = 'oxmeta:exp2_b_parameter'
+    _annot_g_param = 'oxmeta:membrane_rapid_delayed_rectifier_potassium_current_conductance'
     #TODO V-independent rates
+
+    def find_all_parameters(self, model):
+        """
+        Find all parameters in the given ``cellmlmanip.model`` that are compatible with this fitting spec, and return
+        a mapping from variable objects to their desired units.
+
+
+
+        Note that this method is called _before_ the model is manipulated by the protocol, and so
+
+        OR IS IT!
+        """
+
 
 
 def test_fitting():
-
-
-
-
-
-
-    #proto = fc.Protocol('test/protocols/test_clamping1.txt')
-    #proto.set_output_folder('test_clamping_to_initial_value')
-    #proto.set_model('test/models/real/beeler_reuter_model_1977.cellml')
-    #proto.run()
-    # Test assertions are within the protocol itself
+    """Test a fitting procedure using a sine wave protocol."""
 
     #
-    # Get entities from front end
+    # Get static test data (irl this would come from the front-end)
     #
 
+    # Get protocol
+    proto = 'test/protocols/test_sine_wave.txt'
 
-    model = cellmlmanip.load_model('example.cellml')
-    protocol = fc.Protocol('example.txt')
-    data_set = front_end.get_data_set()
-    # Jonathan says: The 'getting' part is basically wget of a URL; done by the fc-runner repo, and local paths passed
-    # to the fitting runner.
+    # Get model filename
+    model = 'test/models/beattie-2017-ikr-hh.cellml'
 
-    spec = front_end.get_parsed_fitting_spec()
-    # Leaving this open for now, not sure what it'd look like to parse it
+    # TODO Get data set from front-end
+    #data_set = front_end.get_data_set()
 
-    front_end.ensure_compatibility(model, protocol, data_set, spec)
+    # TODO Get fitting spec
+    #spec = front_end.get_parsed_fitting_spec()
+    spec = Exp2RateIKrFit()
+
+    # Ensure compatibility?
+    # front_end.ensure_compatibility(model, protocol, data_set, spec)
     # This was probably already done before we got here. If not, there's some room for optimisation (later).
     # Jonathan: I'm adding this kind of functionality to weblab-fc. Generally speaking I don't think we want to depend
     #           on the Django codebase (WebLab repo) here, only back-end stuff (weblab-fc, cellmlmanip, fc-runner, etc).
@@ -131,14 +130,31 @@ def test_fitting():
     # Setting up a fitting problem
     #
 
-    # Find _all_ parameters that _may_ be used in fitting later. The result maps cellmlmanip variables to desired units.
-    parameter_units = spec.find_all_parameters(model)
-
-    # Compile WebLab Model, associate it with the Protocol.
+    # Read the CellML, create a weblab model (
     # At this stage, we _must_ tell the protocol what units we want the parameters
     # in. But we don't know if all parameters are used to calculate the model
     # outputs yet (see below).
-    protocol.set_model(model, parameter_units)
+    proto.set_model(model, parameter_units)
+
+
+
+    # Find _all_ parameters that _may_ be used in fitting later. The result maps cellmlmanip variables to desired units.
+    parameter_units = spec.find_all_parameters(model)
+
+
+    # Get output being fit to
+    output_name = spec.find_output(protocol)
+    # Again: This can be either part of spec, or done locally using info from spec. Note that this is a protocol output,
+    # not a model variable.
+    # Another question: I've assumed here that the units of the output are set by the protocol. So then we have
+    # input-parameters=set-in-spec, but output=set-in-protocol. So slight inconsistency? Is that OK?
+
+
+
+    # Create protocol object
+    proto = fc.Protocol(proto)
+    proto.set_output_folder('test_fitting')
+
 
     # Get parameters to alter during fitting.
     # The result is an ordered mapping from names to initial values
@@ -153,28 +169,13 @@ def test_fitting():
     #  2. Check that those parameters can be combined into a multivariate prior, if desired. I.e. any "a" parameter
     #     needs a "b" parameter if we're using "exp2" rates. This will require some inspection of the model equations.
     # Considerations:
-    #  - If we do this _after_ applying the protocol, all variables that are not
-    #    required to calculate the protocol outputs will have been removed. This is
-    #    useful if we have an AP model with 10 currents in exp2 form, but only one
-    #    that we want to fit to.
-    #  - This could be an issue if we have a rate "k=a" (explicit lack of V
-    #    dependence) but want a "b" so that an "a-b" pair can be formed. Users
-    #    can't hack this in in this case, since the b would have been removed by
-    #    this stage.
-    #  - But the first part is probably very desirable? So maybe the pairing needs
-    #    to be lenient and create a slightly different prior if a param is missing?
-    # Jonathan says: If you're keeping the same model structure, then probably you
-    #                need two protocols, one of which sets the parameter b to
-    #                always 0. Or you actually treat this as two WL models, one of
-    #                which has the voltage dependence removed. In either case you'd
-    #                probably want your spec to use a different prior that didn't
-    #                assume you always had an a-b pair, since even if b exists it
-    #                couldn't be set.
+    #  - If we do this _after_ applying the protocol, all variables that are not required to calculate the protocol
+    #    outputs will have been removed. This is useful if we have an AP model with 10 currents in exp2 form, but only
+    #    one that we want to fit to.
     #
     # PINTS implementation
-    #  Once the param pairs are known, and a single conductance has been identified
-    #  (in case of the initial/default exp2-rate ion current spec), a prior can be
-    #  created. This shouldn't be hard, e.g., these would exist (hardcoded):
+    #  Once the param pairs are known, and a single conductance has been identified (in case of the initial/default
+    #  exp2-rate ion current spec), a prior can be created. This shouldn't be hard, e.g., these would exist (hardcoded):
     #
     #  class RateBoundary(pints.Boundary):
     #    def n_parameters(self):
@@ -190,22 +191,12 @@ def test_fitting():
     #   priors.append(ConductanceBoundary(min_conductance))
     #   return CompositeBoundary(priors)
     #
-    #  (I've noticed we don't actually have a CompositeBoundary in PINTS, although
-    #   we have the equivalent code for LogPrior, which is easily ported,
-    #   https://github.com/pints-team/pints/issues/1209 .)
+    #  (I've noticed we don't actually have a CompositeBoundary in PINTS, although we have the equivalent code for
+    #   LogPrior, which is easily ported, https://github.com/pints-team/pints/issues/1209 .)
     #
-    # Finally, if we anticipate inference rather than just fitting, we can actually
-    # create a pints.LogPrior here, and convert it to a pints.Boundaries using
-    # `boundaries = pints.LogPDFBoundaries(log_prior)` if needed.
+    # Finally, if we anticipate inference rather than just fitting, we can actually create a pints.LogPrior here, and
+    # convert it to a pints.Boundaries using `boundaries = pints.LogPDFBoundaries(log_prior)` if needed.
     # Resolution: Let WL do both.
-
-    # Get output being fit to
-    output_name = spec.find_output(protocol)
-    # Again: This can be either part of spec, or done locally using info from spec.
-    # Note that this is a protocol output, not a model variable.
-    # Another question: I've assumed here that the units of the output are set by
-    # the protocol. So then we have input-parameters=set-in-spec, but
-    # output=set-in-protocol. So slight inconsistency? Is that OK?
 
     # Create stats model for PINTS
     class StatsModel(pints.ForwardModel):
@@ -230,14 +221,12 @@ def test_fitting():
 
             # Run protocol
             protocol.run(verbose=False, write_out=False)
-            # I'm disabling verbose output here because I don't see us using a
-            # centralised tool like WL for day to day fitting. Debugging would be
-            # hard? So I'm assuming for the moment that we've tested offline and
-            # don't need elaborate output here.
-            # Jonathan says: I think that's reasonable, as full output will slow
-            #                things down a lot. We can still report on the
-            #                parameter set that failed if there is an error, and
-            #                what the error was, to enable offline debugging later.
+            # I'm disabling verbose output here because I don't see us using a centralised tool like WL for day to day
+            # fitting. Debugging would be hard? So I'm assuming for the moment that we've tested offline and don't need
+            # elaborate output here.
+            # Jonathan says: I think that's reasonable, as full output will slow things down a lot. We can still report
+            #                on the parameter set that failed if there is an error, and what the error was, to enable
+            #                offline debugging later.
 
             # Get output and return
             return protocol.output_env.look_up(output_name).array
