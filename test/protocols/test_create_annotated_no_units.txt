@@ -25,6 +25,11 @@ model interface {
     output oxmeta:extracellular_chloride_concentration
     optional oxmeta:extracellular_chloride_concentration default 2 :: dimensionless * oxmeta:cytosolic_sodium_concentration
 
+    # Define a new variable with units derived from another non-output optional variable
+    output oxmeta:extracellular_potassium_concentration
+    optional oxmeta:extracellular_calcium_concentration default 2 :: dimensionless * oxmeta:extracellular_chloride_concentration
+    optional oxmeta:extracellular_potassium_concentration default 2 :: dimensionless * oxmeta:extracellular_calcium_concentration
+
     # Define a new state variable, with units derived from the RHS
     input oxmeta:cytosolic_chloride_concentration = 30
     define diff(oxmeta:cytosolic_chloride_concentration; oxmeta:time) = oxmeta:cytosolic_sodium_concentration / 2 :: ms
@@ -44,6 +49,7 @@ post-processing {
 
     assert sim:cytosolic_sodium_concentration[0] == 10
     assert sim:extracellular_chloride_concentration[0] == 20
+    assert sim:extracellular_potassium_concentration[0] == 80
     assert sim:cytosolic_chloride_concentration[0] == 30
     assert sim:cytosolic_chloride_concentration[1] == 35
 }

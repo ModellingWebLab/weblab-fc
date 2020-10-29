@@ -2,6 +2,7 @@
 Routines of use in tests of Functional Curation.
 """
 
+import logging
 import os
 import numpy as np
 
@@ -81,7 +82,7 @@ def within_any_tolerance(arr1, arr2, rel_tol=None, abs_tol=None):
         within_relative_tolerance(arr1, arr2, rel_tol))
 
 
-def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0, messages=None):
+def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0):
     """Check protocol results against saved values.
 
     Note that if the protocol is missing expected results, this is only an error if reference results are actually
@@ -89,62 +90,29 @@ def check_results(proto, expected_spec, data_folder, rel_tol=0.01, abs_tol=0, me
     expected to fail (or at least, not produce this output). Similarly, it is not an error if the protocol produces
     results but no reference results are available, although we do add a warning to messages (if supplied) in this case.
 
+    An assertion will be raised if any output is outside tolerances compared to the reference results, or if an expected
+    output (with reference results available) was not produced.
+
     :param proto: an instance of fc.Protocol that (hopefully) has results available to check
     :param expected_spec: a dictionary mapping result name to number of dimensions, so we can use the correct load*
         method
     :param data_folder: location of the reference data
     :param rel_tol: relative tolerance
     :param abs_tol: absolute tolerance
-    :param messages: if provided, should be a list to which failure reports will be appended. Otherwise any failure will
-        raise AssertionError.
-    :returns: a boolean indicating whether the results matched to within tolerances, or None if failure was expected.
     """
-    results_ok = True
     for name, ndims in expected_spec.items():
         data_file = os.path.join(data_folder, 'outputs_' + name + '.csv')
         try:
             actual = proto.output_env.look_up(name)
         except KeyError:
-            if os.path.exists(data_file):
-                results_ok = False
-                if messages is not None:
-                    messages.append("Output %s not produced but reference result exists" % name)
-            elif results_ok:
-                results_ok = None  # Indicate expected failure
+            assert not os.path.exists(data_file), f"Output {name} not produced but reference result exists"
             continue  # Can't compare in this case
         if not os.path.exists(data_file):
-            if messages is not None:
-                messages.append(
-                    "Output %s produced but no reference result available - please save for future comparison" % name)
-            results_ok = None
+            logging.warning(
+                f"Output {name} produced but no reference result available - please save for future comparison")
             continue  # Can't compare in this case
         if ndims == 2:
-            method = load2d
+            expected = load2d(data_file)
         else:
-            method = load
-        expected = method(data_file)
-        if messages is None:
-            np.testing.assert_allclose(actual.array, expected.array, rtol=rel_tol, atol=abs_tol)
-        else:
-            if actual.array.shape != expected.array.shape:
-                messages.append("Output %s shape %s does not match expected shape %s" %
-                                (name, actual.array.shape, expected.array.shape))
-                results_ok = False
-            else:
-                close_entries = within_any_tolerance(actual.array, expected.array, rel_tol=rel_tol, abs_tol=abs_tol)
-                if not close_entries.all():
-                    bad_entries = np.logical_not(close_entries)
-                    bad = actual.array[bad_entries]
-                    ref = expected.array[bad_entries]
-                    max_rel_err, max_abs_err = get_max_errors(bad, ref)
-                    first_bad = bad.flat[:10]
-                    first_expected = ref.flat[:10]
-                    messages.append(
-                        ("Output %s was not within tolerances (rel=%g, abs=%g) in %d of %d locations." +
-                         " Max rel error=%g, max abs error=%g.\nFirst <=10 mismatches: %s != %s\n" +
-                         "Mismatch locations: %s") %
-                        (name, rel_tol, abs_tol, bad.size, actual.array.size,
-                         max_rel_err, max_abs_err, first_bad, first_expected,
-                         bad_entries.nonzero()[:10]))
-                    results_ok = False
-    return results_ok
+            expected = load(data_file)
+        np.testing.assert_allclose(actual.array, expected.array, rtol=rel_tol, atol=abs_tol)

@@ -89,7 +89,7 @@ setup(
     extras_require={
         'dev': [
             # 'line_profiler',
-            'setproctitle',
+            'pytest-xdist[psutil]',
         ],
         'test': [
             'flake8>=3.6',
