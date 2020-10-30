@@ -9,7 +9,6 @@ addons:
 install:
   # Needed to run setup.py
   - pip install cython numpy
-  - pip install git+https://github.com/ModellingWebLab/cellmlmanip.git@develop
   - pip install -e .[test]
   # Needed to upload coverage results
   - pip install codecov
