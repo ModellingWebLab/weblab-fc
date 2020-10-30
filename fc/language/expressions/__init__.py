@@ -13,6 +13,7 @@ and access `E.Const` etc.
 from .abstract import *  # noqa: F403
 from .general import *  # noqa: F403
 from .maths import *  # noqa: F403
+from .trig import *  # noqa: F403
 from .array import *  # noqa: F403
 
 
