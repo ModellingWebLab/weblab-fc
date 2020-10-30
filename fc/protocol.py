@@ -550,10 +550,14 @@ class Protocol(object):
         """
         Parses a CellML model stored at ``path`` using cellmlmanip, then modifies it according to the protocol
         instructions, and finally returns a :class:`cellmlmanip.Model` object that can be passed to
-        :meth:`set_cellmlmanip_model`.
+        :meth:`compile_cellmlmanip_model`.
 
 
         """
+        # Benchmark model loading/compilation time
+        start = time.time()
+        self.log_progress('Loading model from CellML and applying modifications...')
+
         # Load cellml model
         import cellmlmanip
         model = cellmlmanip.load_model(model, self.units)
@@ -566,7 +570,13 @@ class Protocol(object):
             time_variable = model.add_variable(time, self.units.get('seconds'))
 
         # Do all the transformations specified by the protocol
-        time_variable = self.model_interface.modify_model(model, time_variable, self.units)
+        model._fc_time_variable = self.model_interface.modify_model(model, time_variable, self.units)
+        
+        # Benchmarking
+        self.timings['load model'] = (
+            self.timings.get('load model', 0.0) + (time.time() - start))
+        
+        return model
 
     def compile_cellmlmanip_model(self, model):
         """
@@ -615,7 +625,7 @@ class Protocol(object):
             self.output_folder.path if self.output_folder else temp_dir,
             class_name,
             model,
-            time_variable,
+            model._fc_time_variable,
             ns_map=self.ns_map,
             protocol_variables=self.model_interface.protocol_variables,
         )
@@ -659,6 +669,8 @@ class Protocol(object):
         # Benchmarking
         self.timings['load model'] = (
             self.timings.get('load model', 0.0) + (time.time() - start))
+        
+        self._set_model(model)
 
 
     def set_abstract_model(self, model):
