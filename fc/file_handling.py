@@ -86,14 +86,14 @@ class OutputFolder(object):
     @staticmethod
     def check_output_path(path):
         """Check whether the given path is a location within the Chaste output folder."""
-        # if path.startswith(OutputFolder.get_root_output_folder()):
+        root = OutputFolder.get_root_output_folder()
         if os.path.isabs(path):
             abs_path = path
         else:
-            abs_path = os.path.join(OutputFolder.get_root_output_folder(), path)
+            abs_path = os.path.join(root, path)
         abs_path = os.path.realpath(abs_path)
-        if not abs_path.startswith(OutputFolder.get_root_output_folder()):
-            raise ProtocolError('Cannot alter the directory or file in this path.')
+        if not abs_path.startswith(root):
+            raise ProtocolError(f'Cannot alter the directory or file in this path, as it is not under {root}.')
         return abs_path
 
 

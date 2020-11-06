@@ -23,7 +23,7 @@ def test_unit_conversion_time_independent_var_units():
     proto.run()
 
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
-    assert fc.test_support.check_results(
+    fc.test_support.check_results(
         proto,
         {'state': 2},
         os.path.join('test', 'output', 'real', model_name, 'GraphState'),
@@ -42,7 +42,7 @@ def test_unit_conversion_time_input():
     proto.run()
 
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
-    assert fc.test_support.check_results(
+    fc.test_support.check_results(
         proto,
         {'state': 2},
         os.path.join('test', 'output', 'real', model_name, 'GraphState'),
@@ -64,7 +64,7 @@ def test_unit_conversion_time_duplicate():
     proto.run()
 
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
-    assert fc.test_support.check_results(
+    fc.test_support.check_results(
         proto,
         {'state': 2},
         os.path.join('test', 'output', 'real', model_name, 'GraphState'),
@@ -103,7 +103,7 @@ def test_unit_conversion_state_variable():
     assert os.path.exists(os.path.join(proto.output_folder.path, 'output.h5'))
 
     # Check output is correct
-    assert fc.test_support.check_results(
+    fc.test_support.check_results(
         proto,
         {'state': 2},   # Name and dimension of output to check
         os.path.join('test', 'output', 'real', model_name, 'GraphState'),

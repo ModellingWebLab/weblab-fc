@@ -251,7 +251,7 @@ class Protocol(object):
                             f'Imported or nested protocol redefines units {name} as '
                             f'{udef.pint_expression} not {our_udef.pint_expression}')
                     if our_udef.description != udef.description:
-                        raise ProtocolError(
+                        self.log_warning(
                             f'Imported or nested protocol redefines units {name} with '
                             f'description "{udef.description}" not "{our_udef.description}"')
                 else:
@@ -331,6 +331,9 @@ class Protocol(object):
 
             # Add units
             merge_unit_definitions(nested_proto.unit_definitions)
+
+            # Process namespace mapping
+            process_ns_map(nested_proto.ns_map)
 
         # Store namespace map
         process_ns_map(details.get('ns_map', {}))
@@ -649,7 +652,6 @@ class Protocol(object):
         interface = []
         for output in self.outputs:
             units = output.get('units')
-            print('Output units', units)
             if units is None:
                 # Units are read from the model, and so may be determined by our model interface
                 units = ''  # Default in case we can't figure it out
@@ -662,10 +664,8 @@ class Protocol(object):
                             break
             if not self.units.is_defined(units):
                 # We don't currently require units taken from the store
-                print('Not defined')
                 units = ''
             if units != '':
-                print('Defined', self.units.get_unit(units))
                 units = self.units.format(self.units.get_unit(units), base_units=True)
             interface.append({
                 'kind': 'output',
