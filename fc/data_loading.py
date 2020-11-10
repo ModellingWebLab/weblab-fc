@@ -36,8 +36,16 @@ def load(file_path):
         f = gzip.GzipFile(real_path, 'rb')
     else:
         f = open(real_path, 'r')
-    f.readline()  # strip comment line
-    dims = list(map(int, f.readline().split(',')))[1:]
-    array = np.loadtxt(f, dtype=float)
+    # Check for presence of comment line indicating special n-d format
+    comment = f.readline()
+    if comment.startswith('#'):
+        dims = list(map(int, f.readline().strip().split(',')))[1:]
+        array = np.loadtxt(f, dtype=float)
+        result = V.Array(array.reshape(tuple(dims)))
+    else:
+        # Simple 1d column-oriented data
+        f.seek(0)
+        array = np.loadtxt(f, dtype=float)
+        result = V.Array(array)
     f.close()
-    return V.Array(array.reshape(tuple(dims)))
+    return result
