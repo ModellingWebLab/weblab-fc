@@ -12,9 +12,14 @@ from cellmlmanip.model import Quantity
 from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER, Transpiler
 from cellmlmanip.printer import Printer
 
-# Tell cellmlmanip to create _exp objects instead of exp objects. This prevents Sympy doing simplification (or
+# Tell cellmlmanip to create _exp objects instead of exp objects, etc. This prevents Sympy doing simplification (or
 # canonicalisation) resulting in weird errors with exps in some cardiac models.
 Transpiler.set_mathml_handler('exp', sympy.Function('_exp'))
+Transpiler.set_mathml_handler('abs', sympy.Function('_abs'))
+Transpiler.set_mathml_handler('sqrt', sympy.Function('_sqrt'))
+Transpiler.set_mathml_handler('sin', sympy.Function('_sin'))
+Transpiler.set_mathml_handler('cos', sympy.Function('_cos'))
+Transpiler.set_mathml_handler('acos', sympy.Function('_acos'))
 
 
 # Shared Jinja environment
@@ -129,8 +134,13 @@ class WebLabPrinter(Printer):
     def __init__(self, symbol_function=None, derivative_function=None):
         super().__init__(symbol_function, derivative_function)
 
-        # Deal with _exp function introduced to avoid simplification
+        # Deal with functions introduced to avoid simplification
         self._function_names['_exp'] = 'math.exp'
+        self._function_names['_abs'] = 'math.fabs'
+        self._function_names['_sqrt'] = 'math.sqrt'
+        self._function_names['_sin'] = 'math.sin'
+        self._function_names['_cos'] = 'math.cos'
+        self._function_names['_acos'] = 'math.acos'
 
 
 def get_unique_names(model):

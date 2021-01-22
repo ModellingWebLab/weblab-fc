@@ -186,7 +186,7 @@ class NestedProtocol(AbstractModel):
         for name, expr in self.input_exprs.items():
             self.proto.set_input(name, expr.evaluate(self.sim_env))
 #         self.proto.SetOutputfolder(self.output_path) #TODO
-        self.proto.run()
+        self.proto.run(write_out=False)
 
 
 class TestOdeModel(AbstractOdeModel):
