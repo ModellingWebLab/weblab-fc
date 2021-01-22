@@ -1,0 +1,164 @@
+[[model]]
+name: Beattie-2017-IKr-HH
+author: Michael Clerx
+# Initial values
+ikr.act = 0
+ikr.rec = 1
+
+#
+# Simulation engine variables
+#
+[engine]
+time = 0 [ms]
+    bind time
+    in [ms]
+    oxmeta: time
+
+#
+# Membrane potential
+#
+[membrane]
+V = 0 [mV]
+    bind pace
+    label membrane_potential
+    in [mV]
+    oxmeta: membrane_voltage
+
+[nernst]
+EK = -88 [mV]
+    in [mV]
+    oxmeta: potassium_reversal_potential
+
+#
+# Hodgkin-Huxley current model
+#
+[ikr]
+use membrane.V
+IKr = p9 * act * rec * (V - nernst.EK)
+    in [nA]
+    oxmeta: membrane_rapid_delayed_rectifier_potassium_current
+dot(act) = (inf - act) / tau
+    inf = k1 * tau
+    tau = 1 / (k1 + k2)
+        in [ms]
+    k1 = p1 * exp(p2 * V)
+        in [1/ms]
+        oxmeta: exp2_V_positive_rate
+    k2 = p3 * exp(-p4 * V)
+        in [1/ms]
+        oxmeta: exp2_V_negative_rate
+dot(rec) = (inf - rec) / tau
+    inf = k4 * tau
+    tau = 1 / (k3 + k4)
+        in [ms]
+    k3 = p5 * exp(p6 * V)
+        in [1/ms]
+        oxmeta: exp2_V_positive_rate
+    k4 = p7 * exp(-p8 * V)
+        in [1/ms]
+        oxmeta: exp2_V_negative_rate
+p1 = 2.26e-4 [1/ms]
+    in [1/ms]
+    oxmeta: exp2_a_parameter
+p2 = 0.0699 [1/mV]
+    in [1/mV]
+    oxmeta: exp2_b_parameter
+p3 = 3.45e-5 [1/ms]
+    in [1/ms]
+    oxmeta: exp2_a_parameter
+p4 = 0.05462 [1/mV]
+    in [1/mV]
+    oxmeta: exp2_b_parameter
+p5 = 0.0873 [1/ms]
+    in [1/ms]
+    oxmeta: exp2_a_parameter
+p6 = 8.91e-3 [1/mV]
+    in [1/mV]
+    oxmeta: exp2_b_parameter
+p7 = 5.15e-3 [1/ms]
+    in [1/ms]
+    oxmeta: exp2_a_parameter
+p8 = 0.03158 [1/mV]
+    in [1/mV]
+    oxmeta: exp2_b_parameter
+p9 = 0.1524 [uS]
+    in [uS]
+    oxmeta: membrane_rapid_delayed_rectifier_potassium_current_conductance
+
+[[protocol]]
+# Level  Start    Length   Period   Multiplier
+-80.0    0.0      250.1    0.0      0
+-120.0   250.1    50.0     0.0      0
+-80.0    300.1    200.0    0.0      0
+40.0     500.1    1000.0   0.0      0
+-120.0   1500.1   500.0    0.0      0
+-80.0    2000.1   1000.0   0.0      0
+-30.0    3000.1   3500.0   0.0      0
+-120.0   6500.1   500.0    0.0      0
+-80.0    7000.1   1000.0   0.0      0
+
+[[script]]
+import myokit
+import myokit.lib.hh
+
+# Get model and protocol
+model = get_model()
+protocol = get_protocol()
+
+# Add pacing variable
+pace = model.get('engine').add_variable('pace')
+pace.set_rhs(0)
+
+# Update membrane potential variable
+model.binding('pace').set_binding(None)
+model.get('membrane.V').set_rhs(
+    'if(engine.time >= 3000.1 and engine.time < 6500.1,'
+    + ' - 30'
+    + ' + 54 * sin(0.007 * (engine.time - 2500.1))'
+    + ' + 26 * sin(0.037 * (engine.time - 2500.1))'
+    + ' + 10 * sin(0.190 * (engine.time - 2500.1))'
+    + ', engine.pace)')
+pace.set_binding('pace')
+
+# Get steady state
+hh = myokit.lib.hh.HHModel.from_component(model.get('ikr'))
+x = hh.steady_state(-80)
+model.set_state(x)
+print('\n' + model.format_state(x))
+
+# Apply same values as used in protocol
+model.get('nernst.EK').set_rhs(-85)
+
+# Run simulation
+s = myokit.Simulation(model, protocol)
+s.set_tolerance(1e-8, 1e-8)
+duration = protocol.characteristic_time()
+d = s.run(duration, log_interval=0.1, log=['engine.time', 'membrane.V', 'ikr.IKr'])
+
+with open('outputs_t.csv', 'w') as f:
+    f.write('# Lovely comment\n')
+    f.write('1,80000\n')
+    for x in d['engine.time'][:-1]:
+        f.write(str(x) + '\n')
+
+with open('outputs_V.csv', 'w') as f:
+    f.write('# Lovely comment\n')
+    f.write('1,80000\n')
+    for x in d['membrane.V'][:-1]:
+        f.write(str(x) + '\n')
+
+with open('outputs_IKr.csv', 'w') as f:
+    f.write('# Lovely comment\n')
+    f.write('1,80000\n')
+    for x in d['ikr.IKr'][:-1]:
+        f.write(str(x) + '\n')
+
+# Show results
+import matplotlib.pyplot as plt
+fig = plt.figure()
+ax = fig.add_subplot(2, 1, 1)
+plt.plot(d.time(), d['membrane.V'])
+ax = fig.add_subplot(2, 1, 2)
+plt.plot(d.time(), d['ikr.IKr'])
+plt.show()
+
