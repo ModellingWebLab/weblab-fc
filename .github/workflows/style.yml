@@ -2,7 +2,7 @@ name: Style
 on: [pull_request]
 jobs:
   style:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
 
     steps:
     - name: Check out repository
