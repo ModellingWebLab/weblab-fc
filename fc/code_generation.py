@@ -65,7 +65,9 @@ class DataInterpolation(Quantity):
     _next_id = 0  # Used to generate unique table IDs in code
 
     # Sympy annoyingly overwrites __new__
-    def __new__(cls, name, data, index_variable, *args, **kwargs):
+    def __new__(cls, name, data=None, index_variable=None, *args, **kwargs):
+        assert isinstance(name, str), str(name) +' '+ str(type(name))
+
         obj = super().__new__(cls, name, real=True)
 
         # Record a unique ID for this table
@@ -77,7 +79,7 @@ class DataInterpolation(Quantity):
 
         return obj
 
-    def __init__(self, name, data, index_variable, units):
+    def __init__(self, name, data=None, index_variable=None, units=None, *args, **kwargs):
         """Create a new interpolation construct.
 
         :param name: an identifier for the table, e.g. the data file base name. Will be used for documenting the
@@ -88,6 +90,7 @@ class DataInterpolation(Quantity):
         :param units: the units of the interpolated values (a :class:`~cellmlmanip.units.UnitStore.Unit`)
         """
         super().__init__(name, units)
+
         self.data = data[1]
         self.index_variable = index_variable
         self.initial_index = '%.17g' % data[0, 0]
