@@ -8,7 +8,7 @@ import time
 import jinja2
 import sympy
 
-from cellmlmanip.model import Quantity
+from cellmlmanip.model import Quantity, Variable
 from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER, Transpiler
 from cellmlmanip.printer import Printer
 
@@ -65,9 +65,7 @@ class DataInterpolation(Quantity):
     _next_id = 0  # Used to generate unique table IDs in code
 
     # Sympy annoyingly overwrites __new__
-    def __new__(cls, name, data=None, index_variable=None, *args, **kwargs):
-        assert isinstance(name, str), str(name) +' '+ str(type(name))
-
+    def __new__(cls, name, data, index_variable, units, *args, **kwargs):
         obj = super().__new__(cls, name, real=True)
 
         # Record a unique ID for this table
@@ -79,7 +77,7 @@ class DataInterpolation(Quantity):
 
         return obj
 
-    def __init__(self, name, data=None, index_variable=None, units=None, *args, **kwargs):
+    def __init__(self, name, data, index_variable, units, *args, **kwargs):
         """Create a new interpolation construct.
 
         :param name: an identifier for the table, e.g. the data file base name. Will be used for documenting the
@@ -134,6 +132,13 @@ class WebLabPrinter(Printer):
 
         # Deal with _exp function introduced to avoid simplification
         self._function_names['_exp'] = 'math.exp'
+
+    def doprint(self, expr):
+        #  the underlying sympy printer can't deal with DataInterpolation objects
+        if isinstance(expr, sympy.Expr):
+            subs_dict = {d: Variable(name=d.lookup_call, units=d.units) for d in expr.atoms(DataInterpolation)}
+            expr = expr.xreplace(subs_dict)
+        return super().doprint(expr)
 
 
 def get_unique_names(model):
@@ -228,9 +233,10 @@ def create_weblab_model(path, output_dir, class_name, model, time_variable, ns_m
 
     # Variable naming function
     def variable_name(variable):
-        if isinstance(variable, DataInterpolation):
-            return variable.lookup_call
-        return 'var_' + unames[variable]
+        try:
+            return 'var_' + unames[variable]
+        except KeyError:  # This was a DataInterpolation that got replaced
+            return str(variable)
 
     # Derivative naming function
     def derivative_name(deriv):
