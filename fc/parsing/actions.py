@@ -87,7 +87,6 @@ SYMPY_MATHML = {
     E.Floor: sympy.floor,
     E.Max: sympy.Max,
     E.Min: sympy.Min,
-#    E.Rem: sympy.core.mod,
     E.Rem: sympy.Mod,
     E.Root: sympy.sqrt,
     E.Power: sympy.Pow,
