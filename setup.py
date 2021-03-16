@@ -92,6 +92,7 @@ setup(
             'pytest-xdist[psutil]',
         ],
         'test': [
+            'codecov',
             'flake8>=3.6',
             'pytest>=3.6',
             'pytest-cov',

@@ -7,7 +7,6 @@ import time
 
 import jinja2
 import sympy
-
 from cellmlmanip.model import Quantity
 from cellmlmanip.parser import SYMPY_SYMBOL_DELIMITER, Transpiler
 from cellmlmanip.printer import Printer
@@ -65,19 +64,22 @@ class DataInterpolation(Quantity):
     _next_id = 0  # Used to generate unique table IDs in code
 
     # Sympy annoyingly overwrites __new__
-    def __new__(cls, name, data, index_variable, *args, **kwargs):
+    def __new__(cls, name, data, index_variable, units, index_name=None, id=None, *args, **kwargs):
         obj = super().__new__(cls, name, real=True)
 
         # Record a unique ID for this table
-        obj._id = cls._next_id
-        cls._next_id += 1
+        if id is None:
+            obj._id = cls._next_id
+            cls._next_id += 1
+        else:
+            obj._id = id
 
         # Ensure we depend on the index variable in the model's graph
         obj._args = [index_variable]
 
         return obj
 
-    def __init__(self, name, data, index_variable, units):
+    def __init__(self, name, data, index_variable, units, index_name=None, id=None, *args, **kwargs):
         """Create a new interpolation construct.
 
         :param name: an identifier for the table, e.g. the data file base name. Will be used for documenting the
@@ -88,7 +90,8 @@ class DataInterpolation(Quantity):
         :param units: the units of the interpolated values (a :class:`~cellmlmanip.units.UnitStore.Unit`)
         """
         super().__init__(name, units)
-        self.data = data[1]
+
+        self._input_data = data
         self.index_variable = index_variable
         self.initial_index = '%.17g' % data[0, 0]
         self.final_index = '%.17g' % data[0, -1]
@@ -96,7 +99,7 @@ class DataInterpolation(Quantity):
         self.table_name = '_data_table_' + str(self._id)
         self.step_inverse = '%.17g' % (1.0 / (data[0, 1] - data[0, 0]))
 
-        self.index_name = None
+        self.index_name = index_name
 
     def _eval_evalf(self, prec):
         """We don't want the model's graph to try replacing this with a number!"""
@@ -108,6 +111,15 @@ class DataInterpolation(Quantity):
         :param variable_name_generator: function turning our index variable into its name in the code
         """
         self.index_name = variable_name_generator(self.index_variable)
+
+    @property
+    def data(self):
+        return self._input_data[1]
+
+    @property
+    def func(self):
+        return lambda index_variable: self.__class__(self.name, self._input_data, index_variable, self.units,
+                                                     index_name=self.index_name, id=self._id)
 
     @property
     def lookup_call(self):
