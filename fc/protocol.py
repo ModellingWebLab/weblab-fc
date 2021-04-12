@@ -20,7 +20,7 @@ from .language import values as V
 from .language.statements import Assign
 from .locatable import Locatable
 from .parsing import actions
-from .parsing.rdf import get_used_annotations
+from .parsing.rdf import (get_used_annotations, OXMETA_NS)
 from .plotting import create_plot
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
@@ -572,6 +572,12 @@ class Protocol(object):
             # Load cellml model
             import cellmlmanip
             model = cellmlmanip.load_model(model, self.units)
+            try:
+                V = model.get_variable_by_ontology_term((OXMETA_NS, 'membrane_voltage'))
+                model.remove_fixable_singularities(V)
+            except KeyError:
+                pass  # can't remove singularities if the model doesn't have voltage tagged
+
 
             # Check whether the model has a time variable. If not, create one
             try:
@@ -761,6 +767,12 @@ class Protocol(object):
         required_terms, optional_terms = self.get_required_model_annotations()
         import cellmlmanip
         model = cellmlmanip.load_model(model_path)
+        try:
+            V = model.get_variable_by_ontology_term((OXMETA_NS, 'membrane_voltage'))
+            model.remove_fixable_singularities(V)
+        except KeyError:
+            pass  # can't remove singularities if the model doesn't have voltage tagged
+
         model_terms = get_used_annotations(model)
         # Return the mismatch, if any, as sorted lists
         missing_terms = list(required_terms - model_terms)
