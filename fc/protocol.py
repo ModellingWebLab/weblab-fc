@@ -5,22 +5,22 @@ import itertools
 import os
 import subprocess
 import sys
-import tables
 import tempfile
 import time
 
+import tables
 from cellmlmanip.units import UnitStore
-
 import fc
+
 from .code_generation import create_weblab_model
 from .environment import Environment
-from .error_handling import ProtocolError, ErrorRecorder
+from .error_handling import ErrorRecorder, ProtocolError
 from .file_handling import OutputFolder, sanitise_file_name
 from .language import values as V
 from .language.statements import Assign
 from .locatable import Locatable
 from .parsing import actions
-from .parsing.rdf import (get_used_annotations, OXMETA_NS)
+from .parsing.rdf import get_used_annotations, OXMETA_NS
 from .plotting import create_plot
 
 # NB: Do not import the CompactSyntaxParser here, or we'll get circular imports.
@@ -577,7 +577,6 @@ class Protocol(object):
                 model.remove_fixable_singularities(V)
             except KeyError:
                 pass  # can't remove singularities if the model doesn't have voltage tagged
-
 
             # Check whether the model has a time variable. If not, create one
             try:
