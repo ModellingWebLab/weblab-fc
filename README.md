@@ -19,11 +19,11 @@ It _might_ run on Windows, if you have installed CVODE with the shared libraries
 ## Transition!
 
 This package is currently in transition, migrating the functional curation code from being a Chaste extension project to a standalone Python package.
-In particular, we're replacing the CellML and code-generation tool PyCml with [cellmlmanip](https://github.com/ModellingWebLab/cellmlmanip) to read and manipulate CellML code and [weblab_cg](https://github.com/ModellingWebLab/weblab-cg) to generate Model code.
+In particular, we're replacing the CellML and code-generation tool PyCml with [cellmlmanip](https://github.com/ModellingWebLab/cellmlmanip) to read and manipulate CellML code and a new module within `weblab-fc` to generate Model code.
 
 The code from before this transition started can be seen at the tag [`pycml-version`](https://github.com/ModellingWebLab/weblab-fc/tree/pycml-version), but crucial parts of PyCml weblab code are also temporarily stored in the [pycml](./pycml) directory.
-Most of the code from [pycml_protocol.py](./pycml/pycml_protocol.py) will have to be replaced by (1) changes to `fc` so that it extracts and stores _all_ the protocol information, and (2) updates to `weblab_cg` so that it can use information provides by `fc` to generate a model.
-(At the moment both `fc` and `pycml` read the protocol, but in the new code `fc` should gather all the information and then pass it to `weblab_cg`.)
+Most of the code from [pycml_protocol.py](./pycml/pycml_protocol.py) will have to be replaced by (1) changes to `fc` so that it extracts and stores _all_ the protocol information, and (2) a new code generation module in `fc` that can use information provides by weblab protocols to generate simulation code.
+(At the moment both `fc` and `pycml` read the protocol, but in the new code `fc` should gather all the information and then pass it to the code generation component of `fc`.)
 
 ## Installation
 
