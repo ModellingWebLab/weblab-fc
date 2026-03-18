@@ -32,7 +32,7 @@ def check_parse_results(actual, expected):
 
 def assert_parses(grammar, input, results):
     """Utility method to test that a given grammar parses an input as expected."""
-    actual_results = grammar.parse_string(input, parseAll=True)
+    actual_results = grammar.parse_string(input, parse_all=True)
     check_parse_results(actual_results, results)
 
 
@@ -117,10 +117,10 @@ def test_parsing_trace():
     assert_parses(csp.expr, '(1 + a)?', [[['1', '+', 'a']]])
     assert_parses(csp.expr, '1 + a?', [['1', '+', ['a']]])
 
-    action = csp.expr.parse_string('var?', parseAll=True)
+    action = csp.expr.parse_string('var?', parse_all=True)
     assert action[0].expr().trace
 
-    action = csp.expr.parse_string('var', parseAll=True)
+    action = csp.expr.parse_string('var', parse_all=True)
     assert not action[0].expr().trace
 
 

@@ -598,7 +598,7 @@ class CompactSyntaxParser(object):
         :param source_file: path to the file to parse
         :return: a :class:`fc.parsing.actions.Protocol` object, containing parsed information about the protocol
         """
-        return self.try_parse(self.protocol.parseFile, source_file, parseAll=True)[0]
+        return self.try_parse(self.protocol.parseFile, source_file, parse_all=True)[0]
 
     def try_parse(self, callable, source_file, *args, **kwargs):
         """
