@@ -16,7 +16,7 @@ assert sizeof(np.float64_t) == sizeof(_lib.realtype) # paranoia
 # # Debugging!
 # import sys
 # def fprint(*args):
-#     print ' '.join(map(str, args))
+#     print(' '.join(map(str, args)))
 #     sys.stdout.flush()
 
 
@@ -45,7 +45,7 @@ cdef int _rhs_wrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data):
     try:
         model.evaluate_rhs(t, np_y, np_ydot)
     except Exception, e:
-        print e
+        print(e)
         return 1 # recoverable error
     return 0
 

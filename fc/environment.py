@@ -78,14 +78,14 @@ class Environment(object):
 #         try:
 #             return self.bindings[name]
 #         except KeyError:
-#             print 'Key error looking up', name, 'in', self
+#             print('Key error looking up', name, 'in', self)
 #             import sys
 #             tb = sys.exc_info()[2]
 #             while tb:
 #                 local_vars = tb.tb_frame.f_locals
 #                 obj = local_vars.get('self', None)
 #                 if obj and isinstance(obj, DelegatingDict):
-#                     print 'Looked for', local_vars['key'], 'in', obj._env
+#                     print('Looked for', local_vars['key'], 'in', obj._env)
 #                 tb = tb.tb_next
 #             self.debug_delegatees('root')
 #             raise
@@ -101,7 +101,7 @@ class Environment(object):
                 "The name prefix '" + prefix +
                 "' has already been used in this context. Check your simulations, imports, etc.")
         self.delegatees[prefix] = delegatee
-#         print 'Delegating to', delegatee, 'for', prefix, 'in', self
+#         print('Delegating to', delegatee, 'for', prefix, 'in', self)
         self.bindings.set_delegatee(delegatee.bindings, prefix)
         self.unwrapped_bindings.set_delegatee(delegatee.unwrapped_bindings, prefix)
 
