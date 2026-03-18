@@ -414,7 +414,7 @@ class CompactSyntaxParser(object):
     ).setName('output variable declaration').setParseAction(actions.OutputVariable)
 
     # Model variables (inputs, outputs, or just used in equations) that are allowed to be missing
-    locator = p.Empty().leaveWhitespace().setParseAction(lambda s, l, t: l)
+    locator = p.Empty().leaveWhitespace().setParseAction(lambda s, loc, tokens: loc)
     var_default = make_kw('default') - locator("default_start") + simple_expr("default")
     optional_variable = p.Group(
         make_kw('optional') - c_ident("name") + Optional(var_default) + locator("default_end")

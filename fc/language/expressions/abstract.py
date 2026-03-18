@@ -129,13 +129,13 @@ class AbstractExpression(Locatable):
             return self._defining_envs
         except AttributeError:
             self._root_defining_env = env  # For paranoia checking that the cache is valid
-            d = self._defining_envs = {}
-            l = self._used_var_local_names = []  # noqa: E741
+            defining_envs = self._defining_envs = {}
+            used_local_names = self._used_var_local_names = []  # noqa: E741
             for name in self.used_variable_list:
                 local_name = name[name.rfind(':') + 1:]
-                l.append(local_name)
-                d[local_name] = env.find_defining_environment(name)
-            return d
+                used_local_names.append(local_name)
+                defining_envs[local_name] = env.find_defining_environment(name)
+            return defining_envs
 
     @property
     def compiled_function(self):
@@ -154,9 +154,9 @@ class AbstractExpression(Locatable):
         try:
             return self._used_var_list
         except AttributeError:
-            l = self._used_var_list = list(self.used_variables)  # noqa: E741
-            l.sort()
-            return l
+            used_var_list = self._used_var_list = list(self.used_variables)  # noqa: E741
+            used_var_list.sort()
+            return used_var_list
 
     @property
     def used_variables(self):
