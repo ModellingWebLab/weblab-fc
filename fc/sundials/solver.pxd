@@ -4,10 +4,9 @@ cimport fc.sundials.sundials as _lib
 
 # Save typing
 ctypedef _lib.N_Vector N_Vector
-ctypedef np.float64_t realtype
-IF FC_SUNDIALS_MAJOR >= 3:
-    ctypedef _lib.SUNMatrix SUNMatrix
-    ctypedef _lib.SUNLinearSolver SUNLinearSolver
+ctypedef _lib.sunrealtype realtype
+ctypedef _lib.SUNMatrix SUNMatrix
+ctypedef _lib.SUNLinearSolver SUNLinearSolver
 
 
 cdef class CvodeSolver:
@@ -15,6 +14,7 @@ cdef class CvodeSolver:
 
     cdef N_Vector _state # The state vector of the model being simulated
     cdef int _state_size # The number of state variables / length of the state vector
+    cdef int _sundials_major
 
     cdef public np.ndarray state # Numpy view of the state vector
     cdef public object model # The model being simulated
@@ -27,8 +27,10 @@ cdef class CvodeSolver:
     cdef re_init(self)
     cdef check_flag(self, int flag, char* called)
 
-    IF FC_SUNDIALS_MAJOR >= 3:
-        # Linear matrix solving in sundials 3+
-        cdef SUNMatrix sundense_matrix
-        cdef SUNLinearSolver sundense_solver
+    # Linear matrix solving state for sundials 3+
+    cdef SUNMatrix sundense_matrix
+    cdef SUNLinearSolver sundense_solver
+
+    # Sundials context for v6+
+    cdef _lib.SUNContext sunctx
 

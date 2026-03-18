@@ -60,7 +60,7 @@ fc_extract_outputs = "fc.cli:extract_outputs"
 fc_check_syntax = "fc.cli:check_syntax"
 
 [tool.setuptools]
-package-dir = { "" = "fc" }
+package-dir = { "" = "." }
 
 [tool.pytest]
 testpaths = ["test"]

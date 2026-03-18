@@ -1,15 +1,14 @@
-
 """
 Minimal Cython interface to the (CVODE part of the) SUNDIALS library, for use by Functional Curation.
 
-Handles both SUNDIALS 2.4 and 2.5, since the parts of the interface we use didn't change.
-
 Based on http://code.google.com/p/python-sundials/source/browse/trunk/sundials/SundialsLib.pxd
+Includes compatibility wrappers so Cython code can avoid deprecated compile-time IF directives.
 """
 
 cdef extern from "sundials/sundials_types.h":
     ctypedef long int sunindextype
-    ctypedef double realtype
+    ctypedef double sunrealtype
+    ctypedef int sunbooleantype
     ctypedef bint booleantype
 
 cdef extern from "sundials/sundials_nvector.h":
@@ -17,15 +16,27 @@ cdef extern from "sundials/sundials_nvector.h":
         void *content
     ctypedef _generic_N_Vector *N_Vector
 
+cdef extern from *:
+    ctypedef struct _generic_SUNMatrix:
+        pass
+    ctypedef _generic_SUNMatrix* SUNMatrix
+
+    ctypedef struct _generic_SUNLinearSolver:
+        pass
+    ctypedef _generic_SUNLinearSolver* SUNLinearSolver
+
+    ctypedef struct SUNContext_:
+        pass
+    ctypedef SUNContext_* SUNContext
+
 cdef extern from "nvector/nvector_serial.h":
-    cdef N_Vector N_VMake_Serial(long int vec_length, realtype *v_data)
     N_Vector N_VNew_Serial(long int vec_length)
     void N_VDestroy_Serial(N_Vector v)
     void N_VPrint_Serial(N_Vector v)
 
     cdef struct _N_VectorContent_Serial:
         long int length
-        realtype *data
+        sunrealtype *data
     ctypedef _N_VectorContent_Serial *N_VectorContent_Serial
 
 cdef extern from "cvode/cvode.h":
@@ -65,94 +76,170 @@ cdef extern from "cvode/cvode.h":
     int CV_BAD_DKY
     int CV_TOO_CLOSE
 
-    ctypedef int (*CVRhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data)
-    ctypedef int (*CVRootFn)(realtype t, N_Vector y, realtype *gout, void *user_data)
-
-    # In version 4 Newton iteration became the default, and a new syntax was
-    # introduced to change it (which we don't need to use here)
-    IF FC_SUNDIALS_MAJOR >= 4:
-        void *CVodeCreate(int lmm)
-    ELSE:
-        void *CVodeCreate(int lmm, int iter)
+    ctypedef int (*CVRhsFn)(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
+    ctypedef int (*CVRootFn)(sunrealtype t, N_Vector y, sunrealtype *gout, void *user_data)
 
     int CVodeSetUserData(void *cvode_mem, void *user_data)
-    int CVodeInit(void *cvode_mem, CVRhsFn f, realtype t0, N_Vector y0)
-    int CVodeReInit(void *cvode_mem, realtype t0, N_Vector y0)
-    int CVodeSStolerances(void *cvode_mem, realtype reltol, realtype abstol)
+    int CVodeInit(void *cvode_mem, CVRhsFn f, sunrealtype t0, N_Vector y0)
+    int CVodeReInit(void *cvode_mem, sunrealtype t0, N_Vector y0)
+    int CVodeSStolerances(void *cvode_mem, sunrealtype reltol, sunrealtype abstol)
     int CVodeRootInit(void *cvode_mem, int nrtfn, CVRootFn g)
-
-#     int CVodeStep "CVode"(void *cvode_mem, realtype tout, N_Vector yout, realtype *tret, int itask) nogil
-    int CVode(void *cvode_mem, realtype tout, N_Vector yout, realtype *tret, int itask)
-
-#     int CVodeSetMaxOrd(void *cvode_mem, int maxord)
+    int CVode(void *cvode_mem, sunrealtype tout, N_Vector yout, sunrealtype *tret, int itask)
     int CVodeSetMaxNumSteps(void *cvode_mem, long int mxsteps)
-#     int CVodeSetMaxHnilWarns(void *cvode_mem, int mxhnil)
-#     int CVodeSetStabLimDet(void *cvode_mem, booleantype stldet)
-#     int CVodeSetInitStep(void *cvode_mem, realtype hin)
-#     int CVodeSetMinStep(void *cvode_mem, realtype hmin)
-    int CVodeSetMaxStep(void *cvode_mem, realtype hmax)
-    int CVodeSetStopTime(void *cvode_mem, realtype tstop)
+    int CVodeSetMaxStep(void *cvode_mem, sunrealtype hmax)
+    int CVodeSetStopTime(void *cvode_mem, sunrealtype tstop)
     int CVodeSetMaxErrTestFails(void *cvode_mem, int maxnef)
-#     int CVodeSetMaxNonlinIters(void *cvode_mem, int maxcor)
-#     int CVodeSetMaxConvFails(void *cvode_mem, int maxncf)
-#     int CVodeSetNonlinConvCoef(void *cvode_mem, realtype nlscoef)
-#     int CVodeSetIterType(void *cvode_mem, int iter)
-#     int CVodeSetRootDirection(void *cvode_mem, int *rootdir)
-#     int CVodeSetNoInactiveRootWarn(void *cvode_mem)
-#     int CVodeGetDky(void *cvode_mem, realtype t, int k, N_Vector dky)
-#     int CVodeGetWorkSpace(void *cvode_mem, long int *lenrw, long int *leniw)
-#     int CVodeGetNumSteps(void *cvode_mem, long int *nsteps)
-#     int CVodeGetNumRhsEvals(void *cvode_mem, long int *nfevals)
-#     int CVodeGetNumLinSolvSetups(void *cvode_mem, long int *nlinsetups)
-#     int CVodeGetNumErrTestFails(void *cvode_mem, long int *netfails)
-#     int CVodeGetLastOrder(void *cvode_mem, int *qlast)
-#     int CVodeGetCurrentOrder(void *cvode_mem, int *qcur)
-#     int CVodeGetNumStabLimOrderReds(void *cvode_mem, long int *nslred)
-#     int CVodeGetActualInitStep(void *cvode_mem, realtype *hinused)
-#     int CVodeGetLastStep(void *cvode_mem, realtype *hlast)
-#     int CVodeGetCurrentStep(void *cvode_mem, realtype *hcur)
-#     int CVodeGetCurrentTime(void *cvode_mem, realtype *tcur)
-#     int CVodeGetTolScaleFactor(void *cvode_mem, realtype *tolsfac)
-#     int CVodeGetErrWeights(void *cvode_mem, N_Vector eweight)
-#     int CVodeGetEstLocalErrors(void *cvode_mem, N_Vector ele)
-#     int CVodeGetNumGEvals(void *cvode_mem, long int *ngevals)
-#     int CVodeGetRootInfo(void *cvode_mem, int *rootsfound)
-#     int CVodeGetIntegratorStats(void *cvode_mem, long int *nsteps,
-#                                 long int *nfevals, long int *nlinsetups,
-#                                 long int *netfails, int *qlast,
-#                                 int *qcur, realtype *hinused, realtype *hlast,
-#                                 realtype *hcur, realtype *tcur)
-#     int CVodeGetNumNonlinSolvIters(void *cvode_mem, long int *nniters)
-#     int CVodeGetNumNonlinSolvConvFails(void *cvode_mem, long int *nncfails)
-#     int CVodeGetNonlinSolvStats(void *cvode_mem, long int *nniters, long int *nncfails)
-#     int CVDlsGetNumJacEvals(void *cvode_mem, long int *njevals)
-#     int CVDlsGetNumRhsEvals(void *cvode_mem, long int *nrevalsLS)
-
     char *CVodeGetReturnFlagName(int flag)
     void CVodeFree(void **cvode_mem)
 
-IF FC_SUNDIALS_MAJOR >= 3:
-    cdef extern from "sundials/sundials_matrix.h":
-        ctypedef struct _generic_SUNMatrix:
-            pass
-        ctypedef _generic_SUNMatrix* SUNMatrix
-        void SUNMatDestroy(SUNMatrix A)
+cdef extern from *:
+    """
+    #include <sundials/sundials_config.h>
+    #include <sundials/sundials_types.h>
+    #include <sundials/sundials_nvector.h>
+    #include <nvector/nvector_serial.h>
+    #include <cvode/cvode.h>
 
-    cdef extern from "sunmatrix/sunmatrix_dense.h":
-        SUNMatrix SUNDenseMatrix(sunindextype M, sunindextype N)
+    #if SUNDIALS_VERSION_MAJOR >= 3
+    #include <sundials/sundials_matrix.h>
+    #include <sunmatrix/sunmatrix_dense.h>
+    #include <sunlinsol/sunlinsol_dense.h>
+    #include <cvode/cvode_ls.h>
+    #else
+    #include <cvode/cvode_dense.h>
+    typedef struct _generic_SUNMatrix* SUNMatrix;
+    typedef struct _generic_SUNLinearSolver* SUNLinearSolver;
+    #endif
 
-    cdef extern from "sunlinsol/sunlinsol_dense.h":
-        ctypedef struct _generic_SUNLinearSolver:
-            pass
-        ctypedef _generic_SUNLinearSolver* SUNLinearSolver
-        void SUNLinSolFree(SUNLinearSolver)
+    #if SUNDIALS_VERSION_MAJOR >= 6
+    #include <sundials/sundials_context.h>
+    #else
+    typedef struct SUNContext_* SUNContext;
+    #define SUN_COMM_NULL 0
+    #endif
 
-    cdef extern from "sundials/sundials_linearsolver.h":
-        SUNLinearSolver SUNDenseLinearSolver(N_Vector y, SUNMatrix A)
+    static int FC_SundialsMajor(void)
+    {
+        return SUNDIALS_VERSION_MAJOR;
+    }
 
-    cdef extern from "cvode/cvode_direct.h":
-        int CVDlsSetLinearSolver(void* cvode_mem, SUNLinearSolver LS, SUNMatrix A)
-ELSE:
-    cdef extern from "cvode/cvode_dense.h":
-        int CVDense(void *cvode_mem, int N)
+    static int FC_SUNContext_Create(SUNContext* sunctx_out)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return SUNContext_Create(SUN_COMM_NULL, sunctx_out);
+    #else
+        *sunctx_out = NULL;
+        return 0;
+    #endif
+    }
 
+    static int FC_SUNContext_Free(SUNContext* ctx)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return SUNContext_Free(ctx);
+    #else
+        *ctx = NULL;
+        return 0;
+    #endif
+    }
+
+    static N_Vector FC_N_VMake_Serial(sunindextype vec_length, sunrealtype* v_data, SUNContext sunctx)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return N_VMake_Serial(vec_length, v_data, sunctx);
+    #else
+        (void)sunctx;
+        return N_VMake_Serial((long int)vec_length, v_data);
+    #endif
+    }
+
+    static void* FC_CVodeCreate(int lmm, int iter, SUNContext sunctx)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        (void)iter;
+        return CVodeCreate(lmm, sunctx);
+    #elif SUNDIALS_VERSION_MAJOR >= 4
+        (void)iter;
+        (void)sunctx;
+        return CVodeCreate(lmm);
+    #else
+        (void)sunctx;
+        return CVodeCreate(lmm, iter);
+    #endif
+    }
+
+    static SUNMatrix FC_SUNDenseMatrix(sunindextype m, sunindextype n, SUNContext sunctx)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return SUNDenseMatrix(m, n, sunctx);
+    #elif SUNDIALS_VERSION_MAJOR >= 3
+        (void)sunctx;
+        return SUNDenseMatrix(m, n);
+    #else
+        (void)m; (void)n; (void)sunctx;
+        return NULL;
+    #endif
+    }
+
+    static SUNLinearSolver FC_SUNDenseLinearSolver(N_Vector y, SUNMatrix a, SUNContext sunctx)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return SUNLinSol_Dense(y, a, sunctx);
+    #elif SUNDIALS_VERSION_MAJOR >= 3
+        (void)sunctx;
+        return SUNDenseLinearSolver(y, a);
+    #else
+        (void)y; (void)a; (void)sunctx;
+        return NULL;
+    #endif
+    }
+
+    static int FC_CVodeSetLinearSolver(void* cvode_mem, SUNLinearSolver ls, SUNMatrix a)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 3
+        return CVodeSetLinearSolver(cvode_mem, ls, a);
+    #else
+        (void)cvode_mem; (void)ls; (void)a;
+        return CV_SUCCESS;
+    #endif
+    }
+
+    static int FC_CVDense(void* cvode_mem, int n)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 3
+        (void)cvode_mem; (void)n;
+        return CV_SUCCESS;
+    #else
+        return CVDense(cvode_mem, n);
+    #endif
+    }
+
+    static void FC_SUNMatDestroy(SUNMatrix a)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 3
+        if (a != NULL) SUNMatDestroy(a);
+    #else
+        (void)a;
+    #endif
+    }
+
+    static void FC_SUNLinSolFree(SUNLinearSolver ls)
+    {
+    #if SUNDIALS_VERSION_MAJOR >= 3
+        if (ls != NULL) SUNLinSolFree(ls);
+    #else
+        (void)ls;
+    #endif
+    }
+    """
+    int FC_SundialsMajor()
+    int FC_SUNContext_Create(SUNContext* sunctx_out)
+    int FC_SUNContext_Free(SUNContext* ctx)
+    N_Vector FC_N_VMake_Serial(sunindextype vec_length, sunrealtype* v_data, SUNContext sunctx)
+    void* FC_CVodeCreate(int lmm, int iter, SUNContext sunctx)
+    SUNMatrix FC_SUNDenseMatrix(sunindextype m, sunindextype n, SUNContext sunctx)
+    SUNLinearSolver FC_SUNDenseLinearSolver(N_Vector y, SUNMatrix a, SUNContext sunctx)
+    int FC_CVodeSetLinearSolver(void* cvode_mem, SUNLinearSolver ls, SUNMatrix a)
+    int FC_CVDense(void* cvode_mem, int n)
+    void FC_SUNMatDestroy(SUNMatrix a)
+    void FC_SUNLinSolFree(SUNLinearSolver ls)

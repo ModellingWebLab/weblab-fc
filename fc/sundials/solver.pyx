@@ -11,7 +11,7 @@ from fc.error_handling import ProtocolError
 
 # Data type for numpy arrays
 np_dtype = np.float64
-assert sizeof(np.float64_t) == sizeof(_lib.realtype) # paranoia
+assert sizeof(np.float64_t) == sizeof(_lib.sunrealtype) # paranoia
 
 # # Debugging!
 # import sys
@@ -33,7 +33,7 @@ cdef object numpy_view(N_Vector v):
     ret = np.asarray(data_view, dtype=np_dtype)
     return ret
 
-cdef int _rhs_wrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data):
+cdef int _rhs_wrapper(realtype t, N_Vector y, N_Vector ydot, void* user_data) noexcept:
     """Cython wrapper around a model RHS that uses numpy, for calling by CVODE."""
 
     # Create numpy views on the N_Vectors
@@ -58,10 +58,14 @@ cdef class CvodeSolver:
         self.cvode_mem = NULL
         self._state = NULL
         self._state_size = 0
+        self._sundials_major = _lib.FC_SundialsMajor()
+        self.sunctx = NULL
+        self.sundense_matrix = NULL
+        self.sundense_solver = NULL
 
-        IF FC_SUNDIALS_MAJOR >= 3:
-            self.sundense_matrix = NULL
-            self.sundense_solver = NULL
+        flag = _lib.FC_SUNContext_Create(&self.sunctx)
+        if flag != 0:
+            raise ProtocolError('Error creating SUNDIALS context')
 
     def __dealloc__(self):
         """Free solver memory if allocated."""
@@ -69,11 +73,9 @@ cdef class CvodeSolver:
             _lib.CVodeFree(&self.cvode_mem)
         if self._state != NULL:
             _lib.N_VDestroy_Serial(self._state)
-        IF FC_SUNDIALS_MAJOR >= 3:
-            if self.sundense_solver != NULL:
-                _lib.SUNLinSolFree(self.sundense_solver)
-            if self.sundense_matrix != NULL:
-                _lib.SUNMatDestroy(self.sundense_matrix)
+        _lib.FC_SUNLinSolFree(self.sundense_solver)
+        _lib.FC_SUNMatDestroy(self.sundense_matrix)
+        _lib.FC_SUNContext_Free(&self.sunctx)
 
     def __init__(self):
         """Python level object initialisation."""
@@ -92,14 +94,11 @@ cdef class CvodeSolver:
         assert isinstance(model.state, np.ndarray)
         self.state = model.state
         self._state_size = len(model.state)
-        self._state = _lib.N_VMake_Serial(
-            self._state_size, <realtype*>(<np.ndarray>self.state).data)
+        self._state = _lib.FC_N_VMake_Serial(
+            self._state_size, <realtype*>(<np.ndarray>self.state).data, self.sunctx)
 
         # Create CVode object
-        IF FC_SUNDIALS_MAJOR >= 4:
-            self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF)
-        ELSE:
-            self.cvode_mem = _lib.CVodeCreate(_lib.CV_BDF, _lib.CV_NEWTON)
+        self.cvode_mem = _lib.FC_CVodeCreate(_lib.CV_BDF, 0, self.sunctx)
 
         # Initialise CVode
         if hasattr(self, 'set_rhs_wrapper'):
@@ -121,24 +120,24 @@ cdef class CvodeSolver:
 
         # Create dense matrix for use in linear solves
         if self._state_size > 0:
-            IF FC_SUNDIALS_MAJOR >= 3:
+            if self._sundials_major >= 3:
                 # Create dense matrix
-                self.sundense_matrix = _lib.SUNDenseMatrix(
-                    self._state_size, self._state_size)
+                self.sundense_matrix = _lib.FC_SUNDenseMatrix(
+                    self._state_size, self._state_size, self.sunctx)
                 if self.sundense_matrix == NULL:
                     raise ProtocolError('Error calling CVODE routine SUNDenseMatrix: Null returned')
 
                 # Create linear solver
-                self.sundense_solver = _lib.SUNDenseLinearSolver(self._state, self.sundense_matrix)
+                self.sundense_solver = _lib.FC_SUNDenseLinearSolver(self._state, self.sundense_matrix, self.sunctx)
                 if self.sundense_solver == NULL:
                     raise ProtocolError('Error calling CVODE routine SUNDenseLinearSolver: Null returned')
 
                 # Tell cvode to use this solver
-                flag = _lib.CVDlsSetLinearSolver(self.cvode_mem, self.sundense_solver, self.sundense_matrix)
-                self.check_flag(flag, 'CVDlsSetLinearSolver')
-            ELSE:
+                flag = _lib.FC_CVodeSetLinearSolver(self.cvode_mem, self.sundense_solver, self.sundense_matrix)
+                self.check_flag(flag, 'CVodeSetLinearSolver')
+            else:
                 # Create dense matrix
-                flag = _lib.CVDense(self.cvode_mem, self._state_size)
+                flag = _lib.FC_CVDense(self.cvode_mem, self._state_size)
                 self.check_flag(flag, 'CVDense')
 
         _lib.CVodeSetMaxNumSteps(self.cvode_mem, 20000000)
