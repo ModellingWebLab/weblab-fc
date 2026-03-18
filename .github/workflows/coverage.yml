@@ -17,21 +17,20 @@ jobs:
 
     - name: Install Sundials
       run: |
-        sudo apt-get install libsundials-serial-dev
+        sudo apt-get install libsundials-dev
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install --upgrade pip
 
     - name: Build and install
       run: |
-        python -m pip install -e .[test]
+        python3 -m pip install -e .[test]
 
     - name: Unit & coverage tests
       run: |
-        python -m pytest --cov --cov-config=.coveragerc
+        python3 -m pytest --cov --cov-config=.coveragerc
 
     - name: Submit report to codecov
       uses: codecov/codecov-action@v5
       if: success()
-
