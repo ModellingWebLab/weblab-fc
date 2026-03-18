@@ -20,7 +20,7 @@ class Environment(object):
     Variables not found within the environment are looked up in its "default delegatee".
 
     For more information, see
-    https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Identifiersandnameresolution
+    https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Identifiersandnameresolution
     """
     next_ident = [0]
 

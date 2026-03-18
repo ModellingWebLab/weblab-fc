@@ -15,8 +15,9 @@ try:
 finally:
     # Always manually delete frame
     # https://docs.python.org/2/library/inspect.html#the-interpreter-stack
-    del(frame)
-del(os, inspect)
+    del frame
+del os
+del inspect
 
 
 from .protocol import Protocol  # noqa:F401,E402

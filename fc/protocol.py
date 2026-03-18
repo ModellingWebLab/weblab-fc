@@ -128,17 +128,17 @@ class Protocol(object):
         #
 
         # 1. The ``documentation`` section.
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Documentation
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Documentation
         # This is currently not stored in this object.
 
         # 2. Namespace bindings (no section, just a list of statements)
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Namespacebindings
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Namespacebindings
 
         # Maps namespaces (prefixes) to URIs.
         self.ns_map = {}
 
         # 3. Parsed results from the ``inputs`` section.
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Protocolinputdeclarations
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Protocolinputdeclarations
         # This contains inputs _to the protocol_, that can be used when this
         # protocol is used by another protocol.
 
@@ -147,12 +147,12 @@ class Protocol(object):
         self.inputs = []
 
         # 4. Any number of ``import`` statements (again, no section)
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Importsofotherprotocols
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Importsofotherprotocols
         # Maps an import 'name' prefix to a :class:`Protocol` instance.
         self.imports = {}
 
         # 5. The ``library`` section
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Library
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Library
         # Can contain assignment statements (``var = expr``), function
         # assignment statements (``var = lambda(...)``), or assertions
         # (``assert cond``).
@@ -160,7 +160,7 @@ class Protocol(object):
         self.library = []
 
         # 6. The ``units`` section
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Physicalunitdefinitions
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Physicalunitdefinitions
         # We store the definitions as well as the resolved units to allow for merging definitions from
         # imported protocols or nested protocols without the need to reconcile unit registries and exact
         # unit names.
@@ -173,20 +173,20 @@ class Protocol(object):
 
         # 8. The ``tasks`` section, which contains any number of simulation
         # tasks (possibly with nested ones).
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Simulationtasks
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Simulationtasks
         # Contains instances of :class:`fc.simulations.simulations.AbstractSimulation` subclasses.
         self.simulations = []
 
         # 9. The ``post-processing`` section, that contains post-processing
         # code
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Post-processing
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Post-processing
         # Contains statement instances, as with the library.
         self.post_processing = []
 
         # 10. The ``outputs`` section, listing outputs from the simulations or
         # from post-processing, that can be used in the ``plots`` section or by
         # other protocols.
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Protocoloutputs
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Protocoloutputs
 
         # A list of dictionaries, where each dict specifies a protocol output. They can have keys:
         # - name: name to give the output; should be a valid simple identifier.
@@ -199,7 +199,7 @@ class Protocol(object):
         self.outputs = []
 
         # 11. The ``plots`` section
-        # https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Graphicalplots
+        # https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Graphicalplots
         # A list of dictionaries with keys:
         # - title: title for the plot.
         # - x: name of the x-variable; should be a protocol output.
@@ -226,7 +226,7 @@ class Protocol(object):
         with actions.set_reference_source(self.proto_file):
             details = generator.expr()
         assert isinstance(details, dict)
-        del(generator)
+        del generator
 
         # Store protocol inputs
         self.inputs = details.get('inputs', [])
