@@ -32,7 +32,7 @@ def check_parse_results(actual, expected):
 
 def assert_parses(grammar, input, results):
     """Utility method to test that a given grammar parses an input as expected."""
-    actual_results = grammar.parseString(input, parseAll=True)
+    actual_results = grammar.parse_string(input, parseAll=True)
     check_parse_results(actual_results, results)
 
 
@@ -40,7 +40,7 @@ def assert_does_not_parse(grammar, input):
     """Utility method to test that a given grammar fails to parse an input."""
     strict_grammar = grammar + strict_string_end
     with pytest.raises(CSP.p.ParseBaseException):
-        strict_grammar.parseString(input)
+        strict_grammar.parse_string(input)
 
 
 def test_parsing_identifiers():
@@ -117,10 +117,10 @@ def test_parsing_trace():
     assert_parses(csp.expr, '(1 + a)?', [[['1', '+', 'a']]])
     assert_parses(csp.expr, '1 + a?', [['1', '+', ['a']]])
 
-    action = csp.expr.parseString('var?', parseAll=True)
+    action = csp.expr.parse_string('var?', parseAll=True)
     assert action[0].expr().trace
 
-    action = csp.expr.parseString('var', parseAll=True)
+    action = csp.expr.parse_string('var', parseAll=True)
     assert not action[0].expr().trace
 
 

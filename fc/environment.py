@@ -57,14 +57,14 @@ class Environment(object):
     def evaluate_expr(self, expr_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.expr.parseString(expr_str, parseAll=True)
+        parse_action = csp.expr.parse_string(expr_str, parseAll=True)
         expr = parse_action[0].expr()
         return expr.evaluate(env)
 
     def evaluate_statement(self, stmt_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.stmt_list.parseString(stmt_str, parseAll=True)
+        parse_action = csp.stmt_list.parse_string(stmt_str, parseAll=True)
         stmt_list = parse_action[0].expr()
         return env.execute_statements(stmt_list)
 
