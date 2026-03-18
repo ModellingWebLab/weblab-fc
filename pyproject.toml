@@ -1,3 +1,46 @@
 [build-system]
-requires = ["setuptools", "wheel", "numpy>=1,<2", "cython>=0,<3"]
+requires = ["numpy>=1,<2", "setuptools", "wheel", "cython>=0,<3"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "fc"
+version = "0.1.0"
+requires-python = ">= 3.6"
+dependencies = [
+    "cellmlmanip",
+    "cython",
+    "Jinja2>=2.10",
+    "matplotlib",
+    "numexpr",
+    "numpy>=1,<2",
+    "pyparsing!=2.4.2",
+    "scipy",
+    "tables",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-xdist[psutil]", # "line_profiler",
+]
+
+test = [
+    "codecov",
+    "flake8>=3.6",
+    "pytest>=3.6",
+    "pytest-cov",
+    "pytest-profiling",
+]
+
+[tool.pytest]
+testpaths = ["test"]
+norecursedirs = ["data"]
+
+[tool.isort]
+force_single_line = "False"
+multi_line_output = 5
+# ^ Hanging grid grouped
+line_length = 120
+known_first_party = "fc"
+default_section = "THIRDPARTY"
+order_by_type = "False"
+not_skip = "__init__.py"

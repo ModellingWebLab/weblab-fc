@@ -63,7 +63,7 @@ Compilation is performed using Python's [`setuptools`](https://setuptools.readth
 For developers, this can be done using:
 
 ```sh
-pip install -e ."[dev,test]"
+python3 -m pip install -e ."[dev,test]"
 ```
 
 Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.

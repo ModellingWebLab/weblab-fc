@@ -6,7 +6,9 @@ At present, this just exists to allow us to build our Cython SUNDIALS wrapper.
 If SUNDIALS is installed in a non-standard location, it requires environment variables
 (CFLAGS and LDFLAGS) to have been set up before running.
 """
+print("--------DEBUG: 00--------")
 import numpy
+print("--------DEBUG: 10--------")
 
 from setuptools import find_packages, setup  # Must come before Cython!
 from cython import inline
@@ -75,30 +77,6 @@ setup(
     ],
     cmdclass={'build_ext': build_ext},
     ext_modules=ext_modules,
-    install_requires=[
-        'cellmlmanip',
-        'cython',
-        'Jinja2>=2.10',
-        'matplotlib',
-        'numexpr',
-        'numpy',
-        'pyparsing!=2.4.2',
-        'scipy',
-        'tables',
-    ],
-    extras_require={
-        'dev': [
-            # 'line_profiler',
-            'pytest-xdist[psutil]',
-        ],
-        'test': [
-            'codecov',
-            'flake8>=3.6',
-            'pytest>=3.6',
-            'pytest-cov',
-            'pytest-profiling',
-        ],
-    },
     entry_points={
         'console_scripts': [
             'fc_run = fc.cli:run_protocol',
