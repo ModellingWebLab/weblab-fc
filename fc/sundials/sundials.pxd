@@ -8,8 +8,7 @@ Includes compatibility wrappers so Cython code can avoid deprecated compile-time
 cdef extern from "sundials/sundials_types.h":
     ctypedef long int sunindextype
     ctypedef double sunrealtype
-    ctypedef int sunbooleantype
-    ctypedef bint booleantype
+    ctypedef bint sunbooleantype
 
 cdef extern from "sundials/sundials_nvector.h":
     cdef struct _generic_N_Vector:

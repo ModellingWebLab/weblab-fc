@@ -22,10 +22,10 @@ from fc.error_handling import ProtocolError
 from fc.sundials.solver cimport CvodeSolver
 
 
-cdef int _evaluate_rhs(Sundials.realtype {{ free_variable }},
+cdef int _evaluate_rhs(Sundials.sunrealtype {{ free_variable }},
                        Sundials.N_Vector y,
                        Sundials.N_Vector ydot,
-                       void* user_data):
+                       void* user_data) noexcept:
     """
     Cython wrapper around a model RHS that uses numpy, for calling by CVODE.
 
@@ -33,7 +33,7 @@ cdef int _evaluate_rhs(Sundials.realtype {{ free_variable }},
     """
     # We passed the Python model object in as CVODE user data; get it back as an object
     model = <object>user_data
-    cdef np.ndarray[Sundials.realtype, ndim=1] parameters = <np.ndarray>model.parameters
+    cdef np.ndarray[Sundials.sunrealtype, ndim=1] parameters = <np.ndarray>model.parameters
 
     # Unpack state variables
     {%- for state in states %}
@@ -188,7 +188,7 @@ cdef class {{ class_name }}(CvodeSolver):
         self.associate_with_model(self)
         #self._parameters = Sundials.N_VMake_Serial(
         #    len(self.parameters),
-        #    <Sundials.realtype*>(<np.ndarray>self.parameters).data
+        #    <Sundials.sunrealtype*>(<np.ndarray>self.parameters).data
         #)
         self.env = ModelWrapperEnvironment(self)
 
@@ -221,7 +221,7 @@ cdef class {{ class_name }}(CvodeSolver):
         """
 
         # Get parameters as sundials realtype numpy array
-        cdef np.ndarray[Sundials.realtype, ndim=1] parameters = self.parameters
+        cdef np.ndarray[Sundials.sunrealtype, ndim=1] parameters = self.parameters
 
         # Get current free variable
         cdef double {{ free_variable }} = self.free_variable
