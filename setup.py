@@ -34,6 +34,7 @@ extensions = [
         name="fc.sundials.solver",
         sources=["fc/sundials/solver.pyx"],
         include_dirs=[".", numpy.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
         libraries=["sundials_cvode", "sundials_nvecserial"],
     ),
 ]
