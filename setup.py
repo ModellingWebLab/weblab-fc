@@ -6,14 +6,13 @@ non-standard location, it requires environment variables (CFLAGS and LDFLAGS)
 to have been set up before running.
 """
 
-from setuptools import Extension, setup  # Must come before Cython!
-
 import numpy
 from cython import inline
 from Cython.Build import cythonize
+from setuptools import Extension, setup
 
 # Detect major sundials version (defaults to 2)
-fc_sundials_major = inline(
+FC_SUNDIALS_MAJOR = inline(
     '''
     cdef extern from "<sundials/sundials_config.h>":
         """
@@ -26,7 +25,7 @@ fc_sundials_major = inline(
     return SUNDIALS_VERSION_MAJOR
     '''
 )
-print("Building for Sundials " + str(fc_sundials_major) + ".x")
+print("Building for Sundials " + str(FC_SUNDIALS_MAJOR) + ".x")
 
 # Define Cython modules
 extensions = [
@@ -46,6 +45,6 @@ setup(
     zip_safe=False,
     ext_modules=cythonize(
         extensions,
-        compile_time_env={"FC_SUNDIALS_MAJOR": fc_sundials_major},
+        compile_time_env={"FC_SUNDIALS_MAJOR": FC_SUNDIALS_MAJOR},
     ),
 )

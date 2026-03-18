@@ -30,18 +30,15 @@ from .plotting import create_plot
 # Setup script
 SETUP_PY = '''
 import numpy
-
-from setuptools import setup
 from cython import inline
-from Cython.Distutils import build_ext
-from Cython.Distutils.extension import Extension
+from Cython.Build import cythonize
+from setuptools import Extension, setup
 
 
-SUNDIALS_MAJOR = inline(\'''
-    cdef extern from *:
+FC_SUNDIALS_MAJOR = inline(
+    \'''
+    cdef extern from "<sundials/sundials_config.h>":
         """
-        #include <sundials/sundials_config.h>
-
         #ifndef SUNDIALS_VERSION_MAJOR
             #define SUNDIALS_VERSION_MAJOR 2
         #endif
@@ -49,22 +46,24 @@ SUNDIALS_MAJOR = inline(\'''
         int SUNDIALS_VERSION_MAJOR
 
     return SUNDIALS_VERSION_MAJOR
-    \''')
+    \'''
+)
 
-ext_modules=[
+extensions = [
     Extension(
-        '%(module_name)s',
-        sources=['%(model_file)s'],
-        include_dirs=[numpy.get_include(), '%(fcpath)s'],
-        libraries=['sundials_cvode', 'sundials_nvecserial', 'm'],
-        cython_compile_time_env={'FC_SUNDIALS_MAJOR': SUNDIALS_MAJOR},
+        name="%(module_name)s",
+        sources=["%(model_file)s"],
+        include_dirs=["%(fcpath)s", numpy.get_include()],
+        libraries=["sundials_cvode", "sundials_nvecserial"],
     ),
 ]
 
 setup(
-    name='%(module_name)s',
-    cmdclass={'build_ext': build_ext},
-    ext_modules=ext_modules,
+    name="%(module_name)s",
+    ext_modules=cythonize(
+        extensions,
+        compile_time_env={"FC_SUNDIALS_MAJOR": FC_SUNDIALS_MAJOR},
+    ),
 )
 '''
 

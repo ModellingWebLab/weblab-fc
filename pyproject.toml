@@ -74,4 +74,3 @@ line_length = 120
 known_first_party = "fc"
 default_section = "THIRDPARTY"
 order_by_type = "False"
-not_skip = "__init__.py"
