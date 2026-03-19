@@ -30,24 +30,8 @@ from .plotting import create_plot
 # Setup script
 SETUP_PY = '''
 import numpy
-from cython import inline
 from Cython.Build import cythonize
 from setuptools import Extension, setup
-
-
-SUNDIALS_VERSION_MAJOR = inline(
-    \'''
-    cdef extern from "<sundials/sundials_config.h>":
-        """
-        #ifndef SUNDIALS_VERSION_MAJOR
-            #define SUNDIALS_VERSION_MAJOR 2
-        #endif
-        """
-        int SUNDIALS_VERSION_MAJOR
-
-    return SUNDIALS_VERSION_MAJOR
-    \'''
-)
 
 extensions = [
     Extension(
@@ -58,13 +42,7 @@ extensions = [
     ),
 ]
 
-setup(
-    name="%(module_name)s",
-    ext_modules=cythonize(
-        extensions,
-        compile_time_env={"SUNDIALS_VERSION_MAJOR": SUNDIALS_VERSION_MAJOR},
-    ),
-)
+setup(name="%(module_name)s", ext_modules=cythonize(extensions))
 '''
 
 
