@@ -214,7 +214,7 @@ class CompactSyntaxParser(object):
     # Accessors
     accessor = p.Combine(adjacent(p.Suppress('.')) -
                          p.one_of('IS_SIMPLE_VALUE IS_ARRAY IS_STRING IS_TUPLE IS_FUNCTION IS_NULL IS_DEFAULT '
-                                 'NUM_DIMS NUM_ELEMENTS SHAPE')).set_name('.accessor (e.g. .IS_ARRAY)')
+                                  'NUM_DIMS NUM_ELEMENTS SHAPE')).set_name('.accessor (e.g. .IS_ARRAY)')
 
     # Indexing
     pad = (make_kw('pad') + adjacent(colon) - expr + eq + expr).set_results_name('pad')
@@ -257,20 +257,22 @@ class CompactSyntaxParser(object):
         array | wrap | number.copy().set_parse_action(actions.Number) | string_value |
         if_expr | null_value | default_value | lambda_expr | function_call | ident_as_var | tuple
     ).set_name('atomic expression')
-    expr <<= p.infix_notation(atom, [(accessor, 1, p.opAssoc.LEFT, actions.Accessor),
-                                    (view_spec, 1, p.opAssoc.LEFT, actions.View),
-                                    (index, 1, p.opAssoc.LEFT, actions.Index),
-                                    (trace, 1, p.opAssoc.LEFT, actions.Trace),
-                                    ('^', 2, p.opAssoc.LEFT, actions.Operator),
-                                    ('-', 1, p.opAssoc.RIGHT,
-                                        lambda *args: actions.Operator(*args, rightAssoc=True)),
-                                    (p.one_of('* /'), 2, p.opAssoc.LEFT, actions.Operator),
-                                    (p.one_of('+ -'), 2, p.opAssoc.LEFT, actions.Operator),
-                                    (p.Keyword('not'), 1, p.opAssoc.RIGHT,
-                                     lambda *args: actions.Operator(*args, rightAssoc=True)),
-                                    (p.one_of('== != <= >= < >'), 2, p.opAssoc.LEFT, actions.Operator),
-                                    (p.one_of('&& ||'), 2, p.opAssoc.LEFT, actions.Operator)
-                                    ])
+    expr <<= p.infix_notation(
+        atom,
+        [
+            (accessor, 1, p.opAssoc.LEFT, actions.Accessor),
+            (view_spec, 1, p.opAssoc.LEFT, actions.View),
+            (index, 1, p.opAssoc.LEFT, actions.Index),
+            (trace, 1, p.opAssoc.LEFT, actions.Trace),
+            ("^", 2, p.opAssoc.LEFT, actions.Operator),
+            ("-", 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
+            (p.one_of("* /"), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.one_of("+ -"), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.Keyword("not"), 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
+            (p.one_of("== != <= >= < >"), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.one_of("&& ||"), 2, p.opAssoc.LEFT, actions.Operator),
+        ],
+    )
 
     # Simpler expressions containing no arrays, functions, etc. Used in the model interface.
     simple_expr = p.Forward().set_name('simple expression')
@@ -283,14 +285,15 @@ class CompactSyntaxParser(object):
     simple_expr <<= p.infix_notation(
         number.copy().set_parse_action(actions.Number) | simple_if_expr | simple_function_call | ident_as_var,
         [
-            ('^', 2, p.opAssoc.LEFT, actions.Operator),
-            ('-', 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
-            (p.one_of('* /'), 2, p.opAssoc.LEFT, actions.Operator),
-            (p.one_of('+ -'), 2, p.opAssoc.LEFT, actions.Operator),
-            (p.Keyword('not'), 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
-            (p.one_of('== != <= >= < >'), 2, p.opAssoc.LEFT, actions.Operator),
-            (p.one_of('&& ||'), 2, p.opAssoc.LEFT, actions.Operator)
-        ])
+            ("^", 2, p.opAssoc.LEFT, actions.Operator),
+            ("-", 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
+            (p.one_of("* /"), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.one_of("+ -"), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.Keyword("not"), 1, p.opAssoc.RIGHT, lambda *args: actions.Operator(*args, rightAssoc=True)),
+            (p.one_of("== != <= >= < >"), 2, p.opAssoc.LEFT, actions.Operator),
+            (p.one_of("&& ||"), 2, p.opAssoc.LEFT, actions.Operator),
+        ],
+    )
     simple_param_list = p.Group(optional_delimited_list(p.Group(nc_ident_as_var), comma))
     simple_lambda_expr = p.Group(make_kw('lambda') - simple_param_list + colon -
                                  simple_expr).set_name('simple lambda function').set_parse_action(actions.Lambda)
@@ -381,22 +384,27 @@ class CompactSyntaxParser(object):
 
     # Units definitions
     si_prefix = p.one_of('deka hecto kilo mega giga tera peta exa zetta yotta'
-                        'deci centi milli micro nano pico femto atto zepto yocto')
+                         'deci centi milli micro nano pico femto atto zepto yocto')
     _num_or_expr = p.original_text_for(plain_number | (oparen + expr + cparen))
     unit_ref = p.Group(Optional(_num_or_expr)("multiplier") + Optional(si_prefix)("prefix") + nc_ident("units") +
                        Optional(p.Suppress('^') + plain_number)("exponent") +
                        Optional(p.Group(p.one_of('- +') + _num_or_expr))("offset")).set_parse_action(actions.UnitRef)
     units_def = p.Group(nc_ident + eq + p.DelimitedList(unit_ref, '.') + Optional(quoted_string)("description")
                         ).set_name('units definition').set_parse_action(actions.UnitsDef)
-    units = (make_kw('units') - obrace - optional_delimited_list(units_def, nl) + cbrace
-             ).set_results_name("units").set_name('units section').set_parse_action(actions.Units)
+    units = (
+        (make_kw("units") - obrace - optional_delimited_list(units_def, nl) + cbrace)
+        .set_results_name("units")
+        .set_name("units section")
+        .set_parse_action(actions.Units)
+    )
 
     # Model interface section
     #########################
     units_ref = make_kw('units') - nc_ident
 
     # Setting the units for the independent variable
-    set_time_units = (make_kw('independent') - make_kw('var') - units_ref("units")).set_parse_action(actions.SetTimeUnits)
+    set_time_units = (make_kw('independent') - make_kw('var') -
+                      units_ref("units")).set_parse_action(actions.SetTimeUnits)
 
     # Input variables, with optional units and initial value
     input_variable = p.Group(
