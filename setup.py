@@ -12,18 +12,21 @@ from Cython.Build import cythonize
 from setuptools import Extension, setup
 
 # Detect major sundials version
-SUNDIALS_MAJOR = inline(
+sundials_major = inline(
     '''
-    cdef extern from "sundials/sundials_config.h":
+    cdef extern from *:
+        """
+        #include <sundials/sundials_config.h>
+        """
         int SUNDIALS_VERSION_MAJOR
 
     return SUNDIALS_VERSION_MAJOR
     '''
 )
 
-assert SUNDIALS_MAJOR >= 3, f"Unsupported Sundials version: {SUNDIALS_MAJOR}"
+assert sundials_major >= 3, f"Unsupported SUNDIALS version {sundials_major}"
 
-print(f"Building for Sundials {SUNDIALS_MAJOR}")
+print(f"Building for Sundials {sundials_major}.x")
 
 # Define Cython modules
 extensions = [
@@ -31,7 +34,6 @@ extensions = [
         name="fc.sundials.solver",
         sources=["fc/sundials/solver.pyx"],
         include_dirs=[".", numpy.get_include()],
-        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
         libraries=["sundials_cvode", "sundials_nvecserial"],
     ),
 ]
@@ -41,8 +43,5 @@ setup(
     name="fc",
     include_package_data=True,  # Include non-python files via MANIFEST.in
     zip_safe=False,
-    ext_modules=cythonize(
-        extensions,
-        compile_time_env={"SUNDIALS_MAJOR": SUNDIALS_MAJOR},
-    ),
+    ext_modules=cythonize(extensions),
 )

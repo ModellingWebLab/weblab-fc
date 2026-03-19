@@ -2,7 +2,7 @@
 """
 Minimal Cython interface to the (CVODE part of the) SUNDIALS library, for use by Functional Curation.
 
-Handles both SUNDIALS 2.4 and 2.5, since the parts of the interface we use didn't change.
+Handles SUNDIALS 3.x to 7.x
 
 Based on http://code.google.com/p/python-sundials/source/browse/trunk/sundials/SundialsLib.pxd
 """
@@ -18,7 +18,6 @@ cdef extern from "sundials/sundials_nvector.h":
     ctypedef _generic_N_Vector *N_Vector
 
 cdef extern from "nvector/nvector_serial.h":
-    cdef N_Vector N_VMake_Serial(long int vec_length, realtype *v_data)
     N_Vector N_VNew_Serial(long int vec_length)
     void N_VDestroy_Serial(N_Vector v)
     void N_VPrint_Serial(N_Vector v)
@@ -67,13 +66,6 @@ cdef extern from "cvode/cvode.h":
 
     ctypedef int (*CVRhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     ctypedef int (*CVRootFn)(realtype t, N_Vector y, realtype *gout, void *user_data)
-
-    # In version 4 Newton iteration became the default, and a new syntax was
-    # introduced to change it (which we don't need to use here)
-    IF SUNDIALS_MAJOR >= 4:
-        void *CVodeCreate(int lmm)
-    ELSE:
-        void *CVodeCreate(int lmm, int iter)
 
     int CVodeSetUserData(void *cvode_mem, void *user_data)
     int CVodeInit(void *cvode_mem, CVRhsFn f, realtype t0, N_Vector y0)
@@ -131,27 +123,109 @@ cdef extern from "cvode/cvode.h":
     char *CVodeGetReturnFlagName(int flag)
     void CVodeFree(void **cvode_mem)
 
-IF SUNDIALS_MAJOR >= 3:
-    cdef extern from "sundials/sundials_matrix.h":
-        ctypedef struct _generic_SUNMatrix:
-            pass
-        ctypedef _generic_SUNMatrix* SUNMatrix
-        void SUNMatDestroy(SUNMatrix A)
+# All version-dependent wrappers in one C verbatim block.
+cdef extern from *:
+    """
+    #include <sundials/sundials_config.h>
+    #include <cvode/cvode.h>
+    #include <nvector/nvector_serial.h>
+    #include <sunmatrix/sunmatrix_dense.h>
+    #include <sunlinsol/sunlinsol_dense.h>
+    #include <sundials/sundials_matrix.h>
+    
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        #include <sundials/sundials_context.h>
+        #include <cvode/cvode_ls.h>
+    #elif SUNDIALS_VERSION_MAJOR >= 4
+        #include <cvode/cvode_ls.h>
+    #else
+        #include <cvode/cvode_direct.h>
+    #endif
 
-    cdef extern from "sunmatrix/sunmatrix_dense.h":
-        SUNMatrix SUNDenseMatrix(sunindextype M, sunindextype N)
+    /* In Sundials 7+, realtype was renamed to sunrealtype; provide alias for generated C code */
+    #if SUNDIALS_VERSION_MAJOR >= 7
+    typedef sunrealtype realtype;
+    #endif
 
-    cdef extern from "sunlinsol/sunlinsol_dense.h":
-        ctypedef struct _generic_SUNLinearSolver:
-            pass
-        ctypedef _generic_SUNLinearSolver* SUNLinearSolver
-        void SUNLinSolFree(SUNLinearSolver)
+    /* Create / free a SUNContext (v6+) or return NULL no-op for older versions */
+    static void* fc_SUNContext_Create(void) {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        SUNContext sunctx = NULL;
+        SUNContext_Create(NULL, &sunctx);
+        return (void*)sunctx;
+    #else
+        return NULL;
+    #endif
+    }
 
-    cdef extern from "sundials/sundials_linearsolver.h":
-        SUNLinearSolver SUNDenseLinearSolver(N_Vector y, SUNMatrix A)
+    static void fc_SUNContext_Free(void* sunctx_ptr) {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        SUNContext ctx = (SUNContext)sunctx_ptr;
+        if (ctx) SUNContext_Free(&ctx);
+    #endif
+    }
 
-    cdef extern from "cvode/cvode_direct.h":
-        int CVDlsSetLinearSolver(void* cvode_mem, SUNLinearSolver LS, SUNMatrix A)
-ELSE:
-    cdef extern from "cvode/cvode_dense.h":
-        int CVDense(void *cvode_mem, int N)
+    /* CVodeCreate wrapper: adds sunctx arg for v6+, drops iter arg in v4+ */
+    static void* fc_CVodeCreate(int lmm, void* sunctx) {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return CVodeCreate(lmm, (SUNContext)sunctx);
+    #elif SUNDIALS_VERSION_MAJOR >= 4
+        return CVodeCreate(lmm);
+    #else
+        return CVodeCreate(lmm, CV_NEWTON);
+    #endif
+    }
+
+    /* N_VMake_Serial wrapper: adds sunctx arg for v6+ */
+    static N_Vector fc_N_VMake_Serial(int len, double* data, void* sunctx) {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return N_VMake_Serial((sunindextype)len, data, (SUNContext)sunctx);
+    #else
+        return N_VMake_Serial((long int)len, data);
+    #endif
+    }
+
+    /* SUNDenseMatrix wrapper: adds sunctx arg for v6+ */
+    static void* fc_SUNDenseMatrix(int M, int N, void* sunctx) {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return (void*)SUNDenseMatrix((sunindextype)M, (sunindextype)N, (SUNContext)sunctx);
+    #else
+        return (void*)SUNDenseMatrix(M, N);
+    #endif
+    }
+
+    /* Dense linear solver: renamed to SUNLinSol_Dense in v6; adds sunctx */
+    static void* fc_SUNLinSol_Dense(void* y, void* A, void* sunctx) {
+    #if SUNDIALS_VERSION_MAJOR >= 6
+        return (void*)SUNLinSol_Dense((N_Vector)y, (SUNMatrix)A, (SUNContext)sunctx);
+    #else
+        return (void*)SUNDenseLinearSolver((N_Vector)y, (SUNMatrix)A);
+    #endif
+    }
+
+    /* CVodeSetLinearSolver: renamed from CVDlsSetLinearSolver in v4+ */
+    static int fc_CVodeSetLinearSolver(void* cvode_mem, void* LS, void* A) {
+    #if SUNDIALS_VERSION_MAJOR >= 4
+        return CVodeSetLinearSolver(cvode_mem, (SUNLinearSolver)LS, (SUNMatrix)A);
+    #else
+        return CVDlsSetLinearSolver(cvode_mem, (SUNLinearSolver)LS, (SUNMatrix)A);
+    #endif
+    }
+
+    static void fc_SUNLinSolFree(void* LS) {
+        if (LS) SUNLinSolFree((SUNLinearSolver)LS);
+    }
+
+    static void fc_SUNMatDestroy(void* A) {
+        if (A) SUNMatDestroy((SUNMatrix)A);
+    }
+    """
+    void* fc_SUNContext_Create()
+    void fc_SUNContext_Free(void* sunctx)
+    void* fc_CVodeCreate(int lmm, void* sunctx)
+    N_Vector fc_N_VMake_Serial(int len, realtype* data, void* sunctx)
+    void* fc_SUNDenseMatrix(int M, int N, void* sunctx)
+    void* fc_SUNLinSol_Dense(void* y, void* A, void* sunctx)
+    int fc_CVodeSetLinearSolver(void* cvode_mem, void* LS, void* A)
+    void fc_SUNLinSolFree(void* LS)
+    void fc_SUNMatDestroy(void* A)

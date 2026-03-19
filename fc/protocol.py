@@ -35,7 +35,7 @@ from Cython.Build import cythonize
 from setuptools import Extension, setup
 
 
-SUNDIALS_MAJOR = inline(
+SUNDIALS_VERSION_MAJOR = inline(
     \'''
     cdef extern from "<sundials/sundials_config.h>":
         """
@@ -62,7 +62,7 @@ setup(
     name="%(module_name)s",
     ext_modules=cythonize(
         extensions,
-        compile_time_env={"SUNDIALS_MAJOR": SUNDIALS_MAJOR},
+        compile_time_env={"SUNDIALS_VERSION_MAJOR": SUNDIALS_VERSION_MAJOR},
     ),
 )
 '''
