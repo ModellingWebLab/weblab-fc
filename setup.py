@@ -11,21 +11,19 @@ from cython import inline
 from Cython.Build import cythonize
 from setuptools import Extension, setup
 
-# Detect major sundials version (defaults to 2)
-FC_SUNDIALS_MAJOR = inline(
+# Detect major sundials version
+SUNDIALS_MAJOR = inline(
     '''
-    cdef extern from "<sundials/sundials_config.h>":
-        """
-        #ifndef SUNDIALS_VERSION_MAJOR
-            #define SUNDIALS_VERSION_MAJOR 2
-        #endif
-        """
+    cdef extern from "sundials/sundials_config.h":
         int SUNDIALS_VERSION_MAJOR
 
     return SUNDIALS_VERSION_MAJOR
     '''
 )
-print("Building for Sundials " + str(FC_SUNDIALS_MAJOR) + ".x")
+
+assert SUNDIALS_MAJOR >= 3, f"Unsupported Sundials version: {SUNDIALS_MAJOR}"
+
+print(f"Building for Sundials {SUNDIALS_MAJOR}")
 
 # Define Cython modules
 extensions = [
@@ -45,6 +43,6 @@ setup(
     zip_safe=False,
     ext_modules=cythonize(
         extensions,
-        compile_time_env={"FC_SUNDIALS_MAJOR": FC_SUNDIALS_MAJOR},
+        compile_time_env={"SUNDIALS_MAJOR": SUNDIALS_MAJOR},
     ),
 )

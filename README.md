@@ -46,7 +46,7 @@ The ontologies used are in a separate module, to install this run
 git submodule update --init
 ```
 
-You also need to have CVODE (from Sundials) installed. If you do this with your system package
+You also need to have CVODE (from Sundials v3+) installed. If you do this with your system package
 manager no further setup is (probably) needed. Alternatively you can install it using `conda`:
 ```sh
 conda install sundials -c conda-forge
