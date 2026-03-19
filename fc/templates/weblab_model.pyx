@@ -319,7 +319,8 @@ cdef np.ndarray {{ table.table_name }} = np.array({{ table.data_code }})
 
 cdef double {{ table.lookup_call }}:
     """Look up data from {{ table }}."""
-    assert {{ table.index_name }} >= {{ table.initial_index }} and {{ table.index_name }} <= {{ table.final_index }}
+    assert {{ table.index_name }} >= {{ table.initial_index }}
+    assert {{ table.index_name }} <= {{ table.final_index }}
     cdef double offset_over_step = ({{ table.index_name }} - {{ table.initial_index }}) * {{ table.step_inverse }}
     cdef unsigned index = <unsigned>(offset_over_step)
     cdef double y1 = {{ table.table_name }}[index]

@@ -610,7 +610,7 @@ class Protocol(object):
 
             # Compile the extension module
             result = subprocess.run(
-                ['python', 'setup.py', 'build_ext', '--inplace'],
+                [sys.executable, 'setup.py', 'build_ext', '--inplace'],
                 cwd=temp_dir,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             )
