@@ -6,11 +6,12 @@ non-standard location, it requires environment variables (CFLAGS and LDFLAGS)
 to have been set up before running.
 """
 
-import numpy
 import warnings
-from cython import inline
-from Cython.Build import cythonize
+
 from setuptools import Extension, setup
+from Cython.Build import cythonize
+from cython import inline
+import numpy
 
 # Detect major sundials version
 sundials_major = inline(
@@ -26,7 +27,7 @@ sundials_major = inline(
     force=True,  # Always re-compile to pick up environment changes
 )
 
-if sundials_major < 3:
+if not (3 <= sundials_major <= 7):
     warnings.warn(f"Unsupported SUNDIALS version {sundials_major}")
 
 print(f"Building for Sundials {sundials_major}.x")
@@ -48,3 +49,6 @@ setup(
     zip_safe=False,
     ext_modules=cythonize(extensions, force=True),
 )
+
+# Deprecated NumPy API warning will disappear when we upgrade to numpy 2.x, see
+# https://cython.readthedocs.io/en/stable/src/userguide/numpy_tutorial.html#compilation-using-setuptools
