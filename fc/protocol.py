@@ -29,9 +29,9 @@ from .plotting import create_plot
 
 # Setup script
 SETUP_PY = '''
-import numpy
-from Cython.Build import cythonize
 from setuptools import Extension, setup
+from Cython.Build import cythonize
+import numpy
 
 extensions = [
     Extension(

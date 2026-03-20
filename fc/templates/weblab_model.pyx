@@ -310,7 +310,6 @@ cdef class {{ class_name }}(CvodeSolver):
 
         See :meth:`fc.simulations.AbstractOdeModel.set_solver()`.
         """
-        # TODO Update this (and rest of fc) to Python3
         # TODO Use logging here, or raise an exception
         print('  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.', file=sys.stderr)
 
