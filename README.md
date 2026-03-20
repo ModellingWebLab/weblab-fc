@@ -13,10 +13,8 @@ An ongoing attempt to document the Web Lab and all its interconnected technologi
 > [!NOTE]
 > ### No Windows support
 > 
-> **FC is tested/developed on Linux and OS/X. There are no plans to run it work on Windows**.
-> 
-> It _might_ run on Windows, if you have installed CVODE with the shared libraries, 
-> and an MSVC > compiler that matches your Python installation (see [here](https://wiki.python.org/moin/WindowsCompilers)).
+> FC is tested/developed on Linux and OS/X. There are no plans to make it run on Windows.
+> We recommend the [Windows Subsystem for Linux](https://github.com/microsoft/WSL).
 
 > [!WARNING]
 > ### Transition!
@@ -63,7 +61,7 @@ Compilation is performed using Python's [`setuptools`](https://setuptools.readth
 For developers, this can be done using:
 
 ```sh
-python3 -m pip install -e ."[dev,test]"
+python3 -m pip install -e ."[dev]"
 ```
 
 Note that you'll need to repeat this step after any changes to Cython files (e.g. `.pyx` or `.pxd` files), because these don't automatically get recompiled.

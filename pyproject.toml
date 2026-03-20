@@ -40,15 +40,13 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest-xdist[psutil]", # "line_profiler",
-]
-
-test = [
     "codecov",
     "flake8>=6.0",
+    # "line_profiler",
     "pytest>=8.0",
     "pytest-cov",
     "pytest-profiling",
+    "pytest-xdist[psutil]",
 ]
 
 [project.urls]
