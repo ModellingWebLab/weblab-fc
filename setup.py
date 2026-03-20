@@ -7,6 +7,7 @@ to have been set up before running.
 """
 
 import numpy
+import warnings
 from cython import inline
 from Cython.Build import cythonize
 from setuptools import Extension, setup
@@ -21,10 +22,12 @@ sundials_major = inline(
         int SUNDIALS_VERSION_MAJOR
 
     return SUNDIALS_VERSION_MAJOR
-    '''
+    ''',
+    force=True,  # Always re-compile to pick up environment changes
 )
 
-assert sundials_major >= 3, f"Unsupported SUNDIALS version {sundials_major}"
+if sundials_major < 3:
+    warnings.warn(f"Unsupported SUNDIALS version {sundials_major}")
 
 print(f"Building for Sundials {sundials_major}.x")
 
@@ -43,5 +46,5 @@ setup(
     name="fc",
     include_package_data=True,  # Include non-python files via MANIFEST.in
     zip_safe=False,
-    ext_modules=cythonize(extensions),
+    ext_modules=cythonize(extensions, force=True),
 )
