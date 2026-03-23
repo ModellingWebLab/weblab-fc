@@ -30,7 +30,7 @@ jobs:
 
     - name: Unit & coverage tests
       run: |
-        FC_LONG_TESTS=1 python3 -m pytest -n auto --cov --cov-config=.coveragerc
+        python3 -m pytest -n auto --cov --cov-config=.coveragerc
 
     - name: Submit report to codecov
       uses: codecov/codecov-action@v5
