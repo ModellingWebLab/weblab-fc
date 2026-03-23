@@ -8,7 +8,8 @@ The main class is then available as `fc.Protocol`.
 Extensions of Functional Curation can instead import the variable sub-packages and modules directly.
 """
 
-import os, inspect  # noqa
+import os
+import inspect
 try:
     frame = inspect.currentframe()
     MODULE_DIR = os.path.dirname(inspect.getfile(frame))
@@ -20,4 +21,8 @@ del os
 del inspect
 
 
-from .protocol import Protocol  # noqa:F401,E402
+from .protocol import Protocol  # noqa:E402
+
+__all__ = [
+    "Protocol",
+]
