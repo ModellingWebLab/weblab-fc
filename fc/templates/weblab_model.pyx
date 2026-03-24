@@ -25,7 +25,7 @@ from fc.sundials.solver cimport CvodeSolver
 cdef int _evaluate_rhs(Sundials.realtype {{ free_variable }},
                        Sundials.N_Vector y,
                        Sundials.N_Vector ydot,
-                       void* user_data):
+                       void* user_data) noexcept:
     """
     Cython wrapper around a model RHS that uses numpy, for calling by CVODE.
 
@@ -310,16 +310,16 @@ cdef class {{ class_name }}(CvodeSolver):
 
         See :meth:`fc.simulations.AbstractOdeModel.set_solver()`.
         """
-        # TODO Update this (and rest of fc) to Python3
         # TODO Use logging here, or raise an exception
-        print >>sys.stderr, '  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.'
+        print('  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.', file=sys.stderr)
 
 {%- for table in data_tables %}
 cdef np.ndarray {{ table.table_name }} = np.array({{ table.data_code }})
 
 cdef double {{ table.lookup_call }}:
     """Look up data from {{ table }}."""
-    assert {{ table.index_name }} >= {{ table.initial_index }} and {{ table.index_name }} <= {{ table.final_index }}
+    assert {{ table.index_name }} >= {{ table.initial_index }}
+    assert {{ table.index_name }} <= {{ table.final_index }}
     cdef double offset_over_step = ({{ table.index_name }} - {{ table.initial_index }}) * {{ table.step_inverse }}
     cdef unsigned index = <unsigned>(offset_over_step)
     cdef double y1 = {{ table.table_name }}[index]

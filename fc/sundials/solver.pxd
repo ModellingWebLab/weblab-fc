@@ -5,9 +5,6 @@ cimport fc.sundials.sundials as _lib
 # Save typing
 ctypedef _lib.N_Vector N_Vector
 ctypedef np.float64_t realtype
-IF FC_SUNDIALS_MAJOR >= 3:
-    ctypedef _lib.SUNMatrix SUNMatrix
-    ctypedef _lib.SUNLinearSolver SUNLinearSolver
 
 
 cdef class CvodeSolver:
@@ -19,6 +16,13 @@ cdef class CvodeSolver:
     cdef public np.ndarray state # Numpy view of the state vector
     cdef public object model # The model being simulated
 
+    # SUNContext (v6+; NULL for older versions)
+    cdef void* sunctx
+
+    # Linear matrix solving (opaque void* pointers to SUNMatrix and SUNLinearSolver)
+    cdef void* sundense_matrix
+    cdef void* sundense_solver
+
     cpdef associate_with_model(self, model)
     cpdef reset_solver(self, np.ndarray[realtype, ndim=1] reset_to)
     cpdef set_free_variable(self, realtype t)
@@ -26,9 +30,3 @@ cdef class CvodeSolver:
 
     cdef re_init(self)
     cdef check_flag(self, int flag, char* called)
-
-    IF FC_SUNDIALS_MAJOR >= 3:
-        # Linear matrix solving in sundials 3+
-        cdef SUNMatrix sundense_matrix
-        cdef SUNLinearSolver sundense_solver
-

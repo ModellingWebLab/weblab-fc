@@ -25,7 +25,7 @@ from fc.sundials.solver cimport CvodeSolver
 cdef int _evaluate_rhs(Sundials.realtype var_time,
                        Sundials.N_Vector y,
                        Sundials.N_Vector ydot,
-                       void* user_data):
+                       void* user_data) noexcept:
     """
     Cython wrapper around a model RHS that uses numpy, for calling by CVODE.
 
@@ -319,7 +319,6 @@ cdef class TestModel(CvodeSolver):
 
         See :meth:`fc.simulations.AbstractOdeModel.set_solver()`.
         """
-        # TODO Update this (and rest of fc) to Python3
         # TODO Use logging here, or raise an exception
-        print >>sys.stderr, '  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.'
+        print('  ' * self.indent_level, 'set_solver: Models implemented using Cython contain a built-in ODE solver, so ignoring setting.', file=sys.stderr)
 
