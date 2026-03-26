@@ -66,7 +66,13 @@ def test_fc_experiment(model_name, protocol_settings, tmpdir, request):
         mapping output name to number of dimensions
     """
     proto_name, expected_outputs = protocol_settings
-    print(f'Applying {proto_name} to {model_name}')
+    if os.environ.get('FC_OUTPUT_FOLDER') and os.path.isdir(os.environ['FC_OUTPUT_FOLDER']):
+        os.environ['CHASTE_TEST_OUTPUT'] = os.environ['FC_OUTPUT_FOLDER']
+        output_path = os.path.join(os.environ['FC_OUTPUT_FOLDER'], model_name, proto_name)
+    else:
+        os.environ['CHASTE_TEST_OUTPUT'] = str(tmpdir)
+        output_path = str(tmpdir / 'output')
+    print(f'Applying {proto_name} to {model_name} and writing to {output_path}')
 
     # If there are missing reference results then this is expected to fail
     data_folder = f'test/output/real/{model_name}/{proto_name}'
@@ -77,8 +83,7 @@ def test_fc_experiment(model_name, protocol_settings, tmpdir, request):
 
     # Try to run the protocol
     proto = fc.Protocol('test/protocols/real/%s.txt' % proto_name)
-    os.environ['CHASTE_TEST_OUTPUT'] = str(tmpdir)
-    proto.set_output_folder(str(tmpdir / 'output'))
+    proto.set_output_folder(output_path)
     proto.set_model('test/models/real/%s.cellml' % model_name)
     for input in ['max_paces', 'max_steady_state_beats']:
         try:

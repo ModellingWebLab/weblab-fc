@@ -178,7 +178,7 @@ class BaseAction(object):
 
     def __eq__(self, other):
         """Comparison of these parse results to another instance or a list."""
-        if type(other) == type(self):
+        if isinstance(other, type(self)):
             return self.tokens == other.tokens
         elif isinstance(other, list):
             return self.tokens == other
@@ -1176,8 +1176,8 @@ class ProtocolVariable():
 class ModelInterface(BaseGroupAction):
     """Parse action for the model interface section of a protocol.
 
-    See https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface for more on the syntax
-    and semantics of the model interface.
+    See https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Modelinterface for more on
+    the syntax and semantics of the model interface.
 
     Includes helper methods for merging model interfaces, e.g. when one protocol imports another.
 
@@ -1346,7 +1346,7 @@ class ModelInterface(BaseGroupAction):
         self.units = units
 
         # Time variable may be replaced, so delete this reference just to be safe
-        del(time_variable)
+        del time_variable
 
         # Annotate all state variables with the magic `oxmeta:state_variable` term. This is done before unit conversion
         # so that annotations are transferred where needed. The original order in which state variables were defined is

@@ -30,13 +30,17 @@ def run_protocol():
 def extract_outputs():
     """Extract CSV files of outputs from a single HDF5 file."""
     parser = argparse.ArgumentParser(description='Extract CSV files from a protocol output HDF5 file')
+    parser.add_argument('-o', '--output', help='a specific output name to extract')
     parser.add_argument('h5path', help='path to the HDF5 file containing all outputs')
     args = parser.parse_args()
 
     with tables.open_file(args.h5path, 'r') as h5file:
         output_folder = os.path.dirname(args.h5path)
-        for output in h5file.root.output._v_leaves.keys():
-            extract_output(h5file, output, output_folder)
+        if args.output:
+            extract_output(h5file, args.output, output_folder)
+        else:
+            for output in h5file.root.output._v_leaves.keys():
+                extract_output(h5file, output, output_folder)
 
 
 def check_syntax():
