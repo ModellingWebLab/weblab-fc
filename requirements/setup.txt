@@ -1,3 +1,0 @@
-# These packages are required in order to run setup.py, and hence install this project
-cython
-numpy

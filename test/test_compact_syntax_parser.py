@@ -5,7 +5,7 @@ import fc.parsing.CompactSyntaxParser as CSP
 
 csp = CSP.CompactSyntaxParser
 # An end-of-string match that doesn't allow trailing whitespace
-strict_string_end = CSP.p.StringEnd().leaveWhitespace()
+strict_string_end = CSP.p.StringEnd().leave_whitespace()
 
 
 def check_parse_results(actual, expected):
@@ -32,7 +32,7 @@ def check_parse_results(actual, expected):
 
 def assert_parses(grammar, input, results):
     """Utility method to test that a given grammar parses an input as expected."""
-    actual_results = grammar.parseString(input, parseAll=True)
+    actual_results = grammar.parse_string(input, parse_all=True)
     check_parse_results(actual_results, results)
 
 
@@ -40,7 +40,7 @@ def assert_does_not_parse(grammar, input):
     """Utility method to test that a given grammar fails to parse an input."""
     strict_grammar = grammar + strict_string_end
     with pytest.raises(CSP.p.ParseBaseException):
-        strict_grammar.parseString(input)
+        strict_grammar.parse_string(input)
 
 
 def test_parsing_identifiers():
@@ -117,10 +117,10 @@ def test_parsing_trace():
     assert_parses(csp.expr, '(1 + a)?', [[['1', '+', 'a']]])
     assert_parses(csp.expr, '1 + a?', [['1', '+', ['a']]])
 
-    action = csp.expr.parseString('var?', parseAll=True)
+    action = csp.expr.parse_string('var?', parse_all=True)
     assert action[0].expr().trace
 
-    action = csp.expr.parseString('var', parseAll=True)
+    action = csp.expr.parse_string('var', parse_all=True)
     assert not action[0].expr().trace
 
 
@@ -758,7 +758,7 @@ def test_parsing_find_and_index():
 def test_parsing_units_definitions():
     # Possible syntax:  (mult, offset, expt are 'numbers'; prefix is SI prefix name; base is ncIdent)
     #  new_simple = [mult] [prefix] base [+|- offset]
-    #  new_complex = p.delimitedList( [mult] [prefix] base [^expt], '.')
+    #  new_complex = p.DelimitedList( [mult] [prefix] base [^expt], '.')
     assert_parses(csp.units_def, 'ms = milli second', [['ms', ['milli', 'second']]])
     assert_parses(csp.units_def, 'C = kelvin - 273.15', [['C', ['kelvin', ['-', '273.15']]]])
     assert_parses(csp.units_def, 'C=kelvin+(-273.15)', [['C', ['kelvin', ['+', '(-273.15)']]]])

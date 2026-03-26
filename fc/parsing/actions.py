@@ -47,7 +47,16 @@ MATHML = {'log': E.Log, 'ln': E.Ln, 'exp': E.Exp, 'abs': E.Abs, 'ceiling': E.Cei
           'power': E.Power,
           'plus': E.Plus, 'minus': E.Minus, 'times': E.Times, 'divide': E.Divide,
           'eq': E.Eq, 'neq': E.Neq, 'lt': E.Lt, 'gt': E.Gt, 'leq': E.Leq, 'geq': E.Geq,
-          'not': E.Not, 'and': E.And, 'or': E.Or}
+          'not': E.Not, 'and': E.And, 'or': E.Or,
+          'sin': E.Sin, 'cos': E.Cos, 'tan': E.Tan,
+          'arcsin': E.ArcSin, 'arccos': E.ArcCos, 'arctan': E.ArcTan,
+          'sinh': E.Sinh, 'cosh': E.Cosh, 'tanh': E.Tanh,
+          'arcsinh': E.ArcSinh, 'arccosh': E.ArcCosh, 'arctanh': E.ArcTanh,
+          'sec': E.Sec, 'csc': E.Csc, 'cot': E.Cot,
+          'arcsec': E.ArcSec, 'arccsc': E.ArcCsc, 'arccot': E.ArcCot,
+          'sech': E.Sech, 'csch': E.Csch, 'coth': E.Coth,
+          'arcsech': E.ArcSech, 'arccsch': E.ArcCsch, 'arccoth': E.ArcCoth,
+          }
 VALUES = {'true': E.Const(V.Simple(True)), 'false': E.Const(V.Simple(False)),
           'exponentiale': E.Const(V.Simple(math.e)),
           'infinity': E.Const(V.Simple(float('inf'))),
@@ -78,7 +87,7 @@ SYMPY_MATHML = {
     E.Floor: sympy.floor,
     E.Max: sympy.Max,
     E.Min: sympy.Min,
-    E.Rem: sympy.mod,
+    E.Rem: sympy.Mod,
     E.Root: sympy.sqrt,
     E.Power: sympy.Pow,
     E.Plus: sympy.Add,
@@ -94,39 +103,39 @@ SYMPY_MATHML = {
     E.Not: sympy.Not,
     E.And: sympy.And,
     E.Or: sympy.Or,
+    E.Sin: sympy.sin,
+    E.Cos: sympy.cos,
+    E.Tan: sympy.tan,
+    E.ArcSin: sympy.asin,
+    E.ArcCos: sympy.acos,
+    E.ArcTan: sympy.atan,
+    E.Sinh: sympy.sinh,
+    E.Cosh: sympy.cosh,
+    E.Tanh: sympy.tanh,
+    E.ArcSinh: sympy.asinh,
+    E.ArcCosh: sympy.acosh,
+    E.ArcTanh: sympy.atanh,
+    E.Sec: sympy.sec,
+    E.Csc: sympy.csc,
+    E.Cot: sympy.cot,
+    E.ArcSec: sympy.asec,
+    E.ArcCsc: sympy.acsc,
+    E.ArcCot: sympy.acot,
+    E.Sech: sympy.sech,
+    E.Csch: sympy.csch,
+    E.Coth: sympy.coth,
+    E.ArcSech: sympy.asech,
+    E.ArcCsch: sympy.acsch,
+    E.ArcCoth: sympy.acoth,
 }
 
 
 '''
-    'arccos': sympy.acos,
-    'arccosh': sympy.acosh,
-    'arccot': sympy.acot,
-    'arccoth': sympy.acoth,
-    'arccsc': sympy.acsc,
-    'arccsch': sympy.acsch,
-    'arcsec': sympy.asec,
-    'arcsech': sympy.asech,
-    'arcsin': sympy.asin,
-    'arcsinh': sympy.asinh,
-    'arctan': sympy.atan,
-    'arctanh': sympy.atanh,
-    'cos': sympy.cos,
-    'cosh': sympy.cosh,
-    'cot': sympy.cot,
-    'coth': sympy.coth,
-    'csc': sympy.csc,
-    'csch': sympy.csch,
     'exponentiale': sympy.E,
     'false': sympy.false,
     'infinity': sympy.oo,
     'notanumber': sympy.nan,
     'pi': sympy.pi,
-    'sec': sympy.sec,
-    'sech': sympy.sech,
-    'sin': sympy.sin,
-    'sinh': sympy.sinh,
-    'tan': sympy.tan,
-    'tanh': sympy.tanh,
     'true': sympy.true,
     'xor': sympy.Xor,
 '''
@@ -169,7 +178,7 @@ class BaseAction(object):
 
     def __eq__(self, other):
         """Comparison of these parse results to another instance or a list."""
-        if type(other) == type(self):
+        if isinstance(other, type(self)):
             return self.tokens == other.tokens
         elif isinstance(other, list):
             return self.tokens == other
@@ -1167,8 +1176,8 @@ class ProtocolVariable():
 class ModelInterface(BaseGroupAction):
     """Parse action for the model interface section of a protocol.
 
-    See https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Modelinterface for more on the syntax
-    and semantics of the model interface.
+    See https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Modelinterface for more on
+    the syntax and semantics of the model interface.
 
     Includes helper methods for merging model interfaces, e.g. when one protocol imports another.
 
@@ -1337,7 +1346,7 @@ class ModelInterface(BaseGroupAction):
         self.units = units
 
         # Time variable may be replaced, so delete this reference just to be safe
-        del(time_variable)
+        del time_variable
 
         # Annotate all state variables with the magic `oxmeta:state_variable` term. This is done before unit conversion
         # so that annotations are transferred where needed. The original order in which state variables were defined is

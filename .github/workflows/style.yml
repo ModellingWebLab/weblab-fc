@@ -1,0 +1,25 @@
+name: Style
+on: [pull_request]
+jobs:
+  style:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.10"
+
+    - name: Install tools
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install flake8
+
+    - name: Check code style
+      run: |
+        python3 --version
+        python3 -m flake8 --version
+        python3 -m flake8

@@ -20,7 +20,7 @@ class Environment(object):
     Variables not found within the environment are looked up in its "default delegatee".
 
     For more information, see
-    https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax#Identifiersandnameresolution
+    https://github.com/Chaste/trac_archive/wiki/Functional-Curation-_-Protocol-Syntax#Identifiersandnameresolution
     """
     next_ident = [0]
 
@@ -57,14 +57,14 @@ class Environment(object):
     def evaluate_expr(self, expr_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.expr.parseString(expr_str, parseAll=True)
+        parse_action = csp.expr.parse_string(expr_str, parse_all=True)
         expr = parse_action[0].expr()
         return expr.evaluate(env)
 
     def evaluate_statement(self, stmt_str, env):
         from fc.parsing.CompactSyntaxParser import CompactSyntaxParser as csp
 
-        parse_action = csp.stmt_list.parseString(stmt_str, parseAll=True)
+        parse_action = csp.stmt_list.parse_string(stmt_str, parse_all=True)
         stmt_list = parse_action[0].expr()
         return env.execute_statements(stmt_list)
 
@@ -78,14 +78,14 @@ class Environment(object):
 #         try:
 #             return self.bindings[name]
 #         except KeyError:
-#             print 'Key error looking up', name, 'in', self
+#             print('Key error looking up', name, 'in', self)
 #             import sys
 #             tb = sys.exc_info()[2]
 #             while tb:
 #                 local_vars = tb.tb_frame.f_locals
 #                 obj = local_vars.get('self', None)
 #                 if obj and isinstance(obj, DelegatingDict):
-#                     print 'Looked for', local_vars['key'], 'in', obj._env
+#                     print('Looked for', local_vars['key'], 'in', obj._env)
 #                 tb = tb.tb_next
 #             self.debug_delegatees('root')
 #             raise
@@ -101,7 +101,7 @@ class Environment(object):
                 "The name prefix '" + prefix +
                 "' has already been used in this context. Check your simulations, imports, etc.")
         self.delegatees[prefix] = delegatee
-#         print 'Delegating to', delegatee, 'for', prefix, 'in', self
+#         print('Delegating to', delegatee, 'for', prefix, 'in', self)
         self.bindings.set_delegatee(delegatee.bindings, prefix)
         self.unwrapped_bindings.set_delegatee(delegatee.unwrapped_bindings, prefix)
 

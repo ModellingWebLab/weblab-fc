@@ -1,7 +1,7 @@
 """
 RDF handling routines, including parsing the 'oxmeta' ontology.
 """
-import pkg_resources
+import importlib.resources
 
 import rdflib
 
@@ -47,8 +47,8 @@ def get_variables_transitively(model, term):
     if _ONTOLOGY is None:
         # Load oxmeta ontology
         g = _ONTOLOGY = rdflib.Graph()
-        oxmeta_ttl = pkg_resources.resource_stream('fc', 'ontologies/oxford-metadata.ttl')
-        g.parse(oxmeta_ttl, format='turtle')
+        oxmeta_ttl = importlib.resources.files('fc').joinpath('ontologies/oxford-metadata.ttl')
+        g.parse(str(oxmeta_ttl), format='turtle')
 
     term = create_rdf_node(term)
 
